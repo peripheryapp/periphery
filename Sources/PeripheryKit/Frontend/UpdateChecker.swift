@@ -19,7 +19,7 @@ class UpdateChecker: Singleton {
         self.configuration = configuration
         let config = URLSessionConfiguration.ephemeral
         urlSession = URLSession(configuration: config)
-        latestReleaseURL = URL(string: "https://api.github.com/repos/peripheryapp/releases/releases/latest")!
+        latestReleaseURL = URL(string: "https://api.github.com/repos/peripheryapp/periphery/releases/latest")!
         semaphore = DispatchSemaphore(value: 0)
     }
 

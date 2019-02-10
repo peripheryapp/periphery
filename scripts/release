@@ -55,10 +55,7 @@ echo
 confirm "Continue?"
 
 cd ..
-
-cd ../periphery-releases
-hub release create "${version}" -a ../periphery/.release/periphery-v${version}.zip -F ../periphery/.release/release_notes.md
-cd ../periphery
+hub release create "${version}" -a .release/periphery-v${version}.zip -F .release/release_notes.md
 
 echo "Checksum:"
 sha256=$( shasum -a 256 .release/periphery-v${version}.zip | awk '{print $1}' )
