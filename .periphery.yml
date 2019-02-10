@@ -1,0 +1,12 @@
+--- # .periphery.yml
+project: Periphery.xcodeproj
+report_exclude:
+  - /Users/ian/code/py/periphery/Sources/PeripheryKit/Extensions/String+Version.swift
+  - /Users/ian/code/py/periphery/Sources/PeripheryKit/Indexer/SourceGraphDebugger.swift
+schemes:
+- Periphery
+- Periphery-Package
+targets:
+- Periphery
+- PeripheryKit
+- PeripheryKitTests

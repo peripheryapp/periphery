@@ -1,0 +1,76 @@
+#!/bin/bash
+
+set -e
+
+BOLD='\033[0:1m'
+GREEN='\033[1;32m'
+NC='\033[0m' # No Color
+
+confirm () {
+  green "\n$1 (y/n): "
+  read answer
+
+  if [ $answer != "y" ]
+  then
+    exit 0
+  fi
+}
+
+green () {
+  printf "${GREEN}${1}${NC}"
+}
+
+bold () {
+  printf "${BOLD}${1}${NC}"
+}
+
+printf "Version: "
+read version
+printf "Got it: $version\n"
+
+confirm "Continue?"
+
+cat scripts/Version.swift.template | sed s/__VERSION__/${version}/ > Sources/PeripheryKit/Version.swift
+git commit -a -m "Release ${version}"
+git tag -a ${version} -m "Periphery ${version}"
+git push origin master
+git push origin ${version}
+
+rm -rf .build/release/periphery
+make release
+rm -rf .release
+mkdir .release
+cp .build/release/periphery .release/
+cp scripts/release_notes.md.template .release/release_notes.md
+
+cd .release
+zip periphery-v${version}.zip periphery
+atom --wait release_notes.md
+echo -e "${version}\n\n$(cat release_notes.md)" > release_notes.md
+echo
+echo "Release Notes:"
+cat release_notes.md
+echo
+
+confirm "Continue?"
+
+cd ..
+
+cd ../periphery-releases
+hub release create "${version}" -a ../periphery/.release/periphery-v${version}.zip -F ../periphery/.release/release_notes.md
+cd ../periphery
+
+echo "Checksum:"
+sha256=$( shasum -a 256 .release/periphery-v${version}.zip | awk '{print $1}' )
+echo ${sha256}
+
+cd ../homebrew-periphery
+cat periphery.rb.template | sed s/__VERSION__/${version}/ | sed s/__SHA256__/${sha256}/ > Casks/periphery.rb
+git add Casks/periphery.rb
+git commit -m "${version}"
+git push origin master
+cd ../periphery
+
+green "\nNext Steps:\n\n"
+bold "* Update changelog.\n"
+printf "\n"
