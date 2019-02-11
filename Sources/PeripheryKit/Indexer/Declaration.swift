@@ -283,8 +283,9 @@ public class Declaration: Entity, CustomStringConvertible {
 }
 
 extension Declaration: Hashable {
-    public var hashValue: Int {
-        return kind.rawValue.hashValue ^ usr.hashValue
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(kind)
+        hasher.combine(usr)
     }
 }
 

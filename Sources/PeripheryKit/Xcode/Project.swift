@@ -78,8 +78,8 @@ public class Project: XcodeProjectlike {
 }
 
 extension Project: Hashable {
-    public var hashValue: Int {
-        return path.absolute().string.hashValue
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(path.absolute().string)
     }
 }
 
