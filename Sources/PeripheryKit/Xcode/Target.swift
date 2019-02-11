@@ -127,8 +127,8 @@ public class Target {
 }
 
 extension Target: Hashable {
-    public var hashValue: Int {
-        return target.name.hashValue
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(target.name)
     }
 }
 

@@ -89,14 +89,15 @@ class Reference: Entity {
 }
 
 extension Reference: Hashable {
-    var hashValue: Int {
-        var value = kind.rawValue.hashValue ^ usr.hashValue ^ location.hashValue ^ isRelated.hashValue
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(kind)
+        hasher.combine(usr)
+        hasher.combine(location)
+        hasher.combine(isRelated)
 
         if let receiverUsr = receiverUsr {
-            value = value ^ receiverUsr.hashValue
+            hasher.combine(receiverUsr)
         }
-
-        return value
     }
 }
 

@@ -29,6 +29,10 @@ class Parameter: Item, Hashable {
         return lhs.location == rhs.location
     }
 
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(location)
+    }
+
     let firstName: String?
     let secondName: String?
     let metatype: String?
@@ -47,10 +51,6 @@ class Parameter: Item, Hashable {
         let decl = Declaration(kind: .varParameter, usr: usr, location: location)
         decl.name = name
         return decl
-    }
-
-    var hashValue: Int {
-        return location.hashValue
     }
 
     init(firstName: String?, secondName: String?, metatype: String?, location: SourceLocation) {
