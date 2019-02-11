@@ -20,4 +20,4 @@ lint:
 	@swiftlint lint --quiet
 
 test:
-	@swift test $(SWIFT_BUILD_FLAGS)
+	@set -o pipefail && swift test $(SWIFT_BUILD_FLAGS) 2>&1 | bundle exec xcpretty -tc
