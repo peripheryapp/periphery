@@ -28,7 +28,7 @@ Periphery is distributed via [Homebrew](https://brew.sh/), a package manager pop
 
 Install Homebrew:
 
-```sh
+```
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
@@ -36,13 +36,13 @@ Install Homebrew:
 
 Now that Homebrew is installed, we need to tell it where to find Periphery releases:
 
-```sh
+```
 brew tap peripheryapp/periphery
 ```
 
 Next, install Periphery itself:
 
-```sh
+```
 brew cask install periphery
 ```
 
@@ -50,7 +50,7 @@ brew cask install periphery
 
 The scan command is Periphery's primary function. To begin an interactive guided setup, simply change to your project directory and run:
 
-```sh
+```
 periphery scan
 ```
 
@@ -66,7 +66,7 @@ It's important to specify a complete set of targets for the `--targets` option. 
 
 The scan options for this example would be as follows:
 
-```sh
+```
 periphery scan --workspace MyApp.xcworkspace --schemes MyApp --targets MyApp,FrameworkA,FrameworkB --format xcode
 ```
 
