@@ -16,7 +16,7 @@
 
 <p align="center">
 <hr>
-Periphery was previously a closed-source product, and is still in the process of transitioning to an open-source environment. Please bare with us while the project and its various components are migrated.
+Periphery was previously a closed-source product, and is still in the process of transitioning to an open-source environment. For now, documentation can still be found here: https://peripheryapp.com/documentation.
 <hr>
 </p>
 
