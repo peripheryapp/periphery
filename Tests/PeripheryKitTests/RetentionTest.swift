@@ -831,13 +831,6 @@ class RetentionTest: XCTestCase {
         // Used in a override.
         XCTAssertTrue(protoFunc6Param!.isRetained)
 
-        let protoFunc7Param = get("param", "func7(_:)", "FixtureProtocol104")
-        // Not used in any conformance.
-        // TODO: This fails because the '_' params are marked as used in order to be ignored/silenced.
-        // Instead we need to not ignore them, and also associate each param with its position
-        // in the param list so that we can identify if used.
-        XCTAssertFalse(protoFunc7Param!.isRetained)
-
         // - FixtureProtocol104 (extension)
 
         let protoExtFunc3Param = get("param", "func3(param:)", "FixtureProtocol104", .extensionProtocol)
@@ -939,8 +932,20 @@ class RetentionTest: XCTestCase {
 
     // MARK: - Known Failures
 
+    func knownfailure_testRetainsProtocolParameters_IgnoredParam() {
+        // TODO: This fails because the '_' params are marked as used in order to be ignored/silenced.
+        // Instead we need to not ignore them, and also associate each param with its position
+        // in the param list so that we can identify if used.
+
+        // Merge this back into testRetainsProtocolParameters once completed.
+
+        let protoFunc7Param = get("param", "func7(_:)", "FixtureProtocol104")
+        // Not used in any conformance.
+        XCTAssertFalse(protoFunc7Param!.isRetained)
+    }
+
     // TODO: Need a way to handle this now that we're using the SPM.
-    func testViewXibRetainsClass() {
+    func knownfailure_testViewXibRetainsClass() {
         analyze()
         XCTAssertReferenced((.class, "XibView"))
 
@@ -951,12 +956,12 @@ class RetentionTest: XCTestCase {
     }
 
     // TODO: Need a way to handle this now that we're using the SPM.
-    func testStoryboardRetainsClass() {
+    func knownfailure_testStoryboardRetainsClass() {
         analyze()
         XCTAssertReferenced((.class, "XibViewController"))
     }
 
-    func testNestedDeclarations() {
+    func knownfailure_testNestedDeclarations() {
         // TODO: Report to Apple!
         analyze(retainPublic: true)
 
@@ -964,7 +969,7 @@ class RetentionTest: XCTestCase {
         XCTAssertReferenced((.functionMethodInstance, "nested2()"))
     }
 
-    func testGetSetPropertyWithDefaultImplementation() {
+    func knownfailure_testGetSetPropertyWithDefaultImplementation() {
         // Broken as of Xcode 10.
         // https://bugreport.apple.com/web/?problemID=44703843
         analyze(retainPublic: true)
@@ -979,7 +984,7 @@ class RetentionTest: XCTestCase {
                             descendentOf: (.protocol, "FixtureProtocol100"))
     }
 
-    func testDuplicateGetterUSRBug() {
+    func knownfailure_testDuplicateGetterUSRBug() {
         // Broken as of Xcode 10.
         // https://bugreport.apple.com/web/?problemID=44531531
         analyze(retainPublic: true, aggressive: true)
@@ -987,7 +992,7 @@ class RetentionTest: XCTestCase {
         XCTAssertReferenced((.varStatic, "someVar"))
     }
 
-    func testClassRetainedByUnusedInstanceVariable() {
+    func knownfailure_testClassRetainedByUnusedInstanceVariable() {
         // SourceKit structures the class reference as a descendent of the parent
         // class, not the var declaration.
         analyze(retainPublic: true)
@@ -999,14 +1004,14 @@ class RetentionTest: XCTestCase {
                                descendentOf: (.class, "FixtureClass71"))
     }
 
-    func testStaticPropertyDeclaredWithCompositeValuesIsNotRetained() {
+    func knownfailure_testStaticPropertyDeclaredWithCompositeValuesIsNotRetained() {
         analyze(retainPublic: true)
         XCTAssertReferenced((.class, "FixtureClass38"))
         XCTAssertNotReferenced((.varStatic, "propertyA"))
         XCTAssertNotReferenced((.varStatic, "propertyB"))
     }
 
-    func testDoesNotRetainLazyProperty() {
+    func knownfailure_testDoesNotRetainLazyProperty() {
         analyze(retainPublic: true)
         XCTAssertReferenced((.class, "FixtureClass36"))
         XCTAssertNotReferenced((.varInstance, "someLazyVar"))

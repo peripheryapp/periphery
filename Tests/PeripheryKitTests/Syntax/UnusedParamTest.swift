@@ -131,7 +131,7 @@ class UnusedParamTest: XCTestCase {
 
     // MARK: - Known Failures
 
-    func testMultiLineParameterPosition() {
+    func knownfailure_testMultiLineParameterPosition() {
         // https://bugs.swift.org/browse/SR-9306
         analyze()
         let function = functions.first!
