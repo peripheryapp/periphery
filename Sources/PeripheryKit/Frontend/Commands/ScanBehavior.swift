@@ -81,7 +81,7 @@ class ScanBehavior {
                         " option." +
 
                         colorize("\n - ", .boldGreen) +
-                        "Periphery is a very precise tool, false positives often turn out to be correct after futher investigation."
+                        "Periphery is a very precise tool, false positives often turn out to be correct after further investigation."
                 )
             }
         } catch let error as PeripheryKitError {
