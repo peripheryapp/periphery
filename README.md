@@ -23,7 +23,7 @@ Periphery was previously a closed-source product, and is still in the process of
 
 ## Installation
 
-#### 1. Install the Homebrew package manager
+### 1. Install the Homebrew package manager
 
 Periphery is distributed via [Homebrew](https://brew.sh/), a package manager popular with many developers using macOS. If you're already a Homebrew user, you can skip this step.
 
@@ -33,7 +33,7 @@ Install Homebrew:
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-#### 2. Install Periphery
+### 2. Install Periphery
 
 Now that Homebrew is installed, we need to tell it where to find Periphery releases:
 
@@ -49,13 +49,27 @@ brew cask install periphery
 
 ## How To Use
 
-The scan command is Periphery's primary function. To begin an interactive guided setup, simply change to your project directory and run:
+### The `scan` Command
+
+The scan command is Periphery's primary function. To begin a guided setup, simply change to your project directory and run:
 
 ```
 periphery scan
 ```
 
-After answering a few questions, Periphery will print out the full scan command with appropriate arguments for your project, and execute it.
+After answering a few questions, Periphery will print out the full scan command and execute it.
+
+The guided setup is only intended for introductory purposes, once you are familiar with Periphery you can try some more advanced options, all of which can be seen with `periphery help scan`.
+
+### The `scan-syntax` Command
+
+Whereas the `scan` command performs a full static analysis of your build targets, the `scan-syntax` only perform analysis techniques that use syntax parsing, and is therefore much faster. This currently only includes unused function parameter detection.
+
+Unused function parameter detection when performed by `scan-syntax` is slightly inferior to `scan`, since it cannot use additional information from the compiler to omit redundant results. See [Function Parameters](#function-parameters) for an explanation of the differences.
+
+### Configuration
+
+Once you've settled upon the appropriate options for your project, you may wish to persist them in a YAML configuration file. The simplest way to achieve this is to run Periphery with the `--verbose` option. Near the beginning of the output you will see the `[configuration]` section with your configuration formatted as YAML below. Copy & paste the configuration into `.periphery.yml` in the root of your project folder. You can now simply run `periphery scan` and the YAML configuration will be used.
 
 ## How It Works
 
@@ -85,7 +99,7 @@ This document aims to explain in detail the more advanced analysis techniques th
 
 Periphery provides two commands for identifying unused function parameters. The `scan-syntax` command is the fastest, yet only analyses functions by parsing syntax. This means some results - while still technically correct - may not be practically useful.
 
-The `scan` command also identifies unused function parameters, but uses the context of your whole application in order to silence results which are not practically useful. The sections below describe the scenarios in which the `scan` command works to provide more useful results.
+The `scan` command also identifies unused function parameters, but uses the context of your whole application in order to omit results which are not practically useful. The sections below describe the scenarios in which the `scan` command works to provide more useful results.
 
 #### Protocols
 
@@ -137,6 +151,7 @@ class InformalGreeter: BaseGreeter {
     }
 }
 ```
+
 #### Foreign Protocols & Classes
 
 Unused parameters of protocols or classes defined in foreign modules (e.g Foundation) are always ignored, since you do not have access to modify the base function declaration.
