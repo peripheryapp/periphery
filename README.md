@@ -4,6 +4,13 @@
 
 > A tool to identify unused code in Swift projects.
 
+<a href="https://github.com/peripheryapp/periphery/releases/latest">
+  <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?style=flat-square" />
+</a>
+<a href="https://twitter.com/peripheryappcom">
+  <img src="https://img.shields.io/twitter/follow/peripheryappcom.svg?label=Twitter&style=flat-square" />
+</a>
+
 <br>
 
 ## Contents
