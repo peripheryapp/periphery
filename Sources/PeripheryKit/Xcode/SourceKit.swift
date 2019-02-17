@@ -43,13 +43,13 @@ class SourceKit {
         return response
     }
 
-    func editorOpen(_ file: SourceFile) throws -> [String: Any] {
+    func editorOpenSyntaxTree(_ file: SourceFile) throws -> [String: Any] {
         let request: SourceKitObject = [
             "key.request": UID("source.request.editor.open"),
             "key.name": NSUUID().uuidString,
             "key.sourcefile": file.path.string,
             "key.enablesyntaxmap": 0,
-            "key.enablesubstructure": 1,
+            "key.enablesubstructure": 0,
             "key.enablesyntaxtree": 1,
             "key.syntactic_only": 1,
             "key.syntaxtreetransfermode": UID("source.syntaxtree.transfer.full"),
@@ -61,7 +61,27 @@ class SourceKit {
         do {
             response = try Request.customRequest(request: request).send()
         } catch {
-            throw PeripheryKitError.sourceKitRequestFailed(type: "editorOpen", file: file.path.string, error: error)
+            throw PeripheryKitError.sourceKitRequestFailed(type: "editorOpenSyntaxTree", file: file.path.string, error: error)
+        }
+
+        return response
+    }
+
+    func editorOpenSubstructure(_ file: SourceFile) throws -> [String: Any] {
+        let request: SourceKitObject = [
+            "key.request": UID("source.request.editor.open"),
+            "key.name": NSUUID().uuidString,
+            "key.sourcefile": file.path.string,
+            "key.enablesyntaxmap": 0,
+            "key.enablesubstructure": 1,
+            "key.enablesyntaxtree": 0,
+        ]
+        let response: [String: Any]
+
+        do {
+            response = try Request.customRequest(request: request).send()
+        } catch {
+            throw PeripheryKitError.sourceKitRequestFailed(type: "editorOpenSubstructure", file: file.path.string, error: error)
         }
 
         return response

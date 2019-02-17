@@ -34,7 +34,6 @@ class SwiftIndexer: TypeIndexer {
     func perform() throws {
         var jobs: [Job] = []
         let excludedSourceFiles = configuration.indexExcludeSourceFiles
-        let determineAccessibilityFromStructure = featureManager.isEnabled(.determineAccessibilityFromStructure)
 
         for target in buildPlan.targets {
             let sourceKit = try SourceKit.make(buildPlan: buildPlan, target: target)
@@ -55,9 +54,8 @@ class SwiftIndexer: TypeIndexer {
             let sourceKit = job.sourceKit
 
             let elapsed = try Benchmark.measure {
-                let editorOpen = try sourceKit.editorOpen(sourceFile)
-                try self.parseIndex(sourceFile, sourceKit, editorOpen, determineAccessibilityFromStructure)
-                try self.parseUnusedParams(sourceFile, editorOpen, sourceKit)
+                try self.parseIndex(sourceFile, sourceKit)
+                try self.parseUnusedParams(sourceFile, sourceKit)
             }
 
             self.logger.debug("[index:swift] \(sourceFile.path.string) (\(elapsed)s)")
@@ -69,12 +67,13 @@ class SwiftIndexer: TypeIndexer {
 
     // MARK: - Private
 
-    private func parseIndex(_ sourceFile: SourceFile, _ sourceKit: SourceKit, _ editorOpen: [String: Any], _ determineAccessibilityFromStructure: Bool) throws {
+    private func parseIndex(_ sourceFile: SourceFile, _ sourceKit: SourceKit) throws {
         let index = try sourceKit.requestIndex(sourceFile)
         var rawStructures: [[String: Any]] = []
 
-        if determineAccessibilityFromStructure {
-            rawStructures = editorOpen[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
+        if featureManager.isEnabled(.determineAccessibilityFromStructure) {
+            let substructure = try sourceKit.editorOpenSubstructure(sourceFile)
+            rawStructures = substructure[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
         }
 
         if let rawEntities = index[SourceKit.Key.entities.rawValue] as? [[String: Any]] {
@@ -85,8 +84,9 @@ class SwiftIndexer: TypeIndexer {
         }
     }
 
-    private func parseUnusedParams(_ sourceFile: SourceFile, _ editorOpen: [String: Any], _ sourceKit: SourceKit) throws {
-        guard let syntaxTreeJson = editorOpen[SourceKit.Key.serializedSyntaxTree.rawValue] as? String else { return }
+    private func parseUnusedParams(_ sourceFile: SourceFile, _ sourceKit: SourceKit) throws {
+        let syntaxTree = try sourceKit.editorOpenSyntaxTree(sourceFile)
+        guard let syntaxTreeJson = syntaxTree[SourceKit.Key.serializedSyntaxTree.rawValue] as? String else { return }
 
         let analyzer = UnusedParameterAnalyzer()
         let params = try analyzer.analyze(file: sourceFile.path, json: syntaxTreeJson, parseProtocols: true)
