@@ -1,8 +1,11 @@
-// swift-tools-version:4.2
+// swift-tools-version:5.0
 import PackageDescription
 
 let package = Package(
     name: "Periphery",
+    platforms: [
+      .macOS(.v10_12),
+    ],
     products: [
         .executable(name: "periphery", targets: ["Periphery"]),
         .library(name: "PeripheryKit", targets: ["PeripheryKit"])
