@@ -932,6 +932,12 @@ class RetentionTest: XCTestCase {
 
     // MARK: - Known Failures
 
+    func knownfailure_testCustomConstructorithLiteral() {
+        // TODO: Report to Apple.
+        analyze(retainPublic: true)
+        XCTAssertReferenced((.functionConstructor, "init(title:)"))
+    }
+
     func knownfailure_testRetainsProtocolParameters_IgnoredParam() {
         // TODO: This fails because the '_' params are marked as used in order to be ignored/silenced.
         // Instead we need to not ignore them, and also associate each param with its position
