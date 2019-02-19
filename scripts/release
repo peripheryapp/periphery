@@ -41,10 +41,11 @@ make release
 rm -rf .release
 mkdir .release
 cp .build/release/periphery .release/
+cp LICENSE.md .release/
 cp scripts/release_notes.md.template .release/release_notes.md
 
 cd .release
-zip periphery-v${version}.zip periphery
+zip periphery-v${version}.zip periphery LICENSE.md
 atom --wait release_notes.md
 echo -e "${version}\n\n$(cat release_notes.md)" > release_notes.md
 echo
@@ -70,4 +71,5 @@ cd ../periphery
 
 green "\nNext Steps:\n\n"
 bold "* Update changelog.\n"
+bold "* Push podspec.\n"
 printf "\n"
