@@ -23,8 +23,6 @@ public struct CheckUpdateCommand: CommandProtocol {
                 let boldLatestVersion = colorize(latestVersion, .bold)
                 let boldLocalVersion = colorize(PeripheryVersion, .bold)
                 logger.info("Version \(boldLatestVersion) is now available, you are using version \(boldLocalVersion).")
-                let boldBrewCmd = colorize("brew cask upgrade periphery", .bold)
-                logger.info("Update now: \(boldBrewCmd)")
             } else {
                 let boldLatestVersion = colorize(latestVersion, .bold)
                 logger.info("You are using the latest version, \(boldLatestVersion).")
