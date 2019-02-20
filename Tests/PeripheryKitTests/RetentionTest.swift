@@ -930,6 +930,13 @@ class RetentionTest: XCTestCase {
         XCTAssertIgnored((.varParameter, "param"))
     }
 
+    func testNestedDeclarations() {
+        analyze(retainPublic: true)
+
+        XCTAssertReferenced((.functionMethodInstance, "nested1()"))
+        XCTAssertReferenced((.functionMethodInstance, "nested2()"))
+    }
+
     // MARK: - Known Failures
 
     func knownfailure_testCustomConstructorithLiteral() {
@@ -965,14 +972,6 @@ class RetentionTest: XCTestCase {
     func knownfailure_testStoryboardRetainsClass() {
         analyze()
         XCTAssertReferenced((.class, "XibViewController"))
-    }
-
-    func knownfailure_testNestedDeclarations() {
-        // TODO: Report to Apple!
-        analyze(retainPublic: true)
-
-        XCTAssertReferenced((.functionMethodInstance, "nested1()"))
-        XCTAssertReferenced((.functionMethodInstance, "nested2()"))
     }
 
     func knownfailure_testGetSetPropertyWithDefaultImplementation() {
