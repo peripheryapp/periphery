@@ -29,17 +29,25 @@
 
 ## Installation
 
-### 1. Install the Homebrew package manager
+### [CocoaPods](https://cocoapods.org/)
 
-Periphery is distributed via [Homebrew](https://brew.sh/), a package manager popular with many developers using macOS. If you're already a Homebrew user, you can skip this step.
+Add the following to your Podfile:
+
+```
+pod 'Periphery'
+```
+
+Now run `pod install`, the Periphery executable will be downloaded and placed at `Pods/Periphery/periphery`.
+
+### [Homebrew](https://brew.sh/)
 
 Install Homebrew:
+
+> You can skip this step if you already have Homebrew installed.
 
 ```
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
-
-### 2. Install Periphery
 
 Now that Homebrew is installed, we need to tell it where to find Periphery releases:
 
@@ -47,7 +55,7 @@ Now that Homebrew is installed, we need to tell it where to find Periphery relea
 brew tap peripheryapp/periphery
 ```
 
-Next, install Periphery itself:
+Now install Periphery itself:
 
 ```
 brew cask install periphery
