@@ -81,8 +81,6 @@ class UpdateChecker: Singleton {
         let boldLocalVersion = colorize(PeripheryVersion, .bold)
         logger.info("Version \(boldLatestVersion) is now available, you are using version \(boldLocalVersion).")
         logger.info("Stay up-to-date to benefit the most from Periphery - we're constantly working to improve accuracy and performance.")
-        let boldBrewCmd = colorize("brew cask upgrade periphery", .bold)
-        logger.info("Update now: \(boldBrewCmd)")
         let boldOption = colorize("--disable-update-check", .bold)
         let boldScan = colorize("scan", .bold)
         logger.info("To disable update checks pass the \(boldOption) option to the \(boldScan) command.")
