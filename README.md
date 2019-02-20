@@ -25,7 +25,7 @@
   * [Enumerations](#enumerations)
   * [Objective-C](#objective-c)
   * [Aggressive Mode](#aggressive-mode)
-  * [Global Equatable Operators](#Gglobal-equatable-operators)
+  * [Global Equatable Operators](#global-equatable-operators)
 
 ## Installation
 
