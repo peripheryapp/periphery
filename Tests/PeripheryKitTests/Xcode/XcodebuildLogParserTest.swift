@@ -38,22 +38,21 @@ class XcodebuildLogParserTest: XCTestCase {
     func testParseSwiftcInvocation() throws {
         let xcodebuild = Xcodebuild.make()
         try xcodebuild.clearDerivedData(for: project)
-        let log = try xcodebuild.build(project: project, scheme: "Periphery-Package")
+        let log = try xcodebuild.build(project: project, scheme: "RetentionFixtures")
         let parser = XcodebuildLogParser(log: log)
-
+        let target = project.targets.first { $0.name == "RetentionFixtures" }!
         let arguments = try! parser.getSwiftcInvocation(target: target.name, module: target.moduleName).arguments
         // We can't check all arguments so just check for a few
         let moduleName = arguments.first { $0.key == "-module-name" }
         XCTAssertNotNil(moduleName)
-        XCTAssertEqual(moduleName!.value, "PeripheryKit")
+        XCTAssertEqual(moduleName!.value, "RetentionFixtures")
 
         let targetArgument = arguments.first { $0.key == "-target" }
         XCTAssertNotNil(target)
         XCTAssertEqual(targetArgument!.value, "x86_64-apple-macosx10.12")
 
         // Check that files have been removed
-        let clsName = String(describing: XcodebuildLogParser.self)
-        let containsFile = arguments.contains(where: { $0.key.contains("\(clsName).swift") })
+        let containsFile = arguments.contains(where: { $0.key.hasSuffix(".swift") })
         XCTAssertFalse(containsFile)
     }
 
