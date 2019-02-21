@@ -84,6 +84,10 @@ class ScanBehavior {
                         "Periphery is a very precise tool, false positives often turn out to be correct after further investigation."
                 )
             }
+
+            if !filteredDeclarations.isEmpty && configuration.failOnWarnings {
+                throw PeripheryKitError.foundIssues(count: filteredDeclarations.count)
+            }
         } catch let error as PeripheryKitError {
             return .failure(error)
         } catch {
