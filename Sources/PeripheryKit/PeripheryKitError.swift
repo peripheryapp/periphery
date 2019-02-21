@@ -64,7 +64,7 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
         case .pathDoesNotExist(let path):
             return "No such file or directory: \(path)."
         case .foundIssues(let count):
-            return "Found \(count) issues."
+            return "Found \(count) \(count > 1 ? "issues" : "issue")."
         }
     }
 
