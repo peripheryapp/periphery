@@ -37,7 +37,7 @@ git push origin master
 git push origin ${version}
 
 rm -rf .build/release/periphery
-make release
+make build_release
 rm -rf .release
 mkdir .release
 cp .build/release/periphery .release/
