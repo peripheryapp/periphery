@@ -21,6 +21,7 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
     case buildLogError(message: String)
     case xcodebuildNotConfigured
     case pathDoesNotExist(path: String)
+    case foundIssues(count: Int)
 
     public var errorDescription: String? {
         switch self {
@@ -62,6 +63,8 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
             return "Xcode is not configured for command-line use. Please run 'sudo xcode-select -s /Applications/Xcode.app'."
         case .pathDoesNotExist(let path):
             return "No such file or directory: \(path)."
+        case .foundIssues(let count):
+            return "Found \(count) \(count > 1 ? "issues" : "issue")."
         }
     }
 

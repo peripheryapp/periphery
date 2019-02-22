@@ -6,7 +6,10 @@
 
 ##### Enhancements
 
-* None.
+* New `strict` option to exit with non-zero status if any unused code is found.  
+  [Cihat Gündüz](https://github.com/Dschee)\
+  [#22](https://github.com/peripheryapp/periphery/issues/22)\
+  [#23](https://github.com/peripheryapp/periphery/pull/23)
 
 ##### Bug Fixes
 

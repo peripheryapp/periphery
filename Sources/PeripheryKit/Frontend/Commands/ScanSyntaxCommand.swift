@@ -31,6 +31,10 @@ public struct ScanSyntaxCommand: CommandProtocol {
             configuration.reportExclude = options.exclude
         }
 
+        if options.strict.explicit {
+            configuration.strict = options.strict.value
+        }
+
         do {
             if let formatName = options.format {
                 configuration.outputFormat = try OutputFormat.make(named: formatName)
@@ -51,17 +55,19 @@ public struct ScanSyntaxOptions: OptionsProtocol {
     let exclude: [String]
     let verbose: BoolValue
     let quiet: BoolValue
+    let strict: BoolValue
     let path: String
 
-    public static func create(_ config: String?) -> (_ format: String?) -> (_ exclude: String?) -> (_ verbose: BoolValue) -> (_ quiet: BoolValue) -> (_ path: String) -> ScanSyntaxOptions {
-        return { format in { exclude in { verbose in { quiet in { path in
+    public static func create(_ config: String?) -> (_ format: String?) -> (_ exclude: String?) -> (_ verbose: BoolValue) -> (_ quiet: BoolValue) -> (_ strict: BoolValue) -> (_ path: String) -> ScanSyntaxOptions {
+        return { format in { exclude in { verbose in { quiet in { strict in { path in
             return self.init(config: config,
                              format: format,
                              exclude: parse(exclude, "|"),
                              verbose: verbose,
                              quiet: quiet,
+                             strict: strict,
                              path: path)
-            }}}}}
+            }}}}}}
     }
 
     public static func evaluate(_ m: CommandMode) -> Result<ScanSyntaxOptions, CommandantError<PeripheryKitError>> {
@@ -88,6 +94,10 @@ public struct ScanSyntaxOptions: OptionsProtocol {
             <*> m <| Option(key: "quiet",
                             defaultValue: BoolValue(config.quiet),
                             usage: "Only output results")
+
+            <*> m <| Option(key: "strict",
+                            defaultValue: BoolValue(config.strict),
+                            usage: "Exit with non-zero status if any unused code is found")
 
             <*> m <| Argument(usage: "Path glob to scan")
     }

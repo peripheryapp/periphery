@@ -81,6 +81,10 @@ public struct ScanCommand: CommandProtocol {
             configuration.schemes = options.schemes
         }
 
+        if options.strict.explicit {
+            configuration.strict = options.strict.value
+        }
+
         do {
             if let formatName = options.format {
                 configuration.outputFormat = try OutputFormat.make(named: formatName)
@@ -121,9 +125,10 @@ public struct ScanOptions: OptionsProtocol {
     let disableUpdateCheck: BoolValue
     let saveBuildLog: String?
     let useBuildLog: String?
+    let strict: BoolValue
 
-    public static func create(_ config: String?) -> (_ workspace: String?) -> (_ project: String?) -> (_ schemes: String) -> (_ targets: String) -> (_ retainPublic: BoolValue) -> (_ retainObjcAnnotated: BoolValue) -> (_ retainUnusedProtocolFuncParams: BoolValue) -> (_ aggressive: BoolValue) -> (_ format: String?) -> (_ indexExclude: String?) -> (_ reportExclude: String?) -> (_ saveBuildLog: String?) -> (_ useBuildLog: String?) -> (_ diagnose: BoolValue) -> (_ verbose: BoolValue) -> (_ quiet: BoolValue) -> (_ disableUpdateCheck: BoolValue) -> ScanOptions {
-        return { workspace in { project in { schemes in { targets in { retainPublic in { retainObjcAnnotated in { retainUnusedProtocolFuncParams in { aggressive in { format in { indexExclude in { reportExclude in { saveBuildLog in { useBuildLog in { diagnose in { verbose in { quiet in { disableUpdateCheck in
+    public static func create(_ config: String?) -> (_ workspace: String?) -> (_ project: String?) -> (_ schemes: String) -> (_ targets: String) -> (_ retainPublic: BoolValue) -> (_ retainObjcAnnotated: BoolValue) -> (_ retainUnusedProtocolFuncParams: BoolValue) -> (_ aggressive: BoolValue) -> (_ format: String?) -> (_ indexExclude: String?) -> (_ reportExclude: String?) -> (_ saveBuildLog: String?) -> (_ useBuildLog: String?) -> (_ diagnose: BoolValue) -> (_ verbose: BoolValue) -> (_ quiet: BoolValue) -> (_ disableUpdateCheck: BoolValue) -> (_ strict: BoolValue) -> ScanOptions {
+        return { workspace in { project in { schemes in { targets in { retainPublic in { retainObjcAnnotated in { retainUnusedProtocolFuncParams in { aggressive in { format in { indexExclude in { reportExclude in { saveBuildLog in { useBuildLog in { diagnose in { verbose in { quiet in { disableUpdateCheck in { strict in
             return self.init(config: config,
                              workspace: workspace,
                              project: project,
@@ -141,8 +146,9 @@ public struct ScanOptions: OptionsProtocol {
                              quiet: quiet,
                              disableUpdateCheck: disableUpdateCheck,
                              saveBuildLog: saveBuildLog,
-                             useBuildLog: useBuildLog)
-            }}}}}}}}}}}}}}}}}
+                             useBuildLog: useBuildLog,
+                             strict: strict)
+            }}}}}}}}}}}}}}}}}}
     }
 
     public static func evaluate(_ mode: CommandMode) -> Result<ScanOptions, CommandantError<PeripheryKitError>> {
@@ -221,6 +227,10 @@ public struct ScanOptions: OptionsProtocol {
             <*> mode <| Option(key: "disable-update-check",
                                defaultValue: BoolValue(!config.updateCheck),
                                usage: "Disable checking for updates")
+
+            <*> mode <| Option(key: "strict",
+                               defaultValue: BoolValue(config.strict),
+                               usage: "Exit with non-zero status if any unused code is found")
     }
 
     private static func parse(_ option: String?, _ delimiter: Character) -> [String] {
