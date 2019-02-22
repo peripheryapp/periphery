@@ -81,6 +81,10 @@ public struct ScanCommand: CommandProtocol {
             configuration.schemes = options.schemes
         }
 
+        if options.strict.explicit {
+            configuration.strict = options.strict.value
+        }
+
         do {
             if let formatName = options.format {
                 configuration.outputFormat = try OutputFormat.make(named: formatName)
