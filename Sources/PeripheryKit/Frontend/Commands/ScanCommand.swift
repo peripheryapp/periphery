@@ -121,10 +121,10 @@ public struct ScanOptions: OptionsProtocol {
     let disableUpdateCheck: BoolValue
     let saveBuildLog: String?
     let useBuildLog: String?
-    let failOnWarnings: BoolValue
+    let strict: BoolValue
 
-    public static func create(_ config: String?) -> (_ workspace: String?) -> (_ project: String?) -> (_ schemes: String) -> (_ targets: String) -> (_ retainPublic: BoolValue) -> (_ retainObjcAnnotated: BoolValue) -> (_ retainUnusedProtocolFuncParams: BoolValue) -> (_ aggressive: BoolValue) -> (_ format: String?) -> (_ indexExclude: String?) -> (_ reportExclude: String?) -> (_ saveBuildLog: String?) -> (_ useBuildLog: String?) -> (_ diagnose: BoolValue) -> (_ verbose: BoolValue) -> (_ quiet: BoolValue) -> (_ disableUpdateCheck: BoolValue) -> (_ failOnWarnings: BoolValue) -> ScanOptions {
-        return { workspace in { project in { schemes in { targets in { retainPublic in { retainObjcAnnotated in { retainUnusedProtocolFuncParams in { aggressive in { format in { indexExclude in { reportExclude in { saveBuildLog in { useBuildLog in { diagnose in { verbose in { quiet in { disableUpdateCheck in { failOnWarnings in
+    public static func create(_ config: String?) -> (_ workspace: String?) -> (_ project: String?) -> (_ schemes: String) -> (_ targets: String) -> (_ retainPublic: BoolValue) -> (_ retainObjcAnnotated: BoolValue) -> (_ retainUnusedProtocolFuncParams: BoolValue) -> (_ aggressive: BoolValue) -> (_ format: String?) -> (_ indexExclude: String?) -> (_ reportExclude: String?) -> (_ saveBuildLog: String?) -> (_ useBuildLog: String?) -> (_ diagnose: BoolValue) -> (_ verbose: BoolValue) -> (_ quiet: BoolValue) -> (_ disableUpdateCheck: BoolValue) -> (_ strict: BoolValue) -> ScanOptions {
+        return { workspace in { project in { schemes in { targets in { retainPublic in { retainObjcAnnotated in { retainUnusedProtocolFuncParams in { aggressive in { format in { indexExclude in { reportExclude in { saveBuildLog in { useBuildLog in { diagnose in { verbose in { quiet in { disableUpdateCheck in { strict in
             return self.init(config: config,
                              workspace: workspace,
                              project: project,
@@ -143,7 +143,7 @@ public struct ScanOptions: OptionsProtocol {
                              disableUpdateCheck: disableUpdateCheck,
                              saveBuildLog: saveBuildLog,
                              useBuildLog: useBuildLog,
-                             failOnWarnings: failOnWarnings)
+                             strict: strict)
             }}}}}}}}}}}}}}}}}}
     }
 
@@ -225,7 +225,7 @@ public struct ScanOptions: OptionsProtocol {
                                usage: "Disable checking for updates")
 
             <*> mode <| Option(key: "fail-on-warnings",
-                               defaultValue: BoolValue(config.failOnWarnings),
+                               defaultValue: BoolValue(config.strict),
                                usage: "Make sure command fails if any warnings are encountered")
     }
 

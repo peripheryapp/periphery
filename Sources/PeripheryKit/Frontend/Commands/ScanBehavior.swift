@@ -85,7 +85,7 @@ class ScanBehavior {
                 )
             }
 
-            if !filteredDeclarations.isEmpty && configuration.failOnWarnings {
+            if !filteredDeclarations.isEmpty && configuration.strict {
                 throw PeripheryKitError.foundIssues(count: filteredDeclarations.count)
             }
         } catch let error as PeripheryKitError {

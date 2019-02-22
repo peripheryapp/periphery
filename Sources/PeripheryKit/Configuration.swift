@@ -28,7 +28,7 @@ public class Configuration: Singleton {
     var aggressive: Bool = false
     var updateCheck: Bool = true
     var diagnosisConsole: Bool = false
-    var failOnWarnings: Bool = false
+    var strict: Bool = false
 
     // Non user facing.
     var guidedSetup: Bool = false
@@ -55,7 +55,7 @@ public class Configuration: Singleton {
             "aggressive": aggressive,
             "disable_update_check": !updateCheck,
             "diagnose": diagnosisConsole,
-            "fail_on_warnings": failOnWarnings
+            "strict": strict
         ]
 
         return try Yams.dump(object: config)
@@ -135,8 +135,8 @@ public class Configuration: Singleton {
             self.updateCheck = !value
         }
 
-        if let value = yaml["fail_on_warnings"] as? Bool {
-            self.failOnWarnings = value
+        if let value = yaml["strict"] as? Bool {
+            self.strict = value
         }
     }
 
