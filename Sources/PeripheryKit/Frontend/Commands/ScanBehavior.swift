@@ -85,6 +85,8 @@ class ScanBehavior {
                 )
             }
 
+            updateChecker.notifyIfAvailable()
+
             if !filteredDeclarations.isEmpty && configuration.strict {
                 throw PeripheryKitError.foundIssues(count: filteredDeclarations.count)
             }
@@ -93,8 +95,6 @@ class ScanBehavior {
         } catch {
             return .failure(.underlyingError(error))
         }
-
-        updateChecker.notifyIfAvailable()
 
         if configuration.diagnosisConsole, let graph = result.graph {
             let console = DiagnosisConsole(graph: graph)

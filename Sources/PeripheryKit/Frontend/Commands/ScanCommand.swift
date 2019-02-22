@@ -224,9 +224,9 @@ public struct ScanOptions: OptionsProtocol {
                                defaultValue: BoolValue(!config.updateCheck),
                                usage: "Disable checking for updates")
 
-            <*> mode <| Option(key: "fail-on-warnings",
+            <*> mode <| Option(key: "strict",
                                defaultValue: BoolValue(config.strict),
-                               usage: "Make sure command fails if any warnings are encountered")
+                               usage: "Exit with non-zero status if any unused code is found")
     }
 
     private static func parse(_ option: String?, _ delimiter: Character) -> [String] {
