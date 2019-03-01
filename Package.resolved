@@ -102,7 +102,7 @@
       },
       {
         "package": "SWXMLHash",
-        "repositoryURL": "https://github.com/drmohundro/SWXMLHash",
+        "repositoryURL": "https://github.com/drmohundro/SWXMLHash.git",
         "state": {
           "branch": null,
           "revision": "9ba116841126f6c63435beef21a4cd247c32d2e7",
@@ -114,13 +114,13 @@
         "repositoryURL": "https://github.com/tuist/xcodeproj",
         "state": {
           "branch": null,
-          "revision": "4d31d2be2532e9213d58cd4e0b15588c5dfae42d",
-          "version": "6.5.0"
+          "revision": "3fe1bd763072c81050b867d34db56d11cb9085bb",
+          "version": "6.6.0"
         }
       },
       {
         "package": "Yams",
-        "repositoryURL": "https://github.com/jpsim/Yams",
+        "repositoryURL": "https://github.com/jpsim/Yams.git",
         "state": {
           "branch": null,
           "revision": "26ab35f50ea891e8edefcc9d975db2f6b67e1d68",
