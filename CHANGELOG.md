@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+* None.
+
+##### Bug Fixes
+
+* None.
+
+## 1.4.0 (2019-03-02)
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
 * New `strict` option to exit with non-zero status if any unused code is found.  
   [Cihat Gündüz](https://github.com/Dschee)
   [#22](https://github.com/peripheryapp/periphery/issues/22)
