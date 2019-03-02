@@ -7,13 +7,20 @@
 ##### Enhancements
 
 * New `strict` option to exit with non-zero status if any unused code is found.  
-  [Cihat Gündüz](https://github.com/Dschee)\
-  [#22](https://github.com/peripheryapp/periphery/issues/22)\
+  [Cihat Gündüz](https://github.com/Dschee)
+  [#22](https://github.com/peripheryapp/periphery/issues/22)
   [#23](https://github.com/peripheryapp/periphery/pull/23)
+
+* Add official Homebrew support.  
+  [Ian Leitch](https://github.com/ileitch)
+  [#24](https://github.com/peripheryapp/periphery/pull/24)
 
 ##### Bug Fixes
 
-* None.
+* Fix parsing of projects using Siri message intents.  
+  [Ian Leitch](https://github.com/ileitch)
+  [#25](https://github.com/peripheryapp/periphery/issues/25)
+  [#26](https://github.com/peripheryapp/periphery/pull/26)
 
 ## 1.3.0 (2019-02-10)
 
