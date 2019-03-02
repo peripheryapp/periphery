@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name             = "Periphery"
-  spec.version          = "1.3.0"
+  spec.version          = "1.4.0"
   spec.summary          = "Eliminate Unused Swift Code."
   spec.homepage         = "https://github.com/peripheryapp/periphery"
   spec.license          = { :type => 'MIT', :file => 'LICENSE.md' }
