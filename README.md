@@ -4,12 +4,16 @@
 
 > A tool to identify unused code in Swift projects.
 
+<a href="https://app.bitrise.io/app/bfe24cad630fdf2d#/builds">
+  <img src="https://img.shields.io/bitrise/bfe24cad630fdf2d/master.svg?style=flat-square&token=f2SoNSaIVJneVHHA8bS2FA">
+</a>
 <a href="https://github.com/peripheryapp/periphery/releases/latest">
   <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?style=flat-square" />
 </a>
 <a href="https://twitter.com/peripheryappcom">
   <img src="https://img.shields.io/twitter/follow/peripheryappcom.svg?label=Twitter&style=flat-square" />
 </a>
+
 
 <br>
 
@@ -26,6 +30,10 @@
   * [Objective-C](#objective-c)
   * [Aggressive Mode](#aggressive-mode)
   * [Global Equatable Operators](#global-equatable-operators)
+* [Xcode Integration](#xcode-integration)
+* [Excluding Files](#excluding-files)
+* [Reusing Build Logs](#reusing-build-logs)
+* [Troubleshooting](#troubleshooting)
 
 ## Installation
 
@@ -351,3 +359,75 @@ extension MyClass: Equatable {
     }
 }
 ```
+
+## Xcode Integration
+
+Before setting up Xcode integration, we highly recommend you first get Periphery working in a terminal, as you will be using the exact same command via Xcode.
+
+### Step 1: Create an Aggregate Target
+
+Select your project in the Project Navigator and click the + button at the bottom left of the Targets section. Select **Cross-platform** and choose **Aggregate**. Hit Next.
+
+![Step 1](assets/xcode-integration/1.png)    
+
+Choose a name for the new target, e.g "Periphery" or "Unused Code".
+
+![Step 2](assets/xcode-integration/2.png)
+
+### Step 2: Add a Run Script Build Phase
+
+In the **Build Phases** section click the + button to add a new Run Script phase.
+
+![Step 3](assets/xcode-integration/3.png)
+
+In the shell script window enter the Periphery command. Be sure to include the `--format xcode` option.
+
+![Step 4](assets/xcode-integration/4.png)
+
+### Step 3: Select & Run
+
+You're ready to roll. You should now see the new scheme in the dropdown. Select it and hit run.
+
+> **Tip**
+>
+> If you'd like others on your team to be able to use the scheme, you'll need to mark it as _Shared_. This can be done by selecting _Manage Schemes..._ and selecting the _Shared_ checkbox next to the new scheme. The scheme definition can now be checked into source control.
+
+![Step 5](assets/xcode-integration/5.png)
+
+## Reusing Build Logs
+
+In order to understand what reusing a build log means exactly, you first need to understand a little about how Periphery works, or more specifically, how SourceKit works. Periphery uses SourceKit to 'index' each Swift file, or in other words, translate it into a machine-readable format containing a high degree of detail, and crucially the references between declarations. In order to request this indexed format from SourceKit, Periphery must provide the Swift compiler arguments required to compile the file. In practice, this set of compiler arguments is the same as is needed to build the target which the file is a member of. Frustratingly, SourceKit does not provide an easy way to determine the appropriate compiler arguments needed for any given file. That's why Periphery must build your project - to spy on xcodebuild and extract the arguments passed to the Swift compiler.
+
+Periphery allows you to save build logs so that you may skip the build phase, and jump straight to indexing. This can be a huge time saver while you're iterating on removing unused code, or when using Periphery in a continuous integration environment. To generate a build log, you have two options: allow Periphery to save one, or save your own by redirecting xcodebuild output to a log.
+
+### Using Periphery's Build Logs
+
+Pass the `--save-build-log <key>` option to the `scan` command, and Periphery will save a build log for you. You can then reuse it with the `--use-build-log <key>` option. The key can be anything you wish, however it is hashed along with the project, schemes and targets you specify. For example, you cannot save a build log, add another target to the `--targets` option and attempt to reuse the same build log.
+
+### Using Your Own Build Logs
+
+In a situation where you have already just compiled your project, e.g in CI to run tests, you can save yourself some time by passing the build log to Periphery. In order to do so, you'll need to redirect the output of xcodebuild to a file You need to be sure that the xcodebuild command builds all of the targets that you're then going to ask Periphery to analyze, otherwise Periphery will complain about missing build arguments. If your build process requires multiple calls to xcodebuild, just append the output to the same file. Once you have the build log, you can instruct Periphery to use it by passing the `--use-build-log <path to log>` option to the `scan` command. The build log must have a `.log` extension to distinguish it from a `<key>` as described above.
+
+> **Important - must read!**
+>
+> The build log contains highly specific references to DerivedData. Any modification to DerivedData after saving the build log, and before using it with Periphery is likely to invalidate the build log. Periphery will warn you as such if this has happened. Therefore, reusing build logs is only suitable for situations where you intend to use the log immediately after it has been generated. You cannot save a build log on one machine and reuse it on another, as SourceKit depends upon the contents of DerivedData to index files.
+
+## Excluding Files
+
+Both exclusion options described below accept a path glob, either absolute or relative to your project directory. You may specify multiple globs by separating them with a pipe character, e.g `"Foo.swift|{Bar,Baz}.swift|path/to/*.swift"`. Recursive (`**`) globs are not supported at this time.
+
+### Excluding Results
+
+To exclude the results from certain files, pass the `--report-exclude <globs>` option to the `scan` command.
+
+### Excluding Indexed Files
+
+To exclude files from being indexed, pass the `--index-exclude <glob>` option to the `scan` command. Excluding files from the index phase means that any declarations and references contained within the files will not be seen by Periphery. Periphery will be behave as if the files do not exist. This option can be used to exclude generated code that holds references to non-generated code.
+
+## Troubleshooting
+
+#### Failed to determine build arguments for target 'XYZ'
+
+This is caused by something specific to your project and is likely caused by Periphery failing to correctly parse swiftc compiler arguments from the xcodebuild log.
+
+Please re-run Periphery with the `--verbose` option and open an issue with the full output.
