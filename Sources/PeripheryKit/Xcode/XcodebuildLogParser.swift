@@ -65,7 +65,7 @@ class XcodebuildLogParser {
 
         // These arguments also contain a list of files to compile, we need to remove them.
         // This may change in the future, but for now they always immediately follow the -j or -num-threads flags.
-        if let jobArgumentIndex = arguments.index(where: { $0.key.hasPrefix("-j") }) {
+        if let jobArgumentIndex = arguments.firstIndex(where: { $0.key.hasPrefix("-j") }) {
             var jobArgument = arguments[jobArgumentIndex]
             arguments.remove(at: jobArgumentIndex)
             files += parseFileList(jobArgument.value)
@@ -73,7 +73,7 @@ class XcodebuildLogParser {
             arguments.insert(jobArgument, at: jobArgumentIndex)
         }
 
-        if let threadsArgumentIndex = arguments.index(where: { $0.key == "-num-threads" }) {
+        if let threadsArgumentIndex = arguments.firstIndex(where: { $0.key == "-num-threads" }) {
             var threadsArgument = arguments[threadsArgumentIndex]
             arguments.remove(at: threadsArgumentIndex)
             let parts = threadsArgument.value?.split(separator: " ", maxSplits: 1, omittingEmptySubsequences: true).map { String($0) } ?? []

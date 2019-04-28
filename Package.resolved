@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift",
         "state": {
           "branch": null,
-          "revision": "8b3435bd3236819318cde87c8d9315fb89906df3",
-          "version": "0.14.0"
+          "revision": "5da70ba744d58d772201f03600eb16c53197652d",
+          "version": "0.15.0"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/jpsim/SourceKitten",
         "state": {
           "branch": null,
-          "revision": "176f04295a09324673245d8ec0afcce21ace8722",
-          "version": "0.22.0"
+          "revision": "421a1ec6112b83265b63a163107c9b638dc56e86",
+          "version": "0.23.0"
         }
       },
       {
@@ -84,11 +84,11 @@
       },
       {
         "package": "SwiftSyntax",
-        "repositoryURL": "https://github.com/ileitch/swift-syntax",
+        "repositoryURL": "https://github.com/apple/swift-syntax",
         "state": {
-          "branch": "periphery",
-          "revision": "9f6b9f186e4c1ff1638fef09b54b940a8031ff44",
-          "version": null
+          "branch": null,
+          "revision": "43aa4a19b8105a803d8149ad2a86aa53a77efef3",
+          "version": "0.50000.0"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/drmohundro/SWXMLHash.git",
         "state": {
           "branch": null,
-          "revision": "9ba116841126f6c63435beef21a4cd247c32d2e7",
-          "version": "4.7.6"
+          "revision": "0d6bb315528888edde0dafe93564f074669c44e9",
+          "version": "4.8.0"
         }
       },
       {
@@ -114,8 +114,8 @@
         "repositoryURL": "https://github.com/tuist/xcodeproj",
         "state": {
           "branch": null,
-          "revision": "3fe1bd763072c81050b867d34db56d11cb9085bb",
-          "version": "6.6.0"
+          "revision": "065f348754b6155b8037dc43876a8f2ee354b95d",
+          "version": "6.7.0"
         }
       },
       {
@@ -123,8 +123,8 @@
         "repositoryURL": "https://github.com/jpsim/Yams.git",
         "state": {
           "branch": null,
-          "revision": "26ab35f50ea891e8edefcc9d975db2f6b67e1d68",
-          "version": "1.0.1"
+          "revision": "c947a306d2e80ecb2c0859047b35c73b8e1ca27f",
+          "version": "2.0.0"
         }
       }
     ]

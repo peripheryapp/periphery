@@ -17,6 +17,8 @@ class Analyzer {
     }
 
     private let visitors: [SourceGraphVisitor.Type] = [
+        ObjcMembersAttributeBuilder.self,
+
         // Must come before ExtensionReferenceBuilder.
         ExtensionAccessibilityCascader.self,
 

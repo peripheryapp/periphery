@@ -48,7 +48,7 @@ class UpdateChecker: Singleton {
 
             guard let jsonData = data,
                 let jsonObject = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [AnyHashable: Any],
-                let tagName = jsonObject?["tag_name"] as? String else {
+                let tagName = jsonObject["tag_name"] as? String else {
                     var json = "N/A"
 
                     if let data = data {
