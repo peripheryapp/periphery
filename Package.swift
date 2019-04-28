@@ -16,7 +16,7 @@ let package = Package(
         .package(url: "https://github.com/tuist/xcodeproj", from: "6.0.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "0.1.0"),
         .package(url: "https://github.com/kylef/PathKit", from: "0.9.2"),
-        .package(url: "https://github.com/ileitch/swift-syntax", .branch("periphery"))
+        .package(url: "https://github.com/apple/swift-syntax", from: "0.50000.0")
     ],
     targets: [
         .target(
@@ -45,5 +45,5 @@ let package = Package(
             dependencies: ["PeripheryKit"]
         )
     ],
-    swiftLanguageVersions: [.v4_2]
+    swiftLanguageVersions: [.v4_2, .v5]
 )

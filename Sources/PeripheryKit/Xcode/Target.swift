@@ -97,7 +97,7 @@ public class Target {
         let phases = project.xcodeProject.pbxproj.sourcesBuildPhases.filter { target.buildPhases.contains($0) }
 
         sourceFiles_ = Set(try phases.flatMap {
-            try $0.files.compactMap {
+            try ($0.files ?? []).compactMap {
                 let sourceRoot = project.sourceRoot.absolute()
                 if let path = try $0.file?.fullPath(sourceRoot: sourceRoot),
                     path.extension?.lowercased() == "swift" {
@@ -113,7 +113,7 @@ public class Target {
         let phases = project.xcodeProject.pbxproj.resourcesBuildPhases.filter { target.buildPhases.contains($0) }
 
         xibFiles_ = Set(try phases.flatMap {
-            try $0.files.compactMap {
+            try ($0.files ?? []).compactMap {
                 let sourceRoot = project.sourceRoot.absolute()
                 if let path = try $0.file?.fullPath(sourceRoot: sourceRoot),
                     ["xib", "storyboard"].contains(path.extension?.lowercased()) {

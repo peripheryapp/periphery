@@ -73,7 +73,7 @@ public class Xcodebuild: Injectable {
         // JSON parsing will fail.
         // Note: this is likely not needed since `stderr: false` was added, but we might as well
         // keep it.
-        let startIndex = lines.index { $0.trimmed == "{" }
+        let startIndex = lines.firstIndex { $0.trimmed == "{" }
         let jsonString = lines.suffix(from: startIndex ?? 0).joined()
 
         guard let jsonData = jsonString.data(using: .utf8),

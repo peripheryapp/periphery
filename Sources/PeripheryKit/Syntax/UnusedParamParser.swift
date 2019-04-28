@@ -125,7 +125,7 @@ class UnusedParamParser {
             else { return [] }
 
         let deserializer = SyntaxTreeDeserializer()
-        let syntax = try deserializer.deserialize(syntaxTreeData)
+        let syntax = try deserializer.deserialize(syntaxTreeData, serializationFormat: .json)
         return parse(item: syntax, collecting: Function.self)
     }
 
