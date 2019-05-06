@@ -1,4 +1,4 @@
-RELEASE_BUILD_FLAGS=-c release -Xswiftc -static-stdlib --disable-sandbox
+RELEASE_BUILD_FLAGS=-c release --disable-sandbox
 RELEASE_EXECUTABLE=$(shell swift build $(RELEASE_BUILD_FLAGS) --show-bin-path)/periphery
 
 .PHONY: all $(MAKECMDGOALS)
