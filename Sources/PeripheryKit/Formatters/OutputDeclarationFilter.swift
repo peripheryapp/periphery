@@ -20,8 +20,13 @@ public class OutputDeclarationFilter: Injectable {
             logger.debug("[report:exclude] \($0.path.string)")
         }
 
-        return declarations.filter {
+        let filteredDeclarations = declarations.filter {
             !excludedSourceFiles.contains($0.location.file)
         }
+
+        // Since Xcode 10.2 some unnamed declarations are reported at invalid locations.
+        // We've no way currently to determine the correct USR and location of these declarations, so our only
+        // option is to just hide them.
+        return filteredDeclarations.filter { $0.name != nil }
     }
 }
