@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/jpsim/SourceKitten",
         "state": {
           "branch": null,
-          "revision": "421a1ec6112b83265b63a163107c9b638dc56e86",
-          "version": "0.23.0"
+          "revision": "fd9091759201473aa234c22322a3939615aef59a",
+          "version": "0.23.2"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/drmohundro/SWXMLHash.git",
         "state": {
           "branch": null,
-          "revision": "0d6bb315528888edde0dafe93564f074669c44e9",
-          "version": "4.8.0"
+          "revision": "f43166a8e18fdd0857f29e303b1bb79a5428bca0",
+          "version": "4.9.0"
         }
       },
       {
