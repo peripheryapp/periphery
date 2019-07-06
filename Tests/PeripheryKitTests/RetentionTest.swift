@@ -28,6 +28,7 @@ class RetentionTest: XCTestCase {
     }
 
     private var graph: SourceGraph!
+    private let performKnownFailures = false
 
     func testNonReferencedClass() {
         analyze()
@@ -174,31 +175,6 @@ class RetentionTest: XCTestCase {
         XCTAssertNotReferenced((.functionMethodInstance, "funcPrivate()"))
         XCTAssertNotReferenced((.functionMethodInstance, "funcInternal()"))
         XCTAssertReferenced((.functionMethodInstance, "funcOpen()"))
-    }
-
-    func testProtocolConformingMembersAreRetained() {
-        analyze(retainPublic: true)
-
-        XCTAssertReferenced((.class, "FixtureClass27"))
-        XCTAssertReferenced((.protocol, "FixtureProtocol27"))
-        XCTAssertReferenced((.functionMethodInstance, "protocolMethod()"),
-                            descendentOf: (.class, "FixtureClass27"))
-        XCTAssertReferenced((.functionMethodClass, "staticProtocolMethod()"),
-                            descendentOf: (.class, "FixtureClass27"))
-        XCTAssertReferenced((.varClass, "staticProtocolVar"),
-                            descendentOf: (.class, "FixtureClass27"))
-
-        XCTAssertReferenced((.class, "FixtureClass28"))
-        XCTAssertReferenced((.class, "FixtureClass28Base"))
-        XCTAssertReferenced((.protocol, "FixtureProtocol28"))
-        XCTAssertReferenced((.functionMethodClass, "overrideStaticProtocolMethod()"),
-                            descendentOf: (.class, "FixtureClass28Base"))
-        XCTAssertReferenced((.functionMethodStatic, "overrideStaticProtocolMethod()"),
-                            descendentOf: (.class, "FixtureClass28"))
-        XCTAssertReferenced((.varClass, "overrideStaticProtocolVar"),
-                            descendentOf: (.class, "FixtureClass28Base"))
-        XCTAssertReferenced((.varStatic, "overrideStaticProtocolVar"),
-                            descendentOf: (.class, "FixtureClass28"))
     }
 
     func testConformanceToExternalProtocolIsRetained() {
@@ -785,7 +761,71 @@ class RetentionTest: XCTestCase {
         XCTAssertTrue(encoderParam!.isRetained)
     }
 
-    func no_testRetainsProtocolParameters() {
+    func testRetainUnusedProtocolFuncParams() {
+        let configuration = inject(Configuration.self)
+        configuration.retainUnusedProtocolFuncParams = true
+        analyze(retainPublic: true)
+
+        let protoParam = get("param", "myFunc(param:)", "FixtureProtocol107")
+        XCTAssertTrue(protoParam!.isRetained)
+
+        let protoExtParam = get("param", "myFunc(param:)", "FixtureProtocol107", .extensionProtocol)
+        XCTAssertTrue(protoExtParam!.isRetained)
+
+        let class1Param = get("param", "myFunc(param:)", "FixtureClass107Class1")
+        XCTAssertTrue(class1Param!.isRetained)
+
+        let class2Param = get("param", "myFunc(param:)", "FixtureClass107Class2")
+        XCTAssertTrue(class2Param!.isRetained)
+    }
+
+    func testIgnoreUnusedParamInUnusedFunction() {
+        analyze()
+
+        XCTAssertNotReferenced((.class, "FixtureClass105"))
+        XCTAssertNotReferenced((.functionMethodInstance, "unused(param:)"))
+        XCTAssertIgnored((.varParameter, "param"))
+    }
+
+    func testNestedDeclarations() {
+        analyze(retainPublic: true)
+
+        XCTAssertReferenced((.functionMethodInstance, "nested1()"))
+        XCTAssertReferenced((.functionMethodInstance, "nested2()"))
+    }
+
+    // MARK: - Known Failures
+
+    func testProtocolConformingMembersAreRetained() {
+        guard performKnownFailures else { return }
+
+        analyze(retainPublic: true)
+
+        XCTAssertReferenced((.class, "FixtureClass27"))
+        XCTAssertReferenced((.protocol, "FixtureProtocol27"))
+        XCTAssertReferenced((.functionMethodInstance, "protocolMethod()"),
+                            descendentOf: (.class, "FixtureClass27"))
+        XCTAssertReferenced((.functionMethodClass, "staticProtocolMethod()"),
+                            descendentOf: (.class, "FixtureClass27"))
+        XCTAssertReferenced((.varClass, "staticProtocolVar"),
+                            descendentOf: (.class, "FixtureClass27"))
+
+        XCTAssertReferenced((.class, "FixtureClass28"))
+        XCTAssertReferenced((.class, "FixtureClass28Base"))
+        XCTAssertReferenced((.protocol, "FixtureProtocol28"))
+        XCTAssertReferenced((.functionMethodClass, "overrideStaticProtocolMethod()"),
+                            descendentOf: (.class, "FixtureClass28Base"))
+        XCTAssertReferenced((.functionMethodStatic, "overrideStaticProtocolMethod()"),
+                            descendentOf: (.class, "FixtureClass28"))
+        XCTAssertReferenced((.varClass, "overrideStaticProtocolVar"),
+                            descendentOf: (.class, "FixtureClass28Base"))
+        XCTAssertReferenced((.varStatic, "overrideStaticProtocolVar"),
+                            descendentOf: (.class, "FixtureClass28"))
+    }
+
+    func testRetainsProtocolParameters() {
+        guard performKnownFailures else { return }
+
         analyze(retainPublic: true)
 
         // - FixtureProtocol104
@@ -891,42 +931,9 @@ class RetentionTest: XCTestCase {
         XCTAssertNil(class3Func6Param)
     }
 
-    func testRetainUnusedProtocolFuncParams() {
-        let configuration = inject(Configuration.self)
-        configuration.retainUnusedProtocolFuncParams = true
-        analyze(retainPublic: true)
+    func testProtocolConformedByStaticMethodOutsideExtension() {
+        guard performKnownFailures else { return }
 
-        let protoParam = get("param", "myFunc(param:)", "FixtureProtocol107")
-        XCTAssertTrue(protoParam!.isRetained)
-
-        let protoExtParam = get("param", "myFunc(param:)", "FixtureProtocol107", .extensionProtocol)
-        XCTAssertTrue(protoExtParam!.isRetained)
-
-        let class1Param = get("param", "myFunc(param:)", "FixtureClass107Class1")
-        XCTAssertTrue(class1Param!.isRetained)
-
-        let class2Param = get("param", "myFunc(param:)", "FixtureClass107Class2")
-        XCTAssertTrue(class2Param!.isRetained)
-    }
-
-    func testIgnoreUnusedParamInUnusedFunction() {
-        analyze()
-
-        XCTAssertNotReferenced((.class, "FixtureClass105"))
-        XCTAssertNotReferenced((.functionMethodInstance, "unused(param:)"))
-        XCTAssertIgnored((.varParameter, "param"))
-    }
-
-    func testNestedDeclarations() {
-        analyze(retainPublic: true)
-
-        XCTAssertReferenced((.functionMethodInstance, "nested1()"))
-        XCTAssertReferenced((.functionMethodInstance, "nested2()"))
-    }
-
-    // MARK: - Known Failures
-
-    func knownfailure_testProtocolConformedByStaticMethodOutsideExtension() {
         // Broken since Xcode 10.2
         // TODO: Report to Apple.
         analyze(retainPublic: true)
@@ -939,13 +946,17 @@ class RetentionTest: XCTestCase {
         XCTAssertNotReferenced((.functionOperatorInfix, "==(_:_:)")) // Equatable
     }
 
-    func knownfailure_testCustomConstructorithLiteral() {
+    func testCustomConstructorithLiteral() {
+        guard performKnownFailures else { return }
+
         // TODO: Report to Apple.
         analyze(retainPublic: true)
         XCTAssertReferenced((.functionConstructor, "init(title:)"))
     }
 
-    func knownfailure_testRetainsProtocolParameters_IgnoredParam() {
+    func testRetainsProtocolParameters_IgnoredParam() {
+        guard performKnownFailures else { return }
+
         // TODO: This fails because the '_' params are marked as used in order to be ignored/silenced.
         // Instead we need to not ignore them, and also associate each param with its position
         // in the param list so that we can identify if used.
@@ -958,7 +969,9 @@ class RetentionTest: XCTestCase {
     }
 
     // TODO: Need a way to handle this now that we're using the SPM.
-    func knownfailure_testViewXibRetainsClass() {
+    func testViewXibRetainsClass() {
+        guard performKnownFailures else { return }
+
         analyze()
         XCTAssertReferenced((.class, "XibView"))
 
@@ -969,12 +982,16 @@ class RetentionTest: XCTestCase {
     }
 
     // TODO: Need a way to handle this now that we're using the SPM.
-    func knownfailure_testStoryboardRetainsClass() {
+    func testStoryboardRetainsClass() {
+        guard performKnownFailures else { return }
+
         analyze()
         XCTAssertReferenced((.class, "XibViewController"))
     }
 
-    func knownfailure_testGetSetPropertyWithDefaultImplementation() {
+    func testGetSetPropertyWithDefaultImplementation() {
+        guard performKnownFailures else { return }
+
         // Broken as of Xcode 10.
         // https://bugreport.apple.com/web/?problemID=44703843
         analyze(retainPublic: true)
@@ -989,7 +1006,9 @@ class RetentionTest: XCTestCase {
                             descendentOf: (.protocol, "FixtureProtocol100"))
     }
 
-    func knownfailure_testDuplicateGetterUSRBug() {
+    func testDuplicateGetterUSRBug() {
+        guard performKnownFailures else { return }
+
         // Broken as of Xcode 10.
         // https://bugreport.apple.com/web/?problemID=44531531
         analyze(retainPublic: true, aggressive: true)
@@ -997,7 +1016,9 @@ class RetentionTest: XCTestCase {
         XCTAssertReferenced((.varStatic, "someVar"))
     }
 
-    func knownfailure_testClassRetainedByUnusedInstanceVariable() {
+    func testClassRetainedByUnusedInstanceVariable() {
+        guard performKnownFailures else { return }
+
         // SourceKit structures the class reference as a descendent of the parent
         // class, not the var declaration.
         analyze(retainPublic: true)
@@ -1009,14 +1030,18 @@ class RetentionTest: XCTestCase {
                                descendentOf: (.class, "FixtureClass71"))
     }
 
-    func knownfailure_testStaticPropertyDeclaredWithCompositeValuesIsNotRetained() {
+    func testStaticPropertyDeclaredWithCompositeValuesIsNotRetained() {
+        guard performKnownFailures else { return }
+
         analyze(retainPublic: true)
         XCTAssertReferenced((.class, "FixtureClass38"))
         XCTAssertNotReferenced((.varStatic, "propertyA"))
         XCTAssertNotReferenced((.varStatic, "propertyB"))
     }
 
-    func knownfailure_testDoesNotRetainLazyProperty() {
+    func testDoesNotRetainLazyProperty() {
+        guard performKnownFailures else { return }
+
         analyze(retainPublic: true)
         XCTAssertReferenced((.class, "FixtureClass36"))
         XCTAssertNotReferenced((.varInstance, "someLazyVar"))
