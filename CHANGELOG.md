@@ -12,6 +12,20 @@
 
 * None.
 
+## 1.5.1 (2019-07-06)
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* None.
+
+##### Bug Fixes
+
+* Fix CocoaPod.
+
 ## 1.5.0 (2019-07-06)
 
 ##### Breaking

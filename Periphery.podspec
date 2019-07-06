@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name             = "Periphery"
-  spec.version          = "1.5.0"
+  spec.version          = "1.5.1"
   spec.summary          = "Eliminate Unused Swift Code."
   spec.homepage         = "https://github.com/peripheryapp/periphery"
   spec.license          = { :type => 'MIT', :file => 'LICENSE.md' }
@@ -8,5 +8,4 @@ Pod::Spec.new do |spec|
   spec.social_media_url = "https://twitter.com/peripheryappcom"
   spec.source           = { :http => "#{spec.homepage}/releases/download/#{spec.version}/periphery-v#{spec.version}.zip" }
   spec.preserve_paths   = '*'
-  spec.platform         = :osx, '10.14'
 end
