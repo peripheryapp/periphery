@@ -12,6 +12,20 @@
 
 * None.
 
+## 1.5.0 (2019-07-06)
+
+##### Breaking
+
+* None.
+
+##### Enhancements
+
+* None.
+
+##### Bug Fixes
+
+* Xcode 10.2 compatibly.
+
 ## 1.4.0 (2019-03-02)
 
 ##### Breaking
