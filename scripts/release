@@ -71,5 +71,5 @@ cd ../periphery
 
 green "\nNext Steps:\n\n"
 bold "* Update changelog.\n"
-bold "* Push podspec.\n"
+bold "* Push podspec: pod trunk push --skip-tests --skip-import-validation --allow-warnings Periphery.podspec\n"
 printf "\n"
