@@ -2,7 +2,7 @@ import Foundation
 
 /// Folds all references and declarations that exist within an extension into the
 /// class/struct that is being extended and removes the extension declaration.
-class ExtensionReferenceBuilder: SourceGraphVisitor {
+final class ExtensionReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

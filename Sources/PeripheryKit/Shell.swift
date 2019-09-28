@@ -1,6 +1,6 @@
 import Foundation
 
-class ReadableStream {
+final class ReadableStream {
     private let args: [String]
     private let fileHandle: FileHandle
     private let task: Process

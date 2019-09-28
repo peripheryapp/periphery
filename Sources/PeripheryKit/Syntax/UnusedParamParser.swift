@@ -2,11 +2,11 @@ import Foundation
 import PathKit
 import SwiftSyntax
 
-protocol Item {
+protocol Item: AnyObject {
     var items: [Item] { get }
 }
 
-class Function: Item {
+final class Function: Item {
     let name: String
     let fullName: String
     let location: SourceLocation
@@ -24,7 +24,7 @@ class Function: Item {
     }
 }
 
-class Parameter: Item, Hashable {
+final class Parameter: Item, Hashable {
     static func == (lhs: Parameter, rhs: Parameter) -> Bool {
         return lhs.location == rhs.location
     }
@@ -61,7 +61,7 @@ class Parameter: Item, Hashable {
     }
 }
 
-class Variable: Item {
+final class Variable: Item {
     let names: [String]
     let items: [Item]
 
@@ -71,7 +71,7 @@ class Variable: Item {
     }
 }
 
-class Closure: Item {
+final class Closure: Item {
     let params: [String]
     let items: [Item]
 
@@ -81,7 +81,7 @@ class Closure: Item {
     }
 }
 
-class Identifier: Item {
+final class Identifier: Item {
     let name: String
     let items: [Item] = []
 
@@ -90,7 +90,7 @@ class Identifier: Item {
     }
 }
 
-class GenericItem: Item {
+final class GenericItem: Item {
     let kind: String
     let items: [Item]
 
@@ -100,7 +100,7 @@ class GenericItem: Item {
     }
 }
 
-class UnusedParamParser {
+final class UnusedParamParser {
     private let file: Path
     private let parseProtocols: Bool
 
@@ -337,7 +337,7 @@ class UnusedParamParser {
     }
 }
 
-private class Collector<T> {
+private final class Collector<T> {
     private(set) var collection: [T] = []
 
     func add(_ item: Item) {

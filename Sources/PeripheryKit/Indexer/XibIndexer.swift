@@ -1,6 +1,6 @@
 import PathKit
 
-class XibIndexer: TypeIndexer {
+final class XibIndexer: TypeIndexer {
     static func make(buildPlan: BuildPlan, graph: SourceGraph) -> Self {
         return self.init(buildPlan: buildPlan,
                          graph: graph,

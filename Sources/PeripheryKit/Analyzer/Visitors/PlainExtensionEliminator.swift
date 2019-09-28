@@ -1,6 +1,6 @@
 import Foundation
 
-class PlainExtensionEliminator: SourceGraphVisitor {
+final class PlainExtensionEliminator: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

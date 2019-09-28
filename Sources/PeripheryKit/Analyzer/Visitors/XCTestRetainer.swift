@@ -1,6 +1,6 @@
 import Foundation
 
-class XCTestRetainer: SourceGraphVisitor {
+final class XCTestRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

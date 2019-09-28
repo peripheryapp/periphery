@@ -1,6 +1,6 @@
 import Foundation
 
-class UnusedParameterRetainer: SourceGraphVisitor {
+final class UnusedParameterRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph, configuration: inject())
     }

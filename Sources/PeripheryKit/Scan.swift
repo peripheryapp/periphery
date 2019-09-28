@@ -1,7 +1,7 @@
 import Foundation
 import PathKit
 
-public class Scan: Injectable {
+public final class Scan: Injectable {
     public static func make() -> Self {
         return self.init(configuration: inject(),
                          xcodebuild: inject(),

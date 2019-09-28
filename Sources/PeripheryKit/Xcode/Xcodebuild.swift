@@ -2,7 +2,7 @@ import Foundation
 import PathKit
 
 // TODO: things hangs if e.g xcodebuild just prints its help options
-public class Xcodebuild: Injectable {
+public final class Xcodebuild: Injectable {
     private let shell: Shell
 
     public static func make() -> Self {

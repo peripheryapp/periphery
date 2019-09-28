@@ -2,7 +2,7 @@ import Foundation
 import SourceKittenFramework
 import PathKit
 
-class SourceKit {
+final class SourceKit {
     enum Key: String {
         case entities = "key.entities"
         case kind = "key.kind"

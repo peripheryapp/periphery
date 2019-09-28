@@ -1,6 +1,6 @@
 import Foundation
 
-class Analyzer {
+final class Analyzer {
     enum Hint {
         case unreadProperty
         case aggressive

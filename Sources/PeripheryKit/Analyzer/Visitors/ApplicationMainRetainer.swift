@@ -1,6 +1,6 @@
 import Foundation
 
-class ApplicationMainRetainer: SourceGraphVisitor {
+final class ApplicationMainRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

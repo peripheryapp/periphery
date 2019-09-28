@@ -47,7 +47,7 @@ enum OutputFormat: String, CustomStringConvertible {
     }
 }
 
-protocol OutputFormatter {
+protocol OutputFormatter: AnyObject {
     static func make() -> Self
     func perform(_ declarations: [Declaration]) throws
 }
