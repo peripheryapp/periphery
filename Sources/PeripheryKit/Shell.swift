@@ -42,7 +42,7 @@ final class ReadableStream {
     }
 }
 
-public final class Shell: Injectable {
+public class Shell: Injectable {
     public static func make() -> Self {
         return self.init()
     }
