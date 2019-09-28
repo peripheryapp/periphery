@@ -1,6 +1,6 @@
 import Foundation
 
-class RedundantDeclarationReducer {
+final class RedundantDeclarationReducer {
     private let declarations: Set<Declaration>
 
     init(declarations: Set<Declaration>) {

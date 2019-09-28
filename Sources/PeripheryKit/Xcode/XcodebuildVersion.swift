@@ -1,6 +1,6 @@
 import Foundation
 
-class XcodebuildVersion {
+final class XcodebuildVersion {
     static func parse(_ rawVersion: String) -> String {
         let firstLine = String(rawVersion.split(separator: "\n").first ??
             "").trimmed

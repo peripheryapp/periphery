@@ -1,6 +1,6 @@
 import Foundation
 
-public class DiagnosisConsole {
+public final class DiagnosisConsole {
     private let graph: SourceGraph
 
     public init(graph: SourceGraph) {

@@ -10,7 +10,7 @@ import Foundation
 ///     }
 /// }
 ///
-class CodingKeyEnumReferenceBuilder: SourceGraphVisitor {
+final class CodingKeyEnumReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

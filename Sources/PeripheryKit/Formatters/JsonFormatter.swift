@@ -1,6 +1,6 @@
 import Foundation
 
-class JsonFormatter: OutputFormatter {
+final class JsonFormatter: OutputFormatter {
     public static func make() -> Self {
         return self.init(logger: inject())
     }

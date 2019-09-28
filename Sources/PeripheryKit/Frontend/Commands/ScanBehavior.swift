@@ -1,7 +1,7 @@
 import Foundation
 import Result
 
-class ScanBehavior {
+final class ScanBehavior {
     static func make() -> Self {
         return self.init(configuration: inject(), logger: inject(), xcodebuild: inject())
     }

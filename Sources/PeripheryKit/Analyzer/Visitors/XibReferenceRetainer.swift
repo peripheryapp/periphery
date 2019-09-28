@@ -1,6 +1,6 @@
 import Foundation
 
-class XibReferenceRetainer: SourceGraphVisitor {
+final class XibReferenceRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

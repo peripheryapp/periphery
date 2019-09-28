@@ -1,6 +1,6 @@
 import Foundation
 
-public class OutputDeclarationFilter: Injectable {
+public final class OutputDeclarationFilter: Injectable {
     public static func make() -> Self {
         return self.init(configuration: inject(), logger: inject())
     }

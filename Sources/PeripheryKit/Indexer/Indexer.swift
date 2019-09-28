@@ -1,11 +1,11 @@
 import Foundation
 
-protocol TypeIndexer {
+protocol TypeIndexer: AnyObject {
     static func make(buildPlan: BuildPlan, graph: SourceGraph) -> Self
     func perform() throws
 }
 
-class Indexer {
+final class Indexer {
     static func perform(buildPlan: BuildPlan, graph: SourceGraph) throws {
         try make(buildPlan: buildPlan, graph: graph).perform()
     }

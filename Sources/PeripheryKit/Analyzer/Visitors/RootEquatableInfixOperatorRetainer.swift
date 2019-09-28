@@ -13,7 +13,7 @@ import Foundation
 /// number of protocols. It's certainly _not_ valid for a custom protocol to declare a static func
 /// and for it to be implemented at static scope like this. for now our only option is to retain
 /// specific static infix operators.
-class RootEquatableInfixOperatorRetainer: SourceGraphVisitor {
+final class RootEquatableInfixOperatorRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph, configuration: inject())
     }

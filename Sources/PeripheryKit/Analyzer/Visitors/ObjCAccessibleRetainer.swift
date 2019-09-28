@@ -1,6 +1,6 @@
 import Foundation
 
-class ObjCAccessibleRetainer: SourceGraphVisitor {
+final class ObjCAccessibleRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph, configuration: inject())
     }

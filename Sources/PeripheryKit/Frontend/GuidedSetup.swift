@@ -1,7 +1,7 @@
 import Foundation
 import PathKit
 
-class GuidedSetup: Injectable {
+final class GuidedSetup: Injectable {
     static func make() -> Self {
         return self.init(configuration: inject(), logger: inject(), xcodebuild: inject())
     }

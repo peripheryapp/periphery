@@ -2,7 +2,7 @@ import Foundation
 import Result
 import PathKit
 
-class ScanSyntax {
+final class ScanSyntax {
     public static func make() -> Self {
         return self.init(logger: inject(), configuration: inject())
     }

@@ -5,7 +5,7 @@ import Foundation
 // rather than the property declaration itself. References are not built for simple property
 // accessors as they do not hold references and it aids identification of unread properties in
 // aggressive mode.
-class ComplexPropertyAccessorReferenceBuilder: SourceGraphVisitor {
+final class ComplexPropertyAccessorReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

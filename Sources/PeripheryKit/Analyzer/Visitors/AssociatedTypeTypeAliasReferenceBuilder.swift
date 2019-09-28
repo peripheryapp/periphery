@@ -1,6 +1,6 @@
 import Foundation
 
-class AssociatedTypeTypeAliasReferenceBuilder: SourceGraphVisitor {
+final class AssociatedTypeTypeAliasReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

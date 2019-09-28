@@ -2,7 +2,7 @@ import Foundation
 import PathKit
 import Yams
 
-public class Configuration: Singleton {
+public final class Configuration: Singleton {
     public static func make() -> Self {
         return self.init()
     }

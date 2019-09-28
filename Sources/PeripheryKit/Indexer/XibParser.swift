@@ -8,7 +8,7 @@ struct XibReference {
     let moduleName: String?
 }
 
-class XibParser {
+final class XibParser {
     private let path: Path
 
     required init(path: Path) {

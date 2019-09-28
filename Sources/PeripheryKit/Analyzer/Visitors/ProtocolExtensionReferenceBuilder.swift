@@ -1,6 +1,6 @@
 import Foundation
 
-class ProtocolExtensionReferenceBuilder: SourceGraphVisitor {
+final class ProtocolExtensionReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }
