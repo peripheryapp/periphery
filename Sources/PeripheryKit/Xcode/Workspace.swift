@@ -2,7 +2,7 @@ import Foundation
 import xcodeproj
 import PathKit
 
-public class Workspace: XcodeProjectlike {
+public final class Workspace: XcodeProjectlike {
     public static func make(path: String) throws -> Self {
         return try self.init(path: path,
                              xcodebuild: inject(),

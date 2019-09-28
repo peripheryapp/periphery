@@ -1,7 +1,7 @@
 import Foundation
 import PathKit
 
-class UnusedParameterAnalyzer {
+final class UnusedParameterAnalyzer {
     private enum UsageType {
         case used
         case unused

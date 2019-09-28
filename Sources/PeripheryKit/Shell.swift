@@ -1,6 +1,6 @@
 import Foundation
 
-class ReadableStream {
+final class ReadableStream {
     private let args: [String]
     private let fileHandle: FileHandle
     private let task: Process
@@ -42,7 +42,7 @@ class ReadableStream {
     }
 }
 
-public class Shell: Injectable {
+public final class Shell: Injectable {
     public static func make() -> Self {
         return self.init()
     }

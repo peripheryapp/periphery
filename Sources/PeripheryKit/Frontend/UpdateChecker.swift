@@ -1,7 +1,7 @@
 import Foundation
 import Result
 
-class UpdateChecker: Singleton {
+final class UpdateChecker: Singleton {
     static func make() -> Self {
         return self.init(logger: inject(), configuration: inject())
     }

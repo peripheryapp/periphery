@@ -1,6 +1,6 @@
 import Foundation
 
-public class CsvFormatter: OutputFormatter {
+public final class CsvFormatter: OutputFormatter {
     public static func make() -> Self {
         return self.init(logger: inject())
     }

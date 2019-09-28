@@ -2,7 +2,7 @@ import Foundation
 import xcodeproj
 import PathKit
 
-public class Target {
+public final class Target {
     static func make(project: Project, target: PBXTarget) -> Self {
         return self.init(project: project,
                          target: target,

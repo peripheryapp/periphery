@@ -1,6 +1,6 @@
 import Foundation
 
-class ExtensionAccessibilityCascader: SourceGraphVisitor {
+final class ExtensionAccessibilityCascader: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph,
                         featureManager: inject())

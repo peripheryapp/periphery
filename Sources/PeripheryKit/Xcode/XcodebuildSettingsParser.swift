@@ -1,6 +1,6 @@
 import Foundation
 
-class XcodebuildSettingsParser {
+final class XcodebuildSettingsParser {
     private let lines: [String]
 
     init(settings: String) {

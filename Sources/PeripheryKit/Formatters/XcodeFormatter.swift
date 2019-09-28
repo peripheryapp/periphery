@@ -1,6 +1,6 @@
 import Foundation
 
-public class XcodeFormatter: OutputFormatter {
+public final class XcodeFormatter: OutputFormatter {
     public static func make() -> Self {
         return self.init(logger: inject())
     }

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Retains extensions of types for which we do not have a declaration.
-class UnknownTypeExtensionRetainer: SourceGraphVisitor {
+final class UnknownTypeExtensionRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

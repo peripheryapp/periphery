@@ -2,7 +2,7 @@ import Foundation
 
 /// Builds references to enum cases of enums that are raw representable.
 /// Disabled in aggressive mode.
-class EnumCaseReferenceBuilder: SourceGraphVisitor {
+final class EnumCaseReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph, configuration: inject())
     }

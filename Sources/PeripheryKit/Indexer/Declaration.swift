@@ -1,7 +1,7 @@
 import Foundation
 import PathKit
 
-public class Declaration: Entity, CustomStringConvertible {
+public final class Declaration: Entity, CustomStringConvertible {
     enum RetentionReason {
         case xib
         case unknown

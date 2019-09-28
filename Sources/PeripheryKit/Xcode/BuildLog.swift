@@ -2,7 +2,7 @@ import Foundation
 import PathKit
 import CryptoSwift
 
-class BuildLog {
+final class BuildLog {
     static func make(project: XcodeProjectlike, schemes: Set<Scheme>, targets: Set<Target>) -> Self {
         return self.init(
             project: project,

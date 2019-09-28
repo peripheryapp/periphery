@@ -1,6 +1,6 @@
 import Foundation
 
-class JobPool<T> {
+final class JobPool<T> {
     func map<J>(_ jobs: [J], _ block: @escaping (J) throws -> T?) throws -> [T] {
         let resultQueue = DispatchQueue(label: "resultQueue")
         var result = [T?](repeating: nil, count: jobs.count)

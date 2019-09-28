@@ -1,6 +1,6 @@
 import Foundation
 
-public class SourceGraphDebugger {
+public final class SourceGraphDebugger {
     private let graph: SourceGraph
 
     required public init(graph: SourceGraph) {
@@ -41,7 +41,7 @@ public class SourceGraphDebugger {
     }
 }
 
-class SourceGraphDebuggerVisitor: SourceGraphVisitor {
+final class SourceGraphDebuggerVisitor: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

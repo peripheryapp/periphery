@@ -2,7 +2,7 @@ import Foundation
 import xcodeproj
 import PathKit
 
-public class Project: XcodeProjectlike {
+public final class Project: XcodeProjectlike {
     private static var cache: [Path: Project] = [:]
 
     public static func tryMake(path: Path, referencedBy refPath: Path) throws -> Project? {

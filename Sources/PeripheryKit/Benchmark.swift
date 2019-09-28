@@ -1,6 +1,6 @@
 import Foundation
 
-class Benchmark {
+final class Benchmark {
     static func measure(block: () throws -> Void) rethrows -> String {
         let start = Date()
         try block()

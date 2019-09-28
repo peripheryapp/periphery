@@ -1,6 +1,6 @@
 import Foundation
 
-class DeclarationMarker: SourceGraphVisitor {
+final class DeclarationMarker: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }
