@@ -1,6 +1,6 @@
 import Foundation
 
-class DefaultConstructorReferenceBuilder: SourceGraphVisitor {
+final class DefaultConstructorReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

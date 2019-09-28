@@ -1,4 +1,4 @@
-class Reference: Entity {
+final class Reference: Entity {
     enum Kind: String {
         case `associatedtype` = "source.lang.swift.ref.associatedtype"
         case `class` = "source.lang.swift.ref.class"

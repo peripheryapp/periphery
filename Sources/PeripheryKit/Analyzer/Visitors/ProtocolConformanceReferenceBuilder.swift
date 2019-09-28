@@ -1,6 +1,6 @@
 import Foundation
 
-class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
+final class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

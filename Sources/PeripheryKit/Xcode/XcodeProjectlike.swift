@@ -1,7 +1,7 @@
 import Foundation
 import PathKit
 
-public protocol XcodeProjectlike {
+public protocol XcodeProjectlike: AnyObject {
     var path: Path { get }
     var targets: Set<Target> { get } // Set to ensure uniqueness
     var type: String { get }

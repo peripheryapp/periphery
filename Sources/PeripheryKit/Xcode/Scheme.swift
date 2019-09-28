@@ -1,6 +1,6 @@
 import Foundation
 
-public class Scheme {
+public final class Scheme {
     static func make(project: XcodeProjectlike, name: String) throws -> Self {
         return try self.init(project: project, name: name, xcodebuild: inject())
     }

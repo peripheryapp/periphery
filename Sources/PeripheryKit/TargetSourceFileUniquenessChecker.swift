@@ -1,6 +1,6 @@
 import Foundation
 
-class TargetSourceFileUniquenessChecker {
+final class TargetSourceFileUniquenessChecker {
     static func check(targets: Set<Target>) throws {
         let pairs = try targets.map { ($0, try $0.sourceFiles()) }
         let sourceFilesByTarget = Dictionary(uniqueKeysWithValues: pairs)

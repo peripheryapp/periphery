@@ -1,6 +1,6 @@
 import Foundation
 
-public class SourceGraph {
+public final class SourceGraph {
     private(set) var rootDeclarations: Set<Declaration> = []
     private(set) var rootReferences: Set<Reference> = []
     private(set) var allDeclarations: Set<Declaration> = []

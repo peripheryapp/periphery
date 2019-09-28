@@ -1,6 +1,6 @@
 import Foundation
 
-class AncestralReferenceEliminator: SourceGraphVisitor {
+final class AncestralReferenceEliminator: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }

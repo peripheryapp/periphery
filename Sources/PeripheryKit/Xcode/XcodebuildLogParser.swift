@@ -6,7 +6,7 @@ struct SwiftcInvocation {
     let files: [String]
 }
 
-class XcodebuildLogParser {
+final class XcodebuildLogParser {
     private let lines: [String]
 
     init(log: String) {

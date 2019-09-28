@@ -3,7 +3,7 @@ import Foundation
 // Aggressive Mode Only.
 // Removes all references to the setter accessor of simple properties.
 // Properties that aren't referenced via their getter will thus be identified as unused.
-class UnreadSimplePropertyReferenceEliminator: SourceGraphVisitor {
+final class UnreadSimplePropertyReferenceEliminator: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph, configuration: inject())
     }

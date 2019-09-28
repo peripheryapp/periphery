@@ -27,7 +27,7 @@ public func colorize(_ text: String, _ color: ANSIColor) -> String {
     return "\(color.rawValue)\(text)\u{001B}[0;0m"
 }
 
-public class Logger: Singleton {
+public final class Logger: Singleton {
     public static func make() -> Self {
         return self.init(configuration: inject())
     }

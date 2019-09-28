@@ -1,6 +1,6 @@
 import Foundation
 
-public class Injector {
+public final class Injector {
     private static let singletonQueueSpecificKey = DispatchSpecificKey<Void>()
     private static var singletonQueue: DispatchQueue = {
         let queue = DispatchQueue(label: "Injector.singletonQueue")
@@ -38,7 +38,7 @@ public class Injector {
     }
 }
 
-public protocol Injectable: class {
+public protocol Injectable: AnyObject {
     static func make() -> Self
 }
 
