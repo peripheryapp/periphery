@@ -57,12 +57,30 @@ final class BuildPlan {
             filteredArguments = invocation.arguments
         }
 
-        let arguments = filteredArguments
+        let rawArguments = filteredArguments
             .flatMap { [$0.key, $0.value] }
             .compactMap { $0 } + invocation.files
+        let arguments = try expandResponseFiles(rawArguments)
         argumentsByTarget[target] = arguments
         logger.debug("[arguments:'\(target.name)'] \(arguments)")
 
         return arguments
+    }
+
+    // Swift compiler expands arguments when a file starting with '@' is given just after `main`.
+    // But sourcekitd doesn't expand that, so we need to expand it manually.
+    // References:
+    // - https://github.com/apple/swift/blob/master/tools/driver/driver.cpp#L215
+    // - https://github.com/llvm/llvm-project/blob/master/llvm/lib/Support/CommandLine.cpp#L1112
+    fileprivate func expandResponseFiles(_ arguments: [String]) throws -> [String] {
+        return try arguments.flatMap { arg -> [String] in
+            if arg.starts(with: "@") {
+                let filepath = String(arg.dropFirst())
+                let content = try String(contentsOfFile: filepath)
+                return content.split(separator: "\n").map(String.init)
+            } else {
+                return [arg]
+            }
+        }
     }
 }
