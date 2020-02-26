@@ -110,22 +110,7 @@ final class UnusedParamParser {
     }
 
     func parse() throws -> [Function] {
-        let sourceKit = SourceKit(arguments: [])
-        let syntaxTreeResponse = try sourceKit.syntaxTree(file: file)
-        let key = SourceKit.Key.serializedSyntaxTree.rawValue
-
-        guard let syntaxTreeJson = syntaxTreeResponse[key] as? String
-            else { return [] }
-
-        return try parse(syntaxTreeJson: syntaxTreeJson)
-    }
-
-    func parse(syntaxTreeJson: String) throws -> [Function] {
-        guard let syntaxTreeData = syntaxTreeJson.data(using: .utf8)
-            else { return [] }
-
-        let deserializer = SyntaxTreeDeserializer()
-        let syntax = try deserializer.deserialize(syntaxTreeData, serializationFormat: .json)
+        let syntax = try SyntaxTreeParser.parse(file.url)
         return parse(item: syntax, collecting: Function.self)
     }
 

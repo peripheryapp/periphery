@@ -14,12 +14,6 @@ final class UnusedParameterAnalyzer {
         return Set(functions.flatMap { analyze(function: $0) })
     }
 
-    func analyze(file: Path, json: String, parseProtocols: Bool) throws -> Set<Parameter> {
-        let parser = UnusedParamParser(file: file, parseProtocols: parseProtocols)
-        let functions = try parser.parse(syntaxTreeJson: json)
-        return Set(functions.flatMap { analyze(function: $0) })
-    }
-
     func analyze(function: Function) -> Set<Parameter> {
         return Set(unusedParams(in: function))
     }
