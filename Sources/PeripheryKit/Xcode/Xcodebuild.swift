@@ -36,15 +36,19 @@ public final class Xcodebuild: Injectable {
     }
 
     @discardableResult
-    func build(project: XcodeProjectlike, scheme: String, buildForTesting: Bool = false) throws -> String {
+    func build(project: XcodeProjectlike, scheme: String, additionalArguments: String?, buildForTesting: Bool = false) throws -> String {
         let cmd = buildForTesting ? "build-for-testing" : "build"
 
-        let args = [
+        var args = [
             "-\(project.type)", project.path.absolute().string,
             "-scheme", scheme,
             "-parallelizeTargets",
-            "-derivedDataPath", try derivedDataPath(for: project).string
+            "-derivedDataPath", "'\(try derivedDataPath(for: project).string)'",
         ]
+
+        if let additionalArguments = additionalArguments {
+            args.append(additionalArguments)
+        }
 
         let envs = [
             "CODE_SIGNING_ALLOWED=\"NO\"",
@@ -53,7 +57,9 @@ public final class Xcodebuild: Injectable {
             "DEBUG_INFORMATION_FORMAT=\"dwarf\""
         ]
 
-        return try exec(["xcodebuild"] + args + [cmd] + envs)
+        let xcodebuild = "xcodebuild \((args + [cmd] + envs).joined(separator: " "))"
+
+        return try exec(["/bin/sh", "-c", xcodebuild])
     }
 
     func schemes(project: XcodeProjectlike) throws -> [String] {
