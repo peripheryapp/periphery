@@ -49,7 +49,7 @@ class XcodebuildLogParserTest: XCTestCase {
 
         let targetArgument = arguments.first { $0.key == "-target" }
         XCTAssertNotNil(target)
-        XCTAssertEqual(targetArgument!.value, "x86_64-apple-macosx10.12")
+        XCTAssertEqual(targetArgument!.value, "x86_64-apple-macos10.12")
 
         // Check that files have been removed
         let containsFile = arguments.contains(where: { $0.key.hasSuffix(".swift") })
