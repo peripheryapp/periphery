@@ -252,8 +252,7 @@ final class UnusedParamParser {
         var position = syntax.initKeyword.position
 
         if let leftBracket = syntax.genericParameterClause?.leftAngleBracket {
-            // leftBracket offset is incorrect by +1
-            position = AbsolutePosition(utf8Offset: leftBracket.position.utf8Offset - 5)
+            position = AbsolutePosition(utf8Offset: leftBracket.position.utf8Offset - 4)
         } else {
             let leftParen = syntax.parameters.leftParen
             position = AbsolutePosition(utf8Offset: leftParen.position.utf8Offset - 4)

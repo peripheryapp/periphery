@@ -126,7 +126,7 @@ class UnusedParamTest: XCTestCase {
         let init2 = functions.last!
         XCTAssertEqual(init2.location.line!, 8)
         XCTAssertEqual(init2.location.column!, 5)
-        XCTAssertEqual(init2.location.offset!, 110)
+        XCTAssertEqual(init2.location.offset!, 111)
     }
 
     // MARK: - Known Failures
