@@ -36,7 +36,7 @@ public final class Xcodebuild: Injectable {
     }
 
     @discardableResult
-    func build(project: XcodeProjectlike, scheme: String, additionalArguments: String?, buildForTesting: Bool = false) throws -> String {
+    func build(project: XcodeProjectlike, scheme: String, additionalArguments: String? = nil, buildForTesting: Bool = false) throws -> String {
         let cmd = buildForTesting ? "build-for-testing" : "build"
 
         var args = [
