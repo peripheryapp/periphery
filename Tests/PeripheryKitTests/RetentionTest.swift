@@ -181,7 +181,7 @@ class RetentionTest: XCTestCase {
         analyze()
 
         // Retained because it's a method from an external declaration (in this case, Equatable)
-        XCTAssertReferenced((.functionMethodStatic, "==(_:_:)"),
+        XCTAssertReferenced((.functionOperatorInfix, "==(_:_:)"),
                             descendentOf: (.class, "FixtureClass55"))
     }
 
@@ -626,7 +626,7 @@ class RetentionTest: XCTestCase {
         XCTAssertReferenced((.extensionProtocol, "FixtureProtocol96"))
         XCTAssertReferenced((.varInstance, "usedValue"),
                             descendentOf: (.protocol, "FixtureProtocol96"))
-        XCTAssertReferenced((.functionMethodStatic, "<(_:_:)"),
+        XCTAssertReferenced((.functionOperatorInfix, "<(_:_:)"),
                             descendentOf: (.extensionProtocol, "FixtureProtocol96"))
         XCTAssertNotReferenced((.varInstance, "unusedValue"),
                                descendentOf: (.protocol, "FixtureProtocol96"))

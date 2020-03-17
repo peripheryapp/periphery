@@ -17,7 +17,6 @@ final class SourceKit {
         case attribute = "key.attribute"
         case substructure = "key.substructure"
         case accessibility = "key.accessibility"
-        case serializedSyntaxTree = "key.serialized_syntax_tree"
     }
 
     static func make(buildPlan: BuildPlan, target: Target) throws -> Self {

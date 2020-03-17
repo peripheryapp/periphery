@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/jpsim/SourceKitten",
         "state": {
           "branch": null,
-          "revision": "fd9091759201473aa234c22322a3939615aef59a",
-          "version": "0.23.2"
+          "revision": "77a4dbbb477a8110eb8765e3c44c70fb4929098f",
+          "version": "0.29.0"
         }
       },
       {
@@ -87,8 +87,8 @@
         "repositoryURL": "https://github.com/apple/swift-syntax",
         "state": {
           "branch": null,
-          "revision": "43aa4a19b8105a803d8149ad2a86aa53a77efef3",
-          "version": "0.50000.0"
+          "revision": "3e3eb191fcdbecc6031522660c4ed6ce25282c25",
+          "version": "0.50100.0"
         }
       },
       {
@@ -105,8 +105,8 @@
         "repositoryURL": "https://github.com/drmohundro/SWXMLHash.git",
         "state": {
           "branch": null,
-          "revision": "f43166a8e18fdd0857f29e303b1bb79a5428bca0",
-          "version": "4.9.0"
+          "revision": "a4931e5c3bafbedeb1601d3bb76bbe835c6d475a",
+          "version": "5.0.1"
         }
       },
       {
