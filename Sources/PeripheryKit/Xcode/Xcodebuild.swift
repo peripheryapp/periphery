@@ -57,9 +57,9 @@ public final class Xcodebuild: Injectable {
             "DEBUG_INFORMATION_FORMAT=\"dwarf\""
         ]
 
-        let xcodebuild = "xcodebuild \((args + [cmd] + envs).joined(separator: " "))"
+        let xcodebuild = "xcodebuild \((args + [cmd]).joined(separator: " "))"
 
-        return try exec(["/bin/sh", "-c", xcodebuild])
+        return try exec(["/bin/sh", "-c", xcodebuild] + envs)
     }
 
     func schemes(project: XcodeProjectlike) throws -> [String] {
