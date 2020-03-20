@@ -92,6 +92,7 @@ final class BuildLog {
             let buildForTesting = !Set(try $0.testTargets()).isDisjoint(with: testTargetNames)
             return try xcodebuild.build(project: project,
                                         scheme: $0.name,
+                                        additionalArguments: configuration.xcargs,
                                         buildForTesting: buildForTesting)
             }.joined(separator: "\n")
     }
