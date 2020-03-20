@@ -77,7 +77,10 @@ final class XcodebuildLogParser {
             var threadsArgument = arguments[threadsArgumentIndex]
             arguments.remove(at: threadsArgumentIndex)
             let parts = threadsArgument.value?.split(separator: " ", maxSplits: 1, omittingEmptySubsequences: true).map { String($0) } ?? []
-            files += parseFileList(parts.last)
+            // When there isn't file list after num-threads value skip parsing files
+            if parts.count > 1 {
+                files += parseFileList(parts.last)
+            }
             threadsArgument.value = parts.first
             arguments.insert(threadsArgument, at: threadsArgumentIndex)
         }
