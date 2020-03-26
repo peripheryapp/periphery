@@ -19,16 +19,11 @@ final class SourceKit {
         case accessibility = "key.accessibility"
     }
 
-    static func make(buildPlan: BuildPlan, target: Target) throws -> Self {
-        let arguments = try buildPlan.arguments(for: target)
-        return self.init(arguments: arguments)
+    static func make(target: Target) throws -> Self {
+        return self.init()
     }
 
-    private let arguments: [String]
-
-    required init(arguments: [String]) {
-        self.arguments = arguments
-    }
+    required init() {}
 
     func requestIndex(_ file: SourceFile) throws -> [String: Any] {
         let response: [String: Any]

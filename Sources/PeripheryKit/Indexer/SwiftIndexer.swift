@@ -36,7 +36,7 @@ final class SwiftIndexer: TypeIndexer {
         let excludedSourceFiles = configuration.indexExcludeSourceFiles
 
         for target in buildPlan.targets {
-            let sourceKit = try SourceKit.make(buildPlan: buildPlan, target: target)
+            let sourceKit = try SourceKit.make(target: target)
             let sourceFiles = try target.sourceFiles()
             jobs.append(contentsOf: sourceFiles.map { Job($0, sourceKit) })
         }
