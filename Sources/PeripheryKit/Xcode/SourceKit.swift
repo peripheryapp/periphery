@@ -34,7 +34,8 @@ final class SourceKit {
         let response: [String: Any]
 
         do {
-            response = try Request.index(file: file.path.string, arguments: arguments).send()
+            // FIXME: Cache response
+            response = try Request.editorOpen(file: File(path: file.path.string)!).send()
         } catch {
             throw PeripheryKitError.sourceKitRequestFailed(type: "index", file: file.path.string, error: error)
         }
@@ -92,7 +93,6 @@ final class SourceKit {
             "key.name": NSUUID().uuidString,
             "key.sourcefile": file.path.string,
             "key.offset": offset,
-            "key.compilerargs": arguments
         ]
         let response: [String: Any]
 
@@ -100,19 +100,6 @@ final class SourceKit {
             response = try Request.customRequest(request: request).send()
         } catch {
             throw PeripheryKitError.sourceKitRequestFailed(type: "cursorInfo", file: file.path.string, error: error)
-        }
-
-        return response
-    }
-
-    func syntaxTree(file: Path) throws -> [String: Any] {
-        let response: [String: Any]
-
-        do {
-            let skFile = SourceKittenFramework.File(pathDeferringReading: file.string)
-            response = try Request.syntaxTree(file: skFile, byteTree: false).send()
-        } catch {
-            throw PeripheryKitError.sourceKitRequestFailed(type: "syntaxTree", file: file.string, error: error)
         }
 
         return response
