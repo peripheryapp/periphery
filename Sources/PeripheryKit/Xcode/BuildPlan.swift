@@ -1,7 +1,7 @@
 import Foundation
 
 final class BuildPlan {
-    static func make(buildLog: String, targets: Set<Target>) throws -> BuildPlan {
+    static func make(targets: Set<Target>) throws -> BuildPlan {
         let xcodebuild: Xcodebuild = inject()
         let xcodebuildVersion = XcodebuildVersion.parse(try xcodebuild.version())
 

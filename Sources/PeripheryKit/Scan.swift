@@ -62,13 +62,6 @@ public final class Scan: Injectable {
             throw PeripheryKitError.usageError("Expected --workspace or --project option.")
         }
 
-        // Ensure schemes exist within the project
-        let schemes = try project.schemes().filter { configuration.schemes.contains($0.name) }
-        let validSchemeNames = Set(schemes.map { $0.name })
-        if let scheme = Set(configuration.schemes).subtracting(validSchemeNames).first {
-            throw PeripheryKitError.invalidScheme(name: scheme, project: project.path.lastComponent)
-        }
-
         // Ensure targets are part of the project
         let targets = project.targets.filter { configuration.targets.contains($0.name) }
         let missingTargetNames = Set(configuration.targets).subtracting(targets.map { $0.name })
@@ -80,8 +73,7 @@ public final class Scan: Injectable {
         try targets.forEach { try $0.identifyModuleName() }
         try TargetSourceFileUniquenessChecker.check(targets: targets)
 
-        let buildLog = try BuildLog.make(project: project, schemes: schemes, targets: targets).get()
-        let buildPlan = try BuildPlan.make(buildLog: buildLog, targets: targets)
+        let buildPlan = try BuildPlan.make(targets: targets)
         let graph = SourceGraph()
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
