@@ -68,7 +68,7 @@ final class SwiftIndexer: TypeIndexer {
     // MARK: - Private
 
     private func parseIndex(_ sourceFile: SourceFile, _ sourceKit: SourceKit) throws {
-        let index = try sourceKit.requestIndex(sourceFile)
+        let index = try sourceKit.editorOpen(sourceFile)
         var rawStructures: [[String: Any]] = []
 
         if featureManager.isEnabled(.determineAccessibilityFromStructure) {

@@ -25,7 +25,7 @@ final class SourceKit {
 
     required init() {}
 
-    func requestIndex(_ file: SourceFile) throws -> [String: Any] {
+    func editorOpen(_ file: SourceFile) throws -> [String: Any] {
         let response: [String: Any]
 
         do {
