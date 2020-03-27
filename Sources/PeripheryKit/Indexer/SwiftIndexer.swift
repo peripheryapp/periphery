@@ -99,6 +99,9 @@ final class SwiftIndexer: TypeIndexer {
             guard let parentDecl = graph.declaration(withUsr: parent) else {
                 continue
             }
+            for decl in decls {
+                decl.parent = parentDecl
+            }
             parentDecl.declarations = decls
         }
 
@@ -149,7 +152,7 @@ final class SwiftIndexer: TypeIndexer {
         }
 
         indexStore.forEachRelations(for: occ) { rel -> Bool in
-            if !rel.roles.union([.childOf]).isEmpty {
+            if !rel.roles.intersection([.childOf]).isEmpty {
                 // TODO: Add them in parentDecl.declarations
                 let parent = indexStore.getSymbol(for: rel.symbolRef)
                 if self.childDeclsByParentUsr[parent.usr] != nil {
@@ -158,7 +161,7 @@ final class SwiftIndexer: TypeIndexer {
                     self.childDeclsByParentUsr[parent.usr] = [decl]
                 }
             }
-            if !rel.roles.union([.overrideOf]).isEmpty {
+            if !rel.roles.intersection([.overrideOf]).isEmpty {
                 // ```
                 // class A { func f() {} }
                 // class B: A { override func f() {} }
@@ -175,11 +178,11 @@ final class SwiftIndexer: TypeIndexer {
                 }
             }
 
-            if !rel.roles.union([.accessorOf]).isEmpty {
+            if !rel.roles.intersection([.accessorOf]).isEmpty {
                 // Skip accessorOf
             }
 
-            if !rel.roles.union([.baseOf, .receivedBy, .calledBy, .extendedBy, .containedBy]).isEmpty {
+            if !rel.roles.intersection([.baseOf, .receivedBy, .calledBy, .extendedBy, .containedBy]).isEmpty {
                 // ```
                 // class A {}
                 // class B: A {}

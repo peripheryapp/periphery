@@ -66,6 +66,8 @@ class RetentionTest: XCTestCase {
         XCTAssertReferenced((.class, "FixtureClass70"))
         XCTAssertNotReferenced((.varInstance, "simpleUnreadVar"),
                                descendentOf: (.class, "FixtureClass70"))
+        XCTAssertReferenced((.functionMethodInstance, "someMethod()"),
+                               descendentOf: (.class, "FixtureClass70"))
         XCTAssertNotReferenced((.varStatic, "simpleStaticUnreadVar"),
                                descendentOf: (.class, "FixtureClass70"))
         XCTAssertReferenced((.varInstance, "complexUnreadVar1"),
