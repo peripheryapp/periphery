@@ -1,6 +1,7 @@
 import Foundation
 import PathKit
 import SwiftSyntax
+import TSCBasic
 
 final class SwiftIndexer: TypeIndexer {
     static func make(buildPlan: BuildPlan, graph: SourceGraph) -> Self {
@@ -16,6 +17,7 @@ final class SwiftIndexer: TypeIndexer {
     private let logger: Logger
     private let featureManager: FeatureManager
     private let configuration: Configuration
+    private let indexStore: IndexStore
 
     private typealias Job = (sourceFile: SourceFile, sourceKit: SourceKit)
 
@@ -29,9 +31,18 @@ final class SwiftIndexer: TypeIndexer {
         self.logger = logger
         self.featureManager = featureManager
         self.configuration = configuration
+        self.indexStore = try! .open(
+            store: AbsolutePath("/Users/katei/Library/Developer/Xcode/DerivedData/PeripherySandbox-cvqyihuzhsshqwermarhrwlslakc/Index/DataStore/"),
+            api: IndexStoreAPI(dylib: AbsolutePath("/Applications/Xcode-11.3.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libIndexStore.dylib"))
+        )
     }
 
     func perform() throws {
+
+        try indexStore.forEachUnits { unit -> Bool in
+            try _parseIndex(unit, [], indexStore: indexStore)
+            return true
+        }
         var jobs: [Job] = []
         let excludedSourceFiles = configuration.indexExcludeSourceFiles
 
@@ -54,8 +65,8 @@ final class SwiftIndexer: TypeIndexer {
             let sourceKit = job.sourceKit
 
             let elapsed = try Benchmark.measure {
-                try self.parseIndex(sourceFile, sourceKit)
-                try self.parseUnusedParams(sourceFile, sourceKit)
+//                try self.parseIndex(sourceFile, sourceKit)
+//                try self.parseUnusedParams(sourceFile, sourceKit)
             }
 
             self.logger.debug("[index:swift] \(sourceFile.path.string) (\(elapsed)s)")
@@ -67,7 +78,323 @@ final class SwiftIndexer: TypeIndexer {
 
     // MARK: - Private
 
-    private func parseIndex(_ sourceFile: SourceFile, _ sourceKit: SourceKit) throws {
+    private func _parseIndex(_ unit: IndexStoreUnit, _ indexedStructure: [[String: Any]], indexStore: IndexStore) throws {
+        try indexStore.forEachOccurrences(for: unit) { occ in
+            guard occ.symbol.language == .swift, !occ.location.isSystem else { return true }
+            try self._parse(occ, indexedStructure, indexStore: indexStore)
+            return true
+        }
+
+        for (parent, decls) in childDeclsByParentUsr {
+            guard let parentDecl = graph.declaration(withUsr: parent) else {
+                continue
+            }
+            parentDecl.declarations = decls
+        }
+
+        for (usr, references) in referencedDeclsByUsr {
+            guard let decl = graph.declaration(withUsr: usr) else {
+                continue
+            }
+            decl.references = references
+        }
+
+        for (decl, referencedUsrs) in referencedUsrsByDecl {
+            let referencedDecls = referencedUsrs.compactMap(graph.declaration(withUsr:))
+            let refs = referencedDecls.map { decl in
+                Reference(kind: transformKind(decl.kind), usr: decl.usr, location: decl.location)
+            }
+            decl.references.formIntersection(refs)
+        }
+    }
+
+    private func _parse(
+        _ occ: IndexStoreOccurrence,
+        _ indexedStructure: [[String: Any]],
+        indexStore: IndexStore
+    ) throws {
+        if occ.roles.contains(.definition) {
+            try _parseDecl(occ, indexedStructure, indexStore: indexStore)
+            return
+        }
+    }
+
+    private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
+    private var referencedDeclsByUsr: [String: Set<Reference>] = [:]
+    private var referencedUsrsByDecl: [Declaration: [String]] = [:]
+
+    private func _parseDecl(
+        _ occ: IndexStoreOccurrence,
+        _ indexedStructure: [[String: Any]], indexStore: IndexStore
+    ) throws {
+        guard let kind = transformDeclarationKind(occ.symbol.kind, occ.symbol.subKind) else {
+            return
+        }
+        let loc = transformLocation(occ.location)
+        let decl = Declaration(kind: kind, usr: occ.symbol.usr, location: loc)
+        decl.name = occ.symbol.name
+        if let accessibility = try _parseAccessibility(occ, indexedStructure) {
+            decl.structureAccessibility = accessibility
+        }
+
+        indexStore.forEachRelations(for: occ) { rel -> Bool in
+            if !rel.roles.union([.childOf]).isEmpty {
+                // TODO: Add them in parentDecl.declarations
+                let parent = indexStore.getSymbol(for: rel.symbolRef)
+                if self.childDeclsByParentUsr[parent.usr] != nil {
+                    self.childDeclsByParentUsr[parent.usr]?.insert(decl)
+                } else {
+                    self.childDeclsByParentUsr[parent.usr] = [decl]
+                }
+            }
+            if !rel.roles.union([.overrideOf]).isEmpty {
+                // ```
+                // class A { func f() {} }
+                // class B: A { override func f() {} }
+                // ```
+                // `B.f` is `overrideOf` `A.f`
+                // (B.f).relations has A.f
+                // B.f references A.f
+
+                let baseFunc = indexStore.getSymbol(for: rel.symbolRef)
+                if self.referencedUsrsByDecl[decl] != nil {
+                    self.referencedUsrsByDecl[decl]?.append(baseFunc.usr)
+                } else {
+                    self.referencedUsrsByDecl[decl] = [baseFunc.usr]
+                }
+            }
+
+            if !rel.roles.union([.accessorOf]).isEmpty {
+                // Skip accessorOf
+            }
+
+            if !rel.roles.union([.baseOf, .receivedBy, .calledBy, .extendedBy, .containedBy]).isEmpty {
+                // ```
+                // class A {}
+                // class B: A {}
+                // ```
+                // `A` is `baseOf` `B`
+                // A.relations has B as `baseOf`
+                // B referenes A
+                // TODO: Add them in subDecl.related
+                let referencer = indexStore.getSymbol(for: rel.symbolRef)
+                guard let refKind = transformReferenceKind(occ.symbol.kind, occ.symbol.subKind) else {
+                    logger.error("Failed to transform ref kind")
+                    return false
+                }
+                let reference = Reference(kind: refKind, usr: decl.usr, location: decl.location)
+                if self.referencedDeclsByUsr[referencer.name] != nil {
+                    self.referencedDeclsByUsr[referencer.name]?.insert(reference)
+                } else {
+                    self.referencedDeclsByUsr[referencer.name] = [reference]
+                }
+            }
+
+            return true
+        }
+
+        graph.add(decl)
+    }
+
+    private func _parseAccessibility(
+        _ occ: IndexStoreOccurrence,
+        _ indexedStructure: [[String: Any]]
+    ) throws -> Accessibility? {
+        let matchingStructures = indexedStructure.lazy.filter { [unowned self] in
+            guard let structureKindName = $0[SourceKit.Key.kind.rawValue] as? String,
+                let structureKind = Declaration.Kind(rawValue: structureKindName) else { return false }
+
+            var structureName = $0[SourceKit.Key.name.rawValue] as? String
+
+            if let last = structureName?.split(separator: ".").last {
+                // Truncate e.g Notification.Name to just Name to match the index declaration.
+                structureName = String(last)
+            }
+
+            guard let kind = self.transformDeclarationKind(occ.symbol.kind, occ.symbol.subKind) else {
+                return false
+            }
+
+            return kind.isEqualToStructure(kind: structureKind) && structureName == occ.symbol.name
+        }
+
+        for structure in matchingStructures {
+            if let accessibilityName = structure[SourceKit.Key.accessibility.rawValue] as? String {
+                if let accessibility = Accessibility(rawValue: accessibilityName) {
+                    return accessibility
+                } else {
+                    throw PeripheryKitError.swiftIndexingError(message: "Unhandled accessibility '\(accessibilityName)'")
+                }
+            }
+        }
+        return nil
+    }
+
+    private func transformLocation(_ input: IndexStoreOccurrence.Location) -> SourceLocation {
+        let file = SourceFile(path: Path(input.path))
+        return SourceLocation(file: file, line: input.line, column: input.column)
+    }
+
+    private func transformDeclarationKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Declaration.Kind? {
+        switch kind {
+        case .unknown: return nil
+        case .module: return .module
+        case .namespace, .namespacealias:
+            logger.warn("'namespace' is not supported on Swift")
+            return nil
+        case .macro:
+            logger.warn("'macro' is not supported on Swift")
+            return nil
+        case .enum: return .enum
+        case .struct: return .struct
+        case .class: return .class
+        case .protocol: return .protocol
+        case .extension:
+            switch subKind {
+            case .swiftExtensionOfClass:
+                return .extensionClass
+            case .swiftExtensionOfStruct:
+                return .extensionStruct
+            case .swiftExtensionOfProtocol:
+                return .extensionProtocol
+            case .swiftExtensionOfEnum:
+                return .extensionEnum
+            default:
+                return .extension
+            }
+        case .union:
+            logger.warn("'union' is not supported on Swift")
+            return nil
+        case .typealias: return .typealias
+        case .function: return .functionFree
+        case .variable: return .varGlobal
+        case .field:
+            logger.warn("'field' is not supported on Swift")
+            return nil
+        case .enumconstant: return .enumelement
+        case .instancemethod: return .functionMethodInstance
+        case .classmethod: return .functionMethodClass
+        case .staticmethod: return .functionMethodStatic
+        case .instanceproperty: return .varInstance
+        case .classproperty: return .varClass
+        case .staticproperty: return .varStatic
+        case .constructor: return .functionConstructor
+        case .destructor: return .functionDestructor
+        case .conversionfunction:
+            logger.warn("'conversionfunction' is not supported on Swift")
+            return nil
+        case .parameter: return .varParameter
+        case .using:
+            logger.warn("'using' is not supported on Swift")
+            return nil
+        case .commenttag:
+            logger.warn("'commenttag' is not supported on Swift")
+            return nil
+        }
+    }
+
+    private func transformReferenceKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Reference.Kind? {
+        switch kind {
+        case .unknown: return nil
+        case .module: return .module
+        case .namespace, .namespacealias:
+            logger.warn("'namespace' is not supported on Swift")
+            return nil
+        case .macro:
+            logger.warn("'macro' is not supported on Swift")
+            return nil
+        case .enum: return .enum
+        case .struct: return .struct
+        case .class: return .class
+        case .protocol: return .protocol
+        case .extension:
+            switch subKind {
+            case .swiftExtensionOfClass:
+                return .extensionClass
+            case .swiftExtensionOfStruct:
+                return .extensionStruct
+            case .swiftExtensionOfProtocol:
+                return .extensionProtocol
+            case .swiftExtensionOfEnum:
+                return .extensionEnum
+            default:
+                return .extension
+            }
+        case .union:
+            logger.warn("'union' is not supported on Swift")
+            return nil
+        case .typealias: return .typealias
+        case .function: return .functionFree
+        case .variable: return .varGlobal
+        case .field:
+            logger.warn("'field' is not supported on Swift")
+            return nil
+        case .enumconstant: return .enumelement
+        case .instancemethod: return .functionMethodInstance
+        case .classmethod: return .functionMethodClass
+        case .staticmethod: return .functionMethodStatic
+        case .instanceproperty: return .varInstance
+        case .classproperty: return .varClass
+        case .staticproperty: return .varStatic
+        case .constructor: return .functionConstructor
+        case .destructor: return .functionDestructor
+        case .conversionfunction:
+            logger.warn("'conversionfunction' is not supported on Swift")
+            return nil
+        case .parameter: return .varParameter
+        case .using:
+            logger.warn("'using' is not supported on Swift")
+            return nil
+        case .commenttag:
+            logger.warn("'commenttag' is not supported on Swift")
+            return nil
+        }
+    }
+
+    private func transformKind(_ kind: Declaration.Kind) -> Reference.Kind {
+        switch kind {
+        case .`associatedtype`: return .`associatedtype`
+        case .`class`: return .`class`
+        case .`enum`: return .`enum`
+        case .enumelement: return .enumelement
+        case .`extension`: return .`extension`
+        case .extensionClass: return .extensionClass
+        case .extensionEnum: return .extensionEnum
+        case .extensionProtocol: return .extensionProtocol
+        case .extensionStruct: return .extensionStruct
+        case .functionAccessorAddress: return .functionAccessorAddress
+        case .functionAccessorDidset: return .functionAccessorDidset
+        case .functionAccessorGetter: return .functionAccessorGetter
+        case .functionAccessorMutableaddress: return .functionAccessorMutableaddress
+        case .functionAccessorSetter: return .functionAccessorSetter
+        case .functionAccessorWillset: return .functionAccessorWillset
+        case .functionConstructor: return .functionConstructor
+        case .functionDestructor: return .functionDestructor
+        case .functionFree: return .functionFree
+        case .functionMethodClass: return .functionMethodClass
+        case .functionMethodInstance: return .functionMethodInstance
+        case .functionMethodStatic: return .functionMethodStatic
+        case .functionOperator: return .functionOperator
+        case .functionOperatorInfix: return .functionOperatorInfix
+        case .functionOperatorPostfix: return .functionOperatorPostfix
+        case .functionOperatorPrefix: return .functionOperatorPrefix
+        case .functionSubscript: return .functionSubscript
+        case .genericTypeParam: return .genericTypeParam
+        case .module: return .module
+        case .precedenceGroup: return .precedenceGroup
+        case .`protocol`: return .`protocol`
+        case .`struct`: return .`struct`
+        case .`typealias`: return .`typealias`
+        case .varClass: return .varClass
+        case .varGlobal: return .varGlobal
+        case .varInstance: return .varInstance
+        case .varLocal: return .varLocal
+        case .varParameter: return .varParameter
+        case .varStatic: return .varStatic
+        }
+    }
+
+    private func parseIndex(_ sourceFile: SourceFile, _ sourceKit: SourceKit, indexStore: IndexStore) throws {
         let index = try sourceKit.editorOpen(sourceFile)
         var rawStructures: [[String: Any]] = []
 

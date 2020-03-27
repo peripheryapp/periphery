@@ -69,11 +69,41 @@ struct IndexStoreSymbol {
         case swiftAccessorRead = 1014
         case swiftAccessorModify = 1015
     }
-    
+
+    struct Property: OptionSet, Hashable {
+        let rawValue: UInt32
+
+        static let generic = Property(rawValue: INDEXSTORE_SYMBOL_PROPERTY_GENERIC)
+        static let templatePartialSpecialization = Property(rawValue: INDEXSTORE_SYMBOL_PROPERTY_TEMPLATE_PARTIAL_SPECIALIZATION)
+        static let templateSpecialization = Property(rawValue: INDEXSTORE_SYMBOL_PROPERTY_TEMPLATE_SPECIALIZATION)
+        static let unittest = Property(rawValue: INDEXSTORE_SYMBOL_PROPERTY_UNITTEST)
+        static let ibAnnotated = Property(rawValue: INDEXSTORE_SYMBOL_PROPERTY_IBANNOTATED)
+        static let ibOutletCollection = Property(rawValue: INDEXSTORE_SYMBOL_PROPERTY_IBOUTLETCOLLECTION)
+        static let gkinspectable = Property(rawValue: INDEXSTORE_SYMBOL_PROPERTY_GKINSPECTABLE)
+        static let local = Property(rawValue: INDEXSTORE_SYMBOL_PROPERTY_LOCAL)
+        static let protocolInterface = Property(rawValue: INDEXSTORE_SYMBOL_PROPERTY_PROTOCOL_INTERFACE)
+
+        init(rawValue: UInt32) {
+            self.rawValue = rawValue
+        }
+
+        init(rawValue: indexstore_symbol_property_t) {
+            self.rawValue = rawValue.rawValue
+        }
+    }
+
+    enum Language: UInt32 {
+        case c = 0
+        case objc = 1
+        case cxx = 2
+        case swift = 100
+    }
+
     let usr: String
     let name: String
     let kind: Kind
     let subKind: SubKind
+    let language: Language
 }
 
 struct IndexStoreOccurrence {
@@ -124,6 +154,17 @@ struct IndexStoreOccurrence {
     let roles: Role
     let symbol: IndexStoreSymbol
     let location: Location
+
+    fileprivate let anchor: indexstore_occurrence_t?
+}
+
+struct IndexStoreSymbolRef {
+    fileprivate let anchor: indexstore_symbol_t?
+}
+
+struct IndexStoreRelation {
+    let roles: IndexStoreOccurrence.Role
+    let symbolRef: IndexStoreSymbolRef
 }
 
 final class IndexStore {
@@ -166,15 +207,22 @@ final class IndexStore {
         }
     }
 
-    func forEachUnits(_ next: (IndexStoreUnit) -> Bool) {
-        typealias Ctx = Context<(IndexStoreUnit) -> Bool>
-        withoutActuallyEscaping(next) { next in
+    func forEachUnits(_ next: (IndexStoreUnit) throws -> Bool) rethrows {
+        typealias Ctx = Context<(IndexStoreUnit) throws -> Bool>
+        try withoutActuallyEscaping(next) { next in
             let handler = Ctx(next, api: api)
             let ctx = Unmanaged.passUnretained(handler).toOpaque()
             _ = api.fn.store_units_apply_f(store, false.bit, ctx) { ctx, unitName -> Bool in
                 let ctx = Unmanaged<Ctx>.fromOpaque(ctx!).takeUnretainedValue()
                 let unit = IndexStoreUnit(name: unitName.toSwiftString())
-                return ctx.content(unit)
+                do { return try ctx.content(unit) }
+                catch {
+                    ctx.error = error
+                    return false
+                }
+            }
+            if let error = handler.error {
+                throw error
             }
         }
     }
@@ -208,7 +256,7 @@ final class IndexStore {
         }
     }
 
-    func forEachOccurrences(for unit: IndexStoreUnit, _ next: (IndexStoreOccurrence) -> Bool) throws {
+    func forEachOccurrences(for unit: IndexStoreUnit, _ next: (IndexStoreOccurrence) throws -> Bool) throws {
         try forEachRecordDependencies(for: unit) { (record) -> Bool in
             let recordName = api.fn.unit_dependency_get_name(record).toSwiftString()
             let recordPath = api.fn.unit_dependency_get_filepath(record).toSwiftString()
@@ -217,11 +265,11 @@ final class IndexStore {
                 throw PeripheryKitError.indexStoreError(message: "Unable to create record reader for \(recordName)")
             }
             typealias Ctx = Context<(
-                next: (IndexStoreOccurrence) -> Bool,
+                next: (IndexStoreOccurrence) throws -> Bool,
                 filepath: String,
                 isSystem: Bool
             )>
-            withoutActuallyEscaping(next) { next in
+            try withoutActuallyEscaping(next) { next in
                 let handler = Ctx((next, recordPath, isSystem), api: api)
                 let ctx = Unmanaged.passUnretained(handler).toOpaque()
                 _ = api.fn.record_reader_occurrences_apply_f(reader, ctx) { ctx, occurrence -> Bool in
@@ -232,9 +280,11 @@ final class IndexStore {
                     let symbolSubKind = IndexStoreSymbol.SubKind(rawValue: ctx.api.fn.symbol_get_subkind(symbol).rawValue)!
                     let symbolUsr = ctx.api.fn.symbol_get_usr(symbol).toSwiftString()
                     let symbolName = ctx.api.fn.symbol_get_name(symbol).toSwiftString()
+                    let symbolLanguage = IndexStoreSymbol.Language(rawValue: ctx.api.fn.symbol_get_language(symbol).rawValue)!
                     let sym = IndexStoreSymbol(
                         usr: symbolUsr, name: symbolName,
-                        kind: symbolKind, subKind: symbolSubKind
+                        kind: symbolKind, subKind: symbolSubKind,
+                        language: symbolLanguage
                     )
                     var line: UInt32 = 0
                     var column: UInt32 = 0
@@ -243,12 +293,54 @@ final class IndexStore {
                         path: ctx.content.filepath, isSystem: ctx.content.isSystem,
                         line: Int64(line), column: Int64(column)
                     )
-                    let occ = IndexStoreOccurrence(roles: symbolRoles, symbol: sym, location: location)
-                    return ctx.content.next(occ)
+                    let occ = IndexStoreOccurrence(roles: symbolRoles, symbol: sym, location: location, anchor: occurrence)
+                    do { return try ctx.content.next(occ) }
+                    catch {
+                        ctx.error = error
+                        return false
+                    }
+                }
+                if let error = handler.error {
+                    throw error
                 }
             }
             return true
         }
+    }
+
+    func forEachRelations(for occ: IndexStoreOccurrence, _ next: (IndexStoreRelation) throws -> Bool) rethrows {
+        typealias Ctx = Context<((IndexStoreRelation) throws -> Bool)>
+        try withoutActuallyEscaping(next) { next in
+            let handler = Ctx(next, api: api)
+            let ctx = Unmanaged.passUnretained(handler).toOpaque()
+            _ = api.fn.occurrence_relations_apply_f(occ.anchor, ctx) { ctx, relation -> Bool in
+                let ctx = Unmanaged<Ctx>.fromOpaque(ctx!).takeUnretainedValue()
+                let roles = IndexStoreOccurrence.Role(rawValue: ctx.api.fn.symbol_relation_get_roles(relation))
+                let symbol = IndexStoreSymbolRef(anchor: ctx.api.fn.symbol_relation_get_symbol(relation))
+                let rel = IndexStoreRelation(roles: roles, symbolRef: symbol)
+                do { return try ctx.content(rel) }
+                catch {
+                    ctx.error = error
+                    return false
+                }
+            }
+            if let error = handler.error {
+                throw error
+            }
+        }
+    }
+
+    func getSymbol(for symRef: IndexStoreSymbolRef) -> IndexStoreSymbol {
+        let symbolKind = IndexStoreSymbol.Kind(rawValue: api.fn.symbol_get_kind(symRef.anchor).rawValue)!
+        let symbolSubKind = IndexStoreSymbol.SubKind(rawValue: api.fn.symbol_get_subkind(symRef.anchor).rawValue)!
+        let symbolUsr = api.fn.symbol_get_usr(symRef.anchor).toSwiftString()
+        let symbolName = api.fn.symbol_get_name(symRef.anchor).toSwiftString()
+        let symbolLanguage = IndexStoreSymbol.Language(rawValue: api.fn.symbol_get_language(symRef.anchor).rawValue)!
+        return IndexStoreSymbol(
+            usr: symbolUsr, name: symbolName,
+            kind: symbolKind, subKind: symbolSubKind,
+            language: symbolLanguage
+        )
     }
 }
 
@@ -282,7 +374,26 @@ final class IndexStoreAPI {
 
         api.store_create = try requireSym(dylib, "indexstore_store_create")
         api.store_units_apply_f = try requireSym(dylib, "indexstore_store_units_apply_f")
+        api.unit_reader_dependencies_apply_f = try requireSym(dylib, "indexstore_unit_reader_dependencies_apply_f")
+        api.unit_dependency_get_kind = try requireSym(dylib, "indexstore_unit_dependency_get_kind")
+        api.unit_reader_create = try requireSym(dylib, "indexstore_unit_reader_create")
+        api.unit_dependency_get_name = try requireSym(dylib, "indexstore_unit_dependency_get_name")
+        api.unit_dependency_get_filepath = try requireSym(dylib, "indexstore_unit_dependency_get_filepath")
+        api.unit_dependency_is_system = try requireSym(dylib, "indexstore_unit_dependency_is_system")
+        api.record_reader_create = try requireSym(dylib, "indexstore_record_reader_create")
+        api.record_reader_occurrences_apply_f = try requireSym(dylib, "indexstore_record_reader_occurrences_apply_f")
+        api.occurrence_get_roles = try requireSym(dylib, "indexstore_occurrence_get_roles")
+        api.occurrence_get_symbol = try requireSym(dylib, "indexstore_occurrence_get_symbol")
+        api.symbol_get_kind = try requireSym(dylib, "indexstore_symbol_get_kind")
+        api.symbol_get_subkind = try requireSym(dylib, "indexstore_symbol_get_subkind")
+        api.symbol_get_usr = try requireSym(dylib, "indexstore_symbol_get_usr")
+        api.symbol_get_name = try requireSym(dylib, "indexstore_symbol_get_name")
+        api.occurrence_get_line_col = try requireSym(dylib, "indexstore_occurrence_get_line_col")
         api.error_get_description = try requireSym(dylib, "indexstore_error_get_description")
+        api.occurrence_relations_apply_f = try requireSym(dylib, "indexstore_occurrence_relations_apply_f")
+        api.symbol_relation_get_roles = try requireSym(dylib, "indexstore_symbol_relation_get_roles")
+        api.symbol_relation_get_symbol = try requireSym(dylib, "indexstore_symbol_relation_get_symbol")
+        api.symbol_get_language = try requireSym(dylib, "indexstore_symbol_get_language")
         self.fn = api
     }
 
