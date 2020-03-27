@@ -84,6 +84,8 @@ final class SwiftIndexer: TypeIndexer {
     // MARK: - Private
 
     private func _parseIndex(_ unit: IndexStoreUnit, indexStore: IndexStore) throws {
+
+        var decls: [(decl: Declaration, structures: [[String: Any]])] = []
         try indexStore.forEachOccurrences(for: unit) { occ in
             guard occ.symbol.language == .swift, !occ.location.isSystem else { return true }
             var rawStructures: [[String: Any]] = []
@@ -91,44 +93,46 @@ final class SwiftIndexer: TypeIndexer {
                 let file = SourceFile(path: Path(occ.location.path))
                 rawStructures = try self.indexStructure.get(file)
             }
-            try self._parse(occ, rawStructures, indexStore: indexStore)
+            if !occ.roles.intersection([.definition, .declaration]).isEmpty {
+                let decl = try _parseDecl(occ, rawStructures, indexStore: indexStore)
+                graph.add(decl)
+                decls.append((decl, rawStructures))
+            }
             return true
         }
 
-        for (parent, decls) in childDeclsByParentUsr {
-            guard let parentDecl = graph.declaration(withUsr: parent) else {
-                continue
+        do {
+            // Make relationships between declarations
+
+            for (parent, decls) in childDeclsByParentUsr {
+                guard let parentDecl = graph.declaration(withUsr: parent) else {
+                    continue
+                }
+                for decl in decls {
+                    decl.parent = parentDecl
+                }
+                parentDecl.declarations = decls
             }
-            for decl in decls {
-                decl.parent = parentDecl
+
+            for (usr, references) in referencedDeclsByUsr {
+                guard let decl = graph.declaration(withUsr: usr) else {
+                    continue
+                }
+                decl.references = references
             }
-            parentDecl.declarations = decls
+
+            for (decl, referencedUsrs) in referencedUsrsByDecl {
+                let referencedDecls = referencedUsrs.compactMap(graph.declaration(withUsr:))
+                let refs = referencedDecls.map { decl in
+                    Reference(kind: transformKind(decl.kind), usr: decl.usr, location: decl.location)
+                }
+                decl.references.formIntersection(refs)
+            }
         }
 
-        for (usr, references) in referencedDeclsByUsr {
-            guard let decl = graph.declaration(withUsr: usr) else {
-                continue
-            }
-            decl.references = references
-        }
-
-        for (decl, referencedUsrs) in referencedUsrsByDecl {
-            let referencedDecls = referencedUsrs.compactMap(graph.declaration(withUsr:))
-            let refs = referencedDecls.map { decl in
-                Reference(kind: transformKind(decl.kind), usr: decl.usr, location: decl.location)
-            }
-            decl.references.formIntersection(refs)
-        }
-    }
-
-    private func _parse(
-        _ occ: IndexStoreOccurrence,
-        _ indexedStructure: [[String: Any]],
-        indexStore: IndexStore
-    ) throws {
-        if occ.roles.contains(.definition) {
-            try _parseDecl(occ, indexedStructure, indexStore: indexStore)
-            return
+        for (decl, structure) in decls {
+            guard decl.parent == nil else { continue }
+            try _parseAccessibility(decl, structure)
         }
     }
 
@@ -140,16 +144,13 @@ final class SwiftIndexer: TypeIndexer {
     private func _parseDecl(
         _ occ: IndexStoreOccurrence,
         _ indexedStructure: [[String: Any]], indexStore: IndexStore
-    ) throws {
+    ) throws -> Declaration {
         guard let kind = transformDeclarationKind(occ.symbol.kind, occ.symbol.subKind) else {
-            return
+            throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occ.symbol)")
         }
         let loc = transformLocation(occ.location)
         let decl = Declaration(kind: kind, usr: occ.symbol.usr, location: loc)
         decl.name = occ.symbol.name
-        if let accessibility = try _parseAccessibility(occ, indexedStructure) {
-            decl.structureAccessibility = accessibility
-        }
 
         indexStore.forEachRelations(for: occ) { rel -> Bool in
             if !rel.roles.intersection([.childOf]).isEmpty {
@@ -206,15 +207,14 @@ final class SwiftIndexer: TypeIndexer {
 
             return true
         }
-
-        graph.add(decl)
+        return decl
     }
 
     private func _parseAccessibility(
-        _ occ: IndexStoreOccurrence,
+        _ decl: Declaration,
         _ indexedStructure: [[String: Any]]
-    ) throws -> Accessibility? {
-        let matchingStructures = indexedStructure.lazy.filter { [unowned self] in
+    ) throws {
+        let matchingStructures = indexedStructure.lazy.filter {
             guard let structureKindName = $0[SourceKit.Key.kind.rawValue] as? String,
                 let structureKind = Declaration.Kind(rawValue: structureKindName) else { return false }
 
@@ -225,23 +225,23 @@ final class SwiftIndexer: TypeIndexer {
                 structureName = String(last)
             }
 
-            guard let kind = self.transformDeclarationKind(occ.symbol.kind, occ.symbol.subKind) else {
-                return false
-            }
-
-            return kind.isEqualToStructure(kind: structureKind) && structureName == occ.symbol.name
+            return decl.kind.isEqualToStructure(kind: structureKind) && structureName == decl.name
         }
 
+        var substructures: [[String: Any]] = []
         for structure in matchingStructures {
             if let accessibilityName = structure[SourceKit.Key.accessibility.rawValue] as? String {
                 if let accessibility = Accessibility(rawValue: accessibilityName) {
-                    return accessibility
+                    decl.structureAccessibility = accessibility
                 } else {
                     throw PeripheryKitError.swiftIndexingError(message: "Unhandled accessibility '\(accessibilityName)'")
                 }
             }
+            substructures += structure[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
         }
-        return nil
+        for child in decl.declarations {
+            try _parseAccessibility(child, substructures)
+        }
     }
 
     private func transformLocation(_ input: IndexStoreOccurrence.Location) -> SourceLocation {
