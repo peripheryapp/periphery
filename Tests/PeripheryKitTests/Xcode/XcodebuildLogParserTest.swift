@@ -45,11 +45,11 @@ class XcodebuildLogParserTest: XCTestCase {
         // We can't check all arguments so just check for a few
         let moduleName = arguments.first { $0.key == "-module-name" }
         XCTAssertNotNil(moduleName)
-        XCTAssertEqual(moduleName!.value, "RetentionFixtures")
+        try XCTAssertEqual(XCTUnwrap(moduleName).value, "RetentionFixtures")
 
         let targetArgument = arguments.first { $0.key == "-target" }
         XCTAssertNotNil(target)
-        XCTAssertEqual(targetArgument!.value, "x86_64-apple-macos10.12")
+        try XCTAssertEqual(XCTUnwrap(targetArgument).value, "x86_64-apple-macos10.12")
 
         // Check that files have been removed
         let containsFile = arguments.contains(where: { $0.key.hasSuffix(".swift") })
@@ -101,7 +101,7 @@ CompileSwiftSources normal x86_64 com.apple.xcode.tools.swift.compiler
         let parser = XcodebuildLogParser(log: log)
         let arguments = try! parser.getSwiftcInvocation(target: target.name, module: target.moduleName).arguments
 
-        XCTAssertEqual(arguments.first!.key, "-module-name")
+        try XCTAssertEqual(XCTUnwrap(arguments.first).key, "-module-name")
     }
 
     func testParseSwifcPathWithSpace() {
@@ -113,7 +113,7 @@ CompileSwiftSources normal x86_64 com.apple.xcode.tools.swift.compiler
         let parser = XcodebuildLogParser(log: log)
         let arguments = try! parser.getSwiftcInvocation(target: target.name, module: target.moduleName).arguments
 
-        XCTAssertEqual(arguments.first!.key, "-module-name")
+        try XCTAssertEqual(XCTUnwrap(arguments.first).key, "-module-name")
     }
 
     func testParseTargetContainingNonLatin1Characters() {

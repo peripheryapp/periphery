@@ -10,8 +10,8 @@ class SchemeTest: XCTestCase {
         scheme = try! Scheme.make(project: project, name: "Periphery-Package")
     }
 
-    func testTargets() {
-        XCTAssertEqual(try! scheme.buildTargets().sorted(), ["Periphery", "PeripheryKit"])
-        XCTAssertEqual(try! scheme.testTargets().sorted(), ["Periphery", "PeripheryKit", "PeripheryKitTests", "RetentionFixtures", "SyntaxFixtures"])
+    func testTargets() throws {
+        XCTAssertEqual(try scheme.buildTargets().sorted(), ["Periphery", "PeripheryKit"])
+        XCTAssertEqual(try scheme.testTargets().sorted(), ["Periphery", "PeripheryKit", "PeripheryKitTests", "RetentionFixtures", "SyntaxFixtures"])
     }
 }

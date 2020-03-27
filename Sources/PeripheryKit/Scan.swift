@@ -21,20 +21,6 @@ public final class Scan: Injectable {
         self.logger = logger
     }
 
-    fileprivate var indexStoreLibCache = LazyCache(createIndexStoreLib)
-    private func createIndexStoreLib() -> Result<AbsolutePath, Error> {
-        if let toolchainDir = ProcessEnv.vars["TOOLCHAIN_DIR"] {
-            return .success(AbsolutePath(toolchainDir).appending(components: "usr", "lib", "libIndexStore.dylib"))
-        }
-        return Result {
-            let developerDirStr = try Process.checkNonZeroExit(arguments: ["/usr/bin/xcode-select", "--print-path"])
-            return AbsolutePath(developerDirStr).appending(
-                components: "Toolchains", "XcodeDefault.xctoolchain",
-                            "usr", "lib", "libIndexStore.dylib"
-            )
-        }
-    }
-
     public func perform() throws -> ScanResult {
         guard configuration.workspace != nil || configuration.project != nil else {
             let message = "You must supply either the --workspace or --project option. If your project uses an .xcworkspace to integrate multiple projects, then supply the --workspace option. Otherwise, supply the --project option."
@@ -103,7 +89,7 @@ public final class Scan: Injectable {
             .appending(components: "Index", "DataStore")
         let indexStore = try IndexStore.open(
             store: indexStorePath,
-            api: IndexStoreAPI(dylib: indexStoreLibCache.getValue(self).get())
+            api: IndexStoreAPI.make()
         )
         try Indexer.perform(buildPlan: buildPlan, indexStore: indexStore, graph: graph)
 

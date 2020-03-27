@@ -1,5 +1,6 @@
 import TSCclibc
 import TSCBasic
+import TSCUtility
 import PathKit
 
 struct IndexStoreUnit {
@@ -395,6 +396,25 @@ final class IndexStoreAPI {
             throw PeripheryKitError.indexStoreError(message: String(cString: desc))
         }
         return ret
+    }
+}
+
+extension IndexStoreAPI {
+    private static func createIndexStoreLib() -> Result<AbsolutePath, Error> {
+        if let toolchainDir = ProcessEnv.vars["TOOLCHAIN_DIR"] {
+            return .success(AbsolutePath(toolchainDir).appending(components: "usr", "lib", "libIndexStore.dylib"))
+        }
+        return Result {
+            let developerDirStr = try Process.checkNonZeroExit(arguments: ["/usr/bin/xcode-select", "--print-path"]).spm_chomp()
+            return AbsolutePath(developerDirStr).appending(
+                components: "Toolchains", "XcodeDefault.xctoolchain",
+                            "usr", "lib", "libIndexStore.dylib"
+            )
+        }
+    }
+
+    static func make() throws -> IndexStoreAPI {
+        return try IndexStoreAPI(dylib: createIndexStoreLib().get())
     }
 }
 
