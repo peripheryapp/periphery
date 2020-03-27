@@ -88,6 +88,10 @@ final class SwiftIndexer: TypeIndexer {
         var decls: [(decl: Declaration, structures: [[String: Any]])] = []
         try indexStore.forEachOccurrences(for: unit) { occ in
             guard occ.symbol.language == .swift, !occ.location.isSystem else { return true }
+            let shouldIndex = try buildPlan.targets.contains(where: {
+                try $0.sourceFiles().contains(where: { $0.path.string == occ.location.path })
+            })
+            guard shouldIndex else { return true }
             var rawStructures: [[String: Any]] = []
             if featureManager.isEnabled(.determineAccessibilityFromStructure) {
                 let file = SourceFile(path: Path(occ.location.path))
