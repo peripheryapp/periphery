@@ -127,6 +127,9 @@ final class SwiftIndexer: TypeIndexer {
                 guard let decl = graph.declaration(withUsr: usr) else {
                     continue
                 }
+                for reference in references {
+                    reference.parent = decl
+                }
                 decl.references.formUnion(references)
             }
 
@@ -134,6 +137,9 @@ final class SwiftIndexer: TypeIndexer {
                 let referencedDecls = referencedUsrs.compactMap(graph.declaration(withUsr:))
                 let refs = referencedDecls.map { decl in
                     Reference(kind: transformKind(decl.kind), usr: decl.usr, location: decl.location)
+                }
+                for ref in refs {
+                    ref.parent = decl
                 }
                 decl.references.formUnion(refs)
             }
@@ -162,7 +168,18 @@ final class SwiftIndexer: TypeIndexer {
         decl.name = occ.symbol.name
 
         indexStore.forEachRelations(for: occ) { rel -> Bool in
-            if !rel.roles.intersection([.childOf]).isEmpty {
+            // Note: Skip adding accessor in variable children to avoid circurlar reference
+            // Expected graph is
+            // ```
+            // variable.getter  ──> variable
+            // variable.settter ──> variable
+            // ```
+            // If there is no guard statement,
+            // ```
+            // variable <──┬────> variable.getter
+            //             └────> variable.setter
+            // ```
+            if !rel.roles.intersection([.childOf]).isEmpty && !rel.roles.contains(.accessorOf) {
                 // TODO: Add them in parentDecl.declarations
                 let parent = indexStore.getSymbol(for: rel.symbolRef)
                 if self.childDeclsByParentUsr[parent.usr] != nil {
@@ -286,6 +303,14 @@ final class SwiftIndexer: TypeIndexer {
     }
 
     private func transformDeclarationKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Declaration.Kind? {
+        switch subKind {
+        case .accessorGetter: return .functionAccessorGetter
+        case .accessorSetter: return .functionAccessorSetter
+        case .swiftAccessorDidSet: return .functionAccessorDidset
+        case .swiftAccessorWillSet: return .functionAccessorWillset
+        case .swiftAccessorMutableAddressor: return .functionAccessorMutableaddress
+        default: break
+        }
         switch kind {
         case .unknown: return nil
         case .module: return .module
@@ -344,6 +369,14 @@ final class SwiftIndexer: TypeIndexer {
     }
 
     private func transformReferenceKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Reference.Kind? {
+        switch subKind {
+        case .accessorGetter: return .functionAccessorGetter
+        case .accessorSetter: return .functionAccessorSetter
+        case .swiftAccessorDidSet: return .functionAccessorDidset
+        case .swiftAccessorWillSet: return .functionAccessorWillset
+        case .swiftAccessorMutableAddressor: return .functionAccessorMutableaddress
+        default: break
+        }
         switch kind {
         case .unknown: return nil
         case .module: return .module
