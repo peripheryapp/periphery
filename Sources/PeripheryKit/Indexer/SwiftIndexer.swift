@@ -4,9 +4,10 @@ import SwiftSyntax
 import TSCBasic
 
 final class SwiftIndexer: TypeIndexer {
-    static func make(buildPlan: BuildPlan, graph: SourceGraph) -> Self {
+    static func make(buildPlan: BuildPlan, indexStore: IndexStore, graph: SourceGraph) -> Self {
         return self.init(buildPlan: buildPlan,
                          graph: graph,
+                         indexStore: indexStore,
                          logger: inject(),
                          featureManager: inject(),
                          configuration: inject())
@@ -23,6 +24,7 @@ final class SwiftIndexer: TypeIndexer {
 
     required init(buildPlan: BuildPlan,
                   graph: SourceGraph,
+                  indexStore: IndexStore,
                   logger: Logger,
                   featureManager: FeatureManager,
                   configuration: Configuration) {
@@ -31,10 +33,7 @@ final class SwiftIndexer: TypeIndexer {
         self.logger = logger
         self.featureManager = featureManager
         self.configuration = configuration
-        self.indexStore = try! .open(
-            store: AbsolutePath("/Users/katei/Library/Developer/Xcode/DerivedData/PeripherySandbox-cvqyihuzhsshqwermarhrwlslakc/Index/DataStore/"),
-            api: IndexStoreAPI(dylib: AbsolutePath("/Applications/Xcode-11.3.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libIndexStore.dylib"))
-        )
+        self.indexStore = indexStore
     }
 
     func perform() throws {

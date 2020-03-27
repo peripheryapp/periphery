@@ -168,19 +168,6 @@ struct IndexStoreRelation {
 }
 
 final class IndexStore {
-    fileprivate var indexStoreLibCache = LazyCache(createIndexStoreLib)
-    private func createIndexStoreLib() -> Result<AbsolutePath, Error> {
-        if let toolchainDir = ProcessEnv.vars["TOOLCHAIN_DIR"] {
-            return .success(AbsolutePath(toolchainDir).appending(components: "usr", "lib", "libIndexStore.dylib"))
-        }
-        return Result {
-            let developerDirStr = try Process.checkNonZeroExit(arguments: ["/usr/bin/xcode-select", "--print-path"])
-            return AbsolutePath(developerDirStr).appending(
-                components: "Toolchains", "XcodeDefault.xctoolchain",
-                            "usr", "lib", "libIndexStore.dylib"
-            )
-        }
-    }
 
     let store: indexstore_t
     let api: IndexStoreAPI

@@ -1,5 +1,6 @@
 import Foundation
 import PathKit
+import TSCBasic
 
 public final class Scan: Injectable {
     public static func make() -> Self {
@@ -18,6 +19,20 @@ public final class Scan: Injectable {
         self.configuration = configuration
         self.xcodebuild = xcodebuild
         self.logger = logger
+    }
+
+    fileprivate var indexStoreLibCache = LazyCache(createIndexStoreLib)
+    private func createIndexStoreLib() -> Result<AbsolutePath, Error> {
+        if let toolchainDir = ProcessEnv.vars["TOOLCHAIN_DIR"] {
+            return .success(AbsolutePath(toolchainDir).appending(components: "usr", "lib", "libIndexStore.dylib"))
+        }
+        return Result {
+            let developerDirStr = try Process.checkNonZeroExit(arguments: ["/usr/bin/xcode-select", "--print-path"])
+            return AbsolutePath(developerDirStr).appending(
+                components: "Toolchains", "XcodeDefault.xctoolchain",
+                            "usr", "lib", "libIndexStore.dylib"
+            )
+        }
     }
 
     public func perform() throws -> ScanResult {
@@ -81,7 +96,16 @@ public final class Scan: Injectable {
             logger.info("\(asterisk) Indexing...")
         }
 
-        try Indexer.perform(buildPlan: buildPlan, graph: graph)
+        // FIXME: Add option to specify index-store-path
+        let buildRootPath = AbsolutePath(ProcessEnv.vars["BUILD_ROOT"]!)
+        let indexStorePath = buildRootPath
+            .parentDirectory.parentDirectory
+            .appending(components: "Index", "DataStore")
+        let indexStore = try IndexStore.open(
+            store: indexStorePath,
+            api: IndexStoreAPI(dylib: indexStoreLibCache.getValue(self).get())
+        )
+        try Indexer.perform(buildPlan: buildPlan, indexStore: indexStore, graph: graph)
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)
