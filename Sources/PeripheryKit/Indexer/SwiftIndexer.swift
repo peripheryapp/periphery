@@ -98,6 +98,11 @@ final class SwiftIndexer: TypeIndexer {
                 graph.add(decl)
                 decls.append((decl, rawStructures))
             }
+
+            if !occ.roles.intersection([.reference]).isEmpty {
+                let ref = try _parseReference(occ, indexStore: indexStore)
+                graph.add(ref)
+            }
             return true
         }
 
@@ -111,14 +116,14 @@ final class SwiftIndexer: TypeIndexer {
                 for decl in decls {
                     decl.parent = parentDecl
                 }
-                parentDecl.declarations = decls
+                parentDecl.declarations.formUnion(decls)
             }
 
             for (usr, references) in referencedDeclsByUsr {
                 guard let decl = graph.declaration(withUsr: usr) else {
                     continue
                 }
-                decl.references = references
+                decl.references.formUnion(references)
             }
 
             for (decl, referencedUsrs) in referencedUsrsByDecl {
@@ -126,7 +131,7 @@ final class SwiftIndexer: TypeIndexer {
                 let refs = referencedDecls.map { decl in
                     Reference(kind: transformKind(decl.kind), usr: decl.usr, location: decl.location)
                 }
-                decl.references.formIntersection(refs)
+                decl.references.formUnion(refs)
             }
         }
 
@@ -162,7 +167,7 @@ final class SwiftIndexer: TypeIndexer {
                     self.childDeclsByParentUsr[parent.usr] = [decl]
                 }
             }
-            if !rel.roles.intersection([.overrideOf]).isEmpty {
+            if !rel.roles.intersection([.overrideOf, .accessorOf]).isEmpty {
                 // ```
                 // class A { func f() {} }
                 // class B: A { override func f() {} }
@@ -177,10 +182,6 @@ final class SwiftIndexer: TypeIndexer {
                 } else {
                     self.referencedUsrsByDecl[decl] = [baseFunc.usr]
                 }
-            }
-
-            if !rel.roles.intersection([.accessorOf]).isEmpty {
-                // Skip accessorOf
             }
 
             if !rel.roles.intersection([.baseOf, .receivedBy, .calledBy, .extendedBy, .containedBy]).isEmpty {
@@ -198,10 +199,10 @@ final class SwiftIndexer: TypeIndexer {
                     return false
                 }
                 let reference = Reference(kind: refKind, usr: decl.usr, location: decl.location)
-                if self.referencedDeclsByUsr[referencer.name] != nil {
-                    self.referencedDeclsByUsr[referencer.name]?.insert(reference)
+                if self.referencedDeclsByUsr[referencer.usr] != nil {
+                    self.referencedDeclsByUsr[referencer.usr]?.insert(reference)
                 } else {
-                    self.referencedDeclsByUsr[referencer.name] = [reference]
+                    self.referencedDeclsByUsr[referencer.usr] = [reference]
                 }
             }
 
@@ -242,6 +243,37 @@ final class SwiftIndexer: TypeIndexer {
         for child in decl.declarations {
             try _parseAccessibility(child, substructures)
         }
+    }
+
+    private func _parseReference(_ occ: IndexStoreOccurrence, indexStore: IndexStore) throws -> Reference {
+        guard let kind = transformReferenceKind(occ.symbol.kind, occ.symbol.subKind) else {
+            throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occ.symbol)")
+        }
+        let loc = transformLocation(occ.location)
+        let ref = Reference(kind: kind, usr: occ.symbol.usr, location: loc)
+        ref.name = occ.symbol.name
+
+        indexStore.forEachRelations(for: occ) { rel -> Bool in
+            if !rel.roles.intersection([.receivedBy, .calledBy, .containedBy]).isEmpty {
+                // ```
+                // class A {}
+                // class B: A {}
+                // ```
+                // `A` is `baseOf` `B`
+                // A.relations has B as `baseOf`
+                // B referenes A
+                // TODO: Add them in subDecl.related
+                let referencer = indexStore.getSymbol(for: rel.symbolRef)
+                if self.referencedDeclsByUsr[referencer.usr] != nil {
+                    self.referencedDeclsByUsr[referencer.usr]?.insert(ref)
+                } else {
+                    self.referencedDeclsByUsr[referencer.usr] = [ref]
+                }
+            }
+            return true
+        }
+
+        return ref
     }
 
     private func transformLocation(_ input: IndexStoreOccurrence.Location) -> SourceLocation {
