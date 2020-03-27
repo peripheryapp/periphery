@@ -22,6 +22,12 @@ final class SwiftIndexer: TypeIndexer {
 
     private typealias Job = (sourceFile: SourceFile, sourceKit: SourceKit)
 
+    private let sourceKit = try! SourceKit.make()
+    private lazy var indexStructure = Cache { [sourceKit] (sourceFile: SourceFile) -> [[String: Any]] in
+        let substructure = try sourceKit.editorOpenSubstructure(sourceFile)
+        return substructure[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
+    }
+
     required init(buildPlan: BuildPlan,
                   graph: SourceGraph,
                   indexStore: IndexStore,
@@ -39,37 +45,37 @@ final class SwiftIndexer: TypeIndexer {
     func perform() throws {
 
         try indexStore.forEachUnits { unit -> Bool in
-            try _parseIndex(unit, [], indexStore: indexStore)
+            try _parseIndex(unit, indexStore: indexStore)
             return true
         }
-        var jobs: [Job] = []
-        let excludedSourceFiles = configuration.indexExcludeSourceFiles
-
-        for target in buildPlan.targets {
-            let sourceKit = try SourceKit.make(target: target)
-            let sourceFiles = try target.sourceFiles()
-            jobs.append(contentsOf: sourceFiles.map { Job($0, sourceKit) })
-        }
-
-        try JobPool<Void>().forEach(jobs) { [weak self] job in
-            guard let self = self else { return }
-
-            let sourceFile = job.sourceFile
-
-            if excludedSourceFiles.contains(sourceFile) {
-                self.logger.debug("[index:swift:exclude] \(sourceFile.path.string)")
-                return
-            }
-
-            let sourceKit = job.sourceKit
-
-            let elapsed = try Benchmark.measure {
-//                try self.parseIndex(sourceFile, sourceKit)
-//                try self.parseUnusedParams(sourceFile, sourceKit)
-            }
-
-            self.logger.debug("[index:swift] \(sourceFile.path.string) (\(elapsed)s)")
-        }
+//        var jobs: [Job] = []
+//        let excludedSourceFiles = configuration.indexExcludeSourceFiles
+//
+//        for target in buildPlan.targets {
+//            let sourceKit = try SourceKit.make(target: target)
+//            let sourceFiles = try target.sourceFiles()
+//            jobs.append(contentsOf: sourceFiles.map { Job($0, sourceKit) })
+//        }
+//
+//        try JobPool<Void>().forEach(jobs) { [weak self] job in
+//            guard let self = self else { return }
+//
+//            let sourceFile = job.sourceFile
+//
+//            if excludedSourceFiles.contains(sourceFile) {
+//                self.logger.debug("[index:swift:exclude] \(sourceFile.path.string)")
+//                return
+//            }
+//
+//            let sourceKit = job.sourceKit
+//
+//            let elapsed = try Benchmark.measure {
+////                try self.parseIndex(sourceFile, sourceKit)
+////                try self.parseUnusedParams(sourceFile, sourceKit)
+//            }
+//
+//            self.logger.debug("[index:swift] \(sourceFile.path.string) (\(elapsed)s)")
+//        }
 
         graph.identifyRootDeclarations()
         graph.identifyRootReferences()
@@ -77,10 +83,15 @@ final class SwiftIndexer: TypeIndexer {
 
     // MARK: - Private
 
-    private func _parseIndex(_ unit: IndexStoreUnit, _ indexedStructure: [[String: Any]], indexStore: IndexStore) throws {
+    private func _parseIndex(_ unit: IndexStoreUnit, indexStore: IndexStore) throws {
         try indexStore.forEachOccurrences(for: unit) { occ in
             guard occ.symbol.language == .swift, !occ.location.isSystem else { return true }
-            try self._parse(occ, indexedStructure, indexStore: indexStore)
+            var rawStructures: [[String: Any]] = []
+            if featureManager.isEnabled(.determineAccessibilityFromStructure) {
+                let file = SourceFile(path: Path(occ.location.path))
+                rawStructures = try self.indexStructure.get(file)
+            }
+            try self._parse(occ, rawStructures, indexStore: indexStore)
             return true
         }
 
@@ -118,6 +129,7 @@ final class SwiftIndexer: TypeIndexer {
         }
     }
 
+    // FIXME: Multi-threadrize
     private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
     private var referencedDeclsByUsr: [String: Set<Reference>] = [:]
     private var referencedUsrsByDecl: [Declaration: [String]] = [:]

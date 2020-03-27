@@ -19,7 +19,7 @@ final class SourceKit {
         case accessibility = "key.accessibility"
     }
 
-    static func make(target: Target) throws -> Self {
+    static func make() throws -> Self {
         return self.init()
     }
 
