@@ -22,6 +22,7 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
     case xcodebuildNotConfigured
     case pathDoesNotExist(path: String)
     case foundIssues(count: Int)
+    case indexStoreError(message: String)
 
     public var errorDescription: String? {
         switch self {
@@ -65,6 +66,8 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
             return "No such file or directory: \(path)."
         case .foundIssues(let count):
             return "Found \(count) \(count > 1 ? "issues" : "issue")."
+        case .indexStoreError(let message):
+            return message
         }
     }
 
