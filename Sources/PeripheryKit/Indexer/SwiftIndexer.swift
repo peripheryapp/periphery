@@ -275,7 +275,7 @@ final class SwiftIndexer: TypeIndexer {
         ref.name = occ.symbol.name
 
         indexStore.forEachRelations(for: occ) { rel -> Bool in
-            if !rel.roles.intersection([.receivedBy, .calledBy, .containedBy]).isEmpty {
+            if !rel.roles.intersection([.baseOf, .receivedBy, .calledBy, .containedBy, .extendedBy]).isEmpty {
                 // ```
                 // class A {}
                 // class B: A {}
