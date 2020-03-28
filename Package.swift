@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.1
 import PackageDescription
 
 let package = Package(
@@ -13,9 +13,9 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/ileitch/Commandant", .branch("boolean-option")),
         .package(url: "https://github.com/jpsim/SourceKitten", from: "0.29.0"),
-        .package(url: "https://github.com/tuist/xcodeproj", from: "6.0.0"),
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "0.1.0"),
-        .package(url: "https://github.com/kylef/PathKit", from: "0.9.2"),
+        .package(url: "https://github.com/tuist/xcodeproj", from: "7.9.0"),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "1.3.0"),
+        .package(url: "https://github.com/kylef/PathKit", from: "1.0.0"),
         .package(url: "https://github.com/apple/swift-syntax", from: "0.50100.0")
     ],
     targets: [
@@ -26,12 +26,12 @@ let package = Package(
         .target(
             name: "PeripheryKit",
             dependencies: [
-                "Commandant",
-                "SourceKittenFramework",
-                "xcodeproj",
-                "CryptoSwift",
-                "PathKit",
-                "SwiftSyntax"
+                .product(name: "Commandant", package: "Commandant"),
+                .product(name: "SourceKittenFramework", package: "SourceKitten"),
+                .product(name: "XcodeProj", package: "xcodeproj"),
+                .product(name: "CryptoSwift", package: "CryptoSwift"),
+                .product(name: "PathKit", package: "PathKit"),
+                .product(name: "SwiftSyntax", package: "swift-syntax")
             ]
         ),
         .testTarget(
@@ -45,5 +45,5 @@ let package = Package(
             dependencies: ["PeripheryKit"]
         )
     ],
-    swiftLanguageVersions: [.v4_2, .v5]
+    swiftLanguageVersions: [.v5]
 )
