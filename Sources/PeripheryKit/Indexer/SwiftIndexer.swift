@@ -103,8 +103,15 @@ final class SwiftIndexer: TypeIndexer {
                 decls.append((decl, rawStructures))
             }
 
-            if !occ.roles.intersection([.reference, .implicit]).isEmpty {
+            if !occ.roles.intersection([.reference]).isEmpty {
                 let refs = try _parseReference(occ, indexStore: indexStore)
+                for ref in refs {
+                    graph.add(ref)
+                }
+            }
+
+            if !occ.roles.intersection([.implicit]).isEmpty {
+                let refs = try _parseImplicit(occ, indexStore: indexStore)
                 for ref in refs {
                     graph.add(ref)
                 }
@@ -287,6 +294,36 @@ final class SwiftIndexer: TypeIndexer {
         for child in decl.declarations {
             try _parseIndexedStructure(child, substructures)
         }
+    }
+
+    private func _parseImplicit(_ occ: IndexStoreOccurrence, indexStore: IndexStore) throws -> [Reference] {
+        let loc = transformLocation(occ.location)
+
+        var refs = [Reference]()
+
+        indexStore.forEachRelations(for: occ) { rel -> Bool in
+            if !rel.roles.intersection([.overrideOf]).isEmpty {
+                let baseFunc = indexStore.getSymbol(for: rel.symbolRef)
+                guard let refKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) else {
+                    logger.error("Failed to transform ref kind")
+                    return false
+                }
+                let reference = Reference(kind: refKind, usr: baseFunc.usr, location: loc)
+                reference.name = baseFunc.name
+                if rel.roles.contains(.overrideOf) {
+                    reference.isRelated = true
+                }
+                if self.referencedDeclsByUsr[baseFunc.usr] != nil {
+                    self.referencedDeclsByUsr[baseFunc.usr]?.insert(reference)
+                } else {
+                    self.referencedDeclsByUsr[baseFunc.usr] = [reference]
+                }
+                refs.append(reference)
+            }
+            return true
+        }
+
+        return refs
     }
 
     private func _parseReference(_ occ: IndexStoreOccurrence, indexStore: IndexStore) throws -> [Reference] {
