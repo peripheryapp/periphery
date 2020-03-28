@@ -147,8 +147,7 @@ class UnusedParamTest: XCTestCase {
     private var functions: [Function] = []
 
     private func analyze() {
-        let parser = UnusedParamParser(file: fixturePath, parseProtocols: false)
-        functions = try! parser.parse()
+        functions = try! UnusedParamParser.parse(file: fixturePath, parseProtocols: false)
         let analyzer = UnusedParameterAnalyzer()
 
         for function in functions {

@@ -1,5 +1,6 @@
 import Foundation
 import PathKit
+import SwiftSyntax
 
 final class UnusedParameterAnalyzer {
     private enum UsageType {
@@ -9,8 +10,7 @@ final class UnusedParameterAnalyzer {
     }
 
     func analyze(file: Path, parseProtocols: Bool) throws -> Set<Parameter> {
-        let parser = UnusedParamParser(file: file, parseProtocols: parseProtocols)
-        let functions = try parser.parse()
+        let functions = try UnusedParamParser.parse(file: file, parseProtocols: parseProtocols)
         return Set(functions.flatMap { analyze(function: $0) })
     }
 
@@ -43,10 +43,10 @@ final class UnusedParameterAnalyzer {
 
     private func isFunctionFatalErrorOnly(_ function: Function) -> Bool {
         guard let codeBlockList = function.items.first as? GenericItem,
-            codeBlockList.kind == "CodeBlockItemListSyntax",
+            codeBlockList.node.is(CodeBlockItemListSyntax.self),
             codeBlockList.items.count == 1,
             let funcCallExpr = codeBlockList.items.first as? GenericItem,
-            funcCallExpr.kind == "FunctionCallExprSyntax",
+            funcCallExpr.node.is(FunctionCallExprSyntax.self),
             let identifier = funcCallExpr.items.first as? Identifier
             else { return false }
 
@@ -101,7 +101,7 @@ final class UnusedParameterAnalyzer {
             }
         case let item as Identifier:
             return item.name == param.name ? .used : .unused
-        case let item as GenericItem where item.kind == "FunctionCallArgumentListSyntax":
+        case let item as GenericItem where item.node.is(TupleExprElementListSyntax.self): // function call arguments
             for item in item.items {
                 if isParam(param, usedIn: item) {
                     return .used
