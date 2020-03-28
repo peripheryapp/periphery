@@ -138,6 +138,7 @@ final class SwiftIndexer: TypeIndexer {
                 }
                 for reference in references {
                     reference.parent = decl
+                    graph.add(reference)
                     if reference.isRelated {
                         decl.related.insert(reference)
                     } else {
@@ -313,10 +314,10 @@ final class SwiftIndexer: TypeIndexer {
                 if rel.roles.contains(.overrideOf) {
                     reference.isRelated = true
                 }
-                if self.referencedDeclsByUsr[baseFunc.usr] != nil {
-                    self.referencedDeclsByUsr[baseFunc.usr]?.insert(reference)
+                if self.referencedDeclsByUsr[occ.symbol.usr] != nil {
+                    self.referencedDeclsByUsr[occ.symbol.usr]?.insert(reference)
                 } else {
-                    self.referencedDeclsByUsr[baseFunc.usr] = [reference]
+                    self.referencedDeclsByUsr[occ.symbol.usr] = [reference]
                 }
                 refs.append(reference)
             }
