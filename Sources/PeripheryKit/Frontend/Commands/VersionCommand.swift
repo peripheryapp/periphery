@@ -1,15 +1,15 @@
 import Foundation
 import Commandant
 import Result
+import ArgumentParser
 
-public struct VersionCommand: CommandProtocol {
+public struct VersionCommand: ParsableCommand {
     public let verb = "version"
     public let function = "Display this version of Periphery"
 
     public init() {}
 
-    public func run(_ options: ScanOptions) -> Result<(), PeripheryKitError> {
+    public func run() throws {
         print(PeripheryVersion)
-        return .success(())
     }
 }

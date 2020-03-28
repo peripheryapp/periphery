@@ -8,15 +8,13 @@ private let logger = inject(Logger.self)
 struct PeripheryCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "periphery",
-        subcommands: [CheckUpdateCommand.self]
+        subcommands: [ScanCommand.self, CheckUpdateCommand.self, VersionCommand.self]
     )
 }
 private let registry = CommandRegistry<PeripheryKitError>()
 
-registry.register(ScanCommand())
 registry.register(ScanSyntaxCommand())
 registry.register(CheckUpdateCommand())
-registry.register(VersionCommand())
 
 signal(SIGINT) { _ in
     Shell.terminateAll()
