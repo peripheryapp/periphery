@@ -91,82 +91,88 @@ final class Identifier: Item {
 }
 
 final class GenericItem: Item {
-    let kind: String
+    let node: Syntax
     let items: [Item]
 
-    init(kind: String, items: [Item]) {
-        self.kind = kind
+    init(node: Syntax, items: [Item]) {
+        self.node = node
         self.items = items
     }
 }
 
 final class UnusedParamParser {
-    private let file: Path
+    private let syntax: SourceFileSyntax
     private let parseProtocols: Bool
+    private let sourceFile: SourceFile
+    private let locationConverter: SourceLocationConverter
 
-    init(file: Path, parseProtocols: Bool) {
-        self.file = file
+    static func parse(file: Path, parseProtocols: Bool) throws -> [Function] {
+        let syntax = try SyntaxParser.parse(file.url)
+        let sourceFile = SourceFile(path: file)
+        let locationConverter = SourceLocationConverter(file: file.string, tree: syntax)
+        let parser = self.init(syntax: syntax,
+                               parseProtocols: parseProtocols,
+                               sourceFile: sourceFile,
+                               locationConverter: locationConverter)
+        return try parser.parse()
+    }
+
+    private init(syntax: SourceFileSyntax, parseProtocols: Bool, sourceFile: SourceFile, locationConverter: SourceLocationConverter) {
+        self.syntax = syntax
         self.parseProtocols = parseProtocols
+        self.sourceFile = sourceFile
+        self.locationConverter = locationConverter
     }
 
     func parse() throws -> [Function] {
-        let syntax = try SyntaxParser.parse(file.url)
-        let locationConverter = SourceLocationConverter(file: file.string, tree: syntax)
-        return parse(item: syntax, locationConverter: locationConverter, collecting: Function.self)
+        return parse(node: syntax, collecting: Function.self)
     }
 
     // MARK: - Private
 
-    private func parse<T: Item>(item: Syntax, locationConverter: SourceLocationConverter, collecting: T.Type) -> [T] {
-        return parse(items: [item], locationConverter: locationConverter, collecting: collecting)
+    private func parse<T: Item>(node: SyntaxProtocol, collecting: T.Type) -> [T] {
+        return parse(children: node.children, collecting: collecting)
     }
 
-    private func parse<T: Item>(item: SyntaxChildren, locationConverter: SourceLocationConverter, collecting: T.Type) -> [T] {
-        let items = item.map { $0 }
-        return parse(items: items, locationConverter: locationConverter, collecting: collecting)
+    private func parse<T: Item>(children: SyntaxChildren, collecting: T.Type) -> [T] {
+        return parse(nodes: Array(children), collecting: collecting)
     }
 
-    private func parse<T: Item>(items: [Syntax], locationConverter: SourceLocationConverter, collecting: T.Type) -> [T] {
+    private func parse<T: Item>(nodes: [Syntax], collecting: T.Type) -> [T] {
         let collector = Collector<T>()
-        items.forEach { _ = parse(item: $0, locationConverter: locationConverter, collector) }
+        nodes.forEach { _ = parse(node: $0, collector) }
         return collector.collection
     }
 
-    private func parse<T>(item: Syntax?, locationConverter: SourceLocationConverter, _ collector: Collector<T>? = nil) -> Item? {
-        guard let item = item else { return nil }
-
-//        inspect(item)
+    private func parse<T>(node anyNode: SyntaxProtocol?, _ collector: Collector<T>? = nil) -> Item? {
+        guard let node = anyNode?._syntaxNode else { return nil }
 
         let parsed: Item?
 
-        switch item {
-        case let item as MemberAccessExprSyntax:
+        if let node = node.as(MemberAccessExprSyntax.self) {
             // It's not possible for the member itself to be a reference to a parameter,
             // however the base expression may be.
-            parsed = parse(item: item.base, locationConverter: locationConverter, collector)
-        case let item as CodeBlockItemSyntax:
-            parsed = parse(item: item.item, locationConverter: locationConverter, collector)
-        case let item as FunctionCallArgumentSyntax:
-            parsed = parse(item: item.expression, locationConverter: locationConverter, collector)
-        case let item as ParameterClauseSyntax:
-            parsed = parse(item: item.parameterList, locationConverter: locationConverter, collector)
-        case let item as VariableDeclSyntax:
-            parsed = parse(variableDecl: item, locationConverter: locationConverter, collector)
-        case let item as ClosureExprSyntax:
-            parsed = parse(closureExpr: item, locationConverter: locationConverter, collector)
-        case let item as IdentifierExprSyntax:
-            parsed = parse(identifierExpr: item, locationConverter: locationConverter)
-        case let item as FunctionParameterSyntax:
-            parsed = parse(functionParameter: item, locationConverter: locationConverter)
-        case let item as FunctionDeclSyntax:
-            parsed = parse(functionDecl: item, locationConverter: locationConverter, collector)
-        case let item as InitializerDeclSyntax:
-            parsed = parse(initializerDecl: item, locationConverter: locationConverter, collector)
-        default:
-            let items = item.children.compactMap { parse(item: $0, locationConverter: locationConverter, collector) }
+            parsed = parse(node: node.base, collector)
+        } else if let node = node.as(CodeBlockItemSyntax.self) {
+            parsed = parse(node: node.item, collector)
+        } else if let node = node.as(ParameterClauseSyntax.self) {
+            parsed = parse(node: node.parameterList, collector)
+        } else if let node = node.as(VariableDeclSyntax.self) {
+            parsed = parse(variableDecl: node, collector)
+        } else if let node = node.as(ClosureExprSyntax.self) {
+            parsed = parse(closureExpr: node, collector)
+        } else if let node = node.as(IdentifierExprSyntax.self) {
+            parsed = parse(identifierExpr: node)
+        } else if let node = node.as(FunctionParameterSyntax.self) {
+            parsed = parse(functionParameter: node)
+        } else if let node = node.as(FunctionDeclSyntax.self) {
+            parsed = parse(functionDecl: node, collector)
+        } else if let node = node.as(InitializerDeclSyntax.self) {
+            parsed = parse(initializerDecl: node, collector)
+        } else {
+            let items = node.children.compactMap { parse(node: $0, collector) }
             if items.count > 0 {
-                let kind = String(describing: type(of: item))
-                parsed = GenericItem(kind: kind, items: items)
+                parsed = GenericItem(node: node, items: items)
             } else {
                 parsed = nil
             }
@@ -179,67 +185,66 @@ final class UnusedParamParser {
         return parsed
     }
 
-    private func parse(functionParameter syntax: FunctionParameterSyntax, locationConverter: SourceLocationConverter) -> Item {
+    private func parse(functionParameter syntax: FunctionParameterSyntax) -> Item {
         var metatype: String?
 
-        if let optionalType = syntax.type as? OptionalTypeSyntax {
-            if let metatypeSyntax = optionalType.children.mapFirst({ $0 as? MetatypeTypeSyntax }) {
+        if let optionalType = syntax.type?.as(OptionalTypeSyntax.self) {
+            if let metatypeSyntax = optionalType.children.mapFirst({ $0.as(MetatypeTypeSyntax.self) }) {
                 metatype = metatypeSyntax.description
             }
-        } else if let optionalType = syntax.type as? ImplicitlyUnwrappedOptionalTypeSyntax {
-            if let metatypeSyntax = optionalType.children.mapFirst({ $0 as? MetatypeTypeSyntax }) {
+        } else if let optionalType = syntax.type?.as(ImplicitlyUnwrappedOptionalTypeSyntax.self) {
+            if let metatypeSyntax = optionalType.children.mapFirst({ $0.as(MetatypeTypeSyntax.self) }) {
                 metatype = metatypeSyntax.description
             }
-        } else if let metatypeSyntax = syntax.type as? MetatypeTypeSyntax {
+        } else if let metatypeSyntax = syntax.type?.as(MetatypeTypeSyntax.self) {
             metatype = metatypeSyntax.description
         }
 
         return Parameter(firstName: syntax.firstName?.text,
                          secondName: syntax.secondName?.text,
                          metatype: metatype,
-                         location: sourceLocation(of: syntax.position, locationConverter: locationConverter))
+                         location: sourceLocation(of: syntax.position))
     }
 
-    private func parse<T>(closureExpr syntax: ClosureExprSyntax, locationConverter: SourceLocationConverter, _ collector: Collector<T>?) -> Closure? {
-        let signature = syntax.children.mapFirst { $0 as? ClosureSignatureSyntax }
-        let rawParams = signature?.input?.children.compactMap { $0 as? ClosureParamSyntax }
+    private func parse<T>(closureExpr syntax: ClosureExprSyntax, _ collector: Collector<T>?) -> Closure? {
+        let signature = syntax.children.mapFirst { $0.as(ClosureSignatureSyntax.self) }
+        let rawParams = signature?.input?.children.compactMap { $0.as(ClosureParamSyntax.self) }
         let params = rawParams?.map { $0.name.text } ?? []
-        let items = syntax.statements.compactMap { parse(item: $0, locationConverter: locationConverter, collector) }
+        let items = syntax.statements.compactMap { parse(node: $0.item, collector) }
         return Closure(params: params, items: items)
     }
 
-    private func parse<T>(variableDecl syntax: VariableDeclSyntax, locationConverter: SourceLocationConverter, _ collector: Collector<T>?) -> Variable {
+    private func parse<T>(variableDecl syntax: VariableDeclSyntax, _ collector: Collector<T>?) -> Variable {
         let bindings = syntax.bindings
 
         let names = bindings.flatMap { binding -> [String] in
             let pattern = binding.pattern
 
-            switch pattern {
-            case let pattern as IdentifierPatternSyntax:
+            if let pattern = pattern.as(IdentifierPatternSyntax.self) {
                 return [pattern.identifier.text]
-            case let pattern as TuplePatternSyntax:
+            } else if let pattern = pattern.as(TuplePatternSyntax.self) {
                 return pattern.elements.compactMap {
-                    let token = $0.pattern.children.mapFirst { $0 as? TokenSyntax }
+                    let token = $0.pattern.children.mapFirst { $0.as(TokenSyntax.self) }
                     return token?.text
                 }
-            default:
+            } else {
                 return []
             }
         }
 
         let items = bindings.flatMap {
-            return $0.initializer?.children.compactMap { parse(item: $0, locationConverter: locationConverter, collector) } ?? []
+            return $0.initializer?.children.compactMap { parse(node: $0, collector) } ?? []
         }
 
         return Variable(names: names, items: items)
     }
 
-    private func parse(identifierExpr syntax: IdentifierExprSyntax, locationConverter: SourceLocationConverter) -> Item {
+    private func parse(identifierExpr syntax: IdentifierExprSyntax) -> Item {
         return Identifier(name: syntax.identifier.text)
     }
 
-    private func parse<T>(functionDecl syntax: FunctionDeclSyntax, locationConverter: SourceLocationConverter, _ collector: Collector<T>?) -> Item? {
-        return build(function: syntax.signature, locationConverter: locationConverter,
+    private func parse<T>(functionDecl syntax: FunctionDeclSyntax, _ collector: Collector<T>?) -> Item? {
+        return build(function: syntax.signature,
                      genericParams: syntax.genericParameterClause,
                      body: syntax.body,
                      named: syntax.identifier.text,
@@ -247,7 +252,7 @@ final class UnusedParamParser {
                      collector)
     }
 
-    private func parse<T>(initializerDecl syntax: InitializerDeclSyntax, locationConverter: SourceLocationConverter, _ collector: Collector<T>?) -> Item? {
+    private func parse<T>(initializerDecl syntax: InitializerDeclSyntax, _ collector: Collector<T>?) -> Item? {
         // syntax.initKeyword.position is incorrect, try to find the correct position.
         var position = syntax.initKeyword.position
 
@@ -258,7 +263,7 @@ final class UnusedParamParser {
             position = AbsolutePosition(utf8Offset: leftParen.position.utf8Offset - 4)
         }
 
-        return build(function: syntax.parameters, locationConverter: locationConverter,
+        return build(function: syntax.parameters,
                      genericParams: syntax.genericParameterClause,
                      body: syntax.body,
                      named: "init",
@@ -266,7 +271,7 @@ final class UnusedParamParser {
                      collector)
     }
 
-    private func build<T>(function syntax: Syntax, locationConverter: SourceLocationConverter, genericParams: GenericParameterClauseSyntax?, body: Syntax?, named name: String, position: AbsolutePosition, _ collector: Collector<T>?) -> Function? {
+    private func build<T>(function syntax: SyntaxProtocol, genericParams: GenericParameterClauseSyntax?, body: CodeBlockSyntax?, named name: String, position: AbsolutePosition, _ collector: Collector<T>?) -> Function? {
         if body == nil && !parseProtocols {
             // Function has no body, must be a protocol declaration.
             return nil
@@ -276,31 +281,21 @@ final class UnusedParamParser {
         // Swift supports nested functions, so it's possible this function captures a param
         // from an outer function.
 
-        let params = parse(item: syntax.children, locationConverter: locationConverter, collecting: Parameter.self)
-        let items = parse(item: body, locationConverter: locationConverter, collector)?.items ?? []
+        let params = parse(children: syntax.children, collecting: Parameter.self)
+        let items = parse(node: body, collector)?.items ?? []
         let fullName = buildFullName(for: name, with: params)
         let genericParamNames = genericParams?.genericParameterList.compactMap { $0.name.text } ?? []
 
         let function = Function(
             name: name,
             fullName: fullName,
-            location: sourceLocation(of: position, locationConverter: locationConverter),
+            location: sourceLocation(of: position),
             items: items,
             parameters: params,
             genericParameters: genericParamNames)
 
         params.forEach { $0.function = function }
         return function
-    }
-
-    private func inspect(_ syntax: Syntax?) {
-        guard let syntax = syntax else { return }
-
-        syntax.children.forEach {
-            print("--------------------------------")
-            print(type(of: $0))
-            print($0)
-        }
     }
 
     private func buildFullName(for function: String, with params: [Parameter]) -> String {
@@ -310,9 +305,9 @@ final class UnusedParamParser {
         return "\(function)(\(strParams):)"
     }
 
-    private func sourceLocation(of position: AbsolutePosition, locationConverter: SourceLocationConverter) -> SourceLocation {
+    private func sourceLocation(of position: AbsolutePosition) -> SourceLocation {
         let location = locationConverter.location(for: position)
-        return SourceLocation(file: SourceFile(path: file),
+        return SourceLocation(file: sourceFile,
                               line: Int64(location.line!),
                               column: Int64(location.column!),
                               offset: Int64(position.utf8Offset))
