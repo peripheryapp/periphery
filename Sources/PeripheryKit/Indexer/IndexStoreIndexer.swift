@@ -22,7 +22,7 @@ final class IndexStoreIndexer: TypeIndexer {
 
     private typealias Job = (sourceFile: SourceFile, sourceKit: SourceKit)
 
-    private let sourceKit = try! SourceKit.make()
+    private let sourceKit = SourceKit.make()
     private lazy var indexStructure = Cache { [sourceKit] (sourceFile: SourceFile) -> [[String: Any]] in
         let substructure = try sourceKit.editorOpenSubstructure(sourceFile)
         return substructure[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
