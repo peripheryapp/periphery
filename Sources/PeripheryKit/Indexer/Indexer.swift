@@ -19,7 +19,7 @@ final class Indexer {
     private let graph: SourceGraph
 
     private let indexers: [TypeIndexer.Type] = [
-        SwiftIndexer.self,
+        IndexStoreIndexer.self,
         XibIndexer.self
     ]
 

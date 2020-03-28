@@ -3,7 +3,7 @@ import PathKit
 import SwiftSyntax
 import TSCBasic
 
-final class SwiftIndexer: TypeIndexer {
+final class IndexStoreIndexer: TypeIndexer {
     static func make(buildPlan: BuildPlan, indexStore: IndexStore, graph: SourceGraph) -> Self {
         return self.init(buildPlan: buildPlan,
                          graph: graph,
