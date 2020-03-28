@@ -103,7 +103,7 @@ final class SwiftIndexer: TypeIndexer {
                 decls.append((decl, rawStructures))
             }
 
-            if !occ.roles.intersection([.reference]).isEmpty {
+            if !occ.roles.intersection([.reference, .implicit]).isEmpty {
                 let refs = try _parseReference(occ, indexStore: indexStore)
                 for ref in refs {
                     graph.add(ref)
