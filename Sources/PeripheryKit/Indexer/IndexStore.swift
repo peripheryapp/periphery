@@ -7,10 +7,6 @@ struct IndexStoreUnit {
     fileprivate let name: String
 }
 
-struct IndexStoreRecord {
-    fileprivate let name: String
-}
-
 struct IndexStoreSymbol {
 
     enum Kind: UInt32 {
