@@ -133,13 +133,10 @@ final class SwiftIndexer: TypeIndexer {
                 decl.references.formUnion(references)
             }
 
-            for (decl, referencedUsrs) in referencedUsrsByDecl {
-                let referencedDecls = referencedUsrs.compactMap(graph.declaration(withUsr:))
-                let refs = referencedDecls.map { decl in
-                    Reference(kind: transformKind(decl.kind), usr: decl.usr, location: decl.location)
-                }
+            for (decl, refs) in referencedUsrsByDecl {
                 for ref in refs {
                     ref.parent = decl
+                    graph.add(ref)
                 }
                 decl.references.formUnion(refs)
             }
@@ -154,7 +151,7 @@ final class SwiftIndexer: TypeIndexer {
     // FIXME: Multi-threadrize
     private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
     private var referencedDeclsByUsr: [String: Set<Reference>] = [:]
-    private var referencedUsrsByDecl: [Declaration: [String]] = [:]
+    private var referencedUsrsByDecl: [Declaration: [Reference]] = [:]
 
     private func _parseDecl(
         _ occ: IndexStoreOccurrence,
@@ -198,10 +195,19 @@ final class SwiftIndexer: TypeIndexer {
                 // B.f references A.f
 
                 let baseFunc = indexStore.getSymbol(for: rel.symbolRef)
+                guard let refKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) else {
+                    logger.error("Failed to transform ref kind")
+                    return false
+                }
+                let reference = Reference(kind: refKind, usr: baseFunc.usr, location: decl.location)
+                reference.name = baseFunc.name
+                if rel.roles.contains(.overrideOf) {
+                    reference.isRelated = true
+                }
                 if self.referencedUsrsByDecl[decl] != nil {
-                    self.referencedUsrsByDecl[decl]?.append(baseFunc.usr)
+                    self.referencedUsrsByDecl[decl]?.append(reference)
                 } else {
-                    self.referencedUsrsByDecl[decl] = [baseFunc.usr]
+                    self.referencedUsrsByDecl[decl] = [reference]
                 }
             }
 
