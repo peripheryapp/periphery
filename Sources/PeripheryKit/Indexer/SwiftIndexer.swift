@@ -318,8 +318,26 @@ final class SwiftIndexer: TypeIndexer {
         case .swiftAccessorDidSet: return .functionAccessorDidset
         case .swiftAccessorWillSet: return .functionAccessorWillset
         case .swiftAccessorMutableAddressor: return .functionAccessorMutableaddress
-        default: break
+        case .swiftAccessorAddressor: return .functionAccessorAddress
+        case .swiftSubscript: return .functionSubscript
+        case .swiftInfixOperator: return .functionOperatorInfix
+        case .swiftPrefixOperator: return .functionOperatorPrefix
+        case .swiftPostfixOperator: return .functionOperatorPostfix
+        case .swiftGenericTypeParam: return .genericTypeParam
+        case .swiftAssociatedtype: return .associatedtype
+        case .swiftExtensionOfClass: return .extensionClass
+        case .swiftExtensionOfStruct: return .extensionStruct
+        case .swiftExtensionOfProtocol: return .extensionProtocol
+        case .swiftExtensionOfEnum: return .extensionEnum
+        case .swiftAccessorRead:
+            logger.warn("Skip to transform swiftAccessorRead")
+        case .swiftAccessorModify:
+            logger.warn("Skip to transform swiftAccessorRead")
+        case .none: break
+        case .cxxCopyConstructor, .cxxMoveConstructor,
+             .usingTypeName, .usingValue: break
         }
+
         switch kind {
         case .unknown: return nil
         case .module: return .module
@@ -333,19 +351,7 @@ final class SwiftIndexer: TypeIndexer {
         case .struct: return .struct
         case .class: return .class
         case .protocol: return .protocol
-        case .extension:
-            switch subKind {
-            case .swiftExtensionOfClass:
-                return .extensionClass
-            case .swiftExtensionOfStruct:
-                return .extensionStruct
-            case .swiftExtensionOfProtocol:
-                return .extensionProtocol
-            case .swiftExtensionOfEnum:
-                return .extensionEnum
-            default:
-                return .extension
-            }
+        case .extension: return .extension
         case .union:
             logger.warn("'union' is not supported on Swift")
             return nil
@@ -384,8 +390,26 @@ final class SwiftIndexer: TypeIndexer {
         case .swiftAccessorDidSet: return .functionAccessorDidset
         case .swiftAccessorWillSet: return .functionAccessorWillset
         case .swiftAccessorMutableAddressor: return .functionAccessorMutableaddress
-        default: break
+        case .swiftAccessorAddressor: return .functionAccessorAddress
+        case .swiftSubscript: return .functionSubscript
+        case .swiftInfixOperator: return .functionOperatorInfix
+        case .swiftPrefixOperator: return .functionOperatorPrefix
+        case .swiftPostfixOperator: return .functionOperatorPostfix
+        case .swiftGenericTypeParam: return .genericTypeParam
+        case .swiftAssociatedtype: return .associatedtype
+        case .swiftExtensionOfClass: return .extensionClass
+        case .swiftExtensionOfStruct: return .extensionStruct
+        case .swiftExtensionOfProtocol: return .extensionProtocol
+        case .swiftExtensionOfEnum: return .extensionEnum
+        case .swiftAccessorRead:
+            logger.warn("Skip to transform swiftAccessorRead")
+        case .swiftAccessorModify:
+            logger.warn("Skip to transform swiftAccessorRead")
+        case .none: break
+        case .cxxCopyConstructor, .cxxMoveConstructor,
+             .usingTypeName, .usingValue: break
         }
+
         switch kind {
         case .unknown: return nil
         case .module: return .module
@@ -399,19 +423,7 @@ final class SwiftIndexer: TypeIndexer {
         case .struct: return .struct
         case .class: return .class
         case .protocol: return .protocol
-        case .extension:
-            switch subKind {
-            case .swiftExtensionOfClass:
-                return .extensionClass
-            case .swiftExtensionOfStruct:
-                return .extensionStruct
-            case .swiftExtensionOfProtocol:
-                return .extensionProtocol
-            case .swiftExtensionOfEnum:
-                return .extensionEnum
-            default:
-                return .extension
-            }
+        case .extension: return .extension
         case .union:
             logger.warn("'union' is not supported on Swift")
             return nil
