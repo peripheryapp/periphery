@@ -1,5 +1,4 @@
 import Foundation
-import Result
 import PathKit
 
 final class ScanSyntax {
