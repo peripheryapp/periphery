@@ -92,12 +92,12 @@ final class SwiftIndexer: TypeIndexer {
                 try $0.sourceFiles().contains(where: { $0.path.string == occ.location.path })
             })
             guard shouldIndex else { return true }
-            var rawStructures: [[String: Any]] = []
-            if featureManager.isEnabled(.determineAccessibilityFromStructure) {
-                let file = SourceFile(path: Path(occ.location.path))
-                rawStructures = try self.indexStructure.get(file)
-            }
             if !occ.roles.intersection([.definition, .declaration]).isEmpty {
+                var rawStructures: [[String: Any]] = []
+                if featureManager.isEnabled(.determineAccessibilityFromStructure) {
+                    let file = SourceFile(path: Path(occ.location.path))
+                    rawStructures = try self.indexStructure.get(file)
+                }
                 let decl = try _parseDecl(occ, rawStructures, indexStore: indexStore)
                 graph.add(decl)
                 decls.append((decl, rawStructures))
@@ -321,6 +321,12 @@ final class SwiftIndexer: TypeIndexer {
                 }
             }
             return true
+        }
+
+        if refs.isEmpty {
+            let ref = Reference(kind: kind, usr: occ.symbol.usr, location: loc)
+            ref.name = occ.symbol.name
+            refs.append(ref)
         }
 
         return refs
