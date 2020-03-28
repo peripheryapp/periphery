@@ -46,7 +46,7 @@ cp scripts/release_notes.md.template .release/release_notes.md
 
 cd .release
 zip periphery-v${version}.zip periphery LICENSE.md
-atom --wait release_notes.md
+code --wait release_notes.md
 echo -e "${version}\n\n$(cat release_notes.md)" > release_notes.md
 echo
 echo "Release Notes:"

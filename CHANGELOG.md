@@ -2,64 +2,78 @@
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* None.
+- None.
+
+## 1.6.0 (2020-03-28)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- Add support for Xcode 11.3.
+
+##### Bug Fixes
+
+- None.
 
 ## 1.5.1 (2019-07-06)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Fix CocoaPod.
+- Fix CocoaPod.
 
 ## 1.5.0 (2019-07-06)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Xcode 10.2 compatibly.
+- Xcode 10.2 compatibly.
 
 ## 1.4.0 (2019-03-02)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* New `strict` option to exit with non-zero status if any unused code is found.  
+- New `strict` option to exit with non-zero status if any unused code is found.
   [Cihat Gündüz](https://github.com/Dschee)
   [#22](https://github.com/peripheryapp/periphery/issues/22)
   [#23](https://github.com/peripheryapp/periphery/pull/23)
 
-* Add official Homebrew support.  
+- Add official Homebrew support.
   [Ian Leitch](https://github.com/ileitch)
   [#24](https://github.com/peripheryapp/periphery/pull/24)
 
 ##### Bug Fixes
 
-* Fix parsing of projects using Siri message intents.  
+- Fix parsing of projects using Siri message intents.
   [Ian Leitch](https://github.com/ileitch)
   [#25](https://github.com/peripheryapp/periphery/issues/25)
   [#26](https://github.com/peripheryapp/periphery/pull/26)
@@ -68,464 +82,464 @@
 
 ##### Breaking
 
-* First open-source release.
+- First open-source release.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* None.
+- None.
 
 ## 1.2.3 (2019-01-05)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Don't attempt to syntax scan directories ending with .swift.
-* Detect invalid xcodeproj references.
+- Don't attempt to syntax scan directories ending with .swift.
+- Detect invalid xcodeproj references.
 
 ## 1.2.2 (2018-12-19)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Fix infinate loop from parsing projects with cyclic references.
+- Fix infinate loop from parsing projects with cyclic references.
 
 ## 1.2.1 (2018-12-12)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Improve performance of scan-syntax command.
+- Improve performance of scan-syntax command.
 
 ##### Bug Fixes
 
-* Fix parsing of #warning and #error directives.
+- Fix parsing of #warning and #error directives.
 
 ## 1.2.0 (2018-12-11)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Unused function prameter analysis.
-* Terminate all child processes on SIGINT.
-* Exclude pod schemes from guided setup.
-* Remove retain ObjC question from guided setup.
+- Unused function prameter analysis.
+- Terminate all child processes on SIGINT.
+- Exclude pod schemes from guided setup.
+- Remove retain ObjC question from guided setup.
 
 ##### Bug Fixes
 
-* Avoid passing 'CURRENT_ARCH' and 'arch' environment variables to xcodebuild when their value is 'undefined_arch'.
+- Avoid passing 'CURRENT_ARCH' and 'arch' environment variables to xcodebuild when their value is 'undefined_arch'.
 
 ## 1.1.3 (2018-11-10)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Improved target module name identification.
+- Improved target module name identification.
 
 ## 1.1.2 (2018-10-31)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Fix crash when inspecting project configuration for nested .xcodeproj.
-* Detect .xcodeproj referenced from within groups in an .xcworkspace.
+- Fix crash when inspecting project configuration for nested .xcodeproj.
+- Detect .xcodeproj referenced from within groups in an .xcworkspace.
 
 ## 1.1.1 (2018-10-26)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Projects nested within other projects are now identified.
+- Projects nested within other projects are now identified.
 
 ## 1.1.0 (2018-10-29)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Label results identified by aggressive mode.
-* Add compiler flags to speed up build phase.
-* Schemes are built in the order they're given.
-* Add error hint for CocoaPods bug #8000.
-* Add support for YAML configuration.
+- Label results identified by aggressive mode.
+- Add compiler flags to speed up build phase.
+- Schemes are built in the order they're given.
+- Add error hint for CocoaPods bug #8000.
+- Add support for YAML configuration.
 
 ##### Bug Fixes
 
-* Retain XCTestCase classes that do not directly inherit XCTestCase.
+- Retain XCTestCase classes that do not directly inherit XCTestCase.
 
 ## 1.0.0 (2018-10-20)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* No more trial mode - 100% of results are now free. Advanced features require a Pro license.
+- No more trial mode - 100% of results are now free. Advanced features require a Pro license.
 
 ##### Bug Fixes
 
-* Fixed issue with poor performance resulting in a segmentation fault.
+- Fixed issue with poor performance resulting in a segmentation fault.
 
 ## 0.12.2 (2018-09-27)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Ensures Xcode is configured for command-line use.
+- Ensures Xcode is configured for command-line use.
 
 ## 0.12.1 (2018-09-26)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Built with a static Swift stdlib.
-* Ignore xcworkspace generated by Swift Package Manager inside the xcodeproj.
+- Built with a static Swift stdlib.
+- Ignore xcworkspace generated by Swift Package Manager inside the xcodeproj.
 
 ## 0.12.0 (2018-09-24)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Support for saving, and using build logs in order to skip the build phase.
-* All output format types are now available in trial mode.
+- Support for saving, and using build logs in order to skip the build phase.
+- All output format types are now available in trial mode.
 
 ##### Bug Fixes
 
-* Unused code with cyclic dependencies is now detected.
-* Protocol declarations implemented in a subclass of the conforming class are now identified as used.
-* Protocols that inherit a foreign protocol (e.g from Foundation) are now treated differently than other protocols, as Periphery cannot detect declarations that are used internally by the foreign module. For example, if your class conforms to Comparable and implements <(lhs:rhs:), the behavior of sort() may be altered, yet Periphery does not have visibility of any directs call to <(lhs:rhs:).
+- Unused code with cyclic dependencies is now detected.
+- Protocol declarations implemented in a subclass of the conforming class are now identified as used.
+- Protocols that inherit a foreign protocol (e.g from Foundation) are now treated differently than other protocols, as Periphery cannot detect declarations that are used internally by the foreign module. For example, if your class conforms to Comparable and implements <(lhs:rhs:), the behavior of sort() may be altered, yet Periphery does not have visibility of any directs call to <(lhs:rhs:).
 
 ## 0.11.2 (2018-08-07)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* --report-exclude and --index-exclude options now expect a pipe character to delimit multiple globs.
+- --report-exclude and --index-exclude options now expect a pipe character to delimit multiple globs.
 
 ##### Bug Fixes
 
-* None.
+- None.
 
 ## 0.11.1 (2018-08-06)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Identify LinuxMain.swift as an entry point.
+- Identify LinuxMain.swift as an entry point.
 
 ##### Bug Fixes
 
-* Fix regression of handling schemes and targets containing spaces.
+- Fix regression of handling schemes and targets containing spaces.
 
 ## 0.11.0 (2018-08-04)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Added tips for eliminating false positives in trial mode.
-* Added check-update command.
-* Added ability to exclude files either from indexing or final report.
+- Added tips for eliminating false positives in trial mode.
+- Added check-update command.
+- Added ability to exclude files either from indexing or final report.
 
 ##### Bug Fixes
 
-* None.
+- None.
 
 ## 0.10.0 (2018-07-10)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Added support for Xcode 10.
-* Warn about source files that are members of multiple targets.
-* Diagnosis console now lists active references as their source location.
+- Added support for Xcode 10.
+- Warn about source files that are members of multiple targets.
+- Diagnosis console now lists active references as their source location.
 
 ##### Bug Fixes
 
-* Fixed issue where error messages would not be printed before Periphery exits.
+- Fixed issue where error messages would not be printed before Periphery exits.
 
 ## 0.9.0 (2018-06-22)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Added guided setup flow.
+- Added guided setup flow.
 
 ##### Bug Fixes
 
-* None.
+- None.
 
 ## 0.8.1 (2018-06-13)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Handle explicitly defined PRODUCT_MODULE_NAME.
+- Handle explicitly defined PRODUCT_MODULE_NAME.
 
 ## 0.8.0 (2018-06-12)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Added support for Xcode's new build system.
-* Added support for analyzing XCTest targets.
-* Added interactive diagnosis console, enabled with the --diagnose option.
-* Licenses can now be activated using --email and --key options instead of entering them interactively.
+- Added support for Xcode's new build system.
+- Added support for analyzing XCTest targets.
+- Added interactive diagnosis console, enabled with the --diagnose option.
+- Licenses can now be activated using --email and --key options instead of entering them interactively.
 
 ##### Bug Fixes
 
-* Improve parsing of xcodebuild -list output.
-* Type aliases that define an associated type are now identified as used.
+- Improve parsing of xcodebuild -list output.
+- Type aliases that define an associated type are now identified as used.
 
 ## 0.7.3 (2018-05-11)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Workaround issue with xcodebuild using non-UTF8 encoding.
+- Workaround issue with xcodebuild using non-UTF8 encoding.
 
 ## 0.7.2 (2018-05-03)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Enable analysis of CocoaPod targets.
+- Enable analysis of CocoaPod targets.
 
 ##### Bug Fixes
 
-* None.
+- None.
 
 ## 0.7.1 (2018-05-01)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Improve scheme identification for older workspaces.
-* Fix handling of source files containing single quotes.
-* Fix handling of paths to swiftc that contain hyphens e.g Xcode-9.3.app.
+- Improve scheme identification for older workspaces.
+- Fix handling of source files containing single quotes.
+- Fix handling of paths to swiftc that contain hyphens e.g Xcode-9.3.app.
 
 ## 0.7.0 (2018-04-29)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Disabled code signing as it's not necessary and can cause build failures.
-* Schemes are no longer required to be marked as shared in order to be discovered.
+- Disabled code signing as it's not necessary and can cause build failures.
+- Schemes are no longer required to be marked as shared in order to be discovered.
 
 ##### Bug Fixes
 
-* Fixed discovery of xibs/storyboards that reside within a Base.jproj.
-* Fix retention of protocol declarations with a default implementation within an extension.
+- Fixed discovery of xibs/storyboards that reside within a Base.jproj.
+- Fix retention of protocol declarations with a default implementation within an extension.
 
 ## 0.6.2 (2018-04-26)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Correctly handle projects containing spaces their PRODUCT_NAME.
-* Add support for missing declaration kinds.
+- Correctly handle projects containing spaces their PRODUCT_NAME.
+- Add support for missing declaration kinds.
 
 ## 0.6.1 (2018-04-25)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Improve xcodebuild swiftc argument parsing such that CoreData generated model file arguments are retained.
-* Improved invalid scheme error message.
+- Improve xcodebuild swiftc argument parsing such that CoreData generated model file arguments are retained.
+- Improved invalid scheme error message.
 
 ## 0.6.0 (2018-04-21)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* Added trial mode.
+- Added trial mode.
 
 ##### Bug Fixes
 
-* None.
+- None.
 
 ## 0.5.0 (2018-04-17)
 
 ##### Breaking
 
-* The --retain-all-enum-cases option has been removed. Unused cases of enums that are not raw representable are always identified. Unused cases of raw representable enums are now implicitly used since their use may be completely dynamic. --aggressive analysis disables this implicit behavior.
-* The --retain-objc-annotated option is now enabled by default.
+- The --retain-all-enum-cases option has been removed. Unused cases of enums that are not raw representable are always identified. Unused cases of raw representable enums are now implicitly used since their use may be completely dynamic. --aggressive analysis disables this implicit behavior.
+- The --retain-objc-annotated option is now enabled by default.
 
 ##### Enhancements
 
-* Xcode format output is colored to improve readability.
+- Xcode format output is colored to improve readability.
 
 ##### Bug Fixes
 
-* CodingKey enums are now correctly identified as used if the enclosing class or struct conforms to Decodable.
+- CodingKey enums are now correctly identified as used if the enclosing class or struct conforms to Decodable.
 
 ## 0.4.0 (2018-04-16)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Fix retention of declarations marked @IBOutlet or @IBAction.
+- Fix retention of declarations marked @IBOutlet or @IBAction.
 
 ## 0.3.0 (2018-04-14)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Fix issue parsing Xcode projects that contained groups without an associated physical directory.
+- Fix issue parsing Xcode projects that contained groups without an associated physical directory.
 
 ## 0.2.0 (2018-04-09)
 
 ##### Breaking
 
-* None.
+- None.
 
 ##### Enhancements
 
-* None.
+- None.
 
 ##### Bug Fixes
 
-* Added --project option for use with projects that do not have an .xcworkspace.
+- Added --project option for use with projects that do not have an .xcworkspace.
 
 ## 0.1.0 (2018-04-07)
 
-* Initial release.
+- Initial release.
