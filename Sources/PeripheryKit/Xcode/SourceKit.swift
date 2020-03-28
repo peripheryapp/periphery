@@ -19,11 +19,21 @@ final class SourceKit {
         case accessibility = "key.accessibility"
     }
 
-    static func make() throws -> Self {
-        return self.init()
+    @available(*, deprecated, message: "Indexing with SoruceKit is deprecated. Please use IndexStore versioin instead")
+    static func make(buildPlan: BuildPlan, target: Target) throws -> Self {
+        let arguments = try buildPlan.arguments(for: target)
+        return self.init(arguments: arguments)
     }
 
-    required init() {}
+    static func make() -> Self {
+        return self.init(arguments: [])
+    }
+
+    private let arguments: [String]
+
+    required init(arguments: [String]) {
+        self.arguments = arguments
+    }
 
     func editorOpen(_ file: SourceFile) throws -> [String: Any] {
         let response: [String: Any]
@@ -31,6 +41,19 @@ final class SourceKit {
         do {
             // FIXME: Cache response
             response = try Request.editorOpen(file: File(path: file.path.string)!).send()
+        } catch {
+            throw PeripheryKitError.sourceKitRequestFailed(type: "index", file: file.path.string, error: error)
+        }
+
+        return response
+    }
+
+    @available(*, deprecated, message: "Indexing with SoruceKit is deprecated. Please use IndexStore versioin instead")
+    func requestIndex(_ file: SourceFile) throws -> [String: Any] {
+        let response: [String: Any]
+
+        do {
+            response = try Request.index(file: file.path.string, arguments: arguments).send()
         } catch {
             throw PeripheryKitError.sourceKitRequestFailed(type: "index", file: file.path.string, error: error)
         }
