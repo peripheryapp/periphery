@@ -1,14 +1,23 @@
 import Foundation
 import Commandant
 import Result
+import ArgumentParser
 
-public struct CheckUpdateCommand: CommandProtocol {
-    public let verb = "check-update"
-    public let function = "Check for available update"
+public struct CheckUpdateCommand: CommandProtocol, ParsableCommand {
+    public static let configuration = CommandConfiguration(
+        commandName: "check-update",
+        abstract: "Check for available update"
+    )
+    public let verb = configuration.commandName!
+    public let function = configuration.abstract
 
     public init() {}
 
-    public func run(_ options: ScanOptions) -> Result<(), PeripheryKitError> {
+    public func run() throws {
+        try run(NoOptions()).get()
+    }
+
+    public func run(_ options: NoOptions<PeripheryKitError>) -> Result<(), PeripheryKitError> {
         let logger: Logger = inject()
         let checker = UpdateChecker.make()
         DispatchQueue.global().async { checker.run() }
