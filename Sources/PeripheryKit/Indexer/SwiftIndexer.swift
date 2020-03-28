@@ -147,7 +147,7 @@ final class SwiftIndexer: TypeIndexer {
 
         for (decl, structure) in decls {
             guard decl.parent == nil else { continue }
-            try _parseAccessibility(decl, structure)
+            try _parseIndexedStructure(decl, structure)
         }
     }
 
@@ -232,7 +232,7 @@ final class SwiftIndexer: TypeIndexer {
         return decl
     }
 
-    private func _parseAccessibility(
+    private func _parseIndexedStructure(
         _ decl: Declaration,
         _ indexedStructure: [[String: Any]]
     ) throws {
@@ -259,10 +259,13 @@ final class SwiftIndexer: TypeIndexer {
                     throw PeripheryKitError.swiftIndexingError(message: "Unhandled accessibility '\(accessibilityName)'")
                 }
             }
+            if let rawAttributes = structure[SourceKit.Key.attributes.rawValue] as? [[String: Any]] {
+                decl.attributes = parse(rawAttributes: rawAttributes)
+            }
             substructures += structure[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
         }
         for child in decl.declarations {
-            try _parseAccessibility(child, substructures)
+            try _parseIndexedStructure(child, substructures)
         }
     }
 
