@@ -179,6 +179,11 @@ public final class Declaration: Entity, CustomStringConvertible {
     var structureAccessibility: Accessibility = .internal
     var analyzerHints: [Analyzer.Hint] = []
 
+    // MARK: - IndexStore specific properties
+    var isImplicit: Bool = false
+
+
+    // MARK: - Computed Properties
     var attributeAccessibility: Accessibility {
         if attributes.contains("public") {
             return .public
@@ -240,7 +245,7 @@ public final class Declaration: Entity, CustomStringConvertible {
             // All properties have a getter and setter, however they only have a name when
             // explicitly implemented.
 
-            if $0.name != nil,
+            if ($0.name != nil || !$0.isImplicit),
                 [.functionAccessorGetter,
                  .functionAccessorSetter].contains($0.kind) {
                 return true

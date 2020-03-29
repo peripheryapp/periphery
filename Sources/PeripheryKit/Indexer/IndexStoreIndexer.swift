@@ -208,6 +208,8 @@ final class IndexStoreIndexer: TypeIndexer {
             let decl = Declaration(kind: kind, usr: occ.symbol.usr, location: loc)
             decl.name = occ.symbol.name
 
+            decl.isImplicit = occ.roles.contains(.implicit)
+
             indexStore.forEachRelations(for: occ) { rel -> Bool in
                 // Note: Skip adding accessor in variable children to avoid circurlar reference
                 // Expected graph is
@@ -220,7 +222,7 @@ final class IndexStoreIndexer: TypeIndexer {
                 // variable <──┬────> variable.getter
                 //             └────> variable.setter
                 // ```
-                if !rel.roles.intersection([.childOf]).isEmpty && !rel.roles.contains(.accessorOf) {
+                if !rel.roles.intersection([.childOf]).isEmpty {
                     let parent = indexStore.getSymbol(for: rel.symbolRef)
                     if self.childDeclsByParentUsr[parent.usr] != nil {
                         self.childDeclsByParentUsr[parent.usr]?.insert(decl)
@@ -228,7 +230,8 @@ final class IndexStoreIndexer: TypeIndexer {
                         self.childDeclsByParentUsr[parent.usr] = [decl]
                     }
                 }
-                if !rel.roles.intersection([.overrideOf, .accessorOf]).isEmpty {
+
+                if !rel.roles.intersection([.overrideOf]).isEmpty {
                     // ```
                     // class A { func f() {} }
                     // class B: A { override func f() {} }

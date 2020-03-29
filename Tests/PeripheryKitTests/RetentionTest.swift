@@ -1246,18 +1246,34 @@ class RetentionTest: XCTestCase {
 
         RetentionTest.target.set(sourceFiles: sourceFiles)
 
-        var graphs: [IndexerVariant: SourceGraph] = [:]
+        var indexedGraphs: [IndexerVariant: SourceGraph] = [:]
+        var analyzedGraphs: [IndexerVariant: SourceGraph] = [:]
         for variant in enabledIndexers {
-            graph = SourceGraph()
+            let indexOnlyGraph = SourceGraph()
             configuration.useIndexStore = variant == .indexStore
+            try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: indexOnlyGraph)
+            indexedGraphs[variant] = indexOnlyGraph
+        }
+        if indexedGraphs.count == 2{
+            let indexStoreGraph = indexedGraphs[.indexStore]!
+            let sourceKitGraph = indexedGraphs[.sourceKit]!
+            if !SourceGraphDebugger.isEqual(indexStoreGraph, sourceKitGraph) {
+                perihperyRetentionTestGraphMismatchBreakpoint()
+            }
+        }
+
+        for variant in enabledIndexers {
+            let graph = SourceGraph()
             try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: graph)
             try! Analyzer.perform(graph: graph)
+            self.graph = graph
             try testBlock(variant)
-            graphs[variant] = graph
+            analyzedGraphs[variant] = graph
         }
-        if graphs.count == 2 {
-            let indexStoreGraph = graphs[.indexStore]!
-            let sourceKitGraph = graphs[.sourceKit]!
+
+        if analyzedGraphs.count == 2 {
+            let indexStoreGraph = analyzedGraphs[.indexStore]!
+            let sourceKitGraph = analyzedGraphs[.sourceKit]!
             if !SourceGraphDebugger.isEqual(indexStoreGraph, sourceKitGraph) {
                 perihperyRetentionTestGraphMismatchBreakpoint()
             }
