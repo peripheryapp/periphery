@@ -114,10 +114,11 @@ class RetentionTest: XCTestCase {
         }
     }
 
-    //    func testSelfReferencedClass() {
-    //        analyze()
-    //        XCTAssertNotReferenced((.class, "FixtureClass8"))
-    //    }
+    func testSelfReferencedClass() {
+        analyze(enabledIndexers: [.sourceKit]) {
+            XCTAssertNotReferenced((.class, "FixtureClass8"))
+        }
+    }
 
     func testSelfReferencedRecursiveMethod() {
         analyze() {
