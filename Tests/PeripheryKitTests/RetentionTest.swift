@@ -1264,6 +1264,7 @@ class RetentionTest: XCTestCase {
 
         for variant in enabledIndexers {
             let graph = SourceGraph()
+            configuration.useIndexStore = variant == .indexStore
             try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: graph)
             try! Analyzer.perform(graph: graph)
             self.graph = graph
