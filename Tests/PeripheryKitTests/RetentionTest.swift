@@ -66,8 +66,8 @@ class RetentionTest: XCTestCase {
     }
 
     func testSimplePropertyAssignedButNeverRead() {
-        //        TODO: IndexStore doesn't support aggressive mode for simple property elimination
-        //              Need to re-structure computed property AST
+        // TODO: IndexStore doesn't support aggressive mode for simple property elimination
+        //       Need to re-structure computed property AST
         analyze(retainPublic: true, aggressive: true, enabledIndexers: [.sourceKit]) {
 
             XCTAssertReferenced((.class, "FixtureClass70"))

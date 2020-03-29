@@ -42,21 +42,32 @@ final class UnreadSimplePropertyReferenceEliminator: SourceGraphVisitor {
             let references = graph.references(to: setter)
 
             for reference in references {
-                // Parent should be a reference to a simple property.
-                guard let caller = reference.parent else { continue }
-                let getterUsr = transformToGetterUsr(fromMangledSetterUsr: reference.usr)
-                let propertyUsr = transformToPropertyUsr(fromMangledSetterUsr: reference.usr)
+                if configuration.useIndexStore {
+                    guard let caller = reference.parent else { continue }
+                    let getterUsr = transformToGetterUsr(fromMangledSetterUsr: reference.usr)
+                    let propertyUsr = transformToPropertyUsr(fromMangledSetterUsr: reference.usr)
 
-                guard let property = graph.declaration(withUsr: propertyUsr),
-                    let propertyReference = caller.references.first(where: { $0.usr == propertyUsr }),
-                    !property.isComplexProperty else { continue }
+                    guard let property = graph.declaration(withUsr: propertyUsr),
+                        let propertyReference = caller.references.first(where: { $0.usr == propertyUsr }),
+                        !property.isComplexProperty else { continue }
 
-                // If the property reference has no other descendent references we can remove it.
-                let hasGetterReference = caller.references.contains(where: { $0.kind == .functionAccessorGetter && $0.usr == getterUsr })
-                if !hasGetterReference {
-                    graph.remove(propertyReference)
-                    property.analyzerHints.append(.unreadProperty)
-                    property.analyzerHints.append(.aggressive)
+                    let hasGetterReference = caller.references.contains(where: { $0.kind == .functionAccessorGetter && $0.usr == getterUsr })
+                    if !hasGetterReference {
+                        graph.remove(propertyReference)
+                        property.analyzerHints.append(.unreadProperty)
+                        property.analyzerHints.append(.aggressive)
+                    }
+                } else {
+                    // Parent should be a reference to a simple property.
+                    guard let propertyReference = reference.parent as? Reference,
+                        let property = graph.declaration(withUsr: propertyReference.usr),
+                        !property.isComplexProperty else { continue }
+                    // If the property reference has no other descendent references we can remove it.
+                    if propertyReference.references == [reference] {
+                        graph.remove(propertyReference)
+                        property.analyzerHints.append(.unreadProperty)
+                        property.analyzerHints.append(.aggressive)
+                    }
                 }
             }
         }
