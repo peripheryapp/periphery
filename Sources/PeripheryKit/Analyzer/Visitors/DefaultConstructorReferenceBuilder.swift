@@ -20,7 +20,7 @@ final class DefaultConstructorReferenceBuilder: SourceGraphVisitor {
 
     private func referenceDefaultConstructors() {
         let defaultConstructors = graph.declarations(ofKind: .functionConstructor).filter {
-            $0.name == "init()" || $0.name == nil
+            $0.name == "init()"
         }
 
         defaultConstructors.forEach { constructor in
