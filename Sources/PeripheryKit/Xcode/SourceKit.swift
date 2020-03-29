@@ -19,7 +19,6 @@ final class SourceKit {
         case accessibility = "key.accessibility"
     }
 
-    @available(*, deprecated, message: "Indexing with SoruceKit is deprecated. Please use IndexStore versioin instead")
     static func make(buildPlan: BuildPlan, target: Target) throws -> Self {
         let arguments = try buildPlan.arguments(for: target)
         return self.init(arguments: arguments)
@@ -48,7 +47,6 @@ final class SourceKit {
         return response
     }
 
-    @available(*, deprecated, message: "Indexing with SoruceKit is deprecated. Please use IndexStore versioin instead")
     func requestIndex(_ file: SourceFile) throws -> [String: Any] {
         let response: [String: Any]
 

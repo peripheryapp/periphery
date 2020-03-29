@@ -6,7 +6,7 @@ import TSCBasic
 class RetentionTest: XCTestCase {
     static var buildPlan: BuildPlan!
     static var target: Target!
-    static var indexStore: IndexStore!
+    static var indexStorePath: String!
 
     static override func setUp() {
         super.setUp()
@@ -14,14 +14,11 @@ class RetentionTest: XCTestCase {
         let project = try! Project.make(path: PeripheryProjectPath)
         let xcodebuild: Xcodebuild = inject()
         try! xcodebuild.clearDerivedData(for: project)
-        try! xcodebuild.build(project: project, scheme: "RetentionFixtures")
-        let indexStorePath = try! xcodebuild.indexStorePath(project: project)
+        let buildLog = try! xcodebuild.build(project: project, scheme: "RetentionFixtures")
 
         target = project.targets.first { $0.name == "RetentionFixtures" }!
-        buildPlan = try! BuildPlan.make(targets: [target])
-        indexStore = try! IndexStore.open(
-            store: AbsolutePath(indexStorePath), api: IndexStoreAPI.make()
-        )
+        buildPlan = try! BuildPlan.make(buildLog: buildLog, targets: [target])
+        indexStorePath = try! xcodebuild.indexStorePath(project: project)
     }
 
     override func tearDown() {
@@ -1075,6 +1072,7 @@ class RetentionTest: XCTestCase {
         configuration.retainPublic = retainPublic
         configuration.aggressive = aggressive
         configuration.retainObjcAnnotated = retainObjcAnnotated
+        configuration.indexStorePath = RetentionTest.indexStorePath
 
         if isMainFile {
             configuration.entryPointFilenames.append(testName.lowercased() + ".swift")
@@ -1091,7 +1089,7 @@ class RetentionTest: XCTestCase {
         }
 
         RetentionTest.target.set(sourceFiles: sourceFiles)
-        try! Indexer.perform(buildPlan: RetentionTest.buildPlan, indexStore: RetentionTest.indexStore, graph: graph)
+        try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: graph)
         try! Analyzer.perform(graph: graph)
     }
 

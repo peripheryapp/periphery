@@ -2,7 +2,6 @@ import Foundation
 
 final class BuildPlan {
 
-    @available(*, deprecated, message: "Indexing with SoruceKit is deprecated. Please use IndexStore versioin instead")
     static func make(buildLog: String, targets: Set<Target>) throws -> BuildPlan {
         let parser = XcodebuildLogParser(log: buildLog)
         let xcodebuild: Xcodebuild = inject()
