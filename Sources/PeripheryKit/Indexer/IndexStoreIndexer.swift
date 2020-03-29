@@ -53,34 +53,6 @@ final class IndexStoreIndexer: TypeIndexer {
             try _parseIndex(unit, indexStore: indexStore)
             return true
         }
-//        var jobs: [Job] = []
-//        let excludedSourceFiles = configuration.indexExcludeSourceFiles
-//
-//        for target in buildPlan.targets {
-//            let sourceKit = try SourceKit.make(target: target)
-//            let sourceFiles = try target.sourceFiles()
-//            jobs.append(contentsOf: sourceFiles.map { Job($0, sourceKit) })
-//        }
-//
-//        try JobPool<Void>().forEach(jobs) { [weak self] job in
-//            guard let self = self else { return }
-//
-//            let sourceFile = job.sourceFile
-//
-//            if excludedSourceFiles.contains(sourceFile) {
-//                self.logger.debug("[index:swift:exclude] \(sourceFile.path.string)")
-//                return
-//            }
-//
-//            let sourceKit = job.sourceKit
-//
-//            let elapsed = try Benchmark.measure {
-////                try self.parseIndex(sourceFile, sourceKit)
-////                try self.parseUnusedParams(sourceFile, sourceKit)
-//            }
-//
-//            self.logger.debug("[index:swift] \(sourceFile.path.string) (\(elapsed)s)")
-//        }
 
         graph.identifyRootDeclarations()
         graph.identifyRootReferences()
@@ -200,7 +172,6 @@ final class IndexStoreIndexer: TypeIndexer {
             //             └────> variable.setter
             // ```
             if !rel.roles.intersection([.childOf]).isEmpty && !rel.roles.contains(.accessorOf) {
-                // TODO: Add them in parentDecl.declarations
                 let parent = indexStore.getSymbol(for: rel.symbolRef)
                 if self.childDeclsByParentUsr[parent.usr] != nil {
                     self.childDeclsByParentUsr[parent.usr]?.insert(decl)
@@ -242,7 +213,6 @@ final class IndexStoreIndexer: TypeIndexer {
                 // `A` is `baseOf` `B`
                 // A.relations has B as `baseOf`
                 // B referenes A
-                // TODO: Add them in subDecl.related
                 let referencer = indexStore.getSymbol(for: rel.symbolRef)
                 guard let refKind = transformReferenceKind(occ.symbol.kind, occ.symbol.subKind) else {
                     logger.error("Failed to transform ref kind")
@@ -349,7 +319,6 @@ final class IndexStoreIndexer: TypeIndexer {
                 // `A` is `baseOf` `B`
                 // A.relations has B as `baseOf`
                 // B referenes A
-                // TODO: Add them in subDecl.related
                 let ref = Reference(kind: kind, usr: occ.symbol.usr, location: loc)
                 ref.name = occ.symbol.name
                 if rel.roles.contains(.baseOf) {
