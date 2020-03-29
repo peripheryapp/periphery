@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.1
 import PackageDescription
 
 let package = Package(
@@ -11,12 +11,12 @@ let package = Package(
         .library(name: "PeripheryKit", targets: ["PeripheryKit"])
     ],
     dependencies: [
-        .package(url: "https://github.com/ileitch/Commandant", .branch("boolean-option")),
         .package(url: "https://github.com/jpsim/SourceKitten", from: "0.29.0"),
-        .package(url: "https://github.com/tuist/xcodeproj", from: "6.0.0"),
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "0.1.0"),
-        .package(url: "https://github.com/kylef/PathKit", from: "0.9.2"),
-        .package(url: "https://github.com/apple/swift-syntax", from: "0.50100.0"),
+        .package(url: "https://github.com/tuist/xcodeproj", from: "7.9.0"),
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "1.3.0"),
+        .package(url: "https://github.com/kylef/PathKit", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-syntax", .exact("0.50100.0")),
+        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.0.4")),
         .package(url: "https://github.com/apple/swift-tools-support-core.git", .branch("master")),
     ],
     targets: [
@@ -27,13 +27,13 @@ let package = Package(
         .target(
             name: "PeripheryKit",
             dependencies: [
-                "Commandant",
-                "SourceKittenFramework",
-                "xcodeproj",
-                "CryptoSwift",
-                "PathKit",
-                "SwiftSyntax",
-                "SwiftToolsSupport-auto",
+                .product(name: "SourceKittenFramework", package: "SourceKitten"),
+                .product(name: "XcodeProj", package: "xcodeproj"),
+                .product(name: "CryptoSwift", package: "CryptoSwift"),
+                .product(name: "PathKit", package: "PathKit"),
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
             ]
         ),
         .testTarget(
@@ -47,5 +47,5 @@ let package = Package(
             dependencies: ["PeripheryKit"]
         )
     ],
-    swiftLanguageVersions: [.v4_2, .v5]
+    swiftLanguageVersions: [.v5]
 )

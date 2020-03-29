@@ -1,5 +1,4 @@
 import Foundation
-import Result
 
 final class UpdateChecker: Singleton {
     static func make() -> Self {

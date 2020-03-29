@@ -10,8 +10,8 @@
 <a href="https://github.com/peripheryapp/periphery/releases/latest">
   <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?style=flat-square" />
 </a>
-<a href="https://twitter.com/peripheryappcom">
-  <img src="https://img.shields.io/twitter/follow/peripheryappcom.svg?label=Twitter&style=flat-square" />
+<a href="https://twitter.com/peripheryswift">
+  <img src="https://img.shields.io/twitter/follow/peripheryswift.svg?label=Twitter&style=flat-square" />
 </a>
 
 
@@ -368,7 +368,7 @@ Before setting up Xcode integration, we highly recommend you first get Periphery
 
 Select your project in the Project Navigator and click the + button at the bottom left of the Targets section. Select **Cross-platform** and choose **Aggregate**. Hit Next.
 
-![Step 1](assets/xcode-integration/1.png)    
+![Step 1](assets/xcode-integration/1.png)
 
 Choose a name for the new target, e.g "Periphery" or "Unused Code".
 

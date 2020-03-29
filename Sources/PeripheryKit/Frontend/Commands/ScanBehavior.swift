@@ -1,5 +1,4 @@
 import Foundation
-import Result
 
 final class ScanBehavior {
     static func make() -> Self {
