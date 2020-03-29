@@ -4,7 +4,7 @@ import PathKit
 
 @testable import PeripheryKit
 
-class UnusedParamTest: XCTestCase {
+class UnusedParameterTest: XCTestCase {
     func testSimpleUnused() {
         analyze()
         XCTAssertUnused("param", of: "myFunc(param:)")
@@ -147,7 +147,7 @@ class UnusedParamTest: XCTestCase {
     private var functions: [Function] = []
 
     private func analyze() {
-        functions = try! UnusedParamParser.parse(file: fixturePath, parseProtocols: false)
+        functions = try! UnusedParameterParser.parse(file: fixturePath, parseProtocols: false)
         let analyzer = UnusedParameterAnalyzer()
 
         for function in functions {

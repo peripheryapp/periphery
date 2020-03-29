@@ -100,7 +100,7 @@ final class GenericItem: Item {
     }
 }
 
-final class UnusedParamParser {
+final class UnusedParameterParser {
     private let syntax: SourceFileSyntax
     private let parseProtocols: Bool
     private let sourceFile: SourceFile
