@@ -115,13 +115,9 @@ final class IndexStoreIndexer: TypeIndexer {
 
             var decls: [(decl: Declaration, structures: [[String: Any]])] = []
             try indexStore.forEachOccurrences(for: unit) { occ in
-                guard occ.symbol.language == .swift, !occ.location.isSystem else { return true }
-                let shouldIndex = try buildPlan.targets.contains(where: {
-                    try $0.sourceFiles().contains(where: { $0.path.string == occ.location.path })
-                })
-
-                guard shouldIndex else { return true }
-                if !occ.roles.intersection([.definition, .declaration]).isEmpty {
+                guard try shouldIndex.get(occ.location.path) else { return true }
+                if !occ.roles.intersection([.definition, .declaration]).isEmpty
+                    && !occ.location.isSystem && occ.symbol.language == .swift {
                     var rawStructures: [[String: Any]] = []
                     if featureManager.isEnabled(.determineAccessibilityFromStructure) {
                         let file = SourceFile(path: Path(occ.location.path))
@@ -130,6 +126,7 @@ final class IndexStoreIndexer: TypeIndexer {
                     let decl = try _parseDecl(occ, rawStructures)
                     graph.add(decl)
                     decls.append((decl, rawStructures))
+                    return true
                 }
 
                 if !occ.roles.intersection([.reference]).isEmpty {
@@ -139,7 +136,8 @@ final class IndexStoreIndexer: TypeIndexer {
                     }
                 }
 
-                if !occ.roles.intersection([.implicit]).isEmpty {
+                if !occ.roles.intersection([.implicit]).isEmpty
+                    && !occ.location.isSystem && occ.symbol.language == .swift  {
                     let refs = try _parseImplicit(occ)
                     for ref in refs {
                         graph.add(ref)

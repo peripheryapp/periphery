@@ -41,15 +41,21 @@ public final class SourceGraphDebugger {
     }
 
     static func isEqual(_ lhs: SourceGraph, _ rhs: SourceGraph) -> Bool {
-        lhs.rootDeclarations == rhs.rootDeclarations && lhs.rootReferences == rhs.rootReferences
+        lhs.rootDeclarations.count == rhs.rootDeclarations.count
+            && lhs.rootReferences.count == rhs.rootReferences.count
             && zip(lhs.rootReferences, rhs.rootReferences).allSatisfy { isEqual($0, $1) }
             && zip(lhs.rootDeclarations, rhs.rootDeclarations).allSatisfy { isEqual($0, $1) }
     }
 
-    static func isEqual(_ lhs: Entity, _ rhs: Entity, depth: Int = 0) -> Bool {
-        lhs.references == rhs.references && lhs.declarations == rhs.declarations
+    static func isEqual(_ lhs: Entity, _ rhs: Entity) -> Bool {
+        let result = lhs.references.count == rhs.references.count
+            && lhs.declarations.count == rhs.declarations.count
             && zip(lhs.references, rhs.references).allSatisfy { isEqual($0, $1) }
             && zip(lhs.declarations, rhs.declarations).allSatisfy { isEqual($0, $1) }
+        if !result {
+            print("⛔️ \(lhs.description) is not equal \(rhs.description)")
+        }
+        return result
     }
 }
 
