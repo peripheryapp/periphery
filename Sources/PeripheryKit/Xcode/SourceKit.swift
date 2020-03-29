@@ -34,19 +34,6 @@ final class SourceKit {
         self.arguments = arguments
     }
 
-    func editorOpen(_ file: SourceFile) throws -> [String: Any] {
-        let response: [String: Any]
-
-        do {
-            // FIXME: Cache response
-            response = try Request.editorOpen(file: File(path: file.path.string)!).send()
-        } catch {
-            throw PeripheryKitError.sourceKitRequestFailed(type: "index", file: file.path.string, error: error)
-        }
-
-        return response
-    }
-
     func requestIndex(_ file: SourceFile) throws -> [String: Any] {
         let response: [String: Any]
 
