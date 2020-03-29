@@ -1246,12 +1246,21 @@ class RetentionTest: XCTestCase {
 
         RetentionTest.target.set(sourceFiles: sourceFiles)
 
+        var graphs: [IndexerVariant: SourceGraph] = [:]
         for variant in enabledIndexers {
             graph = SourceGraph()
             configuration.useIndexStore = variant == .indexStore
             try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: graph)
             try! Analyzer.perform(graph: graph)
             try testBlock(variant)
+            graphs[variant] = graph
+        }
+        if graphs.count == 2 {
+            let indexStoreGraph = graphs[.indexStore]!
+            let sourceKitGraph = graphs[.sourceKit]!
+            if !SourceGraphDebugger.isEqual(indexStoreGraph, sourceKitGraph) {
+                perihperyRetentionTestGraphMismatchBreakpoint()
+            }
         }
     }
 
@@ -1337,3 +1346,6 @@ class RetentionTest: XCTestCase {
 
     typealias DeclarationDescription = (kind: Declaration.Kind, name: String)
 }
+
+@_optimize(none)
+private func perihperyRetentionTestGraphMismatchBreakpoint() {}
