@@ -94,16 +94,7 @@ public final class Scan: Injectable {
             logger.info("\(asterisk) Indexing...")
         }
 
-        // FIXME: Add option to specify index-store-path
-        let buildRootPath = AbsolutePath(ProcessEnv.vars["BUILD_ROOT"]!)
-        let indexStorePath = buildRootPath
-            .parentDirectory.parentDirectory
-            .appending(components: "Index", "DataStore")
-        let indexStore = try IndexStore.open(
-            store: indexStorePath,
-            api: IndexStoreAPI.make()
-        )
-        try Indexer.perform(buildPlan: buildPlan, indexStore: indexStore, graph: graph)
+        try Indexer.perform(buildPlan: buildPlan, graph: graph)
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)

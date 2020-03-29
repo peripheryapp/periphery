@@ -1,5 +1,6 @@
 import Foundation
 import ArgumentParser
+import TSCBasic
 
 public struct ScanCommand: ParsableCommand {
 
@@ -70,6 +71,9 @@ public struct ScanCommand: ParsableCommand {
 
     @Flag(inversion: .prefixedNo, help: "Enable new indexing system using IndexStore")
     var useIndexStore: Bool?
+
+    @Option(help: "Path to index that should be loaded. e.g. DerivedData/PROJECT/Index/DataStore")
+    var indexStorePath: String?
 
     public init() {}
 
@@ -154,6 +158,19 @@ public struct ScanCommand: ParsableCommand {
 
         if let useIndexStore = useIndexStore {
             configuration.useIndexStore = useIndexStore
+        }
+
+        if let indexStorePath = indexStorePath {
+            configuration.indexStorePath = indexStorePath
+        }
+
+        if configuration.indexStorePath == nil && configuration.useIndexStore,
+            let buildRootEnv = ProcessInfo.processInfo.environment["BUILD_ROOT"] {
+            let buildRootPath = AbsolutePath(buildRootEnv)
+            configuration.indexStorePath = buildRootPath
+                .parentDirectory.parentDirectory
+                .appending(components: "Index", "DataStore")
+                .pathString
         }
 
         if let formatName = format {

@@ -31,6 +31,7 @@ public final class Configuration: Singleton {
     var strict: Bool = false
     var xcargs: String? = nil
     var useIndexStore: Bool = false
+    var indexStorePath: String?
 
     // Non user facing.
     var guidedSetup: Bool = false
@@ -59,7 +60,8 @@ public final class Configuration: Singleton {
             "diagnose": diagnosisConsole,
             "strict": strict,
             "xcargs": xcargs,
-            "use_index_store": useIndexStore
+            "use_index_store": useIndexStore,
+            "index_store_path": indexStorePath
         ]
 
         return try Yams.dump(object: config)
@@ -149,6 +151,10 @@ public final class Configuration: Singleton {
 
         if let value = yaml["use_index_store"] as? Bool {
             self.useIndexStore = value
+        }
+
+        if let value = yaml["index_store_path"] as? String {
+            self.indexStorePath = value
         }
     }
 

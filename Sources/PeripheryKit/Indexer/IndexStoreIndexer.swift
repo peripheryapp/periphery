@@ -4,10 +4,15 @@ import SwiftSyntax
 import TSCBasic
 
 final class IndexStoreIndexer: TypeIndexer {
-    static func make(buildPlan: BuildPlan, indexStore: IndexStore, graph: SourceGraph) -> Self {
+    static func make(buildPlan: BuildPlan, graph: SourceGraph) throws -> Self {
+        let configuration = inject(Configuration.self)
+        guard let indexStorePathString = configuration.indexStorePath else {
+            throw PeripheryKitError.indexStoreError(message: "-index-store-path option is required")
+        }
+        let indexStorePath = AbsolutePath(indexStorePathString)
         return self.init(buildPlan: buildPlan,
                          graph: graph,
-                         indexStore: indexStore,
+                         indexStore: try IndexStore.open(store: indexStorePath, api: IndexStoreAPI.make()),
                          logger: inject(),
                          featureManager: inject(),
                          configuration: inject())
