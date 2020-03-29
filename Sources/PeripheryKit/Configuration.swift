@@ -30,6 +30,7 @@ public final class Configuration: Singleton {
     var diagnosisConsole: Bool = false
     var strict: Bool = false
     var xcargs: String? = nil
+    var useIndexStore: Bool = false
 
     // Non user facing.
     var guidedSetup: Bool = false
@@ -57,7 +58,8 @@ public final class Configuration: Singleton {
             "disable_update_check": !updateCheck,
             "diagnose": diagnosisConsole,
             "strict": strict,
-            "xcargs": xcargs
+            "xcargs": xcargs,
+            "use_index_store": useIndexStore
         ]
 
         return try Yams.dump(object: config)
@@ -143,6 +145,10 @@ public final class Configuration: Singleton {
 
         if let value = yaml["xcargs"] as? String {
             self.xcargs = value
+        }
+
+        if let value = yaml["use_index_store"] as? Bool {
+            self.useIndexStore = value
         }
     }
 

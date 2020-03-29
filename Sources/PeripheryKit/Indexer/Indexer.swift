@@ -25,7 +25,7 @@ final class Indexer {
         self.indexStore = indexStore
         self.graph = graph
         self.indexers = [
-            IndexStoreIndexer.self,
+            configuration.useIndexStore ? IndexStoreIndexer.self : SourceKitIndexer.self,
             XibIndexer.self
         ]
     }

@@ -68,6 +68,9 @@ public struct ScanCommand: ParsableCommand {
     @Option(help: "Pass additional arguments to xcodebuild for the build phase")
     var xcargs: String?
 
+    @Flag(inversion: .prefixedNo, help: "Enable new indexing system using IndexStore")
+    var useIndexStore: Bool?
+
     public init() {}
 
     public func run() throws {
@@ -147,6 +150,10 @@ public struct ScanCommand: ParsableCommand {
 
         if xcargs != nil {
             configuration.xcargs = xcargs
+        }
+
+        if let useIndexStore = useIndexStore {
+            configuration.useIndexStore = useIndexStore
         }
 
         if let formatName = format {
