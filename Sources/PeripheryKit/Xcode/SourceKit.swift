@@ -111,6 +111,7 @@ final class SourceKit {
             "key.name": NSUUID().uuidString,
             "key.sourcefile": file.path.string,
             "key.offset": offset,
+            "key.compilerargs": arguments
         ]
         let response: [String: Any]
 
