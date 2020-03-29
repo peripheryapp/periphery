@@ -4,7 +4,7 @@ import TSCUtility
 import PathKit
 
 struct IndexStoreUnit {
-    fileprivate let name: String
+    let name: String
 }
 
 struct IndexStoreSymbol {
