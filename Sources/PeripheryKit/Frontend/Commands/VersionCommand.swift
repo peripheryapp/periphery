@@ -2,8 +2,10 @@ import Foundation
 import ArgumentParser
 
 public struct VersionCommand: ParsableCommand {
-    public let verb = "version"
-    public let function = "Display this version of Periphery"
+    public static let configuration = CommandConfiguration(
+        commandName: "version",
+        abstract: "Display this version of Periphery"
+    )
 
     public init() {}
 
