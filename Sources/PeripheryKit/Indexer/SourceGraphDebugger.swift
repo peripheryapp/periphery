@@ -8,10 +8,10 @@ public final class SourceGraphDebugger {
     }
 
     public func describeGraph() {
-        describe(graph.rootDeclarations)
+        describe(graph.rootDeclarations.sorted(by: { $0.usr < $1.usr }))
     }
 
-    func describe(_ declarations: Set<Declaration>) {
+    func describe(_ declarations: [Declaration]) {
         for (index, declaration) in declarations.enumerated() {
             describe(declaration)
 
@@ -25,19 +25,31 @@ public final class SourceGraphDebugger {
         let inset = String(repeating: "··", count: depth)
         print(inset + entity.description)
 
-        for reference in entity.references {
+        for reference in entity.references.sorted(by: { $0.usr < $1.usr }) {
             describe(reference, depth: depth + 1)
         }
 
         if let declaration = entity as? Declaration {
-            for reference in declaration.related {
+            for reference in declaration.related.sorted(by: { $0.usr < $1.usr }) {
                 describe(reference, depth: depth + 1)
             }
         }
 
-        for declaration in entity.declarations {
+        for declaration in entity.declarations.sorted(by: { $0.usr < $1.usr }) {
             describe(declaration, depth: depth + 1)
         }
+    }
+
+    static func isEqual(_ lhs: SourceGraph, _ rhs: SourceGraph) -> Bool {
+        lhs.rootDeclarations == rhs.rootDeclarations && lhs.rootReferences == rhs.rootReferences
+            && zip(lhs.rootReferences, rhs.rootReferences).allSatisfy { isEqual($0, $1) }
+            && zip(lhs.rootDeclarations, rhs.rootDeclarations).allSatisfy { isEqual($0, $1) }
+    }
+
+    static func isEqual(_ lhs: Entity, _ rhs: Entity, depth: Int = 0) -> Bool {
+        lhs.references == rhs.references && lhs.declarations == rhs.declarations
+            && zip(lhs.references, rhs.references).allSatisfy { isEqual($0, $1) }
+            && zip(lhs.declarations, rhs.declarations).allSatisfy { isEqual($0, $1) }
     }
 }
 

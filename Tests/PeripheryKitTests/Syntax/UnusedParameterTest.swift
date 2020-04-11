@@ -119,14 +119,14 @@ class UnusedParameterTest: XCTestCase {
         analyze()
 
         let init1 = functions.first!
-        XCTAssertEqual(init1.location.line!, 4)
-        XCTAssertEqual(init1.location.column!, 5)
-        XCTAssertEqual(init1.location.offset!, 47)
+        try XCTAssertEqual(XCTUnwrap(init1.location.line), 4)
+        try XCTAssertEqual(XCTUnwrap(init1.location.column), 5)
+        try XCTAssertEqual(XCTUnwrap(init1.location.offset), 47)
 
         let init2 = functions.last!
-        XCTAssertEqual(init2.location.line!, 8)
-        XCTAssertEqual(init2.location.column!, 5)
-        XCTAssertEqual(init2.location.offset!, 111)
+        try XCTAssertEqual(XCTUnwrap(init2.location.line), 8)
+        try XCTAssertEqual(XCTUnwrap(init2.location.column), 5)
+        try XCTAssertEqual(XCTUnwrap(init2.location.offset), 111)
     }
 
     // MARK: - Known Failures
@@ -137,8 +137,8 @@ class UnusedParameterTest: XCTestCase {
         let function = functions.first!
         let param1 = function.parameters.first { $0.name == "param1" }!
         let param2 = function.parameters.first { $0.name == "param2" }!
-        XCTAssertEqual(param1.location.line!, 4)
-        XCTAssertEqual(param2.location.line!, 5)
+        try XCTAssertEqual(XCTUnwrap(param1.location.line), 4)
+        try XCTAssertEqual(XCTUnwrap(param2.location.line), 5)
     }
 
     // MARK: - Private

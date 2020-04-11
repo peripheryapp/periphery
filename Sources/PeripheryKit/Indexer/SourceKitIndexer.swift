@@ -2,7 +2,7 @@ import Foundation
 import PathKit
 import SwiftSyntax
 
-final class SwiftIndexer: TypeIndexer {
+final class SourceKitIndexer: TypeIndexer {
     static func make(buildPlan: BuildPlan, graph: SourceGraph) -> Self {
         return self.init(buildPlan: buildPlan,
                          graph: graph,

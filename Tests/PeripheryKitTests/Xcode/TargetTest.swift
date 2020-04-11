@@ -3,11 +3,11 @@ import XCTest
 @testable import PeripheryKit
 
 class TargetTest: XCTestCase {
-    func testSourceFileInGroupWithoutFolder() {
+    func testSourceFileInGroupWithoutFolder() throws {
         let project = try! Project.make(path: PeripheryProjectPath)
         let target = project.targets.first { $0.name == "PeripheryKitTests" }!
 
-        XCTAssertTrue(try! target.sourceFiles().contains { $0.path.relativeTo(ProjectRootPath) == "Tests/PeripheryKitTests/Xcode/fileInGroupWithoutFolder.swift" })
+        XCTAssertTrue(try target.sourceFiles().contains { $0.path.relativeTo(ProjectRootPath) == "Tests/PeripheryKitTests/Xcode/fileInGroupWithoutFolder.swift" })
     }
 
     func testModuleName() {

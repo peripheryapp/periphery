@@ -1,6 +1,7 @@
 import Foundation
 
 final class BuildPlan {
+
     static func make(buildLog: String, targets: Set<Target>) throws -> BuildPlan {
         let parser = XcodebuildLogParser(log: buildLog)
         let xcodebuild: Xcodebuild = inject()
@@ -8,6 +9,15 @@ final class BuildPlan {
 
         return try BuildPlan(targets: targets,
                              buildLogParser: parser,
+                             xcodebuildVersion: xcodebuildVersion,
+                             logger: inject())
+    }
+
+    static func make(targets: Set<Target>) throws -> BuildPlan {
+        let xcodebuild: Xcodebuild = inject()
+        let xcodebuildVersion = XcodebuildVersion.parse(try xcodebuild.version())
+
+        return try BuildPlan(targets: targets, buildLogParser: nil,
                              xcodebuildVersion: xcodebuildVersion,
                              logger: inject())
     }
@@ -21,7 +31,6 @@ final class BuildPlan {
         "-emit-dependencies"
     ]
 
-    private let buildLogParser: XcodebuildLogParser
     private var invocationsByTarget: [Target: SwiftcInvocation] = [:]
     private var argumentsByTarget: [Target: [String]] = [:]
     private let xcodebuildVersion: String
@@ -29,14 +38,16 @@ final class BuildPlan {
 
     let targets: Set<Target>
 
-    required init(targets: Set<Target>, buildLogParser: XcodebuildLogParser, xcodebuildVersion: String, logger: Logger) throws {
+    required init(targets: Set<Target>, buildLogParser: XcodebuildLogParser?, xcodebuildVersion: String, logger: Logger) throws {
         self.targets = targets
-        self.buildLogParser = buildLogParser
         self.xcodebuildVersion = xcodebuildVersion
         self.logger = logger
-        self.invocationsByTarget = Dictionary(uniqueKeysWithValues: try targets.map {
-            ($0, try self.buildLogParser.getSwiftcInvocation(target: $0.name, module: $0.moduleName))
-        })
+        // For legacy mode indexing with SourceKit
+        if let buildLogParser = buildLogParser {
+            self.invocationsByTarget = Dictionary(uniqueKeysWithValues: try targets.map {
+                ($0, try buildLogParser.getSwiftcInvocation(target: $0.name, module: $0.moduleName))
+            })
+        }
     }
 
     func arguments(for target: Target) throws -> [String] {

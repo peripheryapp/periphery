@@ -1,7 +1,7 @@
 import Foundation
 
 protocol TypeIndexer: AnyObject {
-    static func make(buildPlan: BuildPlan, graph: SourceGraph) -> Self
+    static func make(buildPlan: BuildPlan, graph: SourceGraph) throws -> Self
     func perform() throws
 }
 
@@ -11,21 +11,21 @@ final class Indexer {
     }
 
     static func make(buildPlan: BuildPlan, graph: SourceGraph) -> Self {
-        return self.init(buildPlan: buildPlan,
-                        graph: graph)
+        return self.init(buildPlan: buildPlan, graph: graph, configuration: inject())
     }
 
     private let buildPlan: BuildPlan
     private let graph: SourceGraph
 
-    private let indexers: [TypeIndexer.Type] = [
-        SwiftIndexer.self,
-        XibIndexer.self
-    ]
+    private let indexers: [TypeIndexer.Type]
 
-    required init(buildPlan: BuildPlan, graph: SourceGraph) {
+    required init(buildPlan: BuildPlan, graph: SourceGraph, configuration: Configuration) {
         self.buildPlan = buildPlan
         self.graph = graph
+        self.indexers = [
+            configuration.useIndexStore ? IndexStoreIndexer.self : SourceKitIndexer.self,
+            XibIndexer.self
+        ]
     }
 
     func perform() throws {

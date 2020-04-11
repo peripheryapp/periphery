@@ -62,6 +62,10 @@ public final class Xcodebuild: Injectable {
         return try exec(["/bin/sh", "-c", xcodebuild] + envs)
     }
 
+    func indexStorePath(project: XcodeProjectlike) throws -> String {
+        (try derivedDataPath(for: project) + "Index/DataStore").string
+    }
+
     func schemes(project: XcodeProjectlike) throws -> [String] {
         return try schemes(type: project.type, path: project.path.absolute().string)
     }

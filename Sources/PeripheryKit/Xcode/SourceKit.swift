@@ -24,6 +24,10 @@ final class SourceKit {
         return self.init(arguments: arguments)
     }
 
+    static func make() -> Self {
+        return self.init(arguments: [])
+    }
+
     private let arguments: [String]
 
     required init(arguments: [String]) {
@@ -100,19 +104,6 @@ final class SourceKit {
             response = try Request.customRequest(request: request).send()
         } catch {
             throw PeripheryKitError.sourceKitRequestFailed(type: "cursorInfo", file: file.path.string, error: error)
-        }
-
-        return response
-    }
-
-    func syntaxTree(file: Path) throws -> [String: Any] {
-        let response: [String: Any]
-
-        do {
-            let skFile = SourceKittenFramework.File(pathDeferringReading: file.string)
-            response = try Request.syntaxTree(file: skFile, byteTree: false).send()
-        } catch {
-            throw PeripheryKitError.sourceKitRequestFailed(type: "syntaxTree", file: file.string, error: error)
         }
 
         return response
