@@ -14,7 +14,7 @@ build_release:
 proj: build
 	@rm -rf Periphery.xcodeproj
 	@swift package generate-xcodeproj
-	@cp Tests/Configs/RetentionFixtures.xcscheme Periphery.xcodeproj/xcshareddata/xcschemes/
+	@cp Tests/Configs/*.xcscheme Periphery.xcodeproj/xcshareddata/xcschemes/
 	@open Periphery.xcodeproj
 
 lint:

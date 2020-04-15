@@ -16,6 +16,24 @@ class XcodebuildTest: XCTestCase {
     }
 }
 
+class XcodebuildBuildProjectTest: XCTestCase {
+    var shell: Shell!
+    var xcodebuild: Xcodebuild!
+    var project: Project!
+
+    override func setUp() {
+        super.setUp()
+
+        shell = Shell()
+        xcodebuild = Xcodebuild(shell: shell)
+        project = try! Project.make(path: PeripheryProjectPath)
+    }
+
+    func testBuildSchemeWithWhitespace() throws {
+        try xcodebuild.build(project: project, scheme: "TestScheme X")
+    }
+}
+
 class XcodebuildSchemesTest: XcodebuildTest {
     func testParseSchemes() {
         for output in XcodebuildListOutputs {

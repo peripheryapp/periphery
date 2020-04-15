@@ -40,6 +40,9 @@ let package = Package(
             name: "RetentionFixtures"
         ),
         .testTarget(
+            name: "TestEmptyTarget"
+        ),
+        .testTarget(
             name: "SyntaxFixtures"
         ),
         .testTarget(
