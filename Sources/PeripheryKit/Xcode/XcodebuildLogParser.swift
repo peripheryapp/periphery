@@ -57,7 +57,7 @@ final class XcodebuildLogParser {
             let range = $0.range(at: 1)
             let pair = String(command[Range(range, in: command)!])
             var (key, value) = splitArgumentPair(pair)
-            value = sanitize(argValue: value)
+            value = value.map(sanitizeFilePath)
             return BuildArgument(key: key, value: value)
         }
 
@@ -115,11 +115,11 @@ final class XcodebuildLogParser {
 
         return (key, value)
     }
+}
 
-    private func sanitize(argValue value: String?) -> String? {
-        return value?
-            .replacingOccurrences(of: "\\ ", with: " ")
-            .replacingOccurrences(of: "\\'", with: "'")
-            .replacingOccurrences(of: "\\\"", with: "\"")
-    }
+func sanitizeFilePath<S: StringProtocol>(_ value: S) -> String {
+    return value
+        .replacingOccurrences(of: "\\ ", with: " ")
+        .replacingOccurrences(of: "\\'", with: "'")
+        .replacingOccurrences(of: "\\\"", with: "\"")
 }
