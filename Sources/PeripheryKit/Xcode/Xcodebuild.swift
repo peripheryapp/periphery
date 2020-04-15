@@ -41,7 +41,7 @@ public final class Xcodebuild: Injectable {
 
         var args = [
             "-\(project.type)", project.path.absolute().string,
-            "-scheme", scheme,
+            "-scheme", "'\(scheme)'",
             "-parallelizeTargets",
             "-derivedDataPath", "'\(try derivedDataPath(for: project).string)'",
         ]
