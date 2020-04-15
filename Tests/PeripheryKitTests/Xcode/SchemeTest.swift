@@ -12,6 +12,6 @@ class SchemeTest: XCTestCase {
 
     func testTargets() throws {
         XCTAssertEqual(try scheme.buildTargets().sorted(), ["Periphery", "PeripheryKit"])
-        XCTAssertEqual(try scheme.testTargets().sorted(), ["Periphery", "PeripheryKit", "PeripheryKitTests", "RetentionFixtures", "SyntaxFixtures"])
+        XCTAssertEqual(try scheme.testTargets().sorted(), ["Periphery", "PeripheryKit", "PeripheryKitTests", "RetentionFixtures", "SyntaxFixtures", "TestEmptyTarget"])
     }
 }
