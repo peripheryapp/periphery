@@ -928,6 +928,13 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testIdenticallyNamedVarsInStaticAndInstanceScopes() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.varInstance, "someVar"))
+            XCTAssertReferenced((.varStatic, "someVar"))
+        }
+    }
+
     // MARK: - Known Failures
 
     func testProtocolConformingMembersAreRetained() {
@@ -1152,17 +1159,6 @@ class RetentionTest: XCTestCase {
             XCTAssertReferenced((.varInstance, "someGetSetVar"),
                                 descendentOf: (.protocol, "FixtureProtocol100"))
 
-        }
-    }
-
-    func testDuplicateGetterUSRBug() {
-        guard performKnownFailures else { return }
-
-        // Broken as of Xcode 10.
-        // https://bugreport.apple.com/web/?problemID=44531531
-        analyze(retainPublic: true, aggressive: true) {
-            XCTAssertReferenced((.varInstance, "someVar"))
-            XCTAssertReferenced((.varStatic, "someVar"))
         }
     }
 

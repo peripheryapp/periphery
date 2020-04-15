@@ -18,20 +18,35 @@ final class UnreadSimplePropertyReferenceEliminator: SourceGraphVisitor {
 
     func transformToGetterUsr(fromMangledSetterUsr usr: String) -> String {
         var usr = usr
-        assert(usr.last == "s")
-        usr.removeLast()
-        usr.append("g")
+
+        if usr.hasSuffix("sZ") {
+            usr.removeLast(2)
+            usr.append("gZ")
+        } else if usr.hasSuffix("s") {
+            usr.removeLast()
+            usr.append("g")
+        } else {
+            fatalError("Unexpected setter usr: '\(usr)'")
+        }
+
         return usr
     }
 
     func transformToPropertyUsr(fromMangledSetterUsr usr: String) -> String {
         var usr = usr
-        assert(usr.last == "s")
-        usr.removeLast()
-        usr.append("p")
+
+        if usr.hasSuffix("sZ") {
+            usr.removeLast(2)
+            usr.append("pZ")
+        } else if usr.hasSuffix("s") {
+            usr.removeLast()
+            usr.append("p")
+        } else {
+            fatalError("Unexpected setter usr: '\(usr)'")
+        }
+
         return usr
     }
-
 
     func visit() {
         guard configuration.aggressive else { return }
