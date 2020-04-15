@@ -88,7 +88,7 @@ final class BuildPlan {
             if arg.starts(with: "@") {
                 let filepath = String(arg.dropFirst())
                 let content = try String(contentsOfFile: filepath)
-                return content.split(separator: "\n").map(String.init)
+                return content.split(separator: "\n").map(sanitizeFilePath)
             } else {
                 return [arg]
             }
