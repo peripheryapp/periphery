@@ -8,7 +8,7 @@ class SourceKitTest: XCTestCase {
         self.project = try Project.make(path: PeripheryProjectPath)
     }
 
-    func testWhiltespacedFile() throws {
+    func testWhitespacedFile() throws {
         let mockProjectPath = ProjectRootPath + "Tests/TestEmptyTarget"
         let whitespacedFilePath = mockProjectPath + "File name with space.swift"
         let xcodebuild = Xcodebuild.make()
