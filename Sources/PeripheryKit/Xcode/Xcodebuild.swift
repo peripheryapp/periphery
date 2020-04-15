@@ -40,7 +40,7 @@ public final class Xcodebuild: Injectable {
         let cmd = buildForTesting ? "build-for-testing" : "build"
 
         var args = [
-            "-\(project.type)", project.path.absolute().string,
+            "-\(project.type)", "'\(project.path.absolute().string)'",
             "-scheme", "'\(scheme)'",
             "-parallelizeTargets",
             "-derivedDataPath", "'\(try derivedDataPath(for: project).string)'",
