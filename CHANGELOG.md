@@ -12,6 +12,21 @@
 
 - None.
 
+## 1.7.0 (2020-04-17)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- Support for Xcode 11.4, Swift 5.2.
+- Experimental IndexStore based indexer.
+
+##### Bug Fixes
+
+- Fix shell escaping issues.
+
 ## 1.6.0 (2020-03-28)
 
 ##### Breaking
