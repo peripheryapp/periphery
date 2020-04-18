@@ -127,6 +127,13 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testRetainsSelfReferencedMethodViaReceiver() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.functionMethodInstance, "someFunc()"),
+                                descendentOf: (.class, "FixtureClass92"))
+        }
+    }
+
     func testSelfReferencedProperty() {
         analyze() {
             XCTAssertNotReferenced((.class, "FixtureClass39"))
