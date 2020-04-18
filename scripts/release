@@ -2,7 +2,6 @@
 
 set -e
 
-BOLD='\033[0:1m'
 GREEN='\033[1;32m'
 NC='\033[0m' # No Color
 
@@ -20,9 +19,10 @@ green () {
   printf "${GREEN}${1}${NC}"
 }
 
-bold () {
-  printf "${BOLD}${1}${NC}"
-}
+signature="Developer ID Application: Ian Leitch (8L8F8HSTR4)"
+username="port001@gmail.com"
+password="@keychain:PeripheryNotarize"
+bundle_id="com.github.peripheryapp"
 
 xcodebuild -version
 
@@ -35,13 +35,8 @@ confirm "Continue?"
 cat scripts/Version.swift.template | sed s/__VERSION__/${version}/ > Sources/PeripheryKit/Version.swift
 cat scripts/Periphery.podspec.template | sed s/__VERSION__/${version}/ > Periphery.podspec
 
-printf "\nUpdate CHANGELOG.md and verify changes.\n"
+echo -e "\nUpdate CHANGELOG.md and verify changes."
 confirm "Continue?"
-
-git commit -a -m "Release ${version}"
-git tag -a ${version} -m "Periphery ${version}"
-git push origin master
-git push origin ${version}
 
 rm -rf .build/release/periphery
 make build_release
@@ -52,8 +47,27 @@ cp .build/release/periphery .release/
 cp LICENSE.md .release/
 cp scripts/release_notes.md.template .release/release_notes.md
 
+# Archive
 cd .release
-zip periphery-v${version}.zip periphery LICENSE.md lib_InternalSwiftSyntaxParser.dylib
+codesign --force --options=runtime --sign "$signature" periphery
+zip_filename="periphery-v${version}.zip"
+zip "${zip_filename}" periphery LICENSE.md lib_InternalSwiftSyntaxParser.dylib
+codesign --force --options=runtime --sign "$signature" "${zip_filename}"
+xcrun altool --notarize-app --primary-bundle-id "${bundle_id}" --username "${username}" --password "${password}" --file "${zip_filename}"
+
+echo "Checksum:"
+sha256=$( shasum -a 256 ${zip_filename} | awk '{print $1}' )
+echo ${sha256}
+
+echo -e "\nWait for notarization approval: xcrun altool --notarization-history 0 --u \"$username\" --p \"$password\""
+confirm "Continue?"
+
+# GitHub
+git commit -a -m "Release ${version}"
+git tag -a ${version} -m "Periphery ${version}"
+git push origin master
+git push origin ${version}
+
 code --wait release_notes.md
 echo -e "${version}\n\n$(cat release_notes.md)" > release_notes.md
 echo
@@ -61,15 +75,10 @@ echo "Release Notes:"
 cat release_notes.md
 echo
 
-confirm "Continue?"
-
 cd ..
 hub release create "${version}" -a .release/periphery-v${version}.zip -F .release/release_notes.md
 
-echo "Checksum:"
-sha256=$( shasum -a 256 .release/periphery-v${version}.zip | awk '{print $1}' )
-echo ${sha256}
-
+# HomeBrew
 cd ../homebrew-periphery
 cat periphery.rb.template | sed s/__VERSION__/${version}/ | sed s/__SHA256__/${sha256}/ > Casks/periphery.rb
 git add Casks/periphery.rb
@@ -77,5 +86,6 @@ git commit -m "${version}"
 git push origin master
 cd ../periphery
 
+# CocoaPods
 bundle install --quiet
 bundle exec pod trunk push --skip-tests --skip-import-validation --allow-warnings Periphery.podspec
