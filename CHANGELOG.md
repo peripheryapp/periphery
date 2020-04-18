@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 1.7.1 (2020-04-18)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix --exclude option for scan-syntax.
 - Bundle lib_InternalSwiftSyntaxParser.dylib in the release archive.
 
