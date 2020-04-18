@@ -24,7 +24,9 @@ bold () {
   printf "${BOLD}${1}${NC}"
 }
 
-printf "Version: "
+xcodebuild -version
+
+printf "\nVersion: "
 read version
 printf "Got it: $version\n"
 
@@ -45,12 +47,13 @@ rm -rf .build/release/periphery
 make build_release
 rm -rf .release
 mkdir .release
+cp "$(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib" .release
 cp .build/release/periphery .release/
 cp LICENSE.md .release/
 cp scripts/release_notes.md.template .release/release_notes.md
 
 cd .release
-zip periphery-v${version}.zip periphery LICENSE.md
+zip periphery-v${version}.zip periphery LICENSE.md lib_InternalSwiftSyntaxParser.dylib
 code --wait release_notes.md
 echo -e "${version}\n\n$(cat release_notes.md)" > release_notes.md
 echo
