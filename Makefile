@@ -15,7 +15,6 @@ proj: build
 	@rm -rf Periphery.xcodeproj
 	@swift package generate-xcodeproj
 	@cp Tests/Configs/*.xcscheme Periphery.xcodeproj/xcshareddata/xcschemes/
-	@open Periphery.xcodeproj
 
 lint:
 	@swiftlint lint --quiet
