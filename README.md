@@ -1,3 +1,5 @@
+foo
+
 <h1>
   <img src="assets/logo.png" alt="Periphery" width="289" height="60">
 </h1>
@@ -14,26 +16,25 @@
   <img src="https://img.shields.io/twitter/follow/peripheryswift.svg?label=Twitter&style=flat-square" />
 </a>
 
-
 <br>
 
 ## Contents
 
-* [Installation](#installation)
-* [How To Use](#how-to-use)
-* [How It Works](#how-it-works)
-* [Analysis](#analysis)
-  * [Function Parameters](#function-parameters)
-  * [Protocols](#protocols)
-  * [Assign-only Properties](#assign-only-properties)
-  * [Enumerations](#enumerations)
-  * [Objective-C](#objective-c)
-  * [Aggressive Mode](#aggressive-mode)
-  * [Global Equatable Operators](#global-equatable-operators)
-* [Xcode Integration](#xcode-integration)
-* [Excluding Files](#excluding-files)
-* [Reusing Build Logs](#reusing-build-logs)
-* [Troubleshooting](#troubleshooting)
+- [Installation](#installation)
+- [How To Use](#how-to-use)
+- [How It Works](#how-it-works)
+- [Analysis](#analysis)
+  - [Function Parameters](#function-parameters)
+  - [Protocols](#protocols)
+  - [Assign-only Properties](#assign-only-properties)
+  - [Enumerations](#enumerations)
+  - [Objective-C](#objective-c)
+  - [Aggressive Mode](#aggressive-mode)
+  - [Global Equatable Operators](#global-equatable-operators)
+- [Xcode Integration](#xcode-integration)
+- [Excluding Files](#excluding-files)
+- [Reusing Build Logs](#reusing-build-logs)
+- [Troubleshooting](#troubleshooting)
 
 ## Installation
 
@@ -332,9 +333,9 @@ periphery scan --aggressive ...
 
 The following scenarios are identified with aggressive analysis:
 
-* [Assign-only properties](#assign-only-properties)
-* [Unused raw value enumeration cases](#enumerations)
-* [Global Equatable operators](#global-equatable-operators)
+- [Assign-only properties](#assign-only-properties)
+- [Unused raw value enumeration cases](#enumerations)
+- [Global Equatable operators](#global-equatable-operators)
 
 ### Global Equatable Operators
 
