@@ -31,6 +31,11 @@ printf "Got it: $version\n"
 confirm "Continue?"
 
 cat scripts/Version.swift.template | sed s/__VERSION__/${version}/ > Sources/PeripheryKit/Version.swift
+cat scripts/Periphery.podspec.template | sed s/__VERSION__/${version}/ > Periphery.podspec
+
+printf "\nUpdate CHANGELOG.md and verify changes.\n"
+confirm "Continue?"
+
 git commit -a -m "Release ${version}"
 git tag -a ${version} -m "Periphery ${version}"
 git push origin master
@@ -69,7 +74,5 @@ git commit -m "${version}"
 git push origin master
 cd ../periphery
 
-green "\nNext Steps:\n\n"
-bold "* Update changelog.\n"
-bold "* Push podspec: pod trunk push --skip-tests --skip-import-validation --allow-warnings Periphery.podspec\n"
-printf "\n"
+bundle install --quiet
+bundle exec pod trunk push --skip-tests --skip-import-validation --allow-warnings Periphery.podspec
