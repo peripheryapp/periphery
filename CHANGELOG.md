@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix --exclude option for scan-syntax.
 
 ## 1.7.0 (2020-04-17)
 
