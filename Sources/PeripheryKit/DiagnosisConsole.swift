@@ -84,7 +84,7 @@ public final class DiagnosisConsole {
             usr = String(usr.dropLast())
         }
 
-        guard let declaration = graph.declaration(withUsr: usr) else {
+        guard let declaration = graph.explicitDeclaration(withUsr: usr) else {
             print("No declaration found with ID '\(usr)'")
             return
         }

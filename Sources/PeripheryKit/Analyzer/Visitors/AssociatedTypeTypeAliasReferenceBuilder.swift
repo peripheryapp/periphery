@@ -16,7 +16,7 @@ final class AssociatedTypeTypeAliasReferenceBuilder: SourceGraphVisitor {
             let related = alias.related.first { $0.kind == .associatedtype }
 
             if let related = related,
-                let associated = graph.declaration(withUsr: related.usr) {
+                let associated = graph.explicitDeclaration(withUsr: related.usr) {
                 graph.remove(related)
 
                 let inverseRelated = Reference(kind: .typealias, usr: alias.usr, location: alias.location)

@@ -28,7 +28,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
         for protoDecl in protocolDecls {
             let extDecls = protoDecl.references
                 .filter { $0.kind == .extensionProtocol && $0.name == protoDecl.name }
-                .compactMap { graph.declaration(withUsr: $0.usr) }
+                .compactMap { graph.explicitDeclaration(withUsr: $0.usr) }
 
             // Since protocol declarations have no body, their params wil always be unused,
             // and thus present in functionDecls.
@@ -37,7 +37,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
             for protoFuncDecl in protoFuncDecls {
                 let conformingDecls = protoFuncDecl.related
                     .filter { $0.kind.isFunctionKind && $0.name == protoFuncDecl.name }
-                    .compactMap { graph.declaration(withUsr: $0.usr) }
+                    .compactMap { graph.explicitDeclaration(withUsr: $0.usr) }
                 let extFuncDecls = extDecls.flatMap {
                     $0.declarations.filter { $0.kind.isFunctionKind && $0.name == protoFuncDecl.name }
                 }
@@ -61,7 +61,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
         guard let refKind = decl.kind.referenceEquivalent,
             let related = decl.related.first(where: { $0.kind == refKind && $0.name == decl.name }) else { return }
 
-        if graph.declaration(withUsr: related.usr) == nil {
+        if graph.explicitDeclaration(withUsr: related.usr) == nil {
             params.forEach { $0.markRetained(reason: .paramFuncForeginProtocol) }
         }
     }

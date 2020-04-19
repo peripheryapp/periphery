@@ -125,7 +125,7 @@ final class SourceKitIndexer: TypeIndexer {
                 return nil
         }
 
-        guard let functionDecl = graph.declaration(withUsr: usr) else {
+        guard let functionDecl = graph.explicitDeclaration(withUsr: usr) else {
             logger.warn("No such function declaration with USR '\(usr)'")
             return nil
         }
@@ -234,6 +234,10 @@ final class SourceKitIndexer: TypeIndexer {
 
         if let name = entity[SourceKit.Key.name.rawValue] as? String {
             declaration.name = name
+        }
+
+        if let isImplicit = entity[SourceKit.Key.isImplicit.rawValue] as? Bool {
+            declaration.isImplicit = isImplicit
         }
 
         if let structures = structures, let name = declaration.name {
