@@ -178,6 +178,7 @@ public final class Declaration: Entity, CustomStringConvertible {
     var name: String?
     var structureAccessibility: Accessibility = .internal
     var analyzerHints: [Analyzer.Hint] = []
+    var isImplicit: Bool = false
 
     var attributeAccessibility: Accessibility {
         if attributes.contains("public") {
@@ -257,7 +258,8 @@ public final class Declaration: Entity, CustomStringConvertible {
     public var descriptionParts: [String] {
         let formattedName = name != nil ? "'\(name!)'" : "nil"
         let formattedAttributes = "[" + attributes.map { $0 }.sorted().joined(separator: ", ") + "]"
-        return [kind.shortName, formattedName, accessibility.shortName, formattedAttributes, "'\(usr)'", location.shortDescription]
+        let implicitOrExplicit = isImplicit ? "implicit" : "explicit"
+        return [kind.shortName, formattedName, implicitOrExplicit, accessibility.shortName, formattedAttributes, "'\(usr)'", location.shortDescription]
     }
 
     init(kind: Kind, usr: String, location: SourceLocation) {
@@ -286,6 +288,8 @@ extension Declaration: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(kind)
         hasher.combine(usr)
+        hasher.combine(name)
+        hasher.combine(location)
     }
 }
 
@@ -293,7 +297,10 @@ extension Declaration: Equatable {
     public static func == (lhs: Declaration, rhs: Declaration) -> Bool {
         let usrIsEqual = lhs.usr == rhs.usr
         let kindIsEqual = lhs.kind == rhs.kind
+        let nameIsEqual = lhs.name == rhs.name
+        let locationIsEqual = lhs.location == rhs.location
+        let implicitEqual = lhs.isImplicit == rhs.isImplicit
 
-        return kindIsEqual && usrIsEqual
+        return kindIsEqual && usrIsEqual && nameIsEqual && locationIsEqual && implicitEqual
     }
 }

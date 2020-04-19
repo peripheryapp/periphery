@@ -62,7 +62,7 @@ final class UnreadSimplePropertyReferenceEliminator: SourceGraphVisitor {
                     let getterUsr = transformToGetterUsr(fromMangledSetterUsr: reference.usr)
                     let propertyUsr = transformToPropertyUsr(fromMangledSetterUsr: reference.usr)
 
-                    guard let property = graph.declaration(withUsr: propertyUsr),
+                    guard let property = graph.explicitDeclaration(withUsr: propertyUsr),
                         let propertyReference = caller.references.first(where: { $0.usr == propertyUsr }),
                         !property.isComplexProperty else { continue }
 
@@ -75,7 +75,7 @@ final class UnreadSimplePropertyReferenceEliminator: SourceGraphVisitor {
                 } else {
                     // Parent should be a reference to a simple property.
                     guard let propertyReference = reference.parent as? Reference,
-                        let property = graph.declaration(withUsr: propertyReference.usr),
+                        let property = graph.explicitDeclaration(withUsr: propertyReference.usr),
                         !property.isComplexProperty else { continue }
                     // If the property reference has no other descendent references we can remove it.
                     if propertyReference.references == [reference] {

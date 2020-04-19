@@ -152,7 +152,7 @@ final class IndexStoreIndexer: TypeIndexer {
                 // Make relationships between declarations
 
                 for (parent, decls) in childDeclsByParentUsr {
-                    guard let parentDecl = graph.declaration(withUsr: parent) else {
+                    guard let parentDecl = graph.explicitDeclaration(withUsr: parent) else {
                         continue
                     }
                     for decl in decls {
@@ -162,7 +162,7 @@ final class IndexStoreIndexer: TypeIndexer {
                 }
 
                 for (usr, references) in referencedDeclsByUsr {
-                    guard let decl = graph.declaration(withUsr: usr) else {
+                    guard let decl = graph.explicitDeclaration(withUsr: usr) else {
                         continue
                     }
                     for reference in references {

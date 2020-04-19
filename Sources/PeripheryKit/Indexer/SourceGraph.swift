@@ -10,7 +10,7 @@ public final class SourceGraph {
 
     private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
-    private var allDeclarationsByUsr: [String: Declaration] = [:]
+    private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
 
     private let mutationQueue: DispatchQueue
 
@@ -48,8 +48,8 @@ public final class SourceGraph {
         return allDeclarationsByKind[kind] ?? []
     }
 
-    func declaration(withUsr usr: String) -> Declaration? {
-        return allDeclarationsByUsr[usr]
+    func explicitDeclaration(withUsr usr: String) -> Declaration? {
+        return allExplicitDeclarationsByUsr[usr]
     }
 
     func references(toUsr usr: String) -> Set<Reference> {
@@ -63,13 +63,11 @@ public final class SourceGraph {
     func add(_ declaration: Declaration) {
         mutationQueue.sync {
             allDeclarations.insert(declaration)
+            allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
 
-            if !allDeclarationsByKind.keys.contains(declaration.kind) {
-                allDeclarationsByKind[declaration.kind] = []
+            if !declaration.isImplicit {
+                allExplicitDeclarationsByUsr[declaration.usr] = declaration
             }
-
-            allDeclarationsByKind[declaration.kind]?.insert(declaration)
-            allDeclarationsByUsr[declaration.usr] = declaration
         }
     }
 
@@ -78,7 +76,7 @@ public final class SourceGraph {
             declaration.parent?.declarations.remove(declaration)
             allDeclarations.remove(declaration)
             allDeclarationsByKind[declaration.kind]?.remove(declaration)
-            allDeclarationsByUsr.removeValue(forKey: declaration.usr)
+            allExplicitDeclarationsByUsr.removeValue(forKey: declaration.usr)
             rootDeclarations.remove(declaration)
             markedDeclarations.remove(declaration)
         }
@@ -164,7 +162,7 @@ public final class SourceGraph {
         for reference in decl.immediateSuperclassReferences {
             references.append(reference)
 
-            if let superclassDecl = declaration(withUsr: reference.usr) {
+            if let superclassDecl = explicitDeclaration(withUsr: reference.usr) {
                 references = superclassReferences(of: superclassDecl) + references
             }
         }
@@ -174,7 +172,7 @@ public final class SourceGraph {
 
     func superclasses(of decl: Declaration) -> [Declaration] {
         return superclassReferences(of: decl).compactMap {
-            declaration(withUsr: $0.usr)
+            explicitDeclaration(withUsr: $0.usr)
         }
     }
 
@@ -207,7 +205,7 @@ public final class SourceGraph {
 
         guard let extendedReference = extensionDeclaration.references.first(where: { $0.kind == extendedKind && $0.name == extensionDeclaration.name }) else { return nil }
 
-        if let extendedDeclaration = allDeclarationsByUsr[extendedReference.usr] {
+        if let extendedDeclaration = allExplicitDeclarationsByUsr[extendedReference.usr] {
             return extendedDeclaration
         }
 

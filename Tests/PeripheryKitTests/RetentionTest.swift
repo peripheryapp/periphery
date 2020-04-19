@@ -8,8 +8,9 @@ class RetentionTest: XCTestCase {
     static var target: Target!
     static var indexStorePath: String!
 
-    enum IndexerVariant: CaseIterable {
-        case sourceKit, indexStore
+    enum IndexerVariant: String, CaseIterable {
+        case sourceKit = "SourceKit"
+        case indexStore = "IndexStore"
     }
 
     static override func setUp() {
@@ -23,16 +24,6 @@ class RetentionTest: XCTestCase {
         target = project.targets.first { $0.name == "RetentionFixtures" }!
         buildPlan = try! BuildPlan.make(buildLog: buildLog, targets: [target])
         indexStorePath = try! xcodebuild.indexStorePath(project: project)
-    }
-
-    override func tearDown() {
-        if (testRun?.failureCount ?? 0) > 0 {
-            print("----------------------------------------")
-            SourceGraphDebugger(graph: graph).describeGraph()
-            print("----------------------------------------")
-        }
-
-        super.tearDown()
     }
 
     private var graph: SourceGraph!
@@ -942,11 +933,7 @@ class RetentionTest: XCTestCase {
         }
     }
 
-    // MARK: - Known Failures
-
     func testProtocolConformingMembersAreRetained() {
-        guard performKnownFailures else { return }
-
         analyze(retainPublic: true) {
 
             XCTAssertReferenced((.class, "FixtureClass27"))
@@ -972,6 +959,8 @@ class RetentionTest: XCTestCase {
 
         }
     }
+
+    // MARK: - Known Failures
 
     func testRetainsProtocolParameters() throws {
         guard performKnownFailures else { return }
@@ -1257,7 +1246,7 @@ class RetentionTest: XCTestCase {
             try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: indexOnlyGraph)
             indexedGraphs[variant] = indexOnlyGraph
         }
-        if indexedGraphs.count == 2{
+        if indexedGraphs.count == 2 {
             let indexStoreGraph = indexedGraphs[.indexStore]!
             let sourceKitGraph = indexedGraphs[.sourceKit]!
             if !SourceGraphDebugger.isEqual(indexStoreGraph, sourceKitGraph) {
@@ -1281,6 +1270,27 @@ class RetentionTest: XCTestCase {
             if !SourceGraphDebugger.isEqual(indexStoreGraph, sourceKitGraph) {
                 perihperyRetentionTestGraphMismatchBreakpoint()
             }
+        }
+
+        if (testRun?.failureCount ?? 0) > 0 {
+            for (variant, graph) in analyzedGraphs {
+                print("\n> " + variant.rawValue)
+                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                SourceGraphDebugger(graph: graph).describeGraph()
+                print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+            }
+        }
+    }
+
+    private func sort(_ refs: Set<Reference>) -> [Reference] {
+        refs.sorted { (a, b) -> Bool in
+            a.usr < b.usr
+        }
+    }
+
+    private func sort(_ decls: Set<Declaration>) -> [Declaration] {
+        decls.sorted { (a, b) -> Bool in
+            a.usr < b.usr
         }
     }
 

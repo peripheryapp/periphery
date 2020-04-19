@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fixed an issue where implicit declarations inserted by SourceKit could cause incorrect results.
 
 ## 1.7.1 (2020-04-18)
 

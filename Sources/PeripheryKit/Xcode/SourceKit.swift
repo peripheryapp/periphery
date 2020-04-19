@@ -10,6 +10,7 @@ final class SourceKit {
         case line = "key.line"
         case column = "key.column"
         case isDynamic = "key.is_dynamic"
+        case isImplicit = "key.is_implicit"
         case name = "key.name"
         case receiverUsr = "key.receiver_usr"
         case related = "key.related"
