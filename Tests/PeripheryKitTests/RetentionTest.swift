@@ -960,13 +960,8 @@ class RetentionTest: XCTestCase {
         }
     }
 
-    // MARK: - Known Failures
-
     func testRetainsProtocolParameters() throws {
-        guard performKnownFailures else { return }
-
-        try analyze(retainPublic: true) {
-
+        try analyze(retainPublic: true, enabledIndexers: [.sourceKit]) {
             // - FixtureProtocol104
 
             let protoFunc1Param1 = get("param1", "func1(param1:param2:)", "FixtureProtocol104")
@@ -1068,9 +1063,10 @@ class RetentionTest: XCTestCase {
             let class3Func6Param = get("param", "func6(param:)", "FixtureClass104Class3")
             // Nil because the param is used.
             XCTAssertNil(class3Func6Param)
-
         }
     }
+
+    // MARK: - Known Failures
 
     func testProtocolConformedByStaticMethodOutsideExtension() {
         guard performKnownFailures else { return }
