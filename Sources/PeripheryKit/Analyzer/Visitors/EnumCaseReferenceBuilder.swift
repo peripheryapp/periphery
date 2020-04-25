@@ -1,7 +1,6 @@
 import Foundation
 
 /// Builds references to enum cases of enums that are raw representable.
-/// Disabled in aggressive mode.
 final class EnumCaseReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph, configuration: inject())
@@ -20,15 +19,11 @@ final class EnumCaseReferenceBuilder: SourceGraphVisitor {
             if isRawRepresentable(enumDeclaration) {
                 let enumCases = enumDeclaration.declarations.filter { $0.kind == .enumelement }
 
-                if configuration.aggressive {
-                    enumCases.forEach { $0.analyzerHints.append(.aggressive) }
-                } else {
-                    for enumCase in enumCases {
-                        let reference = Reference(kind: .enumelement, usr: enumCase.usr, location: enumCase.location)
-                        reference.name = enumCase.name
-                        reference.parent = enumDeclaration
-                        graph.add(reference, from: enumDeclaration)
-                    }
+                for enumCase in enumCases {
+                    let reference = Reference(kind: .enumelement, usr: enumCase.usr, location: enumCase.location)
+                    reference.name = enumCase.name
+                    reference.parent = enumDeclaration
+                    graph.add(reference, from: enumDeclaration)
                 }
             }
         }

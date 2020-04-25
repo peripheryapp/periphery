@@ -25,7 +25,6 @@ public final class Configuration: Singleton {
     var retainUnusedProtocolFuncParams: Bool = false
     var verbose: Bool = false
     var quiet: Bool = false
-    var aggressive: Bool = false
     var updateCheck: Bool = true
     var diagnosisConsole: Bool = false
     var strict: Bool = false
@@ -55,7 +54,6 @@ public final class Configuration: Singleton {
             "retain_unused_protocol_func_params": retainUnusedProtocolFuncParams,
             "verbose": verbose,
             "quiet": quiet,
-            "aggressive": aggressive,
             "disable_update_check": !updateCheck,
             "diagnose": diagnosisConsole,
             "strict": strict,
@@ -119,10 +117,6 @@ public final class Configuration: Singleton {
 
         if let value = yaml["retain_unused_protocol_func_params"] as? Bool {
             self.retainUnusedProtocolFuncParams = value
-        }
-
-        if let value = yaml["aggressive"] as? Bool {
-            self.aggressive = value
         }
 
         if let value = yaml["diagnose"] as? Bool {

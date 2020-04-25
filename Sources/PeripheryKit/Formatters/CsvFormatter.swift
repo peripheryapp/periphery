@@ -16,9 +16,7 @@ public final class CsvFormatter: OutputFormatter {
 
         declarations.forEach {
             let attributes = $0.attributes.joined(separator: "|")
-            let hints = $0.analyzerHints.map { String(describing: $0) }.joined(separator: "|")
-
-            logger.info("\($0.kind.shortName),\($0.name ?? ""),\(attributes),\($0.accessibility.shortName),\($0.usr),\($0.location),\(hints)", canQuiet: false)
+            logger.info("\($0.kind.shortName),\($0.name ?? ""),\(attributes),\($0.accessibility.shortName),\($0.usr),\($0.location)", canQuiet: false)
         }
     }
 }

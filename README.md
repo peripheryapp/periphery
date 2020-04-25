@@ -14,26 +14,22 @@
   <img src="https://img.shields.io/twitter/follow/peripheryswift.svg?label=Twitter&style=flat-square" />
 </a>
 
-
 <br>
 
 ## Contents
 
-* [Installation](#installation)
-* [How To Use](#how-to-use)
-* [How It Works](#how-it-works)
-* [Analysis](#analysis)
-  * [Function Parameters](#function-parameters)
-  * [Protocols](#protocols)
-  * [Assign-only Properties](#assign-only-properties)
-  * [Enumerations](#enumerations)
-  * [Objective-C](#objective-c)
-  * [Aggressive Mode](#aggressive-mode)
-  * [Global Equatable Operators](#global-equatable-operators)
-* [Xcode Integration](#xcode-integration)
-* [Excluding Files](#excluding-files)
-* [Reusing Build Logs](#reusing-build-logs)
-* [Troubleshooting](#troubleshooting)
+- [Installation](#installation)
+- [How To Use](#how-to-use)
+- [How It Works](#how-it-works)
+- [Analysis](#analysis)
+  - [Function Parameters](#function-parameters)
+  - [Protocols](#protocols)
+  - [Enumerations](#enumerations)
+  - [Objective-C](#objective-c)
+- [Xcode Integration](#xcode-integration)
+- [Excluding Files](#excluding-files)
+- [Reusing Build Logs](#reusing-build-logs)
+- [Troubleshooting](#troubleshooting)
 
 ## Installation
 
@@ -263,36 +259,9 @@ myClass.perform()
 
 Here we can see that `MyProtocol` is itself used, and cannot be removed. However, since `unusedProperty` is never called on `MyConformingClass`, Periphery is able to identify that the declaration of `unusedProperty` in `MyProtocol` is thus also unused and can be removed along with the unused implementation of `unusedProperty`.
 
-### Assign-only Properties
-
-Properties which are assigned to but never read from can be identified as unused by Periphery. However, since an unread property may be a valid use-case, e.g to purposefully retain the object, this identification is only enabled with [Aggressive Mode](#aggressive-mode).
-
-```swift
-class MyClass {
-    static func make() -> Self {
-        return self.init(myDependency: inject())
-    }
-
-    private let myDependency: MyDependency // 'myDependency' is unused
-
-    init(myDependency: MyDependency) {
-        self.myDependency = myDependency
-    }
-
-    func someMethod() {
-    }
-}
-```
-
-Note that this analysis only applies to simple properties, i.e properties do not define a custom getter or setter.
-
-Removal of unused dependencies can reduce redundant incremental recompilation. The Swift compiler keeps track of every type that a source file exports, and uses (in `.swiftdeps` files). When a source file changes, any files that depend upon the changed types must also be recompiled. In this example, if `MyDependency` is declared in another file, and that file is changed, then the file containing `MyClass` will be needlessly recompiled.
-
-As with any aggressive analysis technique, you should consider that the property might be needed solely to retain the instance. If the unread property is in fact needed, then this is a friendly reminder that you should add a comment explaining why.
-
 ### Enumerations
 
-Along with being able to identify unused enumerations, Periphery can also identify individual unused enum cases. Plain enums that are not raw representable, i.e that _don't_ have a `String`, `Character`, `Int` or floating-point value type can be reliably identified. However, enumerations that _do_ have a raw value type can be dynamic in nature, and thus their identification is restricted to [Aggressive Mode](#aggressive-mode) only.
+Along with being able to identify unused enumerations, Periphery can also identify individual unused enum cases. Plain enums that are not raw representable, i.e that _don't_ have a `String`, `Character`, `Int` or floating-point value type can be reliably identified. However, enumerations that _do_ have a raw value type can be dynamic in nature, and therefore must be assumed to be used.
 
 Let's clear this up with a quick example:
 
@@ -308,57 +277,13 @@ func someFunction(value: String) {
 }
 ```
 
-Since `MyEnum` has a raw value type of `String`, `myCase` is only identified as unused when using aggressive analysis. There's no direct reference to the case, so it's reasonable to expect it _might_ no longer be needed, however if it were removed we can see that `somethingImportant` would never be called if `someFunction` were passed the value of `"myCase"`. Therefore more scrutiny is advised when using aggressive analysis and reviewing unused enum cases.
+There's no direct reference to the `myCase` case, so it's reasonable to expect it _might_ no longer be needed, however if it were removed we can see that `somethingImportant` would never be called if `someFunction` were passed the value of `"myCase"`.
 
 ### Objective-C
 
 Since Objective-C can use dynamic types, Periphery cannot reason about it from a static standpoint. Therefore, by default, Periphery will assume that any declaration exposed to Objective-C is in use. If your project is 100% Swift, then you can disable this behavior with the `--no-retain-objc-annotated` option. For those using Periphery on a mixed project, there are some important implications to be aware of.
 
 As you already know, any declaration that is annotated with `@objc` or `@objcMembers` is exposed to the Objective-C runtime, and Periphery will assume they are in use. However, you should also be aware that any `class` that inherits from `NSObject` is also _implicitly_ exposed to Objective-C. If you ever come across a situation where Periphery reports that all methods and properties within a `class` - but not the `class` itself - are unused, then the class likely inherits from `NSObject`. It may be worth your time doing a cursory run of Periphery with `--no-retain-objc-annotated`, you may find a few extra declarations to remove. Though be warned, many declarations reported as unused may still be in use by Objective-C code, so you'll need to take extra care when reviewing them.
-
-### Aggressive Mode
-
-By default Periphery aims to only report declarations that are safe to remove. In practice however, there are some scenarios in which code has a very high likelihood of being unused, but which cannot be guaranteed by static analysis alone. Such analysis techniques that may produce false negatives must be enabled explicitly.
-
-To enable aggressive analysis:
-
-```
-periphery scan --aggressive ...
-```
-
-> **Beware**
->
-> More scrutiny is advised when reviewing results produced by aggressive analysis. Some results may appear at first glance to be unused, and indeed your application may compile successfully after removal, however you should keep in mind how the removal might affect dynamic runtime behavior. With great power comes great responsibility!
-
-The following scenarios are identified with aggressive analysis:
-
-* [Assign-only properties](#assign-only-properties)
-* [Unused raw value enumeration cases](#enumerations)
-* [Global Equatable operators](#global-equatable-operators)
-
-### Global Equatable Operators
-
-Periphery is currently unable to identify if an Equatable infix operator is in use if it is defined at global scope. For example:
-
-```swift
-class MyClass: Equatable {}
-
-func == (lhs: MyClass, rhs: MyClass) -> Bool {
-    return true
-}
-```
-
-Therefore, by default, Periphery will assume all global Equatable infix operators are in use. However, when operating in [Aggressive Mode](#aggressive-mode), such operators will be reported as _unused_. Clearly, false negative results are unwanted, so you can resolve this by moving the operator within the class, or into an extension.
-
-```swift
-class MyClass {}
-
-extension MyClass: Equatable {
-    static func == (lhs: MyClass, rhs: MyClass) -> Bool {
-        return true
-    }
-}
-```
 
 ## Xcode Integration
 

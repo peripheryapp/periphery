@@ -56,42 +56,6 @@ class RetentionTest: XCTestCase {
         }
     }
 
-    func testSimplePropertyAssignedButNeverRead() {
-        // TODO: IndexStore doesn't support aggressive mode for simple property elimination
-        //       Need to re-structure computed property AST
-        analyze(retainPublic: true, aggressive: true, enabledIndexers: [.sourceKit]) {
-
-            XCTAssertReferenced((.class, "FixtureClass70"))
-            XCTAssertNotReferenced((.varInstance, "simpleUnreadVar"),
-                                   descendentOf: (.class, "FixtureClass70"))
-            XCTAssertReferenced((.functionMethodInstance, "someMethod()"),
-                                descendentOf: (.class, "FixtureClass70"))
-            XCTAssertNotReferenced((.varStatic, "simpleStaticUnreadVar"),
-                                   descendentOf: (.class, "FixtureClass70"))
-            XCTAssertReferenced((.varInstance, "complexUnreadVar1"),
-                                descendentOf: (.class, "FixtureClass70"))
-            XCTAssertReferenced((.varInstance, "complexUnreadVar2"),
-                                descendentOf: (.class, "FixtureClass70"))
-            XCTAssertReferenced((.varInstance, "readVar"),
-                                descendentOf: (.class, "FixtureClass70"))
-        }
-
-        // Without aggressive option
-        analyze(retainPublic: true) {
-
-            XCTAssertReferenced((.varInstance, "simpleUnreadVar"),
-                                descendentOf: (.class, "FixtureClass70"))
-            XCTAssertReferenced((.varStatic, "simpleStaticUnreadVar"),
-                                descendentOf: (.class, "FixtureClass70"))
-            XCTAssertReferenced((.varInstance, "complexUnreadVar1"),
-                                descendentOf: (.class, "FixtureClass70"))
-            XCTAssertReferenced((.varInstance, "complexUnreadVar2"),
-                                descendentOf: (.class, "FixtureClass70"))
-            XCTAssertReferenced((.varInstance, "readVar"),
-                                descendentOf: (.class, "FixtureClass70"))
-        }
-    }
-
     func testNonReferencedMethodInClassExtension() {
         analyze(retainPublic: true) {
             XCTAssertNotReferenced((.functionMethodInstance, "someMethod()"))
@@ -432,19 +396,6 @@ class RetentionTest: XCTestCase {
                                     descendentOf: (.enum, enumName))
                 XCTAssertReferenced((.enumelement, "unused"),
                                     descendentOf: (.enum, enumName))
-
-            }
-        }
-
-        analyze(retainPublic: true, aggressive: true) {
-
-            for enumType in enumTypes {
-                let enumName = "Fixture28Enum_\(enumType)"
-
-                XCTAssertReferenced((.enumelement, "used"),
-                                    descendentOf: (.enum, enumName))
-                XCTAssertNotReferenced((.enumelement, "unused"),
-                                       descendentOf: (.enum, enumName))
             }
         }
     }
@@ -1066,25 +1017,16 @@ class RetentionTest: XCTestCase {
         }
     }
 
-    // MARK: - Known Failures
-
     func testProtocolConformedByStaticMethodOutsideExtension() {
-        guard performKnownFailures else { return }
-
-        // Broken since Xcode 10.2
-        // TODO: Report to Apple.
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass64")) // public
             XCTAssertReferenced((.class, "FixtureClass65")) // retained by FixtureClass64
 
             XCTAssertReferenced((.functionOperatorInfix, "==(_:_:)")) // Equatable
         }
-
-        analyze(retainPublic: true, aggressive: true) {
-            XCTAssertNotReferenced((.functionOperatorInfix, "==(_:_:)")) // Equatable
-        }
-
     }
+
+    // MARK: - Known Failures
 
     func testCustomConstructorithLiteral() {
         guard performKnownFailures else { return }
@@ -1092,7 +1034,6 @@ class RetentionTest: XCTestCase {
         // TODO: Report to Apple.
         analyze(retainPublic: true) {
             XCTAssertReferenced((.functionConstructor, "init(title:)"))
-
         }
     }
 
@@ -1194,19 +1135,21 @@ class RetentionTest: XCTestCase {
 
     // MARK: - Private
 
-    private func analyze(retainPublic: Bool = false, aggressive: Bool = false,
-                         retainObjcAnnotated: Bool = false, isMainFile: Bool = false,
+    private func analyze(retainPublic: Bool = false,
+                         retainObjcAnnotated: Bool = false,
+                         isMainFile: Bool = false,
                          supplementalFiles: [String] = [],
                          enabledIndexers: [IndexerVariant] = IndexerVariant.allCases,
                          _ testBlock: () throws -> Void
     ) rethrows {
-        try analyze(retainPublic: retainPublic, aggressive: aggressive, retainObjcAnnotated: retainObjcAnnotated,
+        try analyze(retainPublic: retainPublic, retainObjcAnnotated: retainObjcAnnotated,
                     isMainFile: isMainFile, supplementalFiles: supplementalFiles,
                     enabledIndexers: enabledIndexers, { _ in try testBlock() })
     }
 
-    private func analyze(retainPublic: Bool = false, aggressive: Bool = false,
-                         retainObjcAnnotated: Bool = false, isMainFile: Bool = false,
+    private func analyze(retainPublic: Bool = false,
+                         retainObjcAnnotated: Bool = false,
+                         isMainFile: Bool = false,
                          supplementalFiles: [String] = [],
                          enabledIndexers: [IndexerVariant] = IndexerVariant.allCases,
                          _ testBlock: (IndexerVariant) throws -> Void
@@ -1216,7 +1159,6 @@ class RetentionTest: XCTestCase {
         let testFixturePath = fixturePath(for: testName)
         let configuration = inject(Configuration.self)
         configuration.retainPublic = retainPublic
-        configuration.aggressive = aggressive
         configuration.retainObjcAnnotated = retainObjcAnnotated
         configuration.indexStorePath = RetentionTest.indexStorePath
 

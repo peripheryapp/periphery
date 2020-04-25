@@ -2,7 +2,7 @@
 
 ##### Breaking
 
-- None.
+- Aggressive Mode has been removed as it provided little value.
 
 ##### Enhancements
 

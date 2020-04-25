@@ -177,7 +177,6 @@ public final class Declaration: Entity, CustomStringConvertible {
     var related: Set<Reference> = []
     var name: String?
     var structureAccessibility: Accessibility = .internal
-    var analyzerHints: [Analyzer.Hint] = []
     var isImplicit: Bool = false
 
     var attributeAccessibility: Accessibility {

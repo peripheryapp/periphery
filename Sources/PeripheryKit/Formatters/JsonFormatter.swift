@@ -21,8 +21,7 @@ final class JsonFormatter: OutputFormatter {
                 "attributes": $0.attributes.map { $0 },
                 "accessibility": $0.accessibility.shortName,
                 "id": $0.usr,
-                "location": $0.location.description,
-                "hints": $0.analyzerHints.map { String(describing: $0) }
+                "location": $0.location.description
             ]
             jsonObject.append(object)
         }

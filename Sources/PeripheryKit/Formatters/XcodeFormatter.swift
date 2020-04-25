@@ -27,19 +27,9 @@ public final class XcodeFormatter: OutputFormatter {
                 }
 
                 name = colorize(name, .lightBlue)
-                line += "'\(name)'"
-
-                if $0.analyzerHints.contains(.unreadProperty) {
-                    line += " is written to, but never read"
-                } else {
-                    line += " is unused"
-                }
+                line += "'\(name)' is unused"
             } else {
                 line += "unused"
-            }
-
-            if $0.analyzerHints.contains(.aggressive) {
-                line += " (aggressive)"
             }
 
             logger.info(line, canQuiet: false)

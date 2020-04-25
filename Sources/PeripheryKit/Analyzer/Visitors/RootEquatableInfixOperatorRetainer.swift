@@ -35,11 +35,7 @@ final class RootEquatableInfixOperatorRetainer: SourceGraphVisitor {
             let pair = (declaration.kind, declaration.name ?? "")
 
             if retainedKinds.contains(where: { $0 == pair }) {
-                if configuration.aggressive {
-                    declaration.analyzerHints.append(.aggressive)
-                } else {
-                    declaration.markRetained(reason: .rootEquatableInfixOperator)
-                }
+                declaration.markRetained(reason: .rootEquatableInfixOperator)
             }
         }
     }
