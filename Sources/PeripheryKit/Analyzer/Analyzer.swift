@@ -1,11 +1,6 @@
 import Foundation
 
 final class Analyzer {
-    enum Hint {
-        case unreadProperty
-        case aggressive
-    }
-
     static func perform(graph: SourceGraph) throws {
         try make(graph: graph).perform()
     }
@@ -50,7 +45,6 @@ final class Analyzer {
 
         PlainExtensionEliminator.self,
         AncestralReferenceEliminator.self,
-        UnreadSimplePropertyReferenceEliminator.self,
 
         DeclarationMarker.self
     ]

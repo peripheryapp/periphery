@@ -33,9 +33,6 @@ public struct ScanCommand: ParsableCommand {
     @Flag(inversion: .prefixedNo, help: "Retain unused protocol function parameters, even if the parameter is unused in all conforming functions")
     var retainUnusedProtocolFuncParams: Bool?
 
-    @Flag(inversion: .prefixedNo, help: "Enable heuristics that may produce false negatives")
-    var aggressive: Bool?
-
     @Option(help: "Output format, available formatters are: \(OutputFormat.allCases.map { $0.rawValue }.joined(separator: ", "))")
     var format: String?
 
@@ -102,10 +99,6 @@ public struct ScanCommand: ParsableCommand {
 
         if let retainUnusedProtocolFuncParams = retainUnusedProtocolFuncParams {
             configuration.retainUnusedProtocolFuncParams = retainUnusedProtocolFuncParams
-        }
-
-        if let aggressive = aggressive {
-            configuration.aggressive = aggressive
         }
 
         if let verbose = verbose {
