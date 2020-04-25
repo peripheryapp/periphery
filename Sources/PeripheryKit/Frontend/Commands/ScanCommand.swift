@@ -48,9 +48,6 @@ public struct ScanCommand: ParsableCommand {
     @Option(help: "Use the build log identified by the given key saved using '--save-build-log'. Or, use the build log at the given path (the log file must have a .log extension)")
     var useBuildLog: String?
 
-    @Flag(inversion: .prefixedNo, help: "Start an interactive diagnosis console after analysis completes")
-    var diagnose: Bool?
-
     @Flag(inversion: .prefixedNo, help: "Enable verbose logging")
     var verbose: Bool?
 
@@ -83,10 +80,6 @@ public struct ScanCommand: ParsableCommand {
 
         if let disableUpdateCheck = disableUpdateCheck {
             configuration.updateCheck = !disableUpdateCheck
-        }
-
-        if let diagnose = diagnose {
-            configuration.diagnosisConsole = diagnose
         }
 
         if let retainPublic = retainPublic {

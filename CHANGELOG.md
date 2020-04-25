@@ -3,6 +3,7 @@
 ##### Breaking
 
 - Aggressive Mode has been removed as it provided little value.
+- Removed undocumented diagnosis console feature.
 
 ##### Enhancements
 

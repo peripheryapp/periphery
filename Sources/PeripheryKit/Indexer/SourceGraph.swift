@@ -133,29 +133,6 @@ public final class SourceGraph {
         try visitor.make(graph: self).visit()
     }
 
-    func isReferenced(_ declaration: Declaration) -> Bool {
-        return referencedDeclarations.contains(declaration)
-    }
-
-    func references(to declaration: Declaration) -> [Reference] {
-        return allReferences.filter {
-            $0.usr == declaration.usr || $0.receiverUsr == declaration.usr
-        }
-    }
-
-    func activeReferences(to decl: Declaration) -> Set<Reference> {
-        // Cache to avoid repeated set operations.
-        let referencedDeclarationsLocal = referencedDeclarations
-
-        return Set(references(to: decl).filter {
-            if let ancestralDeclaration = $0.ancestralDeclaration {
-                return referencedDeclarationsLocal.contains(ancestralDeclaration)
-            }
-
-            return false
-        })
-    }
-
     func superclassReferences(of decl: Declaration) -> [Reference] {
         var references: [Reference] = []
 

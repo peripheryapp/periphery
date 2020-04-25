@@ -26,7 +26,6 @@ public final class Configuration: Singleton {
     var verbose: Bool = false
     var quiet: Bool = false
     var updateCheck: Bool = true
-    var diagnosisConsole: Bool = false
     var strict: Bool = false
     var xcargs: String? = nil
     var useIndexStore: Bool = false
@@ -55,7 +54,6 @@ public final class Configuration: Singleton {
             "verbose": verbose,
             "quiet": quiet,
             "disable_update_check": !updateCheck,
-            "diagnose": diagnosisConsole,
             "strict": strict,
             "xcargs": xcargs,
             "use_index_store": useIndexStore,
@@ -117,10 +115,6 @@ public final class Configuration: Singleton {
 
         if let value = yaml["retain_unused_protocol_func_params"] as? Bool {
             self.retainUnusedProtocolFuncParams = value
-        }
-
-        if let value = yaml["diagnose"] as? Bool {
-            self.diagnosisConsole = value
         }
 
         if let value = yaml["verbose"] as? Bool {
