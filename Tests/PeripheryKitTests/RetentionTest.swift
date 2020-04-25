@@ -1220,18 +1220,6 @@ class RetentionTest: XCTestCase {
         }
     }
 
-    private func sort(_ refs: Set<Reference>) -> [Reference] {
-        refs.sorted { (a, b) -> Bool in
-            a.usr < b.usr
-        }
-    }
-
-    private func sort(_ decls: Set<Declaration>) -> [Declaration] {
-        decls.sorted { (a, b) -> Bool in
-            a.usr < b.usr
-        }
-    }
-
     private func fixturePath(for file: String) -> Path {
         return ProjectRootPath + "Tests/RetentionFixtures/\(file).swift"
     }
