@@ -51,6 +51,7 @@ final class XcodebuildLogParser {
     // MARK: - Private
 
     private func parseSwiftcInvocation(command: String) -> SwiftcInvocation {
+        let command = command.replacingOccurrences(of: "\\=", with: "=")
         let pattern = try! NSRegularExpression(pattern: " (-.+?)(?= -|$)", options: []) // swiftlint:disable:this force_try
         let matches = pattern.matches(in: command, options: [], range: NSRange(command.startIndex..., in: command))
         var arguments: [BuildArgument] = matches.map {
