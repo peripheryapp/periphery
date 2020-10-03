@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/jpsim/SourceKitten",
         "state": {
           "branch": null,
-          "revision": "77a4dbbb477a8110eb8765e3c44c70fb4929098f",
-          "version": "0.29.0"
+          "revision": "c0f960f72fa1e6151695074ffa696e4da6c45ce8",
+          "version": "0.30.1"
         }
       },
       {
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/jpsim/Yams.git",
         "state": {
           "branch": null,
-          "revision": "c947a306d2e80ecb2c0859047b35c73b8e1ca27f",
-          "version": "2.0.0"
+          "revision": "88caa2e6fffdbef2e91c2022d038576062042907",
+          "version": "4.0.0"
         }
       }
     ]
