@@ -2,12 +2,26 @@
 
 ##### Breaking
 
+- None
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- None
+
+## 1.8.0 (2020-10-3)
+
+##### Breaking
+
 - Aggressive Mode has been removed as it provided little value.
 - Removed undocumented diagnosis console feature.
 
 ##### Enhancements
 
-- None.
+- Add Xcode 12 support.
 
 ##### Bug Fixes
 
