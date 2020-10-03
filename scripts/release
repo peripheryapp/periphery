@@ -59,7 +59,7 @@ echo "Checksum:"
 sha256=$( shasum -a 256 ${zip_filename} | awk '{print $1}' )
 echo ${sha256}
 
-echo -e "\nWait for notarization approval: xcrun altool --notarization-history 0 --u \"$username\" --p \"$password\""
+echo -e "\nWait for notarization approval: xcrun altool --notarization-history 0 -u \"$username\" -p \"$password\""
 confirm "Continue?"
 
 # GitHub
