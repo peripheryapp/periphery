@@ -24,26 +24,8 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift",
         "state": {
           "branch": null,
-          "revision": "a44caef0550c346e0ab9172f7c9a3852c1833599",
-          "version": "1.3.0"
-        }
-      },
-      {
-        "package": "CwlCatchException",
-        "repositoryURL": "https://github.com/mattgallagher/CwlCatchException.git",
-        "state": {
-          "branch": null,
-          "revision": "7cd2f8cacc4d22f21bc0b2309c3b18acf7957b66",
-          "version": "1.2.0"
-        }
-      },
-      {
-        "package": "CwlPreconditionTesting",
-        "repositoryURL": "https://github.com/mattgallagher/CwlPreconditionTesting.git",
-        "state": {
-          "branch": null,
-          "revision": "c228db5d2ad1b01ebc84435e823e6cca4e3db98b",
-          "version": "1.2.0"
+          "revision": "af1b58fc569bfde777462349b9f7314b61762be0",
+          "version": "1.3.2"
         }
       },
       {
@@ -51,8 +33,8 @@
         "repositoryURL": "https://github.com/Quick/Nimble.git",
         "state": {
           "branch": null,
-          "revision": "827b2b167cf22580bf3fe4debddbd63f5229979c",
-          "version": "8.0.6"
+          "revision": "7a46a5fc86cb917f69e3daf79fcb045283d8f008",
+          "version": "8.1.2"
         }
       },
       {
@@ -69,8 +51,8 @@
         "repositoryURL": "https://github.com/Quick/Quick.git",
         "state": {
           "branch": null,
-          "revision": "33682c2f6230c60614861dfc61df267e11a1602f",
-          "version": "2.2.0"
+          "revision": "09b3becb37cb2163919a3842a4c5fa6ec7130792",
+          "version": "2.2.1"
         }
       },
       {
@@ -87,8 +69,8 @@
         "repositoryURL": "https://github.com/kylef/Spectre.git",
         "state": {
           "branch": null,
-          "revision": "f14ff47f45642aa5703900980b014c2e9394b6e5",
-          "version": "0.9.0"
+          "revision": "f717bbce0e19f0129fc001b2b6bed43b70fd8b87",
+          "version": "0.9.1"
         }
       },
       {
@@ -96,8 +78,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "8d31a0905c346a45c87773ad50862b5b3df8dff6",
-          "version": "0.0.4"
+          "revision": "92646c0cdbaca076c8d3d0207891785b3379cbff",
+          "version": "0.3.1"
         }
       },
       {
@@ -113,9 +95,9 @@
         "package": "swift-tools-support-core",
         "repositoryURL": "https://github.com/apple/swift-tools-support-core.git",
         "state": {
-          "branch": "master",
-          "revision": "d08234c4cf8046786a3552143532222a56273720",
-          "version": null
+          "branch": null,
+          "revision": "31747ebaede7e1a1f2b15346790193d5b5e5e7be",
+          "version": "0.1.11"
         }
       },
       {
@@ -132,8 +114,17 @@
         "repositoryURL": "https://github.com/tuist/xcodeproj",
         "state": {
           "branch": null,
-          "revision": "942b35d6a7ee94752cc726b1fbd8dd7ec468e49d",
-          "version": "7.9.0"
+          "revision": "3038221d72c7202a7b72fb971495dc6257bc3835",
+          "version": "7.15.0"
+        }
+      },
+      {
+        "package": "XcodeProjCExt",
+        "repositoryURL": "https://github.com/tuist/XcodeProjCExt",
+        "state": {
+          "branch": null,
+          "revision": "21a510c225ff2bc83d5920a21d902af4b1e7e218",
+          "version": "0.1.0"
         }
       },
       {
