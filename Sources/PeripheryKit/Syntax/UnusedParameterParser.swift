@@ -46,7 +46,7 @@ final class Parameter: Item, Hashable {
 
     var declaration: Declaration {
         let functionName = function?.fullName ?? "func()"
-        let locationSha = location.description.sha1().prefix(10)
+        let locationSha = location.description.sha1.prefix(10)
         let usr = "\(locationSha)-\(functionName)-\(name)"
         let decl = Declaration(kind: .varParameter, usr: usr, location: location)
         decl.name = name

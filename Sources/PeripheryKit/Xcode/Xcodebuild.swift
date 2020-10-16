@@ -132,7 +132,7 @@ public final class Xcodebuild: Injectable {
     // MARK: - Private
 
     private func derivedDataPath(for project: XcodeProjectlike) throws -> Path {
-        let normalizedName = project.name.sha1()
+        let normalizedName = project.name.sha1
         return try (PeripheryCachePath() + "DerivedData-\(normalizedName)")
     }
 
