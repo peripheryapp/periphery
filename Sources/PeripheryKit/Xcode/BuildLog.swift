@@ -1,6 +1,6 @@
 import Foundation
 import PathKit
-import CryptoSwift
+import CryptoKit
 
 final class BuildLog {
     static func make(project: XcodeProjectlike, schemes: Set<Scheme>, targets: Set<Target>) -> Self {
@@ -115,7 +115,7 @@ final class BuildLog {
     private func buildCacheKey(_ userKey: String) -> String {
         let targetNames = targets.map { $0.name }.sorted().joined()
         let schemeNames = schemes.map { $0.name }.sorted().joined()
-        return "\(userKey)\(targetNames)\(schemeNames)\(project.path.string)".sha1()
+        return "\(userKey)\(targetNames)\(schemeNames)\(project.path.string)".sha1
     }
 
     func cachePath() throws -> Path {
@@ -124,3 +124,4 @@ final class BuildLog {
         return path
     }
 }
+
