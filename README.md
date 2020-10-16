@@ -10,9 +10,6 @@
 <a href="https://github.com/peripheryapp/periphery/releases/latest">
   <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?style=flat-square" />
 </a>
-<a href="https://twitter.com/peripheryswift">
-  <img src="https://img.shields.io/twitter/follow/peripheryswift.svg?label=Twitter&style=flat-square" />
-</a>
 
 <br>
 
