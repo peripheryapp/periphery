@@ -14,8 +14,8 @@ public struct ScanSyntaxCommand: ParsableCommand {
     @Option(help: "Output format, available formatters are: \(OutputFormat.allCases.map { $0.rawValue }.joined(separator: ", "))")
     var format: String?
 
-    @Option(default: [], help: "Path glob of source files which should not be scanned. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
-    var exclude: [String]
+    @Option(help: "Path glob of source files which should not be scanned. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
+    var exclude: [String] = []
 
     @Flag(inversion: .prefixedNo, help: "Enable verbose logging")
     var verbose: Bool?

@@ -17,7 +17,7 @@ signal(SIGINT) { _ in
 }
 
 do {
-    let command = try PeripheryCommand.parseAsRoot()
+    var command = try PeripheryCommand.parseAsRoot()
     try command.run()
 } catch {
     if  let error = error as? PeripheryKitError,
