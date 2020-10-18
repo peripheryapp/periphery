@@ -1,17 +1,17 @@
 import Foundation
 
-protocol FixtureProtocol107 {
+public protocol FixtureProtocol107 {
     func myFunc(param: String)
 }
 
-extension FixtureProtocol107 {
+public extension FixtureProtocol107 {
     func myFunc(param: String) {}
 }
 
 public class FixtureClass107Class1: FixtureProtocol107 {
-    func myFunc(param: String) {}
+    public func myFunc(param: String) {}
 }
 
 public class FixtureClass107Class2: FixtureProtocol107 {
-    func myFunc(param: String) {}
+    public func myFunc(param: String) {}
 }

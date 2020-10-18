@@ -129,7 +129,6 @@ class RetentionTest: XCTestCase {
     func testRetainsObjcAnnotatiedClass() {
         analyze(retainObjcAnnotated: true) {
             XCTAssertReferenced((.class, "FixtureClass21"))
-
         }
     }
 
@@ -138,14 +137,12 @@ class RetentionTest: XCTestCase {
             XCTAssertReferenced((.class, "FixtureClass22"))
             XCTAssertReferenced((.varInstance, "someVar"))
             XCTAssertReferenced((.functionMethodInstance, "someMethod()"))
-
         }
     }
 
     func testDoesNotRetainObjcAnnotatedWithoutOption() {
         analyze() {
             XCTAssertNotReferenced((.class, "FixtureClass23"))
-
         }
     }
 
@@ -154,7 +151,6 @@ class RetentionTest: XCTestCase {
             XCTAssertReferenced((.class, "FixtureClass24"))
             XCTAssertNotReferenced((.functionMethodInstance, "someMethod()"))
             XCTAssertNotReferenced((.varInstance, "someVar"))
-
         }
     }
 
@@ -163,7 +159,6 @@ class RetentionTest: XCTestCase {
             XCTAssertReferenced((.class, "FixtureClass25"))
             XCTAssertReferenced((.varInstance, "someVar"))
             XCTAssertReferenced((.functionMethodInstance, "someMethod()"))
-
         }
     }
 
@@ -174,17 +169,14 @@ class RetentionTest: XCTestCase {
             XCTAssertNotReferenced((.functionMethodInstance, "funcPrivate()"))
             XCTAssertNotReferenced((.functionMethodInstance, "funcInternal()"))
             XCTAssertReferenced((.functionMethodInstance, "funcOpen()"))
-
         }
     }
 
     func testConformanceToExternalProtocolIsRetained() {
         analyze() {
-
             // Retained because it's a method from an external declaration (in this case, Equatable)
             XCTAssertReferenced((.functionOperatorInfix, "==(_:_:)"),
                                 descendentOf: (.class, "FixtureClass55"))
-
         }
     }
 
@@ -193,7 +185,6 @@ class RetentionTest: XCTestCase {
         // itself is unused. In a real situation the protocol could be removed and the conforming
         // class refactored.
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass51"))
             XCTAssertNotReferenced((.protocol, "FixtureProtocol51"))
 
@@ -203,25 +194,21 @@ class RetentionTest: XCTestCase {
                                 descendentOf: (.class, "FixtureClass51"))
             XCTAssertReferenced((.varInstance, "protocolVar"),
                                 descendentOf: (.class, "FixtureClass51"))
-
         }
     }
 
     func testProtocolMethodCalledIndirectlyByProtocolIsRetained() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass52"))
             XCTAssertReferenced((.protocol, "FixtureProtocol52"))
 
             XCTAssertReferenced((.functionMethodInstance, "protocolMethod()"),
                                 descendentOf: (.class, "FixtureClass52"))
-
         }
     }
 
     func testProtocolConformedByClassButNeverDirectlyUsedIsNotRetained() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass54")) // because it's public
             XCTAssertNotReferenced((.protocol, "FixtureProtocol54")) // internal
 
@@ -229,7 +216,6 @@ class RetentionTest: XCTestCase {
                                    descendentOf: (.class, "FixtureClass54"))
             XCTAssertNotReferenced((.functionMethodInstance, "protocolMethod()"),
                                    descendentOf: (.protocol, "FixtureProtocol54"))
-
         }
     }
 
@@ -238,14 +224,12 @@ class RetentionTest: XCTestCase {
         // descent to subclasses. Therefore, a protocol method that's only implemented in a subclass
         // and not the parent conforming class is actually unused.
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.functionMethodInstance, "protocolMethod()"),
                                 descendentOf: (.protocol, "FixtureProtocol83"))
             XCTAssertReferenced((.functionMethodInstance, "protocolMethod()"),
                                 descendentOf: (.extensionProtocol, "FixtureProtocol83"))
             XCTAssertNotReferenced((.functionMethodInstance, "protocolMethod()"),
                                    descendentOf: (.class, "FixtureClass84"))
-
         }
     }
 
@@ -258,16 +242,13 @@ class RetentionTest: XCTestCase {
 
     func testUnusedProtocolWithExtension() {
         analyze(retainPublic: true) {
-
             XCTAssertNotReferenced((.protocol, "FixtureProtocol82"))
             XCTAssertNotReferenced((.extensionProtocol, "FixtureProtocol82"))
-
         }
     }
 
     func testRetainsProtocolMethodImplementedInExtension() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass80"))
             XCTAssertReferenced((.protocol, "FixtureProtocol80"))
             XCTAssertReferenced((.extensionProtocol, "FixtureProtocol80"))
@@ -285,13 +266,11 @@ class RetentionTest: XCTestCase {
                                 descendentOf: (.extensionProtocol, "FixtureProtocol80"))
             XCTAssertReferenced((.functionMethodInstance, "protocolMethodWithUnusedDefault()"),
                                 descendentOf: (.class, "FixtureClass80"))
-
         }
     }
 
     func testRetainsNonProtocolMethodDefinedInProtocolExtension() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass66"))
             XCTAssertReferenced((.protocol, "FixtureProtocol66"))
             XCTAssertReferenced((.extensionProtocol, "FixtureProtocol66"))
@@ -305,13 +284,11 @@ class RetentionTest: XCTestCase {
             // within the extension, the protocol method itself is not used.
             XCTAssertNotReferenced((.functionMethodInstance, "protocolMethod()"),
                                    descendentOf: (.protocol, "FixtureProtocol66"))
-
         }
     }
 
     func testDoesNotRetainUnusedProtocolMethodWithDefaultImplementation() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.functionMethodInstance, "usedMethod()"),
                                 descendentOf: (.extensionProtocol, "FixtureProtocol84"))
             XCTAssertReferenced((.functionMethodInstance, "usedMethod()"),
@@ -321,25 +298,21 @@ class RetentionTest: XCTestCase {
                                    descendentOf: (.extensionProtocol, "FixtureProtocol84"))
             XCTAssertNotReferenced((.functionMethodInstance, "unusedMethod()"),
                                    descendentOf: (.protocol, "FixtureProtocol84"))
-
         }
     }
 
     func testRetainedProtocolDoesNotRetainUnusedClass() {
         analyze(retainPublic: true) {
-
             XCTAssertNotReferenced((.class, "FixtureClass57"))
             XCTAssertReferenced((.protocol, "FixtureProtocol57"))
 
             XCTAssertNotReferenced((.functionMethodInstance, "protocolMethod()"),
                                    descendentOf: (.class, "FixtureClass57"))
-
         }
     }
 
     func testRetainOverridingMethod() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass67"))
             XCTAssertReferenced((.class, "FixtureClass68"))
 
@@ -347,13 +320,11 @@ class RetentionTest: XCTestCase {
                                 descendentOf: (.class, "FixtureClass67"))
             XCTAssertReferenced((.functionMethodInstance, "someMethod()"),
                                 descendentOf: (.class, "FixtureClass68"))
-
         }
     }
 
     func testUnusedOverridenMethod() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass81Base"))
             XCTAssertReferenced((.class, "FixtureClass81Sub"))
 
@@ -362,13 +333,11 @@ class RetentionTest: XCTestCase {
 
             XCTAssertNotReferenced((.functionMethodInstance, "someMethod()"),
                                    descendentOf: (.class, "FixtureClass81Base"))
-
         }
     }
 
     func testOverridenMethodRetainedBySuper() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass82Base"))
             XCTAssertReferenced((.class, "FixtureClass82Sub"))
 
@@ -376,7 +345,6 @@ class RetentionTest: XCTestCase {
                                 descendentOf: (.class, "FixtureClass82Sub"))
             XCTAssertReferenced((.functionMethodInstance, "someMethod()"),
                                 descendentOf: (.class, "FixtureClass82Base"))
-
         }
     }
 
@@ -404,7 +372,6 @@ class RetentionTest: XCTestCase {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass40"))
             XCTAssertReferenced((.functionDestructor, "deinit"))
-
         }
     }
 
@@ -412,13 +379,11 @@ class RetentionTest: XCTestCase {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass41"))
             XCTAssertReferenced((.functionConstructor, "init()"))
-
         }
     }
 
     func testAccessibility() {
         analyze() {
-
             let publicClass = find((.class, "FixtureClass31"))
             XCTAssertEqual(publicClass?.accessibility, .public)
 
@@ -469,7 +434,6 @@ class RetentionTest: XCTestCase {
 
             let customNotification = find((.varStatic, "CustomNotification"))
             XCTAssertEqual(customNotification?.accessibility, .public)
-
         }
     }
 
@@ -482,7 +446,6 @@ class RetentionTest: XCTestCase {
 
             XCTAssertReferenced((.class, "FixtureClass34Subclass"))
             XCTAssertReferenced((.functionMethodInstance, "testSubclass()"))
-
         }
     }
 
@@ -491,7 +454,6 @@ class RetentionTest: XCTestCase {
             XCTAssertReferenced((.varInstance, "trimmed"))
             XCTAssertReferenced((.class, "FixtureClass35"))
             XCTAssertReferenced((.functionMethodInstance, "testSomething()"))
-
         }
     }
 
@@ -499,7 +461,6 @@ class RetentionTest: XCTestCase {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass37"))
             XCTAssertReferenced((.protocol, "FixtureProtocol37"))
-
         }
     }
 
@@ -507,7 +468,6 @@ class RetentionTest: XCTestCase {
         analyze(isMainFile: true) {
             XCTAssertReferenced((.class, "FixtureClass42"))
             XCTAssertReferenced((.varGlobal, "someVar"))
-
         }
     }
 
@@ -520,7 +480,6 @@ class RetentionTest: XCTestCase {
     func testUnusedTypealias() {
         analyze() {
             XCTAssertNotReferenced((.typealias, "UnusedAlias"))
-
         }
     }
 
@@ -530,42 +489,34 @@ class RetentionTest: XCTestCase {
             XCTAssertReferenced((.class, "FixtureClass62"))
             XCTAssertReferenced((.functionConstructor, "init(someVar:)"),
                                 descendentOf: (.class, "FixtureClass61"))
-
         }
     }
 
     func testFunctionAccessorsRetainReferences() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.varInstance, "referencedByGetter"))
             XCTAssertReferenced((.varInstance, "referencedBySetter"))
             XCTAssertReferenced((.varInstance, "referencedByDidSet"))
-
         }
     }
 
     func testInstanceVarReferencedInClosure() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass69"))
             XCTAssertReferenced((.varInstance, "someVar"))
-
         }
     }
 
     func testSelectorTarget() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass73"))
             XCTAssertReferenced((.functionMethodInstance, "someTargetMethod()"),
                                 descendentOf: (.class, "FixtureClass73"))
-
         }
     }
 
     func testCodingKeyEnum() {
         analyze(retainPublic: true) { variant in
-
             XCTAssertReferenced((.class, "FixtureClass74"))
             // FIXME: Fail bacause IndexStore doesn't know the relationship between Codable
             //        protocol and conforming type. The Codable occuerrence doesn't have any
@@ -583,13 +534,11 @@ class RetentionTest: XCTestCase {
             // Not referenced because the enclosing class does not conform to Decodable.
             XCTAssertNotReferenced((.enum, "CodingKeys"),
                                    descendentOf: (.class, "FixtureClass76"))
-
         }
     }
 
     func testRequiredInitInSubclass() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass77Base"))
             XCTAssertReferenced((.class, "FixtureClass77"))
 
@@ -604,23 +553,19 @@ class RetentionTest: XCTestCase {
                                 descendentOf: (.class, "FixtureClass77Base"))
             XCTAssertReferenced((.functionConstructor, "init(b:)"),
                                 descendentOf: (.class, "FixtureClass77Base"))
-
         }
     }
 
     func testRetainsExternalTypeExtension() {
         analyze() {
-
             XCTAssertReferenced((.extensionProtocol, "Sequence")) // protocol
             XCTAssertReferenced((.extensionStruct, "Array")) // struct
             XCTAssertReferenced((.extensionClass, "NumberFormatter")) // class
-
         }
     }
 
     func testRetainsAssociatedTypeTypeAlias() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass87Usage"))
             XCTAssertReferenced((.class, "Fixture87StateMachine"))
             XCTAssertReferenced((.struct, "Fixture87AssociatedType"))
@@ -636,13 +581,11 @@ class RetentionTest: XCTestCase {
                                 descendentOf: (.protocol, "Fixture87State"))
             XCTAssertReferenced((.typealias, "AssociatedType"),
                                 descendentOf: (.enum, "Fixture87MyState"))
-
         }
     }
 
     func testUnusedAssociatedType() {
         analyze(retainPublic: true) { variant in
-
             XCTAssertReferenced((.class, "FixtureClass88Usage"))
             XCTAssertReferenced((.class, "Fixture88StateMachine"))
             XCTAssertReferenced((.protocol, "Fixture88State"))
@@ -667,12 +610,10 @@ class RetentionTest: XCTestCase {
 
     func testRedundantMethodRedeclarationInProtocolSubclass() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.functionMethodInstance, "protocolMethod()"),
                                 descendentOf: (.protocol, "Fixture85ParentProtocol"))
             XCTAssertNotReferenced((.functionMethodInstance, "protocolMethod()"),
                                    descendentOf: (.protocol, "Fixture85ChildProtocol"))
-
         }
     }
 
@@ -680,13 +621,11 @@ class RetentionTest: XCTestCase {
         analyze(retainPublic: true) {
             XCTAssertNotReferenced((.class, "FixtureClass90"))
             XCTAssertNotReferenced((.class, "FixtureClass91"))
-
         }
     }
 
     func testRetainsUsedProtocolThatInheritsForeignProtocol() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.protocol, "FixtureProtocol96"))
             XCTAssertReferenced((.extensionProtocol, "FixtureProtocol96"))
             XCTAssertReferenced((.varInstance, "usedValue"),
@@ -701,13 +640,11 @@ class RetentionTest: XCTestCase {
                                 descendentOf: (.class, "FixtureClass96"))
             XCTAssertNotReferenced((.varInstance, "unusedValue"),
                                    descendentOf: (.class, "FixtureClass96"))
-
         }
     }
 
     func testRetainsProtocolMethodsImplementedInSuperclasss() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.protocol, "FixtureProtocol97"))
             XCTAssertReferenced((.functionMethodInstance, "someProtocolMethod1()"),
                                 descendentOf: (.protocol, "FixtureProtocol97"))
@@ -729,13 +666,11 @@ class RetentionTest: XCTestCase {
 
             XCTAssertNotReferenced((.functionMethodInstance, "someUnusedProtocolMethod()"),
                                    descendentOf: (.class, "FixtureClass97Base2"))
-
         }
     }
 
     func testProtocolImplementInClassAndExtension() {
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass98"))
             XCTAssertReferenced((.functionMethodInstance, "method1()"),
                                 descendentOf: (.class, "FixtureClass98"))
@@ -747,28 +682,82 @@ class RetentionTest: XCTestCase {
                                 descendentOf: (.protocol, "FixtureProtocol98"))
             XCTAssertReferenced((.functionMethodInstance, "method2()"),
                                 descendentOf: (.protocol, "FixtureProtocol98"))
-
         }
     }
 
     func testDoesNotRetainDescendantsOfUnusedDeclaration() {
         analyze(retainPublic: true) {
-
             XCTAssertNotReferenced((.class, "FixtureClass99"))
             XCTAssertNotReferenced((.functionMethodInstance, "someMethod()"))
             XCTAssertNotReferenced((.varInstance, "someVar"))
 
             XCTAssertIgnored((.functionMethodInstance, "someMethod()"))
             XCTAssertIgnored((.varInstance, "someVar"))
-
         }
     }
 
     // MARK: - Unused Parameters
 
+    func testRetainsParamUsedInOverriddenMethod_IndexStore() throws {
+        analyze(retainPublic: true, enabledIndexers: [.indexStore], fixture: "testRetainsParamUsedInOverriddenMethod") {
+            // - FixtureClass101Base
+
+            // Not used and not overriden.
+            XCTAssertNotReferenced((.varParameter, "param"),
+                                   descendentOf: (.class, "FixtureClass101Base"), (.functionMethodInstance, "func1(param:)"))
+
+            // Param is used.
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.class, "FixtureClass101Base"), (.functionMethodInstance, "func2(param:)"))
+
+            // Used in override.
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.class, "FixtureClass101Base"), (.functionMethodInstance, "func3(param:)"))
+
+            // Used in deeply nested override.
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.class, "FixtureClass101Base"), (.functionMethodInstance, "func4(param:)"))
+
+            // Not used in any override.
+            XCTAssertNotReferenced((.varParameter, "param"),
+                                   descendentOf: (.class, "FixtureClass101Base"), (.functionMethodInstance, "func5(param:)"))
+
+            // - FixtureClass101Subclass1
+
+            // Used in base.
+            XCTAssertReferenced((.varParameter, "param"),
+                                   descendentOf: (.class, "FixtureClass101Subclass1"), (.functionMethodInstance, "func2(param:)"))
+
+            // Param is used.
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.class, "FixtureClass101Subclass1"), (.functionMethodInstance, "func3(param:)"))
+
+            // - FixtureClass101Subclass2
+
+            // Param is used.
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.class, "FixtureClass101Subclass2"), (.functionMethodInstance, "func4(param:)"))
+
+            // Not used in any override.
+            XCTAssertNotReferenced((.varParameter, "param"),
+                                   descendentOf: (.class, "FixtureClass101Subclass2"), (.functionMethodInstance, "func5(param:)"))
+
+            // - FixtureClass101InheritForeignBase
+
+            // Overrides foreign function.
+            XCTAssertReferenced((.varParameter, "object"),
+                                descendentOf: (.class, "FixtureClass101InheritForeignBase"), (.functionMethodInstance, "isEqual(_:)"))
+
+            // - FixtureClass101InheritForeignSubclass1
+
+            // Overrides foreign function from base.
+            XCTAssertReferenced((.varParameter, "object"),
+                                descendentOf: (.class, "FixtureClass101InheritForeignSubclass1"), (.functionMethodInstance, "isEqual(_:)"))
+        }
+    }
+
     func testRetainsParamUsedInOverriddenMethod() throws {
         try analyze(retainPublic: true, enabledIndexers: [.sourceKit]) {
-
             // - FixtureClass101Base
 
             let baseFunc1Param = get("param", "func1(param:)", "FixtureClass101Base")
@@ -828,21 +817,33 @@ class RetentionTest: XCTestCase {
 
     func testRetainsForeignProtocolParameters() throws {
         try analyze(retainPublic: true, enabledIndexers: [.sourceKit]) {
-
             let decoderParam = get("decoder", "init(from:)", "FixtureClass103")
             try XCTAssertTrue(XCTUnwrap(decoderParam).isRetained)
 
             let encoderParam = get("encoder", "encode(to:)", "FixtureClass103")
             try XCTAssertTrue(XCTUnwrap(encoderParam).isRetained)
+        }
+    }
 
+    func testRetainsForeignProtocolParameters_IndexStore() {
+        analyze(retainPublic: true, enabledIndexers: [.indexStore], fixture: "testRetainsForeignProtocolParameters") {
+            XCTAssertReferenced(
+                (.varParameter, "decoder"),
+                descendentOf: (.class, "FixtureClass103"), (.functionConstructor, "init(from:)")
+            )
+
+            XCTAssertReferenced(
+                (.varParameter, "encoder"),
+                descendentOf: (.class, "FixtureClass103"), (.functionMethodInstance, "encode(to:)")
+            )
         }
     }
 
     func testRetainUnusedProtocolFuncParams() throws {
         let configuration = inject(Configuration.self)
         configuration.retainUnusedProtocolFuncParams = true
-        try analyze(retainPublic: true, enabledIndexers: [.sourceKit]) {
 
+        try analyze(retainPublic: true, enabledIndexers: [.sourceKit]) {
             let protoParam = get("param", "myFunc(param:)", "FixtureProtocol107")
             try XCTAssertTrue(XCTUnwrap(protoParam).isRetained)
 
@@ -854,60 +855,33 @@ class RetentionTest: XCTestCase {
 
             let class2Param = get("param", "myFunc(param:)", "FixtureClass107Class2")
             try XCTAssertTrue(XCTUnwrap(class2Param).isRetained)
-
         }
     }
 
-    func testIgnoreUnusedParamInUnusedFunction() {
-        analyze(enabledIndexers: [.sourceKit]) {
+    func testRetainUnusedProtocolFuncParams_IndexStore() {
+        let configuration = inject(Configuration.self)
+        configuration.retainUnusedProtocolFuncParams = true
 
-            XCTAssertNotReferenced((.class, "FixtureClass105"))
-            XCTAssertNotReferenced((.functionMethodInstance, "unused(param:)"))
-            XCTAssertIgnored((.varParameter, "param"))
+        analyze(retainPublic: true, enabledIndexers: [.indexStore], fixture: "testRetainUnusedProtocolFuncParams") {
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.protocol, "FixtureProtocol107"), (.functionMethodInstance, "myFunc(param:)")
+            )
 
-        }
-    }
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.extensionProtocol, "FixtureProtocol107"), (.functionMethodInstance, "myFunc(param:)")
+            )
 
-    func testNestedDeclarations() {
-        analyze(retainPublic: true) {
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.class, "FixtureClass107Class1"), (.functionMethodInstance, "myFunc(param:)")
+            )
 
-            XCTAssertReferenced((.functionMethodInstance, "nested1()"))
-            XCTAssertReferenced((.functionMethodInstance, "nested2()"))
-
-        }
-    }
-
-    func testIdenticallyNamedVarsInStaticAndInstanceScopes() {
-        analyze(retainPublic: true) {
-            XCTAssertReferenced((.varInstance, "someVar"))
-            XCTAssertReferenced((.varStatic, "someVar"))
-        }
-    }
-
-    func testProtocolConformingMembersAreRetained() {
-        analyze(retainPublic: true) {
-
-            XCTAssertReferenced((.class, "FixtureClass27"))
-            XCTAssertReferenced((.protocol, "FixtureProtocol27"))
-            XCTAssertReferenced((.functionMethodInstance, "protocolMethod()"),
-                                descendentOf: (.class, "FixtureClass27"))
-            XCTAssertReferenced((.functionMethodClass, "staticProtocolMethod()"),
-                                descendentOf: (.class, "FixtureClass27"))
-            XCTAssertReferenced((.varClass, "staticProtocolVar"),
-                                descendentOf: (.class, "FixtureClass27"))
-
-            XCTAssertReferenced((.class, "FixtureClass28"))
-            XCTAssertReferenced((.class, "FixtureClass28Base"))
-            XCTAssertReferenced((.protocol, "FixtureProtocol28"))
-            XCTAssertReferenced((.functionMethodClass, "overrideStaticProtocolMethod()"),
-                                descendentOf: (.class, "FixtureClass28Base"))
-            XCTAssertReferenced((.functionMethodStatic, "overrideStaticProtocolMethod()"),
-                                descendentOf: (.class, "FixtureClass28"))
-            XCTAssertReferenced((.varClass, "overrideStaticProtocolVar"),
-                                descendentOf: (.class, "FixtureClass28Base"))
-            XCTAssertReferenced((.varStatic, "overrideStaticProtocolVar"),
-                                descendentOf: (.class, "FixtureClass28"))
-
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.class, "FixtureClass107Class2"), (.functionMethodInstance, "myFunc(param:)")
+            )
         }
     }
 
@@ -1017,6 +991,207 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testRetainsProtocolParameters_IndexStore() {
+        analyze(retainPublic: true, enabledIndexers: [.indexStore], fixture: "testRetainsProtocolParameters") {
+            // - FixtureProtocol104
+
+            // Used in a conformance.
+            XCTAssertReferenced(
+                (.varParameter, "param1"),
+                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func1(param1:param2:)")
+            )
+
+            // Not used in any conformance.
+            XCTAssertNotReferenced(
+                (.varParameter, "param2"),
+                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func1(param1:param2:)")
+            )
+
+            // Not used in any conformance.
+            XCTAssertNotReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func2(param:)")
+            )
+
+            // Used in the extension.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func3(param:)")
+            )
+
+            // Unused in extension, but used in conformance.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func4(param:)")
+            )
+
+            // Used in a conformance.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodStatic, "func5(param:)")
+            )
+
+            // Used in a override.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func6(param:)")
+            )
+
+            // - FixtureProtocol104 (extension)
+
+            // Used in the extension.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.extensionProtocol, "FixtureProtocol104"), (.functionMethodInstance, "func3(param:)")
+            )
+
+            // Used in a conformance by another class.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.extensionProtocol, "FixtureProtocol104"), (.functionMethodInstance, "func4(param:)")
+            )
+
+            // - FixtureClass104Class1
+
+            // Used in a conformance by another class.
+            XCTAssertReferenced(
+                (.varParameter, "param1"),
+                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodInstance, "func1(param1:param2:)")
+            )
+
+            // Not used in any conformance.
+            XCTAssertNotReferenced(
+                (.varParameter, "param2"),
+                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodInstance, "func1(param1:param2:)")
+            )
+
+            // Not used in any conformance.
+            XCTAssertNotReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodInstance, "func2(param:)")
+            )
+
+            // Used.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodStatic, "func5(param:)")
+            )
+
+            // Used in an override.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodInstance, "func6(param:)")
+            )
+
+            // Explicitly ignored.
+            XCTAssertReferenced(
+                (.varParameter, "_"),
+                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodInstance, "func7(_:)")
+            )
+
+            // - FixtureClass104Class2
+
+            // Used.
+            XCTAssertReferenced(
+                (.varParameter, "param1"),
+                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func1(param1:param2:)")
+            )
+
+            // Not used in any conformance.
+            XCTAssertNotReferenced(
+                (.varParameter, "param2"),
+                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func1(param1:param2:)")
+            )
+
+            // Not used in any conformance.
+            XCTAssertNotReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func2(param:)")
+            )
+
+            // Used.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func4(param:)")
+            )
+
+            // Used.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodStatic, "func5(param:)")
+            )
+
+            // Used in a override.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func6(param:)")
+            )
+
+            // Explicitly ignored.
+            XCTAssertReferenced(
+                (.varParameter, "_"),
+                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func7(_:)")
+            )
+
+            // - FixtureClass104Class3
+
+            // Used.
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf: (.class, "FixtureClass104Class3"), (.functionMethodInstance, "func6(param:)")
+            )
+        }
+    }
+
+    func testIgnoreUnusedParamInUnusedFunction() {
+        analyze() {
+            XCTAssertNotReferenced((.class, "FixtureClass105"))
+            XCTAssertNotReferenced((.functionMethodInstance, "unused(param:)"))
+            XCTAssertIgnored((.varParameter, "param"))
+
+        }
+    }
+
+    func testNestedDeclarations() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.functionMethodInstance, "nested1()"))
+            XCTAssertReferenced((.functionMethodInstance, "nested2()"))
+
+        }
+    }
+
+    func testIdenticallyNamedVarsInStaticAndInstanceScopes() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.varInstance, "someVar"))
+            XCTAssertReferenced((.varStatic, "someVar"))
+        }
+    }
+
+    func testProtocolConformingMembersAreRetained() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass27"))
+            XCTAssertReferenced((.protocol, "FixtureProtocol27"))
+            XCTAssertReferenced((.functionMethodInstance, "protocolMethod()"),
+                                descendentOf: (.class, "FixtureClass27"))
+            XCTAssertReferenced((.functionMethodClass, "staticProtocolMethod()"),
+                                descendentOf: (.class, "FixtureClass27"))
+            XCTAssertReferenced((.varClass, "staticProtocolVar"),
+                                descendentOf: (.class, "FixtureClass27"))
+
+            XCTAssertReferenced((.class, "FixtureClass28"))
+            XCTAssertReferenced((.class, "FixtureClass28Base"))
+            XCTAssertReferenced((.protocol, "FixtureProtocol28"))
+            XCTAssertReferenced((.functionMethodClass, "overrideStaticProtocolMethod()"),
+                                descendentOf: (.class, "FixtureClass28Base"))
+            XCTAssertReferenced((.functionMethodStatic, "overrideStaticProtocolMethod()"),
+                                descendentOf: (.class, "FixtureClass28"))
+            XCTAssertReferenced((.varClass, "overrideStaticProtocolVar"),
+                                descendentOf: (.class, "FixtureClass28Base"))
+            XCTAssertReferenced((.varStatic, "overrideStaticProtocolVar"),
+                                descendentOf: (.class, "FixtureClass28"))
+        }
+    }
+
     func testProtocolConformedByStaticMethodOutsideExtension() {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass64")) // public
@@ -1035,20 +1210,6 @@ class RetentionTest: XCTestCase {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.functionConstructor, "init(title:)"))
         }
-    }
-
-    func testRetainsProtocolParameters_IgnoredParam() {
-        guard performKnownFailures else { return }
-
-        // TODO: This fails because the '_' params are marked as used in order to be ignored/silenced.
-        // Instead we need to not ignore them, and also associate each param with its position
-        // in the param list so that we can identify if used.
-
-        // Merge this back into testRetainsProtocolParameters once completed.
-
-        let protoFunc7Param = get("param", "func7(_:)", "FixtureProtocol104")
-        // Not used in any conformance.
-        try XCTAssertFalse(XCTUnwrap(protoFunc7Param).isRetained)
     }
 
     // TODO: Need a way to handle this now that we're using the SPM.
@@ -1140,11 +1301,12 @@ class RetentionTest: XCTestCase {
                          isMainFile: Bool = false,
                          supplementalFiles: [String] = [],
                          enabledIndexers: [IndexerVariant] = IndexerVariant.allCases,
+                         fixture: String? = nil,
                          _ testBlock: () throws -> Void
     ) rethrows {
         try analyze(retainPublic: retainPublic, retainObjcAnnotated: retainObjcAnnotated,
                     isMainFile: isMainFile, supplementalFiles: supplementalFiles,
-                    enabledIndexers: enabledIndexers, { _ in try testBlock() })
+                    enabledIndexers: enabledIndexers, fixture: fixture, { _ in try testBlock() })
     }
 
     private func analyze(retainPublic: Bool = false,
@@ -1152,10 +1314,10 @@ class RetentionTest: XCTestCase {
                          isMainFile: Bool = false,
                          supplementalFiles: [String] = [],
                          enabledIndexers: [IndexerVariant] = IndexerVariant.allCases,
+                         fixture: String? = nil,
                          _ testBlock: (IndexerVariant) throws -> Void
     ) rethrows {
-        var testName = String(name.split(separator: " ").last!)
-        testName = testName.replacingOccurrences(of: "]", with: "")
+        let testName = fixture ?? String(name.split(separator: " ").last!).replacingOccurrences(of: "]", with: "")
         let testFixturePath = fixturePath(for: testName)
         let configuration = inject(Configuration.self)
         configuration.retainPublic = retainPublic
@@ -1249,10 +1411,10 @@ class RetentionTest: XCTestCase {
         XCTAssertTrue(graph.referencedDeclarations.contains(declaration), "Expected \(declaration) to be referenced.", file: file, line: line)
     }
 
-    private func XCTAssertReferenced(_ description: DeclarationDescription, descendentOf parentDescription: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
-        let parentDeclaration = find(parentDescription)
+    private func XCTAssertReferenced(_ description: DeclarationDescription, descendentOf parentDescriptions: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
+        let parentDeclaration = find(parentDescriptions)
 
-        XCTAssertNotNil(parentDeclaration, "Parent declaration not found: \(parentDescription)", file: file, line: line)
+        XCTAssertNotNil(parentDeclaration, "Parent declaration not found: \(parentDescriptions)", file: file, line: line)
 
         if let parentDeclaration = parentDeclaration {
             let descendent = find(description, in: parentDeclaration.descendentDeclarations)
@@ -1265,10 +1427,10 @@ class RetentionTest: XCTestCase {
         }
     }
 
-    private func XCTAssertNotReferenced(_ description: DeclarationDescription, descendentOf parentDescription: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
-        let parentDeclaration = find(parentDescription)
+    private func XCTAssertNotReferenced(_ description: DeclarationDescription, descendentOf parentDescriptions: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
+        let parentDeclaration = find(parentDescriptions)
 
-        XCTAssertNotNil(parentDeclaration, "Parent declaration not found: \(parentDescription)", file: file, line: line)
+        XCTAssertNotNil(parentDeclaration, "Parent declaration not found: \(parentDescriptions)", file: file, line: line)
 
         if let parentDeclaration = parentDeclaration {
             let referencedDescendents = parentDeclaration.descendentDeclarations.intersection(graph.referencedDeclarations)
@@ -1290,6 +1452,18 @@ class RetentionTest: XCTestCase {
 
     private func find(_ description: DeclarationDescription, in collection: Set<Declaration>? = nil) -> Declaration? {
         return (collection ?? graph.allDeclarations).first { $0.kind == description.kind && $0.name == description.name }
+    }
+
+    private func find(_ descriptions: [DeclarationDescription]) -> Declaration? {
+        var parentDecls: Set<Declaration> = graph.allDeclarations
+        var decl: Declaration?
+
+        for description in descriptions {
+            decl = find(description, in: parentDecls)
+            parentDecls = decl?.declarations ?? []
+        }
+
+        return decl
     }
 
     func get(_ param: String, _ function: String, _ cls: String, _ kind: Declaration.Kind = .class) -> Declaration? {

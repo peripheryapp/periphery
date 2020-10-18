@@ -10,7 +10,7 @@ public class FixtureClass101Base {
     // Used in override.
     public func func3(param: String) {}
 
-    // Used in deeply nested overridd.
+    // Used in deeply nested override.
     public func func4(param: String) {}
 
     // Overridden, unused.

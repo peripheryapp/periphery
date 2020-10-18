@@ -14,6 +14,98 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
     }
 
     func visit() throws {
+        if configuration.useIndexStore {
+            try IndexStoreRetainer(graph: graph, configuration: configuration).visit()
+        } else {
+            try SourceKitRetainer(graph: graph, configuration: configuration).visit()
+        }
+    }
+}
+
+private class IndexStoreRetainer {
+    private let graph: SourceGraph
+    private let configuration: Configuration
+
+    required init(graph: SourceGraph, configuration: Configuration) {
+        self.graph = graph
+        self.configuration = configuration
+    }
+
+    func visit() throws {
+        let allParams = graph.declarations(ofKind: .varParameter)
+        let paramFunctions = allParams.compactMap { $0.parent as? Declaration }
+
+        if configuration.retainUnusedProtocolFuncParams {
+            retainProtocolFunctionParameters(in: paramFunctions)
+        }
+
+        retainExplicityIgnored(params: allParams)
+        buildRelatedReferences(for: paramFunctions)
+    }
+
+    // MARK: - Private
+
+    private func retainProtocolFunctionParameters(in funcDecls: [Declaration]) {
+        funcDecls.forEach { funcDecl in
+            if let parent = funcDecl.parent as? Declaration, parent.kind == .protocol {
+                funcDecl.parameterDeclarations.forEach { $0.markRetained(reason: .protocolFuncParamForceRetained) }
+            }
+        }
+    }
+
+    private func retainExplicityIgnored(params: Set<Declaration>) {
+        params.forEach { param in
+            if param.name == "_" {
+                param.markRetained(reason: .paramExplicitlyIgnored)
+            }
+        }
+    }
+
+    // For each parameter declaration, using the parent function declaration, find all related methods and build
+    // bi-directional related references between each parameter.
+    private func buildRelatedReferences(for funcDecls: [Declaration]) {
+        for funcDecl in funcDecls {
+            guard let funcRefKind = funcDecl.kind.referenceEquivalent else { continue }
+
+            let funcRelated = funcDecl.related.filter({ $0.kind == funcRefKind && $0.name == funcDecl.name })
+
+            for related in funcRelated {
+                guard let relatedFuncDecl = graph.explicitDeclaration(withUsr: related.usr) else {
+                    // Must be an external protocol conformance.
+                    funcDecl.parameterDeclarations.forEach { $0.markRetained(reason: .paramFuncForeginProtocol) }
+                    continue
+                }
+
+                for relatedParamDecl in relatedFuncDecl.parameterDeclarations {
+                    guard let paramDecl = funcDecl.parameterDeclarations.first(where: { $0.name == relatedParamDecl.name }) else { continue }
+
+                    let relatedRef1 = Reference(kind: .varParameter, usr: paramDecl.usr, location: paramDecl.location)
+                    relatedRef1.isRelated = true
+                    relatedRef1.name = paramDecl.name
+
+                    graph.add(relatedRef1, from: relatedParamDecl)
+
+                    let relatedRef2 = Reference(kind: .varParameter, usr: relatedParamDecl.usr, location: relatedParamDecl.location)
+                    relatedRef2.isRelated = true
+                    relatedRef2.name = relatedParamDecl.name
+
+                    graph.add(relatedRef2, from: paramDecl)
+                }
+            }
+        }
+    }
+}
+
+private class SourceKitRetainer {
+    private let graph: SourceGraph
+    private let configuration: Configuration
+
+    required init(graph: SourceGraph, configuration: Configuration) {
+        self.graph = graph
+        self.configuration = configuration
+    }
+
+    func visit() throws {
         let paramDecls = graph.declarations(ofKind: .varParameter)
         let functionDecls: Set<Declaration> = Set(paramDecls.compactMap { $0.parent as? Declaration })
 
@@ -59,7 +151,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
 
     private func retain(_ params: Set<Declaration>, inForeignProtocolFunction decl: Declaration) {
         guard let refKind = decl.kind.referenceEquivalent,
-            let related = decl.related.first(where: { $0.kind == refKind && $0.name == decl.name }) else { return }
+              let related = decl.related.first(where: { $0.kind == refKind && $0.name == decl.name }) else { return }
 
         if graph.explicitDeclaration(withUsr: related.usr) == nil {
             params.forEach { $0.markRetained(reason: .paramFuncForeginProtocol) }
@@ -68,7 +160,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
 
     private func retain(_ params: Set<Declaration>, inOverriddenFunction decl: Declaration) {
         guard let classDecl = decl.parent as? Declaration,
-            classDecl.kind == .class else { return }
+              classDecl.kind == .class else { return }
 
         let superclasses = graph.superclasses(of: classDecl)
         let subclasses = graph.subclasses(of: classDecl)

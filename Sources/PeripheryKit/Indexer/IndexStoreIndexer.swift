@@ -40,7 +40,6 @@ final class IndexStoreIndexer: TypeIndexer {
     }
 
     func perform() throws {
-
         var jobs = [Job]()
 
         indexStore.forEachUnits { unit -> Bool in
@@ -68,7 +67,6 @@ final class IndexStoreIndexer: TypeIndexer {
     // MARK: - Private
 
     private class Job {
-
         let unit: IndexStoreUnit
 
         private let buildPlan: BuildPlan
@@ -112,8 +110,8 @@ final class IndexStoreIndexer: TypeIndexer {
         }
 
         func perform() throws {
-
             var decls: [(decl: Declaration, structures: [[String: Any]])] = []
+
             try indexStore.forEachOccurrences(for: unit) { occ in
                 guard occ.symbol.language == .swift, !occ.location.isSystem else { return true }
                 let shouldIndex = try buildPlan.targets.contains(where: {
