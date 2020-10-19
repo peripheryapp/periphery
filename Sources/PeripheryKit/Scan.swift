@@ -1,6 +1,5 @@
 import Foundation
 import PathKit
-import TSCBasic
 
 public final class Scan: Injectable {
     public static func make() -> Self {
