@@ -3,6 +3,7 @@ import PathKit
 @testable import PeripheryKit
 
 class RetentionTest: XCTestCase {
+    static var project: Project!
     static var buildPlan: BuildPlan!
     static var target: Target!
     static var indexStorePath: String!
@@ -15,7 +16,7 @@ class RetentionTest: XCTestCase {
     static override func setUp() {
         super.setUp()
 
-        let project = try! Project.make(path: PeripheryProjectPath)
+        project = try! Project.make(path: PeripheryProjectPath)
         let xcodebuild: Xcodebuild = inject()
         try! xcodebuild.clearDerivedData(for: project)
         let buildLog = try! xcodebuild.build(project: project, scheme: "RetentionFixtures")
@@ -1342,9 +1343,10 @@ class RetentionTest: XCTestCase {
         for variant in enabledIndexers {
             let indexOnlyGraph = SourceGraph()
             configuration.useIndexStore = variant == .indexStore
-            try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: indexOnlyGraph)
+            try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: indexOnlyGraph, project: Self.project)
             indexedGraphs[variant] = indexOnlyGraph
         }
+
         if indexedGraphs.count == 2 {
             let indexStoreGraph = indexedGraphs[.indexStore]!
             let sourceKitGraph = indexedGraphs[.sourceKit]!
@@ -1356,7 +1358,7 @@ class RetentionTest: XCTestCase {
         for variant in enabledIndexers {
             let graph = SourceGraph()
             configuration.useIndexStore = variant == .indexStore
-            try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: graph)
+            try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: graph, project: Self.project)
             try! Analyzer.perform(graph: graph)
             self.graph = graph
             try testBlock(variant)

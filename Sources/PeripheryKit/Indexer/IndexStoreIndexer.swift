@@ -4,15 +4,24 @@ import SwiftSyntax
 import SwiftIndexStore
 
 final class IndexStoreIndexer: TypeIndexer {
-    static func make(buildPlan: BuildPlan, graph: SourceGraph) throws -> Self {
+    static func make(buildPlan: BuildPlan, graph: SourceGraph, project: XcodeProjectlike) throws -> Self {
         let configuration = inject(Configuration.self)
-        guard let indexStorePathString = configuration.indexStorePath else {
-            throw PeripheryKitError.indexStoreError(message: "-index-store-path option is required")
+        let xcodebuild = inject(Xcodebuild.self)
+        let storePath: String
+
+        if let path = configuration.indexStorePath {
+            storePath = path
+        } else if let env = ProcessInfo.processInfo.environment["BUILD_ROOT"] {
+            storePath = (Path(env).absolute().parent().parent() + "Index/DataStore").string
+        } else {
+            storePath = try xcodebuild.indexStorePath(project: project)
         }
-        let indexStoreURL = URL(fileURLWithPath: indexStorePathString)
+
+        let storeURL = URL(fileURLWithPath: storePath)
+
         return self.init(buildPlan: buildPlan,
                          graph: graph,
-                         indexStore: try IndexStore.open(store: indexStoreURL, lib: .open()),
+                         indexStore: try IndexStore.open(store: storeURL, lib: .open()),
                          logger: inject(),
                          featureManager: inject(),
                          configuration: inject())

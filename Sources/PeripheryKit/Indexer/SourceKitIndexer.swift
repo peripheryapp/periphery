@@ -3,7 +3,7 @@ import PathKit
 import SwiftSyntax
 
 final class SourceKitIndexer: TypeIndexer {
-    static func make(buildPlan: BuildPlan, graph: SourceGraph) -> Self {
+    static func make(buildPlan: BuildPlan, graph: SourceGraph, project: XcodeProjectlike) -> Self {
         return self.init(buildPlan: buildPlan,
                          graph: graph,
                          logger: inject(),

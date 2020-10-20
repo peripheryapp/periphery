@@ -93,7 +93,7 @@ public final class Scan: Injectable {
             logger.info("\(asterisk) Indexing...")
         }
 
-        try Indexer.perform(buildPlan: buildPlan, graph: graph)
+        try Indexer.perform(buildPlan: buildPlan, graph: graph, project: project)
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)
