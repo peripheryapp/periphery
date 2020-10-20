@@ -150,11 +150,6 @@ public struct ScanCommand: ParsableCommand {
             configuration.indexStorePath = indexStorePath
         }
 
-        if configuration.indexStorePath == nil && configuration.useIndexStore,
-            let buildRootEnv = ProcessInfo.processInfo.environment["BUILD_ROOT"] {
-            configuration.indexStorePath = (Path(buildRootEnv).absolute().parent().parent() + "Index/DataStore").string
-        }
-
         if let formatName = format {
             configuration.outputFormat = try OutputFormat.make(named: formatName)
         }
