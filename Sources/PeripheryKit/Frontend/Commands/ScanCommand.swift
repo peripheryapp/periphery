@@ -1,6 +1,6 @@
 import Foundation
 import ArgumentParser
-import TSCBasic
+import PathKit
 
 public struct ScanCommand: ParsableCommand {
 
@@ -152,11 +152,7 @@ public struct ScanCommand: ParsableCommand {
 
         if configuration.indexStorePath == nil && configuration.useIndexStore,
             let buildRootEnv = ProcessInfo.processInfo.environment["BUILD_ROOT"] {
-            let buildRootPath = AbsolutePath(buildRootEnv)
-            configuration.indexStorePath = buildRootPath
-                .parentDirectory.parentDirectory
-                .appending(components: "Index", "DataStore")
-                .pathString
+            configuration.indexStorePath = (Path(buildRootEnv).absolute().parent().parent() + "Index/DataStore").string
         }
 
         if let formatName = format {

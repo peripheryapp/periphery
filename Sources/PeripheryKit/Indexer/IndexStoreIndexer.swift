@@ -1,7 +1,7 @@
 import Foundation
 import PathKit
 import SwiftSyntax
-import TSCBasic
+import SwiftIndexStore
 
 final class IndexStoreIndexer: TypeIndexer {
     static func make(buildPlan: BuildPlan, graph: SourceGraph) throws -> Self {
@@ -9,10 +9,10 @@ final class IndexStoreIndexer: TypeIndexer {
         guard let indexStorePathString = configuration.indexStorePath else {
             throw PeripheryKitError.indexStoreError(message: "-index-store-path option is required")
         }
-        let indexStorePath = AbsolutePath(indexStorePathString)
+        let indexStoreURL = URL(fileURLWithPath: indexStorePathString)
         return self.init(buildPlan: buildPlan,
                          graph: graph,
-                         indexStore: try IndexStore.open(store: indexStorePath, api: IndexStoreAPI.make()),
+                         indexStore: try IndexStore.open(store: indexStoreURL, lib: .open()),
                          logger: inject(),
                          featureManager: inject(),
                          configuration: inject())
@@ -57,7 +57,7 @@ final class IndexStoreIndexer: TypeIndexer {
                 try job.perform()
             }
 
-            self.logger.debug("[index:swift] \(job.unit.name) (\(elapsed)s)")
+            self.logger.debug("[index:swift] \(job.unit.name ?? "n/a") (\(elapsed)s)")
         }
 
         graph.identifyRootDeclarations()
@@ -112,36 +112,46 @@ final class IndexStoreIndexer: TypeIndexer {
         func perform() throws {
             var decls: [(decl: Declaration, structures: [[String: Any]])] = []
 
-            try indexStore.forEachOccurrences(for: unit) { occ in
-                guard occ.symbol.language == .swift, !occ.location.isSystem else { return true }
-                let shouldIndex = try buildPlan.targets.contains(where: {
-                    try $0.sourceFiles().contains(where: { $0.path.string == occ.location.path })
-                })
+            try indexStore.forEachRecordDependencies(for: unit) { dependency -> Bool in
+                guard case let .record(record) = dependency else { return true }
 
-                guard shouldIndex else { return true }
-                if !occ.roles.intersection([.definition, .declaration]).isEmpty {
-                    var rawStructures: [[String: Any]] = []
-                    if featureManager.isEnabled(.determineAccessibilityFromStructure) {
-                        let file = SourceFile(path: Path(occ.location.path))
-                        rawStructures = try self.indexStructure.get(file)
-                    }
-                    let decl = try _parseDecl(occ, rawStructures)
-                    graph.add(decl)
-                    decls.append((decl, rawStructures))
-                }
+                try indexStore.forEachOccurrences(for: record) { occurrence in
+                    guard let usr = occurrence.symbol.usr,
+                          let path = occurrence.location.path,
+                          let location = transformLocation(occurrence.location),
+                          occurrence.symbol.language == .swift,
+                          !occurrence.location.isSystem else { return true }
 
-                if !occ.roles.intersection([.reference]).isEmpty {
-                    let refs = try _parseReference(occ)
-                    for ref in refs {
-                        graph.add(ref)
-                    }
-                }
+                    let shouldIndex = try buildPlan.targets.contains(where: {
+                        try $0.sourceFiles().contains(where: { $0 == location.file })
+                    })
 
-                if !occ.roles.intersection([.implicit]).isEmpty {
-                    let refs = try _parseImplicit(occ)
-                    for ref in refs {
-                        graph.add(ref)
+                    guard shouldIndex else { return true }
+                    if !occurrence.roles.intersection([.definition, .declaration]).isEmpty {
+                        var rawStructures: [[String: Any]] = []
+                        if featureManager.isEnabled(.determineAccessibilityFromStructure) {
+                            let file = SourceFile(path: Path(path))
+                            rawStructures = try self.indexStructure.get(file)
+                        }
+                        let decl = try _parseDecl(occurrence, usr, location, rawStructures)
+                        graph.add(decl)
+                        decls.append((decl, rawStructures))
                     }
+
+                    if !occurrence.roles.intersection([.reference]).isEmpty {
+                        let refs = try _parseReference(occurrence, usr, location)
+                        for ref in refs {
+                            graph.add(ref)
+                        }
+                    }
+
+                    if !occurrence.roles.intersection([.implicit]).isEmpty {
+                        let refs = try _parseImplicit(occurrence, usr, location)
+                        for ref in refs {
+                            graph.add(ref)
+                        }
+                    }
+                    return true
                 }
                 return true
             }
@@ -198,17 +208,19 @@ final class IndexStoreIndexer: TypeIndexer {
         private var referencedUsrsByDecl: [Declaration: [Reference]] = [:]
 
         private func _parseDecl(
-            _ occ: IndexStoreOccurrence,
+            _ occurrence: IndexStoreOccurrence,
+            _ occurrenceUsr: String,
+            _ location: SourceLocation,
             _ indexedStructure: [[String: Any]]
         ) throws -> Declaration {
-            guard let kind = transformDeclarationKind(occ.symbol.kind, occ.symbol.subKind) else {
-                throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occ.symbol)")
+            guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind) else {
+                throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occurrence.symbol)")
             }
-            let loc = transformLocation(occ.location)
-            let decl = Declaration(kind: kind, usr: occ.symbol.usr, location: loc)
-            decl.name = occ.symbol.name
 
-            indexStore.forEachRelations(for: occ) { rel -> Bool in
+            let decl = Declaration(kind: kind, usr: occurrenceUsr, location: location)
+            decl.name = occurrence.symbol.name
+
+            indexStore.forEachRelations(for: occurrence) { rel -> Bool in
                 // Note: Skip adding accessor in variable children to avoid circurlar reference
                 // Expected graph is
                 // ```
@@ -221,13 +233,15 @@ final class IndexStoreIndexer: TypeIndexer {
                 //             └────> variable.setter
                 // ```
                 if !rel.roles.intersection([.childOf]).isEmpty && !rel.roles.contains(.accessorOf) {
-                    let parent = indexStore.getSymbol(for: rel.symbolRef)
-                    if self.childDeclsByParentUsr[parent.usr] != nil {
-                        self.childDeclsByParentUsr[parent.usr]?.insert(decl)
-                    } else {
-                        self.childDeclsByParentUsr[parent.usr] = [decl]
+                    if let parentUsr = rel.symbol.usr {
+                        if self.childDeclsByParentUsr[parentUsr] != nil {
+                            self.childDeclsByParentUsr[parentUsr]?.insert(decl)
+                        } else {
+                            self.childDeclsByParentUsr[parentUsr] = [decl]
+                        }
                     }
                 }
+
                 if !rel.roles.intersection([.overrideOf, .accessorOf]).isEmpty {
                     // ```
                     // class A { func f() {} }
@@ -236,21 +250,24 @@ final class IndexStoreIndexer: TypeIndexer {
                     // `B.f` is `overrideOf` `A.f`
                     // (B.f).relations has A.f
                     // B.f references A.f
+                    let baseFunc = rel.symbol
 
-                    let baseFunc = indexStore.getSymbol(for: rel.symbolRef)
-                    guard let refKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) else {
-                        logger.error("Failed to transform ref kind")
-                        return false
-                    }
-                    let reference = Reference(kind: refKind, usr: baseFunc.usr, location: decl.location)
-                    reference.name = baseFunc.name
-                    if rel.roles.contains(.overrideOf) {
-                        reference.isRelated = true
-                    }
-                    if self.referencedUsrsByDecl[decl] != nil {
-                        self.referencedUsrsByDecl[decl]?.append(reference)
-                    } else {
-                        self.referencedUsrsByDecl[decl] = [reference]
+                    if let baseFuncUsr = baseFunc.usr {
+                        guard let refKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) else {
+                            logger.error("Failed to transform ref kind")
+                            return false
+                        }
+
+                        let reference = Reference(kind: refKind, usr: baseFuncUsr, location: decl.location)
+                        reference.name = baseFunc.name
+                        if rel.roles.contains(.overrideOf) {
+                            reference.isRelated = true
+                        }
+                        if self.referencedUsrsByDecl[decl] != nil {
+                            self.referencedUsrsByDecl[decl]?.append(reference)
+                        } else {
+                            self.referencedUsrsByDecl[decl] = [reference]
+                        }
                     }
                 }
 
@@ -262,20 +279,24 @@ final class IndexStoreIndexer: TypeIndexer {
                     // `A` is `baseOf` `B`
                     // A.relations has B as `baseOf`
                     // B referenes A
-                    let referencer = indexStore.getSymbol(for: rel.symbolRef)
-                    guard let refKind = transformReferenceKind(occ.symbol.kind, occ.symbol.subKind) else {
-                        logger.error("Failed to transform ref kind")
-                        return false
-                    }
-                    let reference = Reference(kind: refKind, usr: decl.usr, location: decl.location)
-                    reference.name = decl.name
-                    if rel.roles.contains(.baseOf) {
-                        reference.isRelated = true
-                    }
-                    if self.referencedDeclsByUsr[referencer.usr] != nil {
-                        self.referencedDeclsByUsr[referencer.usr]?.insert(reference)
-                    } else {
-                        self.referencedDeclsByUsr[referencer.usr] = [reference]
+                    let referencer = rel.symbol
+
+                    if let referencerUsr = referencer.usr {
+                        guard let refKind = transformReferenceKind(occurrence.symbol.kind, occurrence.symbol.subKind) else {
+                            logger.error("Failed to transform ref kind")
+                            return false
+                        }
+                        let reference = Reference(kind: refKind, usr: decl.usr, location: decl.location)
+                        reference.name = decl.name
+                        if rel.roles.contains(.baseOf) {
+                            reference.isRelated = true
+                        }
+
+                        if self.referencedDeclsByUsr[referencerUsr] != nil {
+                            self.referencedDeclsByUsr[referencerUsr]?.insert(reference)
+                        } else {
+                            self.referencedDeclsByUsr[referencerUsr] = [reference]
+                        }
                     }
                 }
 
@@ -321,29 +342,34 @@ final class IndexStoreIndexer: TypeIndexer {
             }
         }
 
-        private func _parseImplicit(_ occ: IndexStoreOccurrence) throws -> [Reference] {
-            let loc = transformLocation(occ.location)
-
+        private func _parseImplicit(
+            _ occurrence: IndexStoreOccurrence,
+            _ occurrenceUsr: String,
+            _ location: SourceLocation
+        ) throws -> [Reference] {
             var refs = [Reference]()
 
-            indexStore.forEachRelations(for: occ) { rel -> Bool in
+            indexStore.forEachRelations(for: occurrence) { rel -> Bool in
                 if !rel.roles.intersection([.overrideOf]).isEmpty {
-                    let baseFunc = indexStore.getSymbol(for: rel.symbolRef)
-                    guard let refKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) else {
-                        logger.error("Failed to transform ref kind")
-                        return false
+                    let baseFunc = rel.symbol
+
+                    if let baseFuncUsr = baseFunc.usr {
+                        guard let refKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) else {
+                            logger.error("Failed to transform ref kind")
+                            return false
+                        }
+                        let reference = Reference(kind: refKind, usr: baseFuncUsr, location: location)
+                        reference.name = baseFunc.name
+                        if rel.roles.contains(.overrideOf) {
+                            reference.isRelated = true
+                        }
+                        if self.referencedDeclsByUsr[occurrenceUsr] != nil {
+                            self.referencedDeclsByUsr[occurrenceUsr]?.insert(reference)
+                        } else {
+                            self.referencedDeclsByUsr[occurrenceUsr] = [reference]
+                        }
+                        refs.append(reference)
                     }
-                    let reference = Reference(kind: refKind, usr: baseFunc.usr, location: loc)
-                    reference.name = baseFunc.name
-                    if rel.roles.contains(.overrideOf) {
-                        reference.isRelated = true
-                    }
-                    if self.referencedDeclsByUsr[occ.symbol.usr] != nil {
-                        self.referencedDeclsByUsr[occ.symbol.usr]?.insert(reference)
-                    } else {
-                        self.referencedDeclsByUsr[occ.symbol.usr] = [reference]
-                    }
-                    refs.append(reference)
                 }
                 return true
             }
@@ -351,15 +377,18 @@ final class IndexStoreIndexer: TypeIndexer {
             return refs
         }
 
-        private func _parseReference(_ occ: IndexStoreOccurrence) throws -> [Reference] {
-            guard let kind = transformReferenceKind(occ.symbol.kind, occ.symbol.subKind) else {
-                throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occ.symbol)")
+        private func _parseReference(
+            _ occurrence: IndexStoreOccurrence,
+            _ occurrenceUsr: String,
+            _ location: SourceLocation
+        ) throws -> [Reference] {
+            guard let kind = transformReferenceKind(occurrence.symbol.kind, occurrence.symbol.subKind) else {
+                throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occurrence.symbol)")
             }
-            let loc = transformLocation(occ.location)
 
             var refs = [Reference]()
 
-            indexStore.forEachRelations(for: occ) { rel -> Bool in
+            indexStore.forEachRelations(for: occurrence) { rel -> Bool in
                 if !rel.roles.intersection([.baseOf, .receivedBy, .calledBy, .containedBy, .extendedBy]).isEmpty {
                     // ```
                     // class A {}
@@ -368,33 +397,39 @@ final class IndexStoreIndexer: TypeIndexer {
                     // `A` is `baseOf` `B`
                     // A.relations has B as `baseOf`
                     // B referenes A
-                    let ref = Reference(kind: kind, usr: occ.symbol.usr, location: loc)
-                    ref.name = occ.symbol.name
-                    if rel.roles.contains(.baseOf) {
-                        ref.isRelated = true
-                    }
-                    refs.append(ref)
-                    let referencer = indexStore.getSymbol(for: rel.symbolRef)
-                    if self.referencedDeclsByUsr[referencer.usr] != nil {
-                        self.referencedDeclsByUsr[referencer.usr]?.insert(ref)
-                    } else {
-                        self.referencedDeclsByUsr[referencer.usr] = [ref]
+                    let referencer = rel.symbol
+
+                    if let referencerUsr = referencer.usr {
+                        let ref = Reference(kind: kind, usr: occurrenceUsr, location: location)
+                        ref.name = occurrence.symbol.name
+                        if rel.roles.contains(.baseOf) {
+                            ref.isRelated = true
+                        }
+                        refs.append(ref)
+
+                        if self.referencedDeclsByUsr[referencerUsr] != nil {
+                            self.referencedDeclsByUsr[referencerUsr]?.insert(ref)
+                        } else {
+                            self.referencedDeclsByUsr[referencerUsr] = [ref]
+                        }
                     }
                 }
                 return true
             }
 
             if refs.isEmpty {
-                let ref = Reference(kind: kind, usr: occ.symbol.usr, location: loc)
-                ref.name = occ.symbol.name
+                let ref = Reference(kind: kind, usr: occurrenceUsr, location: location)
+                ref.name = occurrence.symbol.name
                 refs.append(ref)
             }
 
             return refs
         }
 
-        private func transformLocation(_ input: IndexStoreOccurrence.Location) -> SourceLocation {
-            let file = SourceFile(path: Path(input.path))
+        private func transformLocation(_ input: IndexStoreOccurrence.Location) -> SourceLocation? {
+            guard let path = input.path else { return nil }
+
+            let file = SourceFile(path: Path(path))
             return SourceLocation(file: file, line: input.line, column: input.column)
         }
 
@@ -428,7 +463,7 @@ final class IndexStoreIndexer: TypeIndexer {
             switch kind {
             case .unknown: return nil
             case .module: return .module
-            case .namespace, .namespacealias:
+            case .namespace, .namespaceAlias:
                 logger.warn("'namespace' is not supported on Swift")
                 return nil
             case .macro:
@@ -448,24 +483,24 @@ final class IndexStoreIndexer: TypeIndexer {
             case .field:
                 logger.warn("'field' is not supported on Swift")
                 return nil
-            case .enumconstant: return .enumelement
-            case .instancemethod: return .functionMethodInstance
-            case .classmethod: return .functionMethodClass
-            case .staticmethod: return .functionMethodStatic
-            case .instanceproperty: return .varInstance
-            case .classproperty: return .varClass
-            case .staticproperty: return .varStatic
+            case .enumConstant: return .enumelement
+            case .instanceMethod: return .functionMethodInstance
+            case .classMethod: return .functionMethodClass
+            case .staticMethod: return .functionMethodStatic
+            case .instanceProperty: return .varInstance
+            case .classProperty: return .varClass
+            case .staticProperty: return .varStatic
             case .constructor: return .functionConstructor
             case .destructor: return .functionDestructor
-            case .conversionfunction:
-                logger.warn("'conversionfunction' is not supported on Swift")
+            case .conversionFunction:
+                logger.warn("'conversionFunction' is not supported on Swift")
                 return nil
             case .parameter: return .varParameter
             case .using:
                 logger.warn("'using' is not supported on Swift")
                 return nil
-            case .commenttag:
-                logger.warn("'commenttag' is not supported on Swift")
+            case .commentTag:
+                logger.warn("'commentTag' is not supported on Swift")
                 return nil
             }
         }
@@ -500,7 +535,7 @@ final class IndexStoreIndexer: TypeIndexer {
             switch kind {
             case .unknown: return nil
             case .module: return .module
-            case .namespace, .namespacealias:
+            case .namespace, .namespaceAlias:
                 logger.warn("'namespace' is not supported on Swift")
                 return nil
             case .macro:
@@ -520,24 +555,24 @@ final class IndexStoreIndexer: TypeIndexer {
             case .field:
                 logger.warn("'field' is not supported on Swift")
                 return nil
-            case .enumconstant: return .enumelement
-            case .instancemethod: return .functionMethodInstance
-            case .classmethod: return .functionMethodClass
-            case .staticmethod: return .functionMethodStatic
-            case .instanceproperty: return .varInstance
-            case .classproperty: return .varClass
-            case .staticproperty: return .varStatic
+            case .enumConstant: return .enumelement
+            case .instanceMethod: return .functionMethodInstance
+            case .classMethod: return .functionMethodClass
+            case .staticMethod: return .functionMethodStatic
+            case .instanceProperty: return .varInstance
+            case .classProperty: return .varClass
+            case .staticProperty: return .varStatic
             case .constructor: return .functionConstructor
             case .destructor: return .functionDestructor
-            case .conversionfunction:
-                logger.warn("'conversionfunction' is not supported on Swift")
+            case .conversionFunction:
+                logger.warn("'conversionFunction' is not supported on Swift")
                 return nil
             case .parameter: return .varParameter
             case .using:
                 logger.warn("'using' is not supported on Swift")
                 return nil
-            case .commenttag:
-                logger.warn("'commenttag' is not supported on Swift")
+            case .commentTag:
+                logger.warn("'commentTag' is not supported on Swift")
                 return nil
             }
         }

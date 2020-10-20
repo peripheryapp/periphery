@@ -1,6 +1,5 @@
 import XCTest
 import PathKit
-import TSCBasic
 @testable import PeripheryKit
 
 class RetentionTest: XCTestCase {
