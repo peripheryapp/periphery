@@ -5,13 +5,10 @@ import SwiftIndexStore
 
 final class IndexStoreIndexer: TypeIndexer {
     static func make(buildPlan: BuildPlan, graph: SourceGraph, project: XcodeProjectlike) throws -> Self {
-        let configuration = inject(Configuration.self)
         let xcodebuild = inject(Xcodebuild.self)
         let storePath: String
 
-        if let path = configuration.indexStorePath {
-            storePath = path
-        } else if let env = ProcessInfo.processInfo.environment["BUILD_ROOT"] {
+        if let env = ProcessInfo.processInfo.environment["BUILD_ROOT"] {
             storePath = (Path(env).absolute().parent().parent() + "Index/DataStore").string
         } else {
             storePath = try xcodebuild.indexStorePath(project: project)
