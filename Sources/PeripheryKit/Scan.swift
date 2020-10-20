@@ -73,19 +73,16 @@ public final class Scan: Injectable {
         try targets.forEach { try $0.identifyModuleName() }
         try TargetSourceFileUniquenessChecker.check(targets: targets)
 
-        let buildPlan: BuildPlan
-        if configuration.useIndexStore {
-            buildPlan = try BuildPlan.make(targets: targets)
-        } else {
-            // Ensure schemes exist within the project
-            let schemes = try project.schemes().filter { configuration.schemes.contains($0.name) }
-            let validSchemeNames = Set(schemes.map { $0.name })
-            if let scheme = Set(configuration.schemes).subtracting(validSchemeNames).first {
-                throw PeripheryKitError.invalidScheme(name: scheme, project: project.path.lastComponent)
-            }
-            let buildLog = try BuildLog.make(project: project, schemes: schemes, targets: targets).get()
-            buildPlan = try BuildPlan.make(buildLog: buildLog, targets: targets)
+        // Ensure schemes exist within the project
+        let schemes = try project.schemes().filter { configuration.schemes.contains($0.name) }
+        let validSchemeNames = Set(schemes.map { $0.name })
+
+        if let scheme = Set(configuration.schemes).subtracting(validSchemeNames).first {
+            throw PeripheryKitError.invalidScheme(name: scheme, project: project.path.lastComponent)
         }
+
+        let buildLog = try BuildLog.make(project: project, schemes: schemes, targets: targets).get()
+        let buildPlan = try BuildPlan.make(buildLog: buildLog, targets: targets)
         let graph = SourceGraph()
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
