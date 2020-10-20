@@ -66,9 +66,6 @@ public struct ScanCommand: ParsableCommand {
     @Flag(inversion: .prefixedNo, help: "Enable new indexing system using IndexStore")
     var useIndexStore: Bool?
 
-    @Option(help: "Path to index that should be loaded. e.g. DerivedData/PROJECT/Index/DataStore")
-    var indexStorePath: String?
-
     public init() {}
 
     public func run() throws {
@@ -144,10 +141,6 @@ public struct ScanCommand: ParsableCommand {
 
         if let useIndexStore = useIndexStore {
             configuration.useIndexStore = useIndexStore
-        }
-
-        if let indexStorePath = indexStorePath {
-            configuration.indexStorePath = indexStorePath
         }
 
         if let formatName = format {

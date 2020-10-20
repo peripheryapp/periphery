@@ -6,7 +6,6 @@ class RetentionTest: XCTestCase {
     static var project: Project!
     static var buildPlan: BuildPlan!
     static var target: Target!
-    static var indexStorePath: String!
 
     enum IndexerVariant: String, CaseIterable {
         case sourceKit = "SourceKit"
@@ -23,7 +22,6 @@ class RetentionTest: XCTestCase {
 
         target = project.targets.first { $0.name == "RetentionFixtures" }!
         buildPlan = try! BuildPlan.make(buildLog: buildLog, targets: [target])
-        indexStorePath = try! xcodebuild.indexStorePath(project: project)
     }
 
     private var graph: SourceGraph!
@@ -1322,7 +1320,6 @@ class RetentionTest: XCTestCase {
         let configuration = inject(Configuration.self)
         configuration.retainPublic = retainPublic
         configuration.retainObjcAnnotated = retainObjcAnnotated
-        configuration.indexStorePath = RetentionTest.indexStorePath
 
         if isMainFile {
             configuration.entryPointFilenames.append(testName.lowercased() + ".swift")
