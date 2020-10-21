@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/github/workflow/status/peripheryapp/periphery/Test/master">
 </a>
 <a href="https://github.com/peripheryapp/periphery/releases/latest">
-  <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg" />
+  <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?color=008DFF" />
 </a>
 
 <br>
