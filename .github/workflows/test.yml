@@ -1,0 +1,20 @@
+name: Test
+on:
+  push:
+    branches:
+      - master
+  pull_request: {}
+jobs:
+  run:
+    runs-on: macOS-latest
+    name: macOS
+    steps:
+    - uses: actions/checkout@master
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_12.1.app
+    - name: Generate project
+      run: make proj
+    - name: Build
+      run: swift build
+    - name: Test
+      run: swift test
