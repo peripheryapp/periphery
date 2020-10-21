@@ -48,13 +48,23 @@ final class IndexStoreIndexer: TypeIndexer {
     func perform() throws {
         var jobs = [Job]()
 
-        indexStore.forEachUnits { unit -> Bool in
-            jobs.append(
-                Job(
-                    unit: unit, buildPlan: buildPlan, graph: graph, indexStore: indexStore,
-                    logger: logger, featureManager: featureManager, configuration: configuration
+        var allowedSourceFilesPaths = Set(try buildPlan.targets.map { try $0.sourceFiles().map { $0.path.string } }.joined())
+        allowedSourceFilesPaths.subtract(configuration.indexExcludeSourceFiles.map { $0.path.string })
+
+        try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
+            guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
+
+            let shouldIndex = allowedSourceFilesPaths.contains(filePath)
+
+            if shouldIndex {
+                jobs.append(
+                    Job(
+                        unit: unit, buildPlan: buildPlan, graph: graph, indexStore: indexStore,
+                        logger: logger, featureManager: featureManager, configuration: configuration
+                    )
                 )
-            )
+            }
+
             return true
         }
 
@@ -81,22 +91,11 @@ final class IndexStoreIndexer: TypeIndexer {
         private let featureManager: FeatureManager
         private let configuration: Configuration
         private let indexStore: IndexStore
-
-
         private let sourceKit = SourceKit.make()
+
         private lazy var indexStructure = Cache { [sourceKit] (sourceFile: SourceFile) -> [[String: Any]] in
             let substructure = try sourceKit.editorOpenSubstructure(sourceFile)
             return substructure[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
-        }
-
-        private lazy var shouldIndex = Cache { [buildPlan, configuration] (path: String) -> Bool in
-            let isExcluded = { configuration.indexExcludeSourceFiles.contains(where: { $0.path.string == path }) }
-            let isInTarget = {
-                try buildPlan.targets.contains(where: {
-                    try $0.sourceFiles().contains(where: { $0.path.string == path })
-                })
-            }
-            return try !isExcluded() && isInTarget()
         }
 
         required init(unit: IndexStoreUnit,
@@ -125,8 +124,7 @@ final class IndexStoreIndexer: TypeIndexer {
                     guard let usr = occurrence.symbol.usr,
                           let path = occurrence.location.path,
                           let location = transformLocation(occurrence.location),
-                          occurrence.symbol.language == .swift,
-                          !occurrence.location.isSystem else { return true }
+                          occurrence.symbol.language == .swift else { return true }
 
                     let shouldIndex = try buildPlan.targets.contains(where: {
                         try $0.sourceFiles().contains(where: { $0 == location.file })
