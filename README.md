@@ -4,7 +4,9 @@
 
 > A tool to identify unused code in Swift projects.
 
-<img src="https://github.com/peripheryapp/periphery/workflows/Test/badge.svg?branch=master&event=push">
+<a href="https://github.com/peripheryapp/periphery/actions">
+  <img src="https://github.com/peripheryapp/periphery/workflows/Test/badge.svg?branch=master&event=push">
+</a>
 <a href="https://github.com/peripheryapp/periphery/releases/latest">
   <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg" />
 </a>
