@@ -16,7 +16,7 @@ let package = Package(
         .package(url: "https://github.com/kylef/PathKit", from: "1.0.0"),
         .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax", .exact("0.50300.0")),
         .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
-        .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.1.0"),
+        .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", .revision("047875b31d65a39919bf1b10304aec7f1d86f971")),
     ],
     targets: [
         .target(
