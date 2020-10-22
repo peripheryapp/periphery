@@ -1254,19 +1254,18 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    // https://bugs.swift.org/browse/SR-13766
     func testClassRetainedByUnusedInstanceVariable() {
         guard performKnownFailures else { return }
 
         // SourceKit structures the class reference as a descendent of the parent
         // class, not the var declaration.
         analyze(retainPublic: true) {
-
             XCTAssertReferenced((.class, "FixtureClass71"))
 
-            XCTAssertNotReferenced((.class, "FixtureProtocol72"))
+            XCTAssertNotReferenced((.class, "FixtureClass71"))
             XCTAssertNotReferenced((.varInstance, "someVar"),
                                    descendentOf: (.class, "FixtureClass71"))
-
         }
     }
 
