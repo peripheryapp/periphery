@@ -126,11 +126,6 @@ final class IndexStoreIndexer: TypeIndexer {
                           let location = transformLocation(occurrence.location),
                           occurrence.symbol.language == .swift else { return true }
 
-                    let shouldIndex = try buildPlan.targets.contains(where: {
-                        try $0.sourceFiles().contains(where: { $0 == location.file })
-                    })
-
-                    guard shouldIndex else { return true }
                     if !occurrence.roles.intersection([.definition, .declaration]).isEmpty {
                         var rawStructures: [[String: Any]] = []
                         if featureManager.isEnabled(.determineAccessibilityFromStructure) {
