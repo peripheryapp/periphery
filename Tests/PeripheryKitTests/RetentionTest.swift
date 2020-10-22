@@ -1201,10 +1201,10 @@ class RetentionTest: XCTestCase {
 
     // MARK: - Known Failures
 
+    // https://bugs.swift.org/browse/SR-13768
     func testCustomConstructorithLiteral() {
         guard performKnownFailures else { return }
 
-        // TODO: Report to Apple.
         analyze(retainPublic: true) {
             XCTAssertReferenced((.functionConstructor, "init(title:)"))
         }
