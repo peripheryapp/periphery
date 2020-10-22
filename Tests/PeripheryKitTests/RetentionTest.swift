@@ -1280,6 +1280,7 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    // https://bugs.swift.org/browse/SR-13767
     func testDoesNotRetainLazyProperty() {
         guard performKnownFailures else { return }
 
