@@ -8,14 +8,16 @@ public final class SourceGraphDebugger {
     }
 
     public func describeGraph() {
-        describe(graph.rootDeclarations.sorted(by: { $0.usr < $1.usr }))
+        var entities: [Entity] = graph.rootDeclarations.map { $0 as Entity }
+        entities += graph.rootReferences.map { $0 as Entity }
+        describe(entities.sorted(by: { $0.usr < $1.usr }))
     }
 
-    func describe(_ declarations: [Declaration]) {
-        for (index, declaration) in declarations.enumerated() {
-            describe(declaration)
+    func describe(_ entities: [Entity]) {
+        for (index, entity) in entities.enumerated() {
+            describe(entity)
 
-            if index != declarations.count - 1 {
+            if index != entities.count - 1 {
                 print("")
             }
         }
