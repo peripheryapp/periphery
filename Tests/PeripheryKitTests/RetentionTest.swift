@@ -498,6 +498,15 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testPropertyReferencedByComputedValue() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass78"))
+            XCTAssertReferenced((.varInstance, "someVar"))
+            XCTAssertReferenced((.varInstance, "someOtherVar"))
+            XCTAssertNotReferenced((.varInstance, "unusedVar"))
+        }
+    }
+
     func testInstanceVarReferencedInClosure() {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass69"))
