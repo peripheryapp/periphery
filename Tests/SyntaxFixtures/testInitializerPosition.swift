@@ -7,3 +7,7 @@ class SyntaxFixture20 {
 class SyntaxFixture20Generic {
     init<T>(type: T.Type) {}
 }
+
+class SyntaxFixture20Optional {
+    init?(someVar: Int = 0) {}
+}

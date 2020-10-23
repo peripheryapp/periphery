@@ -696,66 +696,8 @@ class RetentionTest: XCTestCase {
 
     // MARK: - Unused Parameters
 
-    func testRetainsParamUsedInOverriddenMethod_IndexStore() throws {
-        analyze(retainPublic: true, enabledIndexers: [.indexStore], fixture: "testRetainsParamUsedInOverriddenMethod") {
-            // - FixtureClass101Base
-
-            // Not used and not overriden.
-            XCTAssertNotReferenced((.varParameter, "param"),
-                                   descendentOf: (.class, "FixtureClass101Base"), (.functionMethodInstance, "func1(param:)"))
-
-            // Param is used.
-            XCTAssertReferenced((.varParameter, "param"),
-                                descendentOf: (.class, "FixtureClass101Base"), (.functionMethodInstance, "func2(param:)"))
-
-            // Used in override.
-            XCTAssertReferenced((.varParameter, "param"),
-                                descendentOf: (.class, "FixtureClass101Base"), (.functionMethodInstance, "func3(param:)"))
-
-            // Used in deeply nested override.
-            XCTAssertReferenced((.varParameter, "param"),
-                                descendentOf: (.class, "FixtureClass101Base"), (.functionMethodInstance, "func4(param:)"))
-
-            // Not used in any override.
-            XCTAssertNotReferenced((.varParameter, "param"),
-                                   descendentOf: (.class, "FixtureClass101Base"), (.functionMethodInstance, "func5(param:)"))
-
-            // - FixtureClass101Subclass1
-
-            // Used in base.
-            XCTAssertReferenced((.varParameter, "param"),
-                                   descendentOf: (.class, "FixtureClass101Subclass1"), (.functionMethodInstance, "func2(param:)"))
-
-            // Param is used.
-            XCTAssertReferenced((.varParameter, "param"),
-                                descendentOf: (.class, "FixtureClass101Subclass1"), (.functionMethodInstance, "func3(param:)"))
-
-            // - FixtureClass101Subclass2
-
-            // Param is used.
-            XCTAssertReferenced((.varParameter, "param"),
-                                descendentOf: (.class, "FixtureClass101Subclass2"), (.functionMethodInstance, "func4(param:)"))
-
-            // Not used in any override.
-            XCTAssertNotReferenced((.varParameter, "param"),
-                                   descendentOf: (.class, "FixtureClass101Subclass2"), (.functionMethodInstance, "func5(param:)"))
-
-            // - FixtureClass101InheritForeignBase
-
-            // Overrides foreign function.
-            XCTAssertReferenced((.varParameter, "object"),
-                                descendentOf: (.class, "FixtureClass101InheritForeignBase"), (.functionMethodInstance, "isEqual(_:)"))
-
-            // - FixtureClass101InheritForeignSubclass1
-
-            // Overrides foreign function from base.
-            XCTAssertReferenced((.varParameter, "object"),
-                                descendentOf: (.class, "FixtureClass101InheritForeignSubclass1"), (.functionMethodInstance, "isEqual(_:)"))
-        }
-    }
-
     func testRetainsParamUsedInOverriddenMethod() throws {
-        try analyze(retainPublic: true, enabledIndexers: [.sourceKit]) {
+        try analyze(retainPublic: true) {
             // - FixtureClass101Base
 
             let baseFunc1Param = get("param", "func1(param:)", "FixtureClass101Base")
@@ -809,12 +751,11 @@ class RetentionTest: XCTestCase {
             let foreignSub1FuncParam = get("object", "isEqual(_:)", "FixtureClass101InheritForeignSubclass1")
             // Overrides foreign function.
             try XCTAssertTrue(XCTUnwrap(foreignSub1FuncParam).isRetained)
-
         }
     }
 
     func testRetainsForeignProtocolParameters() throws {
-        try analyze(retainPublic: true, enabledIndexers: [.sourceKit]) {
+        try analyze(retainPublic: true) {
             let decoderParam = get("decoder", "init(from:)", "FixtureClass103")
             try XCTAssertTrue(XCTUnwrap(decoderParam).isRetained)
 
@@ -823,25 +764,11 @@ class RetentionTest: XCTestCase {
         }
     }
 
-    func testRetainsForeignProtocolParameters_IndexStore() {
-        analyze(retainPublic: true, enabledIndexers: [.indexStore], fixture: "testRetainsForeignProtocolParameters") {
-            XCTAssertReferenced(
-                (.varParameter, "decoder"),
-                descendentOf: (.class, "FixtureClass103"), (.functionConstructor, "init(from:)")
-            )
-
-            XCTAssertReferenced(
-                (.varParameter, "encoder"),
-                descendentOf: (.class, "FixtureClass103"), (.functionMethodInstance, "encode(to:)")
-            )
-        }
-    }
-
     func testRetainUnusedProtocolFuncParams() throws {
         let configuration = inject(Configuration.self)
         configuration.retainUnusedProtocolFuncParams = true
 
-        try analyze(retainPublic: true, enabledIndexers: [.sourceKit]) {
+        try analyze(retainPublic: true) {
             let protoParam = get("param", "myFunc(param:)", "FixtureProtocol107")
             try XCTAssertTrue(XCTUnwrap(protoParam).isRetained)
 
@@ -856,35 +783,8 @@ class RetentionTest: XCTestCase {
         }
     }
 
-    func testRetainUnusedProtocolFuncParams_IndexStore() {
-        let configuration = inject(Configuration.self)
-        configuration.retainUnusedProtocolFuncParams = true
-
-        analyze(retainPublic: true, enabledIndexers: [.indexStore], fixture: "testRetainUnusedProtocolFuncParams") {
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.protocol, "FixtureProtocol107"), (.functionMethodInstance, "myFunc(param:)")
-            )
-
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.extensionProtocol, "FixtureProtocol107"), (.functionMethodInstance, "myFunc(param:)")
-            )
-
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.class, "FixtureClass107Class1"), (.functionMethodInstance, "myFunc(param:)")
-            )
-
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.class, "FixtureClass107Class2"), (.functionMethodInstance, "myFunc(param:)")
-            )
-        }
-    }
-
     func testRetainsProtocolParameters() throws {
-        try analyze(retainPublic: true, enabledIndexers: [.sourceKit]) {
+        try analyze(retainPublic: true) {
             // - FixtureProtocol104
 
             let protoFunc1Param1 = get("param1", "func1(param1:param2:)", "FixtureProtocol104")
@@ -989,164 +889,11 @@ class RetentionTest: XCTestCase {
         }
     }
 
-    func testRetainsProtocolParameters_IndexStore() {
-        analyze(retainPublic: true, enabledIndexers: [.indexStore], fixture: "testRetainsProtocolParameters") {
-            // - FixtureProtocol104
-
-            // Used in a conformance.
-            XCTAssertReferenced(
-                (.varParameter, "param1"),
-                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func1(param1:param2:)")
-            )
-
-            // Not used in any conformance.
-            XCTAssertNotReferenced(
-                (.varParameter, "param2"),
-                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func1(param1:param2:)")
-            )
-
-            // Not used in any conformance.
-            XCTAssertNotReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func2(param:)")
-            )
-
-            // Used in the extension.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func3(param:)")
-            )
-
-            // Unused in extension, but used in conformance.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func4(param:)")
-            )
-
-            // Used in a conformance.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodStatic, "func5(param:)")
-            )
-
-            // Used in a override.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.protocol, "FixtureProtocol104"), (.functionMethodInstance, "func6(param:)")
-            )
-
-            // - FixtureProtocol104 (extension)
-
-            // Used in the extension.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.extensionProtocol, "FixtureProtocol104"), (.functionMethodInstance, "func3(param:)")
-            )
-
-            // Used in a conformance by another class.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.extensionProtocol, "FixtureProtocol104"), (.functionMethodInstance, "func4(param:)")
-            )
-
-            // - FixtureClass104Class1
-
-            // Used in a conformance by another class.
-            XCTAssertReferenced(
-                (.varParameter, "param1"),
-                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodInstance, "func1(param1:param2:)")
-            )
-
-            // Not used in any conformance.
-            XCTAssertNotReferenced(
-                (.varParameter, "param2"),
-                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodInstance, "func1(param1:param2:)")
-            )
-
-            // Not used in any conformance.
-            XCTAssertNotReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodInstance, "func2(param:)")
-            )
-
-            // Used.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodStatic, "func5(param:)")
-            )
-
-            // Used in an override.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodInstance, "func6(param:)")
-            )
-
-            // Explicitly ignored.
-            XCTAssertReferenced(
-                (.varParameter, "_"),
-                descendentOf: (.class, "FixtureClass104Class1"), (.functionMethodInstance, "func7(_:)")
-            )
-
-            // - FixtureClass104Class2
-
-            // Used.
-            XCTAssertReferenced(
-                (.varParameter, "param1"),
-                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func1(param1:param2:)")
-            )
-
-            // Not used in any conformance.
-            XCTAssertNotReferenced(
-                (.varParameter, "param2"),
-                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func1(param1:param2:)")
-            )
-
-            // Not used in any conformance.
-            XCTAssertNotReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func2(param:)")
-            )
-
-            // Used.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func4(param:)")
-            )
-
-            // Used.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodStatic, "func5(param:)")
-            )
-
-            // Used in a override.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func6(param:)")
-            )
-
-            // Explicitly ignored.
-            XCTAssertReferenced(
-                (.varParameter, "_"),
-                descendentOf: (.class, "FixtureClass104Class2"), (.functionMethodInstance, "func7(_:)")
-            )
-
-            // - FixtureClass104Class3
-
-            // Used.
-            XCTAssertReferenced(
-                (.varParameter, "param"),
-                descendentOf: (.class, "FixtureClass104Class3"), (.functionMethodInstance, "func6(param:)")
-            )
-        }
-    }
-
     func testIgnoreUnusedParamInUnusedFunction() {
         analyze() {
             XCTAssertNotReferenced((.class, "FixtureClass105"))
             XCTAssertNotReferenced((.functionMethodInstance, "unused(param:)"))
             XCTAssertIgnored((.varParameter, "param"))
-
         }
     }
 
@@ -1154,7 +901,6 @@ class RetentionTest: XCTestCase {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.functionMethodInstance, "nested1()"))
             XCTAssertReferenced((.functionMethodInstance, "nested2()"))
-
         }
     }
 
@@ -1221,7 +967,6 @@ class RetentionTest: XCTestCase {
                                 descendentOf: (.class, "XibView"))
             XCTAssertReferenced((.functionMethodInstance, "click(_:)"),
                                 descendentOf: (.class, "XibView"))
-
         }
     }
 
@@ -1231,7 +976,6 @@ class RetentionTest: XCTestCase {
 
         analyze() {
             XCTAssertReferenced((.class, "XibViewController"))
-
         }
     }
 
@@ -1250,7 +994,6 @@ class RetentionTest: XCTestCase {
 
             XCTAssertReferenced((.varInstance, "someGetSetVar"),
                                 descendentOf: (.protocol, "FixtureProtocol100"))
-
         }
     }
 
@@ -1276,7 +1019,6 @@ class RetentionTest: XCTestCase {
             XCTAssertReferenced((.class, "FixtureClass38"))
             XCTAssertNotReferenced((.varStatic, "propertyA"))
             XCTAssertNotReferenced((.varStatic, "propertyB"))
-
         }
     }
 
@@ -1288,7 +1030,6 @@ class RetentionTest: XCTestCase {
             XCTAssertReferenced((.class, "FixtureClass36"))
             XCTAssertNotReferenced((.varInstance, "someLazyVar"))
             XCTAssertNotReferenced((.varInstance, "someVar"))
-
         }
     }
 

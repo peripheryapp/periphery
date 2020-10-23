@@ -16,8 +16,6 @@ public final class Declaration: Entity, CustomStringConvertible {
         case paramFuncOverridden
         case paramFuncForeginProtocol
         case paramFuncLocalProtocol
-        case paramExplicitlyIgnored
-        case protocolFuncParamForceRetained
     }
 
     enum Kind: String, RawRepresentable, CaseIterable {
@@ -180,10 +178,6 @@ public final class Declaration: Entity, CustomStringConvertible {
     var name: String?
     var structureAccessibility: Accessibility = .internal
     var isImplicit: Bool = false
-
-    var parameterDeclarations: Set<Declaration> {
-        declarations.filter { $0.kind == .varParameter }
-    }
 
     var attributeAccessibility: Accessibility {
         if attributes.contains("public") {
