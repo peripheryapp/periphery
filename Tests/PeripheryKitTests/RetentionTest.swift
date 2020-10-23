@@ -5,7 +5,7 @@ import PathKit
 class RetentionTest: XCTestCase {
     static var project: Project!
     static var buildPlan: BuildPlan!
-    static var target: Target!
+    static var fixtureTarget: Target!
 
     enum IndexerVariant: String, CaseIterable {
         case sourceKit = "SourceKit"
@@ -20,8 +20,9 @@ class RetentionTest: XCTestCase {
         try! xcodebuild.clearDerivedData(for: project)
         let buildLog = try! xcodebuild.build(project: project, scheme: "RetentionFixtures")
 
-        target = project.targets.first { $0.name == "RetentionFixtures" }!
-        buildPlan = try! BuildPlan.make(buildLog: buildLog, targets: [target])
+        fixtureTarget = project.targets.first { $0.name == "RetentionFixtures" }!
+        let crossModuleFixtureTarget = project.targets.first { $0.name == "RetentionFixturesCrossModule" }!
+        buildPlan = try! BuildPlan.make(buildLog: buildLog, targets: [fixtureTarget, crossModuleFixtureTarget])
     }
 
     private var graph: SourceGraph!
@@ -703,6 +704,20 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testCrossModuleReference() {
+        // Entry point is used that so that retainPublic can be disabled, as PublicCrossModuleReferenced must be public in order to be imported.
+        analyze(isMainFile: true) {
+            XCTAssertReferenced((.class, "PublicCrossModuleReferenced"))
+            XCTAssertNotReferenced((.class, "PublicCrossModuleNotReferenced"))
+        }
+    }
+
+    func testCrossModuleReferenceTestableImport() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "InternalCrossModuleReferenced"))
+        }
+    }
+
     // MARK: - Unused Parameters
 
     func testRetainsParamUsedInOverriddenMethod() throws {
@@ -1083,7 +1098,7 @@ class RetentionTest: XCTestCase {
             XCTAssertTrue($0.path.exists, "\($0.path.string) does not exist.")
         }
 
-        RetentionTest.target.set(sourceFiles: sourceFiles)
+        RetentionTest.fixtureTarget.set(sourceFiles: sourceFiles)
 
         var indexedGraphs: [IndexerVariant: SourceGraph] = [:]
         var analyzedGraphs: [IndexerVariant: SourceGraph] = [:]

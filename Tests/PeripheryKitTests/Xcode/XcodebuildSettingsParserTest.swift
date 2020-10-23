@@ -27,8 +27,8 @@ class XcodebuildSettingsParserTest: XCTestCase {
         let pyKitSettings = try! xcodebuild.buildSettings(for: project, scheme: "Periphery-Package")
         let pyKitParser = XcodebuildSettingsParser(settings: pyKitSettings)
 
-        XCTAssertEqual(pyKitParser.buildTargets(action: "build").sorted(), ["Periphery", "PeripheryKit"])
-        XCTAssertEqual(pyKitParser.buildTargets(action: "test").sorted(), ["Periphery", "PeripheryKit", "PeripheryKitTests", "RetentionFixtures", "SyntaxFixtures", "TestEmptyTarget"])
+        XCTAssertEqual(pyKitParser.buildTargets(action: "build").sorted(), ["Periphery", "PeripheryKit", "RetentionFixturesCrossModule"])
+        XCTAssertEqual(pyKitParser.buildTargets(action: "test").sorted(), ["Periphery", "PeripheryKit", "PeripheryKitTests", "RetentionFixtures", "RetentionFixturesCrossModule", "SyntaxFixtures", "TestEmptyTarget"])
 
         let pySettings = try! xcodebuild.buildSettings(for: project, scheme: "Periphery")
         let pyParser = XcodebuildSettingsParser(settings: pySettings)

@@ -34,8 +34,12 @@ let package = Package(
                 .product(name: "SwiftIndexStore", package: "SwiftIndexStore"),
             ]
         ),
+        .target(
+            name: "RetentionFixturesCrossModule"
+        ),
         .testTarget(
-            name: "RetentionFixtures"
+            name: "RetentionFixtures",
+            dependencies: ["RetentionFixturesCrossModule"]
         ),
         .testTarget(
             name: "TestEmptyTarget"
