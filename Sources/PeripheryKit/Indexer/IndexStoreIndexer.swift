@@ -48,16 +48,20 @@ final class IndexStoreIndexer: TypeIndexer {
     func perform() throws {
         var jobs = [Job]()
 
-        var allowedSourceFilesPaths = Set(try buildPlan.targets.map { try $0.sourceFiles().map { $0.path } }.joined())
-        allowedSourceFilesPaths.subtract(configuration.indexExcludeSourceFiles.map { $0.path })
+        let allowedSourceFilesPaths = Set(try buildPlan.targets.map { try $0.sourceFiles().map { $0.path } }.joined())
+        let excludedPaths = configuration.indexExcludeSourceFiles.map { $0.path }
 
         try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
             guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
 
             let path = Path(filePath)
-            let shouldIndex = allowedSourceFilesPaths.contains(path)
 
-            if shouldIndex {
+            guard !excludedPaths.contains(path) else {
+                self.logger.debug("[index:swift:exclude] \(path.string)")
+                return true
+            }
+
+            if allowedSourceFilesPaths.contains(path) {
                 jobs.append(
                     Job(
                         filePath: path,
@@ -127,95 +131,129 @@ final class IndexStoreIndexer: TypeIndexer {
         }
 
         func perform() throws {
-            var decls: [(decl: Declaration, structures: [[String: Any]])] = []
+            var decls: [Declaration] = []
 
-            try indexStore.forEachRecordDependencies(for: unit) { dependency -> Bool in
+            try indexStore.forEachRecordDependencies(for: unit) { dependency in
                 guard case let .record(record) = dependency else { return true }
 
                 try indexStore.forEachOccurrences(for: record) { occurrence in
                     guard let usr = occurrence.symbol.usr,
-                          let path = occurrence.location.path,
                           let location = transformLocation(occurrence.location),
                           occurrence.symbol.language == .swift else { return true }
 
                     if !occurrence.roles.intersection([.definition, .declaration]).isEmpty {
-                        var rawStructures: [[String: Any]] = []
-                        if featureManager.isEnabled(.determineAccessibilityFromStructure) {
-                            let file = SourceFile(path: Path(path))
-                            rawStructures = try self.indexStructure.get(file)
-                        }
-
-                        if let decl = try _parseDecl(occurrence, usr, location) {
-                            graph.add(decl)
-                            decls.append((decl, rawStructures))
+                        if let decl = try parseDeclaration(occurrence, usr, location) {
+                            decls.append(decl)
                         }
                     }
 
                     if !occurrence.roles.intersection([.reference]).isEmpty {
-                        let refs = try _parseReference(occurrence, usr, location)
-                        for ref in refs {
-                            graph.add(ref)
-                        }
+                        try parseReference(occurrence, usr, location)
                     }
 
                     if !occurrence.roles.intersection([.implicit]).isEmpty {
-                        let refs = try _parseImplicit(occurrence, usr, location)
-                        for ref in refs {
-                            graph.add(ref)
-                        }
+                        try parseImplicit(occurrence, usr, location)
                     }
+
                     return true
                 }
+
                 return true
             }
 
-            do {
-                // Make relationships between declarations
+            establishDeclarationHierarchy()
+            associateDanglingReferences(with: decls)
+            try determineAccessibilityFromStructure(for: decls)
+            try identifyUnusedParameters(for: decls.filter { $0.kind.isFunctionKind })
+        }
 
-                for (parent, decls) in childDeclsByParentUsr {
-                    guard let parentDecl = graph.explicitDeclaration(withUsr: parent) else {
-                        continue
-                    }
-                    for decl in decls {
-                        decl.parent = parentDecl
-                    }
-                    parentDecl.declarations.formUnion(decls)
+        private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
+        private var referencedDeclsByUsr: [String: Set<Reference>] = [:]
+        private var referencedUsrsByDecl: [Declaration: [Reference]] = [:]
+        private var danglingReferences: [Reference] = []
+
+        private func establishDeclarationHierarchy() {
+            for (parent, decls) in childDeclsByParentUsr {
+                guard let parentDecl = graph.explicitDeclaration(withUsr: parent) else {
+                    continue
                 }
 
-                for (usr, references) in referencedDeclsByUsr {
-                    guard let decl = graph.explicitDeclaration(withUsr: usr) else {
-                        continue
-                    }
-                    for reference in references {
-                        reference.parent = decl
-                        graph.add(reference)
-                        if reference.isRelated {
-                            decl.related.insert(reference)
-                        } else {
-                            decl.references.insert(reference)
-                        }
-                    }
+                for decl in decls {
+                    decl.parent = parentDecl
                 }
 
-                for (decl, refs) in referencedUsrsByDecl {
-                    for ref in refs {
-                        ref.parent = decl
-                        graph.add(ref)
-                        if ref.isRelated {
-                            decl.related.insert(ref)
-                        } else {
-                            decl.references.insert(ref)
-                        }
+                parentDecl.declarations.formUnion(decls)
+            }
+
+            for (usr, references) in referencedDeclsByUsr {
+                guard let decl = graph.explicitDeclaration(withUsr: usr) else {
+                    danglingReferences.append(contentsOf: references)
+                    continue
+                }
+
+                for reference in references {
+                    reference.parent = decl
+
+                    if reference.isRelated {
+                        decl.related.insert(reference)
+                    } else {
+                        decl.references.insert(reference)
                     }
                 }
             }
 
-            for (decl, structure) in decls {
-                guard decl.parent == nil else { continue }
-                try _parseIndexedStructure(decl, structure)
+            for (decl, refs) in referencedUsrsByDecl {
+                for ref in refs {
+                    ref.parent = decl
+
+                    if ref.isRelated {
+                        decl.related.insert(ref)
+                    } else {
+                        decl.references.insert(ref)
+                    }
+                }
+            }
+        }
+
+        // Workaround for https://bugs.swift.org/browse/SR-13766
+        private func associateDanglingReferences(with decls: [Declaration]) {
+            guard !danglingReferences.isEmpty else { return }
+
+            let declsByLocation = decls.lazy.map { ($0.location, $0) }.reduce(into: [SourceLocation: [Declaration]]()) { (result, tuple) in
+                result[tuple.0, default: []].append(tuple.1)
+            }
+            let declsByLine = decls.lazy.map { ($0.location.line, $0) }.reduce(into: [Int64: [Declaration]]()) { (result, tuple) in
+                result[tuple.0, default: []].append(tuple.1)
             }
 
-            let functionDelcsByLocation = decls.filter { $0.0.kind.isFunctionKind }.map { ($0.0.location, $0.0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
+            for ref in danglingReferences {
+                guard let candidateDecls = declsByLocation[ref.location] ?? declsByLine[ref.location.line] else { continue }
+
+                // The vast majority of the time there will only be a single declaration for this location,
+                // however it is possible for there to be more than one. In that case, first attempt to associate with
+                // a decl without a parent, as the reference may be a related type of a class/struct/etc.
+                if let decl = candidateDecls.first(where: { $0.parent == nil }) {
+                    ref.parent = decl
+
+                    if ref.isRelated {
+                        decl.related.insert(ref)
+                    } else {
+                        decl.references.insert(ref)
+                    }
+                } else if let decl = candidateDecls.first { // Fallback to using the first decl.
+                    ref.parent = decl
+
+                    if ref.isRelated {
+                        decl.related.insert(ref)
+                    } else {
+                        decl.references.insert(ref)
+                    }
+                }
+            }
+        }
+
+        private func identifyUnusedParameters(for decls: [Declaration]) throws {
+            let functionDelcsByLocation = decls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
 
             let analyzer = UnusedParameterAnalyzer()
             let params = try analyzer.analyze(file: filePath, parseProtocols: true)
@@ -234,11 +272,7 @@ final class IndexStoreIndexer: TypeIndexer {
             }
         }
 
-        private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
-        private var referencedDeclsByUsr: [String: Set<Reference>] = [:]
-        private var referencedUsrsByDecl: [Declaration: [Reference]] = [:]
-
-        private func _parseDecl(
+        private func parseDeclaration(
             _ occurrence: IndexStoreOccurrence,
             _ occurrenceUsr: String,
             _ location: SourceLocation
@@ -286,6 +320,8 @@ final class IndexStoreIndexer: TypeIndexer {
                         reference.name = baseFunc.name
                         reference.isRelated = true
 
+                        graph.add(reference)
+
                         if self.referencedUsrsByDecl[decl] != nil {
                             self.referencedUsrsByDecl[decl]?.append(reference)
                         } else {
@@ -309,11 +345,15 @@ final class IndexStoreIndexer: TypeIndexer {
                             logger.error("Failed to transform ref kind")
                             return false
                         }
+
                         let reference = Reference(kind: refKind, usr: decl.usr, location: decl.location)
                         reference.name = decl.name
+
                         if rel.roles.contains(.baseOf) {
                             reference.isRelated = true
                         }
+
+                        graph.add(reference)
 
                         if self.referencedDeclsByUsr[referencerUsr] != nil {
                             self.referencedDeclsByUsr[referencerUsr]?.insert(reference)
@@ -325,16 +365,25 @@ final class IndexStoreIndexer: TypeIndexer {
 
                 return true
             }
+
+            graph.add(decl)
             return decl
         }
 
-        private func _parseIndexedStructure(
-            _ decl: Declaration,
-            _ indexedStructure: [[String: Any]]
-        ) throws {
-            let matchingStructures = indexedStructure.lazy.filter {
+        private func determineAccessibilityFromStructure(for decls: [Declaration]) throws {
+            let file = SourceFile(path: filePath)
+            let structure = try self.indexStructure.get(file)
+
+            for decl in decls {
+                guard decl.parent == nil else { continue }
+                try determineAccessibilityFromStructure(for: decl, with: structure)
+            }
+        }
+
+        private func determineAccessibilityFromStructure(for decl: Declaration, with structure: [[String: Any]]) throws {
+            let matchingStructures = structure.lazy.filter {
                 guard let structureKindName = $0[SourceKit.Key.kind.rawValue] as? String,
-                    let structureKind = Declaration.Kind(rawValue: structureKindName) else { return false }
+                      let structureKind = Declaration.Kind(rawValue: structureKindName) else { return false }
 
                 var structureName = $0[SourceKit.Key.name.rawValue] as? String
 
@@ -360,16 +409,17 @@ final class IndexStoreIndexer: TypeIndexer {
                 }
                 substructures += structure[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
             }
+
             for child in decl.declarations {
-                try _parseIndexedStructure(child, substructures)
+                try determineAccessibilityFromStructure(for: child, with: substructures)
             }
         }
 
-        private func _parseImplicit(
+        private func parseImplicit(
             _ occurrence: IndexStoreOccurrence,
             _ occurrenceUsr: String,
             _ location: SourceLocation
-        ) throws -> [Reference] {
+        ) throws {
             var refs = [Reference]()
 
             indexStore.forEachRelations(for: occurrence) { rel -> Bool in
@@ -381,30 +431,34 @@ final class IndexStoreIndexer: TypeIndexer {
                             logger.error("Failed to transform ref kind")
                             return false
                         }
+
                         let reference = Reference(kind: refKind, usr: baseFuncUsr, location: location)
                         reference.name = baseFunc.name
-                        if rel.roles.contains(.overrideOf) {
-                            reference.isRelated = true
-                        }
+                        reference.isRelated = true
+
+                        graph.add(reference)
+
                         if self.referencedDeclsByUsr[occurrenceUsr] != nil {
                             self.referencedDeclsByUsr[occurrenceUsr]?.insert(reference)
                         } else {
                             self.referencedDeclsByUsr[occurrenceUsr] = [reference]
                         }
+
                         refs.append(reference)
                     }
                 }
+
                 return true
             }
 
-            return refs
+            refs.forEach { graph.add($0) }
         }
 
-        private func _parseReference(
+        private func parseReference(
             _ occurrence: IndexStoreOccurrence,
             _ occurrenceUsr: String,
             _ location: SourceLocation
-        ) throws -> [Reference] {
+        ) throws {
             guard let kind = transformReferenceKind(occurrence.symbol.kind, occurrence.symbol.subKind) else {
                 throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occurrence.symbol)")
             }
@@ -425,9 +479,11 @@ final class IndexStoreIndexer: TypeIndexer {
                     if let referencerUsr = referencer.usr {
                         let ref = Reference(kind: kind, usr: occurrenceUsr, location: location)
                         ref.name = occurrence.symbol.name
+
                         if rel.roles.contains(.baseOf) {
                             ref.isRelated = true
                         }
+
                         refs.append(ref)
 
                         if self.referencedDeclsByUsr[referencerUsr] != nil {
@@ -437,6 +493,7 @@ final class IndexStoreIndexer: TypeIndexer {
                         }
                     }
                 }
+
                 return true
             }
 
@@ -444,9 +501,13 @@ final class IndexStoreIndexer: TypeIndexer {
                 let ref = Reference(kind: kind, usr: occurrenceUsr, location: location)
                 ref.name = occurrence.symbol.name
                 refs.append(ref)
+
+                // The index store doesn't contain any relations for this reference, save it so that we can attempt
+                // to associate it with the correct declaration later based on location.
+                danglingReferences.append(ref)
             }
 
-            return refs
+            refs.forEach { graph.add($0) }
         }
 
         private func transformLocation(_ input: IndexStoreOccurrence.Location) -> SourceLocation? {
@@ -549,7 +610,7 @@ final class IndexStoreIndexer: TypeIndexer {
             case .swiftAccessorRead:
                 logger.warn("Skip to transform swiftAccessorRead")
             case .swiftAccessorModify:
-                logger.warn("Skip to transform swiftAccessorRead")
+                logger.warn("Skip to transform swiftAccessorModify")
             case .none: break
             case .cxxCopyConstructor, .cxxMoveConstructor,
                  .usingTypeName, .usingValue: break

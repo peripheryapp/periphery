@@ -69,7 +69,7 @@ class RetentionTest: XCTestCase {
     }
 
     func testSelfReferencedClass() {
-        analyze(enabledIndexers: [.sourceKit]) {
+        analyze() {
             XCTAssertNotReferenced((.class, "FixtureClass8"))
         }
     }
@@ -97,13 +97,15 @@ class RetentionTest: XCTestCase {
 
     func testRetainsInheritedClass() {
         analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass13"))
+            XCTAssertReferenced((.varInstance, "cls"), descendentOf: (.class, "FixtureClass13"))
             XCTAssertReferenced((.class, "FixtureClass11"))
             XCTAssertReferenced((.class, "FixtureClass12"))
         }
     }
 
     func testCrossReferencedClasses() {
-        analyze(enabledIndexers: [.sourceKit]) {
+        analyze() {
             XCTAssertNotReferenced((.class, "FixtureClass14"))
             XCTAssertNotReferenced((.class, "FixtureClass15"))
             XCTAssertNotReferenced((.class, "FixtureClass16"))
@@ -111,7 +113,7 @@ class RetentionTest: XCTestCase {
     }
 
     func testDeeplyNestedClassReferences() {
-        analyze(enabledIndexers: [.sourceKit]) {
+        analyze() {
             XCTAssertNotReferenced((.class, "FixtureClass17"))
             XCTAssertNotReferenced((.class, "FixtureClass18"))
             XCTAssertNotReferenced((.class, "FixtureClass19"))
@@ -524,19 +526,18 @@ class RetentionTest: XCTestCase {
     }
 
     func testCodingKeyEnum() {
-        analyze(retainPublic: true) { variant in
+        analyze(retainPublic: true, enabledIndexers: [.indexStore]) { variant in
             XCTAssertReferenced((.class, "FixtureClass74"))
-            // FIXME: Fail bacause IndexStore doesn't know the relationship between Codable
-            //        protocol and conforming type. The Codable occuerrence doesn't have any
-            //        relations.
-            if variant != .indexStore {
-                XCTAssertReferenced((.enum, "CodingKeys"),
+            XCTAssertReferenced((.enum, "CodingKeys"),
                                     descendentOf: (.class, "FixtureClass74"))
-            }
 
             XCTAssertReferenced((.class, "FixtureClass75"))
             XCTAssertReferenced((.enum, "CodingKeys"),
                                 descendentOf: (.class, "FixtureClass75"))
+
+            XCTAssertReferenced((.class, "FixtureClass111"))
+            XCTAssertReferenced((.enum, "CodingKeys"),
+                                descendentOf: (.class, "FixtureClass111"))
 
             XCTAssertReferenced((.class, "FixtureClass76"))
             // Not referenced because the enclosing class does not conform to Decodable.
@@ -969,6 +970,26 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testClassRetainedByUnusedInstanceVariable() {
+        // Fails with SourceKit as it structures the class reference as a descendent of the parent
+        // class, not the var declaration.
+        analyze(retainPublic: true, enabledIndexers: [.indexStore]) {
+            XCTAssertReferenced((.class, "FixtureClass71"))
+
+            XCTAssertNotReferenced((.class, "FixtureClass72"))
+            XCTAssertNotReferenced((.varInstance, "someVar"),
+                                   descendentOf: (.class, "FixtureClass71"))
+        }
+    }
+
+    func testStaticPropertyDeclaredWithCompositeValuesIsNotRetained() {
+        analyze(retainPublic: true, enabledIndexers: [.indexStore]) {
+            XCTAssertReferenced((.class, "FixtureClass38"))
+            XCTAssertNotReferenced((.varStatic, "propertyA"))
+            XCTAssertNotReferenced((.varStatic, "propertyB"))
+        }
+    }
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768
@@ -1018,31 +1039,6 @@ class RetentionTest: XCTestCase {
 
             XCTAssertReferenced((.varInstance, "someGetSetVar"),
                                 descendentOf: (.protocol, "FixtureProtocol100"))
-        }
-    }
-
-    // https://bugs.swift.org/browse/SR-13766
-    func testClassRetainedByUnusedInstanceVariable() {
-        guard performKnownFailures else { return }
-
-        // SourceKit structures the class reference as a descendent of the parent
-        // class, not the var declaration.
-        analyze(retainPublic: true) {
-            XCTAssertReferenced((.class, "FixtureClass71"))
-
-            XCTAssertNotReferenced((.class, "FixtureClass71"))
-            XCTAssertNotReferenced((.varInstance, "someVar"),
-                                   descendentOf: (.class, "FixtureClass71"))
-        }
-    }
-
-    func testStaticPropertyDeclaredWithCompositeValuesIsNotRetained() {
-        guard performKnownFailures else { return }
-
-        analyze(retainPublic: true) {
-            XCTAssertReferenced((.class, "FixtureClass38"))
-            XCTAssertNotReferenced((.varStatic, "propertyA"))
-            XCTAssertNotReferenced((.varStatic, "propertyB"))
         }
     }
 
