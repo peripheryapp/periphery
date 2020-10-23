@@ -257,18 +257,7 @@ final class IndexStoreIndexer: TypeIndexer {
             decl.name = occurrence.symbol.name
 
             indexStore.forEachRelations(for: occurrence) { rel -> Bool in
-                // Note: Skip adding accessor in variable children to avoid circurlar reference
-                // Expected graph is
-                // ```
-                // variable.getter  ──> variable
-                // variable.settter ──> variable
-                // ```
-                // If there is no guard statement,
-                // ```
-                // variable <──┬────> variable.getter
-                //             └────> variable.setter
-                // ```
-                if !rel.roles.intersection([.childOf]).isEmpty && !rel.roles.contains(.accessorOf) {
+                if !rel.roles.intersection([.childOf]).isEmpty {
                     if let parentUsr = rel.symbol.usr {
                         if self.childDeclsByParentUsr[parentUsr] != nil {
                             self.childDeclsByParentUsr[parentUsr]?.insert(decl)
@@ -278,7 +267,7 @@ final class IndexStoreIndexer: TypeIndexer {
                     }
                 }
 
-                if !rel.roles.intersection([.overrideOf, .accessorOf]).isEmpty {
+                if !rel.roles.intersection([.overrideOf]).isEmpty {
                     // ```
                     // class A { func f() {} }
                     // class B: A { override func f() {} }
@@ -296,9 +285,8 @@ final class IndexStoreIndexer: TypeIndexer {
 
                         let reference = Reference(kind: refKind, usr: baseFuncUsr, location: decl.location)
                         reference.name = baseFunc.name
-                        if rel.roles.contains(.overrideOf) {
-                            reference.isRelated = true
-                        }
+                        reference.isRelated = true
+
                         if self.referencedUsrsByDecl[decl] != nil {
                             self.referencedUsrsByDecl[decl]?.append(reference)
                         } else {
