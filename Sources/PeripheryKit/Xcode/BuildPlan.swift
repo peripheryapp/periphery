@@ -13,15 +13,6 @@ final class BuildPlan {
                              logger: inject())
     }
 
-    static func make(targets: Set<Target>) throws -> BuildPlan {
-        let xcodebuild: Xcodebuild = inject()
-        let xcodebuildVersion = XcodebuildVersion.parse(try xcodebuild.version())
-
-        return try BuildPlan(targets: targets, buildLogParser: nil,
-                             xcodebuildVersion: xcodebuildVersion,
-                             logger: inject())
-    }
-
     private static let excludedArguments = [
         "-Xfrontend",
         "-output-file-map",

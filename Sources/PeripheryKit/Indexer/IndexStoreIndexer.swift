@@ -145,7 +145,7 @@ final class IndexStoreIndexer: TypeIndexer {
                             rawStructures = try self.indexStructure.get(file)
                         }
 
-                        if let decl = try _parseDecl(occurrence, usr, location, rawStructures) {
+                        if let decl = try _parseDecl(occurrence, usr, location) {
                             graph.add(decl)
                             decls.append((decl, rawStructures))
                         }
@@ -241,8 +241,7 @@ final class IndexStoreIndexer: TypeIndexer {
         private func _parseDecl(
             _ occurrence: IndexStoreOccurrence,
             _ occurrenceUsr: String,
-            _ location: SourceLocation,
-            _ indexedStructure: [[String: Any]]
+            _ location: SourceLocation
         ) throws -> Declaration? {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind) else {
                 throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occurrence.symbol)")
