@@ -80,7 +80,7 @@ final class IndexStoreIndexer: TypeIndexer {
                 try job.perform()
             }
 
-            self.logger.debug("[index:swift] \(job.unit.name ?? "n/a") (\(elapsed)s)")
+            self.logger.debug("[index:swift] \(job.filePath) (\(elapsed)s)")
         }
 
         graph.identifyRootDeclarations()
@@ -90,9 +90,9 @@ final class IndexStoreIndexer: TypeIndexer {
     // MARK: - Private
 
     private class Job {
-        let unit: IndexStoreUnit
+        let filePath: Path
 
-        private let filePath: Path
+        private let unit: IndexStoreUnit
         private let buildPlan: BuildPlan
         private let graph: SourceGraph
         private let logger: Logger
