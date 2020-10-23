@@ -48,19 +48,26 @@ final class IndexStoreIndexer: TypeIndexer {
     func perform() throws {
         var jobs = [Job]()
 
-        var allowedSourceFilesPaths = Set(try buildPlan.targets.map { try $0.sourceFiles().map { $0.path.string } }.joined())
-        allowedSourceFilesPaths.subtract(configuration.indexExcludeSourceFiles.map { $0.path.string })
+        var allowedSourceFilesPaths = Set(try buildPlan.targets.map { try $0.sourceFiles().map { $0.path } }.joined())
+        allowedSourceFilesPaths.subtract(configuration.indexExcludeSourceFiles.map { $0.path })
 
         try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
             guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
 
-            let shouldIndex = allowedSourceFilesPaths.contains(filePath)
+            let path = Path(filePath)
+            let shouldIndex = allowedSourceFilesPaths.contains(path)
 
             if shouldIndex {
                 jobs.append(
                     Job(
-                        unit: unit, buildPlan: buildPlan, graph: graph, indexStore: indexStore,
-                        logger: logger, featureManager: featureManager, configuration: configuration
+                        filePath: path,
+                        unit: unit,
+                        buildPlan: buildPlan,
+                        graph: graph,
+                        indexStore: indexStore,
+                        logger: logger,
+                        featureManager: featureManager,
+                        configuration: configuration
                     )
                 )
             }
@@ -85,6 +92,7 @@ final class IndexStoreIndexer: TypeIndexer {
     private class Job {
         let unit: IndexStoreUnit
 
+        private let filePath: Path
         private let buildPlan: BuildPlan
         private let graph: SourceGraph
         private let logger: Logger
@@ -98,13 +106,17 @@ final class IndexStoreIndexer: TypeIndexer {
             return substructure[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
         }
 
-        required init(unit: IndexStoreUnit,
-                      buildPlan: BuildPlan,
-                      graph: SourceGraph,
-                      indexStore: IndexStore,
-                      logger: Logger,
-                      featureManager: FeatureManager,
-                      configuration: Configuration) {
+        required init(
+            filePath: Path,
+            unit: IndexStoreUnit,
+            buildPlan: BuildPlan,
+            graph: SourceGraph,
+            indexStore: IndexStore,
+            logger: Logger,
+            featureManager: FeatureManager,
+            configuration: Configuration
+        ) {
+            self.filePath = filePath
             self.unit = unit
             self.buildPlan = buildPlan
             self.graph = graph
@@ -132,9 +144,11 @@ final class IndexStoreIndexer: TypeIndexer {
                             let file = SourceFile(path: Path(path))
                             rawStructures = try self.indexStructure.get(file)
                         }
-                        let decl = try _parseDecl(occurrence, usr, location, rawStructures)
-                        graph.add(decl)
-                        decls.append((decl, rawStructures))
+
+                        if let decl = try _parseDecl(occurrence, usr, location, rawStructures) {
+                            graph.add(decl)
+                            decls.append((decl, rawStructures))
+                        }
                     }
 
                     if !occurrence.roles.intersection([.reference]).isEmpty {
@@ -200,6 +214,24 @@ final class IndexStoreIndexer: TypeIndexer {
                 guard decl.parent == nil else { continue }
                 try _parseIndexedStructure(decl, structure)
             }
+
+            let functionDelcsByLocation = decls.filter { $0.0.kind.isFunctionKind }.map { ($0.0.location, $0.0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
+
+            let analyzer = UnusedParameterAnalyzer()
+            let params = try analyzer.analyze(file: filePath, parseProtocols: true)
+
+            for param in params {
+                guard let paramFunction = param.function else { continue }
+
+                guard let functionDecl = functionDelcsByLocation[paramFunction.location] else {
+                    fatalError("Failed to associate indexed function for parameter function '\(paramFunction.name)' at \(paramFunction.location)")
+                }
+
+                let paramDecl = param.declaration
+                paramDecl.parent = functionDecl
+                functionDecl.unusedParameters.insert(paramDecl)
+                graph.add(paramDecl)
+            }
         }
 
         private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
@@ -211,9 +243,14 @@ final class IndexStoreIndexer: TypeIndexer {
             _ occurrenceUsr: String,
             _ location: SourceLocation,
             _ indexedStructure: [[String: Any]]
-        ) throws -> Declaration {
+        ) throws -> Declaration? {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind) else {
                 throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occurrence.symbol)")
+            }
+
+            guard kind != .varParameter else {
+                // Ignore indexed parameters as unused parameter identification is performed separately using SwiftSyntax.
+                return nil
             }
 
             let decl = Declaration(kind: kind, usr: occurrenceUsr, location: location)

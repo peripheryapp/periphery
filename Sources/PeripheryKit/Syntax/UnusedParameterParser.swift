@@ -200,10 +200,14 @@ final class UnusedParameterParser {
             metatype = metatypeSyntax.description
         }
 
+        // Position is off by one, advance forward so that we can identify the correct line of param lists that span
+        // multiple lines.
+        let position = AbsolutePosition(utf8Offset: syntax.position.utf8Offset + 1)
+
         return Parameter(firstName: syntax.firstName?.text,
                          secondName: syntax.secondName?.text,
                          metatype: metatype,
-                         location: sourceLocation(of: syntax.position))
+                         location: sourceLocation(of: position))
     }
 
     private func parse<T>(closureExpr syntax: ClosureExprSyntax, _ collector: Collector<T>?) -> Closure? {
@@ -258,6 +262,9 @@ final class UnusedParameterParser {
 
         if let leftBracket = syntax.genericParameterClause?.leftAngleBracket {
             position = AbsolutePosition(utf8Offset: leftBracket.position.utf8Offset - 4)
+        } else if syntax.optionalMark != nil {
+            let leftParen = syntax.parameters.leftParen
+            position = AbsolutePosition(utf8Offset: leftParen.position.utf8Offset - 5)
         } else {
             let leftParen = syntax.parameters.leftParen
             position = AbsolutePosition(utf8Offset: leftParen.position.utf8Offset - 4)
