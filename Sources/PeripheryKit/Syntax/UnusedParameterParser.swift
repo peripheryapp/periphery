@@ -13,14 +13,24 @@ final class Function: Item {
     let items: [Item]
     let parameters: [Parameter]
     let genericParameters: [String]
+    let attributes: [String]
 
-    init(name: String, fullName: String, location: SourceLocation, items: [Item], parameters: [Parameter], genericParameters: [String]) {
+    init(
+        name: String,
+        fullName: String,
+        location: SourceLocation,
+        items: [Item],
+        parameters: [Parameter],
+        genericParameters: [String],
+        attributes: [String]
+    ) {
         self.name = name
         self.fullName = fullName
         self.location = location
         self.items = items
         self.parameters = parameters
         self.genericParameters = genericParameters
+        self.attributes = attributes
     }
 }
 
@@ -249,6 +259,7 @@ final class UnusedParameterParser {
 
     private func parse<T>(functionDecl syntax: FunctionDeclSyntax, _ collector: Collector<T>?) -> Item? {
         return build(function: syntax.signature,
+                     attributes: syntax.attributes,
                      genericParams: syntax.genericParameterClause,
                      body: syntax.body,
                      named: syntax.identifier.text,
@@ -271,6 +282,7 @@ final class UnusedParameterParser {
         }
 
         return build(function: syntax.parameters,
+                     attributes: syntax.attributes,
                      genericParams: syntax.genericParameterClause,
                      body: syntax.body,
                      named: "init",
@@ -278,7 +290,15 @@ final class UnusedParameterParser {
                      collector)
     }
 
-    private func build<T>(function syntax: SyntaxProtocol, genericParams: GenericParameterClauseSyntax?, body: CodeBlockSyntax?, named name: String, position: AbsolutePosition, _ collector: Collector<T>?) -> Function? {
+    private func build<T>(
+        function syntax: SyntaxProtocol,
+        attributes: AttributeListSyntax?,
+        genericParams: GenericParameterClauseSyntax?,
+        body: CodeBlockSyntax?,
+        named name: String,
+        position: AbsolutePosition,
+        _ collector: Collector<T>?
+    ) -> Function? {
         if body == nil && !parseProtocols {
             // Function has no body, must be a protocol declaration.
             return nil
@@ -292,6 +312,7 @@ final class UnusedParameterParser {
         let items = parse(node: body, collector)?.items ?? []
         let fullName = buildFullName(for: name, with: params)
         let genericParamNames = genericParams?.genericParameterList.compactMap { $0.name.text } ?? []
+        let attributeNames = attributes?.children.compactMap { AttributeSyntax($0)?.attributeName.text } ?? []
 
         let function = Function(
             name: name,
@@ -299,7 +320,8 @@ final class UnusedParameterParser {
             location: sourceLocation(of: position),
             items: items,
             parameters: params,
-            genericParameters: genericParamNames)
+            genericParameters: genericParamNames,
+            attributes: attributeNames)
 
         params.forEach { $0.function = function }
         return function

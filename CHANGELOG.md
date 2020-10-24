@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None
+- Ignore parameters from functions annotated with @IBAction.
 
 ## 1.8.0 (2020-10-3)
 

@@ -143,6 +143,11 @@ class UnusedParameterTest: XCTestCase {
         try XCTAssertEqual(XCTUnwrap(param2.location.line), 5)
     }
 
+    func testIBActionAnnotatedFunction() {
+        analyze()
+        XCTAssertUsed("param", of: "myFunc(param:)")
+    }
+
     // MARK: - Private
 
     private var unusedParamsByFunction: [(Function, Set<Parameter>)] = []
