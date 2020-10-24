@@ -12,9 +12,20 @@ jobs:
     - uses: actions/checkout@master
     - name: Select Xcode version
       run: sudo xcode-select -s /Applications/Xcode_12.1.app
-    - name: Generate project
-      run: make proj
+    - name: Cache resolved dependencies
+      id: cache-resolved-dependencies
+      uses: actions/cache@v2
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-deps-
+    - name: Resolve dependencies
+      if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
+      run: swift package resolve
     - name: Build
       run: swift build --build-tests
+    - name: Generate Xcode project
+      run: make proj
     - name: Test
       run: swift test

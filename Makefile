@@ -11,7 +11,7 @@ build:
 build_release:
 	@swift build $(RELEASE_BUILD_FLAGS)
 
-proj: build
+proj:
 	@rm -rf Periphery.xcodeproj
 	@swift package generate-xcodeproj
 	@cp Tests/Configs/*.xcscheme Periphery.xcodeproj/xcshareddata/xcschemes/
