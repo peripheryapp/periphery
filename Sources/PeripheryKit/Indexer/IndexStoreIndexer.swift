@@ -176,43 +176,45 @@ final class IndexStoreIndexer: TypeIndexer {
         private var danglingReferences: [Reference] = []
 
         private func establishDeclarationHierarchy() {
-            for (parent, decls) in childDeclsByParentUsr {
-                guard let parentDecl = graph.explicitDeclaration(withUsr: parent) else {
-                    continue
+            graph.mutating {
+                for (parent, decls) in childDeclsByParentUsr {
+                    guard let parentDecl = graph.explicitDeclaration(withUsr: parent) else {
+                        continue
+                    }
+
+                    for decl in decls {
+                        decl.parent = parentDecl
+                    }
+
+                    parentDecl.declarations.formUnion(decls)
                 }
 
-                for decl in decls {
-                    decl.parent = parentDecl
-                }
+                for (usr, references) in referencedDeclsByUsr {
+                    guard let decl = graph.explicitDeclaration(withUsr: usr) else {
+                        danglingReferences.append(contentsOf: references)
+                        continue
+                    }
 
-                parentDecl.declarations.formUnion(decls)
-            }
+                    for reference in references {
+                        reference.parent = decl
 
-            for (usr, references) in referencedDeclsByUsr {
-                guard let decl = graph.explicitDeclaration(withUsr: usr) else {
-                    danglingReferences.append(contentsOf: references)
-                    continue
-                }
-
-                for reference in references {
-                    reference.parent = decl
-
-                    if reference.isRelated {
-                        decl.related.insert(reference)
-                    } else {
-                        decl.references.insert(reference)
+                        if reference.isRelated {
+                            decl.related.insert(reference)
+                        } else {
+                            decl.references.insert(reference)
+                        }
                     }
                 }
-            }
 
-            for (decl, refs) in referencedUsrsByDecl {
-                for ref in refs {
-                    ref.parent = decl
+                for (decl, refs) in referencedUsrsByDecl {
+                    for ref in refs {
+                        ref.parent = decl
 
-                    if ref.isRelated {
-                        decl.related.insert(ref)
-                    } else {
-                        decl.references.insert(ref)
+                        if ref.isRelated {
+                            decl.related.insert(ref)
+                        } else {
+                            decl.references.insert(ref)
+                        }
                     }
                 }
             }
