@@ -55,7 +55,7 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
         case .swiftIndexingError(let message):
             return message
         case .guidedSetupError(let message):
-            return "\(message). Please refer to the documentation for instructions on configuring Periphery manually - https://peripheryapp.com/documentation/using-periphery"
+            return "\(message). Please refer to the documentation for instructions on configuring Periphery manually - https://github.com/peripheryapp/periphery/blob/master/README.md"
         case .updateCheckError(let message):
             return message
         case .buildLogError(let message):
