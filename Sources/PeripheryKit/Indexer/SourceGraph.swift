@@ -168,6 +168,10 @@ public final class SourceGraph {
         return immediate + immediate.flatMap { subclasses(of: $0) }
     }
 
+    func mutating(_ block: () -> Void) {
+        mutationQueue.sync(execute: block)
+    }
+
     private let extendedReferenceKindMap: [Declaration.Kind: Reference.Kind] = [
         .extensionClass: .class,
         .extensionStruct: .struct,
