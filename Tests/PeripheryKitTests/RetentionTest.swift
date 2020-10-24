@@ -120,7 +120,7 @@ class RetentionTest: XCTestCase {
         }
     }
 
-    func testNSApplicationMainEntryAnnotation() {
+    func testMainEntryAnnotation() {
         analyze() {
             XCTAssertReferenced((.class, "FixtureClass20"))
             XCTAssertReferenced((.functionMethodInstance, "applicationDidFinishLaunching(_:)"))

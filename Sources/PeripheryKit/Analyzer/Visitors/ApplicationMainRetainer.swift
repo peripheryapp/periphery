@@ -15,7 +15,8 @@ final class ApplicationMainRetainer: SourceGraphVisitor {
         let classes = graph.declarations(ofKind: .class)
         let mainClasses = classes.filter {
             $0.attributes.contains("NSApplicationMain") ||
-            $0.attributes.contains("UIApplicationMain")
+            $0.attributes.contains("UIApplicationMain") ||
+            $0.attributes.contains("main")
         }
 
         mainClasses.forEach {

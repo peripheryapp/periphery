@@ -12,6 +12,7 @@
 
 - Ignore parameters from functions annotated with @IBAction.
 - Classes & structs that conform to SwiftUI's PreviewProvider are now retained.
+- Support @main entry points.
 
 ## 1.8.0 (2020-10-3)
 

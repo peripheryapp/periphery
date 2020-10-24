@@ -1,7 +1,7 @@
 import Foundation
 import AppKit
 
-@NSApplicationMain
+@main
 class FixtureClass20: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {}
 }
