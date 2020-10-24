@@ -1,21 +1,16 @@
 import Foundation
 
-public struct SourceLocation {
+public class SourceLocation {
     let file: SourceFile
     let line: Int64?
     let column: Int64?
     let offset: Int64?
-
-    private var descriptionInternal: String = ""
-    private var shortDescriptionInternal: String = ""
 
     init(file: SourceFile, line: Int64?, column: Int64?, offset: Int64? = nil) {
         self.file = file
         self.line = line
         self.column = column
         self.offset = offset
-        self.descriptionInternal = buildDescription(path: file.path.string)
-        self.shortDescriptionInternal = buildDescription(path: file.path.lastComponent)
     }
 
     // MARK: - Private
@@ -33,6 +28,14 @@ public struct SourceLocation {
 
         return parts.joined(separator: ":")
     }
+
+    private lazy var descriptionInternal: String = {
+        buildDescription(path: file.path.string)
+    }()
+
+    private lazy var shortDescriptionInternal: String = {
+        buildDescription(path: file.path.lastComponent)
+    }()
 }
 
 extension SourceLocation: Equatable {
@@ -47,7 +50,9 @@ extension SourceLocation: Equatable {
 
 extension SourceLocation: Hashable {
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(description)
+        hasher.combine(file)
+        hasher.combine(line)
+        hasher.combine(column)
     }
 }
 
