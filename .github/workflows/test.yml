@@ -29,3 +29,5 @@ jobs:
       run: make proj
     - name: Test
       run: swift test
+    - name: Scan
+      run: ./.build/debug/periphery scan --quiet --use-index-store --skip-build --index-store-path .build/debug/index/store
