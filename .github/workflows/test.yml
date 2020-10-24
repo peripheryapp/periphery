@@ -15,6 +15,6 @@ jobs:
     - name: Generate project
       run: make proj
     - name: Build
-      run: swift build
+      run: swift build --build-tests
     - name: Test
       run: swift test
