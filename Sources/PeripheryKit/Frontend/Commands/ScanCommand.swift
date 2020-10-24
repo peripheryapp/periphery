@@ -66,6 +66,12 @@ public struct ScanCommand: ParsableCommand {
     @Flag(inversion: .prefixedNo, help: "Enable new indexing system using IndexStore")
     var useIndexStore: Bool?
 
+    @Option(help: "Path to index store to use. Automatically defaults to the correct store for your project")
+    var indexStorePath: String?
+
+    @Flag(inversion: .prefixedNo, help: "Skip the project build step. Only compatible with --use-index-store")
+    var skipBuild: Bool?
+
     public init() {}
 
     public func run() throws {
@@ -141,6 +147,18 @@ public struct ScanCommand: ParsableCommand {
 
         if let useIndexStore = useIndexStore {
             configuration.useIndexStore = useIndexStore
+        }
+
+        if let indexStorePath = indexStorePath {
+            configuration.indexStorePath = indexStorePath
+        }
+
+        if let skipBuild = skipBuild {
+            if !configuration.useIndexStore {
+                throw PeripheryKitError.usageError("--skip-build can only be used with --use-index-store")
+            }
+
+            configuration.skipBuild = skipBuild
         }
 
         if let formatName = format {

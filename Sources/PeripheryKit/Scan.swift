@@ -81,8 +81,15 @@ public final class Scan: Injectable {
             throw PeripheryKitError.invalidScheme(name: scheme, project: project.path.lastComponent)
         }
 
-        let buildLog = try BuildLog.make(project: project, schemes: schemes, targets: targets).get()
-        let buildPlan = try BuildPlan.make(buildLog: buildLog, targets: targets)
+        let buildPlan: BuildPlan
+
+        if configuration.skipBuild {
+            buildPlan = try BuildPlan.make(targets: targets)
+        } else {
+            let buildLog = try BuildLog.make(project: project, schemes: schemes, targets: targets).get()
+            buildPlan = try BuildPlan.make(buildLog: buildLog, targets: targets)
+        }
+
         let graph = SourceGraph()
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
