@@ -21,6 +21,7 @@ final class UnusedParameterAnalyzer {
     // MARK: - Private
 
     private func unusedParams(in function: Function) -> [Parameter] {
+        guard !function.attributes.contains("IBAction") else { return [] }
         return function.parameters.filter { !isParam($0, usedIn: function) }
     }
 
