@@ -1,3 +1,4 @@
 set -e
 make proj
+swift build
 time ./.build/debug/periphery scan "$@"
