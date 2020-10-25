@@ -1102,23 +1102,7 @@ class RetentionTest: XCTestCase {
         }
 
         RetentionTest.fixtureTarget.set(sourceFiles: sourceFiles)
-
-        var indexedGraphs: [IndexerVariant: SourceGraph] = [:]
-        var analyzedGraphs: [IndexerVariant: SourceGraph] = [:]
-        for variant in enabledIndexers {
-            let indexOnlyGraph = SourceGraph()
-            configuration.useIndexStore = variant == .indexStore
-            try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: indexOnlyGraph, project: Self.project)
-            indexedGraphs[variant] = indexOnlyGraph
-        }
-
-        if indexedGraphs.count == 2 {
-            let indexStoreGraph = indexedGraphs[.indexStore]!
-            let sourceKitGraph = indexedGraphs[.sourceKit]!
-            if !SourceGraphDebugger.isEqual(indexStoreGraph, sourceKitGraph) {
-                perihperyRetentionTestGraphMismatchBreakpoint()
-            }
-        }
+        var graphs: [IndexerVariant: SourceGraph] = [:]
 
         for variant in enabledIndexers {
             let graph = SourceGraph()
@@ -1127,19 +1111,11 @@ class RetentionTest: XCTestCase {
             try! Analyzer.perform(graph: graph)
             self.graph = graph
             try testBlock(variant)
-            analyzedGraphs[variant] = graph
-        }
-
-        if analyzedGraphs.count == 2 {
-            let indexStoreGraph = analyzedGraphs[.indexStore]!
-            let sourceKitGraph = analyzedGraphs[.sourceKit]!
-            if !SourceGraphDebugger.isEqual(indexStoreGraph, sourceKitGraph) {
-                perihperyRetentionTestGraphMismatchBreakpoint()
-            }
+            graphs[variant] = graph
         }
 
         if (testRun?.failureCount ?? 0) > 0 {
-            for (variant, graph) in analyzedGraphs {
+            for (variant, graph) in graphs {
                 print("\n> " + variant.rawValue)
                 print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 SourceGraphDebugger(graph: graph).describeGraph()
@@ -1242,6 +1218,3 @@ class RetentionTest: XCTestCase {
 
     typealias DeclarationDescription = (kind: Declaration.Kind, name: String)
 }
-
-@_optimize(none)
-private func perihperyRetentionTestGraphMismatchBreakpoint() {}
