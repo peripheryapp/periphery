@@ -48,6 +48,10 @@ public final class SourceGraph {
         return allDeclarationsByKind[kind] ?? []
     }
 
+    func declarations(ofKinds kinds: [Declaration.Kind]) -> Set<Declaration> {
+        return Set(kinds.compactMap { allDeclarationsByKind[$0] }.joined())
+    }
+
     func explicitDeclaration(withUsr usr: String) -> Declaration? {
         return allExplicitDeclarationsByUsr[usr]
     }

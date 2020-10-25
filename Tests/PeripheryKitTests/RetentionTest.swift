@@ -990,6 +990,13 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testRetainsSwiftUIPreviewProviders() {
+        analyze() {
+            XCTAssertReferenced((.struct, "FixtureClass112"))
+            XCTAssertReferenced((.struct, "FixtureClass112ContentView"))
+        }
+    }
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768
