@@ -75,8 +75,8 @@ class RetentionTest: XCTestCase {
     }
 
     func testSelfReferencedRecursiveMethod() {
-        analyze() {
-            XCTAssertNotReferenced((.class, "FixtureClass9"))
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass9"))
             XCTAssertNotReferenced((.functionMethodInstance, "recursive()"))
         }
     }
@@ -85,6 +85,14 @@ class RetentionTest: XCTestCase {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.functionMethodInstance, "someFunc()"),
                                 descendentOf: (.class, "FixtureClass92"))
+        }
+    }
+
+    func testRetainsReferencedMethodViaReceiver() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass113"))
+            XCTAssertReferenced((.functionMethodStatic, "make()"),
+                                descendentOf: (.class, "FixtureClass113"))
         }
     }
 

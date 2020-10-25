@@ -1,11 +1,7 @@
 import Foundation
 
-class FixtureClass9 {
-    var forever = true
-
+public class FixtureClass9 {
     func recursive() {
-        if forever {
-            recursive()
-        }
+        recursive()
     }
 }

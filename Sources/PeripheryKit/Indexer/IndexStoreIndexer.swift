@@ -297,11 +297,7 @@ final class IndexStoreIndexer: TypeIndexer {
             indexStore.forEachRelations(for: occurrence) { rel -> Bool in
                 if !rel.roles.intersection([.childOf]).isEmpty {
                     if let parentUsr = rel.symbol.usr {
-                        if self.childDeclsByParentUsr[parentUsr] != nil {
-                            self.childDeclsByParentUsr[parentUsr]?.insert(decl)
-                        } else {
-                            self.childDeclsByParentUsr[parentUsr] = [decl]
-                        }
+                        self.childDeclsByParentUsr[parentUsr, default: []].insert(decl)
                     }
                 }
 
@@ -326,16 +322,11 @@ final class IndexStoreIndexer: TypeIndexer {
                         reference.isRelated = true
 
                         graph.add(reference)
-
-                        if self.referencedUsrsByDecl[decl] != nil {
-                            self.referencedUsrsByDecl[decl]?.append(reference)
-                        } else {
-                            self.referencedUsrsByDecl[decl] = [reference]
-                        }
+                        self.referencedUsrsByDecl[decl, default: []].append(reference)
                     }
                 }
 
-                if !rel.roles.intersection([.baseOf, .receivedBy, .calledBy, .extendedBy, .containedBy]).isEmpty {
+                if !rel.roles.intersection([.baseOf, .calledBy, .extendedBy, .containedBy]).isEmpty {
                     // ```
                     // class A {}
                     // class B: A {}
@@ -359,12 +350,7 @@ final class IndexStoreIndexer: TypeIndexer {
                         }
 
                         graph.add(reference)
-
-                        if self.referencedDeclsByUsr[referencerUsr] != nil {
-                            self.referencedDeclsByUsr[referencerUsr]?.insert(reference)
-                        } else {
-                            self.referencedDeclsByUsr[referencerUsr] = [reference]
-                        }
+                        self.referencedDeclsByUsr[referencerUsr, default: []].insert(reference)
                     }
                 }
 
@@ -442,13 +428,7 @@ final class IndexStoreIndexer: TypeIndexer {
                         reference.isRelated = true
 
                         graph.add(reference)
-
-                        if self.referencedDeclsByUsr[occurrenceUsr] != nil {
-                            self.referencedDeclsByUsr[occurrenceUsr]?.insert(reference)
-                        } else {
-                            self.referencedDeclsByUsr[occurrenceUsr] = [reference]
-                        }
-
+                        self.referencedDeclsByUsr[occurrenceUsr, default: []].insert(reference)
                         refs.append(reference)
                     }
                 }
@@ -471,7 +451,7 @@ final class IndexStoreIndexer: TypeIndexer {
             var refs = [Reference]()
 
             indexStore.forEachRelations(for: occurrence) { rel -> Bool in
-                if !rel.roles.intersection([.baseOf, .receivedBy, .calledBy, .containedBy, .extendedBy]).isEmpty {
+                if !rel.roles.intersection([.baseOf, .calledBy, .containedBy, .extendedBy]).isEmpty {
                     // ```
                     // class A {}
                     // class B: A {}
@@ -490,12 +470,7 @@ final class IndexStoreIndexer: TypeIndexer {
                         }
 
                         refs.append(ref)
-
-                        if self.referencedDeclsByUsr[referencerUsr] != nil {
-                            self.referencedDeclsByUsr[referencerUsr]?.insert(ref)
-                        } else {
-                            self.referencedDeclsByUsr[referencerUsr] = [ref]
-                        }
+                        self.referencedDeclsByUsr[referencerUsr, default: []].insert(ref)
                     }
                 }
 
