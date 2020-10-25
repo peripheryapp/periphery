@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Ignore parameters from functions annotated with @IBAction.
+- Classes & structs that conform to SwiftUI's PreviewProvider are now retained.
 
 ## 1.8.0 (2020-10-3)
 

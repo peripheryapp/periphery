@@ -16,6 +16,7 @@ public final class Declaration: Entity, CustomStringConvertible {
         case paramFuncOverridden
         case paramFuncForeginProtocol
         case paramFuncLocalProtocol
+        case swiftUIPreviewProvider
     }
 
     enum Kind: String, RawRepresentable, CaseIterable {
