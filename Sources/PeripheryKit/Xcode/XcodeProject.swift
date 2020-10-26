@@ -2,10 +2,10 @@ import Foundation
 import XcodeProj
 import PathKit
 
-public final class Project: XcodeProjectlike {
-    private static var cache: [Path: Project] = [:]
+public final class XcodeProject: XcodeProjectlike {
+    private static var cache: [Path: XcodeProject] = [:]
 
-    public static func tryMake(path: Path, referencedBy refPath: Path) throws -> Project? {
+    public static func tryMake(path: Path, referencedBy refPath: Path) throws -> XcodeProject? {
         if !path.exists {
             let logger: Logger = inject()
             logger.warn("No such project exists at '\(path.absolute())', referenced by '\(refPath)'.")
@@ -15,11 +15,11 @@ public final class Project: XcodeProjectlike {
         return try make(path: path)
     }
 
-    public static func make(path: String) throws -> Project {
+    public static func make(path: String) throws -> XcodeProject {
         return try make(path: Path(path))
     }
 
-    public static func make(path: Path) throws -> Project {
+    public static func make(path: Path) throws -> XcodeProject {
         if let cached = cache[path] {
             return cached
         }
@@ -35,10 +35,10 @@ public final class Project: XcodeProjectlike {
 
     private let xcodebuild: Xcodebuild
 
-    private(set) public var targets: Set<Target> = []
+    private(set) public var targets: Set<XcodeTarget> = []
 
     required public init(path: Path, xcodebuild: Xcodebuild, logger: Logger) throws {
-        logger.debug("[project] Loading \(path)...")
+        logger.debug("[xcode:project] Loading \(path)...")
 
         self.path = path
         self.xcodebuild = xcodebuild
@@ -52,39 +52,39 @@ public final class Project: XcodeProjectlike {
         }
 
         // Cache before loading sub-projects to avoid infinate loop from cyclic project references.
-        Project.cache[path] = self
+        XcodeProject.cache[path] = self
 
-        var subProjects: [Project] = []
+        var subProjects: [XcodeProject] = []
 
         // Don't search for sub projects within CocoaPods.
         if !path.contains("Pods.xcodeproj") {
             subProjects = try xcodeProject.pbxproj.fileReferences
                 .filter { $0.path?.hasSuffix(".xcodeproj") ?? false }
                 .compactMap { try $0.fullPath(sourceRoot: sourceRoot) }
-                .compactMap { try Project.tryMake(path: $0, referencedBy: path) }
+                .compactMap { try XcodeProject.tryMake(path: $0, referencedBy: path) }
         }
 
         targets = Set(xcodeProject.pbxproj.nativeTargets
-            .map { Target.make(project: self, target: $0) }
+            .map { XcodeTarget.make(project: self, target: $0) }
             + subProjects.flatMap { $0.targets })
     }
 
-    public func schemes() throws -> Set<Scheme> {
+    public func schemes() throws -> Set<XcodeScheme> {
         let schemes = try xcodebuild.schemes(project: self).map {
-            try Scheme.make(project: self, name: $0)
+            try XcodeScheme.make(project: self, name: $0)
         }
         return Set(schemes)
     }
 }
 
-extension Project: Hashable {
+extension XcodeProject: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(path.absolute().string)
     }
 }
 
-extension Project: Equatable {
-    public static func == (lhs: Project, rhs: Project) -> Bool {
+extension XcodeProject: Equatable {
+    public static func == (lhs: XcodeProject, rhs: XcodeProject) -> Bool {
         return lhs.path == rhs.path
     }
 }

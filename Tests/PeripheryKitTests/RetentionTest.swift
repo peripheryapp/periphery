@@ -3,9 +3,9 @@ import PathKit
 @testable import PeripheryKit
 
 class RetentionTest: XCTestCase {
-    static var project: Project!
-    static var buildPlan: BuildPlan!
-    static var fixtureTarget: Target!
+    static var project: XcodeProject!
+    static var buildPlan: XcodeBuildPlan!
+    static var fixtureTarget: XcodeTarget!
 
     enum IndexerVariant: String, CaseIterable {
         case sourceKit = "SourceKit"
@@ -15,14 +15,14 @@ class RetentionTest: XCTestCase {
     static override func setUp() {
         super.setUp()
 
-        project = try! Project.make(path: PeripheryProjectPath)
+        project = try! XcodeProject.make(path: PeripheryProjectPath)
         let xcodebuild: Xcodebuild = inject()
         try! xcodebuild.clearDerivedData(for: project)
         let buildLog = try! xcodebuild.build(project: project, scheme: "RetentionFixtures")
 
         fixtureTarget = project.targets.first { $0.name == "RetentionFixtures" }!
         let crossModuleFixtureTarget = project.targets.first { $0.name == "RetentionFixturesCrossModule" }!
-        buildPlan = try! BuildPlan.make(buildLog: buildLog, targets: [fixtureTarget, crossModuleFixtureTarget])
+        buildPlan = try! XcodeBuildPlan.make(buildLog: buildLog, targets: [fixtureTarget, crossModuleFixtureTarget])
     }
 
     private var graph: SourceGraph!

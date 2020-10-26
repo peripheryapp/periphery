@@ -2,8 +2,8 @@ import Foundation
 import PathKit
 import CryptoKit
 
-final class BuildLog {
-    static func make(project: XcodeProjectlike, schemes: Set<Scheme>, targets: Set<Target>) -> Self {
+final class XcodeBuildLog {
+    static func make(project: XcodeProjectlike, schemes: Set<XcodeScheme>, targets: Set<XcodeTarget>) -> Self {
         return self.init(
             project: project,
             schemes: schemes,
@@ -15,16 +15,16 @@ final class BuildLog {
     }
 
     private let project: XcodeProjectlike
-    private let schemes: Set<Scheme>
-    private let targets: Set<Target>
+    private let schemes: Set<XcodeScheme>
+    private let targets: Set<XcodeTarget>
     private let configuration: Configuration
     private let logger: Logger
     private let xcodebuild: Xcodebuild
 
     required init(
         project: XcodeProjectlike,
-        schemes: Set<Scheme>,
-        targets: Set<Target>,
+        schemes: Set<XcodeScheme>,
+        targets: Set<XcodeTarget>,
         configuration: Configuration,
         logger: Logger,
         xcodebuild: Xcodebuild) {
@@ -47,12 +47,12 @@ final class BuildLog {
                     throw PeripheryKitError.buildLogError(message: "No build log exists at path: \(logPath.absolute())")
                 }
 
-                logger.debug("[build] Using build log at '\(logPath.absolute())'")
+                logger.debug("[xcode:build] Using build log at '\(logPath.absolute())'")
                 return try logPath.read()
             }
 
             if let log = try cache(get: key) {
-                logger.debug("[build] Using saved build log with key '\(key)'")
+                logger.debug("[xcode:build] Using saved build log with key '\(key)'")
                 return log
             } else {
                 logger.warn("No saved build log for the current configuration with the key '\(key)' exists. The build phase will be performed and the build log saved.")
@@ -64,7 +64,7 @@ final class BuildLog {
         let log = try build()
 
         if let key = configuration.saveBuildLog ?? forceSaveKey {
-            logger.debug("[build] Saving build log with key '\(key)'")
+            logger.debug("[xcode:build] Saving build log with key '\(key)'")
             try cache(put: log, userKey: key)
         }
 

@@ -1,6 +1,6 @@
 import Foundation
 
-struct BuildArgument {
+struct XcodeBuildArgument {
     let key: String
     var value: String?
 }

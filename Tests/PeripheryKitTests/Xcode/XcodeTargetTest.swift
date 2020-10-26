@@ -2,16 +2,16 @@ import Foundation
 import XCTest
 @testable import PeripheryKit
 
-class TargetTest: XCTestCase {
+class XcodeTargetTest: XCTestCase {
     func testSourceFileInGroupWithoutFolder() throws {
-        let project = try! Project.make(path: PeripheryProjectPath)
+        let project = try! XcodeProject.make(path: PeripheryProjectPath)
         let target = project.targets.first { $0.name == "PeripheryKitTests" }!
 
         XCTAssertTrue(try target.sourceFiles().contains { $0.path.relativeTo(ProjectRootPath) == "Tests/PeripheryKitTests/Xcode/fileInGroupWithoutFolder.swift" })
     }
 
     func testModuleName() {
-        let project = try! Project.make(path: PeripheryProjectPath)
+        let project = try! XcodeProject.make(path: PeripheryProjectPath)
 
         let pyTarget = project.targets.first { $0.name == "Periphery" }!
         try! pyTarget.identifyModuleName()
@@ -28,7 +28,7 @@ class TargetTest: XCTestCase {
     }
 
     func testIsTestTarget() {
-        let project = try! Project.make(path: PeripheryProjectPath)
+        let project = try! XcodeProject.make(path: PeripheryProjectPath)
         let pyTarget = project.targets.first { $0.name == "Periphery" }!
         let pyKitTarget = project.targets.first { $0.name == "PeripheryKit" }!
         let pyKitTestsTarget = project.targets.first { $0.name == "PeripheryKitTests" }!

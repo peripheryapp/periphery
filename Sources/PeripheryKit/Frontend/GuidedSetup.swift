@@ -24,9 +24,9 @@ final class GuidedSetup: Injectable {
         var project: XcodeProjectlike?
 
         if let workspacePath = identifyWorkspace() {
-            project = try Workspace.make(path: workspacePath)
+            project = try XcodeWorkspace.make(path: workspacePath)
         } else if let projectPath = identifyProject() {
-            project = try Project.make(path: projectPath)
+            project = try XcodeProject.make(path: projectPath)
         }
 
         if let project = project {
@@ -197,7 +197,7 @@ final class GuidedSetup: Injectable {
         return Path.current.glob(glob) + Path.current.glob("**/\(glob)")
     }
 
-    private func filter(_ schemes: Set<Scheme>, _ project: XcodeProjectlike) throws -> [Scheme] {
+    private func filter(_ schemes: Set<XcodeScheme>, _ project: XcodeProjectlike) throws -> [XcodeScheme] {
         let podSchemes = try Set(getPodSchemes(in: project))
         return schemes
             .filter { !$0.name.hasPrefix("Pods-") }

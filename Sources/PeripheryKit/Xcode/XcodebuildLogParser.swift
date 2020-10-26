@@ -2,7 +2,7 @@ import Foundation
 import PathKit
 
 struct SwiftcInvocation {
-    let arguments: [BuildArgument]
+    let arguments: [XcodeBuildArgument]
     let files: [String]
 }
 
@@ -54,12 +54,12 @@ final class XcodebuildLogParser {
         let command = command.replacingOccurrences(of: "\\=", with: "=")
         let pattern = try! NSRegularExpression(pattern: " (-.+?)(?= -|$)", options: []) // swiftlint:disable:this force_try
         let matches = pattern.matches(in: command, options: [], range: NSRange(command.startIndex..., in: command))
-        var arguments: [BuildArgument] = matches.map {
+        var arguments: [XcodeBuildArgument] = matches.map {
             let range = $0.range(at: 1)
             let pair = String(command[Range(range, in: command)!])
             var (key, value) = splitArgumentPair(pair)
             value = value.map(sanitizeFilePath)
-            return BuildArgument(key: key, value: value)
+            return XcodeBuildArgument(key: key, value: value)
         }
 
         var files: [String] = []

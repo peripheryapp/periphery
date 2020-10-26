@@ -4,7 +4,7 @@ import SwiftSyntax
 import SwiftIndexStore
 
 final class IndexStoreIndexer: TypeIndexer {
-    static func make(buildPlan: BuildPlan, graph: SourceGraph, project: XcodeProjectlike) throws -> Self {
+    static func make(buildPlan: XcodeBuildPlan, graph: SourceGraph, project: XcodeProjectlike) throws -> Self {
         let configuration = inject(Configuration.self)
         let xcodebuild = inject(Xcodebuild.self)
         let storePath: String
@@ -27,14 +27,14 @@ final class IndexStoreIndexer: TypeIndexer {
                          configuration: inject())
     }
 
-    private let buildPlan: BuildPlan
+    private let buildPlan: XcodeBuildPlan
     private let graph: SourceGraph
     private let logger: Logger
     private let featureManager: FeatureManager
     private let configuration: Configuration
     private let indexStore: IndexStore
 
-    required init(buildPlan: BuildPlan,
+    required init(buildPlan: XcodeBuildPlan,
                   graph: SourceGraph,
                   indexStore: IndexStore,
                   logger: Logger,
@@ -100,7 +100,7 @@ final class IndexStoreIndexer: TypeIndexer {
         let filePath: Path
 
         private let unit: IndexStoreUnit
-        private let buildPlan: BuildPlan
+        private let buildPlan: XcodeBuildPlan
         private let graph: SourceGraph
         private let logger: Logger
         private let featureManager: FeatureManager
@@ -116,7 +116,7 @@ final class IndexStoreIndexer: TypeIndexer {
         required init(
             filePath: Path,
             unit: IndexStoreUnit,
-            buildPlan: BuildPlan,
+            buildPlan: XcodeBuildPlan,
             graph: SourceGraph,
             indexStore: IndexStore,
             logger: Logger,

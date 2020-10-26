@@ -3,7 +3,7 @@ import PathKit
 import SwiftSyntax
 
 final class SourceKitIndexer: TypeIndexer {
-    static func make(buildPlan: BuildPlan, graph: SourceGraph, project: XcodeProjectlike) -> Self {
+    static func make(buildPlan: XcodeBuildPlan, graph: SourceGraph, project: XcodeProjectlike) -> Self {
         return self.init(buildPlan: buildPlan,
                          graph: graph,
                          logger: inject(),
@@ -11,7 +11,7 @@ final class SourceKitIndexer: TypeIndexer {
                          configuration: inject())
     }
 
-    private let buildPlan: BuildPlan
+    private let buildPlan: XcodeBuildPlan
     private let graph: SourceGraph
     private let logger: Logger
     private let featureManager: FeatureManager
@@ -19,7 +19,7 @@ final class SourceKitIndexer: TypeIndexer {
 
     private typealias Job = (sourceFile: SourceFile, sourceKit: SourceKit)
 
-    required init(buildPlan: BuildPlan,
+    required init(buildPlan: XcodeBuildPlan,
                   graph: SourceGraph,
                   logger: Logger,
                   featureManager: FeatureManager,

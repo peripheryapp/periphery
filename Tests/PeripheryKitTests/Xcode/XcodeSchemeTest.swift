@@ -2,12 +2,12 @@ import Foundation
 import XCTest
 @testable import PeripheryKit
 
-class SchemeTest: XCTestCase {
-    private var scheme: Scheme!
+class XcodeSchemeTest: XCTestCase {
+    private var scheme: XcodeScheme!
 
     override func setUp() {
-        let project = try! Project.make(path: PeripheryProjectPath)
-        scheme = try! Scheme.make(project: project, name: "Periphery-Package")
+        let project = try! XcodeProject.make(path: PeripheryProjectPath)
+        scheme = try! XcodeScheme.make(project: project, name: "Periphery-Package")
     }
 
     func testTargets() throws {

@@ -1,26 +1,26 @@
 import Foundation
 
 protocol TypeIndexer: AnyObject {
-    static func make(buildPlan: BuildPlan, graph: SourceGraph, project: XcodeProjectlike) throws -> Self
+    static func make(buildPlan: XcodeBuildPlan, graph: SourceGraph, project: XcodeProjectlike) throws -> Self
     func perform() throws
 }
 
 final class Indexer {
-    static func perform(buildPlan: BuildPlan, graph: SourceGraph, project: XcodeProjectlike) throws {
+    static func perform(buildPlan: XcodeBuildPlan, graph: SourceGraph, project: XcodeProjectlike) throws {
         try make(buildPlan: buildPlan, graph: graph, project: project).perform()
     }
 
-    static func make(buildPlan: BuildPlan, graph: SourceGraph, project: XcodeProjectlike) -> Self {
+    static func make(buildPlan: XcodeBuildPlan, graph: SourceGraph, project: XcodeProjectlike) -> Self {
         return self.init(buildPlan: buildPlan, graph: graph, project: project, configuration: inject())
     }
 
-    private let buildPlan: BuildPlan
+    private let buildPlan: XcodeBuildPlan
     private let graph: SourceGraph
     private let project: XcodeProjectlike
 
     private let indexers: [TypeIndexer.Type]
 
-    required init(buildPlan: BuildPlan, graph: SourceGraph, project: XcodeProjectlike, configuration: Configuration) {
+    required init(buildPlan: XcodeBuildPlan, graph: SourceGraph, project: XcodeProjectlike, configuration: Configuration) {
         self.buildPlan = buildPlan
         self.graph = graph
         self.project = project
