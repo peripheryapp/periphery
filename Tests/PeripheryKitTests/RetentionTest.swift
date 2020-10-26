@@ -6,6 +6,7 @@ class RetentionTest: XCTestCase {
     static var project: XcodeProject!
     static var buildPlan: XcodeBuildPlan!
     static var fixtureTarget: XcodeTarget!
+    static var driver: XcodeProjectDriver!
 
     enum IndexerVariant: String, CaseIterable {
         case sourceKit = "SourceKit"
@@ -23,6 +24,12 @@ class RetentionTest: XCTestCase {
         fixtureTarget = project.targets.first { $0.name == "RetentionFixtures" }!
         let crossModuleFixtureTarget = project.targets.first { $0.name == "RetentionFixturesCrossModule" }!
         buildPlan = try! XcodeBuildPlan.make(buildLog: buildLog, targets: [fixtureTarget, crossModuleFixtureTarget])
+
+        driver = XcodeProjectDriver(
+            configuration: inject(),
+            xcodebuild: inject(),
+            project: project,
+            buildPlan: buildPlan)
     }
 
     private var graph: SourceGraph!
@@ -1115,7 +1122,7 @@ class RetentionTest: XCTestCase {
         for variant in enabledIndexers {
             let graph = SourceGraph()
             configuration.useIndexStore = variant == .indexStore
-            try! Indexer.perform(buildPlan: RetentionTest.buildPlan, graph: graph, project: Self.project)
+            try! Self.driver.index(graph: graph)
             try! Analyzer.perform(graph: graph)
             self.graph = graph
             try testBlock(variant)

@@ -1,31 +1,25 @@
 import PathKit
 
-final class XibIndexer: TypeIndexer {
-    static func make(buildPlan: XcodeBuildPlan, graph: SourceGraph, project: XcodeProjectlike) -> Self {
-        return self.init(buildPlan: buildPlan,
+final class XibIndexer {
+    static func make(xibFiles: Set<Path>, graph: SourceGraph) -> Self {
+        return self.init(xibFiles: xibFiles,
                          graph: graph,
                          logger: inject())
     }
 
-    private let buildPlan: XcodeBuildPlan
+    private let xibFiles: Set<Path>
     private let graph: SourceGraph
     private let logger: Logger
 
-    required init(buildPlan: XcodeBuildPlan, graph: SourceGraph, logger: Logger) {
-        self.buildPlan = buildPlan
+    required init(xibFiles: Set<Path>, graph: SourceGraph, logger: Logger) {
+        self.xibFiles = xibFiles
         self.graph = graph
         self.logger = logger
     }
 
     func perform() throws {
-        var jobs: [Path] = []
-
-        for target in buildPlan.targets {
-            jobs.append(contentsOf: try target.xibFiles())
-        }
-
         let workPool = JobPool<[XibReference]>()
-        let results = try workPool.map(jobs) { [weak self] xibPath in
+        let results = try workPool.map(Array(xibFiles)) { [weak self] xibPath in
             guard let strongSelf = self else { return nil }
 
             var references: [XibReference] = []

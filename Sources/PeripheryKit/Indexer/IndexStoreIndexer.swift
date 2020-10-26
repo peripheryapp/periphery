@@ -3,44 +3,35 @@ import PathKit
 import SwiftSyntax
 import SwiftIndexStore
 
-final class IndexStoreIndexer: TypeIndexer {
-    static func make(buildPlan: XcodeBuildPlan, graph: SourceGraph, project: XcodeProjectlike) throws -> Self {
-        let configuration = inject(Configuration.self)
-        let xcodebuild = inject(Xcodebuild.self)
-        let storePath: String
-
-        if let path = configuration.indexStorePath {
-            storePath = path
-        } else if let env = ProcessInfo.processInfo.environment["BUILD_ROOT"] {
-            storePath = (Path(env).absolute().parent().parent() + "Index/DataStore").string
-        } else {
-            storePath = try xcodebuild.indexStorePath(project: project)
-        }
-
+final class IndexStoreIndexer {
+    static func make(storePath: String, sourceFiles: Set<Path>, graph: SourceGraph) throws -> Self {
         let storeURL = URL(fileURLWithPath: storePath)
 
-        return self.init(buildPlan: buildPlan,
-                         graph: graph,
-                         indexStore: try IndexStore.open(store: storeURL, lib: .open()),
-                         logger: inject(),
-                         featureManager: inject(),
-                         configuration: inject())
+        return self.init(
+            sourceFiles: sourceFiles,
+            graph: graph,
+            indexStore: try IndexStore.open(store: storeURL, lib: .open()),
+            logger: inject(),
+            featureManager: inject(),
+            configuration: inject())
     }
 
-    private let buildPlan: XcodeBuildPlan
+    private let sourceFiles: Set<Path>
     private let graph: SourceGraph
     private let logger: Logger
     private let featureManager: FeatureManager
     private let configuration: Configuration
     private let indexStore: IndexStore
 
-    required init(buildPlan: XcodeBuildPlan,
-                  graph: SourceGraph,
-                  indexStore: IndexStore,
-                  logger: Logger,
-                  featureManager: FeatureManager,
-                  configuration: Configuration) {
-        self.buildPlan = buildPlan
+    required init(
+        sourceFiles: Set<Path>,
+        graph: SourceGraph,
+        indexStore: IndexStore,
+        logger: Logger,
+        featureManager: FeatureManager,
+        configuration: Configuration
+    ) {
+        self.sourceFiles = sourceFiles
         self.graph = graph
         self.logger = logger
         self.featureManager = featureManager
@@ -50,8 +41,6 @@ final class IndexStoreIndexer: TypeIndexer {
 
     func perform() throws {
         var jobs = [Job]()
-
-        let allowedSourceFilesPaths = Set(try buildPlan.targets.map { try $0.sourceFiles().map { $0.path } }.joined())
         let excludedPaths = configuration.indexExcludeSourceFiles.map { $0.path }
 
         try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
@@ -64,12 +53,11 @@ final class IndexStoreIndexer: TypeIndexer {
                 return true
             }
 
-            if allowedSourceFilesPaths.contains(path) {
+            if sourceFiles.contains(path) {
                 jobs.append(
                     Job(
                         filePath: path,
                         unit: unit,
-                        buildPlan: buildPlan,
                         graph: graph,
                         indexStore: indexStore,
                         logger: logger,
@@ -100,13 +88,12 @@ final class IndexStoreIndexer: TypeIndexer {
         let filePath: Path
 
         private let unit: IndexStoreUnit
-        private let buildPlan: XcodeBuildPlan
         private let graph: SourceGraph
         private let logger: Logger
         private let featureManager: FeatureManager
         private let configuration: Configuration
         private let indexStore: IndexStore
-        private let sourceKit = SourceKit.make()
+        private let sourceKit = SourceKit(arguments: [])
 
         private lazy var indexStructure = Cache { [sourceKit] (sourceFile: SourceFile) -> [[String: Any]] in
             let substructure = try sourceKit.editorOpenSubstructure(sourceFile)
@@ -116,7 +103,6 @@ final class IndexStoreIndexer: TypeIndexer {
         required init(
             filePath: Path,
             unit: IndexStoreUnit,
-            buildPlan: XcodeBuildPlan,
             graph: SourceGraph,
             indexStore: IndexStore,
             logger: Logger,
@@ -125,7 +111,6 @@ final class IndexStoreIndexer: TypeIndexer {
         ) {
             self.filePath = filePath
             self.unit = unit
-            self.buildPlan = buildPlan
             self.graph = graph
             self.logger = logger
             self.featureManager = featureManager
