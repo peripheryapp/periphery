@@ -2,7 +2,7 @@ import Foundation
 import PathKit
 import SwiftSyntax
 
-final class SourceKitIndexer: TypeIndexer {
+final class SourceKitIndexer {
     static func make(buildPlan: XcodeBuildPlan, graph: SourceGraph, project: XcodeProjectlike) -> Self {
         return self.init(buildPlan: buildPlan,
                          graph: graph,
@@ -36,7 +36,8 @@ final class SourceKitIndexer: TypeIndexer {
         let excludedSourceFiles = configuration.indexExcludeSourceFiles
 
         for target in buildPlan.targets {
-            let sourceKit = try SourceKit.make(buildPlan: buildPlan, target: target)
+            let arguments = try buildPlan.arguments(for: target)
+            let sourceKit = SourceKit(arguments: arguments)
             let sourceFiles = try target.sourceFiles()
             jobs.append(contentsOf: sourceFiles.map { Job($0, sourceKit) })
         }
