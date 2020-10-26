@@ -1,27 +1,69 @@
 import Foundation
+import PathKit
 
-final class Project {
-    enum Kind {
+public final class Project {
+    enum Kind: CustomStringConvertible {
         case xcode
+        case spm
+
+        var description: String {
+            switch self {
+            case .spm:
+                return "Swift Package Manager"
+            case .xcode:
+                return "Xcode"
+            }
+        }
     }
 
-    static func build() throws -> Self {
+    static func identify() throws -> Self {
+        if (Path.current + "Package.swift").exists {
+            return try self.init(kind: .spm)
+        }
+
         return try self.init(kind: .xcode)
     }
 
     let kind: Kind
-    let driver: ProjectDriver
 
     init(kind: Kind) throws {
         self.kind = kind
+    }
+
+    func validateEnvironment() throws {
+        let logger: Logger = inject()
+        let shell = Shell()
+
+        logger.debug(try shell.exec(["swift", "--version"]).trimmed)
 
         switch kind {
         case .xcode:
-            self.driver = try XcodeProjectDriver.build()
+            do {
+                let xcodebuild: Xcodebuild = inject()
+                logger.debug(try xcodebuild.version())
+            } catch {
+                throw PeripheryKitError.xcodebuildNotConfigured
+            }
+        default:
+            break
         }
     }
 
-    func index(graph: SourceGraph) throws {
-        try driver.index(graph: graph)
+    func driver() throws -> ProjectDriver {
+        switch kind {
+        case .xcode:
+            return try XcodeProjectDriver.make()
+        case .spm:
+            return try SPMProjectDriver.make()
+        }
+    }
+
+    func setupGuide() -> SetupGuide {
+        switch kind {
+        case .xcode:
+            return XcodeProjectSetupGuide.make()
+        case .spm:
+            return SPMProjectSetupGuide.make()
+        }
     }
 }

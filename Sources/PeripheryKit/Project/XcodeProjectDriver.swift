@@ -2,7 +2,7 @@ import Foundation
 import PathKit
 
 final class XcodeProjectDriver {
-    static func build() throws -> Self {
+    static func make() throws -> Self {
         let configuration: Configuration = inject()
         try validateConfiguration(configuration: configuration)
 
@@ -35,32 +35,35 @@ final class XcodeProjectDriver {
             throw PeripheryKitError.invalidScheme(name: scheme, project: project.path.lastComponent)
         }
 
-        let buildLog = try XcodeBuildLog.make(project: project, schemes: schemes, targets: targets).get()
-        let buildPlan = try XcodeBuildPlan.make(buildLog: buildLog, targets: targets)
-
         return self.init(
             configuration: configuration,
             xcodebuild: inject(),
             project: project,
-            buildPlan: buildPlan
+            schemes: schemes,
+            targets: targets
         )
     }
 
     private let configuration: Configuration
     private let xcodebuild: Xcodebuild
     private let project: XcodeProjectlike
-    private let buildPlan: XcodeBuildPlan
+    private let schemes: Set<XcodeScheme>
+    private var targets: Set<XcodeTarget>
+
+    private var buildPlan: XcodeBuildPlan?
 
     init(
         configuration: Configuration,
         xcodebuild: Xcodebuild,
         project: XcodeProjectlike,
-        buildPlan: XcodeBuildPlan
+        schemes: Set<XcodeScheme>,
+        targets: Set<XcodeTarget>
     ) {
         self.configuration = configuration
         self.xcodebuild = xcodebuild
         self.project = project
-        self.buildPlan = buildPlan
+        self.schemes = schemes
+        self.targets = targets
     }
 
     // MARK: - Private
@@ -87,11 +90,26 @@ final class XcodeProjectDriver {
         if configuration.saveBuildLog != nil && configuration.useBuildLog != nil {
             throw PeripheryKitError.usageError("The '--save-build-log' and '--use-build-log' options are mutually exclusive. Please first save the build log with '--save-build-log <key>' and then use it with '--use-build-log <key>'.")
         }
+
+        if configuration.skipBuild {
+            throw PeripheryKitError.usageError("The '--skip-build' option is only useable with Swift Package Manager projects.")
+        }
+    }
+
+    func setTargets(_ targets: Set<XcodeTarget>) {
+        self.targets = targets
     }
 }
 
 extension XcodeProjectDriver: ProjectDriver {
+    func build() throws {
+        let buildLog = try XcodeBuildLog.make(project: project, schemes: schemes, targets: targets).get()
+        buildPlan = try XcodeBuildPlan.make(buildLog: buildLog, targets: targets)
+    }
+
     func index(graph: SourceGraph) throws {
+        guard let buildPlan = buildPlan else { return }
+
         if configuration.useIndexStore {
             let storePath: String
 
@@ -103,15 +121,13 @@ extension XcodeProjectDriver: ProjectDriver {
                 storePath = try xcodebuild.indexStorePath(project: project)
             }
 
-            let sourceFiles = Set(try buildPlan.targets.map { try $0.sourceFiles().map { $0.path } }.joined())
-            print(sourceFiles)
-
+            let sourceFiles = Set(try targets.map { try $0.sourceFiles().map { $0.path } }.joined())
             try IndexStoreIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
         } else {
-            try SourceKitIndexer.make(buildPlan: buildPlan, graph: graph, project: project).perform()
+            try SourceKitIndexer.make(buildPlan: buildPlan, targets: targets, graph: graph).perform()
         }
 
-        let xibFiles = try Set(buildPlan.targets.map { try $0.xibFiles() }.joined())
+        let xibFiles = try Set(targets.map { try $0.xibFiles() }.joined())
         try XibIndexer.make(xibFiles: xibFiles, graph: graph).perform()
     }
 }

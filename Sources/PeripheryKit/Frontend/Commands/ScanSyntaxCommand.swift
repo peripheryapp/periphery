@@ -2,7 +2,6 @@ import Foundation
 import ArgumentParser
 
 public struct ScanSyntaxCommand: ParsableCommand {
-
     public static let configuration = CommandConfiguration(
         commandName: "scan-syntax",
         abstract: "Scan for unused code using fast syntax only analysis techniques (currently only unused function parameter analysis)"
@@ -59,7 +58,9 @@ public struct ScanSyntaxCommand: ParsableCommand {
             configuration.outputFormat = try OutputFormat.make(named: formatName)
         }
 
-        try scanBehavior.main { try ScanSyntax.make().perform(path) }.get()
+        try scanBehavior.main { project in
+            try ScanSyntax.make().perform(path)
+        }.get()
     }
 
 

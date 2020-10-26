@@ -4,8 +4,8 @@ import PathKit
 
 class RetentionTest: XCTestCase {
     static var project: XcodeProject!
-    static var buildPlan: XcodeBuildPlan!
     static var fixtureTarget: XcodeTarget!
+    static var crossModuleFixtureTarget: XcodeTarget!
     static var driver: XcodeProjectDriver!
 
     enum IndexerVariant: String, CaseIterable {
@@ -17,19 +17,24 @@ class RetentionTest: XCTestCase {
         super.setUp()
 
         project = try! XcodeProject.make(path: PeripheryProjectPath)
+
         let xcodebuild: Xcodebuild = inject()
         try! xcodebuild.clearDerivedData(for: project)
-        let buildLog = try! xcodebuild.build(project: project, scheme: "RetentionFixtures")
+
+        let configuration: Configuration = inject()
+        configuration.outputFormat = .json
 
         fixtureTarget = project.targets.first { $0.name == "RetentionFixtures" }!
-        let crossModuleFixtureTarget = project.targets.first { $0.name == "RetentionFixturesCrossModule" }!
-        buildPlan = try! XcodeBuildPlan.make(buildLog: buildLog, targets: [fixtureTarget, crossModuleFixtureTarget])
+        crossModuleFixtureTarget = project.targets.first { $0.name == "RetentionFixturesCrossModule" }!
 
         driver = XcodeProjectDriver(
-            configuration: inject(),
-            xcodebuild: inject(),
+            configuration: configuration,
+            xcodebuild: xcodebuild,
             project: project,
-            buildPlan: buildPlan)
+            schemes: [try! XcodeScheme.make(project: project, name: "RetentionFixtures")],
+            targets: [fixtureTarget, crossModuleFixtureTarget]
+        )
+        try! driver.build()
     }
 
     private var graph: SourceGraph!
@@ -722,14 +727,14 @@ class RetentionTest: XCTestCase {
 
     func testCrossModuleReference() {
         // Entry point is used that so that retainPublic can be disabled, as PublicCrossModuleReferenced must be public in order to be imported.
-        analyze(isMainFile: true) {
+        analyze(isMainFile: true, additionalTargets: [Self.crossModuleFixtureTarget]) {
             XCTAssertReferenced((.class, "PublicCrossModuleReferenced"))
             XCTAssertNotReferenced((.class, "PublicCrossModuleNotReferenced"))
         }
     }
 
     func testCrossModuleReferenceTestableImport() {
-        analyze(retainPublic: true) {
+        analyze(retainPublic: true, additionalTargets: [Self.crossModuleFixtureTarget]) {
             XCTAssertReferenced((.class, "InternalCrossModuleReferenced"))
         }
     }
@@ -1083,11 +1088,12 @@ class RetentionTest: XCTestCase {
                          supplementalFiles: [String] = [],
                          enabledIndexers: [IndexerVariant] = IndexerVariant.allCases,
                          fixture: String? = nil,
+                         additionalTargets: [XcodeTarget] = [],
                          _ testBlock: () throws -> Void
     ) rethrows {
         try analyze(retainPublic: retainPublic, retainObjcAnnotated: retainObjcAnnotated,
                     isMainFile: isMainFile, supplementalFiles: supplementalFiles,
-                    enabledIndexers: enabledIndexers, fixture: fixture, { _ in try testBlock() })
+                    enabledIndexers: enabledIndexers, fixture: fixture, additionalTargets: additionalTargets, { _ in try testBlock() })
     }
 
     private func analyze(retainPublic: Bool = false,
@@ -1096,6 +1102,7 @@ class RetentionTest: XCTestCase {
                          supplementalFiles: [String] = [],
                          enabledIndexers: [IndexerVariant] = IndexerVariant.allCases,
                          fixture: String? = nil,
+                         additionalTargets: [XcodeTarget] = [],
                          _ testBlock: (IndexerVariant) throws -> Void
     ) rethrows {
         let testName = fixture ?? String(name.split(separator: " ").last!).replacingOccurrences(of: "]", with: "")
@@ -1116,7 +1123,8 @@ class RetentionTest: XCTestCase {
             XCTAssertTrue($0.path.exists, "\($0.path.string) does not exist.")
         }
 
-        RetentionTest.fixtureTarget.set(sourceFiles: sourceFiles)
+        Self.driver.setTargets(Set([Self.fixtureTarget] + additionalTargets))
+        Self.fixtureTarget.set(sourceFiles: sourceFiles)
         var graphs: [IndexerVariant: SourceGraph] = [:]
 
         for variant in enabledIndexers {

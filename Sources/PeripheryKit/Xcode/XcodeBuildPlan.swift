@@ -12,16 +12,6 @@ final class XcodeBuildPlan {
                                   logger: inject())
     }
 
-    static func make(targets: Set<XcodeTarget>) throws -> XcodeBuildPlan {
-        let xcodebuild: Xcodebuild = inject()
-        let xcodebuildVersion = XcodebuildVersion.parse(try xcodebuild.version())
-
-        return try XcodeBuildPlan(targets: targets,
-                                  buildLogParser: nil,
-                                  xcodebuildVersion: xcodebuildVersion,
-                                  logger: inject())
-    }
-
     private static let excludedArguments = [
         "-Xfrontend",
         "-output-file-map",
@@ -36,18 +26,13 @@ final class XcodeBuildPlan {
     private let xcodebuildVersion: String
     private let logger: Logger
 
-    let targets: Set<XcodeTarget>
-
-    required init(targets: Set<XcodeTarget>, buildLogParser: XcodebuildLogParser?, xcodebuildVersion: String, logger: Logger) throws {
-        self.targets = targets
+    required init(targets: Set<XcodeTarget>, buildLogParser: XcodebuildLogParser, xcodebuildVersion: String, logger: Logger) throws {
         self.xcodebuildVersion = xcodebuildVersion
         self.logger = logger
-        // For legacy mode indexing with SourceKit
-        if let buildLogParser = buildLogParser {
-            self.invocationsByTarget = Dictionary(uniqueKeysWithValues: try targets.map {
-                ($0, try buildLogParser.getSwiftcInvocation(target: $0.name, module: $0.moduleName))
-            })
-        }
+
+        self.invocationsByTarget = Dictionary(uniqueKeysWithValues: try targets.map {
+            ($0, try buildLogParser.getSwiftcInvocation(target: $0.name, module: $0.moduleName))
+        })
     }
 
     func arguments(for target: XcodeTarget) throws -> [String] {

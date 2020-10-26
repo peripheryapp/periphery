@@ -29,22 +29,21 @@ final class ScanBehavior {
         return .success(())
     }
 
-    func main(_ block: () throws -> ScanResult) -> Result<(), PeripheryKitError> {
-        let xcodebuildVersionOutput: String
+    func main(_ block: (Project) throws -> ScanResult) -> Result<(), PeripheryKitError> {
+        let project: Project
 
         do {
-            xcodebuildVersionOutput = try xcodebuild.version()
+            project = try Project.identify()
+            try project.validateEnvironment()
+        } catch let error as PeripheryKitError {
+            return .failure(error)
         } catch {
-            return .failure(PeripheryKitError.xcodebuildNotConfigured)
+            return .failure(.underlyingError(error))
         }
 
-        logger.debug(xcodebuildVersionOutput)
-
         if configuration.guidedSetup {
-            let guidedSetup = inject(GuidedSetup.self)
-
             do {
-                try guidedSetup.perform()
+                try GuidedSetup.make(project: project).perform()
             } catch let error as PeripheryKitError {
                 return .failure(error)
             } catch {
@@ -58,7 +57,7 @@ final class ScanBehavior {
         let result: ScanResult
 
         do {
-            result = try block()
+            result = try block(project)
             let filteredDeclarations = OutputDeclarationFilter.make().filter(result.declarations)
             let sortedDeclarations = DeclarationSorter.sort(filteredDeclarations)
             try configuration.outputFormat.formatter.make().perform(sortedDeclarations)
@@ -71,7 +70,7 @@ final class ScanBehavior {
 
                         colorize("\n - ", .boldGreen) +
                         "Periphery only analyzes files that are members of the targets you specify." +
-                        "\n   References to declarations identified as unused may reside in files that are members of other targets." +
+                        "\n   References to declarations identified as unused may reside in files that are members of other targets, e.g test targets" +
 
                         colorize("\n - ", .boldGreen) +
                         "By default, Periphery does not assume that all public declarations are in use. " +
