@@ -1,17 +1,17 @@
 import PathKit
 
 final class XibIndexer: TypeIndexer {
-    static func make(buildPlan: BuildPlan, graph: SourceGraph, project: XcodeProjectlike) -> Self {
+    static func make(buildPlan: XcodeBuildPlan, graph: SourceGraph, project: XcodeProjectlike) -> Self {
         return self.init(buildPlan: buildPlan,
                          graph: graph,
                          logger: inject())
     }
 
-    private let buildPlan: BuildPlan
+    private let buildPlan: XcodeBuildPlan
     private let graph: SourceGraph
     private let logger: Logger
 
-    required init(buildPlan: BuildPlan, graph: SourceGraph, logger: Logger) {
+    required init(buildPlan: XcodeBuildPlan, graph: SourceGraph, logger: Logger) {
         self.buildPlan = buildPlan
         self.graph = graph
         self.logger = logger

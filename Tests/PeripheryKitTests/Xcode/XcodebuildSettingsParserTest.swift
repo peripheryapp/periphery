@@ -3,18 +3,18 @@ import XCTest
 @testable import PeripheryKit
 
 class XcodebuildSettingsParserTest: XCTestCase {
-    private static var project: Project!
+    private static var project: XcodeProject!
 
     private var xcodebuild: Xcodebuild!
 
-    private var project: Project! {
+    private var project: XcodeProject! {
         return XcodebuildSettingsParserTest.project
     }
 
     override static func setUp() {
         super.setUp()
 
-        project = try! Project.make(path: PeripheryProjectPath)
+        project = try! XcodeProject.make(path: PeripheryProjectPath)
     }
 
     override func setUp() {

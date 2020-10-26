@@ -1,6 +1,6 @@
 import Foundation
 
-public final class Scheme {
+public final class XcodeScheme {
     static func make(project: XcodeProjectlike, name: String) throws -> Self {
         return try self.init(project: project, name: name, xcodebuild: inject())
     }
@@ -42,14 +42,14 @@ public final class Scheme {
     }
 }
 
-extension Scheme: Hashable {
+extension XcodeScheme: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(name)
     }
 }
 
-extension Scheme: Equatable {
-    public static func == (lhs: Scheme, rhs: Scheme) -> Bool {
+extension XcodeScheme: Equatable {
+    public static func == (lhs: XcodeScheme, rhs: XcodeScheme) -> Bool {
         return lhs.name == rhs.name
     }
 }

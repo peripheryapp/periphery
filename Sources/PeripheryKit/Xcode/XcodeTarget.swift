@@ -2,15 +2,15 @@ import Foundation
 import XcodeProj
 import PathKit
 
-public final class Target {
-    static func make(project: Project, target: PBXTarget) -> Self {
+public final class XcodeTarget {
+    static func make(project: XcodeProject, target: PBXTarget) -> Self {
         return self.init(project: project,
                          target: target,
                          xcodebuild: inject(),
                          logger: inject())
     }
 
-    public let project: Project
+    public let project: XcodeProject
     private(set) var moduleName: String
 
     private let target: PBXTarget
@@ -21,7 +21,7 @@ public final class Target {
     private let xcodebuild: Xcodebuild
     private let logger: Logger
 
-    required init(project: Project, target: PBXTarget, xcodebuild: Xcodebuild, logger: Logger) {
+    required init(project: XcodeProject, target: PBXTarget, xcodebuild: Xcodebuild, logger: Logger) {
         self.project = project
         self.target = target
         self.moduleName = target.name
@@ -126,14 +126,14 @@ public final class Target {
     }
 }
 
-extension Target: Hashable {
+extension XcodeTarget: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(target.name)
     }
 }
 
-extension Target: Equatable {
-    public static func == (lhs: Target, rhs: Target) -> Bool {
+extension XcodeTarget: Equatable {
+    public static func == (lhs: XcodeTarget, rhs: XcodeTarget) -> Bool {
         return lhs.name == rhs.name
     }
 }

@@ -1,25 +1,25 @@
 import Foundation
 
-final class BuildPlan {
-    static func make(buildLog: String, targets: Set<Target>) throws -> BuildPlan {
+final class XcodeBuildPlan {
+    static func make(buildLog: String, targets: Set<XcodeTarget>) throws -> XcodeBuildPlan {
         let parser = XcodebuildLogParser(log: buildLog)
         let xcodebuild: Xcodebuild = inject()
         let xcodebuildVersion = XcodebuildVersion.parse(try xcodebuild.version())
 
-        return try BuildPlan(targets: targets,
-                             buildLogParser: parser,
-                             xcodebuildVersion: xcodebuildVersion,
-                             logger: inject())
+        return try XcodeBuildPlan(targets: targets,
+                                  buildLogParser: parser,
+                                  xcodebuildVersion: xcodebuildVersion,
+                                  logger: inject())
     }
 
-    static func make(targets: Set<Target>) throws -> BuildPlan {
+    static func make(targets: Set<XcodeTarget>) throws -> XcodeBuildPlan {
         let xcodebuild: Xcodebuild = inject()
         let xcodebuildVersion = XcodebuildVersion.parse(try xcodebuild.version())
 
-        return try BuildPlan(targets: targets,
-                             buildLogParser: nil,
-                             xcodebuildVersion: xcodebuildVersion,
-                             logger: inject())
+        return try XcodeBuildPlan(targets: targets,
+                                  buildLogParser: nil,
+                                  xcodebuildVersion: xcodebuildVersion,
+                                  logger: inject())
     }
 
     private static let excludedArguments = [
@@ -31,14 +31,14 @@ final class BuildPlan {
         "-emit-dependencies"
     ]
 
-    private var invocationsByTarget: [Target: SwiftcInvocation] = [:]
-    private var argumentsByTarget: [Target: [String]] = [:]
+    private var invocationsByTarget: [XcodeTarget: SwiftcInvocation] = [:]
+    private var argumentsByTarget: [XcodeTarget: [String]] = [:]
     private let xcodebuildVersion: String
     private let logger: Logger
 
-    let targets: Set<Target>
+    let targets: Set<XcodeTarget>
 
-    required init(targets: Set<Target>, buildLogParser: XcodebuildLogParser?, xcodebuildVersion: String, logger: Logger) throws {
+    required init(targets: Set<XcodeTarget>, buildLogParser: XcodebuildLogParser?, xcodebuildVersion: String, logger: Logger) throws {
         self.targets = targets
         self.xcodebuildVersion = xcodebuildVersion
         self.logger = logger
@@ -50,7 +50,7 @@ final class BuildPlan {
         }
     }
 
-    func arguments(for target: Target) throws -> [String] {
+    func arguments(for target: XcodeTarget) throws -> [String] {
         if let arguments = argumentsByTarget[target] {
             return arguments
         }
@@ -59,11 +59,11 @@ final class BuildPlan {
             throw PeripheryKitError.noSwiftcInvocation(target: target.name)
         }
 
-        let filteredArguments: [BuildArgument]
+        let filteredArguments: [XcodeBuildArgument]
 
         if xcodebuildVersion.isVersion(lessThan: "10.0") {
             filteredArguments = invocation.arguments
-                .filter { !BuildPlan.excludedArguments.contains($0.key) }
+                .filter { !XcodeBuildPlan.excludedArguments.contains($0.key) }
         } else {
             filteredArguments = invocation.arguments
         }

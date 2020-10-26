@@ -5,28 +5,28 @@ import XCTest
 class XcodebuildTest: XCTestCase {
     var shell: ShellMock!
     var xcodebuild: Xcodebuild!
-    var project: Project!
+    var project: XcodeProject!
 
     override func setUp() {
         super.setUp()
 
         shell = ShellMock()
         xcodebuild = Xcodebuild(shell: shell)
-        project = try! Project.make(path: PeripheryProjectPath)
+        project = try! XcodeProject.make(path: PeripheryProjectPath)
     }
 }
 
 class XcodebuildBuildProjectTest: XCTestCase {
     var shell: Shell!
     var xcodebuild: Xcodebuild!
-    var project: Project!
+    var project: XcodeProject!
 
     override func setUp() {
         super.setUp()
 
         shell = Shell()
         xcodebuild = Xcodebuild(shell: shell)
-        project = try! Project.make(path: PeripheryProjectPath)
+        project = try! XcodeProject.make(path: PeripheryProjectPath)
     }
 
     func testBuildSchemeWithWhitespace() throws {

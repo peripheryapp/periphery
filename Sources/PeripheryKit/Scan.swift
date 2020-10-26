@@ -55,9 +55,9 @@ public final class Scan: Injectable {
         }
 
         if let workspacePath = configuration.workspace {
-            project = try Workspace.make(path: workspacePath)
+            project = try XcodeWorkspace.make(path: workspacePath)
         } else if let projectPath = configuration.project {
-            project = try Project.make(path: projectPath)
+            project = try XcodeProject.make(path: projectPath)
         } else {
             throw PeripheryKitError.usageError("Expected --workspace or --project option.")
         }
@@ -81,13 +81,13 @@ public final class Scan: Injectable {
             throw PeripheryKitError.invalidScheme(name: scheme, project: project.path.lastComponent)
         }
 
-        let buildPlan: BuildPlan
+        let buildPlan: XcodeBuildPlan
 
         if configuration.skipBuild {
-            buildPlan = try BuildPlan.make(targets: targets)
+            buildPlan = try XcodeBuildPlan.make(targets: targets)
         } else {
-            let buildLog = try BuildLog.make(project: project, schemes: schemes, targets: targets).get()
-            buildPlan = try BuildPlan.make(buildLog: buildLog, targets: targets)
+            let buildLog = try XcodeBuildLog.make(project: project, schemes: schemes, targets: targets).get()
+            buildPlan = try XcodeBuildPlan.make(buildLog: buildLog, targets: targets)
         }
 
         let graph = SourceGraph()

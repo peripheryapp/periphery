@@ -20,7 +20,7 @@ final class SourceKit {
         case accessibility = "key.accessibility"
     }
 
-    static func make(buildPlan: BuildPlan, target: Target) throws -> Self {
+    static func make(buildPlan: XcodeBuildPlan, target: XcodeTarget) throws -> Self {
         let arguments = try buildPlan.arguments(for: target)
         return self.init(arguments: arguments)
     }

@@ -3,21 +3,21 @@ import XCTest
 @testable import PeripheryKit
 
 class XcodebuildLogParserTest: XCTestCase {
-    private static var project: Project!
-    private static var target: Target!
+    private static var project: XcodeProject!
+    private static var target: XcodeTarget!
 
-    private var project: Project! {
+    private var project: XcodeProject! {
         return XcodebuildLogParserTest.project
     }
 
-    private var target: Target! {
+    private var target: XcodeTarget! {
         return XcodebuildLogParserTest.target
     }
 
     override static func setUp() {
         super.setUp()
 
-        project = try! Project.make(path: PeripheryProjectPath)
+        project = try! XcodeProject.make(path: PeripheryProjectPath)
         target = project.targets.first { $0.name == "PeripheryKit" }!
     }
 
