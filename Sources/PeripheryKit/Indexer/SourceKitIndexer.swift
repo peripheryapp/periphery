@@ -3,8 +3,9 @@ import PathKit
 import SwiftSyntax
 
 final class SourceKitIndexer {
-    static func make(buildPlan: XcodeBuildPlan, graph: SourceGraph, project: XcodeProjectlike) -> Self {
+    static func make(buildPlan: XcodeBuildPlan, targets: Set<XcodeTarget>, graph: SourceGraph) -> Self {
         return self.init(buildPlan: buildPlan,
+                         targets: targets,
                          graph: graph,
                          logger: inject(),
                          featureManager: inject(),
@@ -12,6 +13,7 @@ final class SourceKitIndexer {
     }
 
     private let buildPlan: XcodeBuildPlan
+    private let targets: Set<XcodeTarget>
     private let graph: SourceGraph
     private let logger: Logger
     private let featureManager: FeatureManager
@@ -20,11 +22,13 @@ final class SourceKitIndexer {
     private typealias Job = (sourceFile: SourceFile, sourceKit: SourceKit)
 
     required init(buildPlan: XcodeBuildPlan,
+                  targets: Set<XcodeTarget>,
                   graph: SourceGraph,
                   logger: Logger,
                   featureManager: FeatureManager,
                   configuration: Configuration) {
         self.buildPlan = buildPlan
+        self.targets = targets
         self.graph = graph
         self.logger = logger
         self.featureManager = featureManager
@@ -35,7 +39,7 @@ final class SourceKitIndexer {
         var jobs: [Job] = []
         let excludedSourceFiles = configuration.indexExcludeSourceFiles
 
-        for target in buildPlan.targets {
+        for target in targets {
             let arguments = try buildPlan.arguments(for: target)
             let sourceKit = SourceKit(arguments: arguments)
             let sourceFiles = try target.sourceFiles()

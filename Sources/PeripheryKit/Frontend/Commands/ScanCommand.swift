@@ -3,28 +3,30 @@ import ArgumentParser
 import PathKit
 
 public struct ScanCommand: ParsableCommand {
-
     public static let configuration = CommandConfiguration(
         commandName: "scan",
-        abstract: "Scan for unused code using all available techniques"
+        abstract: "Scan for unused code"
     )
+
+    @Flag(help: "Enable guided setup")
+    var setup: Bool = false
 
     @Option(help: "Path to configuration file. By default Periphery will look for .periphery.yml in the current directory")
     var config: String?
 
-    @Option(help: "Path to your project's .xcworkspace")
+    @Option(help: "Path to your project's .xcworkspace. Xcode projects only")
     var workspace: String?
 
-    @Option(help: "Path to your project's .xcodeproj - supply this option if your project doesn't have an .xcworkspace")
+    @Option(help: "Path to your project's .xcodeproj - supply this option if your project doesn't have an .xcworkspace. Xcode projects only")
     var project: String?
 
-    @Option(help: "Comma separatered list of schemes that must be built in order to produce the targets passed to the --targets option", transform: split(by: ","))
+    @Option(help: "Comma separatered list of schemes that must be built in order to produce the targets passed to the --targets option. Xcode projects only", transform: split(by: ","))
     var schemes: [String] = []
 
-    @Option(help: "Comma separatered list of schemes that must be built in order to produce the targets passed to the --targets option", transform: split(by: ","))
+    @Option(help: "Comma separatered list of target names to scan. Requied for Xcode projects. Optional for Swift Package Manager projects, default behavior is to scan all targets defined in Package.swift", transform: split(by: ","))
     var targets: [String] = []
 
-    @Flag(inversion: .prefixedNo, help: "Retain all public declarations - you'll likely want to enable this if you're scanning a framework")
+    @Flag(inversion: .prefixedNo, help: "Retain all public declarations - you'll likely want to enable this if you're scanning a framework/library project")
     var retainPublic: Bool?
 
     @Flag(inversion: .prefixedNo, help: "Don't retain declarations that are exposed to Objective-C by inheriting NSObject, or explicitly with the @objc and @objcMembers annotations")
@@ -165,14 +167,11 @@ public struct ScanCommand: ParsableCommand {
             configuration.outputFormat = try OutputFormat.make(named: formatName)
         }
 
-        if configuration.workspace == nil &&
-            configuration.project == nil &&
-            configuration.schemes.isEmpty &&
-            configuration.targets.isEmpty {
-            configuration.guidedSetup = true
-        }
+        configuration.guidedSetup = setup
 
-        try scanBehavior.main { try Scan.make().perform() }.get()
+        try scanBehavior.main { project in
+            try Scan.make().perform(project: project)
+        }.get()
     }
 
     fileprivate static func split(by delimiter: Character) -> (String?) -> [String] {

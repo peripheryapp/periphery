@@ -23,6 +23,7 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
     case pathDoesNotExist(path: String)
     case foundIssues(count: Int)
     case indexStoreError(message: String)
+    case packageError(message: String)
 
     public var errorDescription: String? {
         switch self {
@@ -67,6 +68,8 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
         case .foundIssues(let count):
             return "Found \(count) \(count > 1 ? "issues" : "issue")."
         case .indexStoreError(let message):
+            return message
+        case .packageError(let message):
             return message
         }
     }

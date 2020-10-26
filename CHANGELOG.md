@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Support for analyzing Swift Package Manager projects
 
 ##### Bug Fixes
 

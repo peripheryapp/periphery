@@ -20,7 +20,7 @@ public final class Scan: Injectable {
         self.logger = logger
     }
 
-    public func perform() throws -> ScanResult {
+    public func perform(project: Project) throws -> ScanResult {
         logger.debug("[version] \(PeripheryVersion)")
         let configYaml = try configuration.asYaml()
         logger.debug("[configuration]\n--- # .periphery.yml\n\(configYaml.trimmed)\n")
@@ -30,7 +30,8 @@ public final class Scan: Injectable {
             logger.info("\(asterisk) Inspecting project...")
         }
 
-        let project = try Project.build()
+        let driver = try project.driver()
+        try driver.build()
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)
@@ -38,9 +39,7 @@ public final class Scan: Injectable {
         }
 
         let graph = SourceGraph()
-        try project.index(graph: graph)
-
-//        try Indexer.perform(buildPlan: buildPlan, graph: graph, project: project)
+        try driver.index(graph: graph)
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)
