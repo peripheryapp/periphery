@@ -209,10 +209,11 @@ final class IndexStoreIndexer {
         private func associateDanglingReferences(with decls: [Declaration]) {
             guard !danglingReferences.isEmpty else { return }
 
-            let declsByLocation = decls.lazy.map { ($0.location, $0) }.reduce(into: [SourceLocation: [Declaration]]()) { (result, tuple) in
+            let explicitDecls = decls.filter { !$0.isImplicit }
+            let declsByLocation = explicitDecls.lazy.map { ($0.location, $0) }.reduce(into: [SourceLocation: [Declaration]]()) { (result, tuple) in
                 result[tuple.0, default: []].append(tuple.1)
             }
-            let declsByLine = decls.lazy.map { ($0.location.line, $0) }.reduce(into: [Int64: [Declaration]]()) { (result, tuple) in
+            let declsByLine = explicitDecls.lazy.map { ($0.location.line, $0) }.reduce(into: [Int64: [Declaration]]()) { (result, tuple) in
                 result[tuple.0, default: []].append(tuple.1)
             }
 
@@ -278,6 +279,7 @@ final class IndexStoreIndexer {
 
             let decl = Declaration(kind: kind, usr: occurrenceUsr, location: location)
             decl.name = occurrence.symbol.name
+            decl.isImplicit = occurrence.roles.contains(.implicit)
 
             indexStore.forEachRelations(for: occurrence) { rel -> Bool in
                 if !rel.roles.intersection([.childOf]).isEmpty {

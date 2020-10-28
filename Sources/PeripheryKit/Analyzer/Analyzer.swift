@@ -43,6 +43,7 @@ final class Analyzer {
         XCTestRetainer.self,
         RootEquatableInfixOperatorRetainer.self,
         SwiftUIRetainer.self,
+        StructImplicitConstructorPropertyRetainer.self,
 
         PlainExtensionEliminator.self,
         AncestralReferenceEliminator.self,
