@@ -56,6 +56,8 @@ extension SPMProjectDriver: ProjectDriver {
     }
 
     func index(graph: SourceGraph) throws {
+        configuration.useIndexStore = true
+
         let sourceFiles = Set(targets.map { target -> [Path] in
             let path = Path(target.path)
             return target.sources.map { path + $0 }

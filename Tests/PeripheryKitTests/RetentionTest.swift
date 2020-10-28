@@ -1017,6 +1017,22 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testRetainsPropertiesUsedByStructImplicitConstructor() {
+        analyze(retainPublic: true) { variant in
+            XCTAssertReferenced((.struct, "FixtureStruct1"))
+            XCTAssertReferenced((.varInstance, "someVar"),
+                                descendentOf: (.struct, "FixtureStruct1"))
+            XCTAssertReferenced((.varInstance, "someOtherVar"),
+                                descendentOf: (.struct, "FixtureStruct1"))
+
+            if variant != .sourceKit {
+                // SourceKit does not provide the name of implicit constructors.
+                XCTAssertNotReferenced((.varInstance, "someComputedVar"),
+                                       descendentOf: (.struct, "FixtureStruct1"))
+            }
+        }
+    }
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768
