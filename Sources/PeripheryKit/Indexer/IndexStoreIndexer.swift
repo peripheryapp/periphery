@@ -439,6 +439,11 @@ final class IndexStoreIndexer {
                 throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occurrence.symbol)")
             }
 
+            guard kind != .varParameter else {
+                // Ignore indexed parameters as unused parameter identification is performed separately using SwiftSyntax.
+                return
+            }
+
             var refs = [Reference]()
 
             indexStore.forEachRelations(for: occurrence) { rel -> Bool in
