@@ -44,6 +44,7 @@ final class Analyzer {
         RootEquatableInfixOperatorRetainer.self,
         SwiftUIRetainer.self,
         StructImplicitConstructorPropertyRetainer.self,
+        StringInterpolationAppendInterpolationRetainer.self,
 
         PlainExtensionEliminator.self,
         AncestralReferenceEliminator.self,

@@ -20,6 +20,7 @@ public final class Declaration: Entity, CustomStringConvertible {
         case structImplicitConstructorProperty
         case implicit
         case definesExternalAssociatedType
+        case stringInterpolationAppendInterpolation
     }
 
     enum Kind: String, RawRepresentable, CaseIterable {
