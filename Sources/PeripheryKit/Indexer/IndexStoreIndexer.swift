@@ -281,6 +281,10 @@ final class IndexStoreIndexer {
             decl.name = occurrence.symbol.name
             decl.isImplicit = occurrence.roles.contains(.implicit)
 
+            if decl.isImplicit {
+                decl.markRetained(reason: .implicit)
+            }
+
             indexStore.forEachRelations(for: occurrence) { rel -> Bool in
                 if !rel.roles.intersection([.childOf]).isEmpty {
                     if let parentUsr = rel.symbol.usr {
