@@ -1043,6 +1043,15 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testRetainsPropertyWrappers() {
+        analyze(retainPublic: true, enabledIndexers: [.indexStore]) {
+            XCTAssertReferenced((.class, "Fixture111"))
+            XCTAssertReferenced((.class, "Fixture111Wrapper"))
+            XCTAssertReferenced((.varInstance, "someVar"),
+                                descendentOf: (.class, "Fixture111"))
+        }
+    }
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768
