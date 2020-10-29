@@ -1044,11 +1044,18 @@ class RetentionTest: XCTestCase {
     }
 
     func testRetainsPropertyWrappers() {
-        analyze(retainPublic: true, enabledIndexers: [.indexStore]) {
+        analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "Fixture111"))
             XCTAssertReferenced((.class, "Fixture111Wrapper"))
             XCTAssertReferenced((.varInstance, "someVar"),
                                 descendentOf: (.class, "Fixture111"))
+        }
+    }
+
+    func testRetainsStringInterpolationAppendInterpolation() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.functionMethodInstance, "appendInterpolation(test:)"),
+                                descendentOf: (.extensionStruct, "DefaultStringInterpolation"))
         }
     }
 
