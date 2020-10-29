@@ -546,7 +546,7 @@ class RetentionTest: XCTestCase {
     }
 
     func testCodingKeyEnum() {
-        analyze(retainPublic: true, enabledIndexers: [.indexStore]) { variant in
+        analyze(retainPublic: true, enabledIndexers: [.indexStore]) {
             XCTAssertReferenced((.class, "FixtureClass74"))
             XCTAssertReferenced((.enum, "CodingKeys"),
                                     descendentOf: (.class, "FixtureClass74"))
@@ -613,8 +613,15 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testRetainsExternalAssociatedTypeTypeAlias() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.typealias, "Value"),
+                                descendentOf: (.struct, "Fixture110"))
+        }
+    }
+
     func testUnusedAssociatedType() {
-        analyze(retainPublic: true) { variant in
+        analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass88Usage"))
             XCTAssertReferenced((.class, "Fixture88StateMachine"))
             XCTAssertReferenced((.protocol, "Fixture88State"))
@@ -625,11 +632,7 @@ class RetentionTest: XCTestCase {
             XCTAssertReferenced((.functionMethodInstance, "someFunction()"),
                                 descendentOf: (.class, "Fixture88StateMachine"))
 
-            // FIXME: IndexStore doesn't know the relation between assoctype and
-            //        reffered type
-            if variant != .indexStore {
-                XCTAssertNotReferenced((.struct, "Fixture88AssociatedType"))
-            }
+            XCTAssertNotReferenced((.struct, "Fixture88AssociatedType"))
             XCTAssertNotReferenced((.associatedtype, "AssociatedType"),
                                    descendentOf: (.protocol, "Fixture88State"))
             XCTAssertNotReferenced((.typealias, "AssociatedType"),
