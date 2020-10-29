@@ -19,6 +19,7 @@ public final class Declaration: Entity, CustomStringConvertible {
         case swiftUIPreviewProvider
         case structImplicitConstructorProperty
         case implicit
+        case definesExternalAssociatedType
     }
 
     enum Kind: String, RawRepresentable, CaseIterable {

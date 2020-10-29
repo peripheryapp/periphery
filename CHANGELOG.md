@@ -16,6 +16,7 @@
 - Fix unused recursive function detection when using the index store.
 - Properties named in struct implicit constructors are now retained.
 - Implicit declarations such as struct constructors are now retained.
+- A `typealias` that defines an `associatedtype` in an external protocol is now retained.
 
 ## 1.8.0 (2020-10-3)
 
