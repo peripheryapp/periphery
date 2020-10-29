@@ -18,6 +18,7 @@ public final class Declaration: Entity, CustomStringConvertible {
         case paramFuncLocalProtocol
         case swiftUIPreviewProvider
         case structImplicitConstructorProperty
+        case implicit
     }
 
     enum Kind: String, RawRepresentable, CaseIterable {

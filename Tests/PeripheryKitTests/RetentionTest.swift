@@ -1033,6 +1033,13 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testRetainImplicitDeclarations() {
+        analyze(retainPublic: true, enabledIndexers: [.indexStore]) {
+            XCTAssertReferenced((.functionConstructor, "init(someVar:)"),
+                                descendentOf: (.struct, "FixtureStruct2"))
+        }
+    }
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768

@@ -15,6 +15,7 @@
 - Support @main entry points.
 - Fix unused recursive function detection when using the index store.
 - Properties named in struct implicit constructors are now retained.
+- Implicit declarations such as struct constructors are now retained.
 
 ## 1.8.0 (2020-10-3)
 
