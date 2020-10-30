@@ -24,20 +24,4 @@ final class XcodebuildSettingsParser {
             return nil
         }
     }
-
-    func setting(named name: String) -> String? {
-        if let targetNameLine = lines.first(where: { $0.contains(" \(name) =") }) {
-            if let name = targetNameLine.split(separator: "=", maxSplits: 1, omittingEmptySubsequences: true).last {
-                let trimmedName = String(name).trimmed
-
-                if trimmedName.isEmpty {
-                    return nil
-                }
-
-                return trimmedName
-            }
-        }
-
-        return nil
-    }
 }

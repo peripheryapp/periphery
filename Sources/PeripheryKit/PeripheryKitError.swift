@@ -76,20 +76,6 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
 
     public var hint: String? {
         switch self {
-        case .sourceKitRequestFailed:
-            let config = inject(Configuration.self)
-
-            if let key = config.useBuildLog {
-                var msg = "The build log '\(key)' may no longer be valid."
-
-                if !key.hasSuffix(".log") {
-                    msg += " Try again with the '--save-build-log \(key)' option."
-                }
-
-                return msg
-            }
-
-            return nil
         case .xcodebuildNotConfigured:
             return "You may need to change the path to your Xcode.app if it has a different name."
         case let .shellCommandFailed(_, _, output):

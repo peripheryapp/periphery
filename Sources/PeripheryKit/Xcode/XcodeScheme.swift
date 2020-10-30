@@ -10,18 +10,12 @@ public final class XcodeScheme {
 
     private var didPopulate: Bool = false
     private let xcodebuild: Xcodebuild
-    private var buildTargetsProperty: [String] = []
     private var testTargetsProperty: [String] = []
 
     required public init(project: XcodeProjectlike, name: String, xcodebuild: Xcodebuild) throws {
         self.project = project
         self.name = name
         self.xcodebuild = xcodebuild
-    }
-
-    public func buildTargets() throws -> [String] {
-        try populate()
-        return buildTargetsProperty
     }
 
     public func testTargets() throws -> [String] {
@@ -37,7 +31,6 @@ public final class XcodeScheme {
         didPopulate = true
         let settings = try xcodebuild.buildSettings(for: project, scheme: name)
         let parser = XcodebuildSettingsParser(settings: settings)
-        buildTargetsProperty = parser.buildTargets(action: "build")
         testTargetsProperty = parser.buildTargets(action: "test")
     }
 }

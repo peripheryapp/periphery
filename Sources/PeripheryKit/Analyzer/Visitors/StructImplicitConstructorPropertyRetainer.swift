@@ -20,14 +20,6 @@ final class StructImplicitConstructorPropertyRetainer: SourceGraphVisitor {
         for structDecl in graph.declarations(ofKind: .struct) {
             let implicitConstructors = structDecl.declarations.filter { $0.isImplicit && $0.kind == .functionConstructor }
 
-            if !configuration.useIndexStore && implicitConstructors.contains(where: { $0.name == nil }) {
-                // SourceKit does not provide the names of implicit constructors, so we must retain all properties.
-                structDecl.declarations
-                    .filter { $0.kind == .varInstance }
-                    .forEach { $0.markRetained(reason: .structImplicitConstructorProperty) }
-                continue
-            }
-
             for constructor in implicitConstructors {
                 let varNames = argumentNames(in: constructor.name)
 

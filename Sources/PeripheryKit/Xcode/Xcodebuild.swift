@@ -25,16 +25,6 @@ public final class Xcodebuild: Injectable {
         return version
     }
 
-    func clearDerivedData(for project: XcodeProjectlike) throws {
-        let old = try oldDerivedDataPath()
-
-        if old.exists {
-            try exec(["rm", "-rf", old.string])
-        }
-
-        try exec(["rm", "-rf", try derivedDataPath(for: project).string])
-    }
-
     @discardableResult
     func build(project: XcodeProjectlike, scheme: String, additionalArguments: String? = nil, buildForTesting: Bool = false) throws -> String {
         let cmd = buildForTesting ? "build-for-testing" : "build"
@@ -53,7 +43,6 @@ public final class Xcodebuild: Injectable {
         let envs = [
             "CODE_SIGNING_ALLOWED=\"NO\"",
             "ENABLE_BITCODE=\"NO\"",
-            "SWIFT_COMPILATION_MODE=\"wholemodule\"",
             "DEBUG_INFORMATION_FORMAT=\"dwarf\""
         ]
 
@@ -111,33 +100,11 @@ public final class Xcodebuild: Injectable {
         }
     }
 
-    func buildSettings(for project: XcodeProjectlike, target: String, configuration: String? = nil, xcconfig: Path? = nil) throws -> String {
-        var args = [
-            "-\(project.type)", project.path.absolute().string,
-            "-showBuildSettings",
-            "-target", target
-        ]
-
-        if let configuration = configuration {
-            args.append(contentsOf: ["-configuration", configuration])
-        }
-
-        if let xcconfig = xcconfig {
-            args.append(contentsOf: ["-xcconfig", xcconfig.absolute().string])
-        }
-
-        return try exec(["xcodebuild"] + args + ["build"], stderr: false)
-    }
-
     // MARK: - Private
 
     private func derivedDataPath(for project: XcodeProjectlike) throws -> Path {
         let normalizedName = project.name.sha1
         return try (PeripheryCachePath() + "DerivedData-\(normalizedName)")
-    }
-
-    private func oldDerivedDataPath() throws -> Path {
-        return try (PeripheryCachePath() + "DerivedData")
     }
 
     @discardableResult

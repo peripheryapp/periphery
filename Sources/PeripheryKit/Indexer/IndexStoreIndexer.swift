@@ -93,7 +93,7 @@ final class IndexStoreIndexer {
         private let featureManager: FeatureManager
         private let configuration: Configuration
         private let indexStore: IndexStore
-        private let sourceKit = SourceKit(arguments: [])
+        private let sourceKit = SourceKit()
 
         private lazy var indexStructure = Cache { [sourceKit] (sourceFile: SourceFile) -> [[String: Any]] in
             let substructure = try sourceKit.editorOpenSubstructure(sourceFile)

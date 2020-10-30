@@ -2,7 +2,7 @@
 
 ##### Breaking
 
-- None
+- SourceKit based indexing has been removed, the IndexStore indexer is now the sole indexer. Therefore, the following scan options have been removed: `--use-index-store`, `--use-build-log`, `--save-build-log`.
 
 ##### Enhancements
 
