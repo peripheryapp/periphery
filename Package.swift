@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "Periphery",
     platforms: [
-      .macOS(.v10_15),
+      .macOS(.v10_12),
     ],
     products: [
         .executable(name: "periphery", targets: ["Periphery"]),
