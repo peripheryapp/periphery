@@ -12,8 +12,6 @@ public final class Configuration: Singleton {
     var config: String?
     var workspace: String?
     var project: String?
-    var saveBuildLog: String?
-    var useBuildLog: String?
     var outputFormat: OutputFormat = OutputFormat.default
     var schemes: [String] = []
     var targets: [String] = []
@@ -28,7 +26,6 @@ public final class Configuration: Singleton {
     var updateCheck: Bool = true
     var strict: Bool = false
     var xcargs: String? = nil
-    var useIndexStore: Bool = false
     var indexStorePath: String?
     var skipBuild: Bool = false
 
@@ -42,8 +39,6 @@ public final class Configuration: Singleton {
         let config: [String: Any?] = [
             "workspace": workspace,
             "project": project,
-            "save_build_log": saveBuildLog,
-            "use_build_log": useBuildLog,
             "format": outputFormat.description.lowercased(),
             "schemes": schemes,
             "targets": targets,
@@ -57,7 +52,6 @@ public final class Configuration: Singleton {
             "disable_update_check": !updateCheck,
             "strict": strict,
             "xcargs": xcargs,
-            "use_index_store": useIndexStore,
             "index_store_path": indexStorePath,
             "skip_build": skipBuild
         ]
@@ -77,14 +71,6 @@ public final class Configuration: Singleton {
 
         if let value = yaml["project"] as? String {
             self.project = value
-        }
-
-        if let value = yaml["save_build_log"] as? String {
-            self.saveBuildLog = value
-        }
-
-        if let value = yaml["use_build_log"] as? String {
-            self.useBuildLog = value
         }
 
         if let value = yaml["schemes"] as? [String] {
@@ -137,10 +123,6 @@ public final class Configuration: Singleton {
 
         if let value = yaml["xcargs"] as? String {
             self.xcargs = value
-        }
-
-        if let value = yaml["use_index_store"] as? Bool {
-            self.useIndexStore = value
         }
 
         if let value = yaml["index_store_path"] as? String {

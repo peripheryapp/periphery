@@ -65,7 +65,7 @@ private let XcodebuildListOutputA = """
             "SchemeA",
             "SchemeB",
         ],
-        "name" : "Thumbtack"
+        "name" : "Periphery"
     }
 }
 """
@@ -79,7 +79,7 @@ private let XcodebuildListOutputB = """
             "SchemeA",
             "SchemeB",
         ],
-        "name" : "Thumbtack"
+        "name" : "Periphery"
     }
 }
 """
@@ -163,7 +163,7 @@ NSLocalizedRecoverySuggestion = "Please unlock your device and reattach. (0xE800
             "SchemeA",
             "SchemeB",
         ],
-        "name" : "Thumbtack"
+        "name" : "Periphery"
     }
 }
 """

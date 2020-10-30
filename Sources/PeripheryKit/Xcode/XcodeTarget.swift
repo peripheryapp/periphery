@@ -11,7 +11,6 @@ public final class XcodeTarget {
     }
 
     public let project: XcodeProject
-    private(set) var moduleName: String
 
     private let target: PBXTarget
     private var sourceFiles_: Set<SourceFile> = []
@@ -24,7 +23,6 @@ public final class XcodeTarget {
     required init(project: XcodeProject, target: PBXTarget, xcodebuild: Xcodebuild, logger: Logger) {
         self.project = project
         self.target = target
-        self.moduleName = target.name
         self.xcodebuild = xcodebuild
         self.logger = logger
     }
@@ -35,19 +33,6 @@ public final class XcodeTarget {
 
     public var name: String {
         return target.name
-    }
-
-    func identifyModuleName() throws {
-        let settings = try xcodebuild.buildSettings(for: project, target: name, configuration: debugConfig?.name, xcconfig: try debugBaseConfiguration())
-        let parser = XcodebuildSettingsParser(settings: settings)
-
-        if let moduleName = parser.setting(named: "PRODUCT_MODULE_NAME") {
-            self.moduleName = moduleName
-            return
-        }
-
-        logger.warn("Failed to identify module name for target '\(name)', defaulting to target name.")
-        self.moduleName = name
     }
 
     func sourceFiles() throws -> Set<SourceFile> {
@@ -76,22 +61,6 @@ public final class XcodeTarget {
     }
 
     // MARK: - Private
-
-    private func debugBaseConfiguration() throws -> Path? {
-        guard let ref = debugConfig?.baseConfiguration else { return nil }
-
-        return try ref.fullPath(sourceRoot: project.sourceRoot)
-    }
-
-    private var debugConfig: XCBuildConfiguration? {
-        guard let list = target.buildConfigurationList else { return nil }
-
-        let debugConfig = list.buildConfigurations.first { $0.name.lowercased().contains("debug") }
-
-        guard let config = debugConfig ?? list.buildConfigurations.first else { return nil }
-
-        return config
-    }
 
     private func identifySourceFiles() throws {
         let phases = project.xcodeProject.pbxproj.sourcesBuildPhases.filter { target.buildPhases.contains($0) }

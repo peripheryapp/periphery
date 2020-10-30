@@ -20,24 +20,6 @@ final class SourceKit {
         case accessibility = "key.accessibility"
     }
 
-    private let arguments: [String]
-
-    required init(arguments: [String]) {
-        self.arguments = arguments
-    }
-
-    func requestIndex(_ file: SourceFile) throws -> [String: Any] {
-        let response: [String: Any]
-
-        do {
-            response = try Request.index(file: file.path.string, arguments: arguments).send()
-        } catch {
-            throw PeripheryKitError.sourceKitRequestFailed(type: "index", file: file.path.string, error: error)
-        }
-
-        return response
-    }
-
     func editorOpenSubstructure(_ file: SourceFile) throws -> [String: Any] {
         let request: SourceKitObject = [
             "key.request": UID("source.request.editor.open"),
@@ -53,25 +35,6 @@ final class SourceKit {
             response = try Request.customRequest(request: request).send()
         } catch {
             throw PeripheryKitError.sourceKitRequestFailed(type: "editorOpenSubstructure", file: file.path.string, error: error)
-        }
-
-        return response
-    }
-
-    func cursorInfo(file: SourceFile, offset: Int64) throws -> [String: Any] {
-        let request: SourceKitObject = [
-            "key.request": UID("source.request.cursorinfo"),
-            "key.name": NSUUID().uuidString,
-            "key.sourcefile": file.path.string,
-            "key.offset": offset,
-            "key.compilerargs": arguments
-        ]
-        let response: [String: Any]
-
-        do {
-            response = try Request.customRequest(request: request).send()
-        } catch {
-            throw PeripheryKitError.sourceKitRequestFailed(type: "cursorInfo", file: file.path.string, error: error)
         }
 
         return response

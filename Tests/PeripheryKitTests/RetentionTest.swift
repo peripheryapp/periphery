@@ -8,18 +8,10 @@ class RetentionTest: XCTestCase {
     static var crossModuleFixtureTarget: XcodeTarget!
     static var driver: XcodeProjectDriver!
 
-    enum IndexerVariant: String, CaseIterable {
-        case sourceKit = "SourceKit"
-        case indexStore = "IndexStore"
-    }
-
     static override func setUp() {
         super.setUp()
 
         project = try! XcodeProject.make(path: PeripheryProjectPath)
-
-        let xcodebuild: Xcodebuild = inject()
-        try! xcodebuild.clearDerivedData(for: project)
 
         let configuration: Configuration = inject()
         configuration.outputFormat = .json
@@ -28,8 +20,9 @@ class RetentionTest: XCTestCase {
         crossModuleFixtureTarget = project.targets.first { $0.name == "RetentionFixturesCrossModule" }!
 
         driver = XcodeProjectDriver(
+            logger: inject(),
             configuration: configuration,
-            xcodebuild: xcodebuild,
+            xcodebuild: inject(),
             project: project,
             schemes: [try! XcodeScheme.make(project: project, name: "RetentionFixtures")],
             targets: [fixtureTarget, crossModuleFixtureTarget]
@@ -546,7 +539,7 @@ class RetentionTest: XCTestCase {
     }
 
     func testCodingKeyEnum() {
-        analyze(retainPublic: true, enabledIndexers: [.indexStore]) {
+        analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass74"))
             XCTAssertReferenced((.enum, "CodingKeys"),
                                     descendentOf: (.class, "FixtureClass74"))
@@ -996,7 +989,7 @@ class RetentionTest: XCTestCase {
     func testClassRetainedByUnusedInstanceVariable() {
         // Fails with SourceKit as it structures the class reference as a descendent of the parent
         // class, not the var declaration.
-        analyze(retainPublic: true, enabledIndexers: [.indexStore]) {
+        analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass71"))
 
             XCTAssertNotReferenced((.class, "FixtureClass72"))
@@ -1006,7 +999,7 @@ class RetentionTest: XCTestCase {
     }
 
     func testStaticPropertyDeclaredWithCompositeValuesIsNotRetained() {
-        analyze(retainPublic: true, enabledIndexers: [.indexStore]) {
+        analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass38"))
             XCTAssertNotReferenced((.varStatic, "propertyA"))
             XCTAssertNotReferenced((.varStatic, "propertyB"))
@@ -1021,23 +1014,19 @@ class RetentionTest: XCTestCase {
     }
 
     func testRetainsPropertiesUsedByStructImplicitConstructor() {
-        analyze(retainPublic: true) { variant in
+        analyze(retainPublic: true) {
             XCTAssertReferenced((.struct, "FixtureStruct1"))
             XCTAssertReferenced((.varInstance, "someVar"),
                                 descendentOf: (.struct, "FixtureStruct1"))
             XCTAssertReferenced((.varInstance, "someOtherVar"),
                                 descendentOf: (.struct, "FixtureStruct1"))
-
-            if variant != .sourceKit {
-                // SourceKit does not provide the name of implicit constructors.
-                XCTAssertNotReferenced((.varInstance, "someComputedVar"),
-                                       descendentOf: (.struct, "FixtureStruct1"))
-            }
+            XCTAssertNotReferenced((.varInstance, "someComputedVar"),
+                                   descendentOf: (.struct, "FixtureStruct1"))
         }
     }
 
     func testRetainImplicitDeclarations() {
-        analyze(retainPublic: true, enabledIndexers: [.indexStore]) {
+        analyze(retainPublic: true) {
             XCTAssertReferenced((.functionConstructor, "init(someVar:)"),
                                 descendentOf: (.struct, "FixtureStruct2"))
         }
@@ -1128,24 +1117,9 @@ class RetentionTest: XCTestCase {
                          retainObjcAnnotated: Bool = false,
                          isMainFile: Bool = false,
                          supplementalFiles: [String] = [],
-                         enabledIndexers: [IndexerVariant] = IndexerVariant.allCases,
                          fixture: String? = nil,
                          additionalTargets: [XcodeTarget] = [],
                          _ testBlock: () throws -> Void
-    ) rethrows {
-        try analyze(retainPublic: retainPublic, retainObjcAnnotated: retainObjcAnnotated,
-                    isMainFile: isMainFile, supplementalFiles: supplementalFiles,
-                    enabledIndexers: enabledIndexers, fixture: fixture, additionalTargets: additionalTargets, { _ in try testBlock() })
-    }
-
-    private func analyze(retainPublic: Bool = false,
-                         retainObjcAnnotated: Bool = false,
-                         isMainFile: Bool = false,
-                         supplementalFiles: [String] = [],
-                         enabledIndexers: [IndexerVariant] = IndexerVariant.allCases,
-                         fixture: String? = nil,
-                         additionalTargets: [XcodeTarget] = [],
-                         _ testBlock: (IndexerVariant) throws -> Void
     ) rethrows {
         let testName = fixture ?? String(name.split(separator: " ").last!).replacingOccurrences(of: "]", with: "")
         let testFixturePath = fixturePath(for: testName)
@@ -1167,25 +1141,17 @@ class RetentionTest: XCTestCase {
 
         Self.driver.setTargets(Set([Self.fixtureTarget] + additionalTargets))
         Self.fixtureTarget.set(sourceFiles: sourceFiles)
-        var graphs: [IndexerVariant: SourceGraph] = [:]
 
-        for variant in enabledIndexers {
-            let graph = SourceGraph()
-            configuration.useIndexStore = variant == .indexStore
-            try! Self.driver.index(graph: graph)
-            try! Analyzer.perform(graph: graph)
-            self.graph = graph
-            try testBlock(variant)
-            graphs[variant] = graph
-        }
+        let graph = SourceGraph()
+        try! Self.driver.index(graph: graph)
+        try! Analyzer.perform(graph: graph)
+        self.graph = graph
+        try testBlock()
 
         if (testRun?.failureCount ?? 0) > 0 {
-            for (variant, graph) in graphs {
-                print("\n> " + variant.rawValue)
-                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                SourceGraphDebugger(graph: graph).describeGraph()
-                print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-            }
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            SourceGraphDebugger(graph: graph).describeGraph()
+            print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
         }
     }
 
