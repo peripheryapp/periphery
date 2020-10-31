@@ -16,10 +16,11 @@ final class JsonFormatter: OutputFormatter {
 
         declarations.forEach {
             let object: [AnyHashable: Any] = [
-                "kind": $0.kind.shortName,
+                "kind": $0.kind.rawValue,
                 "name": $0.name ?? "",
-                "attributes": $0.attributes.map { $0 },
-                "accessibility": $0.accessibility.shortName,
+                "modifiers": $0.modifiers,
+                "attributes": $0.attributes,
+                "accessibility": $0.accessibility.value.rawValue,
                 "id": $0.usr,
                 "location": $0.location.description
             ]

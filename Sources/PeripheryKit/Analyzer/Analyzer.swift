@@ -15,7 +15,7 @@ final class Analyzer {
         ObjcMembersAttributeBuilder.self,
 
         // Must come before ExtensionReferenceBuilder.
-        ExtensionAccessibilityCascader.self,
+        AccessibilityCascader.self,
 
         // Must come before ProtocolConformanceReferenceBuilder because it removes references to
         // conformed protocols, which CodingKeyEnumReferenceBuilder needs to inspect before removal.

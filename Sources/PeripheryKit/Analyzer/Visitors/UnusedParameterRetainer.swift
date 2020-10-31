@@ -87,7 +87,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
 
         guard let firstFunctionDecl = functionDecls.first else { return }
 
-        if firstFunctionDecl.attributes.contains("override") {
+        if firstFunctionDecl.modifiers.contains("override") {
             // Must be overriding a declaration in a foreign class.
             functionDecls.forEach {
                 $0.unusedParameters.forEach { $0.markRetained(reason: .paramFuncOverridden) }
