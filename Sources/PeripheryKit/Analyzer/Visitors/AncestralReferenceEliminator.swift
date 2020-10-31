@@ -33,21 +33,10 @@ final class AncestralReferenceEliminator: SourceGraphVisitor {
         return usrs.contains(reference.usr)
     }
 
-    private func anyDeclarations(in declarations: [Declaration], areReceiverReferencedBy reference: Reference) -> Bool {
-        if let receiverUsr = reference.receiverUsr {
-            let usrs = declarations.map { $0.usr }
-            return usrs.contains(receiverUsr)
-        }
-
-        return false
-    }
-
     private func eliminateAncestralReferences(in references: Set<Reference>, stack: [Declaration]) {
         for reference in references {
             if anyDeclarations(in: stack, areReferencedBy: reference) {
                 graph.remove(reference)
-            } else if anyDeclarations(in: stack, areReceiverReferencedBy: reference) {
-                reference.receiverUsr = nil
             }
 
             eliminateAncestralReferences(in: reference.references, stack: stack)

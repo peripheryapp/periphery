@@ -44,11 +44,6 @@ final class DeclarationMarker: SourceGraphVisitor {
             declarations.insert(declaration)
         }
 
-        if let receiverUsr = reference.receiverUsr,
-            let declaration = graph.explicitDeclaration(withUsr: receiverUsr) {
-            declarations.insert(declaration)
-        }
-
         return declarations
     }
 
