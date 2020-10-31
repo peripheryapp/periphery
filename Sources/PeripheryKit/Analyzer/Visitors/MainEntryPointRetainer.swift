@@ -25,6 +25,6 @@ final class MainEntryPointRetainer: SourceGraphVisitor {
     // MARK: - Private
 
     private func isInMainFile(_ entity: Entity) -> Bool {
-        return entryPointFilenames.contains(entity.location.file.path.lastComponent.lowercased())
+        return entryPointFilenames.contains(entity.location.file.lastComponent.lowercased())
     }
 }

@@ -136,17 +136,17 @@ public final class Configuration: Singleton {
 
     // MARK: - Helpers
 
-    public var indexExcludeSourceFiles: [SourceFile] {
+    public var indexExcludeSourceFiles: [Path] {
         return indexExclude.flatMap { glob($0) }
     }
 
-    public var reportExcludeSourceFiles: [SourceFile] {
+    public var reportExcludeSourceFiles: [Path] {
         return reportExclude.flatMap { glob($0) }
     }
 
     // MARK: - Private
 
-    private func glob(_ pattern: String) -> [SourceFile] {
+    private func glob(_ pattern: String) -> [Path] {
         var patternPath = Path(pattern)
 
         if patternPath.isRelative {
@@ -154,9 +154,7 @@ public final class Configuration: Singleton {
         }
 
         return Path.glob(patternPath.string).map {
-            return $0.isRelative ?
-                SourceFile(path: $0.relativeTo(Path.current)) :
-                SourceFile(path: $0)
+            return $0.isRelative ? $0.relativeTo(Path.current) : $0
         }
     }
 

@@ -13,7 +13,7 @@ public final class XcodeTarget {
     public let project: XcodeProject
 
     private let target: PBXTarget
-    private var sourceFiles_: Set<SourceFile> = []
+    private var sourceFiles_: Set<Path> = []
     private var xibFiles_: Set<Path> = []
     private var didIdentifySourceFiles = false
     private var didIdentifyXibFiles = false
@@ -35,7 +35,7 @@ public final class XcodeTarget {
         return target.name
     }
 
-    func sourceFiles() throws -> Set<SourceFile> {
+    func sourceFiles() throws -> Set<Path> {
         if didIdentifySourceFiles {
             return sourceFiles_
         }
@@ -55,7 +55,7 @@ public final class XcodeTarget {
         return xibFiles_
     }
 
-    func set(sourceFiles: Set<SourceFile>) {
+    func set(sourceFiles: Set<Path>) {
         sourceFiles_ = sourceFiles
         didIdentifySourceFiles = true
     }
@@ -70,7 +70,7 @@ public final class XcodeTarget {
                 let sourceRoot = project.sourceRoot.absolute()
                 if let path = try $0.file?.fullPath(sourceRoot: sourceRoot),
                     path.extension?.lowercased() == "swift" {
-                    return SourceFile(path: path)
+                    return path
                 }
 
                 return nil
