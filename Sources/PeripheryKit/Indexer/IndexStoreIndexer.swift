@@ -12,14 +12,12 @@ final class IndexStoreIndexer {
             graph: graph,
             indexStore: try IndexStore.open(store: storeURL, lib: .open()),
             logger: inject(),
-            featureManager: inject(),
             configuration: inject())
     }
 
     private let sourceFiles: Set<Path>
     private let graph: SourceGraph
     private let logger: Logger
-    private let featureManager: FeatureManager
     private let configuration: Configuration
     private let indexStore: IndexStore
 
@@ -28,13 +26,11 @@ final class IndexStoreIndexer {
         graph: SourceGraph,
         indexStore: IndexStore,
         logger: Logger,
-        featureManager: FeatureManager,
         configuration: Configuration
     ) {
         self.sourceFiles = sourceFiles
         self.graph = graph
         self.logger = logger
-        self.featureManager = featureManager
         self.configuration = configuration
         self.indexStore = indexStore
     }
@@ -61,7 +57,6 @@ final class IndexStoreIndexer {
                         graph: graph,
                         indexStore: indexStore,
                         logger: logger,
-                        featureManager: featureManager,
                         configuration: configuration
                     )
                 )
@@ -90,15 +85,8 @@ final class IndexStoreIndexer {
         private let unit: IndexStoreUnit
         private let graph: SourceGraph
         private let logger: Logger
-        private let featureManager: FeatureManager
         private let configuration: Configuration
         private let indexStore: IndexStore
-        private let sourceKit = SourceKit()
-
-        private lazy var indexStructure = Cache { [sourceKit] (sourceFile: Path) -> [[String: Any]] in
-            let substructure = try sourceKit.editorOpenSubstructure(sourceFile)
-            return substructure[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
-        }
 
         required init(
             file: Path,
@@ -106,14 +94,12 @@ final class IndexStoreIndexer {
             graph: SourceGraph,
             indexStore: IndexStore,
             logger: Logger,
-            featureManager: FeatureManager,
             configuration: Configuration
         ) {
             self.file = file
             self.unit = unit
             self.graph = graph
             self.logger = logger
-            self.featureManager = featureManager
             self.configuration = configuration
             self.indexStore = indexStore
         }
@@ -125,9 +111,10 @@ final class IndexStoreIndexer {
                 guard case let .record(record) = dependency else { return true }
 
                 try indexStore.forEachOccurrences(for: record) { occurrence in
-                    guard let usr = occurrence.symbol.usr,
-                          let location = transformLocation(occurrence.location),
-                          occurrence.symbol.language == .swift else { return true }
+                    guard occurrence.symbol.language == .swift,
+                          let usr = occurrence.symbol.usr,
+                          let location = transformLocation(occurrence.location)
+                          else { return true }
 
                     if !occurrence.roles.intersection([.definition, .declaration]).isEmpty {
                         if let decl = try parseDeclaration(occurrence, usr, location) {
@@ -151,8 +138,11 @@ final class IndexStoreIndexer {
 
             establishDeclarationHierarchy()
             associateDanglingReferences(with: decls)
-            try determineAccessibilityFromStructure(for: decls)
-            try identifyUnusedParameters(for: decls.filter { $0.kind.isFunctionKind })
+
+            let syntax = try SyntaxParser.parse(file.url)
+            let locationConverter = SourceLocationConverter(file: file.string, tree: syntax)
+            try identifyMetadata(for: decls, syntax: syntax, locationConverter: locationConverter)
+            try identifyUnusedParameters(for: decls.filter { $0.kind.isFunctionKind }, syntax: syntax, locationConverter: locationConverter)
         }
 
         private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
@@ -243,11 +233,47 @@ final class IndexStoreIndexer {
             }
         }
 
-        private func identifyUnusedParameters(for decls: [Declaration]) throws {
+        private func identifyMetadata(
+            for decls: [Declaration],
+            syntax: SourceFileSyntax,
+            locationConverter: SourceLocationConverter
+        ) throws {
+            let declsByLocation = decls.reduce(into: [SourceLocation: Declaration]()) { (result, decl) in
+                result[decl.location] = decl
+            }
+
+            let specifiers = try DeclarationMetadataParser.parse(
+                file: file,
+                syntax: syntax,
+                locationConverter: locationConverter)
+
+            for specifier in specifiers {
+                guard let decl = declsByLocation[specifier.location] else {
+                    throw PeripheryKitError.indexStoreError(message: "Expected declaration at \(specifier.location)")
+                }
+
+                if let accessibility = specifier.accessibility {
+                    decl.accessibility = (accessibility, true)
+                }
+
+                decl.attributes = Set(specifier.attributes)
+                decl.modifiers = Set(specifier.modifiers)
+            }
+        }
+
+        private func identifyUnusedParameters(
+            for decls: [Declaration],
+            syntax: SourceFileSyntax,
+            locationConverter: SourceLocationConverter
+        ) throws {
             let functionDelcsByLocation = decls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
 
             let analyzer = UnusedParameterAnalyzer()
-            let params = try analyzer.analyze(file: file, parseProtocols: true)
+            let params = try analyzer.analyze(
+                file: file,
+                syntax: syntax,
+                locationConverter: locationConverter,
+                parseProtocols: true)
 
             for param in params {
                 guard let paramFunction = param.function else { continue }
@@ -350,50 +376,6 @@ final class IndexStoreIndexer {
 
             graph.add(decl)
             return decl
-        }
-
-        private func determineAccessibilityFromStructure(for decls: [Declaration]) throws {
-            let structure = try self.indexStructure.get(file)
-
-            for decl in decls {
-                guard decl.parent == nil else { continue }
-                try determineAccessibilityFromStructure(for: decl, with: structure)
-            }
-        }
-
-        private func determineAccessibilityFromStructure(for decl: Declaration, with structure: [[String: Any]]) throws {
-            let matchingStructures = structure.lazy.filter {
-                guard let structureKindName = $0[SourceKit.Key.kind.rawValue] as? String,
-                      let structureKind = Declaration.Kind(rawValue: structureKindName) else { return false }
-
-                var structureName = $0[SourceKit.Key.name.rawValue] as? String
-
-                if let last = structureName?.split(separator: ".").last {
-                    // Truncate e.g Notification.Name to just Name to match the index declaration.
-                    structureName = String(last)
-                }
-
-                return decl.kind.isEqualToStructure(kind: structureKind) && structureName == decl.name
-            }
-
-            var substructures: [[String: Any]] = []
-            for structure in matchingStructures {
-                if let accessibilityName = structure[SourceKit.Key.accessibility.rawValue] as? String {
-                    if let accessibility = Accessibility(rawValue: accessibilityName) {
-                        decl.structureAccessibility = accessibility
-                    } else {
-                        throw PeripheryKitError.swiftIndexingError(message: "Unhandled accessibility '\(accessibilityName)'")
-                    }
-                }
-                if let rawAttributes = structure[SourceKit.Key.attributes.rawValue] as? [[String: Any]] {
-                    decl.attributes = parse(rawAttributes: rawAttributes)
-                }
-                substructures += structure[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
-            }
-
-            for child in decl.declarations {
-                try determineAccessibilityFromStructure(for: child, with: substructures)
-            }
         }
 
         private func parseImplicit(
@@ -631,22 +613,6 @@ final class IndexStoreIndexer {
                 logger.warn("'commentTag' is not supported on Swift")
                 return nil
             }
-        }
-
-        private func parse(rawAttributes: [[String: Any]]) -> Set<String> {
-            let attributes: [String] = rawAttributes.compactMap { rawAttribute in
-                if let attributeName = rawAttribute[SourceKit.Key.attribute.rawValue] as? String {
-                    let prefix = "source.decl.attribute."
-
-                    if attributeName.hasPrefix(prefix) {
-                        return String(attributeName.dropFirst(prefix.count))
-                    }
-                }
-
-                return nil
-            }
-
-            return Set(attributes)
         }
     }
 }

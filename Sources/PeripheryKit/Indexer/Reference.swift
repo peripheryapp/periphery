@@ -1,58 +1,50 @@
 final class Reference: Entity {
     enum Kind: String {
-        case `associatedtype` = "source.lang.swift.ref.associatedtype"
-        case `class` = "source.lang.swift.ref.class"
-        case `enum` = "source.lang.swift.ref.enum"
-        case enumelement = "source.lang.swift.ref.enumelement"
-        case `extension` = "source.lang.swift.ref.extension"
-        case extensionClass = "source.lang.swift.ref.extension.class"
-        case extensionEnum = "source.lang.swift.ref.extension.enum"
-        case extensionProtocol = "source.lang.swift.ref.extension.protocol"
-        case extensionStruct = "source.lang.swift.ref.extension.struct"
-        case functionAccessorAddress = "source.lang.swift.ref.function.accessor.address"
-        case functionAccessorDidset = "source.lang.swift.ref.function.accessor.didset"
-        case functionAccessorGetter = "source.lang.swift.ref.function.accessor.getter"
-        case functionAccessorMutableaddress = "source.lang.swift.ref.function.accessor.mutableaddress"
-        case functionAccessorSetter = "source.lang.swift.ref.function.accessor.setter"
-        case functionAccessorWillset = "source.lang.swift.ref.function.accessor.willset"
-        case functionConstructor = "source.lang.swift.ref.function.constructor"
-        case functionDestructor = "source.lang.swift.ref.function.destructor"
-        case functionFree = "source.lang.swift.ref.function.free"
-        case functionMethodClass = "source.lang.swift.ref.function.method.class"
-        case functionMethodInstance = "source.lang.swift.ref.function.method.instance"
-        case functionMethodStatic = "source.lang.swift.ref.function.method.static"
-        case functionOperator = "source.lang.swift.ref.function.operator"
-        case functionOperatorInfix = "source.lang.swift.ref.function.operator.infix"
-        case functionOperatorPostfix = "source.lang.swift.ref.function.operator.postfix"
-        case functionOperatorPrefix = "source.lang.swift.ref.function.operator.prefix"
-        case functionSubscript = "source.lang.swift.ref.function.subscript"
-        case genericTypeParam = "source.lang.swift.ref.generic_type_param"
-        case module = "source.lang.swift.ref.module"
-        case precedenceGroup = "source.lang.swift.ref.precedencegroup"
-        case `protocol` = "source.lang.swift.ref.protocol"
-        case `struct` = "source.lang.swift.ref.struct"
-        case `typealias` = "source.lang.swift.ref.typealias"
-        case varClass = "source.lang.swift.ref.var.class"
-        case varGlobal = "source.lang.swift.ref.var.global"
-        case varInstance = "source.lang.swift.ref.var.instance"
-        case varLocal = "source.lang.swift.ref.var.local"
-        case varParameter = "source.lang.swift.ref.var.parameter"
-        case varStatic = "source.lang.swift.ref.var.static"
+        case `associatedtype` = "associatedtype"
+        case `class` = "class"
+        case `enum` = "enum"
+        case enumelement = "enumelement"
+        case `extension` = "extension"
+        case extensionClass = "extension.class"
+        case extensionEnum = "extension.enum"
+        case extensionProtocol = "extension.protocol"
+        case extensionStruct = "extension.struct"
+        case functionAccessorAddress = "function.accessor.address"
+        case functionAccessorDidset = "function.accessor.didset"
+        case functionAccessorGetter = "function.accessor.getter"
+        case functionAccessorMutableaddress = "function.accessor.mutableaddress"
+        case functionAccessorSetter = "function.accessor.setter"
+        case functionAccessorWillset = "function.accessor.willset"
+        case functionConstructor = "function.constructor"
+        case functionDestructor = "function.destructor"
+        case functionFree = "function.free"
+        case functionMethodClass = "function.method.class"
+        case functionMethodInstance = "function.method.instance"
+        case functionMethodStatic = "function.method.static"
+        case functionOperator = "function.operator"
+        case functionOperatorInfix = "function.operator.infix"
+        case functionOperatorPostfix = "function.operator.postfix"
+        case functionOperatorPrefix = "function.operator.prefix"
+        case functionSubscript = "function.subscript"
+        case genericTypeParam = "generic_type_param"
+        case module = "module"
+        case precedenceGroup = "precedencegroup"
+        case `protocol` = "protocol"
+        case `struct` = "struct"
+        case `typealias` = "typealias"
+        case varClass = "var.class"
+        case varGlobal = "var.global"
+        case varInstance = "var.instance"
+        case varLocal = "var.local"
+        case varParameter = "var.parameter"
+        case varStatic = "var.static"
 
         var isFunctionKind: Bool {
-            return rawValue.hasPrefix("source.lang.swift.ref.function")
-        }
-
-        var shortName: String {
-            let namespace = "source.lang.swift.ref"
-            let index = rawValue.index(after: namespace.endIndex)
-
-            return String(rawValue.suffix(from: index))
+            rawValue.hasPrefix("function")
         }
 
         var declarationEquivalent: Declaration.Kind? {
-            let value = rawValue.replacingOccurrences(of: ".ref.", with: ".decl.")
-            return Declaration.Kind(rawValue: value)
+            Declaration.Kind(rawValue: rawValue)
         }
     }
 
@@ -73,7 +65,7 @@ final class Reference: Entity {
     }
 
     var descendentReferences: Set<Reference> {
-        return Set(references.flatMap { $0.descendentReferences }).union(references)
+        Set(references.flatMap { $0.descendentReferences }).union(references)
     }
 
     var ancestralDeclaration: Declaration? {
@@ -117,6 +109,6 @@ extension Reference: CustomStringConvertible {
     var descriptionParts: [String] {
         let formattedName = name != nil ? "'\(name!)'" : "nil"
 
-        return [kind.shortName, formattedName, "'\(usr)'", location.shortDescription]
+        return [kind.rawValue, formattedName, "'\(usr)'", location.shortDescription]
     }
 }

@@ -20,7 +20,7 @@ final class PubliclyAccessibleRetainer: SourceGraphVisitor {
             graph.declarations(ofKind: $0)
         }
 
-        let publicDeclarations = declarations.filter { $0.accessibility == .public ||  $0.accessibility == .open }
+        let publicDeclarations = declarations.filter { $0.accessibility.value == .public || $0.accessibility.value == .open }
         publicDeclarations.forEach { $0.markRetained(reason: .publicAccessible) }
     }
 }

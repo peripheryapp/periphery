@@ -399,55 +399,55 @@ class RetentionTest: XCTestCase {
     func testAccessibility() {
         analyze() {
             let publicClass = find((.class, "FixtureClass31"))
-            XCTAssertEqual(publicClass?.accessibility, .public)
+            XCTAssertEqual(publicClass?.accessibility.value, .public)
 
             let publicClassInit = find((.functionConstructor, "init(arg:)"))
-            XCTAssertEqual(publicClassInit?.accessibility, .public)
+            XCTAssertEqual(publicClassInit?.accessibility.value, .public)
 
             let openFunc = find((.functionMethodInstance, "openFunc()"))
-            XCTAssertEqual(openFunc?.accessibility, .open)
+            XCTAssertEqual(openFunc?.accessibility.value, .open)
 
             let innerClass = find((.class, "FixtureClass31Inner"))
-            XCTAssertEqual(innerClass?.accessibility, .public)
+            XCTAssertEqual(innerClass?.accessibility.value, .public)
 
             let privateFunc = find((.functionMethodInstance, "privateFunc()"))
-            XCTAssertEqual(privateFunc?.accessibility, .private)
+            XCTAssertEqual(privateFunc?.accessibility.value, .private)
 
             let publicVar = find((.varInstance, "publicVar"))
-            XCTAssertEqual(publicVar?.accessibility, .public)
+            XCTAssertEqual(publicVar?.accessibility.value, .public)
 
             let internalClass = find((.class, "FixtureClass33"))
-            XCTAssertEqual(internalClass?.accessibility, .internal)
+            XCTAssertEqual(internalClass?.accessibility.value, .internal)
 
             let publicEnumFunc = find((.functionMethodInstance, "publicEnumFunc()"))
-            XCTAssertEqual(publicEnumFunc?.accessibility, .public)
+            XCTAssertEqual(publicEnumFunc?.accessibility.value, .public)
 
             let publicMethodInExtension = find((.functionMethodInstance, "publicMethodInExtension()"))
-            XCTAssertEqual(publicMethodInExtension?.accessibility, .public)
+            XCTAssertEqual(publicMethodInExtension?.accessibility.value, .public)
 
             let methodInPublicExtension = find((.functionMethodInstance, "methodInPublicExtension()"))
-            XCTAssertEqual(methodInPublicExtension?.accessibility, .public)
+            XCTAssertEqual(methodInPublicExtension?.accessibility.value, .public)
 
             let staticMethodInPublicExtension = find((.functionMethodStatic, "staticMethodInPublicExtension()"))
-            XCTAssertEqual(staticMethodInPublicExtension?.accessibility, .public)
+            XCTAssertEqual(staticMethodInPublicExtension?.accessibility.value, .public)
 
             let staticVarInExtension = find((.varStatic, "staticVarInExtension"))
-            XCTAssertEqual(staticVarInExtension?.accessibility, .public)
+            XCTAssertEqual(staticVarInExtension?.accessibility.value, .public)
 
             let privateMethodInPublicExtension = find((.functionMethodInstance, "privateMethodInPublicExtension()"))
-            XCTAssertEqual(privateMethodInPublicExtension?.accessibility, .private)
+            XCTAssertEqual(privateMethodInPublicExtension?.accessibility.value, .private)
 
             let internalMethodInPublicExtension = find((.functionMethodInstance, "internalMethodInPublicExtension()"))
-            XCTAssertEqual(internalMethodInPublicExtension?.accessibility, .internal)
+            XCTAssertEqual(internalMethodInPublicExtension?.accessibility.value, .internal)
 
             let methodInExternalStructTypeExtension = find((.functionMethodInstance, "methodInExternalStructTypeExtension()"))
-            XCTAssertEqual(methodInExternalStructTypeExtension?.accessibility, .public)
+            XCTAssertEqual(methodInExternalStructTypeExtension?.accessibility.value, .public)
 
             let methodInExternalProtocolTypeExtension = find((.functionMethodInstance, "methodInExternalProtocolTypeExtension()"))
-            XCTAssertEqual(methodInExternalProtocolTypeExtension?.accessibility, .public)
+            XCTAssertEqual(methodInExternalProtocolTypeExtension?.accessibility.value, .public)
 
             let customNotification = find((.varStatic, "CustomNotification"))
-            XCTAssertEqual(customNotification?.accessibility, .public)
+            XCTAssertEqual(customNotification?.accessibility.value, .public)
         }
     }
 
