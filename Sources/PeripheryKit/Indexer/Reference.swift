@@ -63,7 +63,6 @@ final class Reference: Entity {
     var parent: Entity?
     var declarations: Set<Declaration> = []
     var references: Set<Reference> = []
-    var receiverUsr: String?
     var name: String?
     var isRelated: Bool = false
 
@@ -94,10 +93,6 @@ extension Reference: Hashable {
         hasher.combine(usr)
         hasher.combine(location)
         hasher.combine(isRelated)
-
-        if let receiverUsr = receiverUsr {
-            hasher.combine(receiverUsr)
-        }
     }
 }
 
@@ -107,14 +102,8 @@ extension Reference: Equatable {
         let locationIsEqual = lhs.location == rhs.location
         let kindIsEqual = lhs.kind == rhs.kind
         let relatedIsEqual = lhs.isRelated == rhs.isRelated
-        var receiverUsrIsEqual = true
 
-        if let lhsReceiverUsr = lhs.receiverUsr,
-            let rhsReceiverUsr = rhs.receiverUsr {
-            receiverUsrIsEqual = lhsReceiverUsr == rhsReceiverUsr
-        }
-
-        return usrIsEqual && receiverUsrIsEqual && locationIsEqual && kindIsEqual && relatedIsEqual
+        return usrIsEqual && locationIsEqual && kindIsEqual && relatedIsEqual
     }
 }
 
@@ -126,9 +115,8 @@ extension Reference: CustomStringConvertible {
     }
 
     var descriptionParts: [String] {
-        let formattedReceiverUsr = receiverUsr != nil ? "'\(receiverUsr!)'" : "nil"
         let formattedName = name != nil ? "'\(name!)'" : "nil"
 
-        return [kind.shortName, formattedName, "'\(usr)'", formattedReceiverUsr, location.shortDescription]
+        return [kind.shortName, formattedName, "'\(usr)'", location.shortDescription]
     }
 }
