@@ -1131,12 +1131,12 @@ class RetentionTest: XCTestCase {
             configuration.entryPointFilenames.append(testName.lowercased() + ".swift")
         }
 
-        var sourceFiles: Set<SourceFile> = [SourceFile(path: testFixturePath)]
-        let supplementalSourceFiles = supplementalFiles.map { SourceFile(path: fixturePath(for: $0)) }
+        var sourceFiles: Set<Path> = [testFixturePath]
+        let supplementalSourceFiles = supplementalFiles.map { fixturePath(for: $0) }
         sourceFiles = sourceFiles.union(supplementalSourceFiles)
 
         sourceFiles.forEach {
-            XCTAssertTrue($0.path.exists, "\($0.path.string) does not exist.")
+            XCTAssertTrue($0.exists, "\($0.string) does not exist.")
         }
 
         Self.driver.setTargets(Set([Self.fixtureTarget] + additionalTargets))

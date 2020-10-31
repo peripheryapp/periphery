@@ -20,11 +20,11 @@ final class SourceKit {
         case accessibility = "key.accessibility"
     }
 
-    func editorOpenSubstructure(_ file: SourceFile) throws -> [String: Any] {
+    func editorOpenSubstructure(_ file: Path) throws -> [String: Any] {
         let request: SourceKitObject = [
             "key.request": UID("source.request.editor.open"),
             "key.name": NSUUID().uuidString,
-            "key.sourcefile": file.path.string,
+            "key.sourcefile": file.string,
             "key.enablesyntaxmap": 0,
             "key.enablesubstructure": 1,
             "key.enablesyntaxtree": 0,
@@ -34,7 +34,7 @@ final class SourceKit {
         do {
             response = try Request.customRequest(request: request).send()
         } catch {
-            throw PeripheryKitError.sourceKitRequestFailed(type: "editorOpenSubstructure", file: file.path.string, error: error)
+            throw PeripheryKitError.sourceKitRequestFailed(type: "editorOpenSubstructure", file: file.string, error: error)
         }
 
         return response

@@ -1,11 +1,12 @@
 import Foundation
+import PathKit
 
 final class TargetSourceFileUniquenessChecker {
     static func check(targets: Set<XcodeTarget>) throws {
         let pairs = try targets.map { ($0, try $0.sourceFiles()) }
         let sourceFilesByTarget = Dictionary(uniqueKeysWithValues: pairs)
-        var universalSet: Set<SourceFile> = []
-        var duplicateSourceFiles: Set<SourceFile> = []
+        var universalSet: Set<Path> = []
+        var duplicateSourceFiles: Set<Path> = []
 
         for (_, set) in sourceFilesByTarget {
             let intersection = universalSet.intersection(set)
@@ -22,7 +23,7 @@ final class TargetSourceFileUniquenessChecker {
         for sourceFile in duplicateSourceFiles {
             let targetNames = sourceFilesByTarget.filter { $0.value.contains(sourceFile) }.map { $0.key.name }
 
-            logger.warn("\(sourceFile.path) is a member of multiple targets: \(targetNames.joined(separator: ", ")). This may cause unexpected results.")
+            logger.warn("\(sourceFile) is a member of multiple targets: \(targetNames.joined(separator: ", ")). This may cause unexpected results.")
         }
     }
 }

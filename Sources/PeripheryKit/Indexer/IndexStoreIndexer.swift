@@ -41,22 +41,22 @@ final class IndexStoreIndexer {
 
     func perform() throws {
         var jobs = [Job]()
-        let excludedPaths = configuration.indexExcludeSourceFiles.map { $0.path }
+        let excludedPaths = configuration.indexExcludeSourceFiles
 
         try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
             guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
 
-            let path = Path(filePath)
+            let file = Path(filePath)
 
-            guard !excludedPaths.contains(path) else {
-                self.logger.debug("[index:swift:exclude] \(path.string)")
+            guard !excludedPaths.contains(file) else {
+                self.logger.debug("[index:swift:exclude] \(file.string)")
                 return true
             }
 
-            if sourceFiles.contains(path) {
+            if sourceFiles.contains(file) {
                 jobs.append(
                     Job(
-                        filePath: path,
+                        file: file,
                         unit: unit,
                         graph: graph,
                         indexStore: indexStore,
@@ -75,7 +75,7 @@ final class IndexStoreIndexer {
                 try job.perform()
             }
 
-            self.logger.debug("[index:swift] \(job.filePath) (\(elapsed)s)")
+            self.logger.debug("[index:swift] \(job.file) (\(elapsed)s)")
         }
 
         graph.identifyRootDeclarations()
@@ -85,7 +85,7 @@ final class IndexStoreIndexer {
     // MARK: - Private
 
     private class Job {
-        let filePath: Path
+        let file: Path
 
         private let unit: IndexStoreUnit
         private let graph: SourceGraph
@@ -95,13 +95,13 @@ final class IndexStoreIndexer {
         private let indexStore: IndexStore
         private let sourceKit = SourceKit()
 
-        private lazy var indexStructure = Cache { [sourceKit] (sourceFile: SourceFile) -> [[String: Any]] in
+        private lazy var indexStructure = Cache { [sourceKit] (sourceFile: Path) -> [[String: Any]] in
             let substructure = try sourceKit.editorOpenSubstructure(sourceFile)
             return substructure[SourceKit.Key.substructure.rawValue] as? [[String: Any]] ?? []
         }
 
         required init(
-            filePath: Path,
+            file: Path,
             unit: IndexStoreUnit,
             graph: SourceGraph,
             indexStore: IndexStore,
@@ -109,7 +109,7 @@ final class IndexStoreIndexer {
             featureManager: FeatureManager,
             configuration: Configuration
         ) {
-            self.filePath = filePath
+            self.file = file
             self.unit = unit
             self.graph = graph
             self.logger = logger
@@ -247,7 +247,7 @@ final class IndexStoreIndexer {
             let functionDelcsByLocation = decls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
 
             let analyzer = UnusedParameterAnalyzer()
-            let params = try analyzer.analyze(file: filePath, parseProtocols: true)
+            let params = try analyzer.analyze(file: file, parseProtocols: true)
 
             for param in params {
                 guard let paramFunction = param.function else { continue }
@@ -353,7 +353,6 @@ final class IndexStoreIndexer {
         }
 
         private func determineAccessibilityFromStructure(for decls: [Declaration]) throws {
-            let file = SourceFile(path: filePath)
             let structure = try self.indexStructure.get(file)
 
             for decl in decls {
@@ -487,9 +486,6 @@ final class IndexStoreIndexer {
         }
 
         private func transformLocation(_ input: IndexStoreOccurrence.Location) -> SourceLocation? {
-            guard let path = input.path else { return nil }
-
-            let file = SourceFile(path: Path(path))
             return SourceLocation(file: file, line: input.line, column: input.column)
         }
 

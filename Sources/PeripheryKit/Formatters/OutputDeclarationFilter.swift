@@ -17,7 +17,7 @@ public final class OutputDeclarationFilter: Injectable {
         let excludedSourceFiles = configuration.reportExcludeSourceFiles
 
         excludedSourceFiles.forEach {
-            logger.debug("[report:exclude] \($0.path.string)")
+            logger.debug("[report:exclude] \($0.string)")
         }
 
         let filteredDeclarations = declarations.filter {

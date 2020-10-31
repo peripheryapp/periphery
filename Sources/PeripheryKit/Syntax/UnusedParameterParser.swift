@@ -112,24 +112,23 @@ final class GenericItem: Item {
 final class UnusedParameterParser {
     private let syntax: SourceFileSyntax
     private let parseProtocols: Bool
-    private let sourceFile: SourceFile
+    private let file: Path
     private let locationConverter: SourceLocationConverter
 
     static func parse(file: Path, parseProtocols: Bool) throws -> [Function] {
         let syntax = try SyntaxParser.parse(file.url)
-        let sourceFile = SourceFile(path: file)
         let locationConverter = SourceLocationConverter(file: file.string, tree: syntax)
         let parser = self.init(syntax: syntax,
                                parseProtocols: parseProtocols,
-                               sourceFile: sourceFile,
+                               file: file,
                                locationConverter: locationConverter)
         return try parser.parse()
     }
 
-    private init(syntax: SourceFileSyntax, parseProtocols: Bool, sourceFile: SourceFile, locationConverter: SourceLocationConverter) {
+    private init(syntax: SourceFileSyntax, parseProtocols: Bool, file: Path, locationConverter: SourceLocationConverter) {
         self.syntax = syntax
         self.parseProtocols = parseProtocols
-        self.sourceFile = sourceFile
+        self.file = file
         self.locationConverter = locationConverter
     }
 
@@ -335,7 +334,7 @@ final class UnusedParameterParser {
 
     private func sourceLocation(of position: AbsolutePosition) -> SourceLocation {
         let location = locationConverter.location(for: position)
-        return SourceLocation(file: sourceFile,
+        return SourceLocation(file: file,
                               line: Int64(location.line!),
                               column: Int64(location.column!),
                               offset: Int64(position.utf8Offset))
