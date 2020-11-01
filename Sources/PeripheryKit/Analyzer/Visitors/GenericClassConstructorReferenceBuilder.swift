@@ -1,8 +1,8 @@
 import Foundation
 
 /// https://bugs.swift.org/browse/SR-7093
-/// Due to a SourceKit bug, constructors on a class with generic type parameters are not referenced
-/// despite being used. We therefore must reference the constrcutor from the class.
+/// Constructors on a class with generic type parameters are not referenced despite being used.
+/// We therefore must reference the constrcutor from the class.
 final class GenericClassConstructorReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)

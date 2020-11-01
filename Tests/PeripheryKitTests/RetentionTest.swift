@@ -987,8 +987,6 @@ class RetentionTest: XCTestCase {
     }
 
     func testClassRetainedByUnusedInstanceVariable() {
-        // Fails with SourceKit as it structures the class reference as a descendent of the parent
-        // class, not the var declaration.
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass71"))
 

@@ -12,7 +12,6 @@ public final class Declaration: Entity, CustomStringConvertible {
         case unknownTypeConformance
         case mainEntryPoint
         case xctest
-        case rootEquatableInfixOperator
         case paramFuncOverridden
         case paramFuncForeginProtocol
         case paramFuncLocalProtocol
@@ -185,7 +184,7 @@ public final class Declaration: Entity, CustomStringConvertible {
     var immediateSuperclassReferences: Set<Reference> {
         let superclassReferences = related.filter { [.class, .struct, .protocol].contains($0.kind) }
 
-        // SourceKit returns inherited typealiases as a Reference instead of a Related.
+        // Innherited typealiases are References instead of a Related.
         let typealiasReferences = references.filter { $0.kind == .typealias }
         return superclassReferences.union(typealiasReferences)
     }

@@ -41,7 +41,6 @@ final class Analyzer {
         PubliclyAccessibleRetainer.self,
         ObjCAccessibleRetainer.self,
         XCTestRetainer.self,
-        RootEquatableInfixOperatorRetainer.self,
         SwiftUIRetainer.self,
         StructImplicitConstructorPropertyRetainer.self,
         StringInterpolationAppendInterpolationRetainer.self,
