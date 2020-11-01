@@ -30,4 +30,4 @@ jobs:
     - name: Test
       run: swift test
     - name: Scan
-      run: ./.build/debug/periphery scan --quiet --skip-build
+      run: ./.build/debug/periphery scan --quiet --skip-build --strict
