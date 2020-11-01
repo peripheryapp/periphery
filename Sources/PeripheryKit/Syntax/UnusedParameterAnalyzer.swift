@@ -9,19 +9,32 @@ final class UnusedParameterAnalyzer {
         case shadowed
     }
 
-    func analyze(file: Path, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) throws -> Set<Parameter> {
+    func analyze(file: Path, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) throws -> [Function: Set<Parameter>] {
         let functions = try UnusedParameterParser.parse(
             file: file,
             syntax: syntax,
             locationConverter: locationConverter,
             parseProtocols: parseProtocols)
-        return Set(functions.flatMap { analyze(function: $0) })
+
+        return functions.reduce(into: [Function: Set<Parameter>]()) { (result, function) in
+            let params = analyze(function: function)
+
+            if !params.isEmpty {
+                result[function] = params
+            }
+        }
     }
 
-
-    func analyze(file: Path, parseProtocols: Bool) throws -> Set<Parameter> {
+    func analyze(file: Path, parseProtocols: Bool) throws -> [Function: Set<Parameter>] {
         let functions = try UnusedParameterParser.parse(file: file, parseProtocols: parseProtocols)
-        return Set(functions.flatMap { analyze(function: $0) })
+
+        return functions.reduce(into: [Function: Set<Parameter>]()) { (result, function) in
+            let params = analyze(function: function)
+
+            if !params.isEmpty {
+                result[function] = params
+            }
+        }
     }
 
     func analyze(function: Function) -> Set<Parameter> {

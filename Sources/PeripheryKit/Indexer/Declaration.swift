@@ -154,6 +154,7 @@ public final class Declaration: Entity, CustomStringConvertible {
     var parent: Entity?
     var attributes: Set<String> = []
     var modifiers: Set<String> = []
+    var commentCommands: Set<CommentCommand> = []
     var declarations: Set<Declaration> = []
     var unusedParameters: Set<Declaration> = []
     var references: Set<Reference> = []
@@ -215,8 +216,9 @@ public final class Declaration: Entity, CustomStringConvertible {
 
     public var descriptionParts: [String] {
         let formattedName = name != nil ? "'\(name!)'" : "nil"
-        let formattedAttributes = "[" + attributes.map { $0 }.sorted().joined(separator: ", ") + "]"
-        let formattedModifiers = "[" + modifiers.map { $0 }.sorted().joined(separator: ", ") + "]"
+        let formattedAttributes = "[" + attributes.sorted().joined(separator: ", ") + "]"
+        let formattedModifiers = "[" + modifiers.sorted().joined(separator: ", ") + "]"
+        let formattedCommentCommands = "[" + commentCommands.map { $0.description }.sorted().joined(separator: ", ") + "]"
         let implicitOrExplicit = isImplicit ? "implicit" : "explicit"
         return [kind.rawValue,
                 formattedName,
@@ -224,6 +226,7 @@ public final class Declaration: Entity, CustomStringConvertible {
                 accessibility.value.rawValue,
                 formattedModifiers,
                 formattedAttributes,
+                formattedCommentCommands,
                 "'\(usr)'",
                 location.shortDescription]
     }

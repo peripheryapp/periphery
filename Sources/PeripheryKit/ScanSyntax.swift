@@ -43,14 +43,14 @@ final class ScanSyntax {
         }
 
         let analyzer = UnusedParameterAnalyzer()
-        let jobPool = JobPool<Set<Parameter>>()
+        let jobPool = JobPool<[Function: Set<Parameter>]>()
 
-        let params = try jobPool.map(files) {
+        let paramsByFunction = try jobPool.map(files) {
             self.logger.debug("[syntax] \($0)")
             return try analyzer.analyze(file: $0, parseProtocols: false)
         }.joined()
 
-        let declarations = Set(params.map { $0.declaration })
+        let declarations = Set(paramsByFunction.flatMap { $0.value.map { $0.declaration } })
         return ScanResult(declarations: declarations, graph: nil)
     }
 }

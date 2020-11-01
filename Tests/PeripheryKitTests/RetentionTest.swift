@@ -1046,6 +1046,21 @@ class RetentionTest: XCTestCase {
         }
     }
 
+    func testIgnoreComments() {
+        analyze(retainPublic: true) {
+            XCTAssertIgnored((.class, "Fixture113"))
+            XCTAssertIgnored((.varParameter, "b"))
+            XCTAssertIgnored((.varParameter, "c"))
+        }
+    }
+
+    func testIgnoreAllComment() {
+        analyze(retainPublic: true) {
+            XCTAssertIgnored((.class, "Fixture115"))
+            XCTAssertIgnored((.class, "Fixture116"))
+        }
+    }
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768

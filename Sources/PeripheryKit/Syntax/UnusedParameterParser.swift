@@ -6,7 +6,15 @@ protocol Item: AnyObject {
     var items: [Item] { get }
 }
 
-final class Function: Item {
+final class Function: Item, Hashable {
+    static func == (lhs: Function, rhs: Function) -> Bool {
+        lhs.location == rhs.location
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(location)
+    }
+
     let name: String
     let fullName: String
     let location: SourceLocation
