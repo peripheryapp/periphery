@@ -242,22 +242,38 @@ final class IndexStoreIndexer {
                 result[decl.location] = decl
             }
 
-            let specifiers = try DeclarationMetadataParser.parse(
+            let result = try MetadataParser.parse(
                 file: file,
                 syntax: syntax,
                 locationConverter: locationConverter)
 
-            for specifier in specifiers {
-                guard let decl = declsByLocation[specifier.location] else {
-                    throw PeripheryKitError.swiftIndexingError(message: "Expected declaration at \(specifier.location)")
+            if result.fileCommands.contains(.ignoreAll) {
+                decls.forEach { graph.ignore($0) }
+            }
+
+            for metadata in result.metadata {
+                guard let decl = declsByLocation[metadata.location] else {
+                    throw PeripheryKitError.swiftIndexingError(message: "Expected declaration at \(metadata.location)")
                 }
 
-                if let accessibility = specifier.accessibility {
+                if let accessibility = metadata.accessibility {
                     decl.accessibility = (accessibility, true)
                 }
 
-                decl.attributes = Set(specifier.attributes)
-                decl.modifiers = Set(specifier.modifiers)
+                decl.attributes = Set(metadata.attributes)
+                decl.modifiers = Set(metadata.modifiers)
+                decl.commentCommands = Set(metadata.commentCommands)
+
+                if decl.commentCommands.contains(.ignore) {
+                    ignoreHierarchy(Set([decl]))
+                }
+            }
+        }
+
+        private func ignoreHierarchy(_ decls: Set<Declaration>) {
+            decls.forEach {
+                graph.ignore($0)
+                ignoreHierarchy($0.declarations)
             }
         }
 
@@ -269,23 +285,36 @@ final class IndexStoreIndexer {
             let functionDelcsByLocation = decls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
 
             let analyzer = UnusedParameterAnalyzer()
-            let params = try analyzer.analyze(
+            let paramsByFunction = try analyzer.analyze(
                 file: file,
                 syntax: syntax,
                 locationConverter: locationConverter,
                 parseProtocols: true)
 
-            for param in params {
-                guard let paramFunction = param.function else { continue }
-
-                guard let functionDecl = functionDelcsByLocation[paramFunction.location] else {
-                    fatalError("Failed to associate indexed function for parameter function '\(paramFunction.name)' at \(paramFunction.location)")
+            for (function, params) in paramsByFunction {
+                guard let functionDecl = functionDelcsByLocation[function.location] else {
+                    throw PeripheryKitError.swiftIndexingError(message: "Failed to associate indexed function for parameter function '\(function.name)' at \(function.location)")
                 }
 
-                let paramDecl = param.declaration
-                paramDecl.parent = functionDecl
-                functionDecl.unusedParameters.insert(paramDecl)
-                graph.add(paramDecl)
+                let ignoredParamNames = functionDecl.commentCommands.flatMap { command -> [String] in
+                    switch command {
+                    case let .ignoreParameters(params):
+                        return params
+                    default:
+                        return []
+                    }
+                }
+
+                for param in params {
+                    let paramDecl = param.declaration
+                    paramDecl.parent = functionDecl
+                    functionDecl.unusedParameters.insert(paramDecl)
+                    graph.add(paramDecl)
+
+                    if ignoredParamNames.contains(param.name) {
+                        graph.ignore(paramDecl)
+                    }
+                }
             }
         }
 

@@ -56,6 +56,7 @@ public final class Logger: Singleton {
         log(text, output: stderr)
     }
 
+    // periphery:ignore
     public func important(_ text: String) {
         let text = colorize("important: ", .boldYellow) + text
         log(text, output: stdout)
@@ -71,6 +72,7 @@ public final class Logger: Singleton {
         log(text, output: stderr)
     }
 
+    // periphery:ignore
     public func error(_ e: Error) {
         error(e.localizedDescription)
     }
