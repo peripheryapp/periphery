@@ -249,7 +249,7 @@ final class IndexStoreIndexer {
 
             for specifier in specifiers {
                 guard let decl = declsByLocation[specifier.location] else {
-                    throw PeripheryKitError.indexStoreError(message: "Expected declaration at \(specifier.location)")
+                    throw PeripheryKitError.swiftIndexingError(message: "Expected declaration at \(specifier.location)")
                 }
 
                 if let accessibility = specifier.accessibility {
@@ -295,7 +295,7 @@ final class IndexStoreIndexer {
             _ location: SourceLocation
         ) throws -> Declaration? {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind) else {
-                throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occurrence.symbol)")
+                throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind: \(occurrence.symbol)")
             }
 
             guard kind != .varParameter else {
@@ -417,7 +417,7 @@ final class IndexStoreIndexer {
             _ location: SourceLocation
         ) throws {
             guard let kind = transformReferenceKind(occurrence.symbol.kind, occurrence.symbol.subKind) else {
-                throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind into SourceKit kind: \(occurrence.symbol)")
+                throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind: \(occurrence.symbol)")
             }
 
             guard kind != .varParameter else {

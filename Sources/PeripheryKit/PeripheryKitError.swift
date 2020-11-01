@@ -5,24 +5,19 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
     case shellCommandFailed(args: [String], status: Int32, output: String)
     case shellOuputEncodingFailed(args: [String], encoding: String.Encoding)
 
-    case parseBuildArgumentsFailed(target: String, moduleName: String)
     case usageError(String)
     case underlyingError(Error)
     case invalidFormatter(name: String)
-    case noSwiftcInvocation(target: String)
     case invalidScheme(name: String, project: String)
     case invalidTarget(name: String, project: String)
     case testTargetNotBuildable(name: String)
-    case sourceKitRequestFailed(type: String, file: String, error: Error)
     case sourceGraphIntegrityError(message: String)
     case swiftIndexingError(message: String)
     case guidedSetupError(message: String)
     case updateCheckError(message: String)
-    case buildLogError(message: String)
     case xcodebuildNotConfigured
     case pathDoesNotExist(path: String)
     case foundIssues(count: Int)
-    case indexStoreError(message: String)
     case packageError(message: String)
 
     public var errorDescription: String? {
@@ -36,21 +31,15 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
             return message
         case let .underlyingError(error):
             return String(describing: error)
-        case let .parseBuildArgumentsFailed(target, moduleName):
-            return "Failed to determine build arguments for target '\(target)' with module name '\(moduleName)'. Do your given schemes build '\(target)'?"
         case .invalidFormatter(let name):
             let formatters = OutputFormat.allCases.map { $0.rawValue }.joined(separator: ", ")
             return "Invalid formatter '\(name)'. Available formatters are: \(formatters)."
-        case .noSwiftcInvocation(let target):
-            return "No swiftc invocation for target '\(target)'."
         case let .invalidScheme(name, project):
             return "Scheme '\(name)' does not exist in '\(project)'."
         case let .invalidTarget(name, project):
             return "Target '\(name)' does not exist in '\(project)'."
         case .testTargetNotBuildable(let name):
             return "Test target '\(name)' is not built by any of the given schemes."
-        case .sourceKitRequestFailed(let type, let file, let error):
-            return "SourceKit \(type) request failed for file '\(file)': \(error)"
         case .sourceGraphIntegrityError(let message):
             return message
         case .swiftIndexingError(let message):
@@ -59,16 +48,12 @@ public enum PeripheryKitError: Error, LocalizedError, CustomStringConvertible {
             return "\(message). Please refer to the documentation for instructions on configuring Periphery manually - https://github.com/peripheryapp/periphery/blob/master/README.md"
         case .updateCheckError(let message):
             return message
-        case .buildLogError(let message):
-            return message
         case .xcodebuildNotConfigured:
             return "Xcode is not configured for command-line use. Please run 'sudo xcode-select -s /Applications/Xcode.app'."
         case .pathDoesNotExist(let path):
             return "No such file or directory: \(path)."
         case .foundIssues(let count):
             return "Found \(count) \(count > 1 ? "issues" : "issue")."
-        case .indexStoreError(let message):
-            return message
         case .packageError(let message):
             return message
         }

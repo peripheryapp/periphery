@@ -1,6 +1,6 @@
 import Foundation
 
-// Since Xcode 10.2 declarations of classes marked @objcMembers do not have the objc.name attribute.
+/// Cascade objc.name attribute to members of classes attributed with objcMembers.
 final class ObjcMembersAttributeBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
