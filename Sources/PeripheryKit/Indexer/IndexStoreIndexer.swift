@@ -253,7 +253,8 @@ final class IndexStoreIndexer {
 
             for metadata in result.metadata {
                 guard let decl = declsByLocation[metadata.location] else {
-                    throw PeripheryKitError.swiftIndexingError(message: "Expected declaration at \(metadata.location)")
+                    // The declaration may not exist if the code was not compiled due to build conditions, e.g #if.
+                    continue
                 }
 
                 if let accessibility = metadata.accessibility {
