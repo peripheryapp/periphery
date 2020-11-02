@@ -79,7 +79,10 @@ final class ScanBehavior {
                         " option." +
 
                         colorize("\n - ", .boldGreen) +
-                        "Periphery is a very precise tool, false positives often turn out to be correct after further investigation."
+                        "Periphery is a very precise tool, false positives often turn out to be correct after further investigation." +
+
+                        colorize("\n - ", .boldGreen) +
+                        "If it really is a false positive, please report it - https://github.com/peripheryapp/periphery/issues."
                 )
             }
 
