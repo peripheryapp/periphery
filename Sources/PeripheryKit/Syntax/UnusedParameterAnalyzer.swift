@@ -25,18 +25,6 @@ final class UnusedParameterAnalyzer {
         }
     }
 
-    func analyze(file: Path, parseProtocols: Bool) throws -> [Function: Set<Parameter>] {
-        let functions = try UnusedParameterParser.parse(file: file, parseProtocols: parseProtocols)
-
-        return functions.reduce(into: [Function: Set<Parameter>]()) { (result, function) in
-            let params = analyze(function: function)
-
-            if !params.isEmpty {
-                result[function] = params
-            }
-        }
-    }
-
     func analyze(function: Function) -> Set<Parameter> {
         return Set(unusedParams(in: function))
     }

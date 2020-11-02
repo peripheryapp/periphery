@@ -77,12 +77,6 @@ After answering a few questions, Periphery will print out the full scan command 
 
 The guided setup is only intended for introductory purposes, once you are familiar with Periphery you can try some more advanced options, all of which can be seen with `periphery help scan`.
 
-### The `scan-syntax` Command
-
-Whereas the `scan` command performs a full static analysis of your build targets, the `scan-syntax` only perform analysis techniques that use syntax parsing, and is therefore much faster. This currently only includes unused function parameter detection.
-
-Unused function parameter detection when performed by `scan-syntax` is slightly inferior to `scan`, since it cannot use additional information from the compiler to omit redundant results. See [Function Parameters](#function-parameters) for an explanation of the differences.
-
 ### Configuration
 
 Once you've settled upon the appropriate options for your project, you may wish to persist them in a YAML configuration file. The simplest way to achieve this is to run Periphery with the `--verbose` option. Near the beginning of the output you will see the `[configuration]` section with your configuration formatted as YAML below. Copy & paste the configuration into `.periphery.yml` in the root of your project folder. You can now simply run `periphery scan` and the YAML configuration will be used.
