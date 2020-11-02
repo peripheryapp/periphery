@@ -75,7 +75,7 @@ final class UpdateChecker: Singleton {
 
         guard latestVersion.isVersion(greaterThan: PeripheryVersion) else { return }
 
-        logger.info(colorize("\n➜  Update Available", .boldGreen))
+        logger.info(colorize("\n* Update Available", .boldGreen))
         let boldLatestVersion = colorize(latestVersion, .bold)
         let boldLocalVersion = colorize(PeripheryVersion, .bold)
         logger.info("Version \(boldLatestVersion) is now available, you are using version \(boldLocalVersion).")

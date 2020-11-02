@@ -65,7 +65,7 @@ final class ScanBehavior {
             if filteredDeclarations.count > 0,
                 configuration.outputFormat.supportsAuxiliaryOutput {
                 logger.info(
-                    colorize("\n➜  ", .boldGreen) +
+                    colorize("\n* ", .boldGreen) +
                         colorize("Seeing false positives?", .bold) +
 
                         colorize("\n - ", .boldGreen) +

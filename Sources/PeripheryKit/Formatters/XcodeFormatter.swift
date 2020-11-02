@@ -13,7 +13,7 @@ public final class XcodeFormatter: OutputFormatter {
 
     public func perform(_ declarations: [Declaration]) throws {
         guard declarations.count > 0 else {
-            logger.info(colorize("➜  ", .boldGreen) + colorize("No unused code detected.", .bold))
+            logger.info(colorize("* ", .boldGreen) + colorize("No unused code detected.", .bold))
             return
         }
 
