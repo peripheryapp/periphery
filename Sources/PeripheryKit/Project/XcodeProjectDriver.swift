@@ -136,7 +136,7 @@ extension XcodeProjectDriver: ProjectDriver {
         }
 
         let sourceFiles = Set(try targets.map { try $0.sourceFiles() }.joined())
-        try IndexStoreIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
+        try SwiftIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
 
         let xibFiles = try Set(targets.map { try $0.xibFiles() }.joined())
         try XibIndexer.make(xibFiles: xibFiles, graph: graph).perform()
