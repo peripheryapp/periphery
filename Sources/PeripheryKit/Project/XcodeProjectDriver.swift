@@ -87,10 +87,6 @@ final class XcodeProjectDriver {
         guard !configuration.targets.isEmpty else {
             throw PeripheryKitError.usageError("The '--targets' option is required.")
         }
-
-        if configuration.skipBuild {
-            throw PeripheryKitError.usageError("The '--skip-build' option is only useable with Swift Package Manager projects.")
-        }
     }
 
     func setTargets(_ targets: Set<XcodeTarget>) {
@@ -111,6 +107,8 @@ extension XcodeProjectDriver: ProjectDriver {
                 throw PeripheryKitError.testTargetNotBuildable(name: name)
             }
         }
+
+        guard  !configuration.skipBuild else { return }
 
         for scheme in schemes {
             if configuration.outputFormat.supportsAuxiliaryOutput {
