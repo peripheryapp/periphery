@@ -46,9 +46,9 @@ public final class Xcodebuild: Injectable {
             "DEBUG_INFORMATION_FORMAT=\"dwarf\""
         ]
 
-        let xcodebuild = "xcodebuild \((args + [cmd]).joined(separator: " "))"
+        let xcodebuild = "xcodebuild \((args + [cmd] + envs).joined(separator: " "))"
 
-        return try exec(["/bin/sh", "-c", xcodebuild] + envs)
+        return try exec(["/bin/sh", "-c", xcodebuild])
     }
 
     func indexStorePath(project: XcodeProjectlike) throws -> String {
