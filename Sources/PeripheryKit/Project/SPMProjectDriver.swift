@@ -71,6 +71,6 @@ extension SPMProjectDriver: ProjectDriver {
             storePath = (Path(package.path) + ".build/debug/index/store").string
         }
 
-        try IndexStoreIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
+        try SwiftIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
     }
 }

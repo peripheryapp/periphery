@@ -3,7 +3,7 @@ import PathKit
 import SwiftSyntax
 import SwiftIndexStore
 
-final class IndexStoreIndexer {
+final class SwiftIndexer {
     static func make(storePath: String, sourceFiles: Set<Path>, graph: SourceGraph) throws -> Self {
         let storeURL = URL(fileURLWithPath: storePath)
 
