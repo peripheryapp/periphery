@@ -49,18 +49,21 @@ public final class XcodeWorkspace: XcodeProjectlike {
 
     // MARK: - Private
 
-    private func collectProjectPaths(in elements: [XCWorkspaceDataElement]) -> [Path] {
+    private func collectProjectPaths(in elements: [XCWorkspaceDataElement], groups: [XCWorkspaceDataGroup] = []) -> [Path] {
         var paths: [Path] = []
 
         for child in elements {
             switch child {
             case .file(let ref):
+                let basePath = Path(groups.map { $0.location.path }.joined(separator: "/"))
                 let path = Path(ref.location.path)
-                if path.extension == "xcodeproj" && shouldLoadProject(path) {
-                    paths.append(path)
+                let fullPath = basePath + path
+
+                if fullPath.extension == "xcodeproj" && shouldLoadProject(fullPath) {
+                    paths.append(fullPath)
                 }
             case .group(let group):
-                paths += collectProjectPaths(in: group.children)
+                paths += collectProjectPaths(in: group.children, groups: groups + [group])
             }
         }
 
