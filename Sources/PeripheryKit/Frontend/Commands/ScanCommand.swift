@@ -26,15 +26,6 @@ public struct ScanCommand: ParsableCommand {
     @Option(help: "Comma separatered list of target names to scan. Requied for Xcode projects. Optional for Swift Package Manager projects, default behavior is to scan all targets defined in Package.swift", transform: split(by: ","))
     var targets: [String] = []
 
-    @Flag(inversion: .prefixedNo, help: "Retain all public declarations - you'll likely want to enable this if you're scanning a framework/library project")
-    var retainPublic: Bool?
-
-    @Flag(inversion: .prefixedNo, help: "Don't retain declarations that are exposed to Objective-C by inheriting NSObject, or explicitly with the @objc and @objcMembers annotations")
-    var retainObjcAnnotated: Bool?
-
-    @Flag(inversion: .prefixedNo, help: "Retain unused protocol function parameters, even if the parameter is unused in all conforming functions")
-    var retainUnusedProtocolFuncParams: Bool?
-
     @Option(help: "Output format, available formatters are: \(OutputFormat.allCases.map { $0.rawValue }.joined(separator: ", "))")
     var format: String?
 
@@ -44,26 +35,35 @@ public struct ScanCommand: ParsableCommand {
     @Option(help: "Path glob of source files which should be excluded from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var reportExclude: [String] = []
 
-    @Flag(inversion: .prefixedNo, help: "Enable verbose logging")
-    var verbose: Bool?
-
-    @Flag(inversion: .prefixedNo, help: "Only output results")
-    var quiet: Bool?
-
-    @Flag(inversion: .prefixedNo, help: "Disable checking for updates")
-    var disableUpdateCheck: Bool?
-
-    @Flag(inversion: .prefixedNo, help: "Exit with non-zero status if any unused code is found")
-    var strict: Bool?
-
     @Option(help: "Pass additional arguments to xcodebuild for the build phase")
     var xcargs: String?
 
     @Option(help: "Path to index store to use. Automatically defaults to the correct store for your project")
     var indexStorePath: String?
 
-    @Flag(inversion: .prefixedNo, help: "Skip the project build step")
-    var skipBuild: Bool?
+    @Flag(help: "Retain all public declarations - you'll likely want to enable this if you're scanning a framework/library project")
+    var retainPublic: Bool = false
+
+    @Flag(help: "Don't retain declarations that are exposed to Objective-C by inheriting NSObject, or explicitly with the @objc and @objcMembers annotations")
+    var noRetainObjcAnnotated: Bool = false
+
+    @Flag(help: "Retain unused protocol function parameters, even if the parameter is unused in all conforming functions")
+    var retainUnusedProtocolFuncParams: Bool = false
+
+    @Flag(help: "Skip the project build step")
+    var skipBuild: Bool = false
+
+    @Flag(help: "Exit with non-zero status if any unused code is found")
+    var strict: Bool = false
+
+    @Flag(help: "Disable checking for updates")
+    var disableUpdateCheck: Bool = false
+
+    @Flag(help: "Enable verbose logging")
+    var verbose: Bool = false
+
+    @Flag(help: "Only output results")
+    var quiet: Bool = false
 
     public init() {}
 
@@ -73,30 +73,6 @@ public struct ScanCommand: ParsableCommand {
         try scanBehavior.setup(config).get()
 
         let configuration = inject(Configuration.self)
-
-        if let disableUpdateCheck = disableUpdateCheck {
-            configuration.updateCheck = !disableUpdateCheck
-        }
-
-        if let retainPublic = retainPublic {
-            configuration.retainPublic = retainPublic
-        }
-
-        if let retainObjcAnnotated = retainObjcAnnotated {
-            configuration.retainObjcAnnotated = retainObjcAnnotated
-        }
-
-        if let retainUnusedProtocolFuncParams = retainUnusedProtocolFuncParams {
-            configuration.retainUnusedProtocolFuncParams = retainUnusedProtocolFuncParams
-        }
-
-        if let verbose = verbose {
-            configuration.verbose = verbose
-        }
-
-        if let quiet = quiet {
-            configuration.quiet = quiet
-        }
 
         if workspace != nil {
             configuration.workspace = workspace
@@ -122,24 +98,48 @@ public struct ScanCommand: ParsableCommand {
             configuration.schemes = schemes
         }
 
-        if let strict = strict {
-            configuration.strict = strict
-        }
-
         if xcargs != nil {
             configuration.xcargs = xcargs
+        }
+
+        if let formatName = format {
+            configuration.outputFormat = try OutputFormat.make(named: formatName)
         }
 
         if let indexStorePath = indexStorePath {
             configuration.indexStorePath = indexStorePath
         }
 
-        if let skipBuild = skipBuild {
+        if isExplicit("retain-public") {
+            configuration.retainPublic = retainPublic
+        }
+
+        if isExplicit("retain-objc-annotated") {
+            configuration.retainObjcAnnotated = !noRetainObjcAnnotated
+        }
+
+        if isExplicit("retain-unused-protocol-func-params") {
+            configuration.retainUnusedProtocolFuncParams = retainUnusedProtocolFuncParams
+        }
+
+        if isExplicit("skip-build") {
             configuration.skipBuild = skipBuild
         }
 
-        if let formatName = format {
-            configuration.outputFormat = try OutputFormat.make(named: formatName)
+        if isExplicit("disable-update-check") {
+            configuration.updateCheck = !disableUpdateCheck
+        }
+
+        if isExplicit("verbose") {
+            configuration.verbose = verbose
+        }
+
+        if isExplicit("quiet") {
+            configuration.quiet = quiet
+        }
+
+        if isExplicit("strict") {
+            configuration.strict = strict
         }
 
         configuration.guidedSetup = setup
@@ -147,6 +147,10 @@ public struct ScanCommand: ParsableCommand {
         try scanBehavior.main { project in
             try Scan.make().perform(project: project)
         }.get()
+    }
+
+    private func isExplicit(_ arg: String) -> Bool {
+        CommandLine.arguments.contains { $0.hasSuffix(arg) }
     }
 
     fileprivate static func split(by delimiter: Character) -> (String?) -> [String] {
