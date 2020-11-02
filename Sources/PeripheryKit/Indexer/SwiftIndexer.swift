@@ -294,7 +294,13 @@ final class SwiftIndexer {
 
             for (function, params) in paramsByFunction {
                 guard let functionDecl = functionDelcsByLocation[function.location] else {
-                    throw PeripheryKitError.swiftIndexingError(message: "Failed to associate indexed function for parameter function '\(function.name)' at \(function.location)")
+                    var msg = "Failed to associate indexed function for parameter function '\(function.name)' at \(function.location)."
+
+                    if configuration.skipBuild {
+                        msg += " The --skip-build option is enabled, perhaps the source file and index store are no longer in sync?"
+                    }
+
+                    throw PeripheryKitError.swiftIndexingError(message: msg)
                 }
 
                 let ignoredParamNames = functionDecl.commentCommands.flatMap { command -> [String] in
