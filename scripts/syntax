@@ -1,3 +1,0 @@
-set -e
-swift build
-time ./.build/debug/periphery scan-syntax "$@"

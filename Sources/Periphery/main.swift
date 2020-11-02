@@ -7,7 +7,7 @@ private let logger = inject(Logger.self)
 struct PeripheryCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "periphery",
-        subcommands: [ScanCommand.self, ScanSyntaxCommand.self, CheckUpdateCommand.self, VersionCommand.self]
+        subcommands: [ScanCommand.self, CheckUpdateCommand.self, VersionCommand.self]
     )
 }
 
