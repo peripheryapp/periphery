@@ -15,8 +15,10 @@ public final class XcodeTarget {
     private let target: PBXTarget
     private var sourceFiles_: Set<Path> = []
     private var xibFiles_: Set<Path> = []
+    private var infoPlistFiles_: Set<Path> = []
     private var didIdentifySourceFiles = false
     private var didIdentifyXibFiles = false
+    private var didIdentifyInfoPlistFiles = false
     private let xcodebuild: Xcodebuild
     private let logger: Logger
 
@@ -55,6 +57,16 @@ public final class XcodeTarget {
         return xibFiles_
     }
 
+    func infoPlistFiles() throws -> Set<Path> {
+        if didIdentifyInfoPlistFiles {
+            return infoPlistFiles_
+        }
+
+        try identifyInfoPlistFiles()
+        didIdentifyInfoPlistFiles = true
+        return infoPlistFiles_
+    }
+
     func set(sourceFiles: Set<Path>) {
         sourceFiles_ = sourceFiles
         didIdentifySourceFiles = true
@@ -69,7 +81,7 @@ public final class XcodeTarget {
             try ($0.files ?? []).compactMap {
                 let sourceRoot = project.sourceRoot.absolute()
                 if let path = try $0.file?.fullPath(sourceRoot: sourceRoot),
-                    path.extension?.lowercased() == "swift" {
+                   path.extension?.lowercased() == "swift" {
                     return path
                 }
 
@@ -92,6 +104,13 @@ public final class XcodeTarget {
                 return nil
             }
         })
+    }
+
+    private func identifyInfoPlistFiles() throws {
+        let files = target.buildConfigurationList?.buildConfigurations.compactMap {
+            $0.buildSettings["INFOPLIST_FILE"] as? String
+        } ?? []
+        infoPlistFiles_ = Set(files.map { project.sourceRoot.absolute() + $0 })
     }
 }
 

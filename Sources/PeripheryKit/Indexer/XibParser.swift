@@ -5,7 +5,6 @@ import PathKit
 struct XibReference {
     let xibPath: Path
     let className: String
-    let moduleName: String?
 }
 
 final class XibParser {
@@ -28,10 +27,7 @@ final class XibParser {
         let elements = filter(structure)
         return elements.compactMap {
             guard let customClass = $0.attribute(by: "customClass")?.text else { return nil }
-            let customModule = $0.attribute(by: "customModule")?.text
-            return XibReference(xibPath: path,
-                                className: customClass,
-                                moduleName: customModule)
+            return XibReference(xibPath: path, className: customClass)
         }
     }
 

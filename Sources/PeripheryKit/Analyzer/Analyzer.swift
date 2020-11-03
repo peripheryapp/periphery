@@ -36,6 +36,7 @@ final class Analyzer {
 
         UnusedParameterRetainer.self,
         XibReferenceRetainer.self,
+        InfoPlistReferenceRetainer.self,
         ApplicationMainRetainer.self,
         MainEntryPointRetainer.self,
         PubliclyAccessibleRetainer.self,

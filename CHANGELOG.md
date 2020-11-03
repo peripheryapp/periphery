@@ -12,6 +12,7 @@
 
 ##### Bug Fixes
 
+- UISceneDelegateClassName & UISceneClassName referenced in Info.plist are now retained.
 - Ignore parameters from functions annotated with @IBAction.
 - Classes & structs that conform to SwiftUI's PreviewProvider are now retained.
 - Support @main entry points.

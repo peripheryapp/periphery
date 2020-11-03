@@ -3,8 +3,9 @@ import PathKit
 
 public final class Declaration: Entity, CustomStringConvertible {
     enum RetentionReason {
-        case xib
         case unknown
+        case xib
+        case infoPlist
         case applicationMain
         case publicAccessible
         case objcAnnotated
