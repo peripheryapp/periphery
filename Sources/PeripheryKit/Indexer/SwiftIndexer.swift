@@ -254,6 +254,7 @@ final class SwiftIndexer {
             for metadata in result.metadata {
                 guard let decl = declsByLocation[metadata.location] else {
                     // The declaration may not exist if the code was not compiled due to build conditions, e.g #if.
+                    logger.debug("Expected declaration at \(metadata.location)")
                     continue
                 }
 
@@ -294,13 +295,9 @@ final class SwiftIndexer {
 
             for (function, params) in paramsByFunction {
                 guard let functionDecl = functionDelcsByLocation[function.location] else {
-                    var msg = "Failed to associate indexed function for parameter function '\(function.name)' at \(function.location)."
-
-                    if configuration.skipBuild {
-                        msg += " The --skip-build option is enabled, perhaps the source file and index store are no longer in sync?"
-                    }
-
-                    throw PeripheryKitError.swiftIndexingError(message: msg)
+                    // The declaration may not exist if the code was not compiled due to build conditions, e.g #if.
+                    logger.debug("Failed to associate indexed function for parameter function '\(function.name)' at \(function.location).")
+                    continue
                 }
 
                 let ignoredParamNames = functionDecl.commentCommands.flatMap { command -> [String] in
