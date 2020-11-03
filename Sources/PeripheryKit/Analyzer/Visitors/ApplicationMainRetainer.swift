@@ -12,7 +12,7 @@ final class ApplicationMainRetainer: SourceGraphVisitor {
     }
 
     func visit() {
-        let classes = graph.declarations(ofKind: .class)
+        let classes = graph.declarations(ofKinds: [.class, .struct])
         let mainClasses = classes.filter {
             $0.attributes.contains("NSApplicationMain") ||
             $0.attributes.contains("UIApplicationMain") ||

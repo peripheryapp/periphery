@@ -15,6 +15,7 @@ public final class SourceGraph {
     private let mutationQueue: DispatchQueue
 
     var xibReferences: [XibReference] = []
+    var infoPlistReferences: [InfoPlistReference] = []
 
     var dereferencedDeclarations: Set<Declaration> {
         return allDeclarations

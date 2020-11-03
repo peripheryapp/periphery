@@ -140,5 +140,8 @@ extension XcodeProjectDriver: ProjectDriver {
 
         let xibFiles = try Set(targets.map { try $0.xibFiles() }.joined())
         try XibIndexer.make(xibFiles: xibFiles, graph: graph).perform()
+
+        let infoPlistFiles = try Set(targets.map { try $0.infoPlistFiles() }.joined())
+        try InfoPlistIndexer.make(infoPlistFiles: infoPlistFiles, graph: graph).perform()
     }
 }
