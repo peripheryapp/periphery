@@ -1070,29 +1070,6 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    // TODO: Need a way to handle this now that we're using the SPM.
-    func testViewXibRetainsClass() {
-        guard performKnownFailures else { return }
-
-        analyze() {
-            XCTAssertReferenced((.class, "XibView"))
-
-            XCTAssertReferenced((.varInstance, "button"),
-                                descendentOf: (.class, "XibView"))
-            XCTAssertReferenced((.functionMethodInstance, "click(_:)"),
-                                descendentOf: (.class, "XibView"))
-        }
-    }
-
-    // TODO: Need a way to handle this now that we're using the SPM.
-    func testStoryboardRetainsClass() {
-        guard performKnownFailures else { return }
-
-        analyze() {
-            XCTAssertReferenced((.class, "XibViewController"))
-        }
-    }
-
     func testGetSetPropertyWithDefaultImplementation() {
         guard performKnownFailures else { return }
 
