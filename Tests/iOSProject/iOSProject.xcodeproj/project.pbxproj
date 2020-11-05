@@ -12,6 +12,11 @@
 		3C849662255405B000900DA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C849661255405B000900DA9 /* Assets.xcassets */; };
 		3C849665255405B000900DA9 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3C849664255405B000900DA9 /* Preview Assets.xcassets */; };
 		3C84966E255405F600900DA9 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C84966D255405F600900DA9 /* SceneDelegate.swift */; };
+		3C9B06BE25542DB200E45614 /* XibViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9B06BD25542DB200E45614 /* XibViewController.swift */; };
+		3C9B06C125542DD700E45614 /* XibViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3C9B06C025542DD700E45614 /* XibViewController.xib */; };
+		3C9B06C425542F2500E45614 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C9B06C325542F2500E45614 /* Launch Screen.storyboard */; };
+		3C9B06E725547C3800E45614 /* StoryboardViewController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3C9B06E625547C3800E45614 /* StoryboardViewController.storyboard */; };
+		3C9B06EA25547CEC00E45614 /* StoryboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C9B06E925547CEC00E45614 /* StoryboardViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +27,11 @@
 		3C849664255405B000900DA9 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		3C849666255405B000900DA9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C84966D255405F600900DA9 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		3C9B06BD25542DB200E45614 /* XibViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XibViewController.swift; sourceTree = "<group>"; };
+		3C9B06C025542DD700E45614 /* XibViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = XibViewController.xib; sourceTree = "<group>"; };
+		3C9B06C325542F2500E45614 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		3C9B06E625547C3800E45614 /* StoryboardViewController.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = StoryboardViewController.storyboard; sourceTree = "<group>"; };
+		3C9B06E925547CEC00E45614 /* StoryboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryboardViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +70,11 @@
 				3C849666255405B000900DA9 /* Info.plist */,
 				3C849663255405B000900DA9 /* Preview Content */,
 				3C84966D255405F600900DA9 /* SceneDelegate.swift */,
+				3C9B06BD25542DB200E45614 /* XibViewController.swift */,
+				3C9B06C025542DD700E45614 /* XibViewController.xib */,
+				3C9B06C325542F2500E45614 /* Launch Screen.storyboard */,
+				3C9B06E625547C3800E45614 /* StoryboardViewController.storyboard */,
+				3C9B06E925547CEC00E45614 /* StoryboardViewController.swift */,
 			);
 			path = iOSProject;
 			sourceTree = "<group>";
@@ -130,7 +145,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				3C849665255405B000900DA9 /* Preview Assets.xcassets in Resources */,
+				3C9B06C125542DD700E45614 /* XibViewController.xib in Resources */,
+				3C9B06C425542F2500E45614 /* Launch Screen.storyboard in Resources */,
 				3C849662255405B000900DA9 /* Assets.xcassets in Resources */,
+				3C9B06E725547C3800E45614 /* StoryboardViewController.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,8 +159,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C9B06EA25547CEC00E45614 /* StoryboardViewController.swift in Sources */,
 				3C849660255405AD00900DA9 /* ContentView.swift in Sources */,
 				3C84965E255405AD00900DA9 /* iOSProjectApp.swift in Sources */,
+				3C9B06BE25542DB200E45614 /* XibViewController.swift in Sources */,
 				3C84966E255405F600900DA9 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

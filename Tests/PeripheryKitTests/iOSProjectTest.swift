@@ -37,11 +37,23 @@ class iOSProjectTest: SourceGraphTestCase {
         try! Analyzer.perform(graph: graph)
     }
 
+    func testRetainsMainAppEntryPoint() {
+        XCTAssertReferenced((.struct, "iOSProjectApp"))
+    }
+
     func testRetainsSceneDelegateReferencedInInfoPlist() {
         XCTAssertReferenced((.class, "SceneDelegate"))
     }
 
-    func testRetainsMainAppEntryPoint() {
-        XCTAssertReferenced((.struct, "iOSProjectApp"))
+    func testRetainsXibReferencedClass() {
+        XCTAssertReferenced((.class, "XibViewController"))
+        XCTAssertReferenced((.varInstance, "button"), descendentOf: (.class, "XibViewController"))
+        XCTAssertReferenced((.functionMethodInstance, "click(_:)"), descendentOf: (.class, "XibViewController"))
+    }
+
+    func testRetainsStoryboardReferencedClass() {
+        XCTAssertReferenced((.class, "StoryboardViewController"))
+        XCTAssertReferenced((.varInstance, "button"), descendentOf: (.class, "StoryboardViewController"))
+        XCTAssertReferenced((.functionMethodInstance, "click(_:)"), descendentOf: (.class, "StoryboardViewController"))
     }
 }
