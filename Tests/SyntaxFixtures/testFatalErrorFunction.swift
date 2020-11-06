@@ -1,18 +1,13 @@
 import Foundation
-import AppKit
 
-public class FixtureClass106: NSView {
+public class FixtureClass106 {
     func myFunc(param: String) {
         fatalError()
     }
 }
 
 public class FixtureClass106Subclass: FixtureClass106 {
-    init() {
-        super.init(frame: NSRect.zero)
-    }
-
-    required init?(coder decoder: NSCoder) {
+    required init?(param: String) {
         fatalError("init(coder:) has not been implemented")
     }
 }

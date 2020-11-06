@@ -1,7 +1,7 @@
 import Foundation
 import PathKit
 
-final class MainEntryPointRetainer: SourceGraphVisitor {
+final class EntryPointFileRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph, configuration: inject())
     }

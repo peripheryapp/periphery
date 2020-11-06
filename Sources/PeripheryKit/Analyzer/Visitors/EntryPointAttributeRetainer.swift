@@ -1,6 +1,6 @@
 import Foundation
 
-final class ApplicationMainRetainer: SourceGraphVisitor {
+final class EntryPointAttributeRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }
@@ -20,10 +20,17 @@ final class ApplicationMainRetainer: SourceGraphVisitor {
         }
 
         mainClasses.forEach {
-            $0.markRetained(reason: .applicationMain)
+            $0.markRetained(reason: .mainEntryPoint)
 
             $0.ancestralDeclarations.forEach {
-                $0.markRetained(reason: .applicationMain)
+                $0.markRetained(reason: .mainEntryPoint)
+            }
+
+            if $0.attributes.contains("main") {
+                // @main requires a static main() function.
+                $0.declarations
+                    .filter { $0.kind == .functionMethodStatic && $0.name == "main()"}
+                    .forEach { $0.markRetained(reason: .mainEntryPoint) }
             }
         }
     }
