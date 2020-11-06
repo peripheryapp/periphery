@@ -1,7 +1,8 @@
 import PathKit
+import Shared
 
-final class XibIndexer {
-    static func make(xibFiles: Set<Path>, graph: SourceGraph) -> Self {
+public final class XibIndexer {
+    public static func make(xibFiles: Set<Path>, graph: SourceGraph) -> Self {
         return self.init(xibFiles: xibFiles,
                          graph: graph,
                          logger: inject())
@@ -17,7 +18,7 @@ final class XibIndexer {
         self.logger = logger
     }
 
-    func perform() throws {
+    public func perform() throws {
         let workPool = JobPool<[XibReference]>()
         let results = try workPool.map(Array(xibFiles)) { [weak self] xibPath in
             guard let strongSelf = self else { return nil }

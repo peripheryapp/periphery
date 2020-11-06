@@ -1,4 +1,5 @@
 import Foundation
+import Shared
 
 public final class SourceGraph {
     private(set) var rootDeclarations: Set<Declaration> = []
@@ -17,7 +18,7 @@ public final class SourceGraph {
     var xibReferences: [XibReference] = []
     var infoPlistReferences: [InfoPlistReference] = []
 
-    var dereferencedDeclarations: Set<Declaration> {
+    public var dereferencedDeclarations: Set<Declaration> {
         return allDeclarations
             .subtracting(referencedDeclarations)
             .subtracting(ignoredDeclarations)
@@ -186,7 +187,7 @@ public final class SourceGraph {
 
     func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
         guard let extendedKind = extendedReferenceKindMap[extensionDeclaration.kind] else {
-            throw PeripheryKitError.sourceGraphIntegrityError(message: "Unknown extended reference kind for extension '\(extensionDeclaration.kind.rawValue)'")
+            throw PeripheryError.sourceGraphIntegrityError(message: "Unknown extended reference kind for extension '\(extensionDeclaration.kind.rawValue)'")
         }
 
         guard let extendedReference = extensionDeclaration.references.first(where: { $0.kind == extendedKind && $0.name == extensionDeclaration.name }) else { return nil }

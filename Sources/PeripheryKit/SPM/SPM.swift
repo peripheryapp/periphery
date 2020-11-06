@@ -1,13 +1,14 @@
 import Foundation
+import Shared
 
-struct SPM {
-    struct Package: Decodable {
-        static func load() throws -> Self {
+public struct SPM {
+    public struct Package: Decodable {
+        public static func load() throws -> Self {
             let shell = Shell()
             let jsonString = try shell.exec(["swift", "package", "describe", "--type", "json"])
 
             guard let jsonData = jsonString.data(using: .utf8) else {
-                throw PeripheryKitError.packageError(message: "Failed to read swift package description.")
+                throw PeripheryError.packageError(message: "Failed to read swift package description.")
             }
 
             let decoder = JSONDecoder()
@@ -15,24 +16,24 @@ struct SPM {
             return try decoder.decode(Package.self, from: jsonData)
         }
 
-        let name: String
-        let path: String
-        let targets: [Target]
+        public let name: String
+        public let path: String
+        public let targets: [Target]
 
-        var swiftTargets: [Target] {
+        public var swiftTargets: [Target] {
             targets.filter { $0.moduleType == "SwiftTarget" }
         }
     }
 
-    struct Target: Decodable {
-        let name: String
-        let path: String
-        let sources: [String]
-        let moduleType: String
+    public struct Target: Decodable {
+        public let name: String
+        public let path: String
+        public let sources: [String]
+        public let moduleType: String
 
         func build() throws {
             let shell = Shell()
-            try shell.exec(["swift", "build", "--target", name])
+            try shell.exec(["swift", "build", "--enable-test-discovery", "--target", name])
         }
     }
 }

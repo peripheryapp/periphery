@@ -2,9 +2,10 @@ import Foundation
 import PathKit
 import SwiftSyntax
 import SwiftIndexStore
+import Shared
 
-final class SwiftIndexer {
-    static func make(storePath: String, sourceFiles: Set<Path>, graph: SourceGraph) throws -> Self {
+public final class SwiftIndexer {
+    public static func make(storePath: String, sourceFiles: Set<Path>, graph: SourceGraph) throws -> Self {
         let storeURL = URL(fileURLWithPath: storePath)
 
         return self.init(
@@ -35,7 +36,7 @@ final class SwiftIndexer {
         self.indexStore = indexStore
     }
 
-    func perform() throws {
+    public func perform() throws {
         var jobs = [Job]()
         let excludedPaths = configuration.indexExcludeSourceFiles
 
@@ -336,7 +337,7 @@ final class SwiftIndexer {
             _ location: SourceLocation
         ) throws -> Declaration? {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind) else {
-                throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind: \(occurrence.symbol)")
+                throw PeripheryError.swiftIndexingError(message: "Failed to transform IndexStore kind: \(occurrence.symbol)")
             }
 
             guard kind != .varParameter else {
@@ -458,7 +459,7 @@ final class SwiftIndexer {
             _ location: SourceLocation
         ) throws {
             guard let kind = transformReferenceKind(occurrence.symbol.kind, occurrence.symbol.subKind) else {
-                throw PeripheryKitError.swiftIndexingError(message: "Failed to transform IndexStore kind: \(occurrence.symbol)")
+                throw PeripheryError.swiftIndexingError(message: "Failed to transform IndexStore kind: \(occurrence.symbol)")
             }
 
             guard kind != .varParameter else {

@@ -1,5 +1,8 @@
 --- # .periphery.yml
 targets:
-- Periphery
+- Frontend
+- Shared
 - PeripheryKit
-- PeripheryKitTests
+- PeripheryTests
+- TestShared
+- XcodeSupport

@@ -3,15 +3,13 @@ import Foundation
 /// Builds references to enum cases of enums that are raw representable.
 final class EnumCaseReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph, configuration: inject())
+        return self.init(graph: graph)
     }
 
     private let graph: SourceGraph
-    private let configuration: Configuration
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph) {
         self.graph = graph
-        self.configuration = configuration
     }
 
     func visit() {

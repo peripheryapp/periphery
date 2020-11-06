@@ -1,7 +1,8 @@
 import Foundation
+import Shared
 
-final class Analyzer {
-    static func perform(graph: SourceGraph) throws {
+public final class Analyzer {
+    public static func perform(graph: SourceGraph) throws {
         try make(graph: graph).perform()
     }
 

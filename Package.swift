@@ -1,58 +1,126 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 import PackageDescription
+
+var dependencies: [Package.Dependency] = [
+    .package(url: "https://github.com/kylef/PathKit", from: "1.0.0"),
+    .package(url: "https://github.com/jpsim/Yams", from: "4.0.0"),
+    .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
+    .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
+    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax", .exact("0.50300.0")),
+    .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0")
+]
+
+#if os(macOS)
+dependencies.append(
+    .package(
+        name: "XcodeProj",
+        url: "https://github.com/ileitch/xcodeproj",
+        .revision("026d560a25bedc4eb31c9a991a8988df9c2e4b66")
+    )
+)
+#endif
+
+var frontendDependencies: [PackageDescription.Target.Dependency] = [
+    .target(name: "Shared"),
+    .target(name: "PeripheryKit"),
+    .product(name: "ArgumentParser", package: "swift-argument-parser")
+]
+
+#if os(macOS)
+frontendDependencies.append(.target(name: "XcodeSupport"))
+#endif
+
+var targets: [PackageDescription.Target] = [
+    .target(
+        name: "Frontend",
+        dependencies: frontendDependencies
+    ),
+    .target(
+        name: "PeripheryKit",
+        dependencies: [
+            .target(name: "Shared"),
+            .product(name: "PathKit", package: "PathKit"),
+            .product(name: "AEXML", package: "AEXML"),
+            .product(name: "SwiftSyntax", package: "SwiftSyntax"),
+            .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
+        ]
+    ),
+    .target(
+        name: "Shared",
+        dependencies: [
+            .product(name: "Yams", package: "Yams")
+        ]
+    ),
+    .target(
+        name: "RetentionFixturesCrossModule"
+    ),
+    .target(
+        name: "TestShared",
+        dependencies: [
+            .target(name: "PeripheryKit")
+        ],
+        path: "Tests/Shared"
+    ),
+    .target(
+        name: "RetentionFixtures",
+        dependencies: ["RetentionFixturesCrossModule"],
+        path: "Tests/RetentionFixtures"
+    ),
+    .target(
+        name: "SyntaxFixtures",
+        path: "Tests/SyntaxFixtures"
+    ),
+    .testTarget(
+        name: "PeripheryTests",
+        dependencies: [
+            .target(name: "TestShared"),
+            .target(name: "PeripheryKit")
+        ]
+    ),
+    .testTarget(
+        name: "SPMTests",
+        dependencies: [
+            .target(name: "TestShared"),
+            .target(name: "PeripheryKit")
+        ],
+        exclude: ["SPMProject"]
+    )
+]
+
+#if os(macOS)
+targets.append(
+    .target(
+        name: "XcodeSupport",
+        dependencies: [
+            .target(name: "Shared"),
+            .target(name: "PeripheryKit"),
+            .product(name: "XcodeProj", package: "XcodeProj"),
+        ]
+    )
+)
+
+targets.append(
+    .testTarget(
+        name: "XcodeTests",
+        dependencies: [
+            .target(name: "TestShared"),
+            .target(name: "PeripheryKit"),
+            .target(name: "XcodeSupport")
+        ],
+        exclude: ["iOSProject"]
+    )
+)
+#endif
 
 let package = Package(
     name: "Periphery",
     platforms: [
-      .macOS(.v10_12),
+      .macOS(.v10_12)
     ],
     products: [
-        .executable(name: "periphery", targets: ["Periphery"]),
-        .library(name: "PeripheryKit", targets: ["PeripheryKit"])
+        .executable(name: "periphery", targets: ["Frontend"])
     ],
-    dependencies: [
-        .package(url: "https://github.com/kylef/PathKit", from: "1.0.0"),
-        .package(url: "https://github.com/jpsim/Yams", from: "4.0.0"),
-        .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
-        .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
-        .package(name: "XcodeProj", url: "https://github.com/ileitch/xcodeproj", .revision("026d560a25bedc4eb31c9a991a8988df9c2e4b66")),
-        .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax", .exact("0.50300.0")),
-        .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", .revision("047875b31d65a39919bf1b10304aec7f1d86f971")),
-    ],
-    targets: [
-        .target(
-            name: "Periphery",
-            dependencies: ["PeripheryKit"]
-        ),
-        .target(
-            name: "PeripheryKit",
-            dependencies: [
-                .product(name: "Yams", package: "Yams"),
-                .product(name: "PathKit", package: "PathKit"),
-                .product(name: "AEXML", package: "AEXML"),
-                .product(name: "XcodeProj", package: "XcodeProj"),
-                .product(name: "SwiftSyntax", package: "SwiftSyntax"),
-                .product(name: "SwiftIndexStore", package: "SwiftIndexStore"),
-                .product(name: "ArgumentParser", package: "swift-argument-parser"),
-            ]
-        ),
-        .target(
-            name: "RetentionFixturesCrossModule"
-        ),
-        .testTarget(
-            name: "RetentionFixtures",
-            dependencies: ["RetentionFixturesCrossModule"]
-        ),
-        .testTarget(
-            name: "TestEmptyTarget"
-        ),
-        .testTarget(
-            name: "SyntaxFixtures"
-        ),
-        .testTarget(
-            name: "PeripheryKitTests",
-            dependencies: ["PeripheryKit"]
-        )
-    ],
+    dependencies: dependencies,
+    targets: targets,
     swiftLanguageVersions: [.v5]
 )

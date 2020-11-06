@@ -1,4 +1,5 @@
 import Foundation
+import Shared
 
 final class UnusedParameterRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {

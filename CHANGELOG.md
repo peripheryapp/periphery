@@ -9,6 +9,7 @@
 
 - Support for magic code comments to ignore unused declarations.
 - Support for analyzing Swift Package Manager projects.
+- Linux support for Swift Package Manager projects.
 
 ##### Bug Fixes
 
