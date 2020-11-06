@@ -118,7 +118,8 @@ extension XcodeProjectDriver: ProjectDriver {
 
             let buildForTesting = !Set(try scheme.testTargets()).isDisjoint(with: testTargetNames)
             try xcodebuild.build(project: project,
-                                 scheme: scheme.name,
+                                 scheme: scheme,
+                                 allSchemes: Array(schemes),
                                  additionalArguments: configuration.xcargs,
                                  buildForTesting: buildForTesting)
         }
@@ -132,7 +133,7 @@ extension XcodeProjectDriver: ProjectDriver {
         } else if let env = ProcessInfo.processInfo.environment["BUILD_ROOT"] {
             storePath = (Path(env).absolute().parent().parent() + "Index/DataStore").string
         } else {
-            storePath = try xcodebuild.indexStorePath(project: project)
+            storePath = try xcodebuild.indexStorePath(project: project, schemes: Array(schemes))
         }
 
         let sourceFiles = Set(try targets.map { try $0.sourceFiles() }.joined())

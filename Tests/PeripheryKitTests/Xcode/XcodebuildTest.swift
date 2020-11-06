@@ -30,7 +30,8 @@ class XcodebuildBuildProjectTest: XCTestCase {
     }
 
     func testBuildSchemeWithWhitespace() throws {
-        try xcodebuild.build(project: project, scheme: "TestScheme X")
+        let scheme = try XcodeScheme.make(project: project, name: "TestScheme X")
+        try xcodebuild.build(project: project, scheme: scheme, allSchemes: [scheme])
     }
 }
 

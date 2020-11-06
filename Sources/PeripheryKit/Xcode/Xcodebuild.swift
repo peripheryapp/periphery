@@ -26,14 +26,14 @@ public final class Xcodebuild: Injectable {
     }
 
     @discardableResult
-    func build(project: XcodeProjectlike, scheme: String, additionalArguments: String? = nil, buildForTesting: Bool = false) throws -> String {
+    func build(project: XcodeProjectlike, scheme: XcodeScheme, allSchemes: [XcodeScheme], additionalArguments: String? = nil, buildForTesting: Bool = false) throws -> String {
         let cmd = buildForTesting ? "build-for-testing" : "build"
 
         var args = [
             "-\(project.type)", "'\(project.path.absolute().string)'",
-            "-scheme", "'\(scheme)'",
+            "-scheme", "'\(scheme.name)'",
             "-parallelizeTargets",
-            "-derivedDataPath", "'\(try derivedDataPath(for: project).string)'",
+            "-derivedDataPath", "'\(try derivedDataPath(for: project, schemes: allSchemes).string)'",
         ]
 
         if let additionalArguments = additionalArguments {
@@ -51,8 +51,8 @@ public final class Xcodebuild: Injectable {
         return try exec(["/bin/sh", "-c", xcodebuild])
     }
 
-    func indexStorePath(project: XcodeProjectlike) throws -> String {
-        (try derivedDataPath(for: project) + "Index/DataStore").string
+    func indexStorePath(project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> String {
+        (try derivedDataPath(for: project, schemes: schemes) + "Index/DataStore").string
     }
 
     func schemes(project: XcodeProjectlike) throws -> [String] {
@@ -102,9 +102,15 @@ public final class Xcodebuild: Injectable {
 
     // MARK: - Private
 
-    private func derivedDataPath(for project: XcodeProjectlike) throws -> Path {
+    private func derivedDataPath(for project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> Path {
+        // Given a project with two schemes: A and B, a scenario can arise where the index store contains conflicting
+        // data. If scheme A is built, then the source file modified and then scheme B built, the index store will
+        // contain two records for that source file. One reflects the state of the file when scheme A was built, and the
+        // other when B was built. We must therefore key the DerivedData path with the full list of schemes being built.
+
         let normalizedName = project.name.replacingOccurrences(of: " ", with: "_")
-        return try (PeripheryCachePath() + "DerivedData-\(normalizedName)")
+        let normalizedSchemes = schemes.map { $0.name.replacingOccurrences(of: " ", with: "_") }.joined(separator: "-")
+        return try (PeripheryCachePath() + "DerivedData-\(normalizedName)-\(normalizedSchemes)")
     }
 
     @discardableResult
