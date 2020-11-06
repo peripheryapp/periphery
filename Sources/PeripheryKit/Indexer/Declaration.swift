@@ -6,7 +6,6 @@ public final class Declaration: Entity, CustomStringConvertible {
         case unknown
         case xib
         case infoPlist
-        case applicationMain
         case publicAccessible
         case objcAnnotated
         case unknownTypeExtension

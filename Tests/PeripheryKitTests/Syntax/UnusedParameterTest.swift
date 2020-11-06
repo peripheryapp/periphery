@@ -112,7 +112,7 @@ class UnusedParameterTest: XCTestCase {
     func testFatalErrorFunction() {
         analyze()
         XCTAssertUsed("param", of: "myFunc(param:)")
-        XCTAssertUsed("decoder", of: "init(coder decoder:)")
+        XCTAssertUsed("param", of: "init(param:)")
     }
 
     func testInitializerPosition() {

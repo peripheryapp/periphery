@@ -134,7 +134,8 @@ class RetentionTest: SourceGraphTestCase {
     func testMainEntryAnnotation() {
         analyze() {
             XCTAssertReferenced((.class, "FixtureClass20"))
-            XCTAssertReferenced((.functionMethodInstance, "applicationDidFinishLaunching(_:)"))
+            XCTAssertReferenced((.functionMethodStatic, "main()"),
+                                descendentOf: (.class, "FixtureClass20"))
         }
     }
 
