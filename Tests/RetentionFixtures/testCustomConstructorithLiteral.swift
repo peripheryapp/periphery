@@ -3,7 +3,7 @@ import Foundation
 public class FixtureClass108 {
     public func someMethod() {
         let title = [String](title: "Title").first
-        print(title)
+        print(title ?? "")
     }
 }
 

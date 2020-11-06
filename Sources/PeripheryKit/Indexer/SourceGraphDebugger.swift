@@ -43,18 +43,6 @@ public final class SourceGraphDebugger {
             describe(declaration, depth: depth + 1)
         }
     }
-
-    static func isEqual(_ lhs: SourceGraph, _ rhs: SourceGraph) -> Bool {
-        lhs.rootDeclarations == rhs.rootDeclarations && lhs.rootReferences == rhs.rootReferences
-            && zip(lhs.rootReferences, rhs.rootReferences).allSatisfy { isEqual($0, $1) }
-            && zip(lhs.rootDeclarations, rhs.rootDeclarations).allSatisfy { isEqual($0, $1) }
-    }
-
-    static func isEqual(_ lhs: Entity, _ rhs: Entity, depth: Int = 0) -> Bool {
-        lhs.references == rhs.references && lhs.declarations == rhs.declarations
-            && zip(lhs.references, rhs.references).allSatisfy { isEqual($0, $1) }
-            && zip(lhs.declarations, rhs.declarations).allSatisfy { isEqual($0, $1) }
-    }
 }
 
 final class SourceGraphDebuggerVisitor: SourceGraphVisitor {

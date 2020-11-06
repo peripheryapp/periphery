@@ -1,4 +1,5 @@
 import Foundation
+import Shared
 
 final class ObjCAccessibleRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {

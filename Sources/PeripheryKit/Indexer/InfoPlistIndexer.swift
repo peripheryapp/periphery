@@ -1,7 +1,8 @@
 import PathKit
+import Shared
 
-final class InfoPlistIndexer {
-    static func make(infoPlistFiles: Set<Path>, graph: SourceGraph) -> Self {
+public final class InfoPlistIndexer {
+    public static func make(infoPlistFiles: Set<Path>, graph: SourceGraph) -> Self {
         return self.init(infoPlistFiles: infoPlistFiles,
                          graph: graph,
                          logger: inject())
@@ -17,7 +18,7 @@ final class InfoPlistIndexer {
         self.logger = logger
     }
 
-    func perform() throws {
+    public func perform() throws {
         let workPool = JobPool<[InfoPlistReference]>()
         let results = try workPool.map(Array(infoPlistFiles)) { [weak self] path in
             guard let strongSelf = self else { return nil }

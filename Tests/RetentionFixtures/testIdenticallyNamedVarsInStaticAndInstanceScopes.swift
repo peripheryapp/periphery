@@ -12,6 +12,6 @@ public class FixtureClass95 {
     }
 
     public func testSomething() {
-        print(someVar)
+        print(someVar ?? "")
     }
 }

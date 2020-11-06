@@ -7,6 +7,6 @@ public class FixtureClass13 {
     var cls: FixtureClass12?
 
     public func retainer() {
-        print(cls)
+        print(cls ?? "")
     }
 }

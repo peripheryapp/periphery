@@ -5,7 +5,7 @@ on:
       - master
   pull_request: {}
 jobs:
-  run:
+  macOS:
     runs-on: macOS-latest
     name: macOS
     steps:
@@ -31,3 +31,24 @@ jobs:
       run: swift test
     - name: Scan
       run: ./.build/debug/periphery scan --quiet --skip-build --strict
+  linux:
+    runs-on: ubuntu-latest
+    container: swift:5.3
+    name: Linux
+    steps:
+    - uses: actions/checkout@master
+    - name: Cache resolved dependencies
+      id: cache-resolved-dependencies
+      uses: actions/cache@v2
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-deps-
+    - name: Resolve dependencies
+      if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
+      run: swift package resolve
+    - name: Build
+      run: swift build --build-tests --enable-test-discovery
+    - name: Test
+      run: swift test --enable-test-discovery

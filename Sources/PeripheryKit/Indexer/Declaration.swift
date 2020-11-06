@@ -2,7 +2,7 @@ import Foundation
 import PathKit
 
 public final class Declaration: Entity, CustomStringConvertible {
-    enum Kind: String, RawRepresentable, CaseIterable {
+    public enum Kind: String, RawRepresentable, CaseIterable {
         case `associatedtype` = "associatedtype"
         case `class` = "class"
         case `enum` = "enum"
@@ -91,7 +91,7 @@ public final class Declaration: Entity, CustomStringConvertible {
             functionKinds.union(variableKinds).union(globalKinds)
         }
 
-        var displayName: String? {
+        public var displayName: String? {
             switch self {
             case .class:
                 return "class"
@@ -128,19 +128,19 @@ public final class Declaration: Entity, CustomStringConvertible {
     }
 
     public let location: SourceLocation
-    let kind: Kind
-    let usr: String
-
+    public var attributes: Set<String> = []
+    public var modifiers: Set<String> = []
+    public var accessibility: (value: Accessibility, isExplicit: Bool) = (.internal, false)
+    public let kind: Kind
+    public var name: String?
+    public let usr: String
+    
     var parent: Entity?
-    var attributes: Set<String> = []
-    var modifiers: Set<String> = []
     var commentCommands: Set<CommentCommand> = []
     var declarations: Set<Declaration> = []
     var unusedParameters: Set<Declaration> = []
     var references: Set<Reference> = []
     var related: Set<Reference> = []
-    var name: String?
-    var accessibility: (value: Accessibility, isExplicit: Bool) = (.internal, false)
     var isImplicit: Bool = false
 
     var ancestralDeclarations: Set<Declaration> {
