@@ -69,6 +69,22 @@ class SourceGraphTestCase: XCTestCase {
         }
     }
 
+    func XCTAssertIgnored(_ description: DeclarationDescription, descendentOf parentDescriptions: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
+        let parentDeclaration = find(parentDescriptions)
+
+        XCTAssertNotNil(parentDeclaration, "Parent declaration not found: \(parentDescriptions)", file: file, line: line)
+
+        if let parentDeclaration = parentDeclaration {
+            let descendent = find(description, in: parentDeclaration.descendentDeclarations.union(parentDeclaration.unusedParameters))
+
+            XCTAssertNotNil(descendent, "Descendent declaration not found: \(description)", file: file, line: line)
+
+            if let descendent = descendent {
+                XCTAssertTrue(graph.ignoredDeclarations.contains(descendent), "Expected \(descendent) to be ignored.", file: file, line: line)
+            }
+        }
+    }
+
     func find(_ description: DeclarationDescription, in collection: Set<Declaration>? = nil) -> Declaration? {
         return (collection ?? graph.allDeclarations).first { $0.kind == description.kind && $0.name == description.name }
     }

@@ -1,3 +1,5 @@
+// periphery:ignore:all
+
 import Foundation
 
 public final class SourceGraphDebugger {

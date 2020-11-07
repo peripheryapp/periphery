@@ -1,7 +1,4 @@
 --- # .periphery.yml
-report_exclude:
-  - Sources/PeripheryKit/Extensions/String+Version.swift
-  - Sources/PeripheryKit/Indexer/SourceGraphDebugger.swift
 targets:
 - Periphery
 - PeripheryKit
