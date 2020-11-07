@@ -18,7 +18,7 @@ final class InfoPlistReferenceRetainer: SourceGraphVisitor {
         }
 
         for xibClass in referencedClasses {
-            xibClass.markRetained(reason: .infoPlist)
+            xibClass.markRetained()
         }
     }
 }

@@ -18,13 +18,13 @@ final class XibReferenceRetainer: SourceGraphVisitor {
         }
 
         for xibClass in referencedClasses {
-            xibClass.markRetained(reason: .xib)
+            xibClass.markRetained()
 
             for declaration in xibClass.declarations {
                 let attributes = declaration.attributes
 
                 if attributes.contains("IBOutlet") || attributes.contains("IBAction") {
-                    declaration.markRetained(reason: .xib)
+                    declaration.markRetained()
                 }
             }
         }

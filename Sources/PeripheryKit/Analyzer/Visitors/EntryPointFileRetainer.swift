@@ -17,7 +17,7 @@ final class EntryPointFileRetainer: SourceGraphVisitor {
     func visit() {
         graph.rootDeclarations.forEach {
             if isInMainFile($0) {
-                $0.markRetained(reason: .mainEntryPoint)
+                $0.markRetained()
             }
         }
     }

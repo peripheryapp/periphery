@@ -27,7 +27,7 @@ final class SwiftUIRetainer: SourceGraphVisitor {
                 }
             }
             .forEach { decl in
-                decl.markRetained(reason: .swiftUIPreviewProvider)
+                decl.markRetained()
             }
     }
 }

@@ -2,26 +2,6 @@ import Foundation
 import PathKit
 
 public final class Declaration: Entity, CustomStringConvertible {
-    enum RetentionReason {
-        case unknown
-        case xib
-        case infoPlist
-        case publicAccessible
-        case objcAnnotated
-        case unknownTypeExtension
-        case unknownTypeConformance
-        case mainEntryPoint
-        case xctest
-        case paramFuncOverridden
-        case paramFuncForeginProtocol
-        case paramFuncLocalProtocol
-        case swiftUIPreviewProvider
-        case structImplicitConstructorProperty
-        case implicit
-        case definesExternalAssociatedType
-        case stringInterpolationAppendInterpolation
-    }
-
     enum Kind: String, RawRepresentable, CaseIterable {
         case `associatedtype` = "associatedtype"
         case `class` = "class"
@@ -245,11 +225,9 @@ public final class Declaration: Entity, CustomStringConvertible {
     // MARK: - Analyzer Marking
 
     private(set) var isRetained: Bool = false // retained regardless of presence of references
-    private(set) var retentionReason: RetentionReason = .unknown
 
-    func markRetained(reason: RetentionReason) {
+    func markRetained() {
         isRetained = true
-        retentionReason = reason
     }
 }
 

@@ -341,7 +341,7 @@ final class SwiftIndexer {
             decl.isImplicit = occurrence.roles.contains(.implicit)
 
             if decl.isImplicit {
-                decl.markRetained(reason: .implicit)
+                decl.markRetained()
             }
 
             indexStore.forEachRelations(for: occurrence) { rel -> Bool in

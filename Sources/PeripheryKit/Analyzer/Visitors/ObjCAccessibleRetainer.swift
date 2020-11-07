@@ -25,6 +25,6 @@ final class ObjCAccessibleRetainer: SourceGraphVisitor {
             $0.attributes.contains("objc.name") ||
             $0.attributes.contains("objcMembers")
         }
-        objcDeclarations.forEach { $0.markRetained(reason: .objcAnnotated) }
+        objcDeclarations.forEach { $0.markRetained() }
     }
 }

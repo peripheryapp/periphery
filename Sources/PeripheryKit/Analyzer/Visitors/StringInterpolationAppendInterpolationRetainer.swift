@@ -20,7 +20,7 @@ final class StringInterpolationAppendInterpolationRetainer: SourceGraphVisitor {
                     $0.kind == .functionMethodInstance &&
                         ($0.name ?? "").hasPrefix("appendInterpolation(")
                 }.forEach {
-                    $0.markRetained(reason: .stringInterpolationAppendInterpolation)
+                    $0.markRetained()
                 }
             }
     }

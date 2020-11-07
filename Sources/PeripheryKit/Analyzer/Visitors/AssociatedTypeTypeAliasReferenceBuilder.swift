@@ -26,7 +26,7 @@ final class AssociatedTypeTypeAliasReferenceBuilder: SourceGraphVisitor {
                     graph.add(inverseRelated, from: associated)
                 } else {
                     // The associatedtype is external, we must retain the typealias as it may also be used externally.
-                    alias.markRetained(reason: .definesExternalAssociatedType)
+                    alias.markRetained()
                 }
             }
         }
