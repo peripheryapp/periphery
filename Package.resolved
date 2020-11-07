@@ -3,7 +3,7 @@
     "pins": [
       {
         "package": "AEXML",
-        "repositoryURL": "https://github.com/tadija/AEXML.git",
+        "repositoryURL": "https://github.com/tadija/AEXML",
         "state": {
           "branch": null,
           "revision": "502c4d43a6cc9c395d19111e09dc62ad834977b5",
@@ -75,7 +75,7 @@
       },
       {
         "package": "Yams",
-        "repositoryURL": "https://github.com/jpsim/Yams.git",
+        "repositoryURL": "https://github.com/jpsim/Yams",
         "state": {
           "branch": null,
           "revision": "88caa2e6fffdbef2e91c2022d038576062042907",

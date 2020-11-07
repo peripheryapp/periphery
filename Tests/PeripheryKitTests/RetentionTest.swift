@@ -1048,6 +1048,8 @@ class RetentionTest: SourceGraphTestCase {
     func testIgnoreComments() {
         analyze(retainPublic: true) {
             XCTAssertIgnored((.class, "Fixture113"))
+            XCTAssertIgnored((.functionMethodInstance, "someFunc(param:)"), descendentOf: (.class, "Fixture113"))
+            XCTAssertIgnored((.varParameter, "param"), descendentOf: (.functionMethodInstance, "someFunc(param:)"))
             XCTAssertIgnored((.varParameter, "b"))
             XCTAssertIgnored((.varParameter, "c"))
         }
@@ -1056,6 +1058,8 @@ class RetentionTest: SourceGraphTestCase {
     func testIgnoreAllComment() {
         analyze(retainPublic: true) {
             XCTAssertIgnored((.class, "Fixture115"))
+            XCTAssertIgnored((.functionMethodInstance, "someFunc(param:)"), descendentOf: (.class, "Fixture115"))
+            XCTAssertIgnored((.varParameter, "param"), descendentOf: (.functionMethodInstance, "someFunc(param:)"))
             XCTAssertIgnored((.class, "Fixture116"))
         }
     }

@@ -141,8 +141,9 @@ final class SwiftIndexer {
 
             let syntax = try SyntaxParser.parse(file.url)
             let locationConverter = SourceLocationConverter(file: file.string, tree: syntax)
-            try identifyMetadata(for: decls, syntax: syntax, locationConverter: locationConverter)
+            let result = try identifyMetadata(for: decls, syntax: syntax, locationConverter: locationConverter)
             try identifyUnusedParameters(for: decls.filter { $0.kind.isFunctionKind }, syntax: syntax, locationConverter: locationConverter)
+            applyCommands(for: decls, metadataResult: result)
         }
 
         private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
@@ -233,11 +234,23 @@ final class SwiftIndexer {
             }
         }
 
+        private func applyCommands(for decls: [Declaration], metadataResult result: MetadataParser.Result) {
+            if result.fileCommands.contains(.ignoreAll) {
+                ignoreHierarchy(decls)
+            }
+
+            for decl in decls {
+                if decl.commentCommands.contains(.ignore) {
+                    ignoreHierarchy([decl])
+                }
+            }
+        }
+
         private func identifyMetadata(
             for decls: [Declaration],
             syntax: SourceFileSyntax,
             locationConverter: SourceLocationConverter
-        ) throws {
+        ) throws -> MetadataParser.Result {
             let declsByLocation = decls.reduce(into: [SourceLocation: Declaration]()) { (result, decl) in
                 result[decl.location] = decl
             }
@@ -246,10 +259,6 @@ final class SwiftIndexer {
                 file: file,
                 syntax: syntax,
                 locationConverter: locationConverter)
-
-            if result.fileCommands.contains(.ignoreAll) {
-                decls.forEach { graph.ignore($0) }
-            }
 
             for metadata in result.metadata {
                 guard let decl = declsByLocation[metadata.location] else {
@@ -265,17 +274,16 @@ final class SwiftIndexer {
                 decl.attributes = Set(metadata.attributes)
                 decl.modifiers = Set(metadata.modifiers)
                 decl.commentCommands = Set(metadata.commentCommands)
-
-                if decl.commentCommands.contains(.ignore) {
-                    ignoreHierarchy(Set([decl]))
-                }
             }
+
+            return result
         }
 
-        private func ignoreHierarchy(_ decls: Set<Declaration>) {
+        private func ignoreHierarchy(_ decls: [Declaration]) {
             decls.forEach {
                 graph.ignore($0)
-                ignoreHierarchy($0.declarations)
+                $0.unusedParameters.forEach { graph.ignore($0) }
+                ignoreHierarchy(Array($0.declarations))
             }
         }
 
