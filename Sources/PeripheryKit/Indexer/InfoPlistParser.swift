@@ -1,5 +1,5 @@
 import Foundation
-import SWXMLHash
+import AEXML
 import PathKit
 
 struct InfoPlistReference {
@@ -15,35 +15,27 @@ final class InfoPlistParser {
         self.path = path
     }
 
-    func parse() -> [InfoPlistReference] {
-        guard let data = FileManager.default.contents(atPath: path.string),
-              let xml = String(data: data, encoding: .utf8) else { return [] }
+    func parse() throws -> [InfoPlistReference] {
+        guard let data = FileManager.default.contents(atPath: path.string) else { return [] }
 
-        let config = SWXMLHash.config { config in
-            config.caseInsensitive = false
-            config.shouldProcessLazily = true
-        }
-
-        let structure = config.parse(xml)
-        let elements = filter(structure)
+        let structure = try AEXMLDocument(xml: data)
+        let elements = filter(structure.root)
 
         return elements.compactMap {
-            guard let className = $0.innerXML.split(separator: ".").last else { return nil }
+            guard let className = $0.string.split(separator: ".").last else { return nil }
             return InfoPlistReference(infoPlistPath: path, className: String(className))
         }
     }
 
     // MARK: - Private
 
-    private func filter(_ indexer: XMLIndexer) -> [SWXMLHashXMLElement] {
-        var elements: [SWXMLHashXMLElement] = []
+    private func filter(_ parent: AEXMLElement) -> [AEXMLElement] {
+        var elements: [AEXMLElement] = []
 
-        for (i, child) in indexer.children.enumerated() {
-            if child.element?.name == "key",
-               let element = child.element?.innerXML,
-               Self.elements.contains(element) {
-                if let element = indexer.children[safe: i + 1]?.element {
-                    elements.append(element)
+        for (i, child) in parent.children.enumerated() {
+            if child.name == "key", Self.elements.contains(child.string) {
+                if let nextElement = parent.children[safe: i + 1] {
+                    elements.append(nextElement)
                 }
             }
 

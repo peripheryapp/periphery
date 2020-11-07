@@ -24,8 +24,8 @@ final class InfoPlistIndexer {
 
             var references: [InfoPlistReference] = []
 
-            let elapsed = Benchmark.measure {
-                references = InfoPlistParser(path: path).parse()
+            let elapsed = try Benchmark.measure {
+                references = try InfoPlistParser(path: path).parse()
             }
 
             strongSelf.logger.debug("[index:infoplist] \(path.string) (\(elapsed))s")
