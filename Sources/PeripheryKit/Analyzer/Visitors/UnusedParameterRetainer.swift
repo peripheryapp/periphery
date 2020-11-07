@@ -46,9 +46,9 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
 
                 for functionDecl in allFunctionDecls {
                     if configuration.retainUnusedProtocolFuncParams {
-                        functionDecl.unusedParameters.forEach { $0.markRetained(reason: .paramFuncLocalProtocol) }
+                        functionDecl.unusedParameters.forEach { $0.markRetained() }
                     } else {
-                        retain(functionDecl.unusedParameters, usedIn: allFunctionDecls, reason: .paramFuncLocalProtocol)
+                        retain(functionDecl.unusedParameters, usedIn: allFunctionDecls)
                     }
                 }
             }
@@ -62,7 +62,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
               let related = decl.related.first(where: { $0.kind == refKind && $0.name == decl.name }) else { return }
 
         if graph.explicitDeclaration(withUsr: related.usr) == nil {
-            params.forEach { $0.markRetained(reason: .paramFuncForeginProtocol) }
+            params.forEach { $0.markRetained() }
         }
     }
 
@@ -90,18 +90,18 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
         if firstFunctionDecl.modifiers.contains("override") {
             // Must be overriding a declaration in a foreign class.
             functionDecls.forEach {
-                $0.unusedParameters.forEach { $0.markRetained(reason: .paramFuncOverridden) }
+                $0.unusedParameters.forEach { $0.markRetained() }
             }
         } else {
             // Retain all params that are used in any of the functions.
-            retain(params, usedIn: functionDecls, reason: .paramFuncOverridden)
+            retain(params, usedIn: functionDecls)
         }
     }
 
-    private func retain(_ params: Set<Declaration>, usedIn functionDecls: [Declaration], reason: Declaration.RetentionReason) {
+    private func retain(_ params: Set<Declaration>, usedIn functionDecls: [Declaration]) {
         for param in params {
             if isParam(param, usedInAnyOf: functionDecls) {
-                param.markRetained(reason: reason)
+                param.markRetained()
             }
         }
     }

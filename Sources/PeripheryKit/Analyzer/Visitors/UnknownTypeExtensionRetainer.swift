@@ -21,7 +21,7 @@ final class UnknownTypeExtensionRetainer: SourceGraphVisitor {
     private func retainUnknownExtensions(kind: Declaration.Kind) throws {
         for extensionDeclaration in graph.declarations(ofKind: kind) {
             if try graph.extendedDeclaration(forExtension: extensionDeclaration) == nil {
-                extensionDeclaration.markRetained(reason: .unknownTypeExtension)
+                extensionDeclaration.markRetained()
             }
         }
     }

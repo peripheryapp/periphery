@@ -20,17 +20,17 @@ final class EntryPointAttributeRetainer: SourceGraphVisitor {
         }
 
         mainClasses.forEach {
-            $0.markRetained(reason: .mainEntryPoint)
+            $0.markRetained()
 
             $0.ancestralDeclarations.forEach {
-                $0.markRetained(reason: .mainEntryPoint)
+                $0.markRetained()
             }
 
             if $0.attributes.contains("main") {
                 // @main requires a static main() function.
                 $0.declarations
                     .filter { $0.kind == .functionMethodStatic && $0.name == "main()"}
-                    .forEach { $0.markRetained(reason: .mainEntryPoint) }
+                    .forEach { $0.markRetained() }
             }
         }
     }

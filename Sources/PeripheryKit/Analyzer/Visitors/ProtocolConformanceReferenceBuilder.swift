@@ -158,7 +158,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
                 graph.add(newReference, from: protocolDeclaration)
             } else {
                 // The referenced declaration is external, e.g from stdlib/Foundation.
-                conformingDeclaration.markRetained(reason: .unknownTypeConformance)
+                conformingDeclaration.markRetained()
             }
         }
     }
