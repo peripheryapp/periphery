@@ -24,8 +24,8 @@ final class XibIndexer {
 
             var references: [XibReference] = []
 
-            let elapsed = Benchmark.measure {
-                references = XibParser(path: xibPath).parse()
+            let elapsed = try Benchmark.measure {
+                references = try XibParser(path: xibPath).parse()
             }
 
             strongSelf.logger.debug("[index:xib] \(xibPath.string) (\(elapsed))s")

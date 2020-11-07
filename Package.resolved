@@ -3,11 +3,11 @@
     "pins": [
       {
         "package": "AEXML",
-        "repositoryURL": "https://github.com/tadija/AEXML",
+        "repositoryURL": "https://github.com/tadija/AEXML.git",
         "state": {
           "branch": null,
-          "revision": "e4d517844dd03dac557e35d77a8e9ab438de91a6",
-          "version": "4.4.0"
+          "revision": "502c4d43a6cc9c395d19111e09dc62ad834977b5",
+          "version": "4.6.0"
         }
       },
       {
@@ -56,21 +56,12 @@
         }
       },
       {
-        "package": "SWXMLHash",
-        "repositoryURL": "https://github.com/drmohundro/SWXMLHash.git",
-        "state": {
-          "branch": null,
-          "revision": "a4931e5c3bafbedeb1601d3bb76bbe835c6d475a",
-          "version": "5.0.1"
-        }
-      },
-      {
         "package": "XcodeProj",
-        "repositoryURL": "https://github.com/tuist/xcodeproj",
+        "repositoryURL": "https://github.com/ileitch/xcodeproj",
         "state": {
           "branch": null,
-          "revision": "2ae8e322ddbed99655802533441bc52f9ae76f24",
-          "version": "7.17.0"
+          "revision": "026d560a25bedc4eb31c9a991a8988df9c2e4b66",
+          "version": null
         }
       },
       {

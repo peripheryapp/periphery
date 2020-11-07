@@ -1,5 +1,5 @@
 import Foundation
-import SWXMLHash
+import AEXML
 import PathKit
 
 struct XibReference {
@@ -14,31 +14,25 @@ final class XibParser {
         self.path = path
     }
 
-    func parse() -> [XibReference] {
-        guard let data = FileManager.default.contents(atPath: path.string),
-            let xml = String(data: data, encoding: .utf8) else { return [] }
+    func parse() throws -> [XibReference] {
+        guard let data = FileManager.default.contents(atPath: path.string) else { return [] }
 
-        let config = SWXMLHash.config { config in
-            config.caseInsensitive = false
-            config.shouldProcessLazily = true
-        }
-
-        let structure = config.parse(xml)
-        let elements = filter(structure)
+        let structure = try AEXMLDocument(xml: data)
+        let elements = filter(structure.root)
         return elements.compactMap {
-            guard let customClass = $0.attribute(by: "customClass")?.text else { return nil }
+            guard let customClass = $0.attributes["customClass"] else { return nil }
             return XibReference(xibPath: path, className: customClass)
         }
     }
 
     // MARK: - Private
 
-    private func filter(_ indexer: XMLIndexer) -> [SWXMLHashXMLElement] {
-        var elements: [SWXMLHashXMLElement] = []
+    private func filter(_ element: AEXMLElement) -> [AEXMLElement] {
+        var elements: [AEXMLElement] = []
 
-        for child in indexer.children {
-            if let element = child.element, element.attribute(by: "customClass") != nil {
-                elements.append(element)
+        for child in element.children {
+            if child.attributes["customClass"] != nil {
+                elements.append(child)
             }
 
             elements += filter(child)
