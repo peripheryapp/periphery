@@ -8,7 +8,7 @@ final class EntryPointFileRetainer: SourceGraphVisitor {
     }
 
     private let graph: SourceGraph
-    private var entryPointFilenames = ["main.swift", "linuxmain.swift"]
+    private var entryPointFilenames = ["main.swift", "linuxmain.swift", "xctestmanifests.swift"]
 
     required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
