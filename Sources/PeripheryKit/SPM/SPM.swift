@@ -5,7 +5,7 @@ public struct SPM {
     public struct Package: Decodable {
         public static func load() throws -> Self {
             let shell = Shell()
-            let jsonString = try shell.exec(["swift", "package", "describe", "--type", "json"])
+            let jsonString = try shell.exec(["swift", "package", "describe", "--type", "json"], stderr: false)
 
             guard let jsonData = jsonString.data(using: .utf8) else {
                 throw PeripheryError.packageError(message: "Failed to read swift package description.")
