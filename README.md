@@ -8,10 +8,10 @@
 <a href="https://github.com/peripheryapp/periphery/releases/latest">
   <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?color=008DFF" />
 </a>
+<img src="https://img.shields.io/badge/platform-macOS%20|%20Linux-008DFF">
 <a href="https://github.com/peripheryapp/periphery/actions">
   <img src="https://img.shields.io/github/workflow/status/peripheryapp/periphery/Test/master">
 </a>
-<img src="https://img.shields.io/badge/platform-macos-lightgrey">
 </p>
 
 ## Contents
@@ -21,13 +21,15 @@
 - [How It Works](#how-it-works)
 - [Analysis](#analysis)
   - [Function Parameters](#function-parameters)
-  - [Protocols](#protocols)
+  - [Protocols](#protocols-1)
   - [Enumerations](#enumerations)
+  - [Assign-only Properties](#assign-only-properties)
   - [Objective-C](#objective-c)
+- [Comment Commands](#comment-commands)
 - [Xcode Integration](#xcode-integration)
 - [Excluding Files](#excluding-files)
-- [Reusing Build Logs](#reusing-build-logs)
-- [Troubleshooting](#troubleshooting)
+- [Continuous Integration](#continuous-integration)
+- [Platforms](#platforms)
 
 ## Installation
 
@@ -51,16 +53,30 @@ Install Homebrew:
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-Now that Homebrew is installed, we need to tell it where to find Periphery releases:
-
-```
-brew tap peripheryapp/periphery
-```
-
 Now install Periphery itself:
 
 ```
-brew cask install periphery
+brew tap peripheryapp/periphery && brew install periphery
+```
+
+### [Swift Package Manager](https://swift.org/package-manager/)
+
+Add Periphery to your `Package.swift` dependencies:
+
+```swift
+.package(url: "https://github.com/peripheryapp/periphery", from: "2.0.0")
+```
+
+Next build your project:
+
+```
+swift build
+```
+
+The `periphery` binary will exist at `.build/debug/periphery`. Alternatively, you can execute it via Swift:
+
+```
+swift run periphery ...
 ```
 
 ## How To Use
@@ -70,12 +86,18 @@ brew cask install periphery
 The scan command is Periphery's primary function. To begin a guided setup, simply change to your project directory and run:
 
 ```
-periphery scan
+periphery scan --setup
 ```
 
 After answering a few questions, Periphery will print out the full scan command and execute it.
 
 The guided setup is only intended for introductory purposes, once you are familiar with Periphery you can try some more advanced options, all of which can be seen with `periphery help scan`.
+
+To get coherent results from Periphery, it's crucial to understand the implications of the build targets you choose to analyze. For example, imagine a project consisting of three targets: App, Lib and Tests. The App target imports Lib, and the Tests targets imports both App and Lib. If you were to provide all three to the `--targets` option then Periphery will be able to analyze your project as a whole. However, if you only choose to analyze App and Lib, but not Tests, Periphery may report some instances of unused code that are _only_ referenced by Tests. Therefore when you suspect Periphery has provided an incorrect result, it's important to consider the targets that you have chosen to analyze.
+
+If your project consists of one or more standalone frameworks that do not also contain some kind of application that consume their interfaces, then you'll need to tell Periphery to assume that all public declarations are in fact used by including the `--retain-public` option.
+
+If your project is 100% Swift, then you'll likely want to include the `--no-retain-objc-annotated` option. For projects that are mixed Objective-C/Swift, we highly recommend you [read about the implications](#objective-c) this can have on your results.
 
 ### Configuration
 
@@ -83,33 +105,21 @@ Once you've settled upon the appropriate options for your project, you may wish 
 
 ## How It Works
 
-Periphery first builds all of the schemes provided via the `--schemes` option using `xcodebuild`. It then indexes all files that are members of the targets passed to the `--targets` option, resulting in a graph of declarations and references. Finally, it performs numerous mutations on the graph then analyzes it to identify unused declarations.
+Periphery first builds your project. For Xcode projects the schemes provided via the `--schemes` option are built using `xcodebuild`. For Swift Package Manager projects, the individual targets provided via the `--targets` option are built using `swift build`. The Swift compiler employs a technique called index-while-building to populate an index store that contains information about the structure of your project's source code.
 
-For example, if your Xcode workspace consists of a single application and multiple frameworks all defined in separate projects, you'd choose a scheme that builds the application and framework targets. Typically any dependent frameworks would be built implicitly if they're used by the application, so you'd likely only need to specify your application's main scheme.
+After your project is built, Periphery performs an indexing phase. For every source file that is a member of the targets provided via the `--targets` option, Periphery obtains its structural information from the index store and builds its own internal graph representation of your project. Periphery also analyzes each file's abstract syntax tree (AST) to fill in some details not provided by the index store.
 
-It's important to specify a complete set of targets for the `--targets` option. For the example above, we'd need to specify the application target, and each framework target. If you did not include your application target, then Periphery would correctly identify that many public interfaces of your frameworks are unused.
-
-The scan options for this example would be as follows:
-
-```
-periphery scan --workspace MyApp.xcworkspace --schemes MyApp --targets MyApp,FrameworkA,FrameworkB --format xcode
-```
-
-If your project consists of one or more standalone frameworks that do not also contain some kind of application that consume their interfaces, then you'll need to tell Periphery to assume that all public declarations are in fact used by including the `--retain-public` option.
-
-If your project is 100% Swift, then you'll likely want to include the `--no-retain-objc-annotated` option. For projects that are mixed Objective-C/Swift, we highly recommend you [read about the implications](#objective-c) this can have on your results.
+Once indexing is complete, Periphery analyzes the graph to identify unused code. This phase consists of a number of steps that mutate the graph to make it easier to identify specific scenarios of unused code. The final step walks the graph from its roots to identify declarations that are no longer referenced.
 
 ## Analysis
 
-The goal of Periphery is to report instances of unused _declarations_. A declaration is a `class`, `struct`, `protocol`, `function`, `property`, `constructor`, `enum`, `typealias` or `associatedtype`. As you'd expect, Periphery is able to identify simple unreferenced declarations, e.g a `class` that is no longer used anywhere in your codebase.
+The goal of Periphery is to report instances of unused _declarations_. A declaration is a `class`, `struct`, `protocol`, `function`, `property`, `constructor`, `enum`, `typealias`, `associatedtype`, etc. As you'd expect, Periphery is able to identify simple unreferenced declarations, e.g a `class` that is no longer used anywhere in your codebase.
 
-This document aims to explain in detail the more advanced analysis techniques that Periphery employs.
+Periphery can also identify more advanced instanced of unused code. The following section explains these in detail.
 
 ### Function Parameters
 
-Periphery provides two commands for identifying unused function parameters. The `scan-syntax` command is the fastest, yet only analyses functions by parsing syntax. This means some results - while still technically correct - may not be practically useful.
-
-The `scan` command also identifies unused function parameters, but uses the context of your whole application in order to omit results which are not practically useful. The sections below describe the scenarios in which the `scan` command works to provide more useful results.
+Periphery can identify unused function parameters. Instances of unused parameters can also be identified in protocols and their conforming declarations, as well as parameters in overridden methods. Both of these scenarios are explained further below.
 
 #### Protocols
 
@@ -249,7 +259,7 @@ let myClass = MyClass()
 myClass.perform()
 ```
 
-Here we can see that `MyProtocol` is itself used, and cannot be removed. However, since `unusedProperty` is never called on `MyConformingClass`, Periphery is able to identify that the declaration of `unusedProperty` in `MyProtocol` is thus also unused and can be removed along with the unused implementation of `unusedProperty`.
+Here we can see that `MyProtocol` is itself used, and cannot be removed. However, since `unusedProperty` is never called on `MyConformingClass`, Periphery is able to identify that the declaration of `unusedProperty` in `MyProtocol` is also unused and can be removed along with the unused implementation of `unusedProperty`.
 
 ### Enumerations
 
@@ -271,11 +281,49 @@ func someFunction(value: String) {
 
 There's no direct reference to the `myCase` case, so it's reasonable to expect it _might_ no longer be needed, however if it were removed we can see that `somethingImportant` would never be called if `someFunction` were passed the value of `"myCase"`.
 
+### Assign-only Properties
+
+Properties that are assigned but never used are identified as unused, e.g:
+
+```swift
+class MyClass {
+    var assignOnlyProperty: String // 'assignOnlyProperty' is assigned, but never used
+
+    init(value: String) {
+        self.assignOnlyProperty = value
+    }
+}
+```
+
+In some cases this may be the intended behavior, so to silence these results you can either disable this analysis technique entirely with `--retain-assign-only-properties`, or ignore individual properties using [Comment Commands](#comment-commands).
+
 ### Objective-C
 
 Since Objective-C can use dynamic types, Periphery cannot reason about it from a static standpoint. Therefore, by default, Periphery will assume that any declaration exposed to Objective-C is in use. If your project is 100% Swift, then you can disable this behavior with the `--no-retain-objc-annotated` option. For those using Periphery on a mixed project, there are some important implications to be aware of.
 
 As you already know, any declaration that is annotated with `@objc` or `@objcMembers` is exposed to the Objective-C runtime, and Periphery will assume they are in use. However, you should also be aware that any `class` that inherits from `NSObject` is also _implicitly_ exposed to Objective-C. If you ever come across a situation where Periphery reports that all methods and properties within a `class` - but not the `class` itself - are unused, then the class likely inherits from `NSObject`. It may be worth your time doing a cursory run of Periphery with `--no-retain-objc-annotated`, you may find a few extra declarations to remove. Though be warned, many declarations reported as unused may still be in use by Objective-C code, so you'll need to take extra care when reviewing them.
+
+## Comment Commands
+
+For whatever reason, you may want to keep some unused code. Source code comment commands can be used to instruct Periphery to ignore specific declarations, and exclude them from the results.
+
+An ignore comment command can be placed directly on the line above any declaration to ignore it, and all descendent declarations:
+
+```swift
+// periphery:ignore
+class MyClass {}
+```
+
+You can also ignore specific unused function parameters:
+
+```swift
+// periphery:ignore:parameters unusedOne,unusedTwo
+func someFunc(used: String, unusedOne: String, unusedTwo: String) {
+    print(used)
+}
+```
+
+The `// periphery:ignore:all` command can be placed at the top of the source file to ignore the entire contents of the file. Note that the comment must be placed above any code, including import statements.
 
 ## Xcode Integration
 
@@ -311,24 +359,6 @@ You're ready to roll. You should now see the new scheme in the dropdown. Select 
 
 ![Step 5](assets/xcode-integration/5.png)
 
-## Reusing Build Logs
-
-In order to understand what reusing a build log means exactly, you first need to understand a little about how Periphery works, or more specifically, how SourceKit works. Periphery uses SourceKit to 'index' each Swift file, or in other words, translate it into a machine-readable format containing a high degree of detail, and crucially the references between declarations. In order to request this indexed format from SourceKit, Periphery must provide the Swift compiler arguments required to compile the file. In practice, this set of compiler arguments is the same as is needed to build the target which the file is a member of. Frustratingly, SourceKit does not provide an easy way to determine the appropriate compiler arguments needed for any given file. That's why Periphery must build your project - to spy on xcodebuild and extract the arguments passed to the Swift compiler.
-
-Periphery allows you to save build logs so that you may skip the build phase, and jump straight to indexing. This can be a huge time saver while you're iterating on removing unused code, or when using Periphery in a continuous integration environment. To generate a build log, you have two options: allow Periphery to save one, or save your own by redirecting xcodebuild output to a log.
-
-### Using Periphery's Build Logs
-
-Pass the `--save-build-log <key>` option to the `scan` command, and Periphery will save a build log for you. You can then reuse it with the `--use-build-log <key>` option. The key can be anything you wish, however it is hashed along with the project, schemes and targets you specify. For example, you cannot save a build log, add another target to the `--targets` option and attempt to reuse the same build log.
-
-### Using Your Own Build Logs
-
-In a situation where you have already just compiled your project, e.g in CI to run tests, you can save yourself some time by passing the build log to Periphery. In order to do so, you'll need to redirect the output of xcodebuild to a file You need to be sure that the xcodebuild command builds all of the targets that you're then going to ask Periphery to analyze, otherwise Periphery will complain about missing build arguments. If your build process requires multiple calls to xcodebuild, just append the output to the same file. Once you have the build log, you can instruct Periphery to use it by passing the `--use-build-log <path to log>` option to the `scan` command. The build log must have a `.log` extension to distinguish it from a `<key>` as described above.
-
-> **Important - must read!**
->
-> The build log contains highly specific references to DerivedData. Any modification to DerivedData after saving the build log, and before using it with Periphery is likely to invalidate the build log. Periphery will warn you as such if this has happened. Therefore, reusing build logs is only suitable for situations where you intend to use the log immediately after it has been generated. You cannot save a build log on one machine and reuse it on another, as SourceKit depends upon the contents of DerivedData to index files.
-
 ## Excluding Files
 
 Both exclusion options described below accept a path glob, either absolute or relative to your project directory. You may specify multiple globs by separating them with a pipe character, e.g `"Foo.swift|{Bar,Baz}.swift|path/to/*.swift"`. Recursive (`**`) globs are not supported at this time.
@@ -341,10 +371,12 @@ To exclude the results from certain files, pass the `--report-exclude <globs>` o
 
 To exclude files from being indexed, pass the `--index-exclude <glob>` option to the `scan` command. Excluding files from the index phase means that any declarations and references contained within the files will not be seen by Periphery. Periphery will be behave as if the files do not exist. This option can be used to exclude generated code that holds references to non-generated code.
 
-## Troubleshooting
+## Continuous Integration
 
-#### Failed to determine build arguments for target 'XYZ'
+Periphery can be used in your CI environment to ensure your project remains free of unused code. If you'd like to use Periphery immediately after running your tests, you can use the `--skip-build` option, provided that your build & test steps also built all of the targets you wish to analyze.
 
-This is caused by something specific to your project and is likely caused by Periphery failing to correctly parse swiftc compiler arguments from the xcodebuild log.
+For more complex setups, you may also benefit from the `--index-store-path` option if your index store exists in a non-standard location.
 
-Please re-run Periphery with the `--verbose` option and open an issue with the full output.
+## Platforms
+
+Periphery supports both macOS and Linux. macOS supports both Xcode and Swift Package Manager (SPM) projects, whereas only SPM projects are supported on Linux.
