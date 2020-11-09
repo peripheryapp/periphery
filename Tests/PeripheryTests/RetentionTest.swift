@@ -1013,9 +1013,13 @@ class RetentionTest: SourceGraphTestCase {
     func testRetainsPropertyWrappers() {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "Fixture111"))
-            XCTAssertReferenced((.class, "Fixture111Wrapper"))
             XCTAssertReferenced((.varInstance, "someVar"),
                                 descendentOf: (.class, "Fixture111"))
+            XCTAssertReferenced((.class, "Fixture111Wrapper"))
+            XCTAssertReferenced((.varInstance, "wrappedValue"),
+                                descendentOf: (.class, "Fixture111Wrapper"))
+            XCTAssertReferenced((.varInstance, "projectedValue"),
+                                descendentOf: (.class, "Fixture111Wrapper"))
         }
     }
 
