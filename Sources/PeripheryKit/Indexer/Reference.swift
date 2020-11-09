@@ -43,6 +43,10 @@ final class Reference: Entity {
             rawValue.hasPrefix("function")
         }
 
+        var isVariableKind: Bool {
+            rawValue.hasPrefix("var")
+        }
+
         var declarationEquivalent: Declaration.Kind? {
             Declaration.Kind(rawValue: rawValue)
         }

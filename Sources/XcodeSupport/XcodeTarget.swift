@@ -7,9 +7,7 @@ import Shared
 public final class XcodeTarget {
     static func make(project: XcodeProject, target: PBXTarget) -> Self {
         return self.init(project: project,
-                         target: target,
-                         xcodebuild: inject(),
-                         logger: inject())
+                         target: target)
     }
 
     public let project: XcodeProject
@@ -21,14 +19,10 @@ public final class XcodeTarget {
     private var didIdentifySourceFiles = false
     private var didIdentifyXibFiles = false
     private var didIdentifyInfoPlistFiles = false
-    private let xcodebuild: Xcodebuild
-    private let logger: Logger
 
-    required init(project: XcodeProject, target: PBXTarget, xcodebuild: Xcodebuild, logger: Logger) {
+    required init(project: XcodeProject, target: PBXTarget) {
         self.project = project
         self.target = target
-        self.xcodebuild = xcodebuild
-        self.logger = logger
     }
 
     public var isTestTarget: Bool {

@@ -10,6 +10,7 @@
 - Support for magic code comments to ignore unused declarations.
 - Support for analyzing Swift Package Manager projects.
 - Linux support for Swift Package Manager projects.
+- Assign-only property detection is back and enabled by default. Disable it with `--retain-assign-only-properties`.
 
 ##### Bug Fixes
 

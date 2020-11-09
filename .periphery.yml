@@ -1,4 +1,5 @@
 --- # .periphery.yml
+retain_objc_annotated: false
 targets:
 - Frontend
 - Shared

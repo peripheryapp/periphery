@@ -4,17 +4,13 @@ import Shared
 
 final class GuidedSetup {
     static func make(project: Project) -> Self {
-        return self.init(project: project, configuration: inject(), logger: inject())
+        return self.init(project: project)
     }
 
     private let project: Project
-    private let configuration: Configuration
-    private let logger: Logger
 
-    required init(project: Project, configuration: Configuration, logger: Logger) {
+    required init(project: Project) {
         self.project = project
-        self.configuration = configuration
-        self.logger = logger
     }
 
     func perform() throws {

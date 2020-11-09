@@ -57,8 +57,7 @@ public final class SwiftIndexer {
                         unit: unit,
                         graph: graph,
                         indexStore: indexStore,
-                        logger: logger,
-                        configuration: configuration
+                        logger: logger
                     )
                 )
             }
@@ -86,7 +85,6 @@ public final class SwiftIndexer {
         private let unit: IndexStoreUnit
         private let graph: SourceGraph
         private let logger: Logger
-        private let configuration: Configuration
         private let indexStore: IndexStore
 
         required init(
@@ -94,14 +92,12 @@ public final class SwiftIndexer {
             unit: IndexStoreUnit,
             graph: SourceGraph,
             indexStore: IndexStore,
-            logger: Logger,
-            configuration: Configuration
+            logger: Logger
         ) {
             self.file = file
             self.unit = unit
             self.graph = graph
             self.logger = logger
-            self.configuration = configuration
             self.indexStore = indexStore
         }
 

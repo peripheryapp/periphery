@@ -83,12 +83,12 @@ public final class Declaration: Entity, CustomStringConvertible {
             Set(Kind.allCases.filter { $0.isAccessorKind })
         }
 
-        var isAccessorKind: Bool {
-            rawValue.hasPrefix("function.accessor")
-        }
-
         static var accessibleKinds: Set<Kind> {
             functionKinds.union(variableKinds).union(globalKinds)
+        }
+
+        public var isAccessorKind: Bool {
+            rawValue.hasPrefix("function.accessor")
         }
 
         public var displayName: String? {
@@ -134,6 +134,7 @@ public final class Declaration: Entity, CustomStringConvertible {
     public let kind: Kind
     public var name: String?
     public let usr: String
+    public var analyzerHints: [Analyzer.Hint] = []
     
     var parent: Entity?
     var commentCommands: Set<CommentCommand> = []
@@ -177,12 +178,7 @@ public final class Declaration: Entity, CustomStringConvertible {
                 return true
             }
 
-            // All properties have a getter and setter, however they only have a name when
-            // explicitly implemented.
-
-            if $0.name != nil,
-                [.functionAccessorGetter,
-                 .functionAccessorSetter].contains($0.kind) {
+            if $0.kind.isAccessorKind && !$0.references.isEmpty {
                 return true
             }
 

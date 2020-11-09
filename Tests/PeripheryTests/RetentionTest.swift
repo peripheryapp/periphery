@@ -496,6 +496,9 @@ class RetentionTest: SourceGraphTestCase {
     }
 
     func testFunctionAccessorsRetainReferences() {
+        let configuration = inject(Configuration.self)
+        configuration.retainAssignOnlyProperties = true
+
         analyze(retainPublic: true) {
             XCTAssertReferenced((.varInstance, "referencedByGetter"))
             XCTAssertReferenced((.varInstance, "referencedBySetter"))
@@ -513,6 +516,9 @@ class RetentionTest: SourceGraphTestCase {
     }
 
     func testInstanceVarReferencedInClosure() {
+        let configuration = inject(Configuration.self)
+        configuration.retainAssignOnlyProperties = true
+
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass69"))
             XCTAssertReferenced((.varInstance, "someVar"))
@@ -803,8 +809,6 @@ class RetentionTest: SourceGraphTestCase {
             let class2Param = get("param", "myFunc(param:)", "FixtureClass107Class2")
             try XCTAssertTrue(XCTUnwrap(class2Param).isRetained)
         }
-
-        configuration.retainUnusedProtocolFuncParams = false
     }
 
     func testRetainsProtocolParameters() throws {
@@ -1041,6 +1045,40 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testSimplePropertyAssignedButNeverRead() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass70"))
+            XCTAssertNotReferenced((.varInstance, "simpleUnreadVar"),
+                                   descendentOf: (.class, "FixtureClass70"))
+            XCTAssertReferenced((.functionMethodInstance, "someMethod()"),
+                                descendentOf: (.class, "FixtureClass70"))
+            XCTAssertNotReferenced((.varStatic, "simpleStaticUnreadVar"),
+                                   descendentOf: (.class, "FixtureClass70"))
+            XCTAssertReferenced((.varInstance, "complexUnreadVar1"),
+                                descendentOf: (.class, "FixtureClass70"))
+            XCTAssertReferenced((.varInstance, "complexUnreadVar2"),
+                                descendentOf: (.class, "FixtureClass70"))
+            XCTAssertReferenced((.varInstance, "readVar"),
+                                descendentOf: (.class, "FixtureClass70"))
+        }
+
+        let configuration = inject(Configuration.self)
+        configuration.retainAssignOnlyProperties = true
+
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.varInstance, "simpleUnreadVar"),
+                                descendentOf: (.class, "FixtureClass70"))
+            XCTAssertReferenced((.varStatic, "simpleStaticUnreadVar"),
+                                descendentOf: (.class, "FixtureClass70"))
+            XCTAssertReferenced((.varInstance, "complexUnreadVar1"),
+                                descendentOf: (.class, "FixtureClass70"))
+            XCTAssertReferenced((.varInstance, "complexUnreadVar2"),
+                                descendentOf: (.class, "FixtureClass70"))
+            XCTAssertReferenced((.varInstance, "readVar"),
+                                descendentOf: (.class, "FixtureClass70"))
+        }
+    }
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768
@@ -1127,6 +1165,10 @@ class RetentionTest: SourceGraphTestCase {
         try! Analyzer.perform(graph: graph)
         self.graph = graph
         try testBlock()
+
+        // Reset configuration to defaults.
+        configuration.retainAssignOnlyProperties = false
+        configuration.retainUnusedProtocolFuncParams = false
 
         if (testRun?.failureCount ?? 0) > 0 {
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")

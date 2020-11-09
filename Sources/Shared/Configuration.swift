@@ -20,6 +20,7 @@ public final class Configuration: Singleton {
 
     public var retainObjcAnnotated: Bool = true
     public var retainPublic: Bool = false
+    public var retainAssignOnlyProperties: Bool = false
     public var retainUnusedProtocolFuncParams: Bool = false
     public var verbose: Bool = false
     public var quiet: Bool = false
@@ -46,6 +47,7 @@ public final class Configuration: Singleton {
             "report_exclude": reportExclude,
             "retain_objc_annotated": retainObjcAnnotated,
             "retain_public": retainPublic,
+            "retain_assign_only_properties": retainAssignOnlyProperties,
             "retain_unused_protocol_func_params": retainUnusedProtocolFuncParams,
             "verbose": verbose,
             "quiet": quiet,
@@ -95,6 +97,10 @@ public final class Configuration: Singleton {
 
         if let value = yaml["retain_public"] as? Bool {
             self.retainPublic = value
+        }
+
+        if let value = yaml["retain_assign_only_properties"] as? Bool {
+            self.retainAssignOnlyProperties = value
         }
 
         if let value = yaml["retain_objc_annotated"] as? Bool {
