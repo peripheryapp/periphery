@@ -70,7 +70,7 @@ final class ScanBehavior {
 
                         colorize("\n - ", .boldGreen) +
                         "Periphery only analyzes files that are members of the targets you specify." +
-                        "\n   References to declarations identified as unused may reside in files that are members of other targets, e.g test targets" +
+                        "\n   References to declarations identified as unused may reside in files that are members of other targets, e.g test targets." +
 
                         colorize("\n - ", .boldGreen) +
                         "By default, Periphery does not assume that all public declarations are in use. " +

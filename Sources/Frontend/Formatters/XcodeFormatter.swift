@@ -29,7 +29,13 @@ public final class XcodeFormatter: OutputFormatter {
                 }
 
                 name = colorize(name, .lightBlue)
-                line += "'\(name)' is unused"
+                line += "'\(name)'"
+
+                if $0.analyzerHints.contains(.assignOnlyProperty) {
+                    line += " is assigned, but never used"
+                } else {
+                    line += " is unused"
+                }
             } else {
                 line += "unused"
             }

@@ -45,6 +45,9 @@ public struct ScanCommand: ParsableCommand {
     @Flag(help: "Retain all public declarations - you'll likely want to enable this if you're scanning a framework/library project")
     var retainPublic: Bool = false
 
+    @Flag(help: "Retain properties that are assigned, but never used")
+    var retainAssignOnlyProperties: Bool = false
+
     @Flag(help: "Don't retain declarations that are exposed to Objective-C by inheriting NSObject, or explicitly with the @objc and @objcMembers annotations")
     var noRetainObjcAnnotated: Bool = false
 
@@ -113,6 +116,10 @@ public struct ScanCommand: ParsableCommand {
 
         if isExplicit("retain-public") {
             configuration.retainPublic = retainPublic
+        }
+
+        if isExplicit("retain-assign-only-properties") {
+            configuration.retainAssignOnlyProperties = retainAssignOnlyProperties
         }
 
         if isExplicit("retain-objc-annotated") {

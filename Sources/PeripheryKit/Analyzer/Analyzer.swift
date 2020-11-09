@@ -2,14 +2,16 @@ import Foundation
 import Shared
 
 public final class Analyzer {
+    public enum Hint {
+        case assignOnlyProperty
+    }
+
     public static func perform(graph: SourceGraph) throws {
         try make(graph: graph).perform()
     }
 
     static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph,
-                         configuration: inject(),
-                         logger: inject())
+        return self.init(graph: graph, logger: inject())
     }
 
     private let visitors: [SourceGraphVisitor.Type] = [
@@ -49,17 +51,16 @@ public final class Analyzer {
 
         PlainExtensionEliminator.self,
         AncestralReferenceEliminator.self,
+        UnusedSimplePropertyReferenceEliminator.self,
 
         DeclarationMarker.self
     ]
 
-    private let configuration: Configuration
     private let graph: SourceGraph
     private let logger: Logger
 
-    required init(graph: SourceGraph, configuration: Configuration, logger: Logger) {
+    required init(graph: SourceGraph, logger: Logger) {
         self.graph = graph
-        self.configuration = configuration
         self.logger = logger
     }
 
