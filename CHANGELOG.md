@@ -7,10 +7,11 @@
 
 ##### Enhancements
 
-- Support for magic code comments to ignore unused declarations.
+- Support for code comments to ignore unused declarations.
 - Support for analyzing Swift Package Manager projects.
 - Linux support for Swift Package Manager projects.
 - Assign-only property detection is back and enabled by default. Disable it with `--retain-assign-only-properties`.
+- Added `--skip-build` option to skip the build phase.
 
 ##### Bug Fixes
 
@@ -25,6 +26,8 @@
 - All custom `appendInterpolation` methods are now retained, as they cannot be identified as unused due to https://bugs.swift.org/browse/SR-13792.
 - Fixed path resolution for nested projects in Xcode workspaces.
 - `wrappedValue` and `projectedValue` properties in property wrappers are now retained.
+- `XCTestManifests.swift` is now treated as an entry point file like `LinuxMain.swift`.
+- Updated `XcodeProj` dependency to resolve some Xcode project parsing issues.
 
 ## 1.8.0 (2020-10-3)
 
