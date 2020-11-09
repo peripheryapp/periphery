@@ -24,6 +24,7 @@
 - A `typealias` that defines an `associatedtype` in an external protocol is now retained.
 - All custom `appendInterpolation` methods are now retained, as they cannot be identified as unused due to https://bugs.swift.org/browse/SR-13792.
 - Fixed path resolution for nested projects in Xcode workspaces.
+- `wrappedValue` and `projectedValue` properties in property wrappers are now retained.
 
 ## 1.8.0 (2020-10-3)
 

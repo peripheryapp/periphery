@@ -48,6 +48,7 @@ public final class Analyzer {
         SwiftUIRetainer.self,
         StructImplicitConstructorPropertyRetainer.self,
         StringInterpolationAppendInterpolationRetainer.self,
+        PropertyWrapperRetainer.self,
 
         PlainExtensionEliminator.self,
         AncestralReferenceEliminator.self,
