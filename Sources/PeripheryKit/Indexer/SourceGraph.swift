@@ -2,12 +2,13 @@ import Foundation
 import Shared
 
 public final class SourceGraph {
+    private(set) public var allDeclarations: Set<Declaration> = []
+    private(set) public var ignoredDeclarations: Set<Declaration> = []
+
     private(set) var rootDeclarations: Set<Declaration> = []
     private(set) var rootReferences: Set<Reference> = []
-    private(set) var allDeclarations: Set<Declaration> = []
     private(set) var allReferences: Set<Reference> = []
     private(set) var markedDeclarations: Set<Declaration> = []
-    private(set) var ignoredDeclarations: Set<Declaration> = []
 
     private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
@@ -24,7 +25,7 @@ public final class SourceGraph {
             .subtracting(ignoredDeclarations)
     }
 
-    var referencedDeclarations: Set<Declaration> {
+    public var referencedDeclarations: Set<Declaration> {
         return markedDeclarations
             .union(retainedDeclarations)
             .subtracting(ignoredDeclarations)
