@@ -42,7 +42,7 @@ public final class Declaration: Entity, CustomStringConvertible {
         case varParameter = "var.parameter"
         case varStatic = "var.static"
 
-        static var functionKinds: Set<Kind> {
+        public static var functionKinds: Set<Kind> {
             Set(Kind.allCases.filter { $0.isFunctionKind })
         }
 
@@ -135,11 +135,11 @@ public final class Declaration: Entity, CustomStringConvertible {
     public var name: String?
     public let usr: String
     public var analyzerHints: [Analyzer.Hint] = []
-    
+    public var unusedParameters: Set<Declaration> = []
+    public var declarations: Set<Declaration> = []
+
     var parent: Entity?
     var commentCommands: Set<CommentCommand> = []
-    var declarations: Set<Declaration> = []
-    var unusedParameters: Set<Declaration> = []
     var references: Set<Reference> = []
     var related: Set<Reference> = []
     var isImplicit: Bool = false
@@ -159,7 +159,7 @@ public final class Declaration: Entity, CustomStringConvertible {
         return declarations
     }
 
-    var descendentDeclarations: Set<Declaration> {
+    public var descendentDeclarations: Set<Declaration> {
         Set(declarations.flatMap { $0.descendentDeclarations }).union(declarations)
     }
 

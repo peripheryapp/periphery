@@ -716,12 +716,6 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testCrossModuleReferenceTestableImport() {
-        analyze(retainPublic: true, additionalTargets: [Self.crossModuleFixtureTarget]) {
-            XCTAssertReferenced((.class, "InternalCrossModuleReferenced"))
-        }
-    }
-
     // MARK: - Unused Parameters
 
     func testRetainsParamUsedInOverriddenMethod() throws {
