@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.0.1 (2020-11-10)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix version number.
 
 ## 2.0.0 (2020-11-10)
