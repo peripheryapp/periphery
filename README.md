@@ -33,16 +33,6 @@
 
 ## Installation
 
-### [CocoaPods](https://cocoapods.org/)
-
-Add the following to your Podfile:
-
-```
-pod 'Periphery'
-```
-
-Now run `pod install`, the Periphery executable will be downloaded and placed at `Pods/Periphery/periphery`.
-
 ### [Homebrew](https://brew.sh/)
 
 Install Homebrew:
@@ -77,6 +67,22 @@ The `periphery` binary will exist at `.build/debug/periphery`. Alternatively, yo
 
 ```
 swift run periphery ...
+```
+
+### [CocoaPods](https://cocoapods.org/)
+
+Add the following to your Podfile:
+
+```
+pod 'Periphery'
+```
+
+Now run `pod install`, the Periphery executable will be downloaded and placed at `Pods/Periphery/periphery`.
+
+### [Mint](https://github.com/yonaskolb/Mint)
+
+```
+mint install peripheryapp/periphery
 ```
 
 ## How To Use
