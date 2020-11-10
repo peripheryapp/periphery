@@ -32,7 +32,7 @@ printf "Got it: $version\n"
 
 confirm "Continue?"
 
-cat scripts/Version.swift.template | sed s/__VERSION__/${version}/ > Sources/PeripheryKit/Version.swift
+cat scripts/Version.swift.template | sed s/__VERSION__/${version}/ > Sources/Frontend/Version.swift
 cat scripts/Periphery.podspec.template | sed s/__VERSION__/${version}/ > Periphery.podspec
 
 echo -e "\nUpdate CHANGELOG.md and verify changes."

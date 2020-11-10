@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix version number.
 
 ## 2.0.0 (2020-11-10)
 
