@@ -1,7 +1,7 @@
 import Foundation
 import Shared
 
-#if os(Linux)
+#if canImport(FoundationNetworking)
 import FoundationNetworking
 #endif
 

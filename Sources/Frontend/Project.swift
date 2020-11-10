@@ -3,7 +3,7 @@ import PathKit
 import PeripheryKit
 import Shared
 
-#if os(macOS)
+#if canImport(XcodeSupport)
 import XcodeSupport
 #endif
 
