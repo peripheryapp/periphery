@@ -38,9 +38,7 @@ class SPMProjectTest: SourceGraphTestCase {
         }
     }
 
-    func testMainEntryAnnotation() {
-        XCTAssertReferenced((.struct, "Main"))
-        XCTAssertReferenced((.functionMethodStatic, "main()"),
-                            descendentOf: (.struct, "Main"))
+    func testMainEntryFile() {
+        XCTAssertReferenced((.functionFree, "main()"))
     }
 }

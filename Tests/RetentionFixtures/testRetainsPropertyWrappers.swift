@@ -7,14 +7,18 @@ import Foundation
         didSet { wrappedValue = wrappedValue.capitalized }
     }
 
-    init(wrappedValue: String) {
+    init(wrappedValue: String, block: () -> Void) {
         self.wrappedValue = wrappedValue.capitalized
     }
 }
 
 public class Fixture111 {
-    @Fixture111Wrapper
+    @Fixture111Wrapper(block: buildBlock())
     var someVar: String = ""
+
+    static func buildBlock() -> () -> Void {
+        return {}
+    }
 }
 
 public class Fixture111Retainer {

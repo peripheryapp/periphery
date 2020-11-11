@@ -41,7 +41,11 @@ class iOSProjectTest: SourceGraphTestCase {
     }
 
     func testRetainsMainAppEntryPoint() {
+        #if swift(>=5.3)
         XCTAssertReferenced((.struct, "iOSProjectApp"))
+        #else
+        XCTAssertReferenced((.class, "AppDelegate"))
+        #endif
     }
 
     func testRetainsSceneDelegateReferencedInInfoPlist() {

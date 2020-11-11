@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.2
 import PackageDescription
 
 var dependencies: [Package.Dependency] = [
@@ -6,9 +6,26 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/jpsim/Yams", from: "4.0.0"),
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
-    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax", .exact("0.50300.0")),
     .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0")
 ]
+
+#if swift(>=5.3)
+dependencies.append(
+    .package(
+        name: "SwiftSyntax",
+        url: "https://github.com/apple/swift-syntax",
+        .exact("0.50300.0")
+    )
+)
+#else
+dependencies.append(
+    .package(
+        name: "SwiftSyntax",
+        url: "https://github.com/apple/swift-syntax",
+        .exact("0.50200.0")
+    )
+)
+#endif
 
 #if os(macOS)
 dependencies.append(
