@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/tadija/AEXML",
         "state": {
           "branch": null,
-          "revision": "502c4d43a6cc9c395d19111e09dc62ad834977b5",
-          "version": "4.6.0"
+          "revision": "8623e73b193386909566a9ca20203e33a09af142",
+          "version": "4.5.0"
         }
       },
       {
@@ -57,20 +57,11 @@
       },
       {
         "package": "XcodeProj",
-        "repositoryURL": "https://github.com/ileitch/xcodeproj",
+        "repositoryURL": "https://github.com/tuist/xcodeproj",
         "state": {
           "branch": null,
-          "revision": "026d560a25bedc4eb31c9a991a8988df9c2e4b66",
-          "version": null
-        }
-      },
-      {
-        "package": "XcodeProjCExt",
-        "repositoryURL": "https://github.com/tuist/XcodeProjCExt",
-        "state": {
-          "branch": null,
-          "revision": "21a510c225ff2bc83d5920a21d902af4b1e7e218",
-          "version": "0.1.0"
+          "revision": "82bf5efcaa27e94ed8c761c1eb3e397b6dea82b9",
+          "version": "7.18.0"
         }
       },
       {
