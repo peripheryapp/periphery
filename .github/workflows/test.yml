@@ -6,20 +6,24 @@ on:
   pull_request: {}
 jobs:
   macOS:
+    strategy:
+      fail-fast: false
+      matrix:
+        xcode: [12.2, 12.1, 11.7]
     runs-on: macOS-latest
     name: macOS
     steps:
     - uses: actions/checkout@master
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_12.2.app; swift -version
+      run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app; swift -version
     - name: Cache resolved dependencies
       id: cache-resolved-dependencies
       uses: actions/cache@v2
       with:
         path: .build
-        key: ${{ runner.os }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
+        key: ${{ runner.os }}-${{ matrix.xcode }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-spm-deps-
+          ${{ runner.os }}-${{ matrix.xcode }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: swift package resolve
@@ -32,8 +36,12 @@ jobs:
     - name: Scan
       run: ./.build/debug/periphery scan --quiet --skip-build --strict
   linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        swift: [5.3, 5.2]
     runs-on: ubuntu-latest
-    container: swift:5.3
+    container: swift:${{ matrix.swift }}
     name: Linux
     steps:
     - uses: actions/checkout@master
@@ -42,9 +50,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: .build
-        key: ${{ runner.os }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
+        key: ${{ runner.os }}-${{ matrix.swift }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-spm-deps-
+          ${{ runner.os }}-${{ matrix.swift }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: swift package resolve

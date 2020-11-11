@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix Swift 5.2 support.
 
 ## 2.0.1 (2020-11-10)
 
