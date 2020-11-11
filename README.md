@@ -33,7 +33,7 @@
 
 ## Installation
 
-### [Homebrew](https://brew.sh/)
+### [Homebrew](https://brew.sh/) (macOS only)
 
 Install Homebrew:
 
@@ -66,10 +66,10 @@ swift build
 The `periphery` binary will exist at `.build/debug/periphery`. Alternatively, you can execute it via Swift:
 
 ```
-swift run periphery ...
+swift run periphery scan ...
 ```
 
-### [CocoaPods](https://cocoapods.org/)
+### [CocoaPods](https://cocoapods.org/) (macOS only)
 
 Add the following to your Podfile:
 
@@ -289,7 +289,7 @@ There's no direct reference to the `myCase` case, so it's reasonable to expect i
 
 ### Assign-only Properties
 
-Properties that are assigned but never used are identified as unused, e.g:
+Properties that are assigned but never used are identified as such, e.g:
 
 ```swift
 class MyClass {
