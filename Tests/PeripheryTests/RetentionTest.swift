@@ -1082,6 +1082,14 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testRetainsProtocolsViaCompositeTypealias() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.protocol, "Fixture200"))
+            XCTAssertReferenced((.protocol, "Fixture201"))
+            XCTAssertReferenced((.typealias, "Fixture202"))
+        }
+    }
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768
