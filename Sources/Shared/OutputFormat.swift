@@ -4,6 +4,7 @@ public enum OutputFormat: String, CaseIterable {
     case xcode
     case csv
     case json
+    case checkstyle
 
     static let `default` = OutputFormat.xcode
 
@@ -18,18 +19,5 @@ public enum OutputFormat: String, CaseIterable {
     public var supportsAuxiliaryOutput: Bool {
         if self == .xcode { return true }
         return false
-    }
-}
-
-extension OutputFormat: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .xcode:
-            return "Xcode"
-        case .json:
-            return "JSON"
-        case .csv:
-            return "CSV"
-        }
     }
 }

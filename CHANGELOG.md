@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Added a Checkstyle output formatter.
 
 ##### Bug Fixes
 

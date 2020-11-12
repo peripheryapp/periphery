@@ -16,6 +16,8 @@ extension OutputFormat {
             return CsvFormatter.self
         case .json:
             return JsonFormatter.self
+        case .checkstyle:
+            return CheckstyleFormatter.self
         }
     }
 }
