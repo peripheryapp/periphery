@@ -40,7 +40,7 @@ public final class Configuration: Singleton {
         let config: [String: Any?] = [
             "workspace": workspace,
             "project": project,
-            "format": outputFormat.description.lowercased(),
+            "format": outputFormat.rawValue.lowercased(),
             "schemes": schemes,
             "targets": targets,
             "index_exclude": indexExclude,
