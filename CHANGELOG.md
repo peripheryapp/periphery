@@ -12,6 +12,7 @@
 
 - Fix Swift 5.2 support.
 - Updated Yams dependency to fix building with Swift for Tensorflow.
+- Fix possible concurrent mutation crash.
 
 ## 2.0.1 (2020-11-10)
 
