@@ -6,24 +6,25 @@ final class SwiftUIRetainer: SourceGraphVisitor {
     }
 
     private let graph: SourceGraph
+    private let specialProtocols = ["PreviewProvider", "LibraryContentProvider"]
 
     required init(graph: SourceGraph) {
         self.graph = graph
     }
 
     func visit() {
-        retainPreviewProviders()
+        retainSpecialProtocolConformances()
     }
 
     // MARK: - Private
 
-    private func retainPreviewProviders() {
+    private func retainSpecialProtocolConformances() {
         graph
             .declarations(ofKinds: [.class, .struct])
             .filter {
                 $0.related.contains {
                     let isExternal = graph.explicitDeclaration(withUsr: $0.usr) == nil
-                    return $0.kind == .protocol && $0.name == "PreviewProvider" && isExternal
+                    return isExternal && $0.kind == .protocol && specialProtocols.contains($0.name ?? "")
                 }
             }
             .forEach { decl in
