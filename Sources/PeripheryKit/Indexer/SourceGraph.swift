@@ -64,9 +64,9 @@ public final class SourceGraph {
     }
 
     func ignore(_ declaration: Declaration) {
-        mutationQueue.sync {
+//        mutationQueue.sync {
             _ = ignoredDeclarations.insert(declaration)
-        }
+//        }
     }
 
     func add(_ declaration: Declaration) {
