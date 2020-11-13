@@ -26,3 +26,11 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
+#if swift(>=5.3)
+struct LibraryViewContent: LibraryContentProvider {
+    var views: [LibraryItem] {
+        LibraryItem(ContentView())
+    }
+}
+#endif

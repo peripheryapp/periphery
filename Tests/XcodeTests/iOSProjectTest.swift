@@ -64,9 +64,15 @@ class iOSProjectTest: SourceGraphTestCase {
         XCTAssertReferenced((.functionMethodInstance, "click(_:)"), descendentOf: (.class, "StoryboardViewController"))
     }
 
-    func testRetainsSwiftUIPreviewProviders() {
+    func testRetainsSwiftUIPreviewProvider() {
         XCTAssertReferenced((.struct, "ContentView_Previews"))
     }
+
+    #if swift(>=5.3)
+    func testRetainsSwiftUILibraryContentProvider() {
+        XCTAssertReferenced((.struct, "LibraryViewContent"))
+    }
+    #endif
 
     func testRetainsMethodReferencedByObjcSelector() {
         XCTAssertReferenced((.functionMethodInstance, "targetMethod()"), descendentOf: (.class, "XibViewController"))
