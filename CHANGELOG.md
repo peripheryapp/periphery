@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.1.0 (2020-14-10)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Added a Checkstyle output formatter.
 
 ##### Bug Fixes
