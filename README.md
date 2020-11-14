@@ -57,7 +57,7 @@ Add Periphery to your `Package.swift` dependencies:
 .package(url: "https://github.com/peripheryapp/periphery", from: "2.0.0")
 ```
 
-You can then now periphery via Swift:
+Now run periphery via Swift:
 
 ```
 swift run periphery scan ...
