@@ -20,7 +20,11 @@ final class XibReferenceRetainer: SourceGraphVisitor {
         for xibClass in referencedClasses {
             xibClass.markRetained()
 
-            for declaration in xibClass.declarations {
+            let superclasses = graph.superclasses(of: xibClass)
+            let superclassesDecls = superclasses.map { $0.declarations }.joined()
+            let allDecls = xibClass.declarations.union(superclassesDecls)
+
+            for declaration in allDecls {
                 let attributes = declaration.attributes
 
                 if attributes.contains("IBOutlet") || attributes.contains("IBAction") {

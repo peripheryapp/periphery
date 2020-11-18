@@ -58,6 +58,10 @@ class iOSProjectTest: SourceGraphTestCase {
         XCTAssertReferenced((.functionMethodInstance, "click(_:)"), descendentOf: (.class, "XibViewController"))
     }
 
+    func testRetainsIBActionReferencedViaSubclass() {
+        XCTAssertReferenced((.functionMethodInstance, "clickFromSubclass(_:)"), descendentOf: (.class, "XibViewController2Base"))
+    }
+
     func testRetainsStoryboardReferencedClass() {
         XCTAssertReferenced((.class, "StoryboardViewController"))
         XCTAssertReferenced((.varInstance, "button"), descendentOf: (.class, "StoryboardViewController"))
