@@ -13,6 +13,8 @@
 		3C1FED1E2556D91D0001BD58 /* Target_With_Spaces.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C1FED172556D91C0001BD58 /* Target_With_Spaces.framework */; };
 		3C1FED1F2556D91D0001BD58 /* Target_With_Spaces.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3C1FED172556D91C0001BD58 /* Target_With_Spaces.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3C1FED2B2556D9360001BD58 /* File With Spaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FED2A2556D9360001BD58 /* File With Spaces.swift */; };
+		3C3ABC05256522AB00EAB309 /* XibViewController2Subclass.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3C3ABC04256522AB00EAB309 /* XibViewController2Subclass.xib */; };
+		3C3ABC09256526F900EAB309 /* XibViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3ABC08256526F900EAB309 /* XibViewController2.swift */; };
 		3C5E4E58255C25D200BF728D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C5E4E57255C25D200BF728D /* AppDelegate.swift */; };
 		3C84965E255405AD00900DA9 /* iOSProjectApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C84965D255405AD00900DA9 /* iOSProjectApp.swift */; };
 		3C849660255405AD00900DA9 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C84965F255405AD00900DA9 /* ContentView.swift */; };
@@ -66,6 +68,8 @@
 		3C1FED172556D91C0001BD58 /* Target_With_Spaces.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Target_With_Spaces.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C1FED1A2556D91D0001BD58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C1FED2A2556D9360001BD58 /* File With Spaces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "File With Spaces.swift"; sourceTree = "<group>"; };
+		3C3ABC04256522AB00EAB309 /* XibViewController2Subclass.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = XibViewController2Subclass.xib; sourceTree = "<group>"; };
+		3C3ABC08256526F900EAB309 /* XibViewController2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XibViewController2.swift; sourceTree = "<group>"; };
 		3C5E4E57255C25D200BF728D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3C84965A255405AD00900DA9 /* iOSProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C84965D255405AD00900DA9 /* iOSProjectApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSProjectApp.swift; sourceTree = "<group>"; };
@@ -170,6 +174,8 @@
 				3C9B06E925547CEC00E45614 /* StoryboardViewController.swift */,
 				3C1FECF62555DD1F0001BD58 /* PreviewProviderRetainedView.swift */,
 				3C5E4E57255C25D200BF728D /* AppDelegate.swift */,
+				3C3ABC04256522AB00EAB309 /* XibViewController2Subclass.xib */,
+				3C3ABC08256526F900EAB309 /* XibViewController2.swift */,
 			);
 			path = iOSProject;
 			sourceTree = "<group>";
@@ -311,6 +317,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C3ABC05256522AB00EAB309 /* XibViewController2Subclass.xib in Resources */,
 				3C849665255405B000900DA9 /* Preview Assets.xcassets in Resources */,
 				3C9B06C125542DD700E45614 /* XibViewController.xib in Resources */,
 				3C9B06C425542F2500E45614 /* Launch Screen.storyboard in Resources */,
@@ -344,6 +351,7 @@
 			files = (
 				3C5E4E58255C25D200BF728D /* AppDelegate.swift in Sources */,
 				3C1FED0D2556D7C60001BD58 /* FileInGroupWithoutFolder.swift in Sources */,
+				3C3ABC09256526F900EAB309 /* XibViewController2.swift in Sources */,
 				3C1FECF72555DD1F0001BD58 /* PreviewProviderRetainedView.swift in Sources */,
 				3C9B06EA25547CEC00E45614 /* StoryboardViewController.swift in Sources */,
 				3C849660255405AD00900DA9 /* ContentView.swift in Sources */,

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var xibControllerPresented = false
+    @State private var xibController2SubclassPresented = false
     @State private var storyboardControllerPresented = false
 
     var body: some View {
@@ -10,6 +11,12 @@ struct ContentView: View {
                 self.xibControllerPresented = true
             }.sheet(isPresented: $xibControllerPresented) {
                 XibViewControllerWrapper()
+            }
+
+            Button("XibViewController2Subclass") {
+                self.xibController2SubclassPresented = true
+            }.sheet(isPresented: $xibController2SubclassPresented) {
+                XibViewController2SubclassWrapper()
             }
 
             Button("StoryboardViewController") {

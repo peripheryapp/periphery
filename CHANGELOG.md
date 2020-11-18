@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- IBOutlets and IBActions that reside in a base class that are referenced only via a subclass are now retained.
 
 ## 2.1.0 (2020-14-10)
 
