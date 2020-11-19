@@ -1090,6 +1090,14 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testIssue195() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "Issue195"))
+            XCTAssertReferenced((.enum, "Key"), descendentOf: (.class, "Issue195"))
+            XCTAssertReferenced((.varStatic, "email"), descendentOf: (.enum, "Key"))
+        }
+    }
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768
