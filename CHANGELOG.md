@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Add support for SwiftPM & Xcode mixed projects.
 
 ##### Bug Fixes
 

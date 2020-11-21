@@ -30,6 +30,16 @@ final class ScanBehavior {
     }
 
     func main(_ block: (Project) throws -> ScanResult) -> Result<(), PeripheryError> {
+        if configuration.guidedSetup {
+            do {
+                try GuidedSetup().perform()
+            } catch let error as PeripheryError {
+                return .failure(error)
+            } catch {
+                return .failure(.underlyingError(error))
+            }
+        }
+
         let project: Project
 
         do {
@@ -39,16 +49,6 @@ final class ScanBehavior {
             return .failure(error)
         } catch {
             return .failure(.underlyingError(error))
-        }
-
-        if configuration.guidedSetup {
-            do {
-                try GuidedSetup.make(project: project).perform()
-            } catch let error as PeripheryError {
-                return .failure(error)
-            } catch {
-                return .failure(.underlyingError(error))
-            }
         }
 
         let updateChecker = UpdateChecker.make()

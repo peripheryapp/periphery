@@ -19,6 +19,7 @@ open class SetupGuideHelpers {
     }
 
     public func select(single options: [String]) -> String {
+        print(colorize("?", .boldYellow) + " Type the number for the option you wish to select")
         display(options: options)
         print(colorize("> ", .bold), terminator: "")
 

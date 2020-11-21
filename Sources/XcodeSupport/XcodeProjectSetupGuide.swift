@@ -2,7 +2,7 @@ import Foundation
 import PathKit
 import Shared
 
-public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
+public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide {
     public static func make() -> Self {
         return self.init(configuration: inject(), xcodebuild: inject())
     }
@@ -14,6 +14,14 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
         self.configuration = configuration
         self.xcodebuild = xcodebuild
         super.init()
+    }
+
+    public var projectKind: ProjectKind {
+        return .xcode
+    }
+
+    public var isSupported: Bool {
+        !projectPaths().isEmpty || !workspacePaths().isEmpty
     }
 
     public func perform() throws {
@@ -77,14 +85,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
 
     private func identifyWorkspace() -> String? {
         var workspace: String?
-        let paths = recursiveGlob("*.xcworkspace")
-            .filter {
-                // Swift Package Manager generates a xcworkspace inside the xcodeproj that isn't useful.
-                !$0.string.contains(".xcodeproj/")
-            }
-            .filter {
-                !$0.components.contains(".swiftpm")
-            }
+        let paths = workspacePaths()
 
         if paths.count > 1 {
             print(colorize("Found multiple workspaces, please select the one that defines the schemes for building your project:", .bold))
@@ -103,9 +104,20 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
         return nil
     }
 
+    private func workspacePaths() -> [Path] {
+        recursiveGlob("*.xcworkspace")
+            .filter {
+                // Swift Package Manager generates a xcworkspace inside the xcodeproj that isn't useful.
+                !$0.string.contains(".xcodeproj/")
+            }
+            .filter {
+                !$0.components.contains(".swiftpm")
+            }
+    }
+
     private func identifyProject() -> String? {
         var project: String?
-        let paths = recursiveGlob("*.xcodeproj")
+        let paths = projectPaths()
 
         if paths.count > 1 {
             print(colorize("Found multiple projects, please select the one that defines the schemes for building your project:", .bold))
@@ -122,6 +134,10 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
         }
 
         return nil
+    }
+
+    private func projectPaths() -> [Path] {
+        recursiveGlob("*.xcodeproj")
     }
 
     private func recursiveGlob(_ glob: String) -> [Path] {
