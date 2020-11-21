@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.2.0 (2020-11-21)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Add support for SwiftPM & Xcode mixed projects.
 
 ##### Bug Fixes
