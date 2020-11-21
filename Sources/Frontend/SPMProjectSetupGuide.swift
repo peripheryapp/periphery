@@ -1,8 +1,9 @@
 import Foundation
+import PathKit
 import PeripheryKit
 import Shared
 
-final class SPMProjectSetupGuide: SetupGuideHelpers, SetupGuide {
+final class SPMProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide {
     static func make() -> Self {
         return self.init(configuration: inject())
     }
@@ -12,6 +13,14 @@ final class SPMProjectSetupGuide: SetupGuideHelpers, SetupGuide {
     init(configuration: Configuration) {
         self.configuration = configuration
         super.init()
+    }
+
+    var projectKind: ProjectKind {
+        .spm
+    }
+
+    var isSupported: Bool {
+        (Path.current + "Package.swift").exists
     }
 
     func perform() throws {

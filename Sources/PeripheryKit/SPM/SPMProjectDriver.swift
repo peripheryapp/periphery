@@ -8,14 +8,6 @@ public final class SPMProjectDriver {
         let package = try SPM.Package.load()
         let targets: [SPM.Target]
 
-        if configuration.workspace != nil {
-            throw PeripheryError.usageError("The --workspace option has no effect with Swift Package Manager projects.")
-        }
-
-        if configuration.project != nil {
-            throw PeripheryError.usageError("The --project option has no effect with Swift Package Manager projects.")
-        }
-
         if !configuration.schemes.isEmpty {
             throw PeripheryError.usageError("The --schemes option has no effect with Swift Package Manager projects.")
         }
