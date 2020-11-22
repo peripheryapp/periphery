@@ -276,7 +276,9 @@ struct UnusedParameterParser {
     }
 
     private func parse(identifierExpr syntax: IdentifierExprSyntax) -> Item {
-        return Identifier(name: syntax.identifier.text)
+        // Strip backquotes so that '`class`' becomes just 'class'.
+        let name = syntax.identifier.text.replacingOccurrences(of: "`", with: "")
+        return Identifier(name: name)
     }
 
     private func parse<T>(functionDecl syntax: FunctionDeclSyntax, _ collector: Collector<T>?) -> Item? {
