@@ -148,6 +148,12 @@ class UnusedParameterTest: XCTestCase {
         XCTAssertUsed("param", of: "myFunc(param:)")
     }
 
+    func testBackquote() {
+        analyze()
+        XCTAssertUsed("class", of: "myFunc(class:func:)")
+        XCTAssertUnused("func", of: "myFunc(class:func:)")
+    }
+
     // MARK: - Private
 
     private var unusedParamsByFunction: [(Function, Set<Parameter>)] = []

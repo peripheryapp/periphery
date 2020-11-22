@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix unused parameter identification when surrounded with backquotes.
 
 ## 2.2.0 (2020-11-21)
 
