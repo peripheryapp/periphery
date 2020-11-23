@@ -29,6 +29,7 @@ public final class Configuration: Singleton {
     public var xcargs: String? = nil
     public var indexStorePath: String?
     public var skipBuild: Bool = false
+    public var cleanBuild: Bool = false
 
     // Non user facing.
     public var guidedSetup: Bool = false
@@ -55,7 +56,8 @@ public final class Configuration: Singleton {
             "strict": strict,
             "xcargs": xcargs,
             "index_store_path": indexStorePath,
-            "skip_build": skipBuild
+            "skip_build": skipBuild,
+            "clean_build": cleanBuild
         ]
 
         return try Yams.dump(object: config)
@@ -137,6 +139,10 @@ public final class Configuration: Singleton {
 
         if let value = yaml["skip_build"] as? Bool {
             self.skipBuild = value
+        }
+
+        if let value = yaml["clean_build"] as? Bool {
+            self.cleanBuild = value
         }
     }
 

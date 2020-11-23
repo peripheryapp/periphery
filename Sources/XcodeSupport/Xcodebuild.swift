@@ -53,6 +53,10 @@ public final class Xcodebuild: Injectable {
         return try exec(["/bin/sh", "-c", xcodebuild])
     }
 
+    func removeDerivedData(for project: XcodeProjectlike, allSchemes: [XcodeScheme]) throws {
+        try exec(["rm", "-rf", try derivedDataPath(for: project, schemes: allSchemes).string])
+    }
+
     func indexStorePath(project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> String {
         (try derivedDataPath(for: project, schemes: schemes) + "Index/DataStore").string
     }

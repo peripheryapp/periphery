@@ -41,6 +41,10 @@ public final class SPMProjectDriver {
 extension SPMProjectDriver: ProjectDriver {
     public func build() throws {
         if !configuration.skipBuild {
+            if configuration.cleanBuild {
+                try package.clean()
+            }
+
             try targets.forEach {
                 if configuration.outputFormat.supportsAuxiliaryOutput {
                     let asterisk = colorize("*", .boldGreen)
