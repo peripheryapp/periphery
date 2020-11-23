@@ -18,10 +18,12 @@ final class EnumCaseReferenceBuilder: SourceGraphVisitor {
                 let enumCases = enumDeclaration.declarations.filter { $0.kind == .enumelement }
 
                 for enumCase in enumCases {
-                    let reference = Reference(kind: .enumelement, usr: enumCase.usr, location: enumCase.location)
-                    reference.name = enumCase.name
-                    reference.parent = enumDeclaration
-                    graph.add(reference, from: enumDeclaration)
+                    for usr in enumCase.usrs {
+                        let reference = Reference(kind: .enumelement, usr: usr, location: enumCase.location)
+                        reference.name = enumCase.name
+                        reference.parent = enumDeclaration
+                        graph.add(reference, from: enumDeclaration)
+                    }
                 }
             }
         }

@@ -40,7 +40,7 @@ public final class XcodeProject: XcodeProjectlike {
     private(set) public var targets: Set<XcodeTarget> = []
 
     required public init(path: Path, xcodebuild: Xcodebuild, logger: Logger) throws {
-        logger.debug("[xcode:project] Loading \(path)...")
+        logger.debug("[xcode:project] Loading \(path)")
 
         self.path = path
         self.xcodebuild = xcodebuild

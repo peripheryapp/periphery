@@ -2,11 +2,12 @@
 
 ##### Breaking
 
-- None.
+- JSON and CSV output formats have changed to reflect the fact that declarations can have multiple IDs if they're members of multiple build targets.
 
 ##### Enhancements
 
 - Add `--clean-build` flag to clean build artifacts before the build step.
+- Add support for files that are members of multiple build targets. Such files no longer produce erroneous results.
 
 ##### Bug Fixes
 

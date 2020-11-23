@@ -23,7 +23,7 @@ final class JsonFormatter: OutputFormatter {
                 "modifiers": Array($0.modifiers),
                 "attributes": Array($0.attributes),
                 "accessibility": $0.accessibility.value.rawValue,
-                "id": $0.usr,
+                "ids": Array($0.usrs),
                 "hints": $0.analyzerHints.map { String(describing: $0) },
                 "location": $0.location.description
             ]

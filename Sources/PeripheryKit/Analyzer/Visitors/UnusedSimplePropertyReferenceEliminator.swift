@@ -20,7 +20,7 @@ final class UnusedSimplePropertyReferenceEliminator: SourceGraphVisitor {
         let setters = graph.declarations(ofKind: .functionAccessorSetter)
 
         for setter in setters {
-            let references = graph.references(toUsr: setter.usr)
+            let references = graph.references(to: setter)
 
             for reference in references {
                 guard let caller = reference.parent,

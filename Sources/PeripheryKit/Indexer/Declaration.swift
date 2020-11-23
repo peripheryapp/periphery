@@ -133,7 +133,7 @@ public final class Declaration: Entity, CustomStringConvertible {
     public var accessibility: (value: Accessibility, isExplicit: Bool) = (.internal, false)
     public let kind: Kind
     public var name: String?
-    public let usr: String
+    public let usrs: Set<String>
     public var analyzerHints: [Analyzer.Hint] = []
     public var unusedParameters: Set<Declaration> = []
     public var declarations: Set<Declaration> = []
@@ -195,6 +195,7 @@ public final class Declaration: Entity, CustomStringConvertible {
         let formattedAttributes = "[" + attributes.sorted().joined(separator: ", ") + "]"
         let formattedModifiers = "[" + modifiers.sorted().joined(separator: ", ") + "]"
         let formattedCommentCommands = "[" + commentCommands.map { $0.description }.sorted().joined(separator: ", ") + "]"
+        let formattedUsrs = "[" + usrs.sorted().joined(separator: ", ") + "]"
         let implicitOrExplicit = isImplicit ? "implicit" : "explicit"
         return [kind.rawValue,
                 formattedName,
@@ -203,13 +204,13 @@ public final class Declaration: Entity, CustomStringConvertible {
                 formattedModifiers,
                 formattedAttributes,
                 formattedCommentCommands,
-                "'\(usr)'",
+                formattedUsrs,
                 location.shortDescription]
     }
 
-    init(kind: Kind, usr: String, location: SourceLocation) {
+    init(kind: Kind, usrs: Set<String>, location: SourceLocation) {
         self.kind = kind
-        self.usr = usr
+        self.usrs = usrs
         self.location = location
     }
 
@@ -230,7 +231,7 @@ public final class Declaration: Entity, CustomStringConvertible {
 extension Declaration: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(kind)
-        hasher.combine(usr)
+        hasher.combine(usrs)
         hasher.combine(name)
         hasher.combine(location)
     }
@@ -238,12 +239,12 @@ extension Declaration: Hashable {
 
 extension Declaration: Equatable {
     public static func == (lhs: Declaration, rhs: Declaration) -> Bool {
-        let usrIsEqual = lhs.usr == rhs.usr
+        let usrsIsEqual = lhs.usrs == rhs.usrs
         let kindIsEqual = lhs.kind == rhs.kind
         let nameIsEqual = lhs.name == rhs.name
         let locationIsEqual = lhs.location == rhs.location
         let implicitEqual = lhs.isImplicit == rhs.isImplicit
 
-        return kindIsEqual && usrIsEqual && nameIsEqual && locationIsEqual && implicitEqual
+        return kindIsEqual && usrsIsEqual && nameIsEqual && locationIsEqual && implicitEqual
     }
 }

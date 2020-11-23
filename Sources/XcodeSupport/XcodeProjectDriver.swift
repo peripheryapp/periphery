@@ -26,8 +26,6 @@ public final class XcodeProjectDriver {
             throw PeripheryError.invalidTarget(name: name, project: project.path.lastComponent)
         }
 
-        try TargetSourceFileUniquenessChecker.check(targets: targets)
-
         // Ensure schemes exist within the project
         let schemes = try project.schemes().filter { configuration.schemes.contains($0.name) }
         let validSchemeNames = Set(schemes.map { $0.name })

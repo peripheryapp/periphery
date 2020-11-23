@@ -27,7 +27,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
         for proto in protocols {
             // Find all classes that implement this protocol.
             let conformingClasses = graph.declarations(ofKind: .class).filter {
-                $0.related.contains { $0.usr == proto.usr }
+                $0.related.contains { proto.usrs.contains($0.usr) }
             }
 
             for conformingClass in conformingClasses {
@@ -58,14 +58,16 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
                             // declaration implemented by the superclass.
                             guard let referenceKind = declInSuperclass.kind.referenceEquivalent else { continue }
 
-                            let reference = Reference(kind: referenceKind,
-                                                      usr: declInSuperclass.usr,
-                                                      location: declInSuperclass.location)
-                            reference.name = declInSuperclass.name
-                            reference.isRelated = true
-                            reference.parent = unimplementedProtoDecl
-                            graph.add(reference, from: unimplementedProtoDecl)
-                            newReferences.insert(reference)
+                            for usr in declInSuperclass.usrs {
+                                let reference = Reference(kind: referenceKind,
+                                                          usr: usr,
+                                                          location: declInSuperclass.location)
+                                reference.name = declInSuperclass.name
+                                reference.isRelated = true
+                                reference.parent = unimplementedProtoDecl
+                                graph.add(reference, from: unimplementedProtoDecl)
+                                newReferences.insert(reference)
+                            }
                         }
                     }
                 }
@@ -149,13 +151,15 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
                     graph.remove(relatedReference)
                 }
 
-                let newReference = Reference(kind: relatedReference.kind,
-                                             usr: conformingDeclaration.usr,
-                                             location: relatedReference.location)
-                newReference.name = relatedReference.name
-                newReference.parent = protocolDeclaration
-                newReference.isRelated = true
-                graph.add(newReference, from: protocolDeclaration)
+                for usr in conformingDeclaration.usrs {
+                    let newReference = Reference(kind: relatedReference.kind,
+                                                 usr: usr,
+                                                 location: relatedReference.location)
+                    newReference.name = relatedReference.name
+                    newReference.parent = protocolDeclaration
+                    newReference.isRelated = true
+                    graph.add(newReference, from: protocolDeclaration)
+                }
             } else {
                 // The referenced declaration is external, e.g from stdlib/Foundation.
                 conformingDeclaration.markRetained()

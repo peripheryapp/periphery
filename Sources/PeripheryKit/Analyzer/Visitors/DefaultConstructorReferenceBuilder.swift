@@ -25,12 +25,14 @@ final class DefaultConstructorReferenceBuilder: SourceGraphVisitor {
 
         defaultConstructors.forEach { constructor in
             if let parent = constructor.parent as? Declaration {
-                let reference = Reference(kind: .functionConstructor,
-                                          usr: constructor.usr,
-                                          location: parent.location)
-                reference.name = constructor.name
-                reference.parent = parent
-                graph.add(reference, from: parent)
+                for usr in constructor.usrs {
+                    let reference = Reference(kind: .functionConstructor,
+                                              usr: usr,
+                                              location: parent.location)
+                    reference.name = constructor.name
+                    reference.parent = parent
+                    graph.add(reference, from: parent)
+                }
             }
         }
     }
@@ -38,12 +40,14 @@ final class DefaultConstructorReferenceBuilder: SourceGraphVisitor {
     private func referenceDestructors() {
         graph.declarations(ofKind: .functionDestructor).forEach { destructor in
             if let parent = destructor.parent as? Declaration {
-                let reference = Reference(kind: .functionDestructor,
-                                          usr: destructor.usr,
-                                          location: parent.location)
-                reference.name = destructor.name
-                reference.parent = parent
-                graph.add(reference, from: parent)
+                for usr in destructor.usrs {
+                    let reference = Reference(kind: .functionDestructor,
+                                              usr: usr,
+                                              location: parent.location)
+                    reference.name = destructor.name
+                    reference.parent = parent
+                    graph.add(reference, from: parent)
+                }
             }
         }
     }
