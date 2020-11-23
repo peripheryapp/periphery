@@ -34,10 +34,12 @@ final class CodingKeyEnumReferenceBuilder: SourceGraphVisitor {
             }
 
             if isCodingKey && isParentDecodable {
-                let newReference = Reference(kind: .enum, usr: enumDeclaration.usr, location: enumDeclaration.location)
-                newReference.name = enumDeclaration.name
-                newReference.parent = parent
-                graph.add(newReference, from: parent)
+                for usr in enumDeclaration.usrs {
+                    let newReference = Reference(kind: .enum, usr: usr, location: enumDeclaration.location)
+                    newReference.name = enumDeclaration.name
+                    newReference.parent = parent
+                    graph.add(newReference, from: parent)
+                }
             }
         }
     }

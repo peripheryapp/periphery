@@ -59,8 +59,8 @@ public final class SourceGraph {
         return allExplicitDeclarationsByUsr[usr]
     }
 
-    func references(toUsr usr: String) -> Set<Reference> {
-        return allReferencesByUsr[usr] ?? []
+    func references(to decl: Declaration) -> Set<Reference> {
+        Set(decl.usrs.flatMap { allReferencesByUsr[$0] ?? [] })
     }
 
     func ignore(_ declaration: Declaration) {
@@ -75,7 +75,7 @@ public final class SourceGraph {
             allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
 
             if !declaration.isImplicit {
-                allExplicitDeclarationsByUsr[declaration.usr] = declaration
+                declaration.usrs.forEach { allExplicitDeclarationsByUsr[$0] = declaration }
             }
         }
     }
@@ -85,9 +85,9 @@ public final class SourceGraph {
             declaration.parent?.declarations.remove(declaration)
             allDeclarations.remove(declaration)
             allDeclarationsByKind[declaration.kind]?.remove(declaration)
-            allExplicitDeclarationsByUsr.removeValue(forKey: declaration.usr)
             rootDeclarations.remove(declaration)
             markedDeclarations.remove(declaration)
+            declaration.usrs.forEach { allExplicitDeclarationsByUsr.removeValue(forKey: $0) }
         }
     }
 
@@ -167,7 +167,7 @@ public final class SourceGraph {
         return allClasses
             .filter {
                 $0.related.contains(where: { ref in
-                    ref.kind == .class && ref.usr == decl.usr
+                    ref.kind == .class && decl.usrs.contains(ref.usr)
                 })
             }.filter { $0 != decl }
     }

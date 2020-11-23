@@ -23,7 +23,7 @@ public final class XcodeWorkspace: XcodeProjectlike {
     private(set) public var targets: Set<XcodeTarget> = []
 
     required public init(path: String, xcodebuild: Xcodebuild, configuration: Configuration, logger: Logger) throws {
-        logger.debug("[xcode:workspace] Loading \(path)...")
+        logger.debug("[xcode:workspace] Loading \(path)")
 
         self.path = Path(path)
         self.xcodebuild = xcodebuild

@@ -29,7 +29,7 @@ final class AncestralReferenceEliminator: SourceGraphVisitor {
     }
 
     private func anyDeclarations(in declarations: [Declaration], areReferencedBy reference: Reference) -> Bool {
-        let usrs = declarations.map { $0.usr }
+        let usrs = declarations.flatMap { $0.usrs }
         return usrs.contains(reference.usr)
     }
 

@@ -15,13 +15,15 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphVisitor {
         for extensionDeclaration in graph.declarations(ofKind: .extensionProtocol) {
             // First, create a reference from each protocol to the extension.
             if let extendedProtocol = try graph.extendedDeclaration(forExtension: extensionDeclaration) {
-                let reference = Reference(kind: .extensionProtocol, usr: extensionDeclaration.usr, location: extendedProtocol.location)
-                reference.name = extendedProtocol.name
-                reference.parent = extendedProtocol
-                graph.add(reference, from: extendedProtocol)
+                for usr in extensionDeclaration.usrs {
+                    let reference = Reference(kind: .extensionProtocol, usr: usr, location: extendedProtocol.location)
+                    reference.name = extendedProtocol.name
+                    reference.parent = extendedProtocol
+                    graph.add(reference, from: extendedProtocol)
+                }
 
                 // Now remove the reference from the extension to the protocol
-                for reference in extensionDeclaration.references.filter({ $0.usr == extendedProtocol.usr  }) {
+                for reference in extensionDeclaration.references.filter({ extendedProtocol.usrs.contains($0.usr) }) {
                     graph.remove(reference)
                 }
 
@@ -29,17 +31,21 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphVisitor {
                 // conforming class/struct with a matching default implementation in the
                 // extension.
                 for memberDeclaration in extensionDeclaration.declarations {
-                    for reference in graph.references(toUsr: memberDeclaration.usr) {
+                    for reference in graph.references(to: memberDeclaration) {
                         if let parentDeclaration = reference.ancestralDeclaration {
-                            let extensionReference = Reference(kind: .extensionProtocol, usr: extensionDeclaration.usr, location: reference.location)
-                            extensionReference.name = extensionDeclaration.name
-                            extensionReference.parent = parentDeclaration
-                            graph.add(extensionReference, from: parentDeclaration)
+                            for usr in extensionDeclaration.usrs {
+                                let extensionReference = Reference(kind: .extensionProtocol, usr: usr, location: reference.location)
+                                extensionReference.name = extensionDeclaration.name
+                                extensionReference.parent = parentDeclaration
+                                graph.add(extensionReference, from: parentDeclaration)
+                            }
 
-                            let protocolReference = Reference(kind: .protocol, usr: extendedProtocol.usr, location: reference.location)
-                            protocolReference.name = extendedProtocol.name
-                            protocolReference.parent = parentDeclaration
-                            graph.add(protocolReference, from: parentDeclaration)
+                            for usr in extendedProtocol.usrs {
+                                let protocolReference = Reference(kind: .protocol, usr: usr, location: reference.location)
+                                protocolReference.name = extendedProtocol.name
+                                protocolReference.parent = parentDeclaration
+                                graph.add(protocolReference, from: parentDeclaration)
+                            }
                         }
                     }
                 }

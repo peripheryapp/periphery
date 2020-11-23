@@ -12,7 +12,7 @@ public final class SourceGraphDebugger {
     public func describeGraph() {
         var entities: [Entity] = graph.rootDeclarations.map { $0 as Entity }
         entities += graph.rootReferences.map { $0 as Entity }
-        describe(entities.sorted(by: { $0.usr < $1.usr }))
+        describe(sort(entities))
     }
 
     func describe(_ entities: [Entity]) {
@@ -29,17 +29,17 @@ public final class SourceGraphDebugger {
         let inset = String(repeating: "··", count: depth)
         print(inset + entity.description)
 
-        for reference in entity.references.sorted(by: { $0.usr < $1.usr }) {
+        for reference in sort(Array(entity.references)) {
             describe(reference, depth: depth + 1)
         }
 
         if let declaration = entity as? Declaration {
-            for reference in declaration.related.sorted(by: { $0.usr < $1.usr }) {
+            for reference in sort(Array(declaration.related)) {
                 describe(reference, depth: depth + 1)
             }
         }
 
-        for declaration in entity.declarations.sorted(by: { $0.usr < $1.usr }) {
+        for declaration in sort(Array(entity.declarations)) {
             describe(declaration, depth: depth + 1)
         }
     }
@@ -59,4 +59,14 @@ final class SourceGraphDebuggerVisitor: SourceGraphVisitor {
     func visit() {
         debugger.describeGraph()
     }
+}
+
+private func sort(_ entities: [Entity]) -> [Entity] {
+    return entities.sorted(by: {
+        if $0.location.file == $1.location.file {
+            return ($0.location.line ?? 0) < ($1.location.line ?? 0)
+        }
+
+        return $0.location.file < $1.location.file
+    })
 }

@@ -85,4 +85,12 @@ class iOSProjectTest: SourceGraphTestCase {
     func testRetainsMethodReferencedByObjcSelector() {
         XCTAssertReferenced((.functionMethodInstance, "targetMethod()"), descendentOf: (.class, "XibViewController"))
     }
+
+    func testMultiTargetFile() {
+        XCTAssertReferenced((.struct, "MultiTargetStruct"))
+        XCTAssertReferenced((.varStatic, "usedInBoth"), descendentOf: (.struct, "MultiTargetStruct"))
+        XCTAssertReferenced((.varStatic, "usedInApp"), descendentOf: (.struct, "MultiTargetStruct"))
+        XCTAssertReferenced((.varStatic, "usedInExt"), descendentOf: (.struct, "MultiTargetStruct"))
+        XCTAssertNotReferenced((.varStatic, "unused"), descendentOf: (.struct, "MultiTargetStruct"))
+    }
 }

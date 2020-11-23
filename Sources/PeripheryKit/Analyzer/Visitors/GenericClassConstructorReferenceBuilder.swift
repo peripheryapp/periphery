@@ -23,11 +23,13 @@ final class GenericClassConstructorReferenceBuilder: SourceGraphVisitor {
             let constructors = declaration.declarations.filter { $0.kind == .functionConstructor }
 
             for constructor in constructors {
-                let reference = Reference(kind: .functionConstructor,
-                                          usr: constructor.usr,
-                                          location: declaration.location)
-                reference.parent = declaration
-                graph.add(reference, from: declaration)
+                for usr in constructor.usrs {
+                    let reference = Reference(kind: .functionConstructor,
+                                              usr: usr,
+                                              location: declaration.location)
+                    reference.parent = declaration
+                    graph.add(reference, from: declaration)
+                }
             }
         }
     }

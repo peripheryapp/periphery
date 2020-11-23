@@ -23,11 +23,13 @@ final class ComplexPropertyAccessorReferenceBuilder: SourceGraphVisitor {
                 let kind = declaration.kind.referenceEquivalent else { continue }
 
             if parent.isComplexProperty {
-                let reference = Reference(kind: kind,
-                                          usr: declaration.usr,
-                                          location: declaration.location)
-                reference.parent = parent
-                graph.add(reference, from: parent)
+                for usr in declaration.usrs {
+                    let reference = Reference(kind: kind,
+                                              usr: usr,
+                                              location: declaration.location)
+                    reference.parent = parent
+                    graph.add(reference, from: parent)
+                }
             }
         }
     }
