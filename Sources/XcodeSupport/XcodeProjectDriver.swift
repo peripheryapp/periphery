@@ -108,6 +108,10 @@ extension XcodeProjectDriver: ProjectDriver {
 
         guard  !configuration.skipBuild else { return }
 
+        if configuration.cleanBuild {
+            try xcodebuild.removeDerivedData(for: project, allSchemes: Array(schemes))
+        }
+
         for scheme in schemes {
             if configuration.outputFormat.supportsAuxiliaryOutput {
                 let asterisk = colorize("*", .boldGreen)

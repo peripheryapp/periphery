@@ -23,6 +23,11 @@ public struct SPM {
         public var swiftTargets: [Target] {
             targets.filter { $0.moduleType == "SwiftTarget" }
         }
+
+        func clean() throws {
+            let shell = Shell()
+            try shell.exec(["swift", "package", "clean"])
+        }
     }
 
     public struct Target: Decodable {

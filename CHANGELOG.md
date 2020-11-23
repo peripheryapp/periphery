@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Add `--clean-build` flag to clean build artifacts before the build step.
 
 ##### Bug Fixes
 

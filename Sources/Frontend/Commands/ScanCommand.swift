@@ -54,6 +54,9 @@ public struct ScanCommand: ParsableCommand {
     @Flag(help: "Retain unused protocol function parameters, even if the parameter is unused in all conforming functions")
     var retainUnusedProtocolFuncParams: Bool = false
 
+    @Flag(help: "Clean existing build artifacts before building")
+    var cleanBuild: Bool = false
+
     @Flag(help: "Skip the project build step")
     var skipBuild: Bool = false
 
@@ -132,6 +135,10 @@ public struct ScanCommand: ParsableCommand {
 
         if isExplicit("skip-build") {
             configuration.skipBuild = skipBuild
+        }
+
+        if isExplicit("clean-build") {
+            configuration.cleanBuild = cleanBuild
         }
 
         if isExplicit("disable-update-check") {
