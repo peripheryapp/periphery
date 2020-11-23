@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.2.2 (2020-11-23)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Extension classes referenced in Info.plist as NSExtensionPrincipalClass are now retained.
 
 ## 2.2.1 (2020-11-22)
