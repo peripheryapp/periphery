@@ -30,6 +30,7 @@
 - [Excluding Files](#excluding-files)
 - [Continuous Integration](#continuous-integration)
 - [Platforms](#platforms)
+- [Troubleshooting](#troubleshooting)
 
 ## Installation
 
@@ -380,3 +381,9 @@ For more complex setups, you may also benefit from the `--index-store-path` opti
 ## Platforms
 
 Periphery supports both macOS and Linux. macOS supports both Xcode and Swift Package Manager (SPM) projects, whereas only SPM projects are supported on Linux.
+
+## Troubleshooting
+
+### Erroneous results in one or more files, such as false-positives and incorrect source file locations.
+
+It's possible for the index store to become corrupt, or out of sync with the source file. This can happen, for example, if you forcefully terminate (^C) a scan. To rectify this, you can pass the `--clean-build` flag to the scan command to force removal of existing build artifacts.
