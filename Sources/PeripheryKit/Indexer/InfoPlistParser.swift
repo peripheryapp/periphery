@@ -8,7 +8,7 @@ struct InfoPlistReference {
 }
 
 final class InfoPlistParser {
-    private static let elements = ["UISceneClassName", "UISceneDelegateClassName"]
+    private static let elements = ["UISceneClassName", "UISceneDelegateClassName", "NSExtensionPrincipalClass"]
     private let path: Path
 
     required init(path: Path) {

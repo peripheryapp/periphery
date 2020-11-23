@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3C1A70B4256BBAB300E07E4A /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1A70B3256BBAB300E07E4A /* NotificationService.swift */; };
+		3C1A70B8256BBAB300E07E4A /* NotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 3C1A70B1256BBAB300E07E4A /* NotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3C1FECF72555DD1F0001BD58 /* PreviewProviderRetainedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FECF62555DD1F0001BD58 /* PreviewProviderRetainedView.swift */; };
 		3C1FED002556D5AB0001BD58 /* iOSProjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FECFF2556D5AB0001BD58 /* iOSProjectTests.swift */; };
 		3C1FED0D2556D7C60001BD58 /* FileInGroupWithoutFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FED0C2556D7C60001BD58 /* FileInGroupWithoutFolder.swift */; };
@@ -29,6 +31,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		3C1A70B6256BBAB300E07E4A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3C849652255405AD00900DA9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3C1A70B0256BBAB300E07E4A;
+			remoteInfo = NotificationServiceExtension;
+		};
 		3C1FED022556D5AB0001BD58 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3C849652255405AD00900DA9 /* Project object */;
@@ -46,6 +55,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		3C1A70B9256BBAB300E07E4A /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3C1A70B8256BBAB300E07E4A /* NotificationServiceExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3C1FED232556D91D0001BD58 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -60,6 +80,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3C1A70B1256BBAB300E07E4A /* NotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C1A70B3256BBAB300E07E4A /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		3C1A70B5256BBAB300E07E4A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C1FECF62555DD1F0001BD58 /* PreviewProviderRetainedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewProviderRetainedView.swift; sourceTree = "<group>"; };
 		3C1FECFD2556D5AB0001BD58 /* iOSProjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iOSProjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C1FECFF2556D5AB0001BD58 /* iOSProjectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSProjectTests.swift; sourceTree = "<group>"; };
@@ -86,6 +109,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		3C1A70AE256BBAB300E07E4A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3C1FECFA2556D5AB0001BD58 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -111,6 +141,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3C1A70B2256BBAB300E07E4A /* NotificationServiceExtension */ = {
+			isa = PBXGroup;
+			children = (
+				3C1A70B3256BBAB300E07E4A /* NotificationService.swift */,
+				3C1A70B5256BBAB300E07E4A /* Info.plist */,
+			);
+			path = NotificationServiceExtension;
+			sourceTree = "<group>";
+		};
 		3C1FECFE2556D5AB0001BD58 /* iOSProjectTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -143,6 +182,7 @@
 				3C84965C255405AD00900DA9 /* iOSProject */,
 				3C1FECFE2556D5AB0001BD58 /* iOSProjectTests */,
 				3C1FED182556D91C0001BD58 /* Target With Spaces */,
+				3C1A70B2256BBAB300E07E4A /* NotificationServiceExtension */,
 				3C84965B255405AD00900DA9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -153,6 +193,7 @@
 				3C84965A255405AD00900DA9 /* iOSProject.app */,
 				3C1FECFD2556D5AB0001BD58 /* iOSProjectTests.xctest */,
 				3C1FED172556D91C0001BD58 /* Target_With_Spaces.framework */,
+				3C1A70B1256BBAB300E07E4A /* NotificationServiceExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -201,6 +242,23 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		3C1A70B0256BBAB300E07E4A /* NotificationServiceExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3C1A70BC256BBAB300E07E4A /* Build configuration list for PBXNativeTarget "NotificationServiceExtension" */;
+			buildPhases = (
+				3C1A70AD256BBAB300E07E4A /* Sources */,
+				3C1A70AE256BBAB300E07E4A /* Frameworks */,
+				3C1A70AF256BBAB300E07E4A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = NotificationServiceExtension;
+			productName = NotificationServiceExtension;
+			productReference = 3C1A70B1256BBAB300E07E4A /* NotificationServiceExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		3C1FECFC2556D5AB0001BD58 /* iOSProjectTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3C1FED062556D5AB0001BD58 /* Build configuration list for PBXNativeTarget "iOSProjectTests" */;
@@ -245,11 +303,13 @@
 				3C849657255405AD00900DA9 /* Frameworks */,
 				3C849658255405AD00900DA9 /* Resources */,
 				3C1FED232556D91D0001BD58 /* Embed Frameworks */,
+				3C1A70B9256BBAB300E07E4A /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				3C1FED1D2556D91D0001BD58 /* PBXTargetDependency */,
+				3C1A70B7256BBAB300E07E4A /* PBXTargetDependency */,
 			);
 			name = iOSProject;
 			productName = iOSProject;
@@ -265,6 +325,9 @@
 				LastSwiftUpdateCheck = 1220;
 				LastUpgradeCheck = 1220;
 				TargetAttributes = {
+					3C1A70B0256BBAB300E07E4A = {
+						CreatedOnToolsVersion = 12.2;
+					};
 					3C1FECFC2556D5AB0001BD58 = {
 						CreatedOnToolsVersion = 12.2;
 						TestTargetID = 3C849659255405AD00900DA9;
@@ -294,11 +357,19 @@
 				3C849659255405AD00900DA9 /* iOSProject */,
 				3C1FECFC2556D5AB0001BD58 /* iOSProjectTests */,
 				3C1FED162556D91C0001BD58 /* Target With Spaces */,
+				3C1A70B0256BBAB300E07E4A /* NotificationServiceExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3C1A70AF256BBAB300E07E4A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3C1FECFB2556D5AB0001BD58 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -329,6 +400,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3C1A70AD256BBAB300E07E4A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C1A70B4256BBAB300E07E4A /* NotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3C1FECF92556D5AB0001BD58 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -364,6 +443,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		3C1A70B7256BBAB300E07E4A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3C1A70B0256BBAB300E07E4A /* NotificationServiceExtension */;
+			targetProxy = 3C1A70B6256BBAB300E07E4A /* PBXContainerItemProxy */;
+		};
 		3C1FED032556D5AB0001BD58 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 3C849659255405AD00900DA9 /* iOSProject */;
@@ -377,6 +461,48 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		3C1A70BA256BBAB300E07E4A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = NotificationServiceExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.github.peripheryapp.iOSProject.NotificationServiceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3C1A70BB256BBAB300E07E4A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = NotificationServiceExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.github.peripheryapp.iOSProject.NotificationServiceExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		3C1FED042556D5AB0001BD58 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -645,6 +771,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3C1A70BC256BBAB300E07E4A /* Build configuration list for PBXNativeTarget "NotificationServiceExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3C1A70BA256BBAB300E07E4A /* Debug */,
+				3C1A70BB256BBAB300E07E4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		3C1FED062556D5AB0001BD58 /* Build configuration list for PBXNativeTarget "iOSProjectTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -52,6 +52,10 @@ class iOSProjectTest: SourceGraphTestCase {
         XCTAssertReferenced((.class, "SceneDelegate"))
     }
 
+    func testRetainsExtensionPrincipalClassReferencedInInfoPlist() {
+        XCTAssertReferenced((.class, "NotificationService"))
+    }
+
     func testRetainsXibReferencedClass() {
         XCTAssertReferenced((.class, "XibViewController"))
         XCTAssertReferenced((.varInstance, "button"), descendentOf: (.class, "XibViewController"))
