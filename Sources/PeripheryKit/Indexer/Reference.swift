@@ -39,6 +39,16 @@ final class Reference: Entity {
         case varParameter = "var.parameter"
         case varStatic = "var.static"
 
+        static var protocolMemberKinds: [Kind] {
+            let functionKinds: [Kind] = [.functionMethodInstance, .functionMethodStatic, .functionSubscript, .functionOperator, .functionOperatorInfix, .functionOperatorPostfix, .functionOperatorPrefix, .functionConstructor]
+            let variableKinds: [Kind] = [.varInstance, .varStatic]
+            return functionKinds + variableKinds
+        }
+
+        var isProtocolMemberKind: Bool {
+            Self.protocolMemberKinds.contains(self)
+        }
+
         var isFunctionKind: Bool {
             rawValue.hasPrefix("function")
         }

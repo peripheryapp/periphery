@@ -32,6 +32,7 @@ public final class Analyzer {
         ExtensionReferenceBuilder.self,
         ProtocolExtensionReferenceBuilder.self,
         ProtocolConformanceReferenceBuilder.self,
+        ExternalTypeProtocolConformanceReferenceRemover.self,
         DefaultConstructorReferenceBuilder.self,
         ComplexPropertyAccessorReferenceBuilder.self,
         EnumCaseReferenceBuilder.self,

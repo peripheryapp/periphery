@@ -75,6 +75,21 @@ public final class Declaration: Entity, CustomStringConvertible {
             Set(Kind.allCases.filter { $0.isExtensionKind })
         }
 
+        var extendedKind: Kind? {
+            switch self {
+            case .extensionClass:
+                return .class
+            case .extensionStruct:
+                return .struct
+            case .extensionEnum:
+                return .enum
+            case .extensionProtocol:
+                return .protocol
+            default:
+                return nil
+            }
+        }
+
         var isExtensionKind: Bool {
             rawValue.hasPrefix("extension")
         }

@@ -697,6 +697,36 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testDoesNotRetainProtocolMembersImplementedByExternalType() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.functionMethodInstance, "sync(execute:)"),
+                                descendentOf: (.protocol, "FixtureProtocol110"))
+            // Unused because DispatchQueue already provides an implementation, it appears Swift
+            // always favors the original implementation.
+            XCTAssertNotReferenced((.functionMethodInstance, "sync(execute:)"),
+                                   descendentOf: (.extensionClass, "DispatchQueue"))
+
+            XCTAssertNotReferenced((.functionMethodInstance, "async(execute:)"),
+                                   descendentOf: (.protocol, "FixtureProtocol110"))
+            XCTAssertNotReferenced((.functionMethodInstance, "async(execute:)"),
+                                   descendentOf: (.extensionClass, "DispatchQueue"))
+
+            XCTAssertReferenced((.functionMethodInstance, "customImplementedByExtensionUsed()"),
+                                descendentOf: (.protocol, "FixtureProtocol110"))
+            XCTAssertReferenced((.functionMethodInstance, "customImplementedByExtensionUsed()"),
+                                descendentOf: (.extensionProtocol, "FixtureProtocol110"))
+            XCTAssertReferenced((.functionMethodInstance, "customImplementedByExtensionUsed()"),
+                                descendentOf: (.extensionClass, "DispatchQueue"))
+
+            XCTAssertNotReferenced((.functionMethodInstance, "customImplementedByExtensionUnused()"),
+                                   descendentOf: (.protocol, "FixtureProtocol110"))
+            XCTAssertNotReferenced((.functionMethodInstance, "customImplementedByExtensionUnused()"),
+                                   descendentOf: (.extensionProtocol, "FixtureProtocol110"))
+            XCTAssertNotReferenced((.functionMethodInstance, "customImplementedByExtensionUnused()"),
+                                   descendentOf: (.extensionClass, "DispatchQueue"))
+        }
+    }
+
     func testDoesNotRetainDescendantsOfUnusedDeclaration() {
         analyze(retainPublic: true) {
             XCTAssertNotReferenced((.class, "FixtureClass99"))

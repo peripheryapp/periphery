@@ -181,15 +181,8 @@ public final class SourceGraph {
         mutationQueue.sync(execute: block)
     }
 
-    private let extendedReferenceKindMap: [Declaration.Kind: Reference.Kind] = [
-        .extensionClass: .class,
-        .extensionStruct: .struct,
-        .extensionProtocol: .protocol,
-        .extensionEnum: .enum
-        ]
-
     func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
-        guard let extendedKind = extendedReferenceKindMap[extensionDeclaration.kind] else {
+        guard let extendedKind = extensionDeclaration.kind.extendedKind?.referenceEquivalent else {
             throw PeripheryError.sourceGraphIntegrityError(message: "Unknown extended reference kind for extension '\(extensionDeclaration.kind.rawValue)'")
         }
 
