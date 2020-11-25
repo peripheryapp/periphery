@@ -732,9 +732,8 @@ class RetentionTest: SourceGraphTestCase {
             XCTAssertNotReferenced((.class, "FixtureClass99"))
             XCTAssertNotReferenced((.functionMethodInstance, "someMethod()"))
             XCTAssertNotReferenced((.varInstance, "someVar"))
-
-            XCTAssertIgnored((.functionMethodInstance, "someMethod()"))
-            XCTAssertIgnored((.varInstance, "someVar"))
+            XCTAssertNotReferenced((.functionMethodInstance, "someMethod()"))
+            XCTAssertNotReferenced((.varInstance, "someVar"))
         }
     }
 
@@ -945,7 +944,7 @@ class RetentionTest: SourceGraphTestCase {
         analyze() {
             XCTAssertNotReferenced((.class, "FixtureClass105"))
             XCTAssertNotReferenced((.functionMethodInstance, "unused(param:)"))
-            XCTAssertIgnored((.varParameter, "param"))
+            XCTAssertNotReferenced((.varParameter, "param"))
         }
     }
 
@@ -1061,20 +1060,21 @@ class RetentionTest: SourceGraphTestCase {
 
     func testIgnoreComments() {
         analyze(retainPublic: true) {
-            XCTAssertIgnored((.class, "Fixture113"))
-            XCTAssertIgnored((.functionMethodInstance, "someFunc(param:)"), descendentOf: (.class, "Fixture113"))
-            XCTAssertIgnored((.varParameter, "param"), descendentOf: (.functionMethodInstance, "someFunc(param:)"))
-            XCTAssertIgnored((.varParameter, "b"))
-            XCTAssertIgnored((.varParameter, "c"))
+            XCTAssertReferenced((.class, "Fixture113"))
+            XCTAssertReferenced((.functionMethodInstance, "someFunc(param:)"), descendentOf: (.class, "Fixture113"))
+            XCTAssertReferenced((.functionMethodInstance, "referencedFunc()"), descendentOf: (.class, "Fixture114"))
+            XCTAssertReferenced((.varParameter, "param"), descendentOf: (.functionMethodInstance, "someFunc(param:)"))
+            XCTAssertReferenced((.varParameter, "b"))
+            XCTAssertReferenced((.varParameter, "c"))
         }
     }
 
     func testIgnoreAllComment() {
         analyze(retainPublic: true) {
-            XCTAssertIgnored((.class, "Fixture115"))
-            XCTAssertIgnored((.functionMethodInstance, "someFunc(param:)"), descendentOf: (.class, "Fixture115"))
-            XCTAssertIgnored((.varParameter, "param"), descendentOf: (.functionMethodInstance, "someFunc(param:)"))
-            XCTAssertIgnored((.class, "Fixture116"))
+            XCTAssertReferenced((.class, "Fixture115"))
+            XCTAssertReferenced((.functionMethodInstance, "someFunc(param:)"), descendentOf: (.class, "Fixture115"))
+            XCTAssertReferenced((.varParameter, "param"), descendentOf: (.functionMethodInstance, "someFunc(param:)"))
+            XCTAssertReferenced((.class, "Fixture116"))
         }
     }
 

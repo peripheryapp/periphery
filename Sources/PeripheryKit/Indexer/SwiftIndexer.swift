@@ -288,12 +288,12 @@ public final class SwiftIndexer {
 
         private func applyCommands(for decls: [Declaration], metadataResult result: MetadataParser.Result) {
             if result.fileCommands.contains(.ignoreAll) {
-                ignoreHierarchy(decls)
-            }
-
-            for decl in decls {
-                if decl.commentCommands.contains(.ignore) {
-                    ignoreHierarchy([decl])
+                retainHierarchy(decls)
+            } else {
+                for decl in decls {
+                    if decl.commentCommands.contains(.ignore) {
+                        retainHierarchy([decl])
+                    }
                 }
             }
         }
@@ -333,11 +333,11 @@ public final class SwiftIndexer {
             return result
         }
 
-        private func ignoreHierarchy(_ decls: [Declaration]) {
+        private func retainHierarchy(_ decls: [Declaration]) {
             decls.forEach {
-                graph.ignore($0)
-                $0.unusedParameters.forEach { graph.ignore($0) }
-                ignoreHierarchy(Array($0.declarations))
+                $0.markRetained()
+                $0.unusedParameters.forEach { $0.markRetained() }
+                retainHierarchy(Array($0.declarations))
             }
         }
 
@@ -378,7 +378,7 @@ public final class SwiftIndexer {
                     graph.add(paramDecl)
 
                     if ignoredParamNames.contains(param.name) {
-                        graph.ignore(paramDecl)
+                        paramDecl.markRetained()
                     }
                 }
             }

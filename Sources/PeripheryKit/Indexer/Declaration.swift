@@ -175,7 +175,7 @@ public final class Declaration: Entity, CustomStringConvertible {
     }
 
     public var descendentDeclarations: Set<Declaration> {
-        Set(declarations.flatMap { $0.descendentDeclarations }).union(declarations)
+        Set(declarations.flatMap { $0.descendentDeclarations }).union(declarations).union(unusedParameters)
     }
 
     var immediateSuperclassReferences: Set<Reference> {

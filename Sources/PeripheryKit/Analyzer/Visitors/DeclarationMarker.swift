@@ -53,11 +53,7 @@ final class DeclarationMarker: SourceGraphVisitor {
                 else { continue }
 
             if dereferencedDeclarations.contains(decl) {
-                decl.descendentDeclarations.forEach {
-                    graph.ignore($0)
-                    $0.unusedParameters.forEach { graph.ignore($0) }
-                }
-                decl.unusedParameters.forEach { graph.ignore($0) }
+                decl.descendentDeclarations.forEach { graph.ignore($0) }
                 continue
             } else {
                 ignoreDereferencedDescendents(in: decl.declarations,
