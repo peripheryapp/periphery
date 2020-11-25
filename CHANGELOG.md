@@ -13,6 +13,7 @@
 
 - Protocol members whose implementation is provided by an external type, yet aren't referenced via a value type are now identified as unused.
 - @IBInspectable properties are now retained.
+- Declarations ignored with a '// periphery:ignore' comment now also retain their references to other declarations.
 
 ## 2.2.2 (2020-11-23)
 
