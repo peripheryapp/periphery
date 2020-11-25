@@ -27,7 +27,7 @@ final class XibReferenceRetainer: SourceGraphVisitor {
             for declaration in allDecls {
                 let attributes = declaration.attributes
 
-                if attributes.contains("IBOutlet") || attributes.contains("IBAction") {
+                if attributes.contains("IBOutlet") || attributes.contains("IBAction") || attributes.contains("IBInspectable") {
                     declaration.markRetained()
                 }
             }

@@ -12,6 +12,7 @@
 ##### Bug Fixes
 
 - Protocol members whose implementation is provided by an external type, yet aren't referenced via a value type are now identified as unused.
+- @IBInspectable properties are now retained.
 
 ## 2.2.2 (2020-11-23)
 

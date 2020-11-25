@@ -4,6 +4,7 @@ class XibViewController: UIViewController {
     @IBOutlet weak var button: UIButton!
     @IBAction func click(_ sender: Any) {}
     @IBAction func clickFromSubclass(_ sender: Any) {}
+    @IBInspectable var color: UIColor?
 
     override func viewDidLoad() {
         super.viewDidLoad()

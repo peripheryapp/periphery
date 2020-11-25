@@ -59,6 +59,7 @@ class iOSProjectTest: SourceGraphTestCase {
     func testRetainsXibReferencedClass() {
         XCTAssertReferenced((.class, "XibViewController"))
         XCTAssertReferenced((.varInstance, "button"), descendentOf: (.class, "XibViewController"))
+        XCTAssertReferenced((.varInstance, "color"), descendentOf: (.class, "XibViewController"))
         XCTAssertReferenced((.functionMethodInstance, "click(_:)"), descendentOf: (.class, "XibViewController"))
     }
 
