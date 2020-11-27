@@ -203,20 +203,20 @@ class Subclass: Base {
 
 ### Protocols
 
-A protocol which is conformed to by an object is not truly used unless it's also used in a type cast, as a property type, or to specialize a generic method/class, etc. Periphery is able to identify such protocols whether they are conformed to by one, or even multiple objects.
+A protocol which is conformed to by an object is not truly used unless it's also used as an existential type, or to specialize a generic method/class. Periphery is able to identify such redundant protocols whether they are conformed to by one, or even multiple objects.
 
 ```swift
-protocol MyProtocol { // 'MyProtocol' is unused
+protocol MyProtocol { // 'MyProtocol' is redundant
     func someMethod()
 }
 
-class MyClass1: MyProtocol {
+class MyClass1: MyProtocol { // 'MyProtocol' conformance is redundant
     func someMethod() {
         print("Hello from MyClass1!")
   }
 }
 
-class MyClass2: MyProtocol {
+class MyClass2: MyProtocol { // 'MyProtocol' conformance is redundant
     func someMethod() {
         print("Hello from MyClass2!")
   }
@@ -229,7 +229,7 @@ let myClass2 = MyClass2()
 myClass2.someMethod()
 ```
 
-Here we can see that despite both implementations of `someMethod` are called, at no point does an object take on the type of `MyProtocol`. Therefore the protocol itself is redundant, and there's no benefit from `MyClass1` or `MyClass2` conforming to it. We can remove `MyProtocol` and just keep `someMethod` in each class.
+Here we can see that despite both implementations of `someMethod` are called, at no point does an object take on the type of `MyProtocol`. Therefore the protocol itself is redundant, and there's no benefit from `MyClass1` or `MyClass2` conforming to it. We can remove `MyProtocol` along with each redundant conformance, and just keep `someMethod` in each class.
 
 Just like a normal method or property of a object, individual properties and methods declared by your protocol can also be identified as unused.
 

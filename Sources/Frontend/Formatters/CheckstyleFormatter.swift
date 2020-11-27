@@ -15,10 +15,11 @@ public final class CheckstyleFormatter: OutputFormatter {
     }
 
     public func perform(_ declarations: [Declaration]) {
+        let results = declarations.flatMap { describeResults(for: $0, colored: false) }
         let xml = [
             "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<checkstyle version=\"4.3\">",
-            declarations
-                .group(by: { ($0.location.file.string).escapedForXML() })
+            results
+                .group(by: { ($0.0.file.string).escapedForXML() })
                 .sorted(by: { $0.key < $1.key })
                 .map(generateForFile).joined(),
             "\n</checkstyle>"
@@ -28,46 +29,23 @@ public final class CheckstyleFormatter: OutputFormatter {
 
     // MARK: - Private
 
-    private func generateForFile(_ file: String, declarations: [Declaration]) -> String {
+    private func generateForFile(_ file: String, results: [(SourceLocation, String)]) -> String {
         return [
             "\n\t<file name=\"", file, "\">\n",
-            declarations.map(generateForDeclaration).joined(),
+            results.map(generateForResult).joined(),
             "\t</file>"
         ].joined()
     }
 
-    private func generateForDeclaration(_ declaration: Declaration) -> String {
-        let line = declaration.location.line ?? 0
-        let col = declaration.location.column ?? 0
-        let reason = message(for: declaration)
+    private func generateForResult(_ result: (SourceLocation, String)) -> String {
+        let line = result.0.line ?? 0
+        let col = result.0.column ?? 0
+
         return [
             "\t\t<error line=\"\(line)\" ",
             "column=\"\(col)\" ",
             "severity=\"warning\" ",
-            "message=\"", reason, "\"/>\n"
+            "message=\"", result.1.escapedForXML(), "\"/>\n"
         ].joined()
-    }
-
-    private func message(for decl: Declaration) -> String {
-        var message = ""
-
-        if let name = decl.name {
-            if let kind = decl.kind.displayName, let first_ = kind.first {
-                let first = String(first_)
-                message += "\(first.uppercased())\(kind.dropFirst()) "
-            }
-
-            message += "'\(name)'"
-
-            if decl.analyzerHints.contains(.assignOnlyProperty) {
-                message += " is assigned, but never used"
-            } else {
-                message += " is unused"
-            }
-        } else {
-            message += "unused"
-        }
-
-        return message.escapedForXML()
     }
 }

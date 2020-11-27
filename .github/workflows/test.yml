@@ -4,6 +4,8 @@ on:
     branches:
       - master
   pull_request: {}
+env:
+  cache_version: 1
 jobs:
   macOS:
     strategy:
@@ -21,9 +23,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: .build
-        key: ${{ runner.os }}-${{ matrix.xcode }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
+        key: ${{ env.cache_version }}-${{ runner.os }}-${{ matrix.xcode }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.xcode }}-spm-deps-
+          ${{ env.cache_version }}-${{ runner.os }}-${{ matrix.xcode }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: swift package resolve
@@ -50,9 +52,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: .build
-        key: ${{ runner.os }}-${{ matrix.swift }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
+        key: ${{ env.cache_version }}-${{ runner.os }}-${{ matrix.swift }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.swift }}-spm-deps-
+          ${{ env.cache_version }}-${{ runner.os }}-${{ matrix.swift }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: swift package resolve

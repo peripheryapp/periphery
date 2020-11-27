@@ -2,8 +2,9 @@ import Foundation
 import Shared
 
 public final class Analyzer {
-    public enum Hint {
+    public enum Hint: Equatable {
         case assignOnlyProperty
+        case redundantProtocol(references: Set<Reference>)
     }
 
     public static func perform(graph: SourceGraph) throws {
@@ -55,7 +56,8 @@ public final class Analyzer {
         AncestralReferenceEliminator.self,
         UnusedSimplePropertyReferenceEliminator.self,
 
-        DeclarationMarker.self
+        DeclarationMarker.self,
+        RedundantProtocolMarker.self
     ]
 
     private let graph: SourceGraph

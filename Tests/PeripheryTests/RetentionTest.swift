@@ -183,13 +183,45 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testProtocolVarReferencedByProtocolMethodInSameClassIsRetained() {
+    func testSimpleRedundantProtocol() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass114"))
+            XCTAssertReferenced((.protocol, "FixtureProtocol114"))
+            XCTAssertRedundantProtocol("FixtureProtocol114",
+                                       implementedBy:
+                                        (.class, "FixtureClass114"),
+                                        (.extensionClass, "FixtureClass115"),
+                                        (.struct, "FixtureStruct116"))
+        }
+    }
+
+    func testRedundantProtocolThatInheritsForeignProtocol() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass118"))
+            XCTAssertReferenced((.protocol, "FixtureProtocol118"))
+            // Protocols that inherit external protocols cannot be guaranteed to be redundant.
+            XCTAssertNotRedundantProtocol("FixtureProtocol118")
+        }
+    }
+
+    func testProtocolUsedAsExistentialType() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass119"))
+            XCTAssertReferenced((.protocol, "FixtureProtocol119"))
+            XCTAssertNotReferenced((.functionMethodInstance, "protocolFunc()"), descendentOf: (.protocol, "FixtureProtocol119"))
+            // Protocol is not redundant even though none of its members are called as it's used an existential type.
+            XCTAssertNotRedundantProtocol("FixtureProtocol119")
+        }
+    }
+
+    func testProtocolVarReferencedByProtocolMethodInSameClassIsRedundant() {
         // Despite the conforming class depending internally upon the protocol methods, the protocol
         // itself is unused. In a real situation the protocol could be removed and the conforming
         // class refactored.
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass51"))
-            XCTAssertNotReferenced((.protocol, "FixtureProtocol51"))
+            XCTAssertReferenced((.protocol, "FixtureProtocol51"))
+            XCTAssertRedundantProtocol("FixtureProtocol51", implementedBy: (.class, "FixtureClass51"))
 
             XCTAssertReferenced((.functionMethodInstance, "publicMethod()"),
                                 descendentOf: (.class, "FixtureClass51"))
@@ -207,18 +239,6 @@ class RetentionTest: SourceGraphTestCase {
 
             XCTAssertReferenced((.functionMethodInstance, "protocolMethod()"),
                                 descendentOf: (.class, "FixtureClass52"))
-        }
-    }
-
-    func testProtocolConformedByClassButNeverDirectlyUsedIsNotRetained() {
-        analyze(retainPublic: true) {
-            XCTAssertReferenced((.class, "FixtureClass54")) // because it's public
-            XCTAssertNotReferenced((.protocol, "FixtureProtocol54")) // internal
-
-            XCTAssertNotReferenced((.functionMethodInstance, "protocolMethod()"),
-                                   descendentOf: (.class, "FixtureClass54"))
-            XCTAssertNotReferenced((.functionMethodInstance, "protocolMethod()"),
-                                   descendentOf: (.protocol, "FixtureProtocol54"))
         }
     }
 
@@ -617,15 +637,6 @@ class RetentionTest: SourceGraphTestCase {
                                    descendentOf: (.protocol, "Fixture88State"))
             XCTAssertNotReferenced((.typealias, "AssociatedType"),
                                    descendentOf: (.enum, "Fixture88MyState"))
-        }
-    }
-
-    func testRedundantMethodRedeclarationInProtocolSubclass() {
-        analyze(retainPublic: true) {
-            XCTAssertReferenced((.functionMethodInstance, "protocolMethod()"),
-                                descendentOf: (.protocol, "Fixture85ParentProtocol"))
-            XCTAssertNotReferenced((.functionMethodInstance, "protocolMethod()"),
-                                   descendentOf: (.protocol, "Fixture85ChildProtocol"))
         }
     }
 

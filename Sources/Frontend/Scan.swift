@@ -46,7 +46,7 @@ public final class Scan: Injectable {
 
         try Analyzer.perform(graph: graph)
 
-        let reducer = RedundantDeclarationReducer(declarations: graph.dereferencedDeclarations)
+        let reducer = RedundantDeclarationReducer(declarations: graph.resultDeclarations)
         let reducedDeclarations = reducer.reduce()
 
         return ScanResult(declarations: reducedDeclarations, graph: graph)
