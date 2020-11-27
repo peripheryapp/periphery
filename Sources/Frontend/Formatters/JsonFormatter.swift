@@ -16,18 +16,37 @@ final class JsonFormatter: OutputFormatter {
     public func perform(_ declarations: [Declaration]) throws {
         var jsonObject: [Any] = []
 
-        declarations.forEach {
+        for decl in declarations {
             let object: [AnyHashable: Any] = [
-                "kind": $0.kind.rawValue,
-                "name": $0.name ?? "",
-                "modifiers": Array($0.modifiers),
-                "attributes": Array($0.attributes),
-                "accessibility": $0.accessibility.value.rawValue,
-                "ids": Array($0.usrs),
-                "hints": $0.analyzerHints.map { String(describing: $0) },
-                "location": $0.location.description
+                "kind": decl.kind.rawValue,
+                "name": decl.name ?? "",
+                "modifiers": Array(decl.modifiers),
+                "attributes": Array(decl.attributes),
+                "accessibility": decl.accessibility.value.rawValue,
+                "ids": Array(decl.usrs),
+                "hints": [describe(decl.analyzerHint) ?? ""],
+                "location": decl.location.description
             ]
             jsonObject.append(object)
+
+            switch decl.analyzerHint {
+            case let .redundantProtocol(references: references):
+                for ref in references {
+                    let object: [AnyHashable: Any] = [
+                        "kind": ref.kind.rawValue,
+                        "name": ref.name ?? "",
+                        "modifiers": [],
+                        "attributes": [],
+                        "accessibility": "",
+                        "ids": [ref.usr],
+                        "hints": [redundantConformanceHint],
+                        "location": ref.location.description
+                    ]
+                    jsonObject.append(object)
+                }
+            default:
+                break
+            }
         }
 
         let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted])

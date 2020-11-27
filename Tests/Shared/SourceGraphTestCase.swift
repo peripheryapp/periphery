@@ -59,6 +59,40 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
+    public func XCTAssertRedundantProtocol(_ name: String, implementedBy conformances: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = find((.protocol, name)) else {
+            XCTFail("Expected protocol '\(name)' to exist.", file: file, line: line)
+            return
+        }
+
+        switch declaration.analyzerHint {
+        case let .redundantProtocol(references):
+            let decls = references.compactMap { $0.parent as? Declaration }
+
+            for conformance in conformances {
+                if !decls.contains(where: { $0.kind == conformance.kind && $0.name == conformance.name }) {
+                    XCTFail("Expected \(conformance) to implement protocol '\(name)'.")
+                }
+            }
+        default:
+            XCTFail("Expected '\(name)' to be redundant.", file: file, line: line)
+        }
+    }
+
+    public func XCTAssertNotRedundantProtocol(_ name: String, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = find((.protocol, name)) else {
+            XCTFail("Expected protocol '\(name)' to exist.", file: file, line: line)
+            return
+        }
+
+        switch declaration.analyzerHint {
+        case .redundantProtocol(_):
+            XCTFail("Expected '\(name)' to not be redundant.", file: file, line: line)
+        default:
+            return
+        }
+    }
+
     public func find(_ description: DeclarationDescription, in collection: Set<Declaration>? = nil) -> Declaration? {
         return (collection ?? graph.allDeclarations).first { $0.kind == description.kind && $0.name == description.name }
     }

@@ -94,6 +94,10 @@ public final class Declaration: Entity, CustomStringConvertible {
             rawValue.hasPrefix("extension")
         }
 
+        var isConformingKind: Bool {
+            isExtensionKind || [.class, .struct, .enum].contains(self)
+        }
+
         static var accessorKinds: Set<Kind> {
             Set(Kind.allCases.filter { $0.isAccessorKind })
         }
@@ -149,13 +153,13 @@ public final class Declaration: Entity, CustomStringConvertible {
     public let kind: Kind
     public var name: String?
     public let usrs: Set<String>
-    public var analyzerHints: [Analyzer.Hint] = []
+    public var analyzerHint: Analyzer.Hint?
     public var unusedParameters: Set<Declaration> = []
     public var declarations: Set<Declaration> = []
+    public var commentCommands: Set<CommentCommand> = []
+    public var references: Set<Reference> = []
 
-    var parent: Entity?
-    var commentCommands: Set<CommentCommand> = []
-    var references: Set<Reference> = []
+    public var parent: Entity?
     var related: Set<Reference> = []
     var isImplicit: Bool = false
 
@@ -236,7 +240,7 @@ public final class Declaration: Entity, CustomStringConvertible {
 
     // MARK: - Analyzer Marking
 
-    private(set) var isRetained: Bool = false // retained regardless of presence of references
+    private(set) var isRetained: Bool = false
 
     func markRetained() {
         isRetained = true
@@ -249,6 +253,7 @@ extension Declaration: Hashable {
         hasher.combine(usrs)
         hasher.combine(name)
         hasher.combine(location)
+        hasher.combine(isImplicit)
     }
 }
 

@@ -6,6 +6,7 @@
 
 ##### Enhancements
 
+- Protocols that are never used as an existential type are now explicitly identified as redundant rather than simply unused, which could be confusing.
 - Add `--clean-build` flag to clean build artifacts before the build step.
 - Add support for files that are members of multiple build targets. Such files no longer produce erroneous results.
 

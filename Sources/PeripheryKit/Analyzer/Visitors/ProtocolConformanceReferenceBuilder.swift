@@ -81,48 +81,10 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
         let relatedReferences = graph.allReferences.filter { $0.isRelated }
 
         for relatedReference in relatedReferences.subtracting(nonInvertableReferences) {
-            guard let conformingDeclaration = relatedReference.parent as? Declaration else { continue }
+            guard let conformingDeclaration = relatedReference.parent as? Declaration,
+                  let equivalentDeclarationKind = relatedReference.kind.declarationEquivalent
+            else { continue }
 
-            if relatedReference.kind == .protocol,
-                [.class, .struct].contains(conformingDeclaration.kind) {
-                // Remove any references from a class/struct to the protocol it conforms to.
-                // A protocol should only be retained if it's used directly, and not simply because
-                // a class/struct (which may itself be unsued) conforms to it.
-
-                // However, we can only remove the reference if the protocol does not inherit a foreign protocol,
-                // as the foreign protool may be used only by foreign code which is not visibile to us.
-                // E.g a protocol may inherit Comparable and implement the operator '<', however we have no way to see
-                // that '<' is used when calling sort().
-
-                let inheritsForeignProtocol = graph.superclassReferences(of: conformingDeclaration).contains {
-                    graph.explicitDeclaration(withUsr: $0.usr) == nil
-                }
-
-                if !inheritsForeignProtocol {
-                    graph.remove(relatedReference)
-
-                    // For some reason, a class/struct that conforms to a protocol will have both a
-                    // normal reference and a related reference to the protocol from the same
-                    // location. We just removed the related reference, so we now need to remove the
-                    // normal reference.
-                    let redundantReference = conformingDeclaration.references.first {
-                        // We're not using Equatable to compare these references sine that will
-                        // also take into account 'isRelated'. We're ignoring 'isRelated' because
-                        // they will always be different.
-                        $0.kind == relatedReference.kind &&
-                            $0.usr == relatedReference.usr &&
-                            $0.location == relatedReference.location
-                    }
-
-                    if let redundantReference = redundantReference {
-                        graph.remove(redundantReference)
-                    }
-                }
-            }
-
-            // From this point onward we are only considering absolutely equivalent declarations,
-            // typically methods and vars.
-            guard let equivalentDeclarationKind = relatedReference.kind.declarationEquivalent else { continue }
             var equivalentDeclarationKinds = [equivalentDeclarationKind]
 
             // A comforming declaration can be declared either 'class' or 'static', whereas

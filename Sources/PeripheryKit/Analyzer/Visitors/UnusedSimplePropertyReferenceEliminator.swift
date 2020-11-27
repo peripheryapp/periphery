@@ -37,7 +37,7 @@ final class UnusedSimplePropertyReferenceEliminator: SourceGraphVisitor {
 
                 if !hasGetterReference {
                     graph.remove(propertyReference)
-                    property.analyzerHints.append(.assignOnlyProperty)
+                    property.analyzerHint = .assignOnlyProperty
                 }
             }
         }

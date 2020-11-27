@@ -1,6 +1,6 @@
 import Foundation
 
-public extension Array where Element: Equatable {
+public extension Array {
     func group<U: Hashable>(by transform: (Element) -> U) -> [U: [Element]] {
         return reduce([:]) { dictionary, element in
             var dictionary = dictionary

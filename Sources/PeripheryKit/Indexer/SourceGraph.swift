@@ -3,13 +3,14 @@ import Shared
 
 public final class SourceGraph {
     private(set) public var allDeclarations: Set<Declaration> = []
-    private(set) public var ignoredDeclarations: Set<Declaration> = []
 
     private(set) var rootDeclarations: Set<Declaration> = []
     private(set) var rootReferences: Set<Reference> = []
     private(set) var allReferences: Set<Reference> = []
     private(set) var markedDeclarations: Set<Declaration> = []
+    private(set) var redundantDeclarations: Set<Declaration> = []
 
+    private var ignoredDeclarations: Set<Declaration> = []
     private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
@@ -18,6 +19,10 @@ public final class SourceGraph {
 
     var xibReferences: [XibReference] = []
     var infoPlistReferences: [InfoPlistReference] = []
+
+    public var resultDeclarations: Set<Declaration> {
+        dereferencedDeclarations.union(redundantDeclarations.subtracting(ignoredDeclarations))
+    }
 
     public var dereferencedDeclarations: Set<Declaration> {
         return allDeclarations
@@ -63,7 +68,13 @@ public final class SourceGraph {
         Set(decl.usrs.flatMap { allReferencesByUsr[$0] ?? [] })
     }
 
-    func ignore(_ declaration: Declaration) {
+    func markRedundant(_ declaration: Declaration) {
+        mutationQueue.sync {
+            _ = redundantDeclarations.insert(declaration)
+        }
+    }
+
+    func markIgnored(_ declaration: Declaration) {
         mutationQueue.sync {
             _ = ignoredDeclarations.insert(declaration)
         }

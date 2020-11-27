@@ -19,28 +19,13 @@ public final class XcodeFormatter: OutputFormatter {
             return
         }
 
-        declarations.forEach {
-            var line = prefix(for: $0.location)
+        for decl in declarations {
+            let results = describeResults(for: decl, colored: true)
 
-            if var name = $0.name {
-                if let kind = $0.kind.displayName, let first_ = kind.first {
-                    let first = String(first_)
-                    line += "\(first.uppercased())\(kind.dropFirst()) "
-                }
-
-                name = colorize(name, .lightBlue)
-                line += "'\(name)'"
-
-                if $0.analyzerHints.contains(.assignOnlyProperty) {
-                    line += " is assigned, but never used"
-                } else {
-                    line += " is unused"
-                }
-            } else {
-                line += "unused"
+            for (location, result) in results {
+                let line = prefix(for: location) + result
+                logger.info(line, canQuiet: false)
             }
-
-            logger.info(line, canQuiet: false)
         }
     }
 

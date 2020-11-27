@@ -16,13 +16,53 @@ public final class CsvFormatter: OutputFormatter {
     public func perform(_ declarations: [Declaration]) {
         logger.info("Kind,Name,Modifiers,Attributes,Accessibility,IDs,Location,Hints", canQuiet: false)
 
-        declarations.forEach {
-            let modifiers = $0.modifiers.joined(separator: "|")
-            let attributes = $0.attributes.joined(separator: "|")
-            let hints = $0.analyzerHints.map { String(describing: $0) }.joined(separator: "|")
-            let usrs = $0.usrs.joined(separator: "|")
+        for decl in declarations {
+            let line = format(
+                kind: decl.kind.rawValue,
+                name: decl.name,
+                modifiers: decl.modifiers,
+                attributes: decl.attributes,
+                accessibility: decl.accessibility.value.rawValue,
+                usrs: decl.usrs,
+                location: decl.location,
+                hint: describe(decl.analyzerHint))
+            logger.info(line, canQuiet: false)
 
-            logger.info("\($0.kind.rawValue),\($0.name ?? ""),\(modifiers),\(attributes),\($0.accessibility.value.rawValue),\(usrs),\($0.location),\(hints)", canQuiet: false)
+            switch decl.analyzerHint {
+            case let .redundantProtocol(references: references):
+                for ref in references {
+                    let line = format(
+                        kind: ref.kind.rawValue,
+                        name: ref.name,
+                        modifiers: [],
+                        attributes: [],
+                        accessibility: nil,
+                        usrs: [ref.usr],
+                        location: ref.location,
+                        hint: redundantConformanceHint)
+                    logger.info(line, canQuiet: false)
+                }
+            default:
+                break
+            }
         }
+    }
+
+    // MARK: - Private
+
+    private func format(
+        kind: String,
+        name: String?,
+        modifiers: Set<String>,
+        attributes: Set<String>,
+        accessibility: String?,
+        usrs: Set<String>,
+        location: SourceLocation,
+        hint: String?
+    ) -> String {
+        let joinedModifiers = attributes.joined(separator: "|")
+        let joinedAttributes = modifiers.joined(separator: "|")
+        let joinedUsrs = usrs.joined(separator: "|")
+        return "\(kind),\(name ?? ""),\(joinedModifiers),\(joinedAttributes),\(accessibility ?? ""),\(joinedUsrs),\(location),\(hint ?? "")"
     }
 }
