@@ -3,7 +3,6 @@ import PathKit
 import PeripheryKit
 import Shared
 
-// TODO: things hangs if e.g xcodebuild just prints its help options
 public final class Xcodebuild: Injectable {
     private let shell: Shell
 
@@ -22,7 +21,7 @@ public final class Xcodebuild: Injectable {
             return version
         }
 
-        let version = try exec(["xcodebuild", "-version"]).trimmed
+        let version = try shell.exec(["xcodebuild", "-version"]).trimmed
         Xcodebuild.version = version
         return version
     }
@@ -49,12 +48,11 @@ public final class Xcodebuild: Injectable {
         ]
 
         let xcodebuild = "xcodebuild \((args + [cmd] + envs).joined(separator: " "))"
-
-        return try exec(["/bin/sh", "-c", xcodebuild])
+        return try shell.exec([xcodebuild])
     }
 
     func removeDerivedData(for project: XcodeProjectlike, allSchemes: [XcodeScheme]) throws {
-        try exec(["rm", "-rf", try derivedDataPath(for: project, schemes: allSchemes).string])
+        try shell.exec(["rm", "-rf", try derivedDataPath(for: project, schemes: allSchemes).string])
     }
 
     func indexStorePath(project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> String {
@@ -72,7 +70,7 @@ public final class Xcodebuild: Injectable {
             "-json"
         ]
 
-        let lines = try exec(["xcodebuild"] + args, stderr: false).split(separator: "\n").map { String($0) }
+        let lines = try shell.exec(["xcodebuild"] + args, stderr: false).split(separator: "\n").map { String($0) }
 
         // xcodebuild may output unrelated warnings, we need to strip it out otherwise
         // JSON parsing will fail.
@@ -100,9 +98,9 @@ public final class Xcodebuild: Injectable {
             // Schemes that are not configured for testing will result in an error if the 'test'
             // action is supplied.
             // Note: we don't use -skipUnavailableActions here as it returns incorrect output.
-            return try exec(["xcodebuild"] + args + ["build", "test"], stderr: false)
+            return try shell.exec(["xcodebuild"] + args + ["build", "test"], stderr: false)
         } catch PeripheryError.shellCommandFailed(args: _, status: _, output: _) {
-            return try exec(["xcodebuild"] + args + ["build"], stderr: false)
+            return try shell.exec(["xcodebuild"] + args + ["build"], stderr: false)
         }
     }
 
@@ -122,19 +120,5 @@ public final class Xcodebuild: Injectable {
     private func cachePath() throws -> Path {
         let url = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
         return Path(url.appendingPathComponent("com.github.peripheryapp").path)
-    }
-
-    @discardableResult
-    private func exec(_ args: [String], stderr: Bool = true) throws -> String {
-        let env = ProcessInfo.processInfo.environment
-        let newEnv = env.filter {
-            if ["CURRENT_ARCH", "arch"].contains($0.key) && $0.value == "undefined_arch" {
-                return false
-            }
-
-            return true
-        }
-
-        return try shell.exec(args, stderr: stderr, env: newEnv)
     }
 }

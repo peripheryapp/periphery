@@ -62,3 +62,5 @@ jobs:
       run: swift build --build-tests --enable-test-discovery
     - name: Test
       run: swift test --enable-test-discovery
+    - name: Scan
+      run: ./.build/debug/periphery scan --quiet --skip-build

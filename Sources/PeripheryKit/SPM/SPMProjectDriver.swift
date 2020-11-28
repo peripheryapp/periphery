@@ -66,8 +66,6 @@ extension SPMProjectDriver: ProjectDriver {
 
         if let path = configuration.indexStorePath {
             storePath = path
-        } else if let env = ProcessInfo.processInfo.environment["BUILD_ROOT"] {
-            storePath = (Path(env).absolute().parent().parent() + "Index/DataStore").string
         } else {
             storePath = (Path(package.path) + ".build/debug/index/store").string
         }

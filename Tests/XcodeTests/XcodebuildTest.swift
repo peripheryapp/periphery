@@ -50,7 +50,7 @@ class XcodebuildSchemesTest: XcodebuildTest {
 class ShellMock: Shell {
     var output: String = ""
 
-    override func exec(_ args: [String], stderr: Bool = true, env: [String: String] = ProcessInfo.processInfo.environment) throws -> String {
+    override func exec(_ args: [String], stderr: Bool = true) throws -> String {
         return output
     }
 }
