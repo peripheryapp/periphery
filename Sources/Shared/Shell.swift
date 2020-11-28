@@ -57,24 +57,26 @@ open class Shell: Injectable {
     }
 
     @discardableResult
-    open func exec(_ args: [String], stderr: Bool = true, env: [String: String] = ProcessInfo.processInfo.environment) throws -> String {
+    open func exec(_ args: [String], stderr: Bool = true) throws -> String {
         let task = Process()
-        task.environment = env
         task.launchPath = "/usr/bin/env"
-        task.arguments = args
+
+        let shell = ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/bash"
+        let newArgs: [String] = ["-i", shell, "-lc", "\(args.joined(separator: " "))"]
+        task.arguments = newArgs
 
         let pipe = Pipe()
         task.standardOutput = pipe
         task.standardError = stderr ? pipe : nil
 
         let logger: Logger = inject()
-        logger.debug("[shell] \(args.joined(separator: " "))")
+        logger.debug("[shell] \(task.launchPath ?? "") \(newArgs.joined(separator: " "))")
 
         Shell.tasksQueue.sync { _ = Shell.tasks.insert(task) }
 
         task.launch()
 
-        let readable = ReadableStream(args: args,
+        let readable = ReadableStream(args: newArgs,
                                       fileHandle: pipe.fileHandleForReading,
                                       task: task)
 
@@ -87,8 +89,8 @@ open class Shell: Injectable {
             return output
         }
 
-        throw PeripheryError.shellCommandFailed(args: args,
-                                                   status: status,
-                                                   output: output)
+        throw PeripheryError.shellCommandFailed(args: newArgs,
+                                                status: status,
+                                                output: output)
     }
 }
