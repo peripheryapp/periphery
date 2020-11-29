@@ -136,6 +136,8 @@ public final class Declaration: Entity, CustomStringConvertible {
                 return "property"
             case .varParameter:
                 return "parameter"
+            case .genericTypeParam:
+                return "generic type parameter"
             default:
                 return nil
             }
