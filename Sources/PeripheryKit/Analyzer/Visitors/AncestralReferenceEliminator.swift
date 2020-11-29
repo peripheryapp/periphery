@@ -18,7 +18,7 @@ final class AncestralReferenceEliminator: SourceGraphVisitor {
     }
 
     private func eliminateAncestralReferences(in declaration: Declaration, stack: [Declaration]) {
-        guard !declaration.isRetained else { return }
+        guard !graph.isRetained(declaration) else { return }
 
         eliminateAncestralReferences(in: declaration.references, stack: stack)
 

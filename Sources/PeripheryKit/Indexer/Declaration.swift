@@ -237,14 +237,6 @@ public final class Declaration: Entity, CustomStringConvertible {
         guard let parent = parent as? Declaration else { return false }
         return parent.kind == kind
     }
-
-    // MARK: - Analyzer Marking
-
-    private(set) var isRetained: Bool = false
-
-    func markRetained() {
-        isRetained = true
-    }
 }
 
 extension Declaration: Hashable {

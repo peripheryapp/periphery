@@ -22,12 +22,12 @@ final class XCTestRetainer: SourceGraphVisitor {
         let testCaseClasses = subclasses.union(immediateTestCaseClasses)
 
         for testCaseClass in testCaseClasses {
-            testCaseClass.markRetained()
+            graph.markRetained(testCaseClass)
             let methods = testCaseClass.declarations.filter { $0.kind == .functionMethodInstance }
 
             for method in methods {
                 if method.name?.hasPrefix("test") ?? false {
-                    method.markRetained()
+                    graph.markRetained(method)
                 }
             }
         }

@@ -23,7 +23,7 @@ final class StructImplicitConstructorPropertyRetainer: SourceGraphVisitor {
 
                 structDecl.declarations
                     .filter { $0.kind == .varInstance && varNames.contains($0.name ?? "") }
-                    .forEach { $0.markRetained() }
+                    .forEach { graph.markRetained($0) }
             }
         }
     }

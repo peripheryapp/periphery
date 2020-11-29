@@ -47,7 +47,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
 
                 for functionDecl in allFunctionDecls {
                     if configuration.retainUnusedProtocolFuncParams {
-                        functionDecl.unusedParameters.forEach { $0.markRetained() }
+                        functionDecl.unusedParameters.forEach { graph.markRetained($0) }
                     } else {
                         retain(functionDecl.unusedParameters, usedIn: allFunctionDecls)
                     }
@@ -63,7 +63,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
               let related = decl.related.first(where: { $0.kind == refKind && $0.name == decl.name }) else { return }
 
         if graph.explicitDeclaration(withUsr: related.usr) == nil {
-            params.forEach { $0.markRetained() }
+            params.forEach { graph.markRetained($0) }
         }
     }
 
@@ -91,7 +91,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
         if firstFunctionDecl.modifiers.contains("override") {
             // Must be overriding a declaration in a foreign class.
             functionDecls.forEach {
-                $0.unusedParameters.forEach { $0.markRetained() }
+                $0.unusedParameters.forEach { graph.markRetained($0) }
             }
         } else {
             // Retain all params that are used in any of the functions.
@@ -102,7 +102,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
     private func retain(_ params: Set<Declaration>, usedIn functionDecls: [Declaration]) {
         for param in params {
             if isParam(param, usedInAnyOf: functionDecls) {
-                param.markRetained()
+                graph.markRetained(param)
             }
         }
     }
@@ -111,7 +111,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
         for decl in decls {
             let matchingParam = decl.unusedParameters.first { $0.name == param.name }
 
-            if matchingParam?.isRetained ?? false {
+            if let param = matchingParam, graph.isRetained(param) {
                 // Already retained by a prior analysis.
                 return true
             }

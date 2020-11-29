@@ -334,6 +334,16 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testRetainedProtocolDoesNotRetainImplementationInUnusedClass() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.protocol, "FixtureProtocol200"))
+            XCTAssertReferenced((.functionMethodInstance, "protocolFunc()"), descendentOf: (.protocol, "FixtureProtocol200"))
+            XCTAssertNotReferenced((.class, "FixtureClass200"))
+            XCTAssertNotReferenced((.functionMethodInstance, "protocolFunc()"), descendentOf: (.class, "FixtureClass200"))
+            XCTAssertNotReferenced((.class, "FixtureClass201"))
+        }
+    }
+
     func testRetainOverridingMethod() {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass67"))
@@ -758,196 +768,214 @@ class RetentionTest: SourceGraphTestCase {
 
     // MARK: - Unused Parameters
 
-    func testRetainsParamUsedInOverriddenMethod() throws {
-        try analyze(retainPublic: true) {
+    func testRetainsParamUsedInOverriddenMethod() {
+        analyze(retainPublic: true) {
             // - FixtureClass101Base
 
-            let baseFunc1Param = get("param", "func1(param:)", "FixtureClass101Base")
             // Not used and not overriden.
-            try XCTAssertFalse(XCTUnwrap(baseFunc1Param).isRetained)
+            XCTAssertNotReferenced((.varParameter, "param"),
+                                   descendentOf: (.functionMethodInstance, "func1(param:)"),
+                                   (.class, "FixtureClass101Base"))
 
-            let baseFunc2Param = get("param", "func2(param:)", "FixtureClass101Base")
             // Nil because the param is used.
-            XCTAssertNil(baseFunc2Param)
+            XCTAssertNil(get("param", "func2(param:)", "FixtureClass101Base"))
 
-            let baseFunc3Param = get("param", "func3(param:)", "FixtureClass101Base")
             // Used in override.
-            try XCTAssertTrue(XCTUnwrap(baseFunc3Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "func3(param:)"),
+                                (.class, "FixtureClass101Base"))
 
-            let baseFunc4Param = get("param", "func4(param:)", "FixtureClass101Base")
             // Used in override.
-            try XCTAssertTrue(XCTUnwrap(baseFunc4Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "func4(param:)"),
+                                (.class, "FixtureClass101Base"))
 
-            let baseFunc5Param = get("param", "func5(param:)", "FixtureClass101Base")
             // Not used in any function.
-            try XCTAssertFalse(XCTUnwrap(baseFunc5Param).isRetained)
+            XCTAssertNotReferenced((.varParameter, "param"),
+                                   descendentOf: (.functionMethodInstance, "func5(param:)"),
+                                   (.class, "FixtureClass101Base"))
 
             // - FixtureClass101Subclass1
 
-            let sub1Func2Param = get("param", "func2(param:)", "FixtureClass101Subclass1")
             // Used in base.
-            try XCTAssertTrue(XCTUnwrap(sub1Func2Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "func2(param:)"),
+                                (.class, "FixtureClass101Subclass1"))
 
-            let sub1Func3Param = get("param", "func3(param:)", "FixtureClass101Subclass1")
             // Nil because the param is used.
-            XCTAssertNil(sub1Func3Param)
+            XCTAssertNil(get("param", "func3(param:)", "FixtureClass101Subclass1"))
 
             // - FixtureClass101Subclass2
 
-            let sub2Func4Param = get("param", "func4(param:)", "FixtureClass101Subclass2")
             // Nil because the param is used.
-            XCTAssertNil(sub2Func4Param)
+            XCTAssertNil(get("param", "func4(param:)", "FixtureClass101Subclass2"))
 
-            let sub2Func5Param = get("param", "func5(param:)", "FixtureClass101Subclass2")
             // Not used in any function.
-            try XCTAssertFalse(XCTUnwrap(sub2Func5Param).isRetained)
+            XCTAssertNotReferenced((.varParameter, "param"),
+                                   descendentOf: (.functionMethodInstance, "func5(param:)"),
+                                   (.class, "FixtureClass101Subclass2"))
 
             // - FixtureClass101InheritForeignBase
 
-            let foreignBaseFuncParam = get("object", "isEqual(_:)", "FixtureClass101InheritForeignBase")
             // Overrides foreign function.
-            try XCTAssertTrue(XCTUnwrap(foreignBaseFuncParam).isRetained)
+            XCTAssertReferenced((.varParameter, "object"),
+                                descendentOf: (.functionMethodInstance, "isEqual(_:)"),
+                                (.class, "FixtureClass101InheritForeignBase"))
 
             // - FixtureClass101InheritForeignSubclass1
 
-            let foreignSub1FuncParam = get("object", "isEqual(_:)", "FixtureClass101InheritForeignSubclass1")
             // Overrides foreign function.
-            try XCTAssertTrue(XCTUnwrap(foreignSub1FuncParam).isRetained)
+            XCTAssertReferenced((.varParameter, "object"),
+                                descendentOf: (.functionMethodInstance, "isEqual(_:)"),
+                                (.class, "FixtureClass101InheritForeignSubclass1"))
         }
     }
 
-    func testRetainsForeignProtocolParameters() throws {
-        try analyze(retainPublic: true) {
-            let decoderParam = get("decoder", "init(from:)", "FixtureClass103")
-            try XCTAssertTrue(XCTUnwrap(decoderParam).isRetained)
+    func testRetainsForeignProtocolParameters() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.varParameter, "decoder"),
+                                descendentOf: (.functionConstructor, "init(from:)"),
+                                (.class, "FixtureClass103"))
 
-            let encoderParam = get("encoder", "encode(to:)", "FixtureClass103")
-            try XCTAssertTrue(XCTUnwrap(encoderParam).isRetained)
+            XCTAssertReferenced((.varParameter, "encoder"),
+                                descendentOf: (.functionMethodInstance, "encode(to:)"),
+                                (.class, "FixtureClass103"))
         }
     }
 
-    func testRetainUnusedProtocolFuncParams() throws {
+    func testRetainUnusedProtocolFuncParams() {
         let configuration = inject(Configuration.self)
         configuration.retainUnusedProtocolFuncParams = true
 
-        try analyze(retainPublic: true) {
-            let protoParam = get("param", "myFunc(param:)", "FixtureProtocol107")
-            try XCTAssertTrue(XCTUnwrap(protoParam).isRetained)
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "myFunc(param:)"),
+                                (.protocol, "FixtureProtocol107"))
 
-            let protoExtParam = get("param", "myFunc(param:)", "FixtureProtocol107", .extensionProtocol)
-            try XCTAssertTrue(XCTUnwrap(protoExtParam).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "myFunc(param:)"),
+                                (.extensionProtocol, "FixtureProtocol107"))
 
-            let class1Param = get("param", "myFunc(param:)", "FixtureClass107Class1")
-            try XCTAssertTrue(XCTUnwrap(class1Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "myFunc(param:)"),
+                                (.class, "FixtureClass107Class1"))
 
-            let class2Param = get("param", "myFunc(param:)", "FixtureClass107Class2")
-            try XCTAssertTrue(XCTUnwrap(class2Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "myFunc(param:)"),
+                                (.class, "FixtureClass107Class2"))
         }
     }
 
-    func testRetainsProtocolParameters() throws {
-        try analyze(retainPublic: true) {
+    func testRetainsProtocolParameters() {
+        analyze(retainPublic: true) {
             // - FixtureProtocol104
 
-            let protoFunc1Param1 = get("param1", "func1(param1:param2:)", "FixtureProtocol104")
             // Used in a conformance.
-            try XCTAssertTrue(XCTUnwrap(protoFunc1Param1).isRetained)
+            XCTAssertReferenced((.varParameter, "param1"),
+                                descendentOf: (.functionMethodInstance, "func1(param1:param2:)"),
+                                (.protocol, "FixtureProtocol104"))
 
-            let protoFunc1Param2 = get("param2", "func1(param1:param2:)", "FixtureProtocol104")
             // Not used in any conformance.
-            try XCTAssertFalse(XCTUnwrap(protoFunc1Param2).isRetained)
+            XCTAssertNotReferenced((.varParameter, "param2"),
+                                   descendentOf: (.functionMethodInstance, "func1(param1:param2:)"),
+                                   (.protocol, "FixtureProtocol104"))
 
-            let protoFunc2Param = get("param", "func2(param:)", "FixtureProtocol104")
             // Not used in any conformance.
-            try XCTAssertFalse(XCTUnwrap(protoFunc2Param).isRetained)
+            XCTAssertNotReferenced((.varParameter, "param"),
+                                   descendentOf: (.functionMethodInstance, "func2(param:)"),
+                                   (.protocol, "FixtureProtocol104"))
 
-            let protoFunc3Param = get("param", "func3(param:)", "FixtureProtocol104")
             // Used in the extension.
-            try XCTAssertTrue(XCTUnwrap(protoFunc3Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "func3(param:)"),
+                                (.protocol, "FixtureProtocol104"))
 
-            let protoFunc4Param = get("param", "func4(param:)", "FixtureProtocol104")
             // Unused in extension, but used in conformance.
-            try XCTAssertTrue(XCTUnwrap(protoFunc4Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "func4(param:)"),
+                                (.protocol, "FixtureProtocol104"))
 
-            let protoFunc5Param = get("param", "func5(param:)", "FixtureProtocol104")
             // Used in a conformance.
-            try XCTAssertTrue(XCTUnwrap(protoFunc5Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodStatic, "func5(param:)"),
+                                (.protocol, "FixtureProtocol104"))
 
-            let protoFunc6Param = get("param", "func6(param:)", "FixtureProtocol104")
             // Used in a override.
-            try XCTAssertTrue(XCTUnwrap(protoFunc6Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "func6(param:)"),
+                                (.protocol, "FixtureProtocol104"))
 
             // - FixtureProtocol104 (extension)
 
-            let protoExtFunc3Param = get("param", "func3(param:)", "FixtureProtocol104", .extensionProtocol)
             // Nil because the param is used.
-            XCTAssertNil(protoExtFunc3Param)
+            XCTAssertNil(get("param", "func3(param:)", "FixtureProtocol104", .extensionProtocol))
 
-            let protoExtFunc4Param = get("param", "func4(param:)", "FixtureProtocol104", .extensionProtocol)
             // Used in a conformance by another class.
-            try XCTAssertTrue(XCTUnwrap(protoExtFunc4Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "func4(param:)"),
+                                (.extensionProtocol, "FixtureProtocol104"))
 
             // - FixtureClass104Class1
 
-            let class1Func1Param1 = get("param1", "func1(param1:param2:)", "FixtureClass104Class1")
             // Used in a conformance by another class.
-            try XCTAssertTrue(XCTUnwrap(class1Func1Param1).isRetained)
+            XCTAssertReferenced((.varParameter, "param1"),
+                                descendentOf: (.functionMethodInstance, "func1(param1:param2:)"),
+                                (.class, "FixtureClass104Class1"))
 
-            let class1Func1Param2 = get("param2", "func1(param1:param2:)", "FixtureClass104Class1")
             // Not used in any conformance.
-            try XCTAssertFalse(XCTUnwrap(class1Func1Param2).isRetained)
+            XCTAssertNotReferenced((.varParameter, "param2"),
+                                   descendentOf: (.functionMethodInstance, "func1(param1:param2:)"),
+                                   (.class, "FixtureClass104Class1"))
 
-            let class1Func2Param = get("param", "func2(param:)", "FixtureClass104Class1")
             // Not used in any conformance.
-            try XCTAssertFalse(XCTUnwrap(class1Func2Param).isRetained)
+            XCTAssertNotReferenced((.varParameter, "param"),
+                                   descendentOf: (.functionMethodInstance, "func2(param:)"),
+                                   (.class, "FixtureClass104Class1"))
 
-            let class1Func5Param = get("param", "func5(param:)", "FixtureClass104Class1")
             // Nil because the param is used.
-            XCTAssertNil(class1Func5Param)
+            XCTAssertNil(get("param", "func5(param:)", "FixtureClass104Class1"))
 
-            let class1Func6Param = get("param", "func6(param:)", "FixtureClass104Class1")
             // Used in a override.
-            try XCTAssertTrue(XCTUnwrap(class1Func6Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "func6(param:)"),
+                                (.class, "FixtureClass104Class1"))
 
-            let class1Func7Param = get("_", "func7(_:)", "FixtureClass104Class1")
             // Nil because the param is explicitly ignored.
-            XCTAssertNil(class1Func7Param)
+            XCTAssertNil(get("_", "func7(_:)", "FixtureClass104Class1"))
 
             // - FixtureClass104Class2
 
-            let class2Func1Param1 = get("param1", "func1(param1:param2:)", "FixtureClass104Class2")
             // Nil because the param is used.
-            XCTAssertNil(class2Func1Param1)
+            XCTAssertNil(get("param1", "func1(param1:param2:)", "FixtureClass104Class2"))
 
-            let class2Func1Param2 = get("param2", "func1(param1:param2:)", "FixtureClass104Class2")
             // Not used in any conformance.
-            try XCTAssertFalse(XCTUnwrap(class2Func1Param2).isRetained)
+            XCTAssertNotReferenced((.varParameter, "param2"),
+                                   descendentOf: (.functionMethodInstance, "func1(param1:param2:)"),
+                                   (.class, "FixtureClass104Class2"))
 
-            let class2Func2Param = get("param", "func2(param:)", "FixtureClass104Class2")
             // Not used in any conformance.
-            try XCTAssertFalse(XCTUnwrap(class2Func2Param).isRetained)
+            XCTAssertNotReferenced((.varParameter, "param"),
+                                   descendentOf: (.functionMethodInstance, "func2(param:)"),
+                                   (.class, "FixtureClass104Class2"))
 
-            let class2Func4Param = get("param", "func4(param:)", "FixtureClass104Class2")
             // Nil because the param is used.
-            XCTAssertNil(class2Func4Param)
+            XCTAssertNil(get("param", "func4(param:)", "FixtureClass104Class2"))
 
-            let class2Func5Param = get("param", "func5(param:)", "FixtureClass104Class2")
             // Nil because the param is used.
-            XCTAssertNil(class2Func5Param)
+            XCTAssertNil(get("param", "func5(param:)", "FixtureClass104Class2"))
 
-            let class2Func6Param = get("param", "func6(param:)", "FixtureClass104Class2")
             // Used in a override.
-            try XCTAssertTrue(XCTUnwrap(class2Func6Param).isRetained)
+            XCTAssertReferenced((.varParameter, "param"),
+                                descendentOf: (.functionMethodInstance, "func6(param:)"),
+                                (.class, "FixtureClass104Class2"))
 
-            let class2Func7Param = get("_", "func7(_:)", "FixtureClass104Class2")
             // Nil because the param is explicitly ignored.
-            XCTAssertNil(class2Func7Param)
+            XCTAssertNil(get("_", "func7(_:)", "FixtureClass104Class2"))
 
             // - FixtureClass104Class3
 
-            let class3Func6Param = get("param", "func6(param:)", "FixtureClass104Class3")
             // Nil because the param is used.
-            XCTAssertNil(class3Func6Param)
+            XCTAssertNil(get("param", "func6(param:)", "FixtureClass104Class3"))
         }
     }
 

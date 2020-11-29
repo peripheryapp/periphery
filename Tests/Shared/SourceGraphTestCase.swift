@@ -101,7 +101,7 @@ open class SourceGraphTestCase: XCTestCase {
         var parentDecls: Set<Declaration> = graph.allDeclarations
         var decl: Declaration?
 
-        for description in descriptions {
+        for description in descriptions.reversed() {
             decl = find(description, in: parentDecls)
             parentDecls = decl?.declarations ?? []
         }
