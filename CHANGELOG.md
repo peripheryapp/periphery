@@ -16,6 +16,7 @@
 - @IBInspectable properties are now retained.
 - Declarations ignored with a '// periphery:ignore' comment now also retain their references to other declarations.
 - Fix running Periphery from within Xcode where Xcode's environment variables could cause build failures or incorrect results.
+- Fix an issue where a protocol could incorrectly retain references to methods in an unused conforming declaration.
 
 ## 2.2.2 (2020-11-23)
 

@@ -7,8 +7,9 @@ public final class SourceGraph {
     private(set) var rootDeclarations: Set<Declaration> = []
     private(set) var rootReferences: Set<Reference> = []
     private(set) var allReferences: Set<Reference> = []
-    private(set) var markedDeclarations: Set<Declaration> = []
+    private(set) var reachableDeclarations: Set<Declaration> = []
     private(set) var redundantDeclarations: Set<Declaration> = []
+    private(set) var retainedDeclarations: Set<Declaration> = []
 
     private var ignoredDeclarations: Set<Declaration> = []
     private var allReferencesByUsr: [String: Set<Reference>] = [:]
@@ -21,23 +22,15 @@ public final class SourceGraph {
     var infoPlistReferences: [InfoPlistReference] = []
 
     public var resultDeclarations: Set<Declaration> {
-        dereferencedDeclarations.union(redundantDeclarations.subtracting(ignoredDeclarations))
+        dereferencedDeclarations.union(redundantDeclarations).subtracting(ignoredDeclarations)
     }
 
     public var dereferencedDeclarations: Set<Declaration> {
-        return allDeclarations
-            .subtracting(referencedDeclarations)
-            .subtracting(ignoredDeclarations)
+        return allDeclarations.subtracting(referencedDeclarations)
     }
 
     public var referencedDeclarations: Set<Declaration> {
-        return markedDeclarations
-            .union(retainedDeclarations)
-            .subtracting(ignoredDeclarations)
-    }
-
-    var retainedDeclarations: Set<Declaration> {
-        return allDeclarations.filter { $0.isRetained }
+        return reachableDeclarations.union(retainedDeclarations)
     }
 
     public init() {
@@ -65,7 +58,11 @@ public final class SourceGraph {
     }
 
     func references(to decl: Declaration) -> Set<Reference> {
-        Set(decl.usrs.flatMap { allReferencesByUsr[$0] ?? [] })
+        Set(decl.usrs.flatMap { allReferencesByUsr[$0, default: []] })
+    }
+
+    func hasReferences(to decl: Declaration) -> Bool {
+        decl.usrs.contains { !allReferencesByUsr[$0, default: []].isEmpty }
     }
 
     func markRedundant(_ declaration: Declaration) {
@@ -78,6 +75,22 @@ public final class SourceGraph {
         mutationQueue.sync {
             _ = ignoredDeclarations.insert(declaration)
         }
+    }
+
+    func markRetained(_ declaration: Declaration) {
+        mutationQueue.sync {
+            _ = retainedDeclarations.insert(declaration)
+        }
+    }
+
+    func isRetained(_ declaration: Declaration) -> Bool {
+        var value: Bool = false
+
+        mutationQueue.sync {
+            value = retainedDeclarations.contains(declaration)
+        }
+
+        return value
     }
 
     func add(_ declaration: Declaration) {
@@ -97,7 +110,7 @@ public final class SourceGraph {
             allDeclarations.remove(declaration)
             allDeclarationsByKind[declaration.kind]?.remove(declaration)
             rootDeclarations.remove(declaration)
-            markedDeclarations.remove(declaration)
+            reachableDeclarations.remove(declaration)
             declaration.usrs.forEach { allExplicitDeclarationsByUsr.removeValue(forKey: $0) }
         }
     }
@@ -145,8 +158,8 @@ public final class SourceGraph {
         }
     }
 
-    func mark(_ declaration: Declaration) {
-        markedDeclarations.insert(declaration)
+    func markReachable(_ declaration: Declaration) {
+        reachableDeclarations.insert(declaration)
     }
 
     func accept(visitor: SourceGraphVisitor.Type) throws {

@@ -178,7 +178,7 @@ public final class SwiftIndexer {
                 decl.isImplicit = key.isImplicit
 
                 if decl.isImplicit {
-                    decl.markRetained()
+                    graph.markRetained(decl)
                 }
 
                 let relations = values.flatMap { $0.1 }
@@ -335,8 +335,8 @@ public final class SwiftIndexer {
 
         private func retainHierarchy(_ decls: [Declaration]) {
             decls.forEach {
-                $0.markRetained()
-                $0.unusedParameters.forEach { $0.markRetained() }
+                graph.markRetained($0)
+                $0.unusedParameters.forEach { graph.markRetained($0) }
                 retainHierarchy(Array($0.declarations))
             }
         }
@@ -378,7 +378,7 @@ public final class SwiftIndexer {
                     graph.add(paramDecl)
 
                     if ignoredParamNames.contains(param.name) {
-                        paramDecl.markRetained()
+                        graph.markRetained(paramDecl)
                     }
                 }
             }

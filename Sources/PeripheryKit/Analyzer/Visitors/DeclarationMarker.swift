@@ -12,10 +12,11 @@ final class DeclarationMarker: SourceGraphVisitor {
     }
 
     func visit() {
-        mark(graph.retainedDeclarations)
+        removeErroneousProtocolReferences()
+        markReachable(graph.retainedDeclarations)
 
         let rootReferencedDeclarations = Set(graph.rootReferences.flatMap { declarationsReferenced(by: $0) })
-        mark(rootReferencedDeclarations)
+        markReachable(rootReferencedDeclarations)
 
         ignoreDereferencedDescendents(in: graph.rootDeclarations,
                                       dereferencedDeclarations: graph.dereferencedDeclarations)
@@ -23,12 +24,31 @@ final class DeclarationMarker: SourceGraphVisitor {
 
     // MARK: - Private
 
-    private func mark(_ declarations: Set<Declaration>) {
-        for declaration in declarations {
-            guard !graph.markedDeclarations.contains(declaration) else { continue }
+    // Removes references from protocol member decls to conforming decls that have a dereferenced ancestor.
+    private func removeErroneousProtocolReferences() {
+        for protocolDecl in graph.declarations(ofKind: .protocol) {
+            for memberDecl in protocolDecl.declarations {
+                for relatedRef in memberDecl.related {
+                    guard let relatedDecl = graph.explicitDeclaration(withUsr: relatedRef.usr) else { continue }
 
-            graph.mark(declaration)
-            mark(declarationsReferenced(by: declaration))
+                    let hasDereferencedAncestor = relatedDecl.ancestralDeclarations.contains {
+                        !(graph.isRetained($0) || graph.hasReferences(to: $0))
+                    }
+
+                    if hasDereferencedAncestor {
+                        graph.remove(relatedRef)
+                    }
+                }
+            }
+        }
+    }
+
+    private func markReachable(_ declarations: Set<Declaration>) {
+        for declaration in declarations {
+            guard !graph.reachableDeclarations.contains(declaration) else { continue }
+
+            graph.markReachable(declaration)
+            markReachable(declarationsReferenced(by: declaration))
         }
     }
 

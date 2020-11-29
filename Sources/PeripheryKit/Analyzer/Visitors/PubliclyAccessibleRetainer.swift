@@ -22,6 +22,6 @@ final class PubliclyAccessibleRetainer: SourceGraphVisitor {
         }
 
         let publicDeclarations = declarations.filter { $0.accessibility.value == .public || $0.accessibility.value == .open }
-        publicDeclarations.forEach { $0.markRetained() }
+        publicDeclarations.forEach { graph.markRetained($0) }
     }
 }

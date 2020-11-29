@@ -18,7 +18,7 @@ final class XibReferenceRetainer: SourceGraphVisitor {
         }
 
         for xibClass in referencedClasses {
-            xibClass.markRetained()
+            graph.markRetained(xibClass)
 
             let superclasses = graph.superclasses(of: xibClass)
             let superclassesDecls = superclasses.map { $0.declarations }.joined()
@@ -28,7 +28,7 @@ final class XibReferenceRetainer: SourceGraphVisitor {
                 let attributes = declaration.attributes
 
                 if attributes.contains("IBOutlet") || attributes.contains("IBAction") || attributes.contains("IBInspectable") {
-                    declaration.markRetained()
+                    graph.markRetained(declaration)
                 }
             }
         }

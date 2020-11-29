@@ -124,7 +124,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
                 }
             } else {
                 // The referenced declaration is external, e.g from stdlib/Foundation.
-                conformingDeclaration.markRetained()
+                graph.markRetained(conformingDeclaration)
             }
         }
     }

@@ -19,7 +19,7 @@ final class PropertyWrapperRetainer: SourceGraphVisitor {
             if decl.attributes.contains("propertyWrapper") {
                 decl.declarations
                     .filter { $0.kind == .varInstance && specialProperties.contains($0.name ?? "") }
-                    .forEach { $0.markRetained() }
+                    .forEach { graph.markRetained($0) }
             }
         }
     }
