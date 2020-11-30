@@ -231,8 +231,7 @@ class MetadataParser: SyntaxVisitor {
     private func sourceLocation(of position: AbsolutePosition) -> SourceLocation {
         let location = locationConverter.location(for: position)
         return SourceLocation(file: file,
-                              line: Int64(location.line!),
-                              column: Int64(location.column!),
-                              offset: Int64(position.utf8Offset))
+                              line: Int64(location.line ?? 0),
+                              column: Int64(location.column ?? 0))
     }
 }

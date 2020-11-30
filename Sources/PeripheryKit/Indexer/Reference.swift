@@ -95,7 +95,6 @@ public final class Reference: Entity {
 
 extension Reference: Hashable {
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(kind)
         hasher.combine(usr)
         hasher.combine(location)
         hasher.combine(isRelated)
@@ -106,10 +105,9 @@ extension Reference: Equatable {
     public static func == (lhs: Reference, rhs: Reference) -> Bool {
         let usrIsEqual = lhs.usr == rhs.usr
         let locationIsEqual = lhs.location == rhs.location
-        let kindIsEqual = lhs.kind == rhs.kind
         let relatedIsEqual = lhs.isRelated == rhs.isRelated
 
-        return usrIsEqual && locationIsEqual && kindIsEqual && relatedIsEqual
+        return usrIsEqual && locationIsEqual && relatedIsEqual
     }
 }
 

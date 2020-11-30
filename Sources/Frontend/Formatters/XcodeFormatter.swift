@@ -36,8 +36,8 @@ public final class XcodeFormatter: OutputFormatter {
         let path = absPath.components.dropLast().joined(separator: "/").dropFirst()
         let file = colorize(absPath.lastComponentWithoutExtension, .bold)
         let ext = absPath.extension ?? "swift"
-        let lineNum = colorize(String(location.line ?? 0), .bold)
-        let column = location.column ?? 0
+        let lineNum = colorize(String(location.line), .bold)
+        let column = location.column
         let warning = colorize("warning:", .boldYellow)
 
         return "\(path)/\(file).\(ext):\(lineNum):\(column): \(warning) "
