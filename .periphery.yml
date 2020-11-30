@@ -4,6 +4,8 @@ targets:
 - Frontend
 - Shared
 - PeripheryKit
-- PeripheryTests
-- TestShared
 - XcodeSupport
+- TestShared
+- PeripheryTests
+- XcodeTests
+- SPMTests
