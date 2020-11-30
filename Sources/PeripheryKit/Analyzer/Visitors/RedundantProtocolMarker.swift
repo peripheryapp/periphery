@@ -48,6 +48,7 @@ final class RedundantProtocolMarker: SourceGraphVisitor {
                 // The protocol is redundant.
                 protocolDecl.analyzerHint = .redundantProtocol(references: protocolRefs)
                 graph.markRedundant(protocolDecl)
+                protocolDecl.declarations.forEach { graph.markIgnored($0) }
             }
         }
     }
