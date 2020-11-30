@@ -121,17 +121,14 @@ class UnusedParameterTest: XCTestCase {
         let init1 = functions[0]
         try XCTAssertEqual(XCTUnwrap(init1.location.line), 4)
         try XCTAssertEqual(XCTUnwrap(init1.location.column), 5)
-        try XCTAssertEqual(XCTUnwrap(init1.location.offset), 47)
 
         let init2 = functions[1]
         try XCTAssertEqual(XCTUnwrap(init2.location.line), 8)
         try XCTAssertEqual(XCTUnwrap(init2.location.column), 5)
-        try XCTAssertEqual(XCTUnwrap(init2.location.offset), 111)
 
         let init3 = functions[2]
         try XCTAssertEqual(XCTUnwrap(init3.location.line), 12)
         try XCTAssertEqual(XCTUnwrap(init3.location.column), 5)
-        try XCTAssertEqual(XCTUnwrap(init3.location.offset), 175)
     }
 
     func testMultiLineParameterPosition() {

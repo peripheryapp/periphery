@@ -38,8 +38,8 @@ public final class CheckstyleFormatter: OutputFormatter {
     }
 
     private func generateForResult(_ result: (SourceLocation, String)) -> String {
-        let line = result.0.line ?? 0
-        let col = result.0.column ?? 0
+        let line = result.0.line
+        let col = result.0.column
 
         return [
             "\t\t<error line=\"\(line)\" ",

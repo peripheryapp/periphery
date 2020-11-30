@@ -64,7 +64,7 @@ final class Parameter: Item, Hashable {
 
     var declaration: Declaration {
         let functionName = function?.fullName ?? "func()"
-        let usr = "\(functionName)-\(name)-\(location.line ?? 0)-\(location.column ?? 0)"
+        let usr = "\(functionName)-\(name)-\(location.line)-\(location.column)"
         let decl = Declaration(kind: .varParameter, usrs: [usr], location: location)
         decl.name = name
         return decl
@@ -348,9 +348,8 @@ struct UnusedParameterParser {
     private func sourceLocation(of position: AbsolutePosition) -> SourceLocation {
         let location = locationConverter.location(for: position)
         return SourceLocation(file: file,
-                              line: Int64(location.line!),
-                              column: Int64(location.column!),
-                              offset: Int64(position.utf8Offset))
+                              line: Int64(location.line ?? 0),
+                              column: Int64(location.column ?? 0))
     }
 }
 

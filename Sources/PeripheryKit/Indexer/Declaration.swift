@@ -243,22 +243,12 @@ public final class Declaration: Entity, CustomStringConvertible {
 
 extension Declaration: Hashable {
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(kind)
         hasher.combine(usrs)
-        hasher.combine(name)
-        hasher.combine(location)
-        hasher.combine(isImplicit)
     }
 }
 
 extension Declaration: Equatable {
     public static func == (lhs: Declaration, rhs: Declaration) -> Bool {
-        let usrsIsEqual = lhs.usrs == rhs.usrs
-        let kindIsEqual = lhs.kind == rhs.kind
-        let nameIsEqual = lhs.name == rhs.name
-        let locationIsEqual = lhs.location == rhs.location
-        let implicitEqual = lhs.isImplicit == rhs.isImplicit
-
-        return kindIsEqual && usrsIsEqual && nameIsEqual && locationIsEqual && implicitEqual
+        lhs.usrs == rhs.usrs
     }
 }

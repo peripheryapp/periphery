@@ -3,31 +3,19 @@ import PathKit
 
 public class SourceLocation {
     public let file: Path
-    public let line: Int64?
-    public let column: Int64?
-    public let offset: Int64?
+    public let line: Int64
+    public let column: Int64
 
-    init(file: Path, line: Int64?, column: Int64?, offset: Int64? = nil) {
+    init(file: Path, line: Int64, column: Int64) {
         self.file = file
         self.line = line
         self.column = column
-        self.offset = offset
     }
 
     // MARK: - Private
 
     private func buildDescription(path: String) -> String {
-        var parts: [String] = [path]
-
-        if let line = line {
-            parts.append(line.description)
-        }
-
-        if let column = column {
-            parts.append(column.description)
-        }
-
-        return parts.joined(separator: ":")
+        [path, line.description, column.description].joined(separator: ":")
     }
 
     private lazy var descriptionInternal: String = {
