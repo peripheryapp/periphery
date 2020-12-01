@@ -58,9 +58,15 @@ class iOSProjectTest: SourceGraphTestCase {
 
     func testRetainsXibReferencedClass() {
         XCTAssertReferenced((.class, "XibViewController"))
+        XCTAssertReferenced((.class, "XibView"))
         XCTAssertReferenced((.varInstance, "button"), descendentOf: (.class, "XibViewController"))
-        XCTAssertReferenced((.varInstance, "color"), descendentOf: (.class, "XibViewController"))
+        XCTAssertReferenced((.varInstance, "controllerProperty"), descendentOf: (.class, "XibViewController"))
+        XCTAssertReferenced((.varInstance, "viewProperty"), descendentOf: (.class, "XibView"))
         XCTAssertReferenced((.functionMethodInstance, "click(_:)"), descendentOf: (.class, "XibViewController"))
+    }
+
+    func testRetainsInspectablePropertyInExtension() {
+        XCTAssertReferenced((.varInstance, "customBorderColor"), descendentOf: (.extensionClass, "UIView"))
     }
 
     func testRetainsIBActionReferencedViaSubclass() {
