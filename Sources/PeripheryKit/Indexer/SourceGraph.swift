@@ -15,6 +15,7 @@ public final class SourceGraph {
     private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
+    private var reachableDeclarationCounts: [Declaration: Int] = [:]
 
     private let mutationQueue: DispatchQueue
 
@@ -22,15 +23,11 @@ public final class SourceGraph {
     var infoPlistReferences: [InfoPlistReference] = []
 
     public var resultDeclarations: Set<Declaration> {
-        dereferencedDeclarations.union(redundantDeclarations).subtracting(ignoredDeclarations)
+        unreachableDeclarations.union(redundantDeclarations).subtracting(ignoredDeclarations)
     }
 
-    public var dereferencedDeclarations: Set<Declaration> {
-        return allDeclarations.subtracting(referencedDeclarations)
-    }
-
-    public var referencedDeclarations: Set<Declaration> {
-        return reachableDeclarations.union(retainedDeclarations)
+    public var unreachableDeclarations: Set<Declaration> {
+        return allDeclarations.subtracting(reachableDeclarations)
     }
 
     public init() {
@@ -77,20 +74,28 @@ public final class SourceGraph {
         }
     }
 
+    func isIgnored(_ declaration: Declaration) -> Bool {
+        mutationQueue.sync {
+            ignoredDeclarations.contains(declaration)
+        }
+    }
+
     func markRetained(_ declaration: Declaration) {
         mutationQueue.sync {
             _ = retainedDeclarations.insert(declaration)
         }
     }
 
-    func isRetained(_ declaration: Declaration) -> Bool {
-        var value: Bool = false
-
+    func unmarkRetained(_ declaration: Declaration) {
         mutationQueue.sync {
-            value = retainedDeclarations.contains(declaration)
+            _ = retainedDeclarations.remove(declaration)
         }
+    }
 
-        return value
+    func isRetained(_ declaration: Declaration) -> Bool {
+        mutationQueue.sync {
+            retainedDeclarations.contains(declaration)
+        }
     }
 
     func add(_ declaration: Declaration) {
@@ -158,8 +163,28 @@ public final class SourceGraph {
         }
     }
 
-    func markReachable(_ declaration: Declaration) {
-        reachableDeclarations.insert(declaration)
+    @discardableResult
+    func incrementReachable(_ declaration: Declaration) -> Int {
+        mutationQueue.sync {
+            reachableDeclarations.insert(declaration)
+            reachableDeclarationCounts[declaration, default: 0] += 1
+            return reachableDeclarationCounts[declaration, default: 0]
+        }
+    }
+
+    @discardableResult
+    func decrementReachable(_ declaration: Declaration) -> Int {
+        mutationQueue.sync {
+            reachableDeclarationCounts[declaration, default: 0] -= 1
+            let count = reachableDeclarationCounts[declaration, default: 0]
+
+            if count == 0 {
+                reachableDeclarationCounts.removeValue(forKey: declaration)
+                reachableDeclarations.remove(declaration)
+            }
+
+            return count
+        }
     }
 
     func accept(visitor: SourceGraphVisitor.Type) throws {

@@ -18,8 +18,8 @@ final class DeclarationMarker: SourceGraphVisitor {
         let rootReferencedDeclarations = Set(graph.rootReferences.flatMap { declarationsReferenced(by: $0) })
         markReachable(rootReferencedDeclarations)
 
-        ignoreDereferencedDescendents(in: graph.rootDeclarations,
-                                      dereferencedDeclarations: graph.dereferencedDeclarations)
+        ignoreUnreachableDescendents(in: graph.rootDeclarations,
+                                     unreachableDeclarations: graph.unreachableDeclarations)
     }
 
     // MARK: - Private
@@ -45,10 +45,12 @@ final class DeclarationMarker: SourceGraphVisitor {
 
     private func markReachable(_ declarations: Set<Declaration>) {
         for declaration in declarations {
-            guard !graph.reachableDeclarations.contains(declaration) else { continue }
+            let count = graph.incrementReachable(declaration)
 
-            graph.markReachable(declaration)
-            markReachable(declarationsReferenced(by: declaration))
+            if count == 1 {
+                // First time seeing this declaration.
+                markReachable(declarationsReferenced(by: declaration))
+            }
         }
     }
 
@@ -67,18 +69,65 @@ final class DeclarationMarker: SourceGraphVisitor {
         return declarations
     }
 
-    private func ignoreDereferencedDescendents(in decls: Set<Declaration>, dereferencedDeclarations: Set<Declaration>) {
+    private func ignoreUnreachableDescendents(in decls: Set<Declaration>, unreachableDeclarations: Set<Declaration>) {
         for decl in decls {
             guard !decl.declarations.isEmpty || !decl.unusedParameters.isEmpty
                 else { continue }
 
-            if dereferencedDeclarations.contains(decl) {
-                decl.descendentDeclarations.forEach { graph.markIgnored($0) }
-                continue
+            if unreachableDeclarations.contains(decl) {
+                ignoreDescendents(of: decl)
             } else {
-                ignoreDereferencedDescendents(in: decl.declarations,
-                                              dereferencedDeclarations: dereferencedDeclarations)
+                ignoreUnreachableDescendents(in: decl.declarations,
+                                             unreachableDeclarations: unreachableDeclarations)
             }
         }
+    }
+
+    private func ignoreDescendents(of decl: Declaration) {
+        guard !graph.isIgnored(decl) else {
+            // This declaration is itself ignored, thus is descendents are too already.
+            return
+        }
+
+        decl.descendentDeclarations.forEach {
+            graph.markIgnored($0)
+
+            // If this declaration is retained, we need to unretain it and decrement references it holds.
+            if graph.isRetained($0) {
+                graph.unmarkRetained($0)
+
+                // Retained declarations are also previously marked as reachable, so decrement.
+                graph.decrementReachable($0)
+
+                decrementReferences(from: $0, callers: [$0])
+            }
+        }
+    }
+
+    private func decrementReferences(from declaration: Declaration, callers: Set<Declaration>) {
+        var declarationsToIgnore: [Declaration] = []
+
+        for decl in declarationsReferenced(by: declaration) {
+            let refCount = graph.decrementReachable(decl)
+
+            if graph.isIgnored(decl) {
+                // This declaration is ignored, thus its references have already been decremented.
+                continue
+            }
+
+            if callers.contains(decl) {
+                // Already seen this declaration, avoid traversing cyclic references.
+                continue
+            }
+
+            decrementReferences(from: decl, callers: callers.union([decl]))
+
+            if refCount == 0 {
+                // This declaration is now unreachable, ignore its descendents once we're done decrementing references.
+                declarationsToIgnore.append(decl)
+            }
+        }
+
+        declarationsToIgnore.forEach { ignoreDescendents(of: $0) }
     }
 }

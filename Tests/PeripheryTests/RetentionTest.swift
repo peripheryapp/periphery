@@ -1159,6 +1159,28 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testDoesNotRetainDeclarationsReferencedByExplicitlyRetainedMemberOfUnusedParent() {
+        analyze(retainPublic: true) {
+            XCTAssertNotReferenced((.class, "FixtureClass120"))
+            XCTAssertNotReferenced((.functionMethodInstance, "retainedFunc()"), descendentOf: (.class, "FixtureClass120"))
+
+            XCTAssertReferenced((.class, "FixtureClass121"))
+            XCTAssertReferenced((.functionMethodInstance, "usedFunc1()"), descendentOf: (.class, "FixtureClass121"))
+            XCTAssertReferenced((.functionMethodInstance, "usedFunc2()"), descendentOf: (.class, "FixtureClass121"))
+            XCTAssertNotReferenced((.functionMethodInstance, "unusedFunc1()"), descendentOf: (.class, "FixtureClass121"))
+            XCTAssertNotReferenced((.functionMethodInstance, "unusedFunc2()"), descendentOf: (.class, "FixtureClass121"))
+
+            XCTAssertNotReferenced((.class, "FixtureClass122"))
+            XCTAssertNotReferenced((.functionMethodInstance, "unusedFunc()"), descendentOf: (.class, "FixtureClass122"))
+
+            XCTAssertNotReferenced((.class, "FixtureClass123"))
+            XCTAssertNotReferenced((.functionMethodInstance, "unusedFunc()"), descendentOf: (.class, "FixtureClass123"))
+
+            XCTAssertNotReferenced((.class, "FixtureClass124"))
+            XCTAssertNotReferenced((.functionMethodInstance, "unusedFunc()"), descendentOf: (.class, "FixtureClass124"))
+        }
+    }
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768
