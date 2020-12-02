@@ -1,69 +1,48 @@
 import XCTest
 import PathKit
-import PeripheryKit
+@testable import PeripheryKit
 
 open class SourceGraphTestCase: XCTestCase {
     open var graph: SourceGraph!
 
     public func XCTAssertNotReferenced(_ description: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = graph.allDeclarations.first(where: {
-            $0.kind == description.kind && $0.name == description.name
-        }) else {
-            XCTFail("Expected \(description) to exist.", file: file, line: line)
-            return
-        }
+        guard let declaration = materialize(description) else { return }
 
-        // We don't check dereferencedDeclarations as it's pruned of certain redundant declarations.
-        let isReferenced = graph.referencedDeclarations.contains(declaration)
-        XCTAssertTrue(!isReferenced, "Expected \(description) to not be referenced.", file: file, line: line)
+        if !graph.unreachableDeclarations.contains(declaration) {
+            XCTFail("Expected declaration to not be referenced: \(declaration)", file: file, line: line)
+        }
     }
 
     public func XCTAssertReferenced(_ description: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
-        let isReferenced = graph.referencedDeclarations.contains {
-            $0.kind == description.kind && $0.name == description.name
+        guard let declaration = materialize(description) else { return }
+
+        if !graph.reachableDeclarations.contains(declaration) {
+            XCTFail("Expected declaration to be referenced: \(declaration)", file: file, line: line)
         }
-
-        XCTAssertTrue(isReferenced, "Expected \(description) to be referenced.", file: file, line: line)
-    }
-
-    public func XCTAssertReferenced(_ declaration: Declaration, file: StaticString = #file, line: UInt = #line) {
-        XCTAssertTrue(graph.referencedDeclarations.contains(declaration), "Expected \(declaration) to be referenced.", file: file, line: line)
     }
 
     public func XCTAssertReferenced(_ description: DeclarationDescription, descendentOf parentDescriptions: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
-        let parentDeclaration = find(parentDescriptions)
+        guard let parentDeclaration = materialize(parentDescriptions),
+              let descendent = materialize(description, in: parentDeclaration.descendentDeclarations)
+        else { return }
 
-        XCTAssertNotNil(parentDeclaration, "Parent declaration not found: \(parentDescriptions)", file: file, line: line)
-
-        if let parentDeclaration = parentDeclaration {
-            let descendent = find(description, in: parentDeclaration.descendentDeclarations)
-
-            XCTAssertNotNil(descendent, "Descendent declaration not found: \(description)", file: file, line: line)
-
-            if let descendent = descendent {
-                XCTAssertReferenced(descendent, file: file, line: line)
-            }
+        if !graph.reachableDeclarations.contains(descendent) {
+            XCTFail("Expected declaration to be referenced: \(descendent)", file: file, line: line)
         }
     }
 
     public func XCTAssertNotReferenced(_ description: DeclarationDescription, descendentOf parentDescriptions: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
-        let parentDeclaration = find(parentDescriptions)
+        guard let parentDeclaration = materialize(parentDescriptions),
+              let descendent = materialize(description, in: parentDeclaration.descendentDeclarations)
+        else { return }
 
-        XCTAssertNotNil(parentDeclaration, "Parent declaration not found: \(parentDescriptions)", file: file, line: line)
-
-        if let parentDeclaration = parentDeclaration {
-            let referencedDescendents = parentDeclaration.descendentDeclarations.intersection(graph.referencedDeclarations)
-            let descendent = find(description, in: referencedDescendents)
-
-            XCTAssertNil(descendent, "Descendent declaration should not be referenced: \(description)", file: file, line: line)
+        if graph.reachableDeclarations.contains(descendent) {
+            XCTFail("Expected descendent declaration to not be referenced: \(descendent)", file: file, line: line)
         }
     }
 
     public func XCTAssertRedundantProtocol(_ name: String, implementedBy conformances: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = find((.protocol, name)) else {
-            XCTFail("Expected protocol '\(name)' to exist.", file: file, line: line)
-            return
-        }
+        guard let declaration = materialize((.protocol, name)) else { return }
 
         switch declaration.analyzerHint {
         case let .redundantProtocol(references):
@@ -97,24 +76,34 @@ open class SourceGraphTestCase: XCTestCase {
         return (collection ?? graph.allDeclarations).first { $0.kind == description.kind && $0.name == description.name }
     }
 
-    public func find(_ descriptions: [DeclarationDescription]) -> Declaration? {
-        var parentDecls: Set<Declaration> = graph.allDeclarations
-        var decl: Declaration?
-
-        for description in descriptions.reversed() {
-            decl = find(description, in: parentDecls)
-            parentDecls = decl?.declarations ?? []
-        }
-
-        return decl
-    }
-
     public func get(_ param: String, _ function: String, _ cls: String, _ kind: Declaration.Kind = .class) -> Declaration? {
         let decl = find((kind, cls)) ?? find((.protocol, cls))
         let funcDecl = Declaration.Kind.functionKinds.mapFirst {
             find(($0, function), in: decl!.declarations)
         }
         return find((.varParameter, param), in: funcDecl!.unusedParameters)
+    }
+
+    public func materialize(_ descriptions: [DeclarationDescription]) -> Declaration? {
+        var parentDecls: Set<Declaration> = graph.allDeclarations
+        var decl: Declaration?
+
+        for description in descriptions.reversed() {
+            guard let decl_ = materialize(description, in: parentDecls) else { return nil }
+            decl = decl_
+            parentDecls = decl?.declarations ?? []
+        }
+
+        return decl
+    }
+
+    public func materialize(_ description: DeclarationDescription, in collection: Set<Declaration>? = nil, file: StaticString = #file, line: UInt = #line) -> Declaration? {
+        guard let decl = find(description, in: collection ?? graph.allDeclarations) else {
+            XCTFail("Declaration not found: \(description).", file: file, line: line)
+            return nil
+        }
+
+        return decl
     }
 
     public typealias DeclarationDescription = (kind: Declaration.Kind, name: String)

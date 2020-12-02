@@ -13,7 +13,7 @@ final class RedundantProtocolMarker: SourceGraphVisitor {
     }
 
     func visit() throws {
-        let dereferencedDeclarations = graph.dereferencedDeclarations
+        let unreachableDeclarations = graph.unreachableDeclarations
         let protocolDecls = graph.declarations(ofKind: .protocol)
 
         for protocolDecl in protocolDecls {
@@ -28,10 +28,10 @@ final class RedundantProtocolMarker: SourceGraphVisitor {
             guard !inheritsForeignProtocol else { continue }
 
             // Ensure the protocol isn't just simply unused.
-            guard !dereferencedDeclarations.contains(protocolDecl) else { continue }
+            guard !unreachableDeclarations.contains(protocolDecl) else { continue }
 
             // Ensure all members are unused.
-            guard protocolDecl.declarations.allSatisfy({ dereferencedDeclarations.contains($0) }) else { continue }
+            guard protocolDecl.declarations.allSatisfy({ unreachableDeclarations.contains($0) }) else { continue }
 
             // Ensure the protocol is only used in a conformance.
             let protocolRefs = graph.references(to: protocolDecl)
