@@ -16,8 +16,6 @@ public final class Analyzer {
     }
 
     private let visitors: [SourceGraphVisitor.Type] = [
-        ObjcMembersAttributeBuilder.self,
-
         // Must come before ExtensionReferenceBuilder.
         AccessibilityCascader.self,
 
@@ -45,7 +43,6 @@ public final class Analyzer {
         EntryPointAttributeRetainer.self,
         EntryPointFileRetainer.self,
         PubliclyAccessibleRetainer.self,
-        ObjCAccessibleRetainer.self,
         XCTestRetainer.self,
         SwiftUIRetainer.self,
         StructImplicitConstructorPropertyRetainer.self,

@@ -129,42 +129,6 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testRetainsObjcAnnotatiedClass() {
-        analyze(retainObjcAnnotated: true) {
-            XCTAssertReferenced((.class, "FixtureClass21"))
-        }
-    }
-
-    func testRetainsObjcAnnotatedMembers() {
-        analyze(retainObjcAnnotated: true) {
-            XCTAssertReferenced((.class, "FixtureClass22"))
-            XCTAssertReferenced((.varInstance, "someVar"))
-            XCTAssertReferenced((.functionMethodInstance, "someMethod()"))
-        }
-    }
-
-    func testDoesNotRetainObjcAnnotatedWithoutOption() {
-        analyze() {
-            XCTAssertNotReferenced((.class, "FixtureClass23"))
-        }
-    }
-
-    func testDoesNotRetainMembersOfObjcAnnotatedClass() {
-        analyze(retainObjcAnnotated: true) {
-            XCTAssertReferenced((.class, "FixtureClass24"))
-            XCTAssertNotReferenced((.functionMethodInstance, "someMethod()"))
-            XCTAssertNotReferenced((.varInstance, "someVar"))
-        }
-    }
-
-    func testObjcMembersAnnotationRetainsMembers() {
-        analyze(retainObjcAnnotated: true) {
-            XCTAssertReferenced((.class, "FixtureClass25"))
-            XCTAssertReferenced((.varInstance, "someVar"))
-            XCTAssertReferenced((.functionMethodInstance, "someMethod()"))
-        }
-    }
-
     func testRetainPublicMembers() {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass26"))
@@ -1175,6 +1139,52 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    // MARK: - Objective-C
+
+    #if os(macOS)
+    func testRetainsObjcAnnotatedClass() {
+        analyze(retainObjcAccessible: true) {
+            XCTAssertReferenced((.class, "FixtureClass21"))
+        }
+    }
+
+    func testRetainsImplicitlyObjcAccessibleClass() {
+        analyze(retainObjcAccessible: true) {
+            XCTAssertReferenced((.class, "FixtureClass126"))
+        }
+    }
+
+    func testRetainsObjcAnnotatedMembers() {
+        analyze(retainObjcAccessible: true) {
+            XCTAssertReferenced((.class, "FixtureClass22"))
+            XCTAssertReferenced((.varInstance, "someVar"))
+            XCTAssertReferenced((.functionMethodInstance, "someMethod()"))
+        }
+    }
+
+    func testDoesNotRetainObjcAnnotatedWithoutOption() {
+        analyze() {
+            XCTAssertNotReferenced((.class, "FixtureClass23"))
+        }
+    }
+
+    func testDoesNotRetainMembersOfObjcAnnotatedClass() {
+        analyze(retainObjcAccessible: true) {
+            XCTAssertReferenced((.class, "FixtureClass24"))
+            XCTAssertNotReferenced((.functionMethodInstance, "someMethod()"))
+            XCTAssertNotReferenced((.varInstance, "someVar"))
+        }
+    }
+
+    func testObjcMembersAnnotationRetainsMembers() {
+        analyze(retainObjcAccessible: true) {
+            XCTAssertReferenced((.class, "FixtureClass25"))
+            XCTAssertReferenced((.varInstance, "someVar"))
+            XCTAssertReferenced((.functionMethodInstance, "someMethod()"))
+        }
+    }
+    #endif
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13930
@@ -1232,7 +1242,7 @@ class RetentionTest: SourceGraphTestCase {
     // MARK: - Private
 
     private func analyze(retainPublic: Bool = false,
-                         retainObjcAnnotated: Bool = false,
+                         retainObjcAccessible: Bool = false,
                          isMainFile: Bool = false,
                          supplementalFiles: [String] = [],
                          fixture: String? = nil,
@@ -1248,7 +1258,7 @@ class RetentionTest: SourceGraphTestCase {
         let testFixturePath = fixturePath(for: testName)
         let configuration = inject(Configuration.self)
         configuration.retainPublic = retainPublic
-        configuration.retainObjcAnnotated = retainObjcAnnotated
+        configuration.retainObjcAccessible = retainObjcAccessible
 
         if isMainFile {
             configuration.entryPointFilenames.append(testName.lowercased() + ".swift")

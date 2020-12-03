@@ -164,6 +164,7 @@ public final class Declaration: Entity, CustomStringConvertible {
     public var parent: Entity?
     var related: Set<Reference> = []
     var isImplicit: Bool = false
+    var isObjcAccessible: Bool = false
 
     var ancestralDeclarations: Set<Declaration> {
         var entity: Entity? = parent

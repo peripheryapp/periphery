@@ -98,7 +98,7 @@ To get coherent results from Periphery, it's crucial to understand the implicati
 
 If your project consists of one or more standalone frameworks that do not also contain some kind of application that consume their interfaces, then you'll need to tell Periphery to assume that all public declarations are in fact used by including the `--retain-public` option.
 
-If your project is 100% Swift, then you'll likely want to include the `--no-retain-objc-annotated` option. For projects that are mixed Objective-C/Swift, we highly recommend you [read about the implications](#objective-c) this can have on your results.
+For projects that are mixed Objective-C & Swift, it's highly recommend you [read about the implications](#objective-c) this can have on your results.
 
 ### Configuration
 
@@ -300,9 +300,9 @@ In some cases this may be the intended behavior, so to silence these results you
 
 ### Objective-C
 
-Since Objective-C can use dynamic types, Periphery cannot reason about it from a static standpoint. Therefore, by default, Periphery will assume that any declaration exposed to Objective-C is in use. If your project is 100% Swift, then you can disable this behavior with the `--no-retain-objc-annotated` option. For those using Periphery on a mixed project, there are some important implications to be aware of.
+Periphery cannot analyze Objective-C code since types may be dynamically typed.
 
-As you already know, any declaration that is annotated with `@objc` or `@objcMembers` is exposed to the Objective-C runtime, and Periphery will assume they are in use. However, you should also be aware that any `class` that inherits from `NSObject` is also _implicitly_ exposed to Objective-C. If you ever come across a situation where Periphery reports that all methods and properties within a `class` - but not the `class` itself - are unused, then the class likely inherits from `NSObject`. It may be worth your time doing a cursory run of Periphery with `--no-retain-objc-annotated`, you may find a few extra declarations to remove. Though be warned, many declarations reported as unused may still be in use by Objective-C code, so you'll need to take extra care when reviewing them.
+By default Periphery does not assume that declarations accessible by the Objective-C runtime are in use. If your project is a mix of Swift & Objective-C, you can enable this behavior with the `--retain-objc-accessible` option. Swift declarations that are accessible by the Objective-C runtime are those that are explicitly attributed with `@objc` or `@objcMembers`, and classes that inherit `NSObject` either directly or indirectly via another class.
 
 ## Comment Commands
 
