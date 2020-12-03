@@ -1181,6 +1181,20 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    // https://bugs.swift.org/browse/SR-13930
+    func testRetainsOptionalProtocolMethodImplementedInSubclass() {
+        #if os(macOS)
+        // It appears optional protocol members aren't supported on Linux?
+        guard performKnownFailures else { return }
+
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass125Base"))
+            XCTAssertReferenced((.class, "FixtureClass125"))
+            XCTAssertReferenced((.functionMethodInstance, "fileManager(_:shouldRemoveItemAtPath:)"), descendentOf: (.class, "FixtureClass125"))
+        }
+        #endif
+    }
+
     // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768
