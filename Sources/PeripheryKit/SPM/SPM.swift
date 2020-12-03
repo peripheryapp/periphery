@@ -4,7 +4,7 @@ import Shared
 public struct SPM {
     public struct Package: Decodable {
         public static func load() throws -> Self {
-            let shell = Shell()
+            let shell: Shell = inject()
             let jsonString = try shell.exec(["swift", "package", "describe", "--type", "json"], stderr: false)
 
             guard let jsonData = jsonString.data(using: .utf8) else {
@@ -25,7 +25,7 @@ public struct SPM {
         }
 
         func clean() throws {
-            let shell = Shell()
+            let shell: Shell = inject()
             try shell.exec(["swift", "package", "clean"])
         }
     }
@@ -37,7 +37,7 @@ public struct SPM {
         public let moduleType: String
 
         func build() throws {
-            let shell = Shell()
+            let shell: Shell = inject()
             try shell.exec(["swift", "build", "--enable-test-discovery", "--target", name])
         }
     }

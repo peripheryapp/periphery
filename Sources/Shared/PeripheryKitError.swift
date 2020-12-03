@@ -2,8 +2,8 @@ import Foundation
 import PathKit
 
 public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
-    case shellCommandFailed(args: [String], status: Int32, output: String)
-    case shellOuputEncodingFailed(args: [String], encoding: String.Encoding)
+    case shellCommandFailed(cmd: String, args: [String], status: Int32, output: String)
+    case shellOuputEncodingFailed(cmd: String, args: [String], encoding: String.Encoding)
 
     case usageError(String)
     case underlyingError(Error)
@@ -22,11 +22,12 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
 
     public var errorDescription: String? {
         switch self {
-        case let .shellCommandFailed(args, status, output):
-            let cmd = args.joined(separator: " ")
-            return "Shell command '\(cmd)' returned exit status '\(status)':\n\(output)"
-        case .shellOuputEncodingFailed(let args, let encoding):
-            return "Shell command '\(args)' output encoding to \(encoding) failed."
+        case let .shellCommandFailed(cmd, args, status, output):
+            let joinedArgs = args.joined(separator: " ")
+            return "Shell command '\(cmd) \(joinedArgs)' returned exit status '\(status)':\n\(output)"
+        case let .shellOuputEncodingFailed(cmd, args, encoding):
+            let joinedArgs = args.joined(separator: " ")
+            return "Shell command '\(cmd) \(joinedArgs)' output encoding to \(encoding) failed."
         case let .usageError(message):
             return message
         case let .underlyingError(error):
@@ -63,7 +64,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
         switch self {
         case .xcodebuildNotConfigured:
             return "You may need to change the path to your Xcode.app if it has a different name."
-        case let .shellCommandFailed(_, _, output):
+        case let .shellCommandFailed(_, _, _, output):
             if output.contains("EXPANDED_CODE_SIGN_IDENTITY: unbound variable") {
                 return "You appear to be affected by a bug in CocoaPods (https://github.com/CocoaPods/CocoaPods/issues/8000). Please upgrade to CocoaPods >= 1.6.0, run 'pod install' and try again."
             }
