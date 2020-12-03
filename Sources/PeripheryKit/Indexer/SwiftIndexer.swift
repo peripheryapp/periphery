@@ -63,7 +63,8 @@ public final class SwiftIndexer {
                 units: units,
                 graph: graph,
                 indexStore: indexStore,
-                logger: logger
+                logger: logger,
+                configuration: configuration
             )
         }
 
@@ -86,21 +87,24 @@ public final class SwiftIndexer {
 
         private let units: [IndexStoreUnit]
         private let graph: SourceGraph
-        private let logger: Logger
         private let indexStore: IndexStore
+        private let logger: Logger
+        private let configuration: Configuration
 
         required init(
             file: Path,
             units: [IndexStoreUnit],
             graph: SourceGraph,
             indexStore: IndexStore,
-            logger: Logger
+            logger: Logger,
+            configuration: Configuration
         ) {
             self.file = file
             self.units = units
             self.graph = graph
-            self.logger = logger
             self.indexStore = indexStore
+            self.logger = logger
+            self.configuration = configuration
         }
 
         struct RawRelation {
@@ -120,6 +124,7 @@ public final class SwiftIndexer {
                 let kind: Declaration.Kind
                 let name: String?
                 let isImplicit: Bool
+                let isObjcAccessible: Bool
                 let location: SourceLocation
             }
 
@@ -127,10 +132,11 @@ public final class SwiftIndexer {
             let kind: Declaration.Kind
             let name: String?
             let isImplicit: Bool
+            let isObjcAccessible: Bool
             let location: SourceLocation
 
             var key: Key {
-                Key(kind: kind, name: name, isImplicit: isImplicit, location: location)
+                Key(kind: kind, name: name, isImplicit: isImplicit, isObjcAccessible: isObjcAccessible, location: location)
             }
         }
 
@@ -176,8 +182,13 @@ public final class SwiftIndexer {
 
                 decl.name = key.name
                 decl.isImplicit = key.isImplicit
+                decl.isObjcAccessible = key.isObjcAccessible
 
                 if decl.isImplicit {
+                    graph.markRetained(decl)
+                }
+
+                if decl.isObjcAccessible && configuration.retainObjcAccessible {
                     graph.markRetained(decl)
                 }
 
@@ -387,7 +398,8 @@ public final class SwiftIndexer {
                     functionDecl.unusedParameters.insert(paramDecl)
                     graph.add(paramDecl)
 
-                    if ignoredParamNames.contains(param.name) {
+                    if ignoredParamNames.contains(param.name) ||
+                        (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) {
                         graph.markRetained(paramDecl)
                     }
                 }
@@ -413,6 +425,7 @@ public final class SwiftIndexer {
                 kind: kind,
                 name: occurrence.symbol.name,
                 isImplicit: occurrence.roles.contains(.implicit),
+                isObjcAccessible: usr.hasPrefix("c:"),
                 location: location)
 
             var relations: [RawRelation] = []

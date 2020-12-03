@@ -3,6 +3,7 @@
 ##### Breaking
 
 - JSON and CSV output formats have changed to reflect the fact that declarations can have multiple IDs if they're members of multiple build targets.
+- Declarations accessible by the Objective-C runtime are no longer retained by default. The `--no-retain-objc-annotated` option has been removed, and `--retain-objc-accessible` added.
 
 ##### Enhancements
 

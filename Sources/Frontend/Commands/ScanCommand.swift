@@ -48,8 +48,8 @@ public struct ScanCommand: ParsableCommand {
     @Flag(help: "Retain properties that are assigned, but never used")
     var retainAssignOnlyProperties: Bool = false
 
-    @Flag(help: "Don't retain declarations that are exposed to Objective-C by inheriting NSObject, or explicitly with the @objc and @objcMembers annotations")
-    var noRetainObjcAnnotated: Bool = false
+    @Flag(help: "Retain declarations that are exposed to Objective-C implicitly by inheriting NSObject classes, or explicitly with the @objc and @objcMembers attributes")
+    var retainObjcAccessible: Bool = false
 
     @Flag(help: "Retain unused protocol function parameters, even if the parameter is unused in all conforming functions")
     var retainUnusedProtocolFuncParams: Bool = false
@@ -125,8 +125,8 @@ public struct ScanCommand: ParsableCommand {
             configuration.retainAssignOnlyProperties = retainAssignOnlyProperties
         }
 
-        if isExplicit("retain-objc-annotated") {
-            configuration.retainObjcAnnotated = !noRetainObjcAnnotated
+        if isExplicit("retain-objc-accessible") {
+            configuration.retainObjcAccessible = retainObjcAccessible
         }
 
         if isExplicit("retain-unused-protocol-func-params") {

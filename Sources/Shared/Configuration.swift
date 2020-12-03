@@ -20,7 +20,7 @@ public final class Configuration: Singleton {
     public var indexExclude: [String] = []
     public var reportExclude: [String] = []
 
-    public var retainObjcAnnotated: Bool = true
+    public var retainObjcAccessible: Bool = false
     public var retainPublic: Bool = false
     public var retainAssignOnlyProperties: Bool = false
     public var retainUnusedProtocolFuncParams: Bool = false
@@ -51,7 +51,7 @@ public final class Configuration: Singleton {
             "targets": targets,
             "index_exclude": indexExclude,
             "report_exclude": reportExclude,
-            "retain_objc_annotated": retainObjcAnnotated,
+            "retain_objc_accessible": retainObjcAccessible,
             "retain_public": retainPublic,
             "retain_assign_only_properties": retainAssignOnlyProperties,
             "retain_unused_protocol_func_params": retainUnusedProtocolFuncParams,
@@ -96,8 +96,8 @@ public final class Configuration: Singleton {
                 self.retainPublic = convert(value, to: Bool.self) ?? false
             case "retain_assign_only_properties":
                 self.retainAssignOnlyProperties = convert(value, to: Bool.self) ?? false
-            case "retain_objc_annotated":
-                self.retainObjcAnnotated = convert(value, to: Bool.self) ?? false
+            case "retain_objc_accessible":
+                self.retainObjcAccessible = convert(value, to: Bool.self) ?? false
             case "retain_unused_protocol_func_params":
                 self.retainUnusedProtocolFuncParams = convert(value, to: Bool.self) ?? false
             case "verbose":

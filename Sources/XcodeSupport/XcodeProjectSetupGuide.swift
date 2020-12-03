@@ -49,6 +49,10 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
         } else {
             throw PeripheryError.guidedSetupError(message: "Failed to find .xcworkspace or .xcodeproj in current directory")
         }
+
+        print(colorize("\nAssume Objective-C accessible declarations are in use?", .bold))
+        print(colorize("?", .boldYellow) + " Declarations exposed to the Objective-C runtime explicitly with @objc, or implicitly by inheriting NSObject will be assumed to be in use. You may want to choose 'Yes' here if your project contains a mix of Swift & Objective-C.")
+        configuration.retainObjcAccessible = selectBoolean()
     }
 
     public var commandLineOptions: [String] {
@@ -64,6 +68,10 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
 
         options.append("--schemes " + configuration.schemes.map { "\"\($0)\"" }.joined(separator: ","))
         options.append("--targets " + configuration.targets.map { "\"\($0)\"" }.joined(separator: ","))
+
+        if configuration.retainObjcAccessible {
+            options.append("--retain-objc-accessible")
+        }
 
         return options
     }
