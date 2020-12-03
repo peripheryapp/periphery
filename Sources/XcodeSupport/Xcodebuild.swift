@@ -35,6 +35,7 @@ public final class Xcodebuild: Injectable {
             "-scheme", "'\(scheme.name)'",
             "-parallelizeTargets",
             "-derivedDataPath", "'\(try derivedDataPath(for: project, schemes: allSchemes).string)'",
+            "-quiet"
         ]
 
         if let additionalArguments = additionalArguments {
@@ -48,7 +49,7 @@ public final class Xcodebuild: Injectable {
         ]
 
         let xcodebuild = "xcodebuild \((args + [cmd] + envs).joined(separator: " "))"
-        return try shell.exec([xcodebuild])
+        return try shell.exec(["/bin/sh", "-c", xcodebuild])
     }
 
     func removeDerivedData(for project: XcodeProjectlike, allSchemes: [XcodeScheme]) throws {
@@ -99,7 +100,7 @@ public final class Xcodebuild: Injectable {
             // action is supplied.
             // Note: we don't use -skipUnavailableActions here as it returns incorrect output.
             return try shell.exec(["xcodebuild"] + args + ["build", "test"], stderr: false)
-        } catch PeripheryError.shellCommandFailed(args: _, status: _, output: _) {
+        } catch PeripheryError.shellCommandFailed(_, _, _,  _) {
             return try shell.exec(["xcodebuild"] + args + ["build"], stderr: false)
         }
     }

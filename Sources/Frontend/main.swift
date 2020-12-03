@@ -14,7 +14,8 @@ struct PeripheryCommand: ParsableCommand {
 
 signal(SIGINT) { _ in
     logger.warn("Termination can result in a corrupt index. Try the '--clean-build' flag if you get erroneous results, such as false-positives and incorrect source file locations.")
-    Shell.terminateAll()
+    let shell: Shell = inject()
+    shell.interruptRunning()
     exit(0)
 }
 

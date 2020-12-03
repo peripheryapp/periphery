@@ -28,7 +28,7 @@ public final class Project {
 
     func validateEnvironment() throws {
         let logger: Logger = inject()
-        let shell = Shell()
+        let shell: Shell = inject()
 
         logger.debug(try shell.exec(["swift", "--version"]).trimmed)
 

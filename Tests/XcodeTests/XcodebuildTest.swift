@@ -26,7 +26,7 @@ class XcodebuildBuildProjectTest: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        shell = Shell()
+        shell = inject(Shell.self)
         xcodebuild = Xcodebuild(shell: shell)
         project = try! XcodeProject.make(path: iOSProjectPath)
     }
