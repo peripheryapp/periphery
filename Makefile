@@ -11,11 +11,6 @@ build:
 build_release:
 	@swift build $(RELEASE_BUILD_FLAGS)
 
-proj:
-	@rm -rf Periphery.xcodeproj
-	@swift package generate-xcodeproj
-	@cp Tests/Configs/*.xcscheme Periphery.xcodeproj/xcshareddata/xcschemes/
-
 lint:
 	@swiftlint lint --quiet
 

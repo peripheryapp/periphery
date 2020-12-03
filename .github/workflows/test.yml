@@ -31,8 +31,6 @@ jobs:
       run: swift package resolve
     - name: Build
       run: swift build --build-tests
-    - name: Generate Xcode project
-      run: make proj
     - name: Test
       run: swift test
     - name: Scan
