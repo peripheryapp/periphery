@@ -45,12 +45,10 @@ final class DeclarationMarker: SourceGraphVisitor {
 
     private func markReachable(_ declarations: Set<Declaration>) {
         for declaration in declarations {
-            let count = graph.incrementReachable(declaration)
+            guard !graph.isReachable(declaration) else { continue }
 
-            if count == 1 {
-                // First time seeing this declaration.
-                markReachable(declarationsReferenced(by: declaration))
-            }
+            graph.markReachable(declaration)
+            markReachable(declarationsReferenced(by: declaration))
         }
     }
 
@@ -75,59 +73,11 @@ final class DeclarationMarker: SourceGraphVisitor {
                 else { continue }
 
             if unreachableDeclarations.contains(decl) {
-                ignoreDescendents(of: decl)
+                decl.descendentDeclarations.forEach { graph.markIgnored($0) }
             } else {
                 ignoreUnreachableDescendents(in: decl.declarations,
                                              unreachableDeclarations: unreachableDeclarations)
             }
         }
-    }
-
-    private func ignoreDescendents(of decl: Declaration) {
-        guard !graph.isIgnored(decl) else {
-            // This declaration is itself ignored, thus is descendents are too already.
-            return
-        }
-
-        decl.descendentDeclarations.forEach {
-            graph.markIgnored($0)
-
-            // If this declaration is retained, we need to unretain it and decrement references it holds.
-            if graph.isRetained($0) {
-                graph.unmarkRetained($0)
-
-                // Retained declarations are also previously marked as reachable, so decrement.
-                graph.decrementReachable($0)
-
-                decrementReferences(from: $0, callers: [$0])
-            }
-        }
-    }
-
-    private func decrementReferences(from declaration: Declaration, callers: Set<Declaration>) {
-        var declarationsToIgnore: [Declaration] = []
-
-        for decl in declarationsReferenced(by: declaration) {
-            let refCount = graph.decrementReachable(decl)
-
-            if graph.isIgnored(decl) {
-                // This declaration is ignored, thus its references have already been decremented.
-                continue
-            }
-
-            if callers.contains(decl) {
-                // Already seen this declaration, avoid traversing cyclic references.
-                continue
-            }
-
-            decrementReferences(from: decl, callers: callers.union([decl]))
-
-            if refCount == 0 {
-                // This declaration is now unreachable, ignore its descendents once we're done decrementing references.
-                declarationsToIgnore.append(decl)
-            }
-        }
-
-        declarationsToIgnore.forEach { ignoreDescendents(of: $0) }
     }
 }

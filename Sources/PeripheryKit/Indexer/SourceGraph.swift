@@ -15,7 +15,6 @@ public final class SourceGraph {
     private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
-    private var reachableDeclarationCounts: [Declaration: Int] = [:]
 
     private let mutationQueue: DispatchQueue
 
@@ -74,21 +73,9 @@ public final class SourceGraph {
         }
     }
 
-    func isIgnored(_ declaration: Declaration) -> Bool {
-        mutationQueue.sync {
-            ignoredDeclarations.contains(declaration)
-        }
-    }
-
     func markRetained(_ declaration: Declaration) {
         mutationQueue.sync {
             _ = retainedDeclarations.insert(declaration)
-        }
-    }
-
-    func unmarkRetained(_ declaration: Declaration) {
-        mutationQueue.sync {
-            _ = retainedDeclarations.remove(declaration)
         }
     }
 
@@ -163,27 +150,15 @@ public final class SourceGraph {
         }
     }
 
-    @discardableResult
-    func incrementReachable(_ declaration: Declaration) -> Int {
+    func markReachable(_ declaration: Declaration) {
         mutationQueue.sync {
-            reachableDeclarations.insert(declaration)
-            reachableDeclarationCounts[declaration, default: 0] += 1
-            return reachableDeclarationCounts[declaration, default: 0]
+            _ = reachableDeclarations.insert(declaration)
         }
     }
 
-    @discardableResult
-    func decrementReachable(_ declaration: Declaration) -> Int {
+    func isReachable(_ declaration: Declaration) -> Bool {
         mutationQueue.sync {
-            reachableDeclarationCounts[declaration, default: 0] -= 1
-            let count = reachableDeclarationCounts[declaration, default: 0]
-
-            if count == 0 {
-                reachableDeclarationCounts.removeValue(forKey: declaration)
-                reachableDeclarations.remove(declaration)
-            }
-
-            return count
+            reachableDeclarations.contains(declaration)
         }
     }
 
