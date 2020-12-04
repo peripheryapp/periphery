@@ -4,10 +4,12 @@ import Yams
 
 public final class Configuration: Singleton {
     public static func make() -> Self {
-        return self.init()
+        return self.init(logger: inject())
     }
 
-    public required init() {}
+    public required init(logger: BaseLogger) {
+        self.logger = logger
+    }
 
     public var config: String?
     public var workspace: String?
@@ -36,6 +38,9 @@ public final class Configuration: Singleton {
 
     // Only used for tests.
     public var entryPointFilenames: [String] = []
+
+    // Dependencies
+    private var logger: BaseLogger // Must use BaseLogger as Logger depends upon Configuration.
 
     public func asYaml() throws -> String {
         let config: [String: Any?] = [
@@ -69,80 +74,51 @@ public final class Configuration: Singleton {
         let encodedYAML = try path.read(.utf8)
         let yaml = try Yams.load(yaml: encodedYAML) as? [String: Any] ?? [:]
 
-        if let value = yaml["workspace"] as? String {
-            self.workspace = value
-        }
-
-        if let value = yaml["project"] as? String {
-            self.project = value
-        }
-
-        if let value = yaml["schemes"] as? [String] {
-            self.schemes = value
-        }
-
-        if let value = yaml["targets"] as? [String] {
-            self.targets = value
-        }
-
-        if let value = yaml["index_exclude"] as? [String] {
-            self.indexExclude = value
-        }
-
-        if let value = yaml["report_exclude"] as? [String] {
-            self.reportExclude = value
-        }
-
-        if let value = yaml["format"] as? String {
-            self.outputFormat = try OutputFormat.make(named: value)
-        }
-
-        if let value = yaml["retain_public"] as? Bool {
-            self.retainPublic = value
-        }
-
-        if let value = yaml["retain_assign_only_properties"] as? Bool {
-            self.retainAssignOnlyProperties = value
-        }
-
-        if let value = yaml["retain_objc_annotated"] as? Bool {
-            self.retainObjcAnnotated = value
-        }
-
-        if let value = yaml["retain_unused_protocol_func_params"] as? Bool {
-            self.retainUnusedProtocolFuncParams = value
-        }
-
-        if let value = yaml["verbose"] as? Bool {
-            self.verbose = value
-        }
-
-        if let value = yaml["quiet"] as? Bool {
-            self.quiet = value
-        }
-
-        if let value = yaml["disable_update_check"] as? Bool {
-            self.updateCheck = !value
-        }
-
-        if let value = yaml["strict"] as? Bool {
-            self.strict = value
-        }
-
-        if let value = yaml["xcargs"] as? String {
-            self.xcargs = value
-        }
-
-        if let value = yaml["index_store_path"] as? String {
-            self.indexStorePath = value
-        }
-
-        if let value = yaml["skip_build"] as? Bool {
-            self.skipBuild = value
-        }
-
-        if let value = yaml["clean_build"] as? Bool {
-            self.cleanBuild = value
+        for (key, value) in yaml {
+            switch key {
+            case "workspace":
+                self.workspace = convert(value, to: String.self)
+            case "project":
+                self.project = convert(value, to: String.self)
+            case "schemes":
+                self.schemes = convert(value, to: [String].self) ?? []
+            case "targets":
+                self.targets = convert(value, to: [String].self) ?? []
+            case "index_exclude":
+                self.indexExclude = convert(value, to: [String].self) ?? []
+            case "report_exclude":
+                self.reportExclude = convert(value, to: [String].self) ?? []
+            case "format":
+                if let value = convert(value, to: String.self) {
+                    self.outputFormat = try OutputFormat.make(named: value)
+                }
+            case "retain_public":
+                self.retainPublic = convert(value, to: Bool.self) ?? false
+            case "retain_assign_only_properties":
+                self.retainAssignOnlyProperties = convert(value, to: Bool.self) ?? false
+            case "retain_objc_annotated":
+                self.retainObjcAnnotated = convert(value, to: Bool.self) ?? false
+            case "retain_unused_protocol_func_params":
+                self.retainUnusedProtocolFuncParams = convert(value, to: Bool.self) ?? false
+            case "verbose":
+                self.verbose = convert(value, to: Bool.self) ?? false
+            case "quiet":
+                self.quiet = convert(value, to: Bool.self) ?? false
+            case "disable_update_check":
+                self.updateCheck = !(convert(value, to: Bool.self) ?? false)
+            case "strict":
+                self.strict = convert(value, to: Bool.self) ?? false
+            case "xcargs":
+                self.xcargs = convert(value, to: String.self)
+            case "index_store_path":
+                self.indexStorePath = convert(value, to: String.self)
+            case "skip_build":
+                self.skipBuild = convert(value, to: Bool.self) ?? false
+            case "clean_build":
+                self.cleanBuild = convert(value, to: Bool.self) ?? false
+            default:
+                logger.warn("\(path.string) contains invalid key '\(key)'")
+            }
         }
     }
 
@@ -157,6 +133,10 @@ public final class Configuration: Singleton {
     }
 
     // MARK: - Private
+
+    private func convert<T>(_ value: Any, to type: T.Type) -> T? {
+        value as? T
+    }
 
     private func glob(_ pattern: String) -> [Path] {
         var patternPath = Path(pattern)

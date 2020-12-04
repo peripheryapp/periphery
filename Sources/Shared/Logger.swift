@@ -27,28 +27,23 @@ public func colorize(_ text: String, _ color: ANSIColor) -> String {
     return "\(color.rawValue)\(text)\u{001B}[0;0m"
 }
 
-public final class Logger: Singleton {
+public final class BaseLogger: Singleton {
     public static func make() -> Self {
-        return self.init(configuration: inject())
+        return self.init()
     }
 
-    private let configuration: Configuration
     private let outputQueue: DispatchQueue
 
-    required public init(configuration: Configuration) {
-        self.configuration = configuration
+    required public init() {
         self.outputQueue = DispatchQueue(label: "Logger.outputQueue")
     }
 
-    public func info(_ text: String, canQuiet: Bool = true) {
-        guard !(configuration.quiet && canQuiet) else { return }
+    public func info(_ text: String) {
         log(text, output: stdout)
     }
 
     public func debug(_ text: String) {
-        if configuration.verbose {
-            log(text, output: stdout)
-        }
+        log(text, output: stdout)
     }
 
     public func warn(_ text: String) {
@@ -82,5 +77,53 @@ public final class Logger: Singleton {
 
     private func log(_ line: String, output: UnsafeMutablePointer<FILE>) {
         _ = outputQueue.sync { fputs(line + "\n", output) }
+    }
+}
+
+public final class Logger: Singleton {
+    public static func make() -> Self {
+        return self.init(baseLogger: inject(), configuration: inject())
+    }
+
+    private let baseLogger: BaseLogger
+    private let configuration: Configuration
+
+    required public init(baseLogger: BaseLogger, configuration: Configuration) {
+        self.baseLogger = baseLogger
+        self.configuration = configuration
+    }
+
+    public func info(_ text: String, canQuiet: Bool = true) {
+        guard !(configuration.quiet && canQuiet) else { return }
+        baseLogger.info(text)
+    }
+
+    public func debug(_ text: String) {
+        if configuration.verbose {
+            baseLogger.debug(text)
+        }
+    }
+
+    public func warn(_ text: String) {
+        baseLogger.warn(text)
+    }
+
+    // periphery:ignore
+    public func important(_ text: String) {
+        baseLogger.important(text)
+    }
+
+    public func hint(_ text: String) {
+        baseLogger.hint(text)
+    }
+
+    // periphery:ignore
+    public func error(_ text: String) {
+        baseLogger.error(text)
+    }
+
+    // periphery:ignore
+    public func error(_ e: Error) {
+        error(e.localizedDescription)
     }
 }
