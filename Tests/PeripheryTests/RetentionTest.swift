@@ -195,6 +195,22 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testRedundantProtocolThatInheritsAnyObject() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass120"))
+            XCTAssertReferenced((.protocol, "FixtureProtocol120"))
+            XCTAssertRedundantProtocol("FixtureProtocol120", implementedBy: (.class, "FixtureClass120"))
+
+            XCTAssertReferenced((.class, "FixtureClass121"))
+            XCTAssertReferenced((.protocol, "FixtureProtocol121"))
+            XCTAssertRedundantProtocol("FixtureProtocol121", implementedBy: (.class, "FixtureClass121"))
+
+            XCTAssertReferenced((.class, "FixtureClass122"))
+            XCTAssertReferenced((.protocol, "FixtureProtocol122"))
+            XCTAssertRedundantProtocol("FixtureProtocol122", implementedBy: (.class, "FixtureClass122"))
+        }
+    }
+
     func testRedundantProtocolThatInheritsForeignProtocol() {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass118"))
@@ -1159,6 +1175,8 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    // MARK: - Known Failures
+
     // https://bugs.swift.org/browse/SR-13930
     func testRetainsOptionalProtocolMethodImplementedInSubclass() {
         #if os(macOS)
@@ -1172,8 +1190,6 @@ class RetentionTest: SourceGraphTestCase {
         }
         #endif
     }
-
-    // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-13768
     func testCustomConstructorithLiteral() {
