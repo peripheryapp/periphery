@@ -202,27 +202,35 @@ public final class SwiftIndexer {
         private var referencedDeclsByUsr: [String: Set<Reference>] = [:]
         private var referencedUsrsByDecl: [Declaration: [Reference]] = [:]
         private var danglingReferences: [Reference] = []
+        private var varParameterUsrs: Set<String> = []
 
         private func establishDeclarationHierarchy() {
-            graph.mutating {
-                for (parent, decls) in childDeclsByParentUsr {
-                    guard let parentDecl = graph.explicitDeclaration(withUsr: parent) else {
-                        continue
+            for (parent, decls) in childDeclsByParentUsr {
+                guard let parentDecl = graph.explicitDeclaration(withUsr: parent) else {
+                    if varParameterUsrs.contains(parent) {
+                        // These declarations are children of a parameter and are redundant.
+                        decls.forEach { graph.remove($0) }
                     }
 
+                    continue
+                }
+
+                graph.mutating {
                     for decl in decls {
                         decl.parent = parentDecl
                     }
 
                     parentDecl.declarations.formUnion(decls)
                 }
+            }
 
-                for (usr, references) in referencedDeclsByUsr {
-                    guard let decl = graph.explicitDeclaration(withUsr: usr) else {
-                        danglingReferences.append(contentsOf: references)
-                        continue
-                    }
+            for (usr, references) in referencedDeclsByUsr {
+                guard let decl = graph.explicitDeclaration(withUsr: usr) else {
+                    danglingReferences.append(contentsOf: references)
+                    continue
+                }
 
+                graph.mutating {
                     for reference in references {
                         reference.parent = decl
 
@@ -233,7 +241,9 @@ public final class SwiftIndexer {
                         }
                     }
                 }
+            }
 
+            graph.mutating {
                 for (decl, refs) in referencedUsrsByDecl {
                     for ref in refs {
                         ref.parent = decl
@@ -393,6 +403,8 @@ public final class SwiftIndexer {
 
             guard kind != .varParameter else {
                 // Ignore indexed parameters as unused parameter identification is performed separately using SwiftSyntax.
+                // Record the USR so that we can also ignore implicit accessor declarations.
+                varParameterUsrs.insert(usr)
                 return nil
             }
 
