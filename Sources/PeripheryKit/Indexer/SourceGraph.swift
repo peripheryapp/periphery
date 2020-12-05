@@ -3,11 +3,11 @@ import Shared
 
 public final class SourceGraph {
     private(set) public var allDeclarations: Set<Declaration> = []
+    private(set) public var reachableDeclarations: Set<Declaration> = []
 
     private(set) var rootDeclarations: Set<Declaration> = []
     private(set) var rootReferences: Set<Reference> = []
     private(set) var allReferences: Set<Reference> = []
-    private(set) var reachableDeclarations: Set<Declaration> = []
     private(set) var redundantDeclarations: Set<Declaration> = []
     private(set) var retainedDeclarations: Set<Declaration> = []
 
