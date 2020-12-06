@@ -216,32 +216,30 @@ public final class SwiftIndexer {
         private var varParameterUsrs: Set<String> = []
 
         private func establishDeclarationHierarchy() {
-            for (parent, decls) in childDeclsByParentUsr {
-                guard let parentDecl = graph.explicitDeclaration(withUsr: parent) else {
-                    if varParameterUsrs.contains(parent) {
-                        // These declarations are children of a parameter and are redundant.
-                        decls.forEach { graph.remove($0) }
+            graph.mutating {
+                for (parent, decls) in childDeclsByParentUsr {
+                    guard let parentDecl = graph.explicitDeclaration(withUsr: parent) else {
+                        if varParameterUsrs.contains(parent) {
+                            // These declarations are children of a parameter and are redundant.
+                            decls.forEach { graph.removeUnsafe($0) }
+                        }
+
+                        continue
                     }
 
-                    continue
-                }
-
-                graph.mutating {
                     for decl in decls {
                         decl.parent = parentDecl
                     }
 
                     parentDecl.declarations.formUnion(decls)
                 }
-            }
 
-            for (usr, references) in referencedDeclsByUsr {
-                guard let decl = graph.explicitDeclaration(withUsr: usr) else {
-                    danglingReferences.append(contentsOf: references)
-                    continue
-                }
+                for (usr, references) in referencedDeclsByUsr {
+                    guard let decl = graph.explicitDeclaration(withUsr: usr) else {
+                        danglingReferences.append(contentsOf: references)
+                        continue
+                    }
 
-                graph.mutating {
                     for reference in references {
                         reference.parent = decl
 
@@ -252,9 +250,7 @@ public final class SwiftIndexer {
                         }
                     }
                 }
-            }
 
-            graph.mutating {
                 for (decl, refs) in referencedUsrsByDecl {
                     for ref in refs {
                         ref.parent = decl

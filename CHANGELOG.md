@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix crash during indexing phase.
 
 ## 2.3.0 (2020-12-05)
 
