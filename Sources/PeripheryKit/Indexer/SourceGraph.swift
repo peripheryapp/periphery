@@ -98,13 +98,17 @@ public final class SourceGraph {
 
     func remove(_ declaration: Declaration) {
         mutationQueue.sync {
-            declaration.parent?.declarations.remove(declaration)
-            allDeclarations.remove(declaration)
-            allDeclarationsByKind[declaration.kind]?.remove(declaration)
-            rootDeclarations.remove(declaration)
-            reachableDeclarations.remove(declaration)
-            declaration.usrs.forEach { allExplicitDeclarationsByUsr.removeValue(forKey: $0) }
+            removeUnsafe(declaration)
         }
+    }
+
+    func removeUnsafe(_ declaration: Declaration) {
+        declaration.parent?.declarations.remove(declaration)
+        allDeclarations.remove(declaration)
+        allDeclarationsByKind[declaration.kind]?.remove(declaration)
+        rootDeclarations.remove(declaration)
+        reachableDeclarations.remove(declaration)
+        declaration.usrs.forEach { allExplicitDeclarationsByUsr.removeValue(forKey: $0) }
     }
 
     func add(_ reference: Reference) {
