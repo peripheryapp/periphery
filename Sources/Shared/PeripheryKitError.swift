@@ -12,7 +12,6 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case invalidTarget(name: String, project: String)
     case testTargetNotBuildable(name: String)
     case sourceGraphIntegrityError(message: String)
-    case swiftIndexingError(message: String)
     case guidedSetupError(message: String)
     case updateCheckError(message: String)
     case xcodebuildNotConfigured
@@ -42,8 +41,6 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
         case .testTargetNotBuildable(let name):
             return "Test target '\(name)' is not built by any of the given schemes."
         case .sourceGraphIntegrityError(let message):
-            return message
-        case .swiftIndexingError(let message):
             return message
         case .guidedSetupError(let message):
             return "\(message). Please refer to the documentation for instructions on configuring Periphery manually - https://github.com/peripheryapp/periphery/blob/master/README.md"

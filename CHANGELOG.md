@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix indexing failure on unhandled declaration kinds, such as 'commentTag'.
 
 ## 2.3.1 (2020-12-06)
 
