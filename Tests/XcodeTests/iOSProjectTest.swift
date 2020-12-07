@@ -90,7 +90,8 @@ class iOSProjectTest: SourceGraphTestCase {
     #endif
 
     func testRetainsMethodReferencedByObjcSelector() {
-        XCTAssertReferenced((.functionMethodInstance, "targetMethod()"), descendentOf: (.class, "XibViewController"))
+        XCTAssertReferenced((.functionMethodInstance, "selectorMethod()"), descendentOf: (.class, "XibViewController"))
+        XCTAssertReferenced((.functionMethodInstance, "addTargetMethod()"), descendentOf: (.class, "XibViewController"))
     }
 
     func testMultiTargetFile() {

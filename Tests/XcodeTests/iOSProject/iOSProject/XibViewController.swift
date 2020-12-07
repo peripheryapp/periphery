@@ -8,10 +8,12 @@ class XibViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        _ = #selector(targetMethod)
+        _ = #selector(selectorMethod)
+        button.addTarget(self, action: #selector(addTargetMethod), for: .touchUpInside)
     }
 
-    @objc private func targetMethod() {}
+    @objc private func selectorMethod() {}
+    @objc private func addTargetMethod() {}
 }
 
 struct XibViewControllerWrapper: UIViewControllerRepresentable {
