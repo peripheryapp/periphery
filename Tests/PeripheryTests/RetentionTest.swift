@@ -1159,6 +1159,7 @@ class RetentionTest: SourceGraphTestCase {
             XCTAssertReferenced((.class, "FixtureClass22"))
             XCTAssertReferenced((.varInstance, "someVar"))
             XCTAssertReferenced((.functionMethodInstance, "someMethod()"))
+            XCTAssertReferenced((.functionMethodInstance, "somePrivateMethod()"))
         }
     }
 
@@ -1181,6 +1182,7 @@ class RetentionTest: SourceGraphTestCase {
             XCTAssertReferenced((.class, "FixtureClass25"))
             XCTAssertReferenced((.varInstance, "someVar"))
             XCTAssertReferenced((.functionMethodInstance, "someMethod()"))
+            XCTAssertNotReferenced((.functionMethodInstance, "somePrivateMethod()"))
         }
     }
     #endif

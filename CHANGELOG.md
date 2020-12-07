@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Fix indexing failure on unhandled declaration kinds, such as 'commentTag'.
+- `--retain-objc-accessible` also retains private declarations explicitly attributed with `@objc`.
 
 ## 2.3.1 (2020-12-06)
 
