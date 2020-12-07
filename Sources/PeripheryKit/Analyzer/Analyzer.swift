@@ -43,6 +43,7 @@ public final class Analyzer {
         EntryPointAttributeRetainer.self,
         EntryPointFileRetainer.self,
         PubliclyAccessibleRetainer.self,
+        ObjCAccessibleRetainer.self,
         XCTestRetainer.self,
         SwiftUIRetainer.self,
         StructImplicitConstructorPropertyRetainer.self,
