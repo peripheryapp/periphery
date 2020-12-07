@@ -407,7 +407,8 @@ public final class SwiftIndexer {
             _ usr: String,
             _ location: SourceLocation
         ) throws -> (RawDeclaration, [RawRelation])? {
-            let kind = try transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
+            guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
+            else { return nil }
 
             guard kind != .varParameter else {
                 // Ignore indexed parameters as unused parameter identification is performed separately using SwiftSyntax.
@@ -459,7 +460,7 @@ public final class SwiftIndexer {
                 if !rel.roles.intersection([.overrideOf]).isEmpty {
                     let baseFunc = rel.symbol
 
-                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = try? transformReferenceKind(baseFunc.kind, baseFunc.subKind) {
+                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) {
                         let reference = Reference(kind: baseFuncKind, usr: baseFuncUsr, location: decl.location)
                         reference.name = baseFunc.name
                         reference.isRelated = true
@@ -500,7 +501,7 @@ public final class SwiftIndexer {
                 if !rel.roles.intersection([.overrideOf]).isEmpty {
                     let baseFunc = rel.symbol
 
-                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = try? transformReferenceKind(baseFunc.kind, baseFunc.subKind) {
+                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) {
                         let reference = Reference(kind: baseFuncKind, usr: baseFuncUsr, location: location)
                         reference.name = baseFunc.name
                         reference.isRelated = true
@@ -522,7 +523,8 @@ public final class SwiftIndexer {
             _ occurrenceUsr: String,
             _ location: SourceLocation
         ) throws {
-            let kind = try transformReferenceKind(occurrence.symbol.kind, occurrence.symbol.subKind)
+            guard let kind = transformReferenceKind(occurrence.symbol.kind, occurrence.symbol.subKind)
+                  else { return }
 
             guard kind != .varParameter else {
                 // Ignore indexed parameters as unused parameter identification is performed separately using SwiftSyntax.
@@ -568,7 +570,7 @@ public final class SwiftIndexer {
             return SourceLocation(file: file, line: input.line, column: input.column)
         }
 
-        private func transformDeclarationKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) throws -> Declaration.Kind {
+        private func transformDeclarationKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Declaration.Kind? {
             switch subKind {
             case .accessorGetter: return .functionAccessorGetter
             case .accessorSetter: return .functionAccessorSetter
@@ -609,13 +611,11 @@ public final class SwiftIndexer {
             case .constructor: return .functionConstructor
             case .destructor: return .functionDestructor
             case .parameter: return .varParameter
-            default: break
+            default: return nil
             }
-
-            throw PeripheryError.swiftIndexingError(message: "Failed to transform IndexStoreSymbol declaration kind: \(kind), subKind: \(subKind)")
         }
 
-        private func transformReferenceKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) throws -> Reference.Kind {
+        private func transformReferenceKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Reference.Kind? {
             switch subKind {
             case .accessorGetter: return .functionAccessorGetter
             case .accessorSetter: return .functionAccessorSetter
@@ -656,10 +656,8 @@ public final class SwiftIndexer {
             case .constructor: return .functionConstructor
             case .destructor: return .functionDestructor
             case .parameter: return .varParameter
-            default: break
+            default: return nil
             }
-
-            throw PeripheryError.swiftIndexingError(message: "Failed to transform IndexStoreSymbol reference kind: \(kind), subKind: \(subKind)")
         }
     }
 }
