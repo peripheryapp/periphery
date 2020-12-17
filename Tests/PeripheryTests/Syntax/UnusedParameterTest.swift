@@ -115,6 +115,23 @@ class UnusedParameterTest: XCTestCase {
         XCTAssertUsed("param", of: "init(param:)")
     }
 
+    func testParameterPosition() {
+        analyze()
+        let function = functions.first!
+
+        let param1 = function.parameters.first { $0.name == "param1" }!
+        try XCTAssertEqual(XCTUnwrap(param1.location.line), 4)
+        try XCTAssertEqual(XCTUnwrap(param1.location.column), 17)
+
+        let param2 = function.parameters.first { $0.name == "param2" }!
+        try XCTAssertEqual(XCTUnwrap(param2.location.line), 4)
+        try XCTAssertEqual(XCTUnwrap(param2.location.column), 38)
+
+        let param3 = function.parameters.first { $0.name == "param3" }!
+        try XCTAssertEqual(XCTUnwrap(param3.location.line), 4)
+        try XCTAssertEqual(XCTUnwrap(param3.location.column), 56)
+    }
+
     func testInitializerPosition() {
         analyze()
 
@@ -134,10 +151,30 @@ class UnusedParameterTest: XCTestCase {
     func testMultiLineParameterPosition() {
         analyze()
         let function = functions.first!
+
         let param1 = function.parameters.first { $0.name == "param1" }!
-        let param2 = function.parameters.first { $0.name == "param2" }!
         try XCTAssertEqual(XCTUnwrap(param1.location.line), 4)
+        try XCTAssertEqual(XCTUnwrap(param1.location.column), 17)
+
+        let param2 = function.parameters.first { $0.name == "param2" }!
         try XCTAssertEqual(XCTUnwrap(param2.location.line), 5)
+        try XCTAssertEqual(XCTUnwrap(param2.location.column), 17)
+
+        let param3 = function.parameters.first { $0.name == "param3" }!
+        try XCTAssertEqual(XCTUnwrap(param3.location.line), 7)
+        try XCTAssertEqual(XCTUnwrap(param3.location.column), 17)
+
+        let param4 = function.parameters.first { $0.name == "param4" }!
+        try XCTAssertEqual(XCTUnwrap(param4.location.line), 8)
+        try XCTAssertEqual(XCTUnwrap(param4.location.column), 19)
+
+        let param5 = function.parameters.first { $0.name == "param5" }!
+        try XCTAssertEqual(XCTUnwrap(param5.location.line), 9)
+        try XCTAssertEqual(XCTUnwrap(param5.location.column), 22)
+
+        let param6 = function.parameters.first { $0.name == "param6" }!
+        try XCTAssertEqual(XCTUnwrap(param6.location.line), 11)
+        try XCTAssertEqual(XCTUnwrap(param6.location.column), 21)
     }
 
     func testIBActionAnnotatedFunction() {

@@ -232,14 +232,14 @@ struct UnusedParameterParser {
             metatype = metatypeSyntax.description
         }
 
-        // Position is off by one, advance forward so that we can identify the correct line of param lists that span
-        // multiple lines.
-        let position = AbsolutePosition(utf8Offset: syntax.position.utf8Offset + 1)
+        let positionSyntax: SyntaxProtocol = (syntax.secondName ?? syntax.firstName) ?? syntax
+        let absolutePosition = AbsolutePosition(utf8Offset: positionSyntax.position.utf8Offset + positionSyntax.leadingTriviaLength.utf8Length)
+        let location = sourceLocation(of: absolutePosition)
 
         return Parameter(firstName: syntax.firstName?.text,
                          secondName: syntax.secondName?.text,
                          metatype: metatype,
-                         location: sourceLocation(of: position))
+                         location: location)
     }
 
     private func parse<T>(closureExpr syntax: ClosureExprSyntax, _ collector: Collector<T>?) -> Closure? {
