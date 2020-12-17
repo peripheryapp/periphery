@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Improve unused parameter location identification.
 
 ## 2.3.2 (2020-12-10)
 
