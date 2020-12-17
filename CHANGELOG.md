@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.3.3 (2020-12-17)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Improve unused parameter location identification.
 
 ## 2.3.2 (2020-12-10)
