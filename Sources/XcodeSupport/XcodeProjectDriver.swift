@@ -120,7 +120,7 @@ extension XcodeProjectDriver: ProjectDriver {
             try xcodebuild.build(project: project,
                                  scheme: scheme,
                                  allSchemes: Array(schemes),
-                                 additionalArguments: configuration.xcargs,
+                                 additionalArguments: configuration.buildArguments,
                                  buildForTesting: buildForTesting)
         }
     }

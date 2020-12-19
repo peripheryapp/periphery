@@ -36,9 +36,9 @@ public struct SPM {
         public let sources: [String]
         public let moduleType: String
 
-        func build() throws {
+        func build(additionalArguments: [String]) throws {
             let shell: Shell = inject()
-            try shell.exec(["swift", "build", "--enable-test-discovery", "--target", name])
+            try shell.exec(["swift", "build", "--enable-test-discovery", "--target", name] + additionalArguments)
         }
     }
 }

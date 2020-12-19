@@ -51,7 +51,7 @@ extension SPMProjectDriver: ProjectDriver {
                     logger.info("\(asterisk) Building \($0.name)...")
                 }
 
-                try $0.build()
+                try $0.build(additionalArguments: configuration.buildArguments)
             }
         }
     }

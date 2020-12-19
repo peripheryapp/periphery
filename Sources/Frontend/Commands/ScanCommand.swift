@@ -9,6 +9,9 @@ public struct ScanCommand: ParsableCommand {
         abstract: "Scan for unused code"
     )
 
+    @Argument(help: "Arguments following '--' will be passed to the underlying build tool, which is either 'swift build' or 'xcodebuild' depending on your project")
+    var buildArguments: [String] = []
+
     @Flag(help: "Enable guided setup")
     var setup: Bool = false
 
@@ -35,9 +38,6 @@ public struct ScanCommand: ParsableCommand {
 
     @Option(help: "Path glob of source files which should be excluded from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var reportExclude: [String] = []
-
-    @Option(help: "Pass additional arguments to xcodebuild for the build phase")
-    var xcargs: String?
 
     @Option(help: "Path to index store to use. Automatically defaults to the correct store for your project")
     var indexStorePath: String?
@@ -105,8 +105,8 @@ public struct ScanCommand: ParsableCommand {
             configuration.schemes = schemes
         }
 
-        if xcargs != nil {
-            configuration.xcargs = xcargs
+        if !buildArguments.isEmpty {
+            configuration.buildArguments = buildArguments
         }
 
         if let formatName = format {
