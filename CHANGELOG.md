@@ -2,6 +2,20 @@
 
 ##### Breaking
 
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.4.0 (2020-12-19)
+
+##### Breaking
+
 - The `--xcargs` option has been removed, and superseded by passing arguments following the `--` terminator. E.g `periphery scan --xcargs --foo` is now `periphery scan -- --foo`. This feature can also be used to pass arguments to `swift build` for SwiftPM projects.
 
 ##### Enhancements
