@@ -27,7 +27,7 @@ public final class Xcodebuild: Injectable {
     }
 
     @discardableResult
-    func build(project: XcodeProjectlike, scheme: XcodeScheme, allSchemes: [XcodeScheme], additionalArguments: String? = nil, buildForTesting: Bool = false) throws -> String {
+    func build(project: XcodeProjectlike, scheme: XcodeScheme, allSchemes: [XcodeScheme], additionalArguments: [String] = [], buildForTesting: Bool = false) throws -> String {
         let cmd = buildForTesting ? "build-for-testing" : "build"
 
         var args = [
@@ -38,9 +38,7 @@ public final class Xcodebuild: Injectable {
             "-quiet"
         ]
 
-        if let additionalArguments = additionalArguments {
-            args.append(additionalArguments)
-        }
+        args.append(contentsOf: additionalArguments)
 
         let envs = [
             "CODE_SIGNING_ALLOWED=\"NO\"",

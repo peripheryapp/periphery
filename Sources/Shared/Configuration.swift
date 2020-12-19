@@ -19,6 +19,7 @@ public final class Configuration: Singleton {
     public var targets: [String] = []
     public var indexExclude: [String] = []
     public var reportExclude: [String] = []
+    public var buildArguments: [String] = []
 
     public var retainObjcAccessible: Bool = false
     public var retainPublic: Bool = false
@@ -28,7 +29,6 @@ public final class Configuration: Singleton {
     public var quiet: Bool = false
     public var updateCheck: Bool = true
     public var strict: Bool = false
-    public var xcargs: String? = nil
     public var indexStorePath: String?
     public var skipBuild: Bool = false
     public var cleanBuild: Bool = false
@@ -59,10 +59,10 @@ public final class Configuration: Singleton {
             "quiet": quiet,
             "disable_update_check": !updateCheck,
             "strict": strict,
-            "xcargs": xcargs,
             "index_store_path": indexStorePath,
             "skip_build": skipBuild,
-            "clean_build": cleanBuild
+            "clean_build": cleanBuild,
+            "build_arguments": buildArguments
         ]
 
         return try Yams.dump(object: config)
@@ -109,15 +109,18 @@ public final class Configuration: Singleton {
             case "strict":
                 self.strict = convert(value, to: Bool.self) ?? false
             case "xcargs":
-                self.xcargs = convert(value, to: String.self)
+                logger.warn("\(path.string): 'xcargs' is deprecated and has been superseded by 'build_arguments'")
+                self.buildArguments = (convert(value, to: String.self) ?? "").split(separator: " ").map { String($0) }
             case "index_store_path":
                 self.indexStorePath = convert(value, to: String.self)
             case "skip_build":
                 self.skipBuild = convert(value, to: Bool.self) ?? false
             case "clean_build":
                 self.cleanBuild = convert(value, to: Bool.self) ?? false
+            case "build_arguments":
+                self.buildArguments = convert(value, to: [String].self) ?? []
             default:
-                logger.warn("\(path.string) contains invalid key '\(key)'")
+                logger.warn("\(path.string): invalid key '\(key)'")
             }
         }
     }
