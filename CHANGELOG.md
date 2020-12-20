@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix ignore comments on protocol declarations.
 
 ## 2.4.0 (2020-12-19)
 

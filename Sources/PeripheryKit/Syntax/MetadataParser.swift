@@ -59,7 +59,7 @@ class MetadataParser: SyntaxVisitor {
             trivia: node.leadingTrivia,
             at: node.identifier.position
         )
-        return .skipChildren
+        return .visitChildren
     }
 
     override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
