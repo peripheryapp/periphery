@@ -1085,6 +1085,17 @@ class RetentionTest: SourceGraphTestCase {
             XCTAssertReferenced((.varParameter, "param"), descendentOf: (.functionMethodInstance, "someFunc(param:)"))
             XCTAssertReferenced((.varParameter, "b"))
             XCTAssertReferenced((.varParameter, "c"))
+
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf:
+                    (.functionMethodInstance, "protocolFunc(param:)"),
+                    (.protocol, "Fixture114Protocol"))
+            XCTAssertReferenced(
+                (.varParameter, "param"),
+                descendentOf:
+                    (.functionMethodInstance, "protocolFunc(param:)"),
+                    (.class, "Fixture114"))
         }
     }
 
