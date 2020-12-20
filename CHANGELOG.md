@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.4.1 (2020-12-20)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix ignore comments on protocol declarations.
 
 ## 2.4.0 (2020-12-19)
