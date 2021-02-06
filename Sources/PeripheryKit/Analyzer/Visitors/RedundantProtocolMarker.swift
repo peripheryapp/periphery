@@ -30,6 +30,17 @@ final class RedundantProtocolMarker: SourceGraphVisitor {
 
             guard !inheritsForeignProtocol else { continue }
 
+            // Ensure all members implemented only in extensions are unused.
+            let areAllExtensionsMembersUnused = protocolDecl
+                .references
+                .lazy
+                .filter { $0.kind == .extensionProtocol }
+                .compactMap { self.graph.explicitDeclaration(withUsr: $0.usr) }
+                .flatMap { $0.declarations }
+                .allSatisfy({ unreachableDeclarations.contains($0) })
+
+            guard areAllExtensionsMembersUnused else { continue }
+
             // Ensure the protocol isn't just simply unused.
             guard !unreachableDeclarations.contains(protocolDecl) else { continue }
 
@@ -37,19 +48,19 @@ final class RedundantProtocolMarker: SourceGraphVisitor {
             guard protocolDecl.declarations.allSatisfy({ unreachableDeclarations.contains($0) }) else { continue }
 
             // Ensure the protocol is only used in a conformance.
-            let protocolRefs = graph.references(to: protocolDecl)
+            let protocolReferences = graph.references(to: protocolDecl)
 
-            let allRefsAreConformances = protocolRefs.allSatisfy({
-                guard
-                    $0.isRelated,
-                    let parentDecl = $0.parent as? Declaration
-                else { return false }
-                return parentDecl.kind.isConformingKind
-            })
+            let areAllReferencesConformances = protocolReferences.allSatisfy { reference in
+                guard reference.isRelated, let parent = reference.parent as? Declaration else {
+                    return false
+                }
 
-            if allRefsAreConformances {
+                return parent.kind.isConformingKind
+            }
+
+            if areAllReferencesConformances {
                 // The protocol is redundant.
-                protocolDecl.analyzerHint = .redundantProtocol(references: protocolRefs)
+                protocolDecl.analyzerHint = .redundantProtocol(references: protocolReferences)
                 graph.markRedundant(protocolDecl)
                 protocolDecl.declarations.forEach { graph.markIgnored($0) }
             }

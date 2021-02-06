@@ -689,6 +689,40 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testProtocolMethodsImplementedOnlyInExtension() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.protocol, "ProtocolWithExtension"))
+            XCTAssertNotRedundantProtocol("ProtocolWithExtension")
+
+            XCTAssertReferenced(
+                (.functionMethodInstance, "used()"),
+                descendentOf: (.extensionProtocol, "ProtocolWithExtension")
+            )
+
+            XCTAssertNotReferenced(
+                (.functionMethodInstance, "unused()"),
+                descendentOf: (.extensionProtocol, "ProtocolWithExtension")
+            )
+        }
+    }
+
+    func testPublicProtocolMethodImplementedOnlyInExtension() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.protocol, "PublicProtocolWithExtension"))
+            XCTAssertNotRedundantProtocol("PublicProtocolWithExtension")
+
+            XCTAssertReferenced(
+                (.functionMethodInstance, "used()"),
+                descendentOf: (.extensionProtocol, "PublicProtocolWithExtension")
+            )
+
+            XCTAssertNotReferenced(
+                (.functionMethodInstance, "unused()"),
+                descendentOf: (.extensionProtocol, "PublicProtocolWithExtension")
+            )
+        }
+    }
+
     func testProtocolImplementInClassAndExtension() {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass98"))
