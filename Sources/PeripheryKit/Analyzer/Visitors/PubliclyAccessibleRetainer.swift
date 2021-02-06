@@ -21,7 +21,17 @@ final class PubliclyAccessibleRetainer: SourceGraphVisitor {
             graph.declarations(ofKind: $0)
         }
 
-        let publicDeclarations = declarations.filter { $0.accessibility.value == .public || $0.accessibility.value == .open }
+        let publicDeclarations = declarations.filter { declaration in
+            declaration.accessibility.value == .public || declaration.accessibility.value == .open
+        }
+
         publicDeclarations.forEach { graph.markRetained($0) }
+
+        publicDeclarations
+            .lazy
+            .filter { $0.kind == .enum }
+            .flatMap { $0.declarations }
+            .filter { $0.kind == .enumelement }
+            .forEach { graph.markRetained($0) }
     }
 }

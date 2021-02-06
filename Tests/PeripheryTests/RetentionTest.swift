@@ -367,8 +367,8 @@ class RetentionTest: SourceGraphTestCase {
 
             XCTAssertReferenced((.enumelement, "used"),
                                 descendentOf: (.enum, "Fixture28Enum_Bare"))
-            XCTAssertNotReferenced((.enumelement, "unused"),
-                                   descendentOf: (.enum, "Fixture28Enum_Bare"))
+            XCTAssertReferenced((.enumelement, "unused"),
+                                descendentOf: (.enum, "Fixture28Enum_Bare"))
 
             for enumType in enumTypes {
                 let enumName = "Fixture28Enum_\(enumType)"
