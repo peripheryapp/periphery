@@ -381,6 +381,13 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testRetainsPublicEnumCases() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.enum, "FixtureEnum179"))
+            XCTAssertReferenced((.enumelement, "someCase"), descendentOf: (.enum, "FixtureEnum179"))
+        }
+    }
+
     func testRetainsDestructor() {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass40"))

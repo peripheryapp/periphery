@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - In Swift 5.3 and lower, all optional protocol members are now retained in order to workaround a Swift bug. This bug is resolved in Swift 5.4.
+- Cases of public enums are now also retained when using `--retain-public`.
 
 ## 2.4.1 (2020-12-20)
 
