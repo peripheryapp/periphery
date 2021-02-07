@@ -1150,6 +1150,19 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testRetainsOptionalProtocolMethod() {
+        #if os(macOS)
+        // It appears optional protocol members aren't supported on Linux?
+
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.class, "FixtureClass127"))
+            XCTAssertReferenced((.functionMethodInstance, "someFunc()"), descendentOf: (.class, "FixtureClass127"))
+            XCTAssertReferenced((.protocol, "FixtureProtocol127"))
+            XCTAssertReferenced((.functionMethodInstance, "optionalFunc()"), descendentOf: (.protocol, "FixtureProtocol127"))
+        }
+        #endif
+    }
+
     // MARK: - Objective-C
 
     #if os(macOS)

@@ -49,6 +49,7 @@ public final class Analyzer {
         StructImplicitConstructorPropertyRetainer.self,
         StringInterpolationAppendInterpolationRetainer.self,
         PropertyWrapperRetainer.self,
+        OptionalProtocolMemberRetainer.self,
 
         PlainExtensionEliminator.self,
         AncestralReferenceEliminator.self,
