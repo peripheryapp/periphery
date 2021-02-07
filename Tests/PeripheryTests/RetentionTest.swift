@@ -1228,7 +1228,7 @@ class RetentionTest: SourceGraphTestCase {
     }
 
     // https://bugs.swift.org/browse/SR-13768
-    func testCustomConstructorithLiteral() {
+    func testCustomConstructorWithLiteral() {
         guard performKnownFailures else { return }
 
         analyze(retainPublic: true) {
