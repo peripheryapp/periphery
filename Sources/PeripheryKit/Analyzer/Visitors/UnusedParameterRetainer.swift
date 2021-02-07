@@ -80,13 +80,10 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
             allMethodDeclarations = [methodDeclaration]
         }
 
-        retainIfNeeded(
-            params: params,
-            inForeignProtocolMethods: allMethodDeclarations
-        )
+        retainParamsIfNeeded(inForeignProtocolMethods: allMethodDeclarations)
     }
 
-    private func retainIfNeeded(params: Set<Declaration>, inForeignProtocolMethods methodDeclarations: [Declaration]) {
+    private func retainParamsIfNeeded(inForeignProtocolMethods methodDeclarations: [Declaration]) {
         guard let methodDeclaration = methodDeclarations.first else {
             return
         }
