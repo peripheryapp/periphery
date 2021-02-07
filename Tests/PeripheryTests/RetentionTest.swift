@@ -852,6 +852,18 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testRetainsForeignProtocolParametersInSubclass() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.varParameter, "zone"),
+                                descendentOf: (.functionMethodInstance, "copy(with:)"),
+                                (.class, "ForeignProtocolClass"))
+
+            XCTAssertReferenced((.varParameter, "zone"),
+                                descendentOf: (.functionMethodInstance, "copy(with:)"),
+                                (.class, "ForeignProtocolSubclass"))
+        }
+    }
+
     func testRetainsForeignProtocolParameters() {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.varParameter, "decoder"),
