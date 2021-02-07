@@ -856,11 +856,11 @@ class RetentionTest: SourceGraphTestCase {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.varParameter, "zone"),
                                 descendentOf: (.functionMethodInstance, "copy(with:)"),
-                                (.class, "ForeignProtocolClass"))
+                                (.class, "FixtureClass109"))
 
             XCTAssertReferenced((.varParameter, "zone"),
                                 descendentOf: (.functionMethodInstance, "copy(with:)"),
-                                (.class, "ForeignProtocolSubclass"))
+                                (.class, "FixtureClass109Subclass"))
         }
     }
 

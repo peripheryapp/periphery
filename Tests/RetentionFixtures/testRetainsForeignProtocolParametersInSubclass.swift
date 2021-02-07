@@ -1,13 +1,13 @@
 import Foundation
 
-public class ForeignProtocolClass: NSCopying {
+public class FixtureClass109: NSCopying {
     public func copy(with zone: NSZone?) -> Any {
-        ForeignProtocolClass()
+        FixtureClass109()
     }
 }
 
-public class ForeignProtocolSubclass: ForeignProtocolClass {
+public class FixtureClass109Subclass: FixtureClass109 {
     public override func copy(with zone: NSZone?) -> Any {
-        ForeignProtocolSubclass()
+        FixtureClass109Subclass()
     }
 }
