@@ -1213,6 +1213,16 @@ class RetentionTest: SourceGraphTestCase {
 
     // MARK: - Known Failures
 
+    // https://bugs.swift.org/browse/SR-14162
+    func testStaticMemberUsedAsSubscriptKey() {
+        guard performKnownFailures else { return }
+
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.enum, "FixtureEnum128"))
+            XCTAssertReferenced((.varStatic, "someVar"), descendentOf: (.enum, "FixtureEnum128"))
+        }
+    }
+
     // https://bugs.swift.org/browse/SR-13930
     func testRetainsOptionalProtocolMethodImplementedInSubclass() {
         #if os(macOS)
