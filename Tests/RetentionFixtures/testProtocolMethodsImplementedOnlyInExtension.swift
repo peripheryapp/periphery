@@ -1,13 +1,13 @@
 import Foundation
 
-protocol ProtocolWithExtension { }
+protocol FixtureProtocol115 { }
 
-extension ProtocolWithExtension {
+extension FixtureProtocol115 {
     func used() { }
     func unused() { }
 }
 
-public class ProtocolWithExtensionRetainer: ProtocolWithExtension {
+public class FixtureProtocol115Retainer: FixtureProtocol115 {
     public func someMethod() {
         used()
     }

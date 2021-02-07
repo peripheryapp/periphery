@@ -691,34 +691,34 @@ class RetentionTest: SourceGraphTestCase {
 
     func testProtocolMethodsImplementedOnlyInExtension() {
         analyze(retainPublic: true) {
-            XCTAssertReferenced((.protocol, "ProtocolWithExtension"))
-            XCTAssertNotRedundantProtocol("ProtocolWithExtension")
+            XCTAssertReferenced((.protocol, "FixtureProtocol115"))
+            XCTAssertNotRedundantProtocol("FixtureProtocol115")
 
             XCTAssertReferenced(
                 (.functionMethodInstance, "used()"),
-                descendentOf: (.extensionProtocol, "ProtocolWithExtension")
+                descendentOf: (.extensionProtocol, "FixtureProtocol115")
             )
 
             XCTAssertNotReferenced(
                 (.functionMethodInstance, "unused()"),
-                descendentOf: (.extensionProtocol, "ProtocolWithExtension")
+                descendentOf: (.extensionProtocol, "FixtureProtocol115")
             )
         }
     }
 
     func testPublicProtocolMethodImplementedOnlyInExtension() {
         analyze(retainPublic: true) {
-            XCTAssertReferenced((.protocol, "PublicProtocolWithExtension"))
-            XCTAssertNotRedundantProtocol("PublicProtocolWithExtension")
+            XCTAssertReferenced((.protocol, "FixtureProtocol116"))
+            XCTAssertNotRedundantProtocol("FixtureProtocol116")
 
             XCTAssertReferenced(
                 (.functionMethodInstance, "used()"),
-                descendentOf: (.extensionProtocol, "PublicProtocolWithExtension")
+                descendentOf: (.extensionProtocol, "FixtureProtocol116")
             )
 
             XCTAssertNotReferenced(
                 (.functionMethodInstance, "unused()"),
-                descendentOf: (.extensionProtocol, "PublicProtocolWithExtension")
+                descendentOf: (.extensionProtocol, "FixtureProtocol116")
             )
         }
     }

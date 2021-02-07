@@ -1,8 +1,8 @@
 import Foundation
 
-public protocol PublicProtocolWithExtension { }
+public protocol FixtureProtocol116 { }
 
-extension PublicProtocolWithExtension {
+extension FixtureProtocol116 {
     public func used() { }
     func unused() { }
 }
