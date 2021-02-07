@@ -22,6 +22,15 @@ final class PubliclyAccessibleRetainer: SourceGraphVisitor {
         }
 
         let publicDeclarations = declarations.filter { $0.accessibility.value == .public || $0.accessibility.value == .open }
+        
         publicDeclarations.forEach { graph.markRetained($0) }
+
+        // Enum cases inherit the accessibility of the enum.
+        publicDeclarations
+            .lazy
+            .filter { $0.kind == .enum }
+            .flatMap { $0.declarations }
+            .filter { $0.kind == .enumelement }
+            .forEach { graph.markRetained($0) }
     }
 }
