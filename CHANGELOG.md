@@ -14,6 +14,7 @@
 - Cases of public enums are now also retained when using `--retain-public`.
 - Empty public protocols that have an implementation in extensions are no longer identified as redundant.
 - Foreign protocol method parameters are no longer identified as unused.
+- Open method parameters are no longer identified as unused.
 
 ## 2.4.1 (2020-12-20)
 
