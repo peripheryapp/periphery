@@ -38,7 +38,15 @@ public struct SPM {
 
         func build(additionalArguments: [String]) throws {
             let shell: Shell = inject()
-            try shell.exec(["swift", "build", "--enable-test-discovery", "--target", name] + additionalArguments)
+            var args: [String] = []
+
+            #if swift(>=5.4)
+            args = ["swift", "build", "--target", name] + additionalArguments
+            #else
+            args = ["swift", "build", "--enable-test-discovery", "--target", name] + additionalArguments
+            #endif
+
+            try shell.exec(args)
         }
     }
 }
