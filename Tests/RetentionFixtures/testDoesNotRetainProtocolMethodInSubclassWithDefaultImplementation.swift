@@ -1,6 +1,6 @@
 import Foundation
 
-protocol FixtureProtocol83: class {
+protocol FixtureProtocol83: AnyObject {
     func protocolMethod()
 }
 
