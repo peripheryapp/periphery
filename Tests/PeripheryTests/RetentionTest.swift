@@ -1220,6 +1220,17 @@ class RetentionTest: SourceGraphTestCase {
 
     // MARK: - Known Failures
 
+    // https://bugs.swift.org/browse/SR-14181
+    func testSelfReferencedConstructor() {
+        guard performKnownFailures else { return }
+
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.struct, "FixtureStruct3"))
+            XCTAssertReferenced((.varStatic, "instance"), descendentOf: (.struct, "FixtureStruct3"))
+            XCTAssertReferenced((.functionConstructor, "init(someVar:)"), descendentOf: (.struct, "FixtureStruct3"))
+        }
+    }
+
     // https://bugs.swift.org/browse/SR-14162
     func testStaticMemberUsedAsSubscriptKey() {
         guard performKnownFailures else { return }
