@@ -2,7 +2,9 @@
 
 import Foundation
 
-public extension String {
+public typealias VersionString = String
+
+public extension VersionString {
     /// Inner comparison utility to handle same versions with different length. (Ex: "1.0.0" & "1.0")
     private func compare(toVersion targetVersion: String) -> ComparisonResult {
 
