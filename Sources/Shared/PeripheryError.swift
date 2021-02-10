@@ -18,6 +18,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case pathDoesNotExist(path: String)
     case foundIssues(count: Int)
     case packageError(message: String)
+    case swiftVersionParseError(fullVersion: String)
 
     public var errorDescription: String? {
         switch self {
@@ -54,6 +55,8 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             return "Found \(count) \(count > 1 ? "issues" : "issue")."
         case .packageError(let message):
             return message
+        case .swiftVersionParseError(let fullVersion):
+            return "Failed to parse Swift version from: \(fullVersion)"
         }
     }
 

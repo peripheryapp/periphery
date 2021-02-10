@@ -58,7 +58,7 @@ extension SPMProjectDriver: ProjectDriver {
 
     public func index(graph: SourceGraph) throws {
         let sourceFiles = Set(targets.map { target -> [Path] in
-            let path = Path(target.path)
+            let path = absolutePath(for: target)
             return target.sources.map { path + $0 }
         }.joined())
 
@@ -71,5 +71,15 @@ extension SPMProjectDriver: ProjectDriver {
         }
 
         try SwiftIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
+    }
+
+    // MARK: - Private
+
+    private func absolutePath(for target: SPM.Target) -> Path {
+        if SwiftVersion.current.version.isVersion(greaterThanOrEqualTo: "5.4") {
+            return Path(package.path) + Path(target.path)
+        } else {
+            return Path(target.path)
+        }
     }
 }

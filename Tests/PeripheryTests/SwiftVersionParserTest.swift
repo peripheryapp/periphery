@@ -1,0 +1,16 @@
+import Foundation
+import XCTest
+import PeripheryKit
+
+class SwiftVersionParserTest: XCTestCase {
+    func testParse() throws {
+        let v1 = try SwiftVersionParser.parse("Apple Swift version 5.4 (swiftlang-1205.0.16.12 clang-1205.0.19.6)\nTarget: x86_64-apple-darwin20.2.0")
+        XCTAssertEqual(v1, "5.4")
+
+        let v2 = try SwiftVersionParser.parse("Apple Swift version 5.3.2 (swiftlang-1200.0.45 clang-1200.0.32.28)\nTarget: x86_64-apple-darwin20.2.0")
+        XCTAssertEqual(v2, "5.3.2")
+
+        let v3 = try SwiftVersionParser.parse("Swift version 5.4-dev (LLVM e2976fe639d1f50, Swift ce587f0a137bf18)\nTarget: x86_64-apple-darwin20.2.0")
+        XCTAssertEqual(v3, "5.4")
+    }
+}
