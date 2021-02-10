@@ -26,7 +26,7 @@ public class FixtureClass27Retainer {
     }
 }
 
-public protocol FixtureProtocol28: class {
+public protocol FixtureProtocol28: AnyObject {
     static func overrideStaticProtocolMethod()
     static var overrideStaticProtocolVar: String { get }
 }
