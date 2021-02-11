@@ -19,9 +19,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
         let functionDecls: Set<Declaration> = Set(paramDecls.compactMap { $0.parent as? Declaration })
 
         for functionDecl in functionDecls {
-            let paramDecls = functionDecl.unusedParameters
-            retain(paramDecls, inForeignProtocolFunction: functionDecl)
-            retain(paramDecls, inOverriddenFunction: functionDecl)
+            retainIfNeeded(params: functionDecl.unusedParameters, inMethod: functionDecl)
         }
 
         let protocolDecls = graph.declarations(ofKind: .protocol)
@@ -58,44 +56,73 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
 
     // MARK: - Private
 
-    private func retain(_ params: Set<Declaration>, inForeignProtocolFunction decl: Declaration) {
-        guard let refKind = decl.kind.referenceEquivalent,
-              let related = decl.related.first(where: { $0.kind == refKind && $0.name == decl.name }) else { return }
+    private func retainIfNeeded(params: Set<Declaration>, inMethod methodDeclaration: Declaration) {
+        let allMethodDeclarations: [Declaration]
 
-        if graph.explicitDeclaration(withUsr: related.usr) == nil {
-            params.forEach { graph.markRetained($0) }
+        if let classDeclaration = methodDeclaration.parent as? Declaration, classDeclaration.kind == .class {
+            let allClassDeclarations = [classDeclaration]
+                + graph.superclasses(of: classDeclaration)
+                + graph.subclasses(of: classDeclaration)
+
+            allMethodDeclarations = allClassDeclarations.compactMap { declaration in
+                declaration
+                    .declarations
+                    .lazy
+                    .filter { $0.kind == methodDeclaration.kind }
+                    .first { $0.name == methodDeclaration.name }
+            }
+
+            retainIfNeeded(
+                params: params,
+                inOverridenMethods: allMethodDeclarations
+            )
+        } else {
+            allMethodDeclarations = [methodDeclaration]
         }
+
+        retainParamsIfNeeded(inForeignProtocolMethods: allMethodDeclarations)
     }
 
-    private func retain(_ params: Set<Declaration>, inOverriddenFunction decl: Declaration) {
-        guard let classDecl = decl.parent as? Declaration,
-              classDecl.kind == .class else { return }
-
-        let superclasses = graph.superclasses(of: classDecl)
-        let subclasses = graph.subclasses(of: classDecl)
-        let allClasses = superclasses + [classDecl] + subclasses
-        var functionDecls: [Declaration] = []
-
-        allClasses.forEach {
-            let functionDecl = $0.declarations.first {
-                $0.kind == decl.kind && $0.name == decl.name
-            }
-
-            if let functionDecl = functionDecl {
-                functionDecls.append(functionDecl)
-            }
+    private func retainParamsIfNeeded(inForeignProtocolMethods methodDeclarations: [Declaration]) {
+        guard let methodDeclaration = methodDeclarations.first else {
+            return
         }
 
-        guard let firstFunctionDecl = functionDecls.first else { return }
+        guard let referenceKind = methodDeclaration.kind.referenceEquivalent else {
+            return
+        }
 
-        if firstFunctionDecl.modifiers.contains("override") {
+        let foreignReferences = methodDeclaration
+            .related
+            .lazy
+            .filter { $0.kind == referenceKind }
+            .filter { $0.name == methodDeclaration.name }
+            .filter { self.graph.explicitDeclaration(withUsr: $0.usr) == nil }
+
+        guard !foreignReferences.isEmpty else {
+            return
+        }
+
+        methodDeclarations
+            .lazy
+            .flatMap { $0.unusedParameters }
+            .forEach { graph.markRetained($0) }
+    }
+
+    private func retainIfNeeded(params: Set<Declaration>, inOverridenMethods methodDeclarations: [Declaration]) {
+        let isSuperclassForeign = methodDeclarations.allSatisfy { declaration in
+            declaration.modifiers.contains("override")
+        }
+
+        if isSuperclassForeign {
             // Must be overriding a declaration in a foreign class.
-            functionDecls.forEach {
-                $0.unusedParameters.forEach { graph.markRetained($0) }
-            }
+            methodDeclarations
+                .lazy
+                .flatMap { $0.unusedParameters }
+                .forEach { graph.markRetained($0) }
         } else {
             // Retain all params that are used in any of the functions.
-            retain(params, usedIn: functionDecls)
+            retain(params, usedIn: methodDeclarations)
         }
     }
 
