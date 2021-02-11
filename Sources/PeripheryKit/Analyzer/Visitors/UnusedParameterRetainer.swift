@@ -47,7 +47,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
                     if configuration.retainUnusedProtocolFuncParams {
                         functionDecl.unusedParameters.forEach { graph.markRetained($0) }
                     } else {
-                        retain(functionDecl.unusedParameters, usedIn: allFunctionDecls)
+                        retain(params: functionDecl.unusedParameters, usedIn: allFunctionDecls)
                     }
                 }
             }
@@ -64,12 +64,12 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
                 + graph.superclasses(of: classDeclaration)
                 + graph.subclasses(of: classDeclaration)
 
-            allMethodDeclarations = allClassDeclarations.compactMap { declaration in
+            allMethodDeclarations = allClassDeclarations.flatMap { declaration in
                 declaration
                     .declarations
                     .lazy
                     .filter { $0.kind == methodDeclaration.kind }
-                    .first { $0.name == methodDeclaration.name }
+                    .filter { $0.name == methodDeclaration.name }
             }
 
             retainIfNeeded(
@@ -110,23 +110,28 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
     }
 
     private func retainIfNeeded(params: Set<Declaration>, inOverridenMethods methodDeclarations: [Declaration]) {
-        let isSuperclassForeign = methodDeclarations.allSatisfy { declaration in
-            declaration.modifiers.contains("override")
+        guard let baseDeclaration = methodDeclarations.first(where: { !$0.modifiers.contains("override") }) else {
+            // Must be overriding a declaration in a foreign class.
+            return retainAllUnusedParams(inMethods: methodDeclarations)
         }
 
-        if isSuperclassForeign {
-            // Must be overriding a declaration in a foreign class.
-            methodDeclarations
-                .lazy
-                .flatMap { $0.unusedParameters }
-                .forEach { graph.markRetained($0) }
-        } else {
-            // Retain all params that are used in any of the functions.
-            retain(params, usedIn: methodDeclarations)
+        guard baseDeclaration.accessibility.value != .open || !configuration.retainPublic else {
+            // Parameters can be used in methods that are overridden from the outside
+            return retainAllUnusedParams(inMethods: methodDeclarations)
         }
+
+        // Retain all params that are used in any of the functions.
+        return retain(params: params, usedIn: methodDeclarations)
     }
 
-    private func retain(_ params: Set<Declaration>, usedIn functionDecls: [Declaration]) {
+    private func retainAllUnusedParams(inMethods methodDeclarations: [Declaration]) {
+        methodDeclarations
+            .lazy
+            .flatMap { $0.unusedParameters }
+            .forEach { graph.markRetained($0) }
+    }
+
+    private func retain(params: Set<Declaration>, usedIn functionDecls: [Declaration]) {
         for param in params {
             if isParam(param, usedInAnyOf: functionDecls) {
                 graph.markRetained(param)

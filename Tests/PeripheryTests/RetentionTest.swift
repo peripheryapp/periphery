@@ -1012,6 +1012,14 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testRetainsOpenClassParameters() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.varParameter, "value"),
+                                descendentOf: (.functionMethodInstance, "doSomething(with:)"),
+                                (.class, "FixtureClass112"))
+        }
+    }
+
     func testIgnoreUnusedParamInUnusedFunction() {
         analyze() {
             XCTAssertNotReferenced((.class, "FixtureClass105"))
