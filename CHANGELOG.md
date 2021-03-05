@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.4.3 (2021-03-05)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Retain constructors of generic structs that cannot be identified as used due to Swift bug SR-7093.
 
 ## 2.4.2 (2021-02-11)
