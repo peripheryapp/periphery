@@ -1,9 +1,9 @@
 import Foundation
 
 /// https://bugs.swift.org/browse/SR-7093
-/// Constructors on a class with generic type parameters are not referenced despite being used.
-/// We therefore must reference the constrcutor from the class.
-final class GenericClassConstructorReferenceBuilder: SourceGraphVisitor {
+/// Constructors on a class/struct with generic type parameters are not referenced despite being used.
+/// We therefore must reference the constrcutor from the class/struct.
+final class GenericClassAndStructConstructorReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }
@@ -15,11 +15,11 @@ final class GenericClassConstructorReferenceBuilder: SourceGraphVisitor {
     }
 
     func visit() {
-        let genericClassDeclarations = graph.declarations(ofKind: .class).filter {
+        let genericDeclarations = graph.declarations(ofKinds: [.class, .struct]).filter {
             $0.declarations.contains { $0.kind == .genericTypeParam }
         }
 
-        for declaration in genericClassDeclarations {
+        for declaration in genericDeclarations {
             let constructors = declaration.declarations.filter { $0.kind == .functionConstructor }
 
             for constructor in constructors {
@@ -27,6 +27,7 @@ final class GenericClassConstructorReferenceBuilder: SourceGraphVisitor {
                     let reference = Reference(kind: .functionConstructor,
                                               usr: usr,
                                               location: declaration.location)
+                    reference.name = constructor.name
                     reference.parent = declaration
                     graph.add(reference, from: declaration)
                 }

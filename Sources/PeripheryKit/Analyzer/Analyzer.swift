@@ -27,7 +27,7 @@ public final class Analyzer {
         // from the extension to the protocol, thus making them appear to be unknown.
         UnknownTypeExtensionRetainer.self,
 
-        GenericClassConstructorReferenceBuilder.self,
+        GenericClassAndStructConstructorReferenceBuilder.self,
         ExtensionReferenceBuilder.self,
         ProtocolExtensionReferenceBuilder.self,
         ProtocolConformanceReferenceBuilder.self,
