@@ -503,12 +503,14 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testRetainsConstructorOfGenericClassWithDefaultArgumentValue() {
+    func testRetainsConstructorOfGenericClassAndStruct() {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass61"))
-            XCTAssertReferenced((.class, "FixtureClass62"))
+            XCTAssertReferenced((.struct, "FixtureStruct61"))
             XCTAssertReferenced((.functionConstructor, "init(someVar:)"),
                                 descendentOf: (.class, "FixtureClass61"))
+            XCTAssertReferenced((.functionConstructor, "init(someVar:)"),
+                                descendentOf: (.struct, "FixtureStruct61"))
         }
     }
 
