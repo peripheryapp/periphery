@@ -1,7 +1,5 @@
 ## ⭐️ The author of Periphery is looking for a job, more info [here](https://github.com/peripheryapp/periphery/issues/282). ⭐️
 
-<hr>
-
 <h1>
   <img src="assets/logo.png" alt="Periphery" width="289" height="60">
 </h1>
