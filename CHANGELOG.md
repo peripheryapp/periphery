@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Added `--retain-assign-only-property-types` option to retain assign-only properties based on their type.
 
 ##### Bug Fixes
 

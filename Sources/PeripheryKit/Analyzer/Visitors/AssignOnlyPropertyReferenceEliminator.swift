@@ -1,7 +1,7 @@
 import Foundation
 import Shared
 
-final class UnusedSimplePropertyReferenceEliminator: SourceGraphVisitor {
+final class AssignOnlyPropertyReferenceEliminator: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph, configuration: inject())
     }
@@ -14,10 +14,12 @@ final class UnusedSimplePropertyReferenceEliminator: SourceGraphVisitor {
         self.configuration = configuration
     }
 
-    func visit() {
+    func visit() throws {
         guard !configuration.retainAssignOnlyProperties else { return }
 
         let setters = graph.declarations(ofKind: .functionAccessorSetter)
+
+        var assignOnlyProperties: [(Declaration, Reference)] = []
 
         for setter in setters {
             let references = graph.references(to: setter)
@@ -36,9 +38,28 @@ final class UnusedSimplePropertyReferenceEliminator: SourceGraphVisitor {
                 let hasGetterReference = caller.references.contains { $0.kind == .functionAccessorGetter && $0.name == getterName }
 
                 if !hasGetterReference {
-                    graph.remove(propertyReference)
-                    property.analyzerHint = .assignOnlyProperty
+                    assignOnlyProperties.append((property, propertyReference))
                 }
+            }
+        }
+
+        var retainedProperties: Set<Declaration> = []
+
+        if !configuration.retainAssignOnlyPropertyTypes.isEmpty {
+            let allProperties = Set(assignOnlyProperties.map { $0.0 })
+            let propertiesByType = try PropertyTypeParser.parse(allProperties)
+
+            for (type, properties) in propertiesByType {
+                if configuration.retainAssignOnlyPropertyTypes.contains(type) {
+                    retainedProperties.formUnion(properties)
+                }
+            }
+        }
+
+        for (property, reference) in assignOnlyProperties {
+            if !retainedProperties.contains(property) {
+                graph.remove(reference)
+                property.analyzerHint = .assignOnlyProperty
             }
         }
     }

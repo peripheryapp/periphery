@@ -789,6 +789,17 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testRetainsAssignOnlyPropertyTypes() {
+        let configuration = inject(Configuration.self)
+        configuration.retainAssignOnlyProperties = false
+        configuration.retainAssignOnlyPropertyTypes = ["CustomType"]
+
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.varInstance, "retainedAssignOnlyProperty"))
+            XCTAssertNotReferenced((.varInstance, "notRetainedAssignOnlyProperty"))
+        }
+    }
+
     // MARK: - Unused Parameters
 
     func testRetainsParamUsedInOverriddenMethod() {
