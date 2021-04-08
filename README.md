@@ -64,6 +64,8 @@ Now run periphery via Swift:
 swift run periphery scan ...
 ```
 
+> SwiftPM does not yet support prebuilt binaries, therefore be aware that Periphery will be built from source. This also means that Periphery will be built using the same build configuration you specify to build your entire project (the default is 'debug'). Debug builds of Periphery are significantly slower than release builds.
+
 ### [CocoaPods](https://cocoapods.org/) (macOS only)
 
 Add the following to your Podfile:
