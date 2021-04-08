@@ -296,7 +296,10 @@ class MyClass {
 }
 ```
 
-In some cases this may be the intended behavior, so to silence these results you can either disable this analysis technique entirely with `--retain-assign-only-properties`, or ignore individual properties using [Comment Commands](#comment-commands).
+In some cases this may be the intended behavior, therefore you have a few options available to silence such results:
+* Retain individual properties using [Comment Commands](#comment-commands).
+* Retain all assign-only properties by their type with `--retain-assign-only-property-types`. Given types must match their exact usage in the property declaration (sans optional question mark), e.g `String`, `[String]`, `Set<String>`. Periphery is unable to resolve inferred property types, therefore in some instances you may need to add explicit type annotations to your properties.
+* Disable assign-only property analysis entirely with `--retain-assign-only-properties`.
 
 ### Objective-C
 
