@@ -21,6 +21,16 @@ public final class Configuration: Singleton {
     public var reportExclude: [String] = []
     public var buildArguments: [String] = []
 
+    private var _retainAssignOnlyPropertyTypes: [String] = []
+    public var retainAssignOnlyPropertyTypes: [String] {
+        get {
+            _retainAssignOnlyPropertyTypes
+        }
+        set {
+            _retainAssignOnlyPropertyTypes = newValue.map { PropertyTypeSanitizer.sanitize($0) }
+        }
+    }
+
     public var retainObjcAccessible: Bool = false
     public var retainPublic: Bool = false
     public var retainAssignOnlyProperties: Bool = false
@@ -54,6 +64,7 @@ public final class Configuration: Singleton {
             "retain_objc_accessible": retainObjcAccessible,
             "retain_public": retainPublic,
             "retain_assign_only_properties": retainAssignOnlyProperties,
+            "retain_assign_only_property_types": retainAssignOnlyPropertyTypes,
             "retain_unused_protocol_func_params": retainUnusedProtocolFuncParams,
             "verbose": verbose,
             "quiet": quiet,
@@ -96,6 +107,8 @@ public final class Configuration: Singleton {
                 self.retainPublic = convert(value, to: Bool.self) ?? false
             case "retain_assign_only_properties":
                 self.retainAssignOnlyProperties = convert(value, to: Bool.self) ?? false
+            case "retain_assign_only_property_types":
+                self.retainAssignOnlyPropertyTypes = convert(value, to: [String].self) ?? []
             case "retain_objc_accessible":
                 self.retainObjcAccessible = convert(value, to: Bool.self) ?? false
             case "retain_unused_protocol_func_params":

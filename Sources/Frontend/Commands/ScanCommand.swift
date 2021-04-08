@@ -48,6 +48,9 @@ public struct ScanCommand: ParsableCommand {
     @Flag(help: "Retain properties that are assigned, but never used")
     var retainAssignOnlyProperties: Bool = false
 
+    @Option(help: "Comma separatered list of property types to retain if the property is assigned, but never read", transform: split(by: ","))
+    var retainAssignOnlyPropertyTypes: [String] = []
+
     @Flag(help: "Retain declarations that are exposed to Objective-C implicitly by inheriting NSObject classes, or explicitly with the @objc and @objcMembers attributes")
     var retainObjcAccessible: Bool = false
 
@@ -123,6 +126,10 @@ public struct ScanCommand: ParsableCommand {
 
         if isExplicit("retain-assign-only-properties") {
             configuration.retainAssignOnlyProperties = retainAssignOnlyProperties
+        }
+
+        if !retainAssignOnlyPropertyTypes.isEmpty {
+            configuration.retainAssignOnlyPropertyTypes = retainAssignOnlyPropertyTypes
         }
 
         if isExplicit("retain-objc-accessible") {

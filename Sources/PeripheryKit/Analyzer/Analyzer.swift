@@ -53,7 +53,7 @@ public final class Analyzer {
 
         PlainExtensionEliminator.self,
         AncestralReferenceEliminator.self,
-        UnusedSimplePropertyReferenceEliminator.self,
+        AssignOnlyPropertyReferenceEliminator.self,
 
         DeclarationMarker.self,
         RedundantProtocolMarker.self
