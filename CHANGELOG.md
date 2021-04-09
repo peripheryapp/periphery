@@ -6,7 +6,8 @@
 
 ##### Enhancements
 
-- Added `--retain-assign-only-property-types` option to retain assign-only properties based on their type.
+- Add arm64 support.
+- Add `--retain-assign-only-property-types` option to retain assign-only properties based on their type.
 
 ##### Bug Fixes
 

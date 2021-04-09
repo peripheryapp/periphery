@@ -38,12 +38,13 @@ cat scripts/Periphery.podspec.template | sed s/__VERSION__/${version}/ > Periphe
 echo -e "\nUpdate CHANGELOG.md and verify changes."
 confirm "Continue?"
 
-rm -rf .build/release/periphery
+bin_path=$(make show_bin_path)
+rm -rf "$bin_path"
 make build_release
 rm -rf .release
 mkdir .release
 cp "$(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib" .release
-cp .build/release/periphery .release/
+cp "$bin_path" .release/
 cp LICENSE.md .release/
 cp scripts/release_notes.md.template .release/release_notes.md
 
