@@ -92,8 +92,20 @@ var targets: [PackageDescription.Target] = [
         path: "Tests/RetentionFixtures"
     ),
     .target(
-        name: "SyntaxFixtures",
-        path: "Tests/SyntaxFixtures"
+        name: "UnusedParameterFixtures",
+        path: "Tests/Fixtures/UnusedParameterFixtures"
+    ),
+    .target(
+        name: "TypeSyntaxInspectorFixtures",
+        path: "Tests/Fixtures/TypeSyntaxInspectorFixtures"
+    ),
+    .target(
+        name: "FunctionVisitorFixtures",
+        path: "Tests/Fixtures/FunctionVisitorFixtures"
+    ),
+    .target(
+        name: "PropertyVisitorFixtures",
+        path: "Tests/Fixtures/PropertyVisitorFixtures"
     ),
     .testTarget(
         name: "PeripheryTests",
@@ -109,6 +121,14 @@ var targets: [PackageDescription.Target] = [
             .target(name: "PeripheryKit")
         ],
         exclude: ["SPMProject"]
+    ),
+    .testTarget(
+        name: "AccessibilityTests",
+        dependencies: [
+            .target(name: "TestShared"),
+            .target(name: "PeripheryKit")
+        ],
+        exclude: ["AccessibilityProject"]
     )
 ]
 

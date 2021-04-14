@@ -3,11 +3,7 @@ import PathKit
 import SwiftSyntax
 
 protocol PeripherySyntaxVisitor {
-    var file: Path { get }
-    var locationConverter: SourceLocationConverter { get }
-
-    init(file: Path, locationConverter: SourceLocationConverter)
-    func sourceLocation(of position: AbsolutePosition) -> SourceLocation
+    static func make(sourceLocationBuilder: SourceLocationBuilder) -> Self
 
     func visit(_ node: ClassDeclSyntax)
     func visit(_ node: ProtocolDeclSyntax)
@@ -23,16 +19,10 @@ protocol PeripherySyntaxVisitor {
     func visit(_ node: AssociatedtypeDeclSyntax)
     func visit(_ node: OperatorDeclSyntax)
     func visit(_ node: PrecedenceGroupDeclSyntax)
+    func visit(_ node: ImportDeclSyntax)
 }
 
 extension PeripherySyntaxVisitor {
-    func sourceLocation(of position: AbsolutePosition) -> SourceLocation {
-        let location = locationConverter.location(for: position)
-        return SourceLocation(file: file,
-                              line: Int64(location.line ?? 0),
-                              column: Int64(location.column ?? 0))
-    }
-
     func visit(_ node: ClassDeclSyntax) { }
     func visit(_ node: ProtocolDeclSyntax) { }
     func visit(_ node: StructDeclSyntax) { }
@@ -47,28 +37,31 @@ extension PeripherySyntaxVisitor {
     func visit(_ node: AssociatedtypeDeclSyntax) { }
     func visit(_ node: OperatorDeclSyntax) { }
     func visit(_ node: PrecedenceGroupDeclSyntax) { }
+    func visit(_ node: ImportDeclSyntax) { }
 }
 
-final class MultiplexingParser: SyntaxVisitor {
-    let file: Path
+final class MultiplexingSyntaxVisitor: SyntaxVisitor {
+    let file: SourceFile
     let syntax: SourceFileSyntax
     let locationConverter: SourceLocationConverter
+    let sourceLocationBuilder: SourceLocationBuilder
 
     private var visitors: [PeripherySyntaxVisitor] = []
 
-    required init(file: Path) throws {
+    required init(file: SourceFile) throws {
         self.file = file
-        self.syntax = try SyntaxParser.parse(file.url)
-        self.locationConverter = SourceLocationConverter(file: file.string, tree: syntax)
+        self.syntax = try SyntaxParser.parse(file.path.url)
+        self.locationConverter = SourceLocationConverter(file: file.path.string, tree: syntax)
+        self.sourceLocationBuilder = SourceLocationBuilder(file: file, locationConverter: locationConverter)
     }
 
     func add<T: PeripherySyntaxVisitor>(_ visitorType: T.Type) -> T {
-        let visitor = visitorType.init(file: file, locationConverter: locationConverter)
+        let visitor = visitorType.make(sourceLocationBuilder: sourceLocationBuilder)
         visitors.append(visitor)
         return visitor
     }
 
-    func parse() {
+    func visit() {
         walk(syntax)
     }
 
@@ -138,6 +131,11 @@ final class MultiplexingParser: SyntaxVisitor {
     }
 
     override func visit(_ node: PrecedenceGroupDeclSyntax) -> SyntaxVisitorContinueKind {
+        visitors.forEach { $0.visit(node) }
+        return .visitChildren
+    }
+
+    override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
         visitors.forEach { $0.visit(node) }
         return .visitChildren
     }

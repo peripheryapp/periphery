@@ -1,0 +1,124 @@
+import Foundation
+import XCTest
+import PathKit
+import TestShared
+@testable import PeripheryKit
+
+class PropertyVisitorTest: XCTestCase {
+    private var results: [PeripheryKit.SourceLocation: PropertyVisitor.Result]!
+
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        let multiplexingVisitor = try MultiplexingSyntaxVisitor(file: fixturePath)
+        let visitor = multiplexingVisitor.add(PropertyVisitor.self)
+        multiplexingVisitor.visit()
+        results = visitor.resultsByLocation
+    }
+
+    func testImplicitType() {
+        let result = results[fixtureLocation(line: 8)]!
+        XCTAssertNil(result.type)
+        XCTAssertTrue(result.typeLocations.isEmpty)
+    }
+
+    func testSimpleType() {
+        let result = results[fixtureLocation(line: 9)]!
+        XCTAssertEqual(result.type, "Bool")
+        XCTAssertEqual(result.typeLocations, [fixtureLocation(line: 9, column: 23)])
+    }
+
+    func testOptionalType() {
+        let result = results[fixtureLocation(line: 10)]!
+        XCTAssertEqual(result.type, "Bool")
+        XCTAssertEqual(result.typeLocations, [fixtureLocation(line: 10, column: 31)])
+    }
+
+    func testLiteralType() {
+        let result = results[fixtureLocation(line: 11)]!
+        XCTAssertEqual(result.type, "[CustomType]")
+        XCTAssertEqual(result.typeLocations, [fixtureLocation(line: 11, column: 32)])
+    }
+
+    func testOptionalLiteralType() {
+        let result = results[fixtureLocation(line: 12)]!
+        XCTAssertEqual(result.type, "[CustomType]")
+        XCTAssertEqual(result.typeLocations, [fixtureLocation(line: 12, column: 40)])
+    }
+
+    func testGenericType() {
+        let result = results[fixtureLocation(line: 13)]!
+        XCTAssertEqual(result.type, "Set<CustomType>")
+        XCTAssertEqual(result.typeLocations, [
+            fixtureLocation(line: 13, column: 26),
+            fixtureLocation(line: 13, column: 30)
+        ])
+    }
+
+    func testTupleType() {
+        let result = results[fixtureLocation(line: 14)]!
+        XCTAssertEqual(result.type, "(Int, String)")
+        XCTAssertEqual(result.typeLocations, [
+            fixtureLocation(line: 14, column: 25),
+            fixtureLocation(line: 14, column: 30)
+        ])
+    }
+
+    func testDestructuring() {
+        let propertyA = results[fixtureLocation(line: 15, column: 10)]!
+        let propertyB = results[fixtureLocation(line: 15, column: 34)]!
+        let propertyC = results[fixtureLocation(line: 16, column: 10)]!
+        let propertyD = results[fixtureLocation(line: 17, column: 10)]!
+        let propertyE = results[fixtureLocation(line: 18, column: 10)]!
+
+        XCTAssertEqual(propertyA.type, "CustomType")
+        XCTAssertEqual(propertyA.typeLocations, [fixtureLocation(line: 15, column: 60)])
+
+        XCTAssertEqual(propertyB.type, "String")
+        XCTAssertEqual(propertyB.typeLocations, [fixtureLocation(line: 15, column: 72)])
+
+        XCTAssertEqual(propertyC.type, "CustomType.NestedType")
+        XCTAssertEqual(propertyC.typeLocations, [
+            fixtureLocation(line: 19, column: 10),
+            fixtureLocation(line: 19, column: 21)
+        ])
+
+        XCTAssertEqual(propertyD.type, "CustomType.NestedType.NestedScalar")
+        XCTAssertEqual(propertyD.typeLocations, [fixtureLocation(line: 19, column: 33), fixtureLocation(line: 19, column: 44), fixtureLocation(line: 19, column: 55)])
+
+        XCTAssertEqual(propertyE.type, "Swift.String")
+        XCTAssertEqual(propertyE.typeLocations, [fixtureLocation(line: 19, column: 69), fixtureLocation(line: 19, column: 75)])
+    }
+
+    func testImplicitDestructuring() {
+        let propertyA = results[fixtureLocation(line: 20, column: 10)]!
+        let propertyB = results[fixtureLocation(line: 20, column: 42)]!
+
+        XCTAssertNil(propertyA.type)
+        XCTAssertTrue(propertyA.typeLocations.isEmpty)
+
+        XCTAssertNil(propertyB.type)
+        XCTAssertTrue(propertyB.typeLocations.isEmpty)
+    }
+
+    func testMultipleBindings() {
+        let propertyA = results[fixtureLocation(line: 21)]!
+        let propertyB = results[fixtureLocation(line: 21, column: 44)]!
+
+        XCTAssertEqual(propertyA.type, "Int")
+        XCTAssertEqual(propertyA.typeLocations, [fixtureLocation(line: 21, column: 35)])
+
+        XCTAssertEqual(propertyB.type, "String")
+        XCTAssertEqual(propertyB.typeLocations, [fixtureLocation(line: 21, column: 70)])
+    }
+
+    // MARK: - Private
+
+    private var fixturePath: SourceFile {
+        let path = ProjectRootPath + "Tests/Fixtures/PropertyVisitorFixtures/PropertyVisitorFixture.swift"
+        return SourceFile(path: path, modules: ["PropertyVisitorFixtures"])
+    }
+
+    private func fixtureLocation(line: Int, column: Int = 9) -> SourceLocation {
+        SourceLocation(file: fixturePath, line: Int64(line), column: Int64(column))
+    }
+}

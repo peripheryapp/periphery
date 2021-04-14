@@ -1,6 +1,6 @@
 import XCTest
 import PathKit
-import PeripheryKit
+@testable import PeripheryKit
 
 open class SourceGraphTestCase: XCTestCase {
     open var graph: SourceGraph!
@@ -44,8 +44,7 @@ open class SourceGraphTestCase: XCTestCase {
     public func XCTAssertRedundantProtocol(_ name: String, implementedBy conformances: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize((.protocol, name)) else { return }
 
-        switch declaration.analyzerHint {
-        case let .redundantProtocol(references):
+        if let references = graph.redundantProtocols[declaration] {
             let decls = references.compactMap { $0.parent }
 
             for conformance in conformances {
@@ -53,7 +52,7 @@ open class SourceGraphTestCase: XCTestCase {
                     XCTFail("Expected \(conformance) to implement protocol '\(name)'.")
                 }
             }
-        default:
+        } else {
             XCTFail("Expected '\(name)' to be redundant.", file: file, line: line)
         }
     }
@@ -64,11 +63,8 @@ open class SourceGraphTestCase: XCTestCase {
             return
         }
 
-        switch declaration.analyzerHint {
-        case .redundantProtocol(_):
+        if graph.redundantProtocols.keys.contains(declaration) {
             XCTFail("Expected '\(name)' to not be redundant.", file: file, line: line)
-        default:
-            return
         }
     }
 
@@ -84,8 +80,8 @@ open class SourceGraphTestCase: XCTestCase {
         return find((.varParameter, param), in: funcDecl!.unusedParameters)
     }
 
-    public func materialize(_ descriptions: [DeclarationDescription]) -> Declaration? {
-        var parentDecls: Set<Declaration> = graph.allDeclarations
+    public func materialize(_ descriptions: [DeclarationDescription], in declarations: Set<Declaration>? = nil) -> Declaration? {
+        var parentDecls = declarations ?? graph.allDeclarations
         var decl: Declaration?
 
         for description in descriptions.reversed() {

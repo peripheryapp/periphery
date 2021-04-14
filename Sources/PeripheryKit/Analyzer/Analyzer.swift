@@ -2,11 +2,6 @@ import Foundation
 import Shared
 
 public final class Analyzer {
-    public enum Hint: Equatable {
-        case assignOnlyProperty
-        case redundantProtocol(references: Set<Reference>)
-    }
-
     public static func perform(graph: SourceGraph) throws {
         try make(graph: graph).perform()
     }
@@ -18,6 +13,9 @@ public final class Analyzer {
     private let visitors: [SourceGraphVisitor.Type] = [
         // Must come before ExtensionReferenceBuilder.
         AccessibilityCascader.self,
+
+        // Must come before ExtensionReferenceBuilder so that it can detect redundant accessibility on extensions.
+        RedundantExplicitPublicAccessibilityMarker.self,
 
         // Must come before ProtocolConformanceReferenceBuilder because it removes references to
         // conformed protocols, which CodingKeyEnumReferenceBuilder needs to inspect before removal.

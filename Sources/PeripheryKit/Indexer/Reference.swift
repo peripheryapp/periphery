@@ -1,4 +1,23 @@
 public final class Reference {
+    public enum Role {
+        case varType
+        case returnType
+        case parameterType
+        case genericParameterType
+        case genericRequirementType
+        case unknown
+
+        static var publiclyExposableRoles: [Role] {
+            return [
+                .varType,
+                .returnType,
+                .parameterType,
+                .genericParameterType,
+                .genericRequirementType
+            ]
+        }
+    }
+
     public enum Kind: String {
         case `associatedtype` = "associatedtype"
         case `class` = "class"
@@ -68,6 +87,7 @@ public final class Reference {
     public var parent: Declaration?
     public var references: Set<Reference> = []
     public let usr: String
+    public var role: Role = .unknown
 
     var isRelated: Bool = false
 

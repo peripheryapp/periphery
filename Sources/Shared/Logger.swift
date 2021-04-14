@@ -27,49 +27,49 @@ public func colorize(_ text: String, _ color: ANSIColor) -> String {
     return "\(color.rawValue)\(text)\u{001B}[0;0m"
 }
 
-public final class BaseLogger: Singleton {
-    public static func make() -> Self {
+final class BaseLogger: Singleton {
+    static func make() -> Self {
         return self.init()
     }
 
     private let outputQueue: DispatchQueue
 
-    required public init() {
+    required init() {
         self.outputQueue = DispatchQueue(label: "Logger.outputQueue")
     }
 
-    public func info(_ text: String) {
+    func info(_ text: String) {
         log(text, output: stdout)
     }
 
-    public func debug(_ text: String) {
+    func debug(_ text: String) {
         log(text, output: stdout)
     }
 
-    public func warn(_ text: String) {
+    func warn(_ text: String) {
         let text = colorize("warning: ", .boldYellow) + text
         log(text, output: stderr)
     }
 
     // periphery:ignore
-    public func important(_ text: String) {
+    func important(_ text: String) {
         let text = colorize("important: ", .boldYellow) + text
         log(text, output: stdout)
     }
 
-    public func hint(_ text: String) {
+    func hint(_ text: String) {
         let text = colorize("hint: ", .boldMagenta) + colorize(text, .bold)
         log(text, output: stdout)
     }
 
     // periphery:ignore
-    public func error(_ text: String) {
+    func error(_ text: String) {
         let text = colorize("error: ", .boldRed) + colorize(text, .bold)
         log(text, output: stderr)
     }
 
     // periphery:ignore
-    public func error(_ e: Error) {
+    func error(_ e: Error) {
         error(e.localizedDescription)
     }
 
@@ -88,7 +88,7 @@ public final class Logger: Singleton {
     private let baseLogger: BaseLogger
     private let configuration: Configuration
 
-    required public init(baseLogger: BaseLogger, configuration: Configuration) {
+    required init(baseLogger: BaseLogger, configuration: Configuration) {
         self.baseLogger = baseLogger
         self.configuration = configuration
     }

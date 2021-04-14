@@ -2,7 +2,11 @@ import Foundation
 import PathKit
 import SwiftSyntax
 
-final class DeclarationMetadataVisitor: PeripherySyntaxVisitor {
+final class DeclarationVisitor: PeripherySyntaxVisitor {
+    static func make(sourceLocationBuilder: SourceLocationBuilder) -> Self {
+        self.init(sourceLocationBuilder: sourceLocationBuilder)
+    }
+
     typealias Result = (
         location: SourceLocation,
         accessibility: Accessibility?,
@@ -11,13 +15,11 @@ final class DeclarationMetadataVisitor: PeripherySyntaxVisitor {
         commentCommands: [CommentCommand]
     )
 
-    let file: Path
-    let locationConverter: SourceLocationConverter
+    private let sourceLocationBuilder: SourceLocationBuilder
     private(set) var results: [Result] = []
 
-    required init(file: Path, locationConverter: SourceLocationConverter) {
-        self.file = file
-        self.locationConverter = locationConverter
+    init(sourceLocationBuilder: SourceLocationBuilder) {
+        self.sourceLocationBuilder = sourceLocationBuilder
     }
 
     func visit(_ node: ClassDeclSyntax) {
@@ -169,7 +171,7 @@ final class DeclarationMetadataVisitor: PeripherySyntaxVisitor {
             !modifierNames.isEmpty ||
             !attributeNames.isEmpty ||
             !commands.isEmpty {
-            let location = sourceLocation(of: position)
+            let location = sourceLocationBuilder.location(at: position)
             results.append((location, accessibility, attributeNames, modifierNames, commands))
         }
     }

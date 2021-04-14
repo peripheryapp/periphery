@@ -8,7 +8,7 @@ public protocol SetupGuide {
 open class SetupGuideHelpers {
     public init() {}
 
-    public func display(options: [String]) {
+    func display(options: [String]) {
         let maxPaddingCount = String(options.count).count
 
         for (index, option) in options.enumerated() {

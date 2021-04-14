@@ -58,7 +58,7 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphVisitor {
                 continue
             }
 
-            property.analyzerHint = .assignOnlyProperty
+            graph.markPotentialAssignOnlyProperty(property)
 
             for reference in references {
                 graph.remove(reference)

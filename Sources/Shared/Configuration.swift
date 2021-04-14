@@ -7,7 +7,7 @@ public final class Configuration: Singleton {
         return self.init(logger: inject())
     }
 
-    public required init(logger: BaseLogger) {
+    required init(logger: BaseLogger) {
         self.logger = logger
     }
 
@@ -35,6 +35,7 @@ public final class Configuration: Singleton {
     public var retainPublic: Bool = false
     public var retainAssignOnlyProperties: Bool = false
     public var retainUnusedProtocolFuncParams: Bool = false
+    public var disableRedundantPublicAnalysis: Bool = false
     public var verbose: Bool = false
     public var quiet: Bool = false
     public var updateCheck: Bool = true
@@ -63,6 +64,7 @@ public final class Configuration: Singleton {
             "retain_assign_only_properties": retainAssignOnlyProperties,
             "retain_assign_only_property_types": retainAssignOnlyPropertyTypes,
             "retain_unused_protocol_func_params": retainUnusedProtocolFuncParams,
+            "disable_redundant_public_analysis": disableRedundantPublicAnalysis,
             "verbose": verbose,
             "quiet": quiet,
             "disable_update_check": !updateCheck,
@@ -110,6 +112,8 @@ public final class Configuration: Singleton {
                 self.retainObjcAccessible = convert(value, to: Bool.self) ?? false
             case "retain_unused_protocol_func_params":
                 self.retainUnusedProtocolFuncParams = convert(value, to: Bool.self) ?? false
+            case "disable_redundant_public_analysis":
+                self.disableRedundantPublicAnalysis = convert(value, to: Bool.self) ?? false
             case "verbose":
                 self.verbose = convert(value, to: Bool.self) ?? false
             case "quiet":

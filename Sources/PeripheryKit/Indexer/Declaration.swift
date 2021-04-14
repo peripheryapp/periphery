@@ -94,8 +94,12 @@ public final class Declaration {
             rawValue.hasPrefix("extension")
         }
 
-        var isConformingKind: Bool {
-            isExtensionKind || [.class, .struct, .enum].contains(self)
+        var isConformableKind: Bool {
+            isDiscreteConformableKind || isExtensionKind
+        }
+
+        var isDiscreteConformableKind: Bool {
+            [.class, .struct, .enum].contains(self)
         }
 
         static var accessorKinds: Set<Kind> {
@@ -151,11 +155,10 @@ public final class Declaration {
     public let location: SourceLocation
     public var attributes: Set<String> = []
     public var modifiers: Set<String> = []
-    public var accessibility: (value: Accessibility, isExplicit: Bool) = (.internal, false)
+    public var accessibility: DeclarationAccessibility = .init(value: .internal, isExplicit: false)
     public let kind: Kind
     public var name: String?
     public let usrs: Set<String>
-    public var analyzerHint: Analyzer.Hint?
     public var unusedParameters: Set<Declaration> = []
     public var declarations: Set<Declaration> = []
     public var commentCommands: Set<CommentCommand> = []
@@ -257,5 +260,14 @@ extension Declaration: CustomStringConvertible {
 extension Declaration: Comparable {
     public static func < (lhs: Declaration, rhs: Declaration) -> Bool {
         lhs.location < rhs.location
+    }
+}
+
+public struct DeclarationAccessibility {
+    public let value: Accessibility
+    public let isExplicit: Bool
+
+    public func isExplicitly(_ testValue: Accessibility) -> Bool {
+        isExplicit && value == testValue
     }
 }

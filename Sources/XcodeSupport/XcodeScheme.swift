@@ -2,25 +2,25 @@ import Foundation
 import PeripheryKit
 import Shared
 
-public final class XcodeScheme {
+final class XcodeScheme {
     static func make(project: XcodeProjectlike, name: String) throws -> Self {
         return try self.init(project: project, name: name, xcodebuild: inject())
     }
 
-    public let project: XcodeProjectlike
-    public let name: String
+    let project: XcodeProjectlike
+    let name: String
 
     private var didPopulate: Bool = false
     private let xcodebuild: Xcodebuild
     private var testTargetsProperty: [String] = []
 
-    required public init(project: XcodeProjectlike, name: String, xcodebuild: Xcodebuild) throws {
+    required init(project: XcodeProjectlike, name: String, xcodebuild: Xcodebuild) throws {
         self.project = project
         self.name = name
         self.xcodebuild = xcodebuild
     }
 
-    public func testTargets() throws -> [String] {
+    func testTargets() throws -> [String] {
         try populate()
         return testTargetsProperty
     }
@@ -38,13 +38,13 @@ public final class XcodeScheme {
 }
 
 extension XcodeScheme: Hashable {
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(name)
     }
 }
 
 extension XcodeScheme: Equatable {
-    public static func == (lhs: XcodeScheme, rhs: XcodeScheme) -> Bool {
+    static func == (lhs: XcodeScheme, rhs: XcodeScheme) -> Bool {
         return lhs.name == rhs.name
     }
 }

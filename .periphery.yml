@@ -8,3 +8,4 @@ targets:
 - PeripheryTests
 - XcodeTests
 - SPMTests
+- AccessibilityTests

@@ -194,7 +194,7 @@ class UnusedParameterTest: XCTestCase {
     private var functions: [Function] = []
 
     private func analyze() {
-        functions = try! UnusedParameterParser.parse(file: fixturePath, parseProtocols: false)
+        functions = try! UnusedParameterParser.parse(file: fixtureFile, parseProtocols: false)
         let analyzer = UnusedParameterAnalyzer()
 
         for function in functions {
@@ -203,14 +203,15 @@ class UnusedParameterTest: XCTestCase {
         }
     }
 
-    private var fixturePath: Path {
+    private var fixtureFile: SourceFile {
         #if os(macOS)
         let testName = String(name.split(separator: " ").last!).replacingOccurrences(of: "]", with: "")
         #else
         let testName = String(name.split(separator: ".", maxSplits: 1).last!)
         #endif
 
-        return ProjectRootPath + "Tests/SyntaxFixtures/\(testName).swift"
+        let path = ProjectRootPath + "Tests/Fixtures/UnusedParameterFixtures/\(testName).swift"
+        return SourceFile(path: path, modules: ["UnusedParameterFixtures"])
     }
 
     private func XCTAssertUnused(_ name: String, of functionName: String, file: StaticString = #file, line: UInt = #line) {

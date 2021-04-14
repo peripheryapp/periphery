@@ -4,13 +4,13 @@ import PathKit
 import PeripheryKit
 import Shared
 
-public final class XcodeTarget {
+final class XcodeTarget {
     static func make(project: XcodeProject, target: PBXTarget) -> Self {
         return self.init(project: project,
                          target: target)
     }
 
-    public let project: XcodeProject
+    let project: XcodeProject
 
     private let target: PBXTarget
     private var sourceFiles_: Set<Path> = []
@@ -25,11 +25,11 @@ public final class XcodeTarget {
         self.target = target
     }
 
-    public var isTestTarget: Bool {
+    var isTestTarget: Bool {
         return target.productType?.rawValue.contains("test") ?? false
     }
 
-    public var name: String {
+    var name: String {
         return target.name
     }
 
@@ -106,13 +106,13 @@ public final class XcodeTarget {
 }
 
 extension XcodeTarget: Hashable {
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(target.name)
     }
 }
 
 extension XcodeTarget: Equatable {
-    public static func == (lhs: XcodeTarget, rhs: XcodeTarget) -> Bool {
+    static func == (lhs: XcodeTarget, rhs: XcodeTarget) -> Bool {
         return lhs.name == rhs.name
     }
 }

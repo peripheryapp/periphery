@@ -2,11 +2,11 @@ import Foundation
 import PathKit
 
 public class SourceLocation {
-    public let file: Path
+    public let file: SourceFile
     public let line: Int64
     public let column: Int64
 
-    init(file: Path, line: Int64, column: Int64) {
+    init(file: SourceFile, line: Int64, column: Int64) {
         self.file = file
         self.line = line
         self.column = column
@@ -19,11 +19,11 @@ public class SourceLocation {
     }
 
     private lazy var descriptionInternal: String = {
-        buildDescription(path: file.string)
+        buildDescription(path: file.path.string)
     }()
 
     private lazy var shortDescriptionInternal: String = {
-        buildDescription(path: file.lastComponent)
+        buildDescription(path: file.path.lastComponent)
     }()
 }
 

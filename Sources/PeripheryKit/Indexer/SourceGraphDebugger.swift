@@ -2,14 +2,14 @@
 
 import Foundation
 
-public final class SourceGraphDebugger {
+final class SourceGraphDebugger {
     private let graph: SourceGraph
 
-    required public init(graph: SourceGraph) {
+    required init(graph: SourceGraph) {
         self.graph = graph
     }
 
-    public func describeGraph() {
+    func describeGraph() {
         describe(graph.rootDeclarations.sorted())
         describe(graph.rootReferences.sorted())
     }

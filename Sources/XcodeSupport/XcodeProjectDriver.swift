@@ -142,5 +142,7 @@ extension XcodeProjectDriver: ProjectDriver {
 
         let infoPlistFiles = try Set(targets.map { try $0.infoPlistFiles() }.joined())
         try InfoPlistIndexer.make(infoPlistFiles: infoPlistFiles, graph: graph).perform()
+
+        graph.indexingComplete()
     }
 }

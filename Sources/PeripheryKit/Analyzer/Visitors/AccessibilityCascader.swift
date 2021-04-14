@@ -25,7 +25,7 @@ final class AccessibilityCascader: SourceGraphVisitor {
             if decl.accessibility.isExplicit {
                 for childDecl in decl.declarations {
                     if !childDecl.accessibility.isExplicit {
-                        childDecl.accessibility = (decl.accessibility.value, false)
+                        childDecl.accessibility = .init(value: decl.accessibility.value, isExplicit: false)
                     }
                 }
             }

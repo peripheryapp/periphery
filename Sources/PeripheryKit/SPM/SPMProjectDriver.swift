@@ -71,6 +71,8 @@ extension SPMProjectDriver: ProjectDriver {
         }
 
         try SwiftIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
+
+        graph.indexingComplete()
     }
 
     // MARK: - Private

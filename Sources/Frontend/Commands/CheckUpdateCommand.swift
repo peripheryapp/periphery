@@ -2,15 +2,13 @@ import Foundation
 import ArgumentParser
 import Shared
 
-public struct CheckUpdateCommand: ParsableCommand {
-    public static let configuration = CommandConfiguration(
+struct CheckUpdateCommand: ParsableCommand {
+    static let configuration = CommandConfiguration(
         commandName: "check-update",
         abstract: "Check for available update"
     )
 
-    public init() {}
-
-    public func run() throws {
+    func run() throws {
         let logger: Logger = inject()
         let checker = UpdateChecker.make()
         DispatchQueue.global().async { checker.run() }

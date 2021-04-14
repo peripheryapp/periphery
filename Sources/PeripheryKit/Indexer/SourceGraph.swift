@@ -2,28 +2,30 @@ import Foundation
 import Shared
 
 public final class SourceGraph {
-    private(set) public var allDeclarations: Set<Declaration> = []
-    private(set) public var reachableDeclarations: Set<Declaration> = []
-
+    private(set) var allDeclarations: Set<Declaration> = []
+    private(set) var reachableDeclarations: Set<Declaration> = []
     private(set) var rootDeclarations: Set<Declaration> = []
     private(set) var rootReferences: Set<Reference> = []
     private(set) var allReferences: Set<Reference> = []
-    private(set) var redundantDeclarations: Set<Declaration> = []
     private(set) var retainedDeclarations: Set<Declaration> = []
+    private(set) var redundantProtocols: [Declaration: Set<Reference>] = [:]
+    private(set) var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
+    private(set) var potentialAssignOnlyProperties: Set<Declaration> = []
+    private(set) var ignoredDeclarations: Set<Declaration> = []
 
-    private var ignoredDeclarations: Set<Declaration> = []
     private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
+    private var _allDeclarationsUnmodified: Set<Declaration> = []
 
     private let mutationQueue: DispatchQueue
 
+    var allDeclarationsUnmodified: Set<Declaration> {
+        _allDeclarationsUnmodified
+    }
+
     var xibReferences: [XibReference] = []
     var infoPlistReferences: [InfoPlistReference] = []
-
-    public var resultDeclarations: Set<Declaration> {
-        unreachableDeclarations.union(redundantDeclarations).subtracting(ignoredDeclarations)
-    }
 
     public var unreachableDeclarations: Set<Declaration> {
         return allDeclarations.subtracting(reachableDeclarations)
@@ -33,12 +35,10 @@ public final class SourceGraph {
         mutationQueue = DispatchQueue(label: "SourceGraph.mutationQueue")
     }
 
-    func identifyRootDeclarations() {
+    public func indexingComplete() {
         rootDeclarations = allDeclarations.filter { $0.parent == nil }
-    }
-
-    func identifyRootReferences() {
         rootReferences = allReferences.filter { $0.parent == nil }
+        _allDeclarationsUnmodified = allDeclarations
     }
 
     func declarations(ofKind kind: Declaration.Kind) -> Set<Declaration> {
@@ -61,9 +61,15 @@ public final class SourceGraph {
         decl.usrs.contains { !allReferencesByUsr[$0, default: []].isEmpty }
     }
 
-    func markRedundant(_ declaration: Declaration) {
+    func markRedundantProtocol(_ declaration: Declaration, references: Set<Reference>) {
         mutationQueue.sync {
-            _ = redundantDeclarations.insert(declaration)
+            redundantProtocols[declaration] = references
+        }
+    }
+
+    func markRedundantPublicAccessibility(_ declaration: Declaration, modules: Set<String>) {
+        mutationQueue.sync {
+            redundantPublicAccessibility[declaration] = modules
         }
     }
 
@@ -76,6 +82,12 @@ public final class SourceGraph {
     func markRetained(_ declaration: Declaration) {
         mutationQueue.sync {
             _ = retainedDeclarations.insert(declaration)
+        }
+    }
+
+    func markPotentialAssignOnlyProperty(_ declaration: Declaration) {
+        mutationQueue.sync {
+            _ = potentialAssignOnlyProperties.insert(declaration)
         }
     }
 
@@ -108,6 +120,7 @@ public final class SourceGraph {
         allDeclarationsByKind[declaration.kind]?.remove(declaration)
         rootDeclarations.remove(declaration)
         reachableDeclarations.remove(declaration)
+        potentialAssignOnlyProperties.remove(declaration)
         declaration.usrs.forEach { allExplicitDeclarationsByUsr.removeValue(forKey: $0) }
     }
 

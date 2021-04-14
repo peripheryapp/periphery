@@ -7,7 +7,7 @@ import Shared
 import XcodeSupport
 #endif
 
-public final class Project {
+final class Project {
     static func identify() throws -> Self {
         let configuration: Configuration = inject()
 

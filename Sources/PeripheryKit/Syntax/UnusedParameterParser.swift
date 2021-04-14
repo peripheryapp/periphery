@@ -11,7 +11,7 @@ final class Function: Item, Hashable {
         lhs.location == rhs.location
     }
 
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(location)
     }
 
@@ -47,7 +47,7 @@ final class Parameter: Item, Hashable {
         return lhs.location == rhs.location
     }
 
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(location)
     }
 
@@ -120,11 +120,11 @@ final class GenericItem: Item {
 struct UnusedParameterParser {
     private let syntax: SourceFileSyntax
     private let parseProtocols: Bool
-    private let file: Path
+    private let file: SourceFile
     private let locationConverter: SourceLocationConverter
 
     static func parse(
-        file: Path,
+        file: SourceFile,
         syntax: SourceFileSyntax,
         locationConverter: SourceLocationConverter,
         parseProtocols: Bool
@@ -138,9 +138,9 @@ struct UnusedParameterParser {
         return parser.parse()
     }
 
-    static func parse(file: Path, parseProtocols: Bool) throws -> [Function] {
-        let syntax = try SyntaxParser.parse(file.url)
-        let locationConverter = SourceLocationConverter(file: file.string, tree: syntax)
+    static func parse(file: SourceFile, parseProtocols: Bool) throws -> [Function] {
+        let syntax = try SyntaxParser.parse(file.path.url)
+        let locationConverter = SourceLocationConverter(file: file.path.string, tree: syntax)
         return parse(
             file: file,
             syntax: syntax,
@@ -149,7 +149,7 @@ struct UnusedParameterParser {
         )
     }
 
-    private init(file: Path, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) {
+    private init(file: SourceFile, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) {
         self.file = file
         self.syntax = syntax
         self.locationConverter = locationConverter
@@ -315,10 +315,7 @@ struct UnusedParameterParser {
             return nil
         }
 
-        // TODO: It'd be nice to avoid building this function if it has no params, however
-        // Swift supports nested functions, so it's possible this function captures a param
-        // from an outer function.
-
+        // Swift supports nested functions, so it's possible this function captures a param from an outer function.
         let params = parse(children: syntax.children, collecting: Parameter.self)
         let items = parse(node: body, collector)?.items ?? []
         let fullName = buildFullName(for: name, with: params)

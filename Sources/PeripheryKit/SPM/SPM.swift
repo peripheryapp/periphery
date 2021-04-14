@@ -17,8 +17,9 @@ public struct SPM {
         }
 
         public let name: String
-        public let path: String
-        public let targets: [Target]
+
+        let targets: [Target]
+        let path: String
 
         public var swiftTargets: [Target] {
             targets.filter { $0.moduleType == "SwiftTarget" }
@@ -32,9 +33,10 @@ public struct SPM {
 
     public struct Target: Decodable {
         public let name: String
-        public let path: String
-        public let sources: [String]
-        public let moduleType: String
+
+        let path: String
+        let moduleType: String
+        let sources: [String]
 
         func build(additionalArguments: [String]) throws {
             let shell: Shell = inject()
