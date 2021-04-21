@@ -525,6 +525,13 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testAssignOnlyPropertyAnalysisDoesNotApplyToProtocolProperties() {
+        analyze(retainPublic: true) {
+            XCTAssertReferenced((.varInstance, "someProperty"), descendentOf: (.protocol, "FixtureProtocol124"))
+            XCTAssertReferenced((.varInstance, "someProperty"), descendentOf: (.class, "FixtureClass124"))
+        }
+    }
+
     func testPropertyReferencedByComputedValue() {
         analyze(retainPublic: true) {
             XCTAssertReferenced((.class, "FixtureClass78"))

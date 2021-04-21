@@ -200,6 +200,7 @@ public final class SwiftIndexer {
             }
 
             establishDeclarationHierarchy()
+            makeProtocolPropertyAccessorsImplicit(with: decls)
             associateDanglingReferences(with: decls)
 
             let syntax = try SyntaxParser.parse(file.url)
@@ -262,6 +263,22 @@ public final class SwiftIndexer {
                         }
                     }
                 }
+            }
+        }
+
+        // All property accessors with a body are considered explicit, because they are explicitly declared in code.
+        // Property accessors without a body are still present, however they are implied by the compiler and thus
+        // marked as implicit. Protocol property accessors muddy this distinction, as they are explicitly declared
+        // e.g: `var foo: Int { get set }` yet they cannot have a body. Swift marks these accessors as explicit,
+        // however for our intents and purposes we need to consider them as implicit.
+        private func makeProtocolPropertyAccessorsImplicit(with decls: [Declaration]) {
+            graph.mutating {
+                decls.filter { $0.kind == .protocol }
+                    .flatMap { $0.declarations }
+                    .filter { $0.kind.isVariableKind }
+                    .flatMap { $0.declarations }
+                    .filter { $0.kind.isAccessorKind }
+                    .forEach { graph.makeImplicitUnsafe($0) }
             }
         }
 

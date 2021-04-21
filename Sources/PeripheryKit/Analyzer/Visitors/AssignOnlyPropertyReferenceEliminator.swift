@@ -19,7 +19,7 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphVisitor {
 
         let setters = graph.declarations(ofKind: .functionAccessorSetter)
 
-        var assignOnlyProperties: [(Declaration, Reference)] = []
+        var assignOnlyProperties: [Declaration: [Reference]] = [:]
 
         for setter in setters {
             let references = graph.references(to: setter)
@@ -38,15 +38,22 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphVisitor {
                 let hasGetterReference = caller.references.contains { $0.kind == .functionAccessorGetter && $0.name == getterName }
 
                 if !hasGetterReference {
-                    assignOnlyProperties.append((property, propertyReference))
+                    assignOnlyProperties[property, default: []].append(propertyReference)
                 }
             }
         }
 
         var retainedProperties: Set<Declaration> = []
+        let allProperties = Set(assignOnlyProperties.map { $0.0 })
+
+        // A protocol property can technically be assigned and never used when the protocol is used as an existential
+        // type, however communicating that succinctly would be very tricky, and most likely just lead to confusion.
+        // Here we filter out protocol properties and thus restrict this analysis only to concrete properties.
+        allProperties
+            .filter { ($0.parent as? Declaration)?.kind == .protocol }
+            .forEach { retainedProperties.insert($0) }
 
         if !configuration.retainAssignOnlyPropertyTypes.isEmpty {
-            let allProperties = Set(assignOnlyProperties.map { $0.0 })
             let propertiesByType = try PropertyTypeParser.parse(allProperties)
 
             for (type, properties) in propertiesByType {
@@ -56,10 +63,13 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphVisitor {
             }
         }
 
-        for (property, reference) in assignOnlyProperties {
+        for (property, references) in assignOnlyProperties {
             if !retainedProperties.contains(property) {
-                graph.remove(reference)
                 property.analyzerHint = .assignOnlyProperty
+
+                for reference in references {
+                    graph.remove(reference)
+                }
             }
         }
     }

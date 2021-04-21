@@ -154,6 +154,11 @@ public final class SourceGraph {
         }
     }
 
+    func makeImplicitUnsafe(_ declaration: Declaration) {
+        declaration.isImplicit = true
+        declaration.usrs.forEach { allExplicitDeclarationsByUsr.removeValue(forKey: $0) }
+    }
+
     func markReachable(_ declaration: Declaration) {
         mutationQueue.sync {
             _ = reachableDeclarations.insert(declaration)

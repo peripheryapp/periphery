@@ -11,7 +11,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix issue where protocol property references could be incorrectly associated with the getter/setter rather than the property itself, leading to erroneous results.
 
 ## 2.4.3 (2021-03-05)
 
