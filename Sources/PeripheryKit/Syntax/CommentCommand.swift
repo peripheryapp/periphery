@@ -1,9 +1,31 @@
 import Foundation
+import SwiftSyntax
 
 public enum CommentCommand: CustomStringConvertible, Hashable {
     case ignore
     case ignoreAll
     case ignoreParameters([String])
+
+    static func parseCommands(in trivia: Trivia?) -> [CommentCommand] {
+        let comments: [String] = trivia?.compactMap {
+            switch $0 {
+            case let .lineComment(comment),
+                 let .blockComment(comment),
+                 let .docLineComment(comment),
+                 let .docBlockComment(comment):
+                return comment
+            default:
+                return nil
+            }
+        } ?? []
+
+        return comments
+            .compactMap { comment in
+                guard let range = comment.range(of: "periphery:") else { return nil }
+                let rawCommand = String(comment[range.upperBound...]).replacingOccurrences(of: "*/", with: "").trimmed
+                return CommentCommand.parse(rawCommand)
+            }
+    }
 
     static func parse(_ rawCommand: String) -> Self? {
         if rawCommand == "ignore" {
