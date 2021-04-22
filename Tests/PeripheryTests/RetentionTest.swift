@@ -6,7 +6,6 @@ import TestShared
 
 class RetentionTest: SourceGraphTestCase {
     static var fixtureTarget: SPM.Target!
-    static var crossModuleFixtureTarget: SPM.Target!
     static var driver: SPMProjectDriver!
     private let performKnownFailures = false
 
@@ -18,11 +17,10 @@ class RetentionTest: SourceGraphTestCase {
 
         let package = try! SPM.Package.load()
         fixtureTarget = package.targets.first { $0.name == "RetentionFixtures" }!
-        crossModuleFixtureTarget = package.targets.first { $0.name == "RetentionFixturesCrossModule" }!
 
         driver = SPMProjectDriver(
             package: package,
-            targets: [fixtureTarget, crossModuleFixtureTarget],
+            targets: [fixtureTarget],
             configuration: configuration,
             logger: inject()
         )
@@ -484,19 +482,6 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testMainFileEntryPoint() {
-        analyze(isMainFile: true) {
-            XCTAssertReferenced((.class, "FixtureClass42"))
-            XCTAssertReferenced((.varGlobal, "someVar"))
-        }
-    }
-
-    func testMainFileEntryPointReference() {
-        analyze(isMainFile: true, supplementalFiles: ["testMainFileEntryPointReference_2"]) {
-            XCTAssertReferenced((.class, "FixtureClass94"))
-        }
-    }
-
     func testUnusedTypealias() {
         analyze() {
             XCTAssertNotReferenced((.typealias, "UnusedAlias"))
@@ -785,14 +770,6 @@ class RetentionTest: SourceGraphTestCase {
             XCTAssertNotReferenced((.varInstance, "someVar"))
             XCTAssertNotReferenced((.functionMethodInstance, "someMethod()"))
             XCTAssertNotReferenced((.varInstance, "someVar"))
-        }
-    }
-
-    func testCrossModuleReference() {
-        // Entry point is used that so that retainPublic can be disabled, as PublicCrossModuleReferenced must be public in order to be imported.
-        analyze(isMainFile: true, additionalTargets: [Self.crossModuleFixtureTarget]) {
-            XCTAssertReferenced((.class, "PublicCrossModuleReferenced"))
-            XCTAssertNotReferenced((.class, "PublicCrossModuleNotReferenced"))
         }
     }
 
@@ -1371,10 +1348,7 @@ class RetentionTest: SourceGraphTestCase {
 
     private func analyze(retainPublic: Bool = false,
                          retainObjcAccessible: Bool = false,
-                         isMainFile: Bool = false,
-                         supplementalFiles: [String] = [],
                          fixture: String? = nil,
-                         additionalTargets: [SPM.Target] = [],
                          _ testBlock: () throws -> Void
     ) rethrows {
         #if os(macOS)
@@ -1388,25 +1362,15 @@ class RetentionTest: SourceGraphTestCase {
         configuration.retainPublic = retainPublic
         configuration.retainObjcAccessible = retainObjcAccessible
 
-        if isMainFile {
-            configuration.entryPointFilenames.append(testName.lowercased() + ".swift")
-        }
-
-        var sourceFiles: [Path] = [testFixturePath]
-        let supplementalSourceFiles = supplementalFiles.map { fixturePath(for: $0) }
-        sourceFiles = sourceFiles + supplementalSourceFiles
-
-        sourceFiles.forEach {
-            XCTAssertTrue($0.exists, "\($0.string) does not exist.")
-        }
+        XCTAssertTrue(testFixturePath.exists, "\(testFixturePath.string) does not exist.")
 
         let newFixtureTarget = SPM.Target(
             name: Self.fixtureTarget.name,
             path: Self.fixtureTarget.path,
-            sources: sourceFiles.map { $0.string },
+            sources: [testFixturePath.string],
             moduleType: Self.fixtureTarget.moduleType)
 
-        Self.driver.setTargets([newFixtureTarget] + additionalTargets)
+        Self.driver.setTargets([newFixtureTarget])
 
         let graph = SourceGraph()
         try! Self.driver.index(graph: graph)

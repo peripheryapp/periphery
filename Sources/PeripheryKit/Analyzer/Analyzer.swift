@@ -41,7 +41,6 @@ public final class Analyzer {
         XibReferenceRetainer.self,
         InfoPlistReferenceRetainer.self,
         EntryPointAttributeRetainer.self,
-        EntryPointFileRetainer.self,
         PubliclyAccessibleRetainer.self,
         ObjCAccessibleRetainer.self,
         XCTestRetainer.self,

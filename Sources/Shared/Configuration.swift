@@ -46,9 +46,6 @@ public final class Configuration: Singleton {
     // Non user facing.
     public var guidedSetup: Bool = false
 
-    // Only used for tests.
-    public var entryPointFilenames: [String] = []
-
     // Dependencies
     private var logger: BaseLogger // Must use BaseLogger as Logger depends upon Configuration.
 

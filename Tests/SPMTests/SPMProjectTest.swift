@@ -41,4 +41,9 @@ class SPMProjectTest: SourceGraphTestCase {
     func testMainEntryFile() {
         XCTAssertReferenced((.functionFree, "main()"))
     }
+
+    func testCrossModuleReference() {
+        XCTAssertReferenced((.class, "PublicCrossModuleReferenced"))
+        XCTAssertNotReferenced((.class, "PublicCrossModuleNotReferenced"))
+    }
 }
