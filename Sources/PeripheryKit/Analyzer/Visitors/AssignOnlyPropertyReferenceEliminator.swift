@@ -34,6 +34,15 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphVisitor {
                       !property.isComplexProperty
                 else { continue }
 
+                // A protocol property can technically be assigned and never used when the protocol is used as an existential
+                // type, however communicating that succinctly would be very tricky, and most likely just lead to confusion.
+                // Here we filter out protocol properties and thus restrict this analysis only to concrete properties.
+                if let parent = property.parent as? Declaration {
+                    if parent.kind == .protocol {
+                        continue
+                    }
+                }
+
                 let getterName = "getter:\(propertyName)"
                 let hasGetterReference = caller.references.contains { $0.kind == .functionAccessorGetter && $0.name == getterName }
 
@@ -43,33 +52,16 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphVisitor {
             }
         }
 
-        var retainedProperties: Set<Declaration> = []
-        let allProperties = Set(assignOnlyProperties.map { $0.0 })
-
-        // A protocol property can technically be assigned and never used when the protocol is used as an existential
-        // type, however communicating that succinctly would be very tricky, and most likely just lead to confusion.
-        // Here we filter out protocol properties and thus restrict this analysis only to concrete properties.
-        allProperties
-            .filter { ($0.parent as? Declaration)?.kind == .protocol }
-            .forEach { retainedProperties.insert($0) }
-
-        if !configuration.retainAssignOnlyPropertyTypes.isEmpty {
-            let propertiesByType = try PropertyTypeParser.parse(allProperties)
-
-            for (type, properties) in propertiesByType {
-                if configuration.retainAssignOnlyPropertyTypes.contains(type) {
-                    retainedProperties.formUnion(properties)
-                }
-            }
-        }
-
         for (property, references) in assignOnlyProperties {
-            if !retainedProperties.contains(property) {
-                property.analyzerHint = .assignOnlyProperty
+            if let declaredType = property.declaredType,
+               configuration.retainAssignOnlyPropertyTypes.contains(declaredType) {
+                continue
+            }
 
-                for reference in references {
-                    graph.remove(reference)
-                }
+            property.analyzerHint = .assignOnlyProperty
+
+            for reference in references {
+                graph.remove(reference)
             }
         }
     }

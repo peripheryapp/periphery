@@ -160,6 +160,7 @@ public final class Declaration: Entity, CustomStringConvertible {
     public var declarations: Set<Declaration> = []
     public var commentCommands: Set<CommentCommand> = []
     public var references: Set<Reference> = []
+    public var declaredType: String?
 
     public var parent: Entity?
     var related: Set<Reference> = []

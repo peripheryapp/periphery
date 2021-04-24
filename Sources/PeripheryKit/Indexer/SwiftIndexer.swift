@@ -199,15 +199,24 @@ public final class SwiftIndexer {
                 decls.append(decl)
             }
 
-            establishDeclarationHierarchy()
-            makeProtocolPropertyAccessorsImplicit(with: decls)
-            associateDanglingReferences(with: decls)
+            let multiplexingParser = try MultiplexingParser(file: file)
+            let declarationMetadataVisitor = multiplexingParser.add(DeclarationMetadataVisitor.self)
+            let propertyMetadataVisitor = multiplexingParser.add(PropertyMetadataVisitor.self)
 
-            let syntax = try SyntaxParser.parse(file.url)
-            let locationConverter = SourceLocationConverter(file: file.string, tree: syntax)
-            let result = try identifyMetadata(for: decls, syntax: syntax, locationConverter: locationConverter)
-            try identifyUnusedParameters(for: decls.filter { $0.kind.isFunctionKind }, syntax: syntax, locationConverter: locationConverter)
-            applyCommands(for: decls, metadataResult: result)
+            multiplexingParser.parse()
+
+            let propertyMetadataByLocation = propertyMetadataVisitor.resultsByLocation
+            let propertyMetadataByTypeLocation = propertyMetadataVisitor.resultsByTypeLocation
+            let propertyDeclarations = decls.filter { $0.kind.isVariableKind }
+
+            establishDeclarationHierarchy()
+            makeProtocolPropertyAccessorsImplicit(for: decls)
+            associateDanglingReferences(for: decls, using: propertyMetadataByTypeLocation)
+            identifyDeclaredPropertyTypes(for: propertyDeclarations, using: propertyMetadataByLocation)
+
+            applyDeclarationMetadata(for: decls, using: declarationMetadataVisitor.results)
+            identifyUnusedParameters(for: decls.filter { $0.kind.isFunctionKind }, parser: multiplexingParser)
+            applyCommentCommands(for: decls, parser: multiplexingParser)
         }
 
         private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
@@ -235,32 +244,20 @@ public final class SwiftIndexer {
                     parentDecl.declarations.formUnion(decls)
                 }
 
-                for (usr, references) in referencedDeclsByUsr {
+                for (usr, refs) in referencedDeclsByUsr {
                     guard let decl = graph.explicitDeclaration(withUsr: usr) else {
-                        danglingReferences.append(contentsOf: references)
+                        danglingReferences.append(contentsOf: refs)
                         continue
                     }
 
-                    for reference in references {
-                        reference.parent = decl
-
-                        if reference.isRelated {
-                            decl.related.insert(reference)
-                        } else {
-                            decl.references.insert(reference)
-                        }
+                    for ref in refs {
+                        associateUnsafe(ref, with: decl)
                     }
                 }
 
                 for (decl, refs) in referencedUsrsByDecl {
                     for ref in refs {
-                        ref.parent = decl
-
-                        if ref.isRelated {
-                            decl.related.insert(ref)
-                        } else {
-                            decl.references.insert(ref)
-                        }
+                        associateUnsafe(ref, with: decl)
                     }
                 }
             }
@@ -271,7 +268,7 @@ public final class SwiftIndexer {
         // marked as implicit. Protocol property accessors muddy this distinction, as they are explicitly declared
         // e.g: `var foo: Int { get set }` yet they cannot have a body. Swift marks these accessors as explicit,
         // however for our intents and purposes we need to consider them as implicit.
-        private func makeProtocolPropertyAccessorsImplicit(with decls: [Declaration]) {
+        private func makeProtocolPropertyAccessorsImplicit(for decls: [Declaration]) {
             graph.mutating {
                 decls.filter { $0.kind == .protocol }
                     .flatMap { $0.declarations }
@@ -283,45 +280,69 @@ public final class SwiftIndexer {
         }
 
         // Workaround for https://bugs.swift.org/browse/SR-13766
-        private func associateDanglingReferences(with decls: [Declaration]) {
+        // Swift does not associate some type references with the containing declaration, resulting in references
+        // with no clear parent.
+        private func associateDanglingReferences(for decls: [Declaration], using propertyMetadataByTypeLocation: [SourceLocation: [PropertyMetadataVisitor.Result]]) {
             guard !danglingReferences.isEmpty else { return }
 
             let explicitDecls = decls.filter { !$0.isImplicit }
-            let declsByLocation = explicitDecls.lazy.map { ($0.location, $0) }.reduce(into: [SourceLocation: [Declaration]]()) { (result, tuple) in
-                result[tuple.0, default: []].append(tuple.1)
-            }
-            let declsByLine = explicitDecls.lazy.map { ($0.location.line, $0) }.reduce(into: [Int64: [Declaration]]()) { (result, tuple) in
-                result[tuple.0, default: []].append(tuple.1)
-            }
+            let declsByLocation = explicitDecls
+                .lazy
+                .reduce(into: [SourceLocation: [Declaration]]()) { (result, decl) in
+                    result[decl.location, default: []].append(decl)
+                }
+            let declsByLine = explicitDecls
+                .lazy
+                .reduce(into: [Int64: [Declaration]]()) { (result, decl) in
+                    result[decl.location.line, default: []].append(decl)
+                }
 
             for ref in danglingReferences {
-                guard let candidateDecls = declsByLocation[ref.location] ?? declsByLine[ref.location.line] else { continue }
+                var propertyDecls: [Declaration]?
+
+                // First attempt to identify property declarations that may be associated with this reference.
+                if let propertyMetadatas = propertyMetadataByTypeLocation[ref.location] {
+                    for propertyMetadata in propertyMetadatas {
+                        if let decls = declsByLocation[propertyMetadata.location] {
+                            propertyDecls = decls
+                        }
+                    }
+                }
+
+                guard let candidateDecls = propertyDecls ??
+                        declsByLocation[ref.location] ??
+                        declsByLine[ref.location.line] else { continue }
 
                 // The vast majority of the time there will only be a single declaration for this location,
                 // however it is possible for there to be more than one. In that case, first attempt to associate with
                 // a decl without a parent, as the reference may be a related type of a class/struct/etc.
                 if let decl = candidateDecls.first(where: { $0.parent == nil }) {
-                    ref.parent = decl
-
-                    if ref.isRelated {
-                        decl.related.insert(ref)
-                    } else {
-                        decl.references.insert(ref)
-                    }
+                    associate(ref, with: decl)
                 } else if let decl = candidateDecls.first { // Fallback to using the first decl.
-                    ref.parent = decl
-
-                    if ref.isRelated {
-                        decl.related.insert(ref)
-                    } else {
-                        decl.references.insert(ref)
-                    }
+                    associate(ref, with: decl)
                 }
             }
         }
 
-        private func applyCommands(for decls: [Declaration], metadataResult result: MetadataParser.Result) {
-            if result.fileCommands.contains(.ignoreAll) {
+        // The index store does not provide type information, thus we use the declared type information from the source
+        // file. This type information may be used during anlysis.
+        private func identifyDeclaredPropertyTypes(for decls: [Declaration], using metadataByLocation: [SourceLocation: PropertyMetadataVisitor.Result]) {
+            for decl in decls {
+                guard let metadata = metadataByLocation[decl.location] else {
+                    logger.debug("Failed to identify property declaration at '\(decl.location)'.")
+                    continue
+                }
+
+                graph.mutating {
+                    decl.declaredType = metadata.type
+                }
+            }
+        }
+
+        private func applyCommentCommands(for decls: [Declaration], parser: MultiplexingParser) {
+            let fileCommands = CommentCommand.parseCommands(in: parser.syntax.leadingTrivia)
+
+            if fileCommands.contains(.ignoreAll) {
                 retainHierarchy(decls)
             } else {
                 for decl in decls {
@@ -332,21 +353,12 @@ public final class SwiftIndexer {
             }
         }
 
-        private func identifyMetadata(
-            for decls: [Declaration],
-            syntax: SourceFileSyntax,
-            locationConverter: SourceLocationConverter
-        ) throws -> MetadataParser.Result {
+        private func applyDeclarationMetadata(for decls: [Declaration], using metadatas: [DeclarationMetadataVisitor.Result]) {
             let declsByLocation = decls.reduce(into: [SourceLocation: [Declaration]]()) { (result, decl) in
                 result[decl.location, default: []].append(decl)
             }
 
-            let result = try MetadataParser.parse(
-                file: file,
-                syntax: syntax,
-                locationConverter: locationConverter)
-
-            for metadata in result.metadata {
+            for metadata in metadatas {
                 guard let decls = declsByLocation[metadata.location] else {
                     // The declaration may not exist if the code was not compiled due to build conditions, e.g #if.
                     logger.debug("[index:swift] Expected declaration at \(metadata.location)")
@@ -363,8 +375,6 @@ public final class SwiftIndexer {
                     decl.commentCommands = Set(metadata.commentCommands)
                 }
             }
-
-            return result
         }
 
         private func retainHierarchy(_ decls: [Declaration]) {
@@ -375,18 +385,30 @@ public final class SwiftIndexer {
             }
         }
 
-        private func identifyUnusedParameters(
-            for decls: [Declaration],
-            syntax: SourceFileSyntax,
-            locationConverter: SourceLocationConverter
-        ) throws {
+        private func associate(_ ref: Reference, with decl: Declaration) {
+            graph.mutating {
+                associateUnsafe(ref, with: decl)
+            }
+        }
+
+        private func associateUnsafe(_ ref: Reference, with decl: Declaration) {
+            ref.parent = decl
+
+            if ref.isRelated {
+                decl.related.insert(ref)
+            } else {
+                decl.references.insert(ref)
+            }
+        }
+
+        private func identifyUnusedParameters(for decls: [Declaration], parser: MultiplexingParser) {
             let functionDelcsByLocation = decls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
 
             let analyzer = UnusedParameterAnalyzer()
-            let paramsByFunction = try analyzer.analyze(
+            let paramsByFunction = analyzer.analyze(
                 file: file,
-                syntax: syntax,
-                locationConverter: locationConverter,
+                syntax: parser.syntax,
+                locationConverter: parser.locationConverter,
                 parseProtocols: true)
 
             for (function, params) in paramsByFunction {

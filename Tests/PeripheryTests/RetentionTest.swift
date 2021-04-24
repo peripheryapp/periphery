@@ -776,11 +776,20 @@ class RetentionTest: SourceGraphTestCase {
     func testRetainsAssignOnlyPropertyTypes() {
         let configuration = inject(Configuration.self)
         configuration.retainAssignOnlyProperties = false
-        configuration.retainAssignOnlyPropertyTypes = ["CustomType"]
+        configuration.retainAssignOnlyPropertyTypes = ["CustomType", "(CustomType, String)", "Swift.Double"]
 
         analyze(retainPublic: true) {
-            XCTAssertReferenced((.varInstance, "retainedAssignOnlyProperty"))
-            XCTAssertNotReferenced((.varInstance, "notRetainedAssignOnlyProperty"))
+            XCTAssertReferenced((.varInstance, "retainedSimpleProperty"))
+            XCTAssertReferenced((.varInstance, "retainedModulePrefixedProperty"))
+            XCTAssertReferenced((.varInstance, "retainedTupleProperty"))
+            XCTAssertReferenced((.varInstance, "retainedDestructuredPropertyA"))
+            XCTAssertReferenced((.varInstance, "retainedMultipleBindingPropertyA"))
+
+            XCTAssertNotReferenced((.varInstance, "notRetainedSimpleProperty"))
+            XCTAssertNotReferenced((.varInstance, "notRetainedModulePrefixedProperty"))
+            XCTAssertNotReferenced((.varInstance, "notRetainedTupleProperty"))
+            XCTAssertNotReferenced((.varInstance, "notRetainedDestructuredPropertyB"))
+            XCTAssertNotReferenced((.varInstance, "notRetainedMultipleBindingPropertyB"))
         }
     }
 

@@ -9,8 +9,8 @@ final class UnusedParameterAnalyzer {
         case shadowed
     }
 
-    func analyze(file: Path, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) throws -> [Function: Set<Parameter>] {
-        let functions = try UnusedParameterParser.parse(
+    func analyze(file: Path, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) -> [Function: Set<Parameter>] {
+        let functions = UnusedParameterParser.parse(
             file: file,
             syntax: syntax,
             locationConverter: locationConverter,

@@ -128,20 +128,20 @@ struct UnusedParameterParser {
         syntax: SourceFileSyntax,
         locationConverter: SourceLocationConverter,
         parseProtocols: Bool
-    ) throws -> [Function] {
+    ) -> [Function] {
         let parser = self.init(
             file: file,
             syntax: syntax,
             locationConverter: locationConverter,
             parseProtocols: parseProtocols
         )
-        return try parser.parse()
+        return parser.parse()
     }
 
     static func parse(file: Path, parseProtocols: Bool) throws -> [Function] {
         let syntax = try SyntaxParser.parse(file.url)
         let locationConverter = SourceLocationConverter(file: file.string, tree: syntax)
-        return try parse(
+        return parse(
             file: file,
             syntax: syntax,
             locationConverter: locationConverter,
@@ -156,7 +156,7 @@ struct UnusedParameterParser {
         self.parseProtocols = parseProtocols
     }
 
-    func parse() throws -> [Function] {
+    func parse() -> [Function] {
         return parse(node: syntax, collecting: Function.self)
     }
 
