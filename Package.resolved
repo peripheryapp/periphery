@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/kateinoigakukun/swift-indexstore",
         "state": {
           "branch": null,
-          "revision": "8687e14e3cea5f7909d71ffd4e8d9bd351aa9794",
-          "version": "0.1.2"
+          "revision": "b41ed32f4ee85ac4621e817bc68a0ce39bd7da99",
+          "version": "0.1.3"
         }
       },
       {
@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/apple/swift-syntax",
         "state": {
           "branch": null,
-          "revision": "844574d683f53d0737a9c6d706c3ef31ed2955eb",
-          "version": "0.50300.0"
+          "revision": "2fff9fc25cdc059379b6bd309377cfab45d8520c",
+          "version": "0.50400.0"
         }
       },
       {
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/tuist/xcodeproj",
         "state": {
           "branch": null,
-          "revision": "6943d5c5f9085d070dbde3c669144e30d41ec635",
-          "version": "7.20.0"
+          "revision": "94e55232d227f9d78b811c98cb2e5d0cbd08987b",
+          "version": "7.22.0"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/jpsim/Yams",
         "state": {
           "branch": null,
-          "revision": "4ec0a3c5d6a2446667a2b22c8c7d0fc82dd1d3de",
-          "version": "4.0.5"
+          "revision": "9ff1cc9327586db4e0c8f46f064b6a82ec1566fa",
+          "version": "4.0.6"
         }
       }
     ]
