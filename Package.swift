@@ -14,7 +14,7 @@ dependencies.append(
     .package(
         name: "SwiftSyntax",
         url: "https://github.com/apple/swift-syntax",
-        .branch("release/5.4")
+        .exact("0.50400.0")
     )
 )
 #elseif swift(>=5.3)
