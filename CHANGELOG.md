@@ -9,6 +9,7 @@
 - Add arm64 support.
 - Add `--retain-assign-only-property-types` option to retain assign-only properties based on their type.
 - Declarations in an entry point file (e.g main.swift) are no longer blindly retained, even if unused.
+- Additional arguments passed to xcodebuild can how override the default set of environment based arguments.
 
 ##### Bug Fixes
 

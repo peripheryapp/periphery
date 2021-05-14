@@ -29,24 +29,20 @@ public final class Xcodebuild: Injectable {
     @discardableResult
     func build(project: XcodeProjectlike, scheme: XcodeScheme, allSchemes: [XcodeScheme], additionalArguments: [String] = [], buildForTesting: Bool = false) throws -> String {
         let cmd = buildForTesting ? "build-for-testing" : "build"
-
-        var args = [
+        let args = [
             "-\(project.type)", "'\(project.path.absolute().string)'",
             "-scheme", "'\(scheme.name)'",
             "-parallelizeTargets",
             "-derivedDataPath", "'\(try derivedDataPath(for: project, schemes: allSchemes).string)'",
             "-quiet"
         ]
-
-        args.append(contentsOf: additionalArguments)
-
         let envs = [
             "CODE_SIGNING_ALLOWED=\"NO\"",
             "ENABLE_BITCODE=\"NO\"",
             "DEBUG_INFORMATION_FORMAT=\"dwarf\""
         ]
 
-        let xcodebuild = "xcodebuild \((args + [cmd] + envs).joined(separator: " "))"
+        let xcodebuild = "xcodebuild \((args + [cmd] + envs + additionalArguments).joined(separator: " "))"
         return try shell.exec(["/bin/sh", "-c", xcodebuild])
     }
 
