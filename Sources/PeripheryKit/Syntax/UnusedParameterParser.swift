@@ -64,7 +64,7 @@ final class Parameter: Item, Hashable {
 
     var declaration: Declaration {
         let functionName = function?.fullName ?? "func()"
-        let usr = "\(functionName)-\(name)-\(location.line)-\(location.column)"
+        let usr = "\(functionName)-\(name)-\(location)"
         let decl = Declaration(kind: .varParameter, usrs: [usr], location: location)
         decl.name = name
         return decl

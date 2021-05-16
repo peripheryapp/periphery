@@ -14,6 +14,7 @@
 ##### Bug Fixes
 
 - Fix issue where protocol property references could be incorrectly associated with the getter/setter rather than the property itself, leading to erroneous results.
+- Fix unused parameter false positive result for identical function signatures at the same location in different files.
 
 ## 2.4.3 (2021-03-05)
 
