@@ -81,7 +81,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
         let relatedReferences = graph.allReferences.filter { $0.isRelated }
 
         for relatedReference in relatedReferences.subtracting(nonInvertableReferences) {
-            guard let conformingDeclaration = relatedReference.parent as? Declaration,
+            guard let conformingDeclaration = relatedReference.parent,
                   let equivalentDeclarationKind = relatedReference.kind.declarationEquivalent
             else { continue }
 

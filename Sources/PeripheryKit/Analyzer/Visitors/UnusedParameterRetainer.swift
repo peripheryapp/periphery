@@ -16,7 +16,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
 
     func visit() throws {
         let paramDecls = graph.declarations(ofKind: .varParameter)
-        let functionDecls: Set<Declaration> = Set(paramDecls.compactMap { $0.parent as? Declaration })
+        let functionDecls: Set<Declaration> = Set(paramDecls.compactMap { $0.parent })
 
         for functionDecl in functionDecls {
             retainIfNeeded(params: functionDecl.unusedParameters, inMethod: functionDecl)
@@ -59,7 +59,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
     private func retainIfNeeded(params: Set<Declaration>, inMethod methodDeclaration: Declaration) {
         let allMethodDeclarations: [Declaration]
 
-        if let classDeclaration = methodDeclaration.parent as? Declaration, classDeclaration.kind == .class {
+        if let classDeclaration = methodDeclaration.parent, classDeclaration.kind == .class {
             let allClassDeclarations = [classDeclaration]
                 + graph.superclasses(of: classDeclaration)
                 + graph.subclasses(of: classDeclaration)

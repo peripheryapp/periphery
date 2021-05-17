@@ -46,7 +46,7 @@ open class SourceGraphTestCase: XCTestCase {
 
         switch declaration.analyzerHint {
         case let .redundantProtocol(references):
-            let decls = references.compactMap { $0.parent as? Declaration }
+            let decls = references.compactMap { $0.parent }
 
             for conformance in conformances {
                 if !decls.contains(where: { $0.kind == conformance.kind && $0.name == conformance.name }) {

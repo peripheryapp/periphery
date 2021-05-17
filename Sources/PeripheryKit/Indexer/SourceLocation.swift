@@ -54,3 +54,17 @@ extension SourceLocation: CustomStringConvertible {
         return shortDescriptionInternal
     }
 }
+
+extension SourceLocation: Comparable {
+    public static func < (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
+        if lhs.file == rhs.file {
+            if lhs.line == rhs.line {
+                return lhs.column < rhs.column
+            }
+
+            return lhs.line < rhs.line
+        }
+
+        return lhs.file < rhs.file
+    }
+}

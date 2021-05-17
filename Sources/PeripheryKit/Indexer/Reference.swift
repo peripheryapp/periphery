@@ -1,4 +1,4 @@
-public final class Reference: Entity {
+public final class Reference {
     public enum Kind: String {
         case `associatedtype` = "associatedtype"
         case `class` = "class"
@@ -65,8 +65,7 @@ public final class Reference: Entity {
     public let location: SourceLocation
     public let kind: Kind
     public var name: String?
-    public var parent: Entity?
-    public var declarations: Set<Declaration> = []
+    public var parent: Declaration?
     public var references: Set<Reference> = []
     public let usr: String
 
@@ -80,16 +79,6 @@ public final class Reference: Entity {
 
     var descendentReferences: Set<Reference> {
         Set(references.flatMap { $0.descendentReferences }).union(references)
-    }
-
-    var ancestralDeclaration: Declaration? {
-        if let parent = parent as? Reference {
-            return parent.ancestralDeclaration
-        } else if let parent = parent as? Declaration {
-            return parent
-        }
-
-        return nil
     }
 }
 
@@ -122,5 +111,11 @@ extension Reference: CustomStringConvertible {
         let formattedName = name != nil ? "'\(name!)'" : "nil"
 
         return [kind.rawValue, formattedName, "'\(usr)'", location.shortDescription]
+    }
+}
+
+extension Reference: Comparable {
+    public static func < (lhs: Reference, rhs: Reference) -> Bool {
+        lhs.location < rhs.location
     }
 }

@@ -1,7 +1,7 @@
 import Foundation
 import PathKit
 
-public final class Declaration: Entity, CustomStringConvertible {
+public final class Declaration {
     public enum Kind: String, RawRepresentable, CaseIterable {
         case `associatedtype` = "associatedtype"
         case `class` = "class"
@@ -162,21 +162,18 @@ public final class Declaration: Entity, CustomStringConvertible {
     public var references: Set<Reference> = []
     public var declaredType: String?
 
-    public var parent: Entity?
+    public var parent: Declaration?
     var related: Set<Reference> = []
     var isImplicit: Bool = false
     var isObjcAccessible: Bool = false
 
     var ancestralDeclarations: Set<Declaration> {
-        var entity: Entity? = parent
+        var maybeParent = parent
         var declarations: Set<Declaration> = []
 
-        while let thisEntity = entity {
-            if let declaration = thisEntity as? Declaration {
-                declarations.insert(declaration)
-            }
-
-            entity = thisEntity.parent
+        while let thisParent = maybeParent {
+            declarations.insert(thisParent)
+            maybeParent = thisParent.parent
         }
 
         return declarations
@@ -209,11 +206,36 @@ public final class Declaration: Entity, CustomStringConvertible {
         }
     }
 
+    init(kind: Kind, usrs: Set<String>, location: SourceLocation) {
+        self.kind = kind
+        self.usrs = usrs
+        self.location = location
+    }
+
+    func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {
+        guard let parent = parent else { return false }
+        return parent.kind == kind
+    }
+}
+
+extension Declaration: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(usrs)
+    }
+}
+
+extension Declaration: Equatable {
+    public static func == (lhs: Declaration, rhs: Declaration) -> Bool {
+        lhs.usrs == rhs.usrs
+    }
+}
+
+extension Declaration: CustomStringConvertible {
     public var description: String {
         "Declaration(\(descriptionParts.joined(separator: ", ")))"
     }
 
-    public var descriptionParts: [String] {
+    private var descriptionParts: [String] {
         let formattedName = name != nil ? "'\(name!)'" : "nil"
         let formattedAttributes = "[" + attributes.sorted().joined(separator: ", ") + "]"
         let formattedModifiers = "[" + modifiers.sorted().joined(separator: ", ") + "]"
@@ -230,27 +252,10 @@ public final class Declaration: Entity, CustomStringConvertible {
                 formattedUsrs,
                 location.shortDescription]
     }
-
-    init(kind: Kind, usrs: Set<String>, location: SourceLocation) {
-        self.kind = kind
-        self.usrs = usrs
-        self.location = location
-    }
-
-    func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {
-        guard let parent = parent as? Declaration else { return false }
-        return parent.kind == kind
-    }
 }
 
-extension Declaration: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(usrs)
-    }
-}
-
-extension Declaration: Equatable {
-    public static func == (lhs: Declaration, rhs: Declaration) -> Bool {
-        lhs.usrs == rhs.usrs
+extension Declaration: Comparable {
+    public static func < (lhs: Declaration, rhs: Declaration) -> Bool {
+        lhs.location < rhs.location
     }
 }

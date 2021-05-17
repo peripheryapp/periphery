@@ -19,7 +19,7 @@ final class ComplexPropertyAccessorReferenceBuilder: SourceGraphVisitor {
         let declarations = Declaration.Kind.accessorKinds.flatMap { graph.declarations(ofKind: $0) }
 
         for declaration in declarations {
-            guard let parent = declaration.parent as? Declaration,
+            guard let parent = declaration.parent,
                 let kind = declaration.kind.referenceEquivalent else { continue }
 
             if parent.isComplexProperty {

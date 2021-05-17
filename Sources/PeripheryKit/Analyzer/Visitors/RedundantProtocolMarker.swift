@@ -51,7 +51,7 @@ final class RedundantProtocolMarker: SourceGraphVisitor {
             let protocolReferences = graph.references(to: protocolDecl)
 
             let areAllReferencesConformances = protocolReferences.allSatisfy { reference in
-                guard reference.isRelated, let parent = reference.parent as? Declaration else {
+                guard reference.isRelated, let parent = reference.parent else {
                     return false
                 }
 

@@ -142,14 +142,10 @@ public final class SourceGraph {
             allReferencesByUsr[reference.usr]?.remove(reference)
         }
 
-        if let parent = reference.parent as? Declaration {
+        if let parent = reference.parent {
             mutationQueue.sync {
                 parent.references.remove(reference)
                 parent.related.remove(reference)
-            }
-        } else if let parent = reference.parent as? Reference {
-            _ = mutationQueue.sync {
-                parent.references.remove(reference)
             }
         }
     }

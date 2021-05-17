@@ -29,7 +29,7 @@ final class ExternalTypeProtocolConformanceReferenceRemover: SourceGraphVisitor 
                 // Ensure the relatedDecl is a member of a protocol.
                 guard
                     let relatedDecl = graph.explicitDeclaration(withUsr: relatedRef.usr),
-                    let parentDecl = relatedDecl.parent as? Declaration,
+                    let parentDecl = relatedDecl.parent,
                     protocolDecls.contains(parentDecl)
                 else { continue  }
 

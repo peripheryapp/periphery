@@ -32,7 +32,7 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphVisitor {
                 // extension.
                 for memberDeclaration in extensionDeclaration.declarations {
                     for reference in graph.references(to: memberDeclaration) {
-                        if let parentDeclaration = reference.ancestralDeclaration {
+                        if let parentDeclaration = reference.parent {
                             for usr in extensionDeclaration.usrs {
                                 let extensionReference = Reference(kind: .extensionProtocol, usr: usr, location: reference.location)
                                 extensionReference.name = extensionDeclaration.name
