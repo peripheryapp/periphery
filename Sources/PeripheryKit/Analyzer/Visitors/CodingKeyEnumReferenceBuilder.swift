@@ -23,7 +23,7 @@ final class CodingKeyEnumReferenceBuilder: SourceGraphVisitor {
 
     func visit() {
         for enumDeclaration in graph.declarations(ofKind: .enum) {
-            guard let parent = enumDeclaration.parent as? Declaration else { continue }
+            guard let parent = enumDeclaration.parent else { continue }
 
             let isCodingKey = graph.superclassReferences(of: enumDeclaration).contains {
                 $0.kind == .protocol && $0.name == "CodingKey"

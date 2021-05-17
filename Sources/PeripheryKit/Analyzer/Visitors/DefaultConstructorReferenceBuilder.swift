@@ -24,7 +24,7 @@ final class DefaultConstructorReferenceBuilder: SourceGraphVisitor {
         }
 
         defaultConstructors.forEach { constructor in
-            if let parent = constructor.parent as? Declaration {
+            if let parent = constructor.parent {
                 for usr in constructor.usrs {
                     let reference = Reference(kind: .functionConstructor,
                                               usr: usr,
@@ -39,7 +39,7 @@ final class DefaultConstructorReferenceBuilder: SourceGraphVisitor {
 
     private func referenceDestructors() {
         graph.declarations(ofKind: .functionDestructor).forEach { destructor in
-            if let parent = destructor.parent as? Declaration {
+            if let parent = destructor.parent {
                 for usr in destructor.usrs {
                     let reference = Reference(kind: .functionDestructor,
                                               usr: usr,

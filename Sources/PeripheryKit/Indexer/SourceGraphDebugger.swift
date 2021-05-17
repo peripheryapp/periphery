@@ -10,37 +10,51 @@ public final class SourceGraphDebugger {
     }
 
     public func describeGraph() {
-        var entities: [Entity] = graph.rootDeclarations.map { $0 as Entity }
-        entities += graph.rootReferences.map { $0 as Entity }
-        describe(sort(entities))
+        describe(graph.rootDeclarations.sorted())
+        describe(graph.rootReferences.sorted())
     }
 
-    func describe(_ entities: [Entity]) {
-        for (index, entity) in entities.enumerated() {
-            describe(entity)
+    // MARK: - Private
 
-            if index != entities.count - 1 {
+    private func describe(_ declarations: [Declaration]) {
+        for (index, declaration) in declarations.enumerated() {
+            describe(declaration)
+
+            if index != declarations.count - 1 {
                 print("")
             }
         }
     }
 
-    func describe(_ entity: Entity, depth: Int = 0) {
-        let inset = String(repeating: "··", count: depth)
-        print(inset + entity.description)
+    private func describe(_ references: [Reference]) {
+        for (index, reference) in references.enumerated() {
+            describe(reference)
 
-        for reference in sort(Array(entity.references)) {
+            if index != references.count - 1 {
+                print("")
+            }
+        }
+    }
+
+    private func describe(_ declaration: Declaration, depth: Int = 0) {
+        let inset = String(repeating: "··", count: depth)
+        print(inset + declaration.description)
+
+        for reference in declaration.references.sorted() {
             describe(reference, depth: depth + 1)
         }
 
-        if let declaration = entity as? Declaration {
-            for reference in sort(Array(declaration.related)) {
-                describe(reference, depth: depth + 1)
-            }
-        }
-
-        for declaration in sort(Array(entity.declarations)) {
+        for declaration in declaration.declarations.sorted() {
             describe(declaration, depth: depth + 1)
+        }
+    }
+
+    private func describe(_ reference: Reference, depth: Int = 0) {
+        let inset = String(repeating: "··", count: depth)
+        print(inset + reference.description)
+
+        for reference in reference.references.sorted() {
+            describe(reference, depth: depth + 1)
         }
     }
 }
@@ -59,14 +73,4 @@ final class SourceGraphDebuggerVisitor: SourceGraphVisitor {
     func visit() {
         debugger.describeGraph()
     }
-}
-
-private func sort(_ entities: [Entity]) -> [Entity] {
-    return entities.sorted(by: {
-        if $0.location.file == $1.location.file {
-            return $0.location.line < $1.location.line
-        }
-
-        return $0.location.file < $1.location.file
-    })
 }
