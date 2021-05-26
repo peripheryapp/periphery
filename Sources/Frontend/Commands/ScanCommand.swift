@@ -3,8 +3,8 @@ import ArgumentParser
 import PathKit
 import Shared
 
-public struct ScanCommand: ParsableCommand {
-    public static let configuration = CommandConfiguration(
+struct ScanCommand: ParsableCommand {
+    static let configuration = CommandConfiguration(
         commandName: "scan",
         abstract: "Scan for unused code"
     )
@@ -45,6 +45,9 @@ public struct ScanCommand: ParsableCommand {
     @Flag(help: "Retain all public declarations - you'll likely want to enable this if you're scanning a framework/library project")
     var retainPublic: Bool = false
 
+    @Flag(help: "Disable identification of redundant public accessibility")
+    var disableRedundantPublicAnalysis: Bool = false
+
     @Flag(help: "Retain properties that are assigned, but never used")
     var retainAssignOnlyProperties: Bool = false
 
@@ -75,9 +78,7 @@ public struct ScanCommand: ParsableCommand {
     @Flag(help: "Only output results")
     var quiet: Bool = false
 
-    public init() {}
-
-    public func run() throws {
+    func run() throws {
         let scanBehavior = ScanBehavior.make()
 
         try scanBehavior.setup(config).get()
@@ -140,6 +141,10 @@ public struct ScanCommand: ParsableCommand {
             configuration.retainUnusedProtocolFuncParams = retainUnusedProtocolFuncParams
         }
 
+        if isExplicit("disable-redundant-public-analysis") {
+            configuration.disableRedundantPublicAnalysis = disableRedundantPublicAnalysis
+        }
+
         if isExplicit("skip-build") {
             configuration.skipBuild = skipBuild
         }
@@ -170,6 +175,8 @@ public struct ScanCommand: ParsableCommand {
             try Scan.make().perform(project: project)
         }.get()
     }
+
+    // MARK: - Private
 
     private func isExplicit(_ arg: String) -> Bool {
         CommandLine.arguments.contains { $0.hasSuffix(arg) }

@@ -2,33 +2,34 @@ import Foundation
 import Shared
 import PeripheryKit
 
-public final class CsvFormatter: OutputFormatter {
-    public static func make() -> Self {
+final class CsvFormatter: OutputFormatter {
+    static func make() -> Self {
         return self.init(logger: inject())
     }
 
     private let logger: Logger
 
-    required public init(logger: Logger) {
+    required init(logger: Logger) {
         self.logger = logger
     }
 
-    public func perform(_ declarations: [Declaration]) {
+    func perform(_ results: [ScanResult]) {
         logger.info("Kind,Name,Modifiers,Attributes,Accessibility,IDs,Location,Hints", canQuiet: false)
 
-        for decl in declarations {
+        for result in results {
             let line = format(
-                kind: decl.kind.rawValue,
-                name: decl.name,
-                modifiers: decl.modifiers,
-                attributes: decl.attributes,
-                accessibility: decl.accessibility.value.rawValue,
-                usrs: decl.usrs,
-                location: decl.location,
-                hint: describe(decl.analyzerHint))
+                kind: result.declaration.kind.rawValue,
+                name: result.declaration.name,
+                modifiers: result.declaration.modifiers,
+                attributes: result.declaration.attributes,
+                accessibility: result.declaration.accessibility.value.rawValue,
+                usrs: result.declaration.usrs,
+                location: result.declaration.location,
+                hint: describe(result.annotation)
+            )
             logger.info(line, canQuiet: false)
 
-            switch decl.analyzerHint {
+            switch result.annotation {
             case let .redundantProtocol(references: references):
                 for ref in references {
                     let line = format(

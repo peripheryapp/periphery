@@ -10,7 +10,7 @@ public final class Xcodebuild: Injectable {
         return self.init(shell: inject())
     }
 
-    required public init(shell: Shell) {
+    required init(shell: Shell) {
         self.shell = shell
     }
 

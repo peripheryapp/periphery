@@ -1376,8 +1376,8 @@ class RetentionTest: SourceGraphTestCase {
         let newFixtureTarget = SPM.Target(
             name: Self.fixtureTarget.name,
             path: Self.fixtureTarget.path,
-            sources: [testFixturePath.string],
-            moduleType: Self.fixtureTarget.moduleType)
+            moduleType: Self.fixtureTarget.moduleType,
+            sources: [testFixturePath.string])
 
         Self.driver.setTargets([newFixtureTarget])
 

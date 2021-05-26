@@ -1,6 +1,6 @@
 import Foundation
 
-public final class Injector {
+private final class Injector {
     private static let singletonQueueSpecificKey = DispatchSpecificKey<Void>()
     private static var singletonQueue: DispatchQueue = {
         let queue = DispatchQueue(label: "Injector.singletonQueue")

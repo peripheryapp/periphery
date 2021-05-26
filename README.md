@@ -24,6 +24,7 @@
   - [Protocols](#protocols-1)
   - [Enumerations](#enumerations)
   - [Assign-only Properties](#assign-only-properties)
+  - [Redundant Public Accessibility](#redundant-public-accessibility)
   - [Objective-C](#objective-c)
 - [Comment Commands](#comment-commands)
 - [Xcode Integration](#xcode-integration)
@@ -118,7 +119,7 @@ Once indexing is complete, Periphery analyzes the graph to identify unused code.
 
 The goal of Periphery is to report instances of unused _declarations_. A declaration is a `class`, `struct`, `protocol`, `function`, `property`, `constructor`, `enum`, `typealias`, `associatedtype`, etc. As you'd expect, Periphery is able to identify simple unreferenced declarations, e.g a `class` that is no longer used anywhere in your codebase.
 
-Periphery can also identify more advanced instanced of unused code. The following section explains these in detail.
+Periphery can also identify more advanced instances of unused code. The following section explains these in detail.
 
 ### Function Parameters
 
@@ -299,6 +300,14 @@ class MyClass {
 ```
 
 In some cases this may be the intended behavior, so to silence these results you can either disable this analysis technique entirely with `--retain-assign-only-properties`, or ignore individual properties using [Comment Commands](#comment-commands).
+
+### Redundant Public Accessibility
+
+Declarations that are marked `public` yet are not referenced from outside their home module, are identified as having redundant public accessibility. In this scenario, the `public` annotation can be removed from the declaration. Removing redundant public accessibility has a couple of benefits:
+* It helps reduce the public surface area of your modules.
+* In [Whole Module Compilation](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#whole-module-optimizations-wmo) mode, Swift can infer `final` by [automatically discovering](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-if-wmo-is-enabled-use-internal-when-a-declaration-does-not-need-to-be-accessed-outside-of-module) all potentially overriding declarations. `final` classes are [better optimized](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-use-final-when-you-know-the-declaration-does-not-need-to-be-overridden) by the compiler.
+
+This analysis can be disabled with `--disable-redundant-public-analysis`.
 
 ### Objective-C
 

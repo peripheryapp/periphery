@@ -2,28 +2,28 @@ import Foundation
 import Shared
 import PeripheryKit
 
-public final class XcodeFormatter: OutputFormatter {
-    public static func make() -> Self {
+final class XcodeFormatter: OutputFormatter {
+    static func make() -> Self {
         return self.init(logger: inject())
     }
 
     private let logger: Logger
 
-    required public init(logger: Logger) {
+    required init(logger: Logger) {
         self.logger = logger
     }
 
-    public func perform(_ declarations: [Declaration]) throws {
-        guard declarations.count > 0 else {
+    func perform(_ results: [ScanResult]) throws {
+        guard results.count > 0 else {
             logger.info(colorize("* ", .boldGreen) + colorize("No unused code detected.", .bold))
             return
         }
 
-        for decl in declarations {
-            let results = describeResults(for: decl, colored: true)
+        for result in results {
+            let descriptions = describe(result, colored: true)
 
-            for (location, result) in results {
-                let line = prefix(for: location) + result
+            for (location, description) in descriptions {
+                let line = prefix(for: location) + description
                 logger.info(line, canQuiet: false)
             }
         }
@@ -32,7 +32,7 @@ public final class XcodeFormatter: OutputFormatter {
     // MARK: - Private
 
     private func prefix(for location: SourceLocation) -> String {
-        let absPath = location.file.absolute()
+        let absPath = location.file.path.absolute()
         let path = absPath.components.dropLast().joined(separator: "/").dropFirst()
         let file = colorize(absPath.lastComponentWithoutExtension, .bold)
         let ext = absPath.extension ?? "swift"

@@ -37,7 +37,7 @@ final class RedundantProtocolMarker: SourceGraphVisitor {
                 .filter { $0.kind == .extensionProtocol }
                 .compactMap { self.graph.explicitDeclaration(withUsr: $0.usr) }
                 .flatMap { $0.declarations }
-                .allSatisfy({ unreachableDeclarations.contains($0) })
+                .allSatisfy { unreachableDeclarations.contains($0) }
 
             guard areAllExtensionsMembersUnused else { continue }
 
@@ -55,13 +55,12 @@ final class RedundantProtocolMarker: SourceGraphVisitor {
                     return false
                 }
 
-                return parent.kind.isConformingKind
+                return parent.kind.isConformableKind
             }
 
             if areAllReferencesConformances {
                 // The protocol is redundant.
-                protocolDecl.analyzerHint = .redundantProtocol(references: protocolReferences)
-                graph.markRedundant(protocolDecl)
+                graph.markRedundantProtocol(protocolDecl, references: protocolReferences)
                 protocolDecl.declarations.forEach { graph.markIgnored($0) }
             }
         }

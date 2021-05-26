@@ -2,7 +2,7 @@ import Foundation
 import PathKit
 import PeripheryKit
 
-public protocol XcodeProjectlike: AnyObject {
+protocol XcodeProjectlike: AnyObject {
     var path: Path { get }
     var targets: Set<XcodeTarget> { get } // Set to ensure uniqueness
     var type: String { get }
@@ -12,7 +12,7 @@ public protocol XcodeProjectlike: AnyObject {
     func schemes() throws -> Set<XcodeScheme> // Set to ensure uniqueness
 }
 
-public extension XcodeProjectlike {
+extension XcodeProjectlike {
     var name: String {
         return path.lastComponentWithoutExtension
     }

@@ -29,7 +29,7 @@ final class ScanBehavior {
         return .success(())
     }
 
-    func main(_ block: (Project) throws -> ScanResult) -> Result<(), PeripheryError> {
+    func main(_ block: (Project) throws -> [ScanResult]) -> Result<(), PeripheryError> {
         if configuration.guidedSetup {
             do {
                 try GuidedSetup().perform()
@@ -54,15 +54,15 @@ final class ScanBehavior {
         let updateChecker = UpdateChecker.make()
         updateChecker.run()
 
-        let result: ScanResult
+        let results: [ScanResult]
 
         do {
-            result = try block(project)
-            let filteredDeclarations = OutputDeclarationFilter.make().filter(result.declarations)
-            let sortedDeclarations = DeclarationSorter.sort(filteredDeclarations)
-            try configuration.outputFormat.formatter.make().perform(sortedDeclarations)
+            results = try block(project)
+            let filteredResults = OutputDeclarationFilter.make().filter(results)
+            let sortedResults = filteredResults.sorted { $0.declaration < $1.declaration }
+            try configuration.outputFormat.formatter.make().perform(sortedResults)
 
-            if filteredDeclarations.count > 0,
+            if filteredResults.count > 0,
                 configuration.outputFormat.supportsAuxiliaryOutput {
                 logger.info(
                     colorize("\n* ", .boldGreen) +
@@ -88,8 +88,8 @@ final class ScanBehavior {
 
             updateChecker.notifyIfAvailable()
 
-            if !filteredDeclarations.isEmpty && configuration.strict {
-                throw PeripheryError.foundIssues(count: filteredDeclarations.count)
+            if !filteredResults.isEmpty && configuration.strict {
+                throw PeripheryError.foundIssues(count: filteredResults.count)
             }
         } catch let error as PeripheryError {
             return .failure(error)

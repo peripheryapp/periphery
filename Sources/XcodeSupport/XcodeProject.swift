@@ -4,10 +4,10 @@ import PathKit
 import PeripheryKit
 import Shared
 
-public final class XcodeProject: XcodeProjectlike {
+final class XcodeProject: XcodeProjectlike {
     private static var cache: [Path: XcodeProject] = [:]
 
-    public static func tryMake(path: Path, referencedBy refPath: Path) throws -> XcodeProject? {
+    static func tryMake(path: Path, referencedBy refPath: Path) throws -> XcodeProject? {
         if !path.exists {
             let logger: Logger = inject()
             logger.warn("No such project exists at '\(path.absolute())', referenced by '\(refPath)'.")
@@ -17,11 +17,11 @@ public final class XcodeProject: XcodeProjectlike {
         return try make(path: path)
     }
 
-    public static func make(path: String) throws -> XcodeProject {
+    static func make(path: String) throws -> XcodeProject {
         return try make(path: Path(path))
     }
 
-    public static func make(path: Path) throws -> XcodeProject {
+    static func make(path: Path) throws -> XcodeProject {
         if let cached = cache[path] {
             return cached
         }
@@ -29,17 +29,17 @@ public final class XcodeProject: XcodeProjectlike {
         return try self.init(path: path, xcodebuild: inject(), logger: inject())
     }
 
-    public let type: String = "project"
-    public let path: Path
-    public let sourceRoot: Path
-    public let xcodeProject: XcodeProj
-    public let name: String
+    let type: String = "project"
+    let path: Path
+    let sourceRoot: Path
+    let xcodeProject: XcodeProj
+    let name: String
 
     private let xcodebuild: Xcodebuild
 
-    private(set) public var targets: Set<XcodeTarget> = []
+    private(set) var targets: Set<XcodeTarget> = []
 
-    required public init(path: Path, xcodebuild: Xcodebuild, logger: Logger) throws {
+    required init(path: Path, xcodebuild: Xcodebuild, logger: Logger) throws {
         logger.debug("[xcode:project] Loading \(path)")
 
         self.path = path
@@ -71,7 +71,7 @@ public final class XcodeProject: XcodeProjectlike {
             + subProjects.flatMap { $0.targets })
     }
 
-    public func schemes() throws -> Set<XcodeScheme> {
+    func schemes() throws -> Set<XcodeScheme> {
         let schemes = try xcodebuild.schemes(project: self).map {
             try XcodeScheme.make(project: self, name: $0)
         }
@@ -80,13 +80,13 @@ public final class XcodeProject: XcodeProjectlike {
 }
 
 extension XcodeProject: Hashable {
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(path.absolute().string)
     }
 }
 
 extension XcodeProject: Equatable {
-    public static func == (lhs: XcodeProject, rhs: XcodeProject) -> Bool {
+    static func == (lhs: XcodeProject, rhs: XcodeProject) -> Bool {
         return lhs.path == rhs.path
     }
 }

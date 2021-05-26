@@ -1,0 +1,9 @@
+import Foundation
+
+public protocol PublicTypeUsedAsPublicClassGenericParameter_ProtocolA {}
+public protocol PublicTypeUsedAsPublicClassGenericParameter_ProtocolB {}
+public class PublicTypeUsedAsPublicClassGenericParameter_ConformingClass: PublicTypeUsedAsPublicClassGenericParameter_ProtocolA, PublicTypeUsedAsPublicClassGenericParameter_ProtocolB {}
+
+public class PublicTypeUsedAsPublicClassGenericParameterRetainer<T: PublicTypeUsedAsPublicClassGenericParameter_ProtocolA & PublicTypeUsedAsPublicClassGenericParameter_ProtocolB> {
+    public init() {}
+}

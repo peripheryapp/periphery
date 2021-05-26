@@ -15,6 +15,11 @@ jobs:
     runs-on: macOS-latest
     name: macOS
     steps:
+    - name: Get Swift Version
+      id: get-swift-version
+      run: |
+          echo "::set-output name=version::$(swift -version | head -n 1)"
+      shell: bash
     - uses: actions/checkout@master
     - name: Select Xcode version
       run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app; swift -version
@@ -23,9 +28,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: .build
-        key: ${{ env.cache_version }}-${{ runner.os }}-${{ matrix.xcode }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
+        key: ${{ env.cache_version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
-          ${{ env.cache_version }}-${{ runner.os }}-${{ matrix.xcode }}-spm-deps-
+          ${{ env.cache_version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: swift package resolve
@@ -44,15 +49,20 @@ jobs:
     container: swift:${{ matrix.swift }}
     name: Linux
     steps:
+    - name: Get Swift Version
+      id: get-swift-version
+      run: |
+        echo "::set-output name=version::$(swift -version | head -n 1)"
+      shell: bash
     - uses: actions/checkout@master
     - name: Cache resolved dependencies
       id: cache-resolved-dependencies
       uses: actions/cache@v2
       with:
         path: .build
-        key: ${{ env.cache_version }}-${{ runner.os }}-${{ matrix.swift }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
+        key: ${{ env.cache_version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-${{ hashFiles('**/Package.resolved') }}
         restore-keys: |
-          ${{ env.cache_version }}-${{ runner.os }}-${{ matrix.swift }}-spm-deps-
+          ${{ env.cache_version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: swift package resolve

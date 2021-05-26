@@ -3,8 +3,8 @@ import PathKit
 import Shared
 import PeripheryKit
 
-public final class Scan: Injectable {
-    public static func make() -> Self {
+final class Scan: Injectable {
+    static func make() -> Self {
         return self.init(configuration: inject(),
                          logger: inject())
     }
@@ -12,13 +12,12 @@ public final class Scan: Injectable {
     private let configuration: Configuration
     private let logger: Logger
 
-    public required init(configuration: Configuration,
-                         logger: Logger) {
+    required init(configuration: Configuration, logger: Logger) {
         self.configuration = configuration
         self.logger = logger
     }
 
-    public func perform(project: Project) throws -> ScanResult {
+    func perform(project: Project) throws -> [ScanResult] {
         logger.debug("[version] \(PeripheryVersion)")
         let configYaml = try configuration.asYaml()
         logger.debug("[configuration]\n--- # .periphery.yml\n\(configYaml.trimmed)\n")
@@ -45,10 +44,6 @@ public final class Scan: Injectable {
         }
 
         try Analyzer.perform(graph: graph)
-
-        let reducer = RedundantDeclarationReducer(declarations: graph.resultDeclarations)
-        let reducedDeclarations = reducer.reduce()
-
-        return ScanResult(declarations: reducedDeclarations, graph: graph)
+        return ScanResultBuilder.build(for: graph)
     }
 }

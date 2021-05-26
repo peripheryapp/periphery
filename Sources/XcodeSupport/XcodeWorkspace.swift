@@ -4,25 +4,25 @@ import PathKit
 import PeripheryKit
 import Shared
 
-public final class XcodeWorkspace: XcodeProjectlike {
-    public static func make(path: String) throws -> Self {
+final class XcodeWorkspace: XcodeProjectlike {
+    static func make(path: String) throws -> Self {
         return try self.init(path: path,
                              xcodebuild: inject(),
                              configuration: inject(),
                              logger: inject())
     }
 
-    public let type: String = "workspace"
-    public let path: Path
-    public let sourceRoot: Path
+    let type: String = "workspace"
+    let path: Path
+    let sourceRoot: Path
 
     private let xcodebuild: Xcodebuild
     private let configuration: Configuration
     private let xcworkspace: XCWorkspace
 
-    private(set) public var targets: Set<XcodeTarget> = []
+    private(set) var targets: Set<XcodeTarget> = []
 
-    required public init(path: String, xcodebuild: Xcodebuild, configuration: Configuration, logger: Logger) throws {
+    required init(path: String, xcodebuild: Xcodebuild, configuration: Configuration, logger: Logger) throws {
         logger.debug("[xcode:workspace] Loading \(path)")
 
         self.path = Path(path)
@@ -42,7 +42,7 @@ public final class XcodeWorkspace: XcodeProjectlike {
             .flatMap { $0.targets })
     }
 
-    public func schemes() throws -> Set<XcodeScheme> {
+    func schemes() throws -> Set<XcodeScheme> {
         let schemes = try xcodebuild.schemes(project: self).map {
             try XcodeScheme.make(project: self, name: $0)
         }
