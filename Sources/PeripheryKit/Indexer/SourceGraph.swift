@@ -2,13 +2,14 @@ import Foundation
 import Shared
 
 public final class SourceGraph {
-    private(set) var allDeclarations: Set<Declaration> = []
-    private(set) var reachableDeclarations: Set<Declaration> = []
+    private(set) public var allDeclarations: Set<Declaration> = []
+    private(set) public var reachableDeclarations: Set<Declaration> = []
+    private(set) public var redundantProtocols: [Declaration: Set<Reference>] = [:]
+
     private(set) var rootDeclarations: Set<Declaration> = []
     private(set) var rootReferences: Set<Reference> = []
     private(set) var allReferences: Set<Reference> = []
     private(set) var retainedDeclarations: Set<Declaration> = []
-    private(set) var redundantProtocols: [Declaration: Set<Reference>] = [:]
     private(set) var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
     private(set) var potentialAssignOnlyProperties: Set<Declaration> = []
     private(set) var ignoredDeclarations: Set<Declaration> = []
