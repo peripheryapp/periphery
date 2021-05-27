@@ -1,6 +1,6 @@
 import XCTest
 import PathKit
-@testable import PeripheryKit
+import PeripheryKit
 
 open class SourceGraphTestCase: XCTestCase {
     open var graph: SourceGraph!
