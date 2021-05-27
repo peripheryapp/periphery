@@ -622,7 +622,6 @@ public final class SwiftIndexer {
                         reference.name = baseFunc.name
                         reference.isRelated = true
 
-                        graph.add(reference)
                         self.referencedDeclsByUsr[occurrenceUsr, default: []].insert(reference)
                         refs.append(reference)
                     }
@@ -631,7 +630,9 @@ public final class SwiftIndexer {
                 return true
             }
 
-            refs.forEach { graph.add($0) }
+            graph.mutating {
+                refs.forEach { graph.addUnsafe($0) }
+            }
         }
 
         private func parseReference(
@@ -679,7 +680,9 @@ public final class SwiftIndexer {
                 danglingReferences.append(ref)
             }
 
-            refs.forEach { graph.add($0) }
+            graph.mutating {
+                refs.forEach { graph.addUnsafe($0) }
+            }
         }
 
         private func transformLocation(_ input: IndexStoreOccurrence.Location) -> SourceLocation? {
