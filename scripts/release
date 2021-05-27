@@ -20,7 +20,6 @@ green () {
 }
 
 signature="Developer ID Application: Ian Leitch (8L8F8HSTR4)"
-username="port001@gmail.com"
 password="@keychain:PeripheryNotarize"
 bundle_id="com.github.peripheryapp"
 
@@ -54,13 +53,13 @@ codesign --force --options=runtime --sign "$signature" periphery
 zip_filename="periphery-v${version}.zip"
 zip "${zip_filename}" periphery LICENSE.md lib_InternalSwiftSyntaxParser.dylib
 codesign --force --options=runtime --sign "$signature" "${zip_filename}"
-xcrun altool --notarize-app --primary-bundle-id "${bundle_id}" --username "${username}" --password "${password}" --file "${zip_filename}"
+xcrun altool --notarize-app --primary-bundle-id "${bundle_id}" --password "${password}" --file "${zip_filename}"
 
 echo "Checksum:"
 sha256=$( shasum -a 256 ${zip_filename} | awk '{print $1}' )
 echo ${sha256}
 
-echo -e "\nWait for notarization approval: xcrun altool --notarization-history 0 -u \"$username\" -p \"$password\""
+echo -e "\nWait for notarization approval: xcrun altool --notarization-history 0 -p \"$password\""
 confirm "Continue?"
 
 # GitHub

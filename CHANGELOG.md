@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.5.0 (2021-05-27)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Add redundant public accessibility analysis.
 - Add arm64 support.
 - Add `--retain-assign-only-property-types` option to retain assign-only properties based on their type.

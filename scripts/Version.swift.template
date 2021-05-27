@@ -1,1 +1,1 @@
-public let PeripheryVersion = "__VERSION__"
+let PeripheryVersion = "__VERSION__"
