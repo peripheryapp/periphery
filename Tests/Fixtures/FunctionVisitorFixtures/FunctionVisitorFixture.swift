@@ -21,3 +21,16 @@ func functionWithGenericArgument<T: StringProtocol & AnyObject>(_ t: T.Type) whe
 
 @available(macOS 10.15.0, *)
 func functionWithSomeReturnType() -> some StringProtocol { "" }
+
+class FixtureClass1 {
+    init(a: String, b: Int) {}
+}
+
+class FixtureClass2 {
+    init<T: StringProtocol & AnyObject>(_ t: T.Type) where T: RawRepresentable {}
+}
+
+class FixtureClass3 {
+    subscript(a: Int, b: String) -> Int { 0 }
+    subscript<T: StringProtocol & AnyObject>(_ t: T.Type) -> Int where T: RawRepresentable { 0 }
+}
