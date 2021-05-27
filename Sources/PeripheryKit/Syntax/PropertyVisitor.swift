@@ -19,12 +19,6 @@ final class PropertyVisitor: PeripherySyntaxVisitor {
     private let logger: Logger
     private(set) var results: [Result] = []
 
-    var resultsByTypeLocation: [SourceLocation: [Result]] {
-        results.reduce(into: [SourceLocation: [Result]]()) { (dict, result) in
-            result.typeLocations.forEach { dict[$0, default: []].append(result) }
-        }
-    }
-
     var resultsByLocation: [SourceLocation: Result] {
         results.reduce(into: [SourceLocation: Result]()) { (dict, result) in
             dict[result.location] = result

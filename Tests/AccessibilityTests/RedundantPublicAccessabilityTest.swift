@@ -59,6 +59,10 @@ class RedundantPublicAccessabilityTest: SourceGraphTestCase {
         XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicPropertyArrayType"))
     }
 
+    func testPublicTypeUsedAsPublicInitializerParameterType() {
+        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicInitializerParameterType"))
+    }
+
     func testPublicTypeUsedAsPublicFunctionParameterType() {
         XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicFunctionParameterType"))
         XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicFunctionParameterTypeClosureArgument"))
@@ -69,6 +73,14 @@ class RedundantPublicAccessabilityTest: SourceGraphTestCase {
         XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicFunctionReturnType"))
         XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicFunctionReturnTypeClosureArgument"))
         XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicFunctionReturnTypeClosureReturnType"))
+    }
+
+    func testPublicTypeUsedAsPublicSubscriptParameterType() {
+        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicSubscriptParameterType"))
+    }
+
+    func testPublicTypeUsedAsPublicSubscriptReturnType() {
+        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicSubscriptReturnType"))
     }
 
     func testPublicTypeUsedInPublicFunctionBody() {

@@ -10,6 +10,11 @@ _ = PublicTypeUsedAsPublicPropertyTypeRetainer().retain1
 _ = PublicTypeUsedAsPublicPropertyTypeRetainer().retain2
 _ = PublicTypeUsedAsPublicPropertyTypeRetainer().retain3
 
+_ = PublicTypeUsedAsPublicInitializerParameterTypeRetainer()
+
+_ = PublicTypeUsedAsPublicSubscriptParameterTypeRetainer()[]
+_ = PublicTypeUsedAsPublicSubscriptReturnTypeRetainer()[]
+
 PublicTypeUsedAsPublicFunctionParameterTypeRetainer().retain1()
 PublicTypeUsedAsPublicFunctionParameterTypeRetainer().retain2()
 PublicTypeUsedAsPublicFunctionParameterTypeRetainer().retain3()

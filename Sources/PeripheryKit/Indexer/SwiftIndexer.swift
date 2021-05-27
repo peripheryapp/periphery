@@ -214,16 +214,16 @@ public final class SwiftIndexer {
 
             file.importStatements = importVisitor.importStatements
             let propertyByLocation = propertyVisitor.resultsByLocation
-            let propertyByTypeLocation = propertyVisitor.resultsByTypeLocation
             let functionByLocation = functionVisitor.resultsByLocation
             let conformableByLocation = conformableVisitor.resultsByLocation
-            let propertyDeclarations = decls.filter { !$0.isImplicit && $0.kind.isVariableKind }
-            let functionDeclarations = decls.filter { !$0.isImplicit && $0.kind.isFunctionKind }
-            let conformableDeclarations = decls.filter { !$0.isImplicit && $0.kind.isDiscreteConformableKind }
+            let explicitDeclarations = decls.filter { !$0.isImplicit }
+            let propertyDeclarations = explicitDeclarations.filter { $0.kind.isAccessibilityModifiableVariableKind }
+            let functionDeclarations = explicitDeclarations.filter { $0.kind.isAccessibilityModifiableFunctionKind }
+            let conformableDeclarations = explicitDeclarations.filter { $0.kind.isDiscreteConformableKind }
 
             establishDeclarationHierarchy()
             makeProtocolPropertyAccessorsImplicit(for: decls)
-            associateDanglingReferences(for: decls, using: propertyByTypeLocation)
+            associateDanglingReferences(for: explicitDeclarations)
             identifyDeclaredPropertyTypes(for: propertyDeclarations, using: propertyByLocation)
             identifyPropertyReferenceRoles(for: propertyDeclarations, using: propertyByLocation)
             identifyFunctionReferenceRoles(for: functionDeclarations, using: functionByLocation)
@@ -297,34 +297,20 @@ public final class SwiftIndexer {
         // Workaround for https://bugs.swift.org/browse/SR-13766
         // Swift does not associate some type references with the containing declaration, resulting in references
         // with no clear parent.
-        private func associateDanglingReferences(for decls: [Declaration], using propertyByTypeLocation: [SourceLocation: [PropertyVisitor.Result]]) {
+        private func associateDanglingReferences(for declarations: [Declaration]) {
             guard !danglingReferences.isEmpty else { return }
 
-            let explicitDecls = decls.filter { !$0.isImplicit }
-            let declsByLocation = explicitDecls
-                .lazy
+            let declsByLocation = declarations
                 .reduce(into: [SourceLocation: [Declaration]]()) { (result, decl) in
                     result[decl.location, default: []].append(decl)
                 }
-            let declsByLine = explicitDecls
-                .lazy
+            let declsByLine = declarations
                 .reduce(into: [Int64: [Declaration]]()) { (result, decl) in
                     result[decl.location.line, default: []].append(decl)
                 }
 
             for ref in danglingReferences {
-                var propertyDecls: [Declaration]?
-
-                // First attempt to identify property declarations that may be associated with this reference.
-                if let propertyMetadatas = propertyByTypeLocation[ref.location] {
-                    for propertyMetadata in propertyMetadatas {
-                        if let decls = declsByLocation[propertyMetadata.location] {
-                            propertyDecls = decls
-                        }
-                    }
-                }
-
-                guard let candidateDecls = propertyDecls ??
+                guard let candidateDecls =
                         declsByLocation[ref.location] ??
                         declsByLine[ref.location.line] else { continue }
 
@@ -333,7 +319,11 @@ public final class SwiftIndexer {
                 // a decl without a parent, as the reference may be a related type of a class/struct/etc.
                 if let decl = candidateDecls.first(where: { $0.parent == nil }) {
                     associate(ref, with: decl)
-                } else if let decl = candidateDecls.first { // Fallback to using the first decl.
+                } else if let decl = candidateDecls.sorted().first {
+                    // Fallback to using the first declaration.
+                    // Sorting the declarations helps in the situation where the candidate declarations includes a
+                    // property/subscript, and a getter on the same line. The property/subscript is more likely to be
+                    // the declaration that should hold the references.
                     associate(ref, with: decl)
                 }
             }

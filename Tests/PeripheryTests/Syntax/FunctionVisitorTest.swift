@@ -92,6 +92,62 @@ class FunctionVisitorTest: XCTestCase {
         XCTAssertTrue(result?.genericConformanceRequirementLocations.isEmpty ?? false)
     }
 
+    func testInitializerWithArguments() throws {
+        let result = results[fixtureLocation(line: 26, column: 5)]
+        XCTAssertEqual(result?.parameterTypeLocations, [
+            fixtureLocation(line: 26, column: 13),
+            fixtureLocation(line: 26, column: 24),
+        ])
+        XCTAssertTrue(result?.returnTypeLocations.isEmpty ?? false)
+        XCTAssertTrue(result?.genericParameterLocations.isEmpty ?? false)
+        XCTAssertTrue(result?.genericConformanceRequirementLocations.isEmpty ?? false)
+    }
+
+    func testInitializerWithGenericArguments() throws {
+        let result = results[fixtureLocation(line: 30, column: 5)]
+        XCTAssertEqual(result?.parameterTypeLocations, [
+            fixtureLocation(line: 30, column: 46)
+        ])
+        XCTAssertEqual(result?.genericParameterLocations, [
+            fixtureLocation(line: 30, column: 13),
+            fixtureLocation(line: 30, column: 30)
+        ])
+        XCTAssertEqual(result?.genericConformanceRequirementLocations, [
+            fixtureLocation(line: 30, column: 63),
+        ])
+        XCTAssertTrue(result?.returnTypeLocations.isEmpty ?? false)
+    }
+
+    func testSubscriptWithArguments() throws {
+        let result = results[fixtureLocation(line: 34, column: 5)]
+        XCTAssertEqual(result?.parameterTypeLocations, [
+            fixtureLocation(line: 34, column: 18),
+            fixtureLocation(line: 34, column: 26),
+        ])
+        XCTAssertEqual(result?.returnTypeLocations, [
+            fixtureLocation(line: 34, column: 37)
+        ])
+        XCTAssertTrue(result?.genericParameterLocations.isEmpty ?? false)
+        XCTAssertTrue(result?.genericConformanceRequirementLocations.isEmpty ?? false)
+    }
+
+    func testSubscriptWithGenericArguments() throws {
+        let result = results[fixtureLocation(line: 35, column: 5)]
+        XCTAssertEqual(result?.parameterTypeLocations, [
+            fixtureLocation(line: 35, column: 51)
+        ])
+        XCTAssertEqual(result?.returnTypeLocations, [
+            fixtureLocation(line: 35, column: 62)
+        ])
+        XCTAssertEqual(result?.genericParameterLocations, [
+            fixtureLocation(line: 35, column: 18),
+            fixtureLocation(line: 35, column: 35)
+        ])
+        XCTAssertEqual(result?.genericConformanceRequirementLocations, [
+            fixtureLocation(line: 35, column: 75),
+        ])
+    }
+
     // MARK: - Private
 
     private var fixturePath: SourceFile {
