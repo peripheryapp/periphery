@@ -1,10 +1,12 @@
-<h1>
-  <img src="assets/logo.png" alt="Periphery" width="289" height="60">
+<h1 align="center">
+  <img src="assets/logo.png" alt="Periphery" height="60" />
+  <br>
+  Periphery
 </h1>
 
-> A tool to identify unused code in Swift projects.
+<h4 align="center">A tool to identify unused code in Swift projects.</h4>
 
-<p float="left">
+<p align="center">
 <a href="https://github.com/peripheryapp/periphery/releases/latest">
   <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?color=008DFF" />
 </a>
@@ -12,6 +14,8 @@
 <a href="https://github.com/peripheryapp/periphery/actions">
   <img src="https://img.shields.io/github/workflow/status/peripheryapp/periphery/Test/master">
 </a>
+<br>
+<br>
 </p>
 
 ## Contents
