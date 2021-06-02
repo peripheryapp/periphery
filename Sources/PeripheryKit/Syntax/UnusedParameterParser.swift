@@ -297,7 +297,7 @@ struct UnusedParameterParser {
                      genericParams: syntax.genericParameterClause,
                      body: syntax.body,
                      named: "init",
-                     position: SyntaxUtils.correctPosition(of: syntax),
+                     position: syntax.initKeyword.positionAfterSkippingLeadingTrivia,
                      collector)
     }
 

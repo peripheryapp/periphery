@@ -87,7 +87,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: SyntaxUtils.correctPosition(of: node)
+            at: node.initKeyword.positionAfterSkippingLeadingTrivia
         )
     }
 
