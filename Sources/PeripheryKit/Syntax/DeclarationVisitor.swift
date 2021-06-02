@@ -27,7 +27,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.identifier.position
+            at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
 
@@ -36,7 +36,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.identifier.position
+            at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
 
@@ -45,7 +45,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.identifier.position
+            at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
 
@@ -54,15 +54,15 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.identifier.position
+            at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
 
     func visit(_ node: ExtensionDeclSyntax) {
-        var position = node.extendedType.position
+        var position = node.extendedType.positionAfterSkippingLeadingTrivia
 
         if let memberType = node.extendedType.as(MemberTypeIdentifierSyntax.self) {
-            position = memberType.name.position
+            position = memberType.name.positionAfterSkippingLeadingTrivia
         }
 
         parse(
@@ -78,7 +78,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.identifier.position
+            at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
 
@@ -96,7 +96,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.deinitKeyword.position
+            at: node.deinitKeyword.positionAfterSkippingLeadingTrivia
         )
     }
 
@@ -105,7 +105,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.subscriptKeyword.position
+            at: node.subscriptKeyword.positionAfterSkippingLeadingTrivia
         )
     }
 
@@ -114,7 +114,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.bindings.position
+            at: node.bindings.positionAfterSkippingLeadingTrivia
         )
     }
 
@@ -123,7 +123,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.identifier.position
+            at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
 
@@ -132,7 +132,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.identifier.position
+            at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
 
@@ -141,7 +141,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.identifier.position
+            at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
 
@@ -150,7 +150,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            at: node.identifier.position
+            at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
 
