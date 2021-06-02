@@ -36,6 +36,7 @@
 - [Continuous Integration](#continuous-integration)
 - [Platforms](#platforms)
 - [Troubleshooting](#troubleshooting)
+- [Known Bugs](#known-bugs)
 
 ## Installation
 
@@ -405,3 +406,17 @@ Periphery supports both macOS and Linux. macOS supports both Xcode and Swift Pac
 ### Erroneous results in one or more files, such as false-positives and incorrect source file locations.
 
 It's possible for the index store to become corrupt, or out of sync with the source file. This can happen, for example, if you forcefully terminate (^C) a scan. To rectify this, you can pass the `--clean-build` flag to the scan command to force removal of existing build artifacts.
+
+## Known Bugs
+
+Due to some underlying bugs in Swift, Periphery may in some instances report incorrect results. You can encourage Apple to fix these issues by voting for them on the Swift JIRA.
+
+* [SR-14181](https://bugs.swift.org/browse/SR-14181) - Index store does not relate constructor referenced via Self
+* [SR-14162](https://bugs.swift.org/browse/SR-14162) - Index store does not relate static property getter used as subscript key
+* [SR-13930](https://bugs.swift.org/browse/SR-13930) - Index store does not relate objc optional protocol method implemented in subclass
+* [SR-13792](https://bugs.swift.org/browse/SR-13792) - Index store should relate appendInterpolation from string literals
+* [SR-13768](https://bugs.swift.org/browse/SR-13768) - Index store does not relate constructor via literal notation
+* [SR-13767](https://bugs.swift.org/browse/SR-13767) - Index store reference occurrence incorrectly related for lazy variable
+* [SR-13766](https://bugs.swift.org/browse/SR-13766) - Index store does not correctly relate variable type
+* [SR-13765](https://bugs.swift.org/browse/SR-13765) - Index store does not contain reference occurance for labeled parameters
+* [SR-7093](https://bugs.swift.org/browse/SR-7093) - Index does not include reference to constructor of class/struct with generic types
