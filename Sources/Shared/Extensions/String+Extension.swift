@@ -20,4 +20,15 @@ public extension String {
         }
         return newString
     }
+
+    // http://www.cse.yorku.ca/~oz/hash.html
+    var djb2: Int {
+        unicodeScalars
+            .map { $0.value }
+            .reduce(5381) { ($0 << 5) &+ $0 &+ Int($1) }
+    }
+
+    var djb2Hex: String {
+        String(format: "%02x", djb2)
+    }
 }

@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix an issue where scans with many schemes could breaking loading of the index store.
 
 ## 2.5.0 (2021-05-27)
 

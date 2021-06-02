@@ -107,9 +107,9 @@ public final class Xcodebuild: Injectable {
         // contain two records for that source file. One reflects the state of the file when scheme A was built, and the
         // other when B was built. We must therefore key the DerivedData path with the full list of schemes being built.
 
-        let normalizedName = project.name.replacingOccurrences(of: " ", with: "_")
-        let normalizedSchemes = schemes.map { $0.name.replacingOccurrences(of: " ", with: "_") }.joined(separator: "-")
-        return try (cachePath() + "DerivedData-\(normalizedName)-\(normalizedSchemes)")
+        let projectHash = project.name.djb2Hex
+        let schemesHash = schemes.map { $0.name }.joined().djb2Hex
+        return try (cachePath() + "DerivedData-\(projectHash)-\(schemesHash)")
     }
 
     private func cachePath() throws -> Path {
