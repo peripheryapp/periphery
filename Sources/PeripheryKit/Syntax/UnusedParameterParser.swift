@@ -233,8 +233,7 @@ struct UnusedParameterParser {
         }
 
         let positionSyntax: SyntaxProtocol = (syntax.secondName ?? syntax.firstName) ?? syntax
-        let absolutePosition = AbsolutePosition(utf8Offset: positionSyntax.position.utf8Offset + positionSyntax.leadingTriviaLength.utf8Length)
-        let location = sourceLocation(of: absolutePosition)
+        let location = sourceLocation(of: positionSyntax.positionAfterSkippingLeadingTrivia)
 
         return Parameter(firstName: syntax.firstName?.text,
                          secondName: syntax.secondName?.text,
@@ -287,7 +286,7 @@ struct UnusedParameterParser {
                      genericParams: syntax.genericParameterClause,
                      body: syntax.body,
                      named: syntax.identifier.text,
-                     position: syntax.identifier.position,
+                     position: syntax.identifier.positionAfterSkippingLeadingTrivia,
                      collector)
     }
 
