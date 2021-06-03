@@ -15,14 +15,14 @@ jobs:
     runs-on: macOS-latest
     name: macOS
     steps:
+    - uses: actions/checkout@master
+    - name: Select Xcode version
+      run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app; swift -version
     - name: Get Swift Version
       id: get-swift-version
       run: |
           echo "::set-output name=version::$(swift -version | head -n 1)"
       shell: bash
-    - uses: actions/checkout@master
-    - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app; swift -version
     - name: Cache resolved dependencies
       id: cache-resolved-dependencies
       uses: actions/cache@v2
