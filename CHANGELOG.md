@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.5.2 (2021-06-03)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix erroneous results for explicit 'getter' accessors.
 
 ## 2.5.1 (2021-06-02)
