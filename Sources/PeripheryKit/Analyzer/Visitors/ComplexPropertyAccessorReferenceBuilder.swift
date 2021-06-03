@@ -16,7 +16,7 @@ final class ComplexPropertyAccessorReferenceBuilder: SourceGraphVisitor {
     }
 
     func visit() {
-        let declarations = Declaration.Kind.accessorKinds.flatMap { graph.declarations(ofKind: $0) }
+        let declarations = graph.declarations(ofKinds: Array(Declaration.Kind.accessorKinds))
 
         for declaration in declarations {
             guard let parent = declaration.parent,
