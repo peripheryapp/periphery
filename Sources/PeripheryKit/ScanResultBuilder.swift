@@ -27,6 +27,7 @@ public struct ScanResultBuilder {
         return allAnnotatedDeclarations
             .filter {
                 !$0.declaration.isImplicit &&
+                !$0.declaration.kind.isAccessorKind &&
                 !graph.ignoredDeclarations.contains($0.declaration)
             }
     }
