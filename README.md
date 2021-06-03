@@ -414,7 +414,6 @@ Due to some underlying bugs in Swift, Periphery may in some instances report inc
 | ID    | Title |
 | :---  | ---   |
 | [SR-14181](https://bugs.swift.org/browse/SR-14181) | Index store does not relate constructor referenced via Self |
-| [SR-14181](https://bugs.swift.org/browse/SR-14181) | Index store does not relate constructor referenced via Self |
 | [SR-14162](https://bugs.swift.org/browse/SR-14162) | Index store does not relate static property getter used as subscript key |
 | [SR-13930](https://bugs.swift.org/browse/SR-13930) | Index store does not relate objc optional protocol method implemented in subclass |
 | [SR-13792](https://bugs.swift.org/browse/SR-13792) | Index store should relate appendInterpolation from string literals |
