@@ -51,26 +51,9 @@ final class BaseLogger: Singleton {
         log(text, output: stderr)
     }
 
-    // periphery:ignore
-    func important(_ text: String) {
-        let text = colorize("important: ", .boldYellow) + text
-        log(text, output: stdout)
-    }
-
     func hint(_ text: String) {
         let text = colorize("hint: ", .boldMagenta) + colorize(text, .bold)
         log(text, output: stdout)
-    }
-
-    // periphery:ignore
-    func error(_ text: String) {
-        let text = colorize("error: ", .boldRed) + colorize(text, .bold)
-        log(text, output: stderr)
-    }
-
-    // periphery:ignore
-    func error(_ e: Error) {
-        error(e.localizedDescription)
     }
 
     // MARK: - Private
@@ -108,22 +91,7 @@ public final class Logger: Singleton {
         baseLogger.warn(text)
     }
 
-    // periphery:ignore
-    public func important(_ text: String) {
-        baseLogger.important(text)
-    }
-
     public func hint(_ text: String) {
         baseLogger.hint(text)
-    }
-
-    // periphery:ignore
-    public func error(_ text: String) {
-        baseLogger.error(text)
-    }
-
-    // periphery:ignore
-    public func error(_ e: Error) {
-        error(e.localizedDescription)
     }
 }

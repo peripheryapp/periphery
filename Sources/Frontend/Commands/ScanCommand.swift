@@ -3,7 +3,7 @@ import ArgumentParser
 import PathKit
 import Shared
 
-struct ScanCommand: ParsableCommand {
+struct ScanCommand: FrontendCommand {
     static let configuration = CommandConfiguration(
         commandName: "scan",
         abstract: "Scan for unused code"
