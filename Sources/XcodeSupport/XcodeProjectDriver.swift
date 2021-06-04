@@ -134,7 +134,10 @@ extension XcodeProjectDriver: ProjectDriver {
             storePath = try xcodebuild.indexStorePath(project: project, schemes: Array(schemes))
         }
 
-        let sourceFiles = Set(try targets.map { try $0.sourceFiles() }.joined())
+        let sourceFiles = try targets.reduce(into: [Path: [String]]()) { result, target in
+            try target.sourceFiles().forEach { result[$0, default: []].append(target.name) }
+        }
+
         try SwiftIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
 
         let xibFiles = try Set(targets.map { try $0.xibFiles() }.joined())

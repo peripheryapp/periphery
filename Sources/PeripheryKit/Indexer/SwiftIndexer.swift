@@ -5,40 +5,45 @@ import SwiftIndexStore
 import Shared
 
 public final class SwiftIndexer {
-    public static func make(storePath: String, sourceFiles: Set<Path>, graph: SourceGraph) throws -> Self {
+    public static func make(storePath: String, sourceFiles: [Path: [String]], graph: SourceGraph) throws -> Self {
         let storeURL = URL(fileURLWithPath: storePath)
 
         return self.init(
             sourceFiles: sourceFiles,
             graph: graph,
-            indexStore: try IndexStore.open(store: storeURL, lib: .open()),
+            indexStore: try .open(store: storeURL, lib: .open()),
+            indexStoreURL: storeURL,
             logger: inject(),
             configuration: inject())
     }
 
-    private let sourceFiles: Set<Path>
+    private let sourceFiles: [Path: [String]]
     private let graph: SourceGraph
     private let logger: Logger
     private let configuration: Configuration
     private let indexStore: IndexStore
+    private let indexStoreURL: URL
 
     required init(
-        sourceFiles: Set<Path>,
+        sourceFiles: [Path: [String]],
         graph: SourceGraph,
         indexStore: IndexStore,
+        indexStoreURL: URL,
         logger: Logger,
         configuration: Configuration
     ) {
         self.sourceFiles = sourceFiles
         self.graph = graph
+        self.indexStore = indexStore
+        self.indexStoreURL = indexStoreURL
         self.logger = logger
         self.configuration = configuration
-        self.indexStore = indexStore
     }
 
     public func perform() throws {
         let excludedPaths = configuration.indexExcludeSourceFiles
         var unitsByFile: [Path: [IndexStoreUnit]] = [:]
+        let allSourceFiles = Set(sourceFiles.keys)
 
         try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
             guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
@@ -46,15 +51,24 @@ public final class SwiftIndexer {
             let file = Path(filePath)
 
             guard !excludedPaths.contains(file) else {
-                self.logger.debug("[index:swift:exclude] \(file.string)")
+                self.logger.debug("[index:swift] Excluding \(file.string)")
                 return true
             }
 
-            if sourceFiles.contains(file) {
+            if allSourceFiles.contains(file) {
                 unitsByFile[file, default: []].append(unit)
             }
 
             return true
+        }
+
+        let indexedPaths = Set(unitsByFile.keys)
+        let unindexedPaths = allSourceFiles.subtracting(indexedPaths)
+
+        if !unindexedPaths.isEmpty {
+            unindexedPaths.forEach { logger.debug("[index:swift] Source file not indexed: \($0)") }
+            let targets: Set<String> = Set(unindexedPaths.flatMap { sourceFiles[$0] ?? [] })
+            throw PeripheryError.unindexedTargetsError(targets: targets, indexStorePath: indexStoreURL.path)
         }
 
         let jobs = try unitsByFile.map { (file, units) -> Job in

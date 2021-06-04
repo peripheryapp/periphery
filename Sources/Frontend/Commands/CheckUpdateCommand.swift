@@ -2,7 +2,7 @@ import Foundation
 import ArgumentParser
 import Shared
 
-struct CheckUpdateCommand: ParsableCommand {
+struct CheckUpdateCommand: FrontendCommand {
     static let configuration = CommandConfiguration(
         commandName: "check-update",
         abstract: "Check for available update"
