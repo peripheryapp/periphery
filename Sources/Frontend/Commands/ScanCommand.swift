@@ -39,7 +39,7 @@ struct ScanCommand: ParsableCommand {
     @Option(help: "Path glob of source files which should be excluded from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var reportExclude: [String] = []
 
-    @Option(help: "Path to index store to use. Automatically defaults to the correct store for your project")
+    @Option(help: "Path to index store to use. Implies '--skip-build'")
     var indexStorePath: String?
 
     @Flag(help: "Retain all public declarations - you'll likely want to enable this if you're scanning a framework/library project")

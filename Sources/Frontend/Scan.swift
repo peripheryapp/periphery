@@ -19,6 +19,12 @@ final class Scan: Injectable {
 
     func perform(project: Project) throws -> [ScanResult] {
         logger.debug("[version] \(PeripheryVersion)")
+
+        if configuration.indexStorePath != nil, !configuration.skipBuild {
+            logger.warn("The '--index-store-path' option implies '--skip-build', specify it to silence this warning")
+            configuration.skipBuild = true
+        }
+
         let configYaml = try configuration.asYaml()
         logger.debug("[configuration]\n--- # .periphery.yml\n\(configYaml.trimmed)\n")
 
