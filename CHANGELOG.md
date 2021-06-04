@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- The '--index-store-path' option now implies '--skip-build'.
 
 ##### Bug Fixes
 
