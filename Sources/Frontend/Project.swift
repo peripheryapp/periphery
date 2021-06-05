@@ -31,6 +31,10 @@ final class Project {
 
         logger.debug(SwiftVersion.current.fullVersion)
 
+        if SwiftVersion.current.version.isVersion(lessThanOrEqualTo: "5.2") {
+            throw PeripheryError.swiftVersionUnsupportedError(version: SwiftVersion.current.fullVersion)
+        }
+
         switch kind {
         case .xcode:
             #if os(Linux)

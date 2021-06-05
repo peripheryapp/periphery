@@ -184,9 +184,7 @@ struct ScanCommand: FrontendCommand {
         CommandLine.arguments.contains { $0.hasSuffix(arg) }
     }
 
-    // Not referenced in Swift 5.2, but fixed in 5.3.
-    // periphery:ignore
-    fileprivate static func split(by delimiter: Character) -> (String?) -> [String] {
+    private static func split(by delimiter: Character) -> (String?) -> [String] {
         return { options in options?.split(separator: delimiter).map(String.init) ?? [] }
     }
 }
