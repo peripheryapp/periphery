@@ -25,18 +25,26 @@ final class SPMProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide {
 
     func perform() throws {
         let package = try SPM.Package.load()
-        configuration.targets = try selectTargets(in: package)
+        let selection = try selectTargets(in: package)
+
+        if case let .some(targets) = selection {
+            configuration.targets = targets
+        }
     }
 
     var commandLineOptions: [String] {
         var options: [String] = []
-        options.append("--targets " + configuration.targets.map { "\"\($0)\"" }.joined(separator: ","))
+
+        if !configuration.targets.isEmpty {
+            options.append("--targets " + configuration.targets.map { "\"\($0)\"" }.joined(separator: ","))
+        }
+
         return options
     }
 
     // MARK: - Private
 
-    private func selectTargets(in package: SPM.Package) throws -> [String] {
+    private func selectTargets(in package: SPM.Package) throws -> SetupSelection {
         let targets = package.swiftTargets
 
         guard !targets.isEmpty else {

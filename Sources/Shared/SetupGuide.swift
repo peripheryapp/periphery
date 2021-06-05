@@ -5,6 +5,18 @@ public protocol SetupGuide {
     var commandLineOptions: [String] { get }
 }
 
+public enum SetupSelection {
+    case all([String])
+    case some([String])
+
+    public var selectedValues: [String] {
+        switch self {
+        case .all(let values), .some(let values):
+            return values
+        }
+    }
+}
+
 open class SetupGuideHelpers {
     public init() {}
 
@@ -36,7 +48,7 @@ open class SetupGuideHelpers {
         return select(single: options)
     }
 
-    public func select(multiple options: [String], allowAll: Bool) -> [String] {
+    public func select(multiple options: [String], allowAll: Bool) -> SetupSelection {
         var helpMsg = " Delimit choices with a single space, e.g: 1 2 3"
 
         if allowAll {
@@ -46,12 +58,13 @@ open class SetupGuideHelpers {
         print(colorize("?", .boldYellow) + helpMsg)
         display(options: options)
         print(colorize("> ", .bold), terminator: "")
-        var selected: [String] = []
 
         if let strChoices = readLine(strippingNewline: true)?.trimmed.split(separator: " ", omittingEmptySubsequences: true) {
             if allowAll && strChoices.contains("all") {
-                selected = options
+                return .all(options)
             } else {
+                var selected: [String] = []
+
                 for strChoice in strChoices {
                     if let choice = Int(strChoice),
                        let option = options[safe: choice - 1] {
@@ -61,10 +74,10 @@ open class SetupGuideHelpers {
                         return select(multiple: options, allowAll: allowAll)
                     }
                 }
+
+                if !selected.isEmpty { return .some(selected) }
             }
         }
-
-        if !selected.isEmpty { return selected }
 
         print(colorize("\nInvalid input, expected a number.\n", .boldYellow))
         return select(multiple: options, allowAll: allowAll)

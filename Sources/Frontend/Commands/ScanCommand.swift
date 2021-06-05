@@ -81,7 +81,9 @@ struct ScanCommand: FrontendCommand {
     func run() throws {
         let scanBehavior = ScanBehavior.make()
 
-        try scanBehavior.setup(config).get()
+        if !setup {
+            try scanBehavior.setup(config).get()
+        }
 
         let configuration = inject(Configuration.self)
 

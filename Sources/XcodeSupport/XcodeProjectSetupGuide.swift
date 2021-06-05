@@ -42,10 +42,10 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             let schemes = try filter(project.schemes(), project).map { $0.name }.sorted()
 
             print(colorize("Select build targets to analyze:", .bold))
-            configuration.targets = select(multiple: targets, allowAll: true)
+            configuration.targets = select(multiple: targets, allowAll: true).selectedValues
 
             print(colorize("\nSelect the schemes necessary to build your chosen targets:", .bold))
-            configuration.schemes = select(multiple: schemes, allowAll: false)
+            configuration.schemes = select(multiple: schemes, allowAll: false).selectedValues
         } else {
             throw PeripheryError.guidedSetupError(message: "Failed to find .xcworkspace or .xcodeproj in current directory")
         }
