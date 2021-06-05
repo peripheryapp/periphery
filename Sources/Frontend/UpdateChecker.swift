@@ -34,7 +34,7 @@ final class UpdateChecker: Singleton {
     func run() {
         // We only perform the update check with xcode format because it may interfere with
         // parsing json and csv.
-        guard configuration.updateCheck,
+        guard !configuration.disableUpdateCheck,
             configuration.outputFormat.supportsAuxiliaryOutput else { return }
 
         var urlRequest = URLRequest(url: latestReleaseURL)

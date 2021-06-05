@@ -53,7 +53,7 @@ final class GuidedSetup: SetupGuideHelpers {
         let shouldSave = selectBoolean()
 
         if shouldSave {
-            try configuration.saveYaml()
+            try configuration.save()
         }
 
         print(colorize("\n*", .boldGreen) + " Executing command:")

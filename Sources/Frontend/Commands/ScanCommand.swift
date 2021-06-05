@@ -30,8 +30,8 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Comma separatered list of target names to scan. Requied for Xcode projects. Optional for Swift Package Manager projects, default behavior is to scan all targets defined in Package.swift", transform: split(by: ","))
     var targets: [String] = []
 
-    @Option(help: "Output format, available formatters are: \(OutputFormat.allCases.map { $0.rawValue }.joined(separator: ", "))")
-    var format: String?
+    @Option(help: "Output format (allowed: \(OutputFormat.allValueStrings.joined(separator: ", ")))")
+    var format: OutputFormat = .default
 
     @Option(help: "Path glob of source files which should be excluded from indexing. Declarations and references within these files will not be considered during analysis. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var indexExclude: [String] = []
@@ -115,12 +115,12 @@ struct ScanCommand: FrontendCommand {
             configuration.buildArguments = buildArguments
         }
 
-        if let formatName = format {
-            configuration.outputFormat = try OutputFormat.make(named: formatName)
-        }
-
         if let indexStorePath = indexStorePath {
             configuration.indexStorePath = indexStorePath
+        }
+
+        if isExplicit("format") {
+            configuration.outputFormat = format
         }
 
         if isExplicit("retain-public") {
@@ -156,7 +156,7 @@ struct ScanCommand: FrontendCommand {
         }
 
         if isExplicit("disable-update-check") {
-            configuration.updateCheck = !disableUpdateCheck
+            configuration.disableUpdateCheck = disableUpdateCheck
         }
 
         if isExplicit("verbose") {
@@ -188,3 +188,5 @@ struct ScanCommand: FrontendCommand {
         return { options in options?.split(separator: delimiter).map(String.init) ?? [] }
     }
 }
+
+extension OutputFormat: ExpressibleByArgument {}

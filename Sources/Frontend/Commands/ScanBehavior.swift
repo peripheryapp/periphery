@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 import PeripheryKit
+import PathKit
 
 final class ScanBehavior {
     static func make() -> Self {
@@ -15,11 +16,14 @@ final class ScanBehavior {
         self.logger = logger
     }
 
-    func setup(_ config: String?) -> Result<(), PeripheryError> {
-        configuration.config = config
-
+    func setup(_ configPath: String?) -> Result<(), PeripheryError> {
         do {
-            try configuration.applyYamlConfiguration()
+            var path: Path?
+
+            if let configPath = configPath {
+                path = Path(configPath)
+            }
+            try configuration.load(from: path)
         } catch let error as PeripheryError {
             return .failure(error)
         } catch {

@@ -26,7 +26,7 @@ final class Scan: Injectable {
         }
 
         let configYaml = try configuration.asYaml()
-        logger.debug("[configuration]\n--- # .periphery.yml\n\(configYaml.trimmed)\n")
+        logger.debug("[configuration:begin]\n\(configYaml.trimmed)\n[configuration:end]")
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)

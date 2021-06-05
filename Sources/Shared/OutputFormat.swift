@@ -6,18 +6,13 @@ public enum OutputFormat: String, CaseIterable {
     case json
     case checkstyle
 
-    static let `default` = OutputFormat.xcode
+    public static let `default` = OutputFormat.xcode
 
-    public static func make(named name: String) throws -> OutputFormat {
-        guard let outputFormat = OutputFormat(rawValue: name) else {
-            throw PeripheryError.invalidFormatter(name: name)
-        }
-
-        return outputFormat
+    init?(anyValue: Any) {
+        self.init(rawValue: anyValue as? String ?? "")
     }
 
     public var supportsAuxiliaryOutput: Bool {
-        if self == .xcode { return true }
-        return false
+        self == .xcode
     }
 }
