@@ -32,7 +32,7 @@ final class ScanBehavior {
     func main(_ block: (Project) throws -> [ScanResult]) -> Result<(), PeripheryError> {
         if configuration.guidedSetup {
             do {
-                try GuidedSetup().perform()
+                try GuidedSetup.make().perform()
             } catch let error as PeripheryError {
                 return .failure(error)
             } catch {

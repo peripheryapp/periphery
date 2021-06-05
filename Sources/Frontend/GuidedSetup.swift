@@ -7,6 +7,16 @@ import XcodeSupport
 #endif
 
 final class GuidedSetup: SetupGuideHelpers {
+    static func make() -> Self {
+        return self.init(configuration: inject())
+    }
+
+    required init(configuration: Configuration) {
+        self.configuration = configuration
+    }
+
+    private let configuration: Configuration
+
     func perform() throws {
         print(colorize("Welcome to Periphery!", .boldGreen))
         print("This guided setup will help you select the appropriate configuration for your project.\n")
@@ -39,14 +49,27 @@ final class GuidedSetup: SetupGuideHelpers {
         try guides.forEach { try $0.perform() }
         let options = Array(guides.map { $0.commandLineOptions }.joined())
 
+        print(colorize("\nSave configuration to \(Configuration.defaultConfigurationFile)?", .bold))
+        let shouldSave = selectBoolean()
+
+        if shouldSave {
+            try configuration.saveYaml()
+        }
+
         print(colorize("\n*", .boldGreen) + " Executing command:")
-        print(colorize(formatScanCommand(options: options) + "\n", .bold))
+        print(colorize(formatScanCommand(options: options, didSave: shouldSave) + "\n", .bold))
     }
 
     // MARK: - Private
 
-    private func formatScanCommand(options: [String]) -> String {
-        let parts = ["periphery scan"] + options
+    private func formatScanCommand(options: [String], didSave: Bool) -> String {
+        let bareCommand = "periphery scan"
+
+        if didSave {
+            return bareCommand
+        }
+
+        let parts = [bareCommand] + options
         return parts.joined(separator: " \\\n  ")
     }
 }
