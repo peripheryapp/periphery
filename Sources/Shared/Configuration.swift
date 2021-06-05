@@ -3,6 +3,8 @@ import PathKit
 import Yams
 
 public final class Configuration: Singleton {
+    public static var defaultConfigurationFile = ".periphery.yml"
+
     public static func make() -> Self {
         return self.init(logger: inject())
     }
@@ -76,6 +78,11 @@ public final class Configuration: Singleton {
         ]
 
         return try Yams.dump(object: config)
+    }
+
+    public func saveYaml() throws {
+        let data = try asYaml().data(using: .utf8)
+        FileManager.default.createFile(atPath: Self.defaultConfigurationFile, contents: data)
     }
 
     public func applyYamlConfiguration() throws {
@@ -178,6 +185,6 @@ public final class Configuration: Singleton {
             return path
         }
 
-        return [Path(".periphery.yml"), Path(".periphery.yaml")].first { $0.exists }
+        return [Path(Self.defaultConfigurationFile), Path(".periphery.yaml")].first { $0.exists }
     }
 }
