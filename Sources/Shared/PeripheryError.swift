@@ -4,7 +4,6 @@ import PathKit
 public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case shellCommandFailed(cmd: String, args: [String], status: Int32, output: String)
     case shellOuputEncodingFailed(cmd: String, args: [String], encoding: String.Encoding)
-
     case usageError(String)
     case underlyingError(Error)
     case invalidFormatter(name: String)
@@ -19,6 +18,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case foundIssues(count: Int)
     case packageError(message: String)
     case swiftVersionParseError(fullVersion: String)
+    case swiftVersionUnsupportedError(version: String)
     case unindexedTargetsError(targets: Set<String>, indexStorePath: String)
 
     public var errorDescription: String? {
@@ -61,6 +61,8 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
         case let .unindexedTargetsError(targets, indexStorePath):
             let joinedTargets = targets.sorted().joined(separator: ", ")
             return "The index store at '\(indexStorePath)' does not contain data for the following targets: \(joinedTargets). Either the index store is outdated, or you have requested to scan targets that have not been built."
+        case let .swiftVersionUnsupportedError(version):
+            return "This version of Periphery only supports Swift >= 5.3, you're using \(version)."
         }
     }
 

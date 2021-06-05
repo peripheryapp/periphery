@@ -2,7 +2,7 @@
 
 ##### Breaking
 
-- None.
+- Removed support for Swift <= 5.2.
 
 ##### Enhancements
 
