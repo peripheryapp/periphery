@@ -7,7 +7,8 @@
 ##### Enhancements
 
 - Using an index store that does not contain complete data for the requested targets now results in an error.
-- The '--index-store-path' option now implies '--skip-build'.
+- The `--index-store-path` option now implies `--skip-build`.
+- Guided setup now omits the `--targets` option from the generated command when 'all' targets are selected for SwiftPM projects.
 
 ##### Bug Fixes
 
