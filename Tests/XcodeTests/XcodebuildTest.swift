@@ -14,7 +14,7 @@ class XcodebuildTest: XCTestCase {
 
         shell = ShellMock()
         xcodebuild = Xcodebuild(shell: shell)
-        project = try! XcodeProject.make(path: iOSProjectPath)
+        project = try! XcodeProject.make(path: UIKitProjectPath)
     }
 }
 
@@ -28,7 +28,7 @@ class XcodebuildBuildProjectTest: XCTestCase {
 
         shell = inject(Shell.self)
         xcodebuild = Xcodebuild(shell: shell)
-        project = try! XcodeProject.make(path: iOSProjectPath)
+        project = try! XcodeProject.make(path: UIKitProjectPath)
     }
 
     func testBuildSchemeWithWhitespace() throws {

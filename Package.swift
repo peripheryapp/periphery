@@ -26,13 +26,7 @@ dependencies.append(
     )
 )
 #else
-dependencies.append(
-    .package(
-        name: "SwiftSyntax",
-        url: "https://github.com/apple/swift-syntax",
-        .exact("0.50200.0")
-    )
-)
+fatalError("This version of Periphery does not support Swift <= 5.2.")
 #endif
 
 #if os(macOS)
@@ -153,7 +147,7 @@ targets.append(contentsOf: [
             .target(name: "PeripheryKit"),
             .target(name: "XcodeSupport")
         ],
-        exclude: ["iOSProject"]
+        exclude: ["UIKitProject", "SwiftUIProject"]
     )
 ])
 #endif

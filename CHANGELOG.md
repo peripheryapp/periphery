@@ -13,7 +13,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix parsing `INFOPLIST_FILE` references containing `$(SRCROOT)`.
 
 ## 2.5.2 (2021-06-03)
 
