@@ -13,133 +13,220 @@ public final class Configuration: Singleton {
         self.logger = logger
     }
 
-    public var config: String?
+    @Setting(key: "workspace", defaultValue: nil)
     public var workspace: String?
+
+    @Setting(key: "project", defaultValue: nil)
     public var project: String?
-    public var outputFormat: OutputFormat = OutputFormat.default
-    public var schemes: [String] = []
-    public var targets: [String] = []
-    public var indexExclude: [String] = []
-    public var reportExclude: [String] = []
-    public var buildArguments: [String] = []
 
-    private var _retainAssignOnlyPropertyTypes: [String] = []
-    public var retainAssignOnlyPropertyTypes: [String] {
-        get {
-            _retainAssignOnlyPropertyTypes
-        }
-        set {
-            _retainAssignOnlyPropertyTypes = newValue.map { PropertyTypeSanitizer.sanitize($0) }
-        }
-    }
+    @Setting(key: "format", defaultValue: .default, valueConverter: { OutputFormat(anyValue: $0) })
+    public var outputFormat: OutputFormat
 
-    public var retainObjcAccessible: Bool = false
-    public var retainPublic: Bool = false
-    public var retainAssignOnlyProperties: Bool = false
-    public var retainUnusedProtocolFuncParams: Bool = false
-    public var disableRedundantPublicAnalysis: Bool = false
-    public var verbose: Bool = false
-    public var quiet: Bool = false
-    public var updateCheck: Bool = true
-    public var strict: Bool = false
+    @Setting(key: "schemes", defaultValue: [])
+    public var schemes: [String]
+
+    @Setting(key: "targets", defaultValue: [])
+    public var targets: [String]
+
+    @Setting(key: "index_exclude", defaultValue: [])
+    public var indexExclude: [String]
+
+    @Setting(key: "report_exclude", defaultValue: [])
+    public var reportExclude: [String]
+
+    @Setting(key: "build_arguments", defaultValue: [])
+    public var buildArguments: [String]
+
+    @Setting(key: "retain_assign_only_property_types", defaultValue: [], valueSanitizer: PropertyTypeSanitizer.sanitize)
+    public var retainAssignOnlyPropertyTypes: [String]
+
+    @Setting(key: "retain_objc_accessible", defaultValue: false)
+    public var retainObjcAccessible: Bool
+
+    @Setting(key: "retain_public", defaultValue: false)
+    public var retainPublic: Bool
+
+    @Setting(key: "retain_assign_only_properties", defaultValue: false)
+    public var retainAssignOnlyProperties: Bool
+
+    @Setting(key: "retain_unused_protocol_func_params", defaultValue: false)
+    public var retainUnusedProtocolFuncParams: Bool
+
+    @Setting(key: "disable_redundant_public_analysis", defaultValue: false)
+    public var disableRedundantPublicAnalysis: Bool
+
+    @Setting(key: "verbose", defaultValue: false)
+    public var verbose: Bool
+
+    @Setting(key: "quiet", defaultValue: false)
+    public var quiet: Bool
+
+    @Setting(key: "disable_update_check", defaultValue: false)
+    public var disableUpdateCheck: Bool
+
+    @Setting(key: "strict", defaultValue: false)
+    public var strict: Bool
+
+    @Setting(key: "index_store_path", defaultValue: nil)
     public var indexStorePath: String?
-    public var skipBuild: Bool = false
-    public var cleanBuild: Bool = false
+
+    @Setting(key: "skip_build", defaultValue: false)
+    public var skipBuild: Bool
+
+    @Setting(key: "clean_build", defaultValue: false)
+    public var cleanBuild: Bool
 
     // Non user facing.
     public var guidedSetup: Bool = false
 
-    // Dependencies
+    // Dependencies.
     private var logger: BaseLogger // Must use BaseLogger as Logger depends upon Configuration.
 
     public func asYaml() throws -> String {
-        let config: [String: Any?] = [
-            "workspace": workspace,
-            "project": project,
-            "format": outputFormat.rawValue.lowercased(),
-            "schemes": schemes,
-            "targets": targets,
-            "index_exclude": indexExclude,
-            "report_exclude": reportExclude,
-            "retain_objc_accessible": retainObjcAccessible,
-            "retain_public": retainPublic,
-            "retain_assign_only_properties": retainAssignOnlyProperties,
-            "retain_assign_only_property_types": retainAssignOnlyPropertyTypes,
-            "retain_unused_protocol_func_params": retainUnusedProtocolFuncParams,
-            "disable_redundant_public_analysis": disableRedundantPublicAnalysis,
-            "verbose": verbose,
-            "quiet": quiet,
-            "disable_update_check": !updateCheck,
-            "strict": strict,
-            "index_store_path": indexStorePath,
-            "skip_build": skipBuild,
-            "clean_build": cleanBuild,
-            "build_arguments": buildArguments
-        ]
+        var config: [String: Any?] = [:]
+
+        if $workspace.hasNonDefaultValue {
+            config[$workspace.key] = workspace
+        }
+
+        if $project.hasNonDefaultValue {
+            config[$project.key] = project
+        }
+
+        if $schemes.hasNonDefaultValue {
+            config[$schemes.key] = schemes
+        }
+
+        if $targets.hasNonDefaultValue {
+            config[$targets.key] = targets
+        }
+
+        if $outputFormat.hasNonDefaultValue {
+            config[$outputFormat.key] = outputFormat.rawValue
+        }
+
+        if $indexExclude.hasNonDefaultValue {
+            config[$indexExclude.key] = indexExclude
+        }
+
+        if $reportExclude.hasNonDefaultValue {
+            config[$reportExclude.key] = reportExclude
+        }
+
+        if $retainObjcAccessible.hasNonDefaultValue {
+            config[$retainObjcAccessible.key] = retainObjcAccessible
+        }
+
+        if $retainPublic.hasNonDefaultValue {
+            config[$retainPublic.key] = retainPublic
+        }
+
+        if $retainAssignOnlyProperties.hasNonDefaultValue {
+            config[$retainAssignOnlyProperties.key] = retainAssignOnlyProperties
+        }
+
+        if $retainAssignOnlyPropertyTypes.hasNonDefaultValue {
+            config[$retainAssignOnlyPropertyTypes.key] = retainAssignOnlyPropertyTypes
+        }
+
+        if $retainUnusedProtocolFuncParams.hasNonDefaultValue {
+            config[$retainUnusedProtocolFuncParams.key] = retainUnusedProtocolFuncParams
+        }
+
+        if $disableRedundantPublicAnalysis.hasNonDefaultValue {
+            config[$disableRedundantPublicAnalysis.key] = disableRedundantPublicAnalysis
+        }
+
+        if $verbose.hasNonDefaultValue {
+            config[$verbose.key] = verbose
+        }
+
+        if $quiet.hasNonDefaultValue {
+            config[$quiet.key] = quiet
+        }
+
+        if $disableUpdateCheck.hasNonDefaultValue {
+            config[$disableUpdateCheck.key] = disableUpdateCheck
+        }
+
+        if $strict.hasNonDefaultValue {
+            config[$strict.key] = strict
+        }
+
+        if $indexStorePath.hasNonDefaultValue {
+            config[$indexStorePath.key] = indexStorePath
+        }
+
+        if $skipBuild.hasNonDefaultValue {
+            config[$skipBuild.key] = skipBuild
+        }
+
+        if $cleanBuild.hasNonDefaultValue {
+            config[$cleanBuild.key] = cleanBuild
+        }
+
+        if $buildArguments.hasNonDefaultValue {
+            config[$buildArguments.key] = buildArguments
+        }
 
         return try Yams.dump(object: config)
     }
 
-    public func saveYaml() throws {
+    public func save() throws {
         let data = try asYaml().data(using: .utf8)
         FileManager.default.createFile(atPath: Self.defaultConfigurationFile, contents: data)
     }
 
-    public func applyYamlConfiguration() throws {
-        guard let path = try yamlConfigurationPath() else { return }
+    public func load(from path: Path?) throws {
+        guard let path = try configurationPath(withUserProvided: path) else { return }
 
         let encodedYAML = try path.read(.utf8)
         let yaml = try Yams.load(yaml: encodedYAML) as? [String: Any] ?? [:]
 
         for (key, value) in yaml {
             switch key {
-            case "workspace":
-                self.workspace = convert(value, to: String.self)
-            case "project":
-                self.project = convert(value, to: String.self)
-            case "schemes":
-                self.schemes = convert(value, to: [String].self) ?? []
-            case "targets":
-                self.targets = convert(value, to: [String].self) ?? []
-            case "index_exclude":
-                self.indexExclude = convert(value, to: [String].self) ?? []
-            case "report_exclude":
-                self.reportExclude = convert(value, to: [String].self) ?? []
-            case "format":
-                if let value = convert(value, to: String.self) {
-                    self.outputFormat = try OutputFormat.make(named: value)
-                }
-            case "retain_public":
-                self.retainPublic = convert(value, to: Bool.self) ?? false
-            case "retain_assign_only_properties":
-                self.retainAssignOnlyProperties = convert(value, to: Bool.self) ?? false
-            case "retain_assign_only_property_types":
-                self.retainAssignOnlyPropertyTypes = convert(value, to: [String].self) ?? []
-            case "retain_objc_accessible":
-                self.retainObjcAccessible = convert(value, to: Bool.self) ?? false
-            case "retain_unused_protocol_func_params":
-                self.retainUnusedProtocolFuncParams = convert(value, to: Bool.self) ?? false
-            case "disable_redundant_public_analysis":
-                self.disableRedundantPublicAnalysis = convert(value, to: Bool.self) ?? false
-            case "verbose":
-                self.verbose = convert(value, to: Bool.self) ?? false
-            case "quiet":
-                self.quiet = convert(value, to: Bool.self) ?? false
-            case "disable_update_check":
-                self.updateCheck = !(convert(value, to: Bool.self) ?? false)
-            case "strict":
-                self.strict = convert(value, to: Bool.self) ?? false
-            case "xcargs":
-                logger.warn("\(path.string): 'xcargs' is deprecated and has been superseded by 'build_arguments'")
-                self.buildArguments = (convert(value, to: String.self) ?? "").split(separator: " ").map { String($0) }
-            case "index_store_path":
-                self.indexStorePath = convert(value, to: String.self)
-            case "skip_build":
-                self.skipBuild = convert(value, to: Bool.self) ?? false
-            case "clean_build":
-                self.cleanBuild = convert(value, to: Bool.self) ?? false
-            case "build_arguments":
-                self.buildArguments = convert(value, to: [String].self) ?? []
+            case $workspace.key:
+                $workspace.assign(value)
+            case $project.key:
+                $project.assign(value)
+            case $schemes.key:
+                $schemes.assign(value)
+            case $targets.key:
+                $targets.assign(value)
+            case $indexExclude.key:
+                $indexExclude.assign(value)
+            case $reportExclude.key:
+                $reportExclude.assign(value)
+            case $outputFormat.key:
+                $outputFormat.assign(value)
+            case $retainPublic.key:
+                $retainPublic.assign(value)
+            case $retainAssignOnlyProperties.key:
+                $retainAssignOnlyProperties.assign(value)
+            case $retainAssignOnlyPropertyTypes.key:
+                $retainAssignOnlyPropertyTypes.assign(value)
+            case $retainObjcAccessible.key:
+                $retainObjcAccessible.assign(value)
+            case $retainUnusedProtocolFuncParams.key:
+                $retainUnusedProtocolFuncParams.assign(value)
+            case $disableRedundantPublicAnalysis.key:
+                $disableRedundantPublicAnalysis.assign(value)
+            case $verbose.key:
+                $verbose.assign(value)
+            case $quiet.key:
+                $quiet.assign(value)
+            case $disableUpdateCheck.key:
+                $disableUpdateCheck.assign(value)
+            case $strict.key:
+                $strict.assign(value)
+            case $indexStorePath.key:
+                $indexStorePath.assign(value)
+            case $skipBuild.key:
+                $skipBuild.assign(value)
+            case $cleanBuild.key:
+                $cleanBuild.assign(value)
+            case $buildArguments.key:
+                $buildArguments.assign(value)
             default:
                 logger.warn("\(path.string): invalid key '\(key)'")
             }
@@ -158,10 +245,6 @@ public final class Configuration: Singleton {
 
     // MARK: - Private
 
-    private func convert<T>(_ value: Any, to type: T.Type) -> T? {
-        value as? T
-    }
-
     private func glob(_ pattern: String) -> [Path] {
         var patternPath = Path(pattern)
 
@@ -174,10 +257,8 @@ public final class Configuration: Singleton {
         }
     }
 
-    private func yamlConfigurationPath() throws -> Path? {
-        if let config = config {
-            let path = Path(config)
-
+    private func configurationPath(withUserProvided path: Path?) throws -> Path? {
+        if let path = path {
             if !path.exists {
                 throw PeripheryError.pathDoesNotExist(path: path.absolute().string)
             }
@@ -186,5 +267,43 @@ public final class Configuration: Singleton {
         }
 
         return [Path(Self.defaultConfigurationFile), Path(".periphery.yaml")].first { $0.exists }
+    }
+}
+
+@propertyWrapper public final class Setting<Value: Equatable> {
+    typealias ValueConverter = (Any) -> Value?
+    typealias ValueSanitizer = (Value) -> Value
+
+    let key: String
+
+    private let defaultValue: Value
+    private let valueConverter: ValueConverter
+    private let valueSanitizer: ValueSanitizer
+    private var value: Value
+
+    init(key: String,
+         defaultValue: Value,
+         valueConverter: @escaping ValueConverter = { $0 as? Value },
+         valueSanitizer: @escaping ValueSanitizer = { $0 }) {
+        self.key = key
+        self.value = defaultValue
+        self.defaultValue = defaultValue
+        self.valueConverter = valueConverter
+        self.valueSanitizer = valueSanitizer
+    }
+
+    public var wrappedValue: Value {
+        get { value }
+        set { value = valueSanitizer(newValue) }
+    }
+
+    public var projectedValue: Setting { self }
+
+    var hasNonDefaultValue: Bool {
+        value != defaultValue
+    }
+
+    func assign(_ value: Any) {
+        wrappedValue = valueConverter(value) ?? defaultValue
     }
 }

@@ -6,7 +6,6 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case shellOuputEncodingFailed(cmd: String, args: [String], encoding: String.Encoding)
     case usageError(String)
     case underlyingError(Error)
-    case invalidFormatter(name: String)
     case invalidScheme(name: String, project: String)
     case invalidTarget(name: String, project: String)
     case testTargetNotBuildable(name: String)
@@ -32,10 +31,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
         case let .usageError(message):
             return message
         case let .underlyingError(error):
-            return String(describing: error)
-        case .invalidFormatter(let name):
-            let formatters = OutputFormat.allCases.map { $0.rawValue }.joined(separator: ", ")
-            return "Invalid formatter '\(name)'. Available formatters are: \(formatters)."
+            return "(\(type(of: error))) \(String(describing: error))" 
         case let .invalidScheme(name, project):
             return "Scheme '\(name)' does not exist in '\(project)'."
         case let .invalidTarget(name, project):
