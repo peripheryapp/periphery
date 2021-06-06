@@ -1137,11 +1137,8 @@ class RetentionTest: SourceGraphTestCase {
                                 descendentOf: (.class, "Fixture111Wrapper"))
             XCTAssertReferenced((.varInstance, "projectedValue"),
                                 descendentOf: (.class, "Fixture111Wrapper"))
-
-            #if swift(>=5.3)
             XCTAssertReferenced((.functionMethodStatic, "buildBlock()"),
                                 descendentOf: (.class, "Fixture111"))
-            #endif
         }
     }
 

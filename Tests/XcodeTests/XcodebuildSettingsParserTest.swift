@@ -15,7 +15,7 @@ class XcodebuildSettingsParserTest: XCTestCase {
     override static func setUp() {
         super.setUp()
 
-        project = try! XcodeProject.make(path: iOSProjectPath)
+        project = try! XcodeProject.make(path: UIKitProjectPath)
     }
 
     override func setUp() {
@@ -25,10 +25,10 @@ class XcodebuildSettingsParserTest: XCTestCase {
     }
 
     func testBuildTargets() {
-        let settings = try! xcodebuild.buildSettings(for: project, scheme: "iOSProject")
+        let settings = try! xcodebuild.buildSettings(for: project, scheme: "UIKitProject")
         let parser = XcodebuildSettingsParser(settings: settings)
 
-        XCTAssertEqual(parser.buildTargets(action: "build").sorted(), ["iOSProject"])
-        XCTAssertEqual(parser.buildTargets(action: "test").sorted(), ["iOSProject", "iOSProjectTests"])
+        XCTAssertEqual(parser.buildTargets(action: "build").sorted(), ["UIKitProject"])
+        XCTAssertEqual(parser.buildTargets(action: "test").sorted(), ["UIKitProject", "UIKitProjectTests"])
     }
 }

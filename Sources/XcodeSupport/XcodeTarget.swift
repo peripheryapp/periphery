@@ -101,7 +101,17 @@ final class XcodeTarget {
         let files = target.buildConfigurationList?.buildConfigurations.compactMap {
             $0.buildSettings["INFOPLIST_FILE"] as? String
         } ?? []
-        infoPlistFiles_ = Set(files.map { project.sourceRoot.absolute() + $0 })
+        infoPlistFiles_ = Set(files.map { parseInfoPlistSetting($0) })
+    }
+
+    private func parseInfoPlistSetting(_ setting: String) -> Path {
+        var setting = setting.replacingOccurrences(of: "$(SRCROOT)", with: "")
+
+        if setting.hasPrefix("/") {
+            setting.removeFirst()
+        }
+
+        return project.sourceRoot.absolute() + setting
     }
 }
 
