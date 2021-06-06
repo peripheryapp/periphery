@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: [5.3]
+        swift: [5.4, 5.3]
     runs-on: ubuntu-latest
     container: swift:${{ matrix.swift }}
     name: Linux
