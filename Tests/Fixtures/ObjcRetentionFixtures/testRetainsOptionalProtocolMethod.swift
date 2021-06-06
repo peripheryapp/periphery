@@ -1,5 +1,3 @@
-#if os(macOS)
-// It appears optional protocol members aren't supported on Linux?
 import Foundation
 
 @objc protocol FixtureProtocol127 {
@@ -12,4 +10,3 @@ public class FixtureClass127: FixtureProtocol127 {
         p?.optionalFunc?()
     }
 }
-#endif

@@ -6,6 +6,7 @@ import TestShared
 
 class RetentionTest: SourceGraphTestCase {
     static var fixtureTarget: SPM.Target!
+    static var objcFixtureTarget: SPM.Target?
     static var driver: SPMProjectDriver!
     private let performKnownFailures = false
 
@@ -17,10 +18,17 @@ class RetentionTest: SourceGraphTestCase {
 
         let package = try! SPM.Package.load()
         fixtureTarget = package.targets.first { $0.name == "RetentionFixtures" }!
+        objcFixtureTarget = package.targets.first { $0.name == "ObjcRetentionFixtures" }
+
+        var targets = [fixtureTarget]
+
+        #if os(macOS)
+        targets.append(objcFixtureTarget)
+        #endif
 
         driver = SPMProjectDriver(
             package: package,
-            targets: [fixtureTarget],
+            targets: targets.compactMap { $0 },
             configuration: configuration,
             logger: inject()
         )
@@ -1217,36 +1225,44 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testRetainsOptionalProtocolMethod() {
-        #if os(macOS)
-        // It appears optional protocol members aren't supported on Linux?
+    // MARK: - Objective-C
 
-        analyze(retainPublic: true) {
+    #if os(macOS)
+
+    // https://bugs.swift.org/browse/SR-13930
+    func testRetainsOptionalProtocolMethodImplementedInSubclass() {
+        guard performKnownFailures else { return }
+
+        analyze(retainPublic: true, objc: true) {
+            XCTAssertReferenced((.class, "FixtureClass125Base"))
+            XCTAssertReferenced((.class, "FixtureClass125"))
+            XCTAssertReferenced((.functionMethodInstance, "fileManager(_:shouldRemoveItemAtPath:)"), descendentOf: (.class, "FixtureClass125"))
+        }
+    }
+
+    func testRetainsOptionalProtocolMethod() {
+        analyze(retainPublic: true, objc: true) {
             XCTAssertReferenced((.class, "FixtureClass127"))
             XCTAssertReferenced((.functionMethodInstance, "someFunc()"), descendentOf: (.class, "FixtureClass127"))
             XCTAssertReferenced((.protocol, "FixtureProtocol127"))
             XCTAssertReferenced((.functionMethodInstance, "optionalFunc()"), descendentOf: (.protocol, "FixtureProtocol127"))
         }
-        #endif
     }
 
-    // MARK: - Objective-C
-
-    #if os(macOS)
     func testRetainsObjcAnnotatedClass() {
-        analyze(retainObjcAccessible: true) {
+        analyze(retainObjcAccessible: true, objc: true) {
             XCTAssertReferenced((.class, "FixtureClass21"))
         }
     }
 
     func testRetainsImplicitlyObjcAccessibleClass() {
-        analyze(retainObjcAccessible: true) {
+        analyze(retainObjcAccessible: true, objc: true) {
             XCTAssertReferenced((.class, "FixtureClass126"))
         }
     }
 
     func testRetainsObjcAnnotatedMembers() {
-        analyze(retainObjcAccessible: true) {
+        analyze(retainObjcAccessible: true, objc: true) {
             XCTAssertReferenced((.class, "FixtureClass22"))
             XCTAssertReferenced((.varInstance, "someVar"))
             XCTAssertReferenced((.functionMethodInstance, "someMethod()"))
@@ -1255,13 +1271,13 @@ class RetentionTest: SourceGraphTestCase {
     }
 
     func testDoesNotRetainObjcAnnotatedWithoutOption() {
-        analyze() {
+        analyze(objc: true) {
             XCTAssertNotReferenced((.class, "FixtureClass23"))
         }
     }
 
     func testDoesNotRetainMembersOfObjcAnnotatedClass() {
-        analyze(retainObjcAccessible: true) {
+        analyze(retainObjcAccessible: true, objc: true) {
             XCTAssertReferenced((.class, "FixtureClass24"))
             XCTAssertNotReferenced((.functionMethodInstance, "someMethod()"))
             XCTAssertNotReferenced((.varInstance, "someVar"))
@@ -1269,13 +1285,14 @@ class RetentionTest: SourceGraphTestCase {
     }
 
     func testObjcMembersAnnotationRetainsMembers() {
-        analyze(retainObjcAccessible: true) {
+        analyze(retainObjcAccessible: true, objc: true) {
             XCTAssertReferenced((.class, "FixtureClass25"))
             XCTAssertReferenced((.varInstance, "someVar"))
             XCTAssertReferenced((.functionMethodInstance, "someMethod()"))
             XCTAssertNotReferenced((.functionMethodInstance, "somePrivateMethod()"))
         }
     }
+
     #endif
 
     // MARK: - Known Failures
@@ -1301,20 +1318,6 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    // https://bugs.swift.org/browse/SR-13930
-    func testRetainsOptionalProtocolMethodImplementedInSubclass() {
-        #if os(macOS)
-        // It appears optional protocol members aren't supported on Linux?
-        guard performKnownFailures else { return }
-
-        analyze(retainPublic: true) {
-            XCTAssertReferenced((.class, "FixtureClass125Base"))
-            XCTAssertReferenced((.class, "FixtureClass125"))
-            XCTAssertReferenced((.functionMethodInstance, "fileManager(_:shouldRemoveItemAtPath:)"), descendentOf: (.class, "FixtureClass125"))
-        }
-        #endif
-    }
-
     // https://bugs.swift.org/browse/SR-13768
     func testCustomConstructorWithLiteral() {
         guard performKnownFailures else { return }
@@ -1324,11 +1327,11 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    // Broken as of Xcode 10.
+    // https://bugreport.apple.com/web/?problemID=44703843
     func testGetSetPropertyWithDefaultImplementation() {
         guard performKnownFailures else { return }
 
-        // Broken as of Xcode 10.
-        // https://bugreport.apple.com/web/?problemID=44703843
         analyze(retainPublic: true) {
 
             XCTAssertReferenced((.class, "FixtureClass100"))
@@ -1357,26 +1360,31 @@ class RetentionTest: SourceGraphTestCase {
 
     private func analyze(retainPublic: Bool = false,
                          retainObjcAccessible: Bool = false,
-                         fixture: String? = nil,
+                         objc: Bool = false,
                          _ testBlock: () throws -> Void
     ) rethrows {
         #if os(macOS)
-        let testName = fixture ?? String(name.split(separator: " ").last!).replacingOccurrences(of: "]", with: "")
+        let testName = String(name.split(separator: " ").last!).replacingOccurrences(of: "]", with: "")
         #else
-        let testName = fixture ?? String(name.split(separator: ".", maxSplits: 1).last!)
+        let testName = String(name.split(separator: ".", maxSplits: 1).last!)
         #endif
 
-        let testFixturePath = fixturePath(for: testName)
+        let testFixturePath = fixturePath(for: testName, objc: objc)
         let configuration = inject(Configuration.self)
         configuration.retainPublic = retainPublic
         configuration.retainObjcAccessible = retainObjcAccessible
 
-        XCTAssertTrue(testFixturePath.exists, "\(testFixturePath.string) does not exist.")
+        if !testFixturePath.exists {
+            XCTFail("\(testFixturePath.string) does not exist.")
+            return
+        }
+
+        let target = objc ? Self.objcFixtureTarget! : Self.fixtureTarget!
 
         let newFixtureTarget = SPM.Target(
-            name: Self.fixtureTarget.name,
-            path: Self.fixtureTarget.path,
-            moduleType: Self.fixtureTarget.moduleType,
+            name: target.name,
+            path: target.path,
+            moduleType: target.moduleType,
             sources: [testFixturePath.string])
 
         Self.driver.setTargets([newFixtureTarget])
@@ -1398,7 +1406,8 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    private func fixturePath(for file: String) -> Path {
-        return ProjectRootPath + "Tests/RetentionFixtures/\(file).swift"
+    private func fixturePath(for file: String, objc: Bool) -> Path {
+        let fixtureFolder = objc ? "ObjcRetentionFixtures" : "RetentionFixtures"
+        return ProjectRootPath + "Tests/Fixtures/\(fixtureFolder)/\(file).swift"
     }
 }

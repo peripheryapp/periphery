@@ -89,7 +89,7 @@ var targets: [PackageDescription.Target] = [
     .target(
         name: "RetentionFixtures",
         dependencies: ["RetentionFixturesCrossModule"],
-        path: "Tests/RetentionFixtures"
+        path: "Tests/Fixtures/RetentionFixtures"
     ),
     .target(
         name: "UnusedParameterFixtures",
@@ -133,7 +133,7 @@ var targets: [PackageDescription.Target] = [
 ]
 
 #if os(macOS)
-targets.append(
+targets.append(contentsOf: [
     .target(
         name: "XcodeSupport",
         dependencies: [
@@ -141,10 +141,11 @@ targets.append(
             .target(name: "PeripheryKit"),
             .product(name: "XcodeProj", package: "XcodeProj"),
         ]
-    )
-)
-
-targets.append(
+    ),
+    .target(
+        name: "ObjcRetentionFixtures",
+        path: "Tests/Fixtures/ObjcRetentionFixtures"
+    ),
     .testTarget(
         name: "XcodeTests",
         dependencies: [
@@ -154,7 +155,7 @@ targets.append(
         ],
         exclude: ["iOSProject"]
     )
-)
+])
 #endif
 
 let package = Package(
