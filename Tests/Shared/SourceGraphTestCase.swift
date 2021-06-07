@@ -3,53 +3,52 @@ import PathKit
 import PeripheryKit
 
 open class SourceGraphTestCase: XCTestCase {
-    open var graph: SourceGraph!
+    static var graph: SourceGraph!
 
-    public func XCTAssertNotReferenced(_ description: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = materialize(description) else { return }
-
-        if !graph.unreachableDeclarations.contains(declaration) {
-            XCTFail("Expected declaration to not be referenced: \(declaration)", file: file, line: line)
+    var graph: SourceGraph! {
+        get {
+            Self.graph
+        }
+        set {
+            Self.graph = newValue
         }
     }
 
-    public func XCTAssertReferenced(_ description: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = materialize(description) else { return }
+    private var scopedDeclarationStack: [Declaration] = []
+
+    func assertReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, file: file, line: line) else { return }
 
         if !graph.reachableDeclarations.contains(declaration) {
             XCTFail("Expected declaration to be referenced: \(declaration)", file: file, line: line)
         }
+
+        scopedDeclarationStack.append(declaration)
+        scopedAssertions?()
+        scopedDeclarationStack.removeLast()
     }
 
-    public func XCTAssertReferenced(_ description: DeclarationDescription, descendentOf parentDescriptions: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
-        guard let parentDeclaration = materialize(parentDescriptions),
-              let descendent = materialize(description, in: parentDeclaration.descendentDeclarations)
-        else { return }
+    func assertNotReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, file: file, line: line) else { return }
 
-        if !graph.reachableDeclarations.contains(descendent) {
-            XCTFail("Expected declaration to be referenced: \(descendent)", file: file, line: line)
+        if !graph.unreachableDeclarations.contains(declaration) {
+            XCTFail("Expected declaration to not be referenced: \(declaration)", file: file, line: line)
         }
+
+        scopedDeclarationStack.append(declaration)
+        scopedAssertions?()
+        scopedDeclarationStack.removeLast()
     }
 
-    public func XCTAssertNotReferenced(_ description: DeclarationDescription, descendentOf parentDescriptions: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
-        guard let parentDeclaration = materialize(parentDescriptions),
-              let descendent = materialize(description, in: parentDeclaration.descendentDeclarations)
-        else { return }
-
-        if graph.reachableDeclarations.contains(descendent) {
-            XCTFail("Expected descendent declaration to not be referenced: \(descendent)", file: file, line: line)
-        }
-    }
-
-    public func XCTAssertRedundantProtocol(_ name: String, implementedBy conformances: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = materialize((.protocol, name)) else { return }
+    func assertRedundantProtocol(_ name: String, implementedBy conformances: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(.protocol(name), file: file, line: line) else { return }
 
         if let references = graph.redundantProtocols[declaration] {
             let decls = references.compactMap { $0.parent }
 
             for conformance in conformances {
                 if !decls.contains(where: { $0.kind == conformance.kind && $0.name == conformance.name }) {
-                    XCTFail("Expected \(conformance) to implement protocol '\(name)'.")
+                    XCTFail("Expected \(conformance) to implement protocol '\(name)'.", file: file, line: line)
                 }
             }
         } else {
@@ -57,50 +56,77 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
-    public func XCTAssertNotRedundantProtocol(_ name: String, file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = find((.protocol, name)) else {
-            XCTFail("Expected protocol '\(name)' to exist.", file: file, line: line)
-            return
-        }
+    func assertNotRedundantProtocol(_ name: String, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(.protocol(name), file: file, line: line) else { return }
 
         if graph.redundantProtocols.keys.contains(declaration) {
             XCTFail("Expected '\(name)' to not be redundant.", file: file, line: line)
         }
     }
 
-    public func find(_ description: DeclarationDescription, in collection: Set<Declaration>? = nil) -> Declaration? {
-        return (collection ?? graph.allDeclarations).first { $0.kind == description.kind && $0.name == description.name }
-    }
+    func assertAccessibility(_ description: DeclarationDescription, _ accessibility: Accessibility, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, file: file, line: line) else { return }
 
-    public func get(_ param: String, _ function: String, _ cls: String, _ kind: Declaration.Kind = .class) -> Declaration? {
-        let decl = find((kind, cls)) ?? find((.protocol, cls))
-        let funcDecl = Declaration.Kind.functionKinds.mapFirst {
-            find(($0, function), in: decl!.declarations)
-        }
-        return find((.varParameter, param), in: funcDecl!.unusedParameters)
-    }
-
-    public func materialize(_ descriptions: [DeclarationDescription], in declarations: Set<Declaration>? = nil) -> Declaration? {
-        var parentDecls = declarations ?? graph.allDeclarations
-        var decl: Declaration?
-
-        for description in descriptions.reversed() {
-            guard let decl_ = materialize(description, in: parentDecls) else { return nil }
-            decl = decl_
-            parentDecls = decl?.declarations ?? []
+        if declaration.accessibility.value != accessibility {
+            XCTFail("Expected \(description) to have \(accessibility) accessibility, but found \(declaration.accessibility.value).", file: file, line: line)
         }
 
-        return decl
+        scopedDeclarationStack.append(declaration)
+        scopedAssertions?()
+        scopedDeclarationStack.removeLast()
     }
 
-    public func materialize(_ description: DeclarationDescription, in collection: Set<Declaration>? = nil, file: StaticString = #file, line: UInt = #line) -> Declaration? {
-        guard let decl = find(description, in: collection ?? graph.allDeclarations) else {
+    func assertRedundantPublicAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, in: graph.allDeclarationsUnmodified, file: file, line: line) else { return }
+
+        if !graph.redundantPublicAccessibility.keys.contains(declaration) {
+            XCTFail("Expected declaration to have redundant public accessibility: \(declaration)", file: file, line: line)
+        }
+
+        scopedDeclarationStack.append(declaration)
+        scopedAssertions?()
+        scopedDeclarationStack.removeLast()
+    }
+
+    func assertNotRedundantPublicAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, in: graph.allDeclarationsUnmodified, file: file, line: line) else { return }
+
+        if graph.redundantPublicAccessibility.keys.contains(declaration) {
+            XCTFail("Expected declaration to not have redundant public accessibility: \(declaration)", file: file, line: line)
+        }
+
+        scopedDeclarationStack.append(declaration)
+        scopedAssertions?()
+        scopedDeclarationStack.removeLast()
+    }
+
+    func assertUsedParameter(_ name: String, file: StaticString = #file, line: UInt = #line) {
+        let declaration = materialize(.varParameter(name), fail: false, file: file, line: line)
+
+        if declaration != nil {
+            XCTFail("Expected parameter '\(name)' to be used.", file: file, line: line)
+        }
+    }
+
+    // MARK: - Private
+
+    private func materialize(_ description: DeclarationDescription, in defaultDeclarationSet: Set<Declaration>? = nil, fail: Bool = true, file: StaticString, line: UInt) -> Declaration? {
+        let scopedDeclarations: Set<Declaration>
+
+        if let scopedDeclaration = scopedDeclarationStack.last {
+            scopedDeclarations = scopedDeclaration.declarations.union(scopedDeclaration.unusedParameters)
+        } else {
+            scopedDeclarations = defaultDeclarationSet ?? graph.rootDeclarations
+        }
+
+        if let declaration = scopedDeclarations.first(where: { $0.kind == description.kind && $0.name == description.name }) {
+            return declaration
+        }
+
+        if fail {
             XCTFail("Declaration not found: \(description).", file: file, line: line)
-            return nil
         }
 
-        return decl
+        return nil
     }
-
-    public typealias DeclarationDescription = (kind: Declaration.Kind, name: String)
 }

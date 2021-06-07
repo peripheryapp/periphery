@@ -5,25 +5,23 @@ public final class SourceGraph {
     private(set) public var allDeclarations: Set<Declaration> = []
     private(set) public var reachableDeclarations: Set<Declaration> = []
     private(set) public var redundantProtocols: [Declaration: Set<Reference>] = [:]
+    private(set) public var rootDeclarations: Set<Declaration> = []
+    private(set) public var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
 
-    private(set) var rootDeclarations: Set<Declaration> = []
     private(set) var rootReferences: Set<Reference> = []
     private(set) var allReferences: Set<Reference> = []
     private(set) var retainedDeclarations: Set<Declaration> = []
-    private(set) var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
     private(set) var potentialAssignOnlyProperties: Set<Declaration> = []
     private(set) var ignoredDeclarations: Set<Declaration> = []
 
     private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
-    private var _allDeclarationsUnmodified: Set<Declaration> = []
 
     private let mutationQueue: DispatchQueue
 
-    var allDeclarationsUnmodified: Set<Declaration> {
-        _allDeclarationsUnmodified
-    }
+    private var _allDeclarationsUnmodified: Set<Declaration> = []
+    public var allDeclarationsUnmodified: Set<Declaration> { _allDeclarationsUnmodified }
 
     var xibReferences: [XibReference] = []
     var infoPlistReferences: [InfoPlistReference] = []

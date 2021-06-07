@@ -1,21 +1,10 @@
 import XCTest
 import PathKit
 import Shared
-import TestShared
+@testable import TestShared
 @testable import PeripheryKit
 
 class RedundantPublicAccessabilityTest: SourceGraphTestCase {
-    static private var graph: SourceGraph!
-
-    override var graph: SourceGraph! {
-        get {
-            Self.graph
-        }
-        set {
-            Self.graph = newValue
-        }
-    }
-
     override static func setUp() {
         super.setUp()
 
@@ -39,108 +28,83 @@ class RedundantPublicAccessabilityTest: SourceGraphTestCase {
     }
 
     func testRedundantPublicType() {
-        XCTAssertRedundantPublicAccessibility((.class, "RedundantPublicType"))
-        XCTAssertRedundantPublicAccessibility((.functionMethodInstance, "redundantPublicFunction()"), descendentOf: (.class, "RedundantPublicType"))
+        assertRedundantPublicAccessibility(.class("RedundantPublicType")) {
+            self.assertRedundantPublicAccessibility(.functionMethodInstance("redundantPublicFunction()"))
+        }
     }
 
     func testPublicDeclarationInInternalParent() {
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicDeclarationInInternalParent"))
-        XCTAssertRedundantPublicAccessibility((.functionMethodInstance, "somePublicFunc()"), descendentOf: (.class, "PublicDeclarationInInternalParent"))
+        assertNotRedundantPublicAccessibility(.class("PublicDeclarationInInternalParent")) {
+            self.assertRedundantPublicAccessibility(.functionMethodInstance("somePublicFunc()"))
+        }
     }
 
     func testPublicExtensionOnRedundantPublicKind() {
-        XCTAssertRedundantPublicAccessibility((.class, "PublicExtensionOnRedundantPublicKind"))
-        XCTAssertRedundantPublicAccessibility((.extensionClass, "PublicExtensionOnRedundantPublicKind"))
+        assertRedundantPublicAccessibility(.class("PublicExtensionOnRedundantPublicKind"))
+        assertRedundantPublicAccessibility(.extensionClass("PublicExtensionOnRedundantPublicKind"))
     }
 
     func testPublicTypeUsedAsPublicPropertyType() {
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicPropertyType"))
-        XCTAssertNotRedundantPublicAccessibility((.struct, "PublicTypeUsedAsPublicPropertyGenericArgumentType"))
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicPropertyArrayType"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyType"))
+        assertNotRedundantPublicAccessibility(.struct("PublicTypeUsedAsPublicPropertyGenericArgumentType"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyArrayType"))
     }
 
     func testPublicTypeUsedAsPublicInitializerParameterType() {
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicInitializerParameterType"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicInitializerParameterType"))
     }
 
     func testPublicTypeUsedAsPublicFunctionParameterType() {
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicFunctionParameterType"))
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicFunctionParameterTypeClosureArgument"))
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicFunctionParameterTypeClosureReturnType"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicFunctionParameterType"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicFunctionParameterTypeClosureArgument"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicFunctionParameterTypeClosureReturnType"))
     }
 
     func testPublicTypeUsedAsPublicFunctionReturnType() {
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicFunctionReturnType"))
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicFunctionReturnTypeClosureArgument"))
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicFunctionReturnTypeClosureReturnType"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicFunctionReturnType"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicFunctionReturnTypeClosureArgument"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicFunctionReturnTypeClosureReturnType"))
     }
 
     func testPublicTypeUsedAsPublicSubscriptParameterType() {
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicSubscriptParameterType"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicSubscriptParameterType"))
     }
 
     func testPublicTypeUsedAsPublicSubscriptReturnType() {
-        XCTAssertNotRedundantPublicAccessibility((.class, "PublicTypeUsedAsPublicSubscriptReturnType"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicSubscriptReturnType"))
     }
 
     func testPublicTypeUsedInPublicFunctionBody() {
-        XCTAssertRedundantPublicAccessibility((.class, "PublicTypeUsedInPublicFunctionBody"))
+        assertRedundantPublicAccessibility(.class("PublicTypeUsedInPublicFunctionBody"))
     }
 
     func testIgnoreCommentCommands() {
-        XCTAssertNotRedundantPublicAccessibility((.class, "IgnoreCommentCommand"))
-        XCTAssertNotRedundantPublicAccessibility((.class, "IgnoreAllCommentCommand"))
+        assertNotRedundantPublicAccessibility(.class("IgnoreCommentCommand"))
+        assertNotRedundantPublicAccessibility(.class("IgnoreAllCommentCommand"))
     }
 
     func testTestableImport() {
-        XCTAssertRedundantPublicAccessibility((.class, "RedundantPublicTestableImportClass"))
-        XCTAssertRedundantPublicAccessibility((.varInstance, "testableProperty"), descendentOf: (.class, "RedundantPublicTestableImportClass"))
-        XCTAssertNotRedundantPublicAccessibility((.class, "NotRedundantPublicTestableImportClass"))
+        assertRedundantPublicAccessibility(.class("RedundantPublicTestableImportClass")) {
+            self.assertRedundantPublicAccessibility(.varInstance("testableProperty"))
+        }
+        assertNotRedundantPublicAccessibility(.class("NotRedundantPublicTestableImportClass"))
     }
 
     func testFunctionGenericParameter() {
-        XCTAssertNotRedundantPublicAccessibility((.protocol, "PublicTypeUsedAsPublicFunctionGenericParameter_ProtocolA"))
-        XCTAssertNotRedundantPublicAccessibility((.protocol, "PublicTypeUsedAsPublicFunctionGenericParameter_ProtocolB"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionGenericParameter_ProtocolA"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionGenericParameter_ProtocolB"))
     }
 
     func testFunctionGenericRequirement() {
-        XCTAssertNotRedundantPublicAccessibility((.protocol, "PublicTypeUsedAsPublicFunctionGenericRequirement_Protocol"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionGenericRequirement_Protocol"))
     }
 
     func testGenericClassParameter() {
-        XCTAssertNotRedundantPublicAccessibility((.protocol, "PublicTypeUsedAsPublicClassGenericParameter_ProtocolA"))
-        XCTAssertNotRedundantPublicAccessibility((.protocol, "PublicTypeUsedAsPublicClassGenericParameter_ProtocolB"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicClassGenericParameter_ProtocolA"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicClassGenericParameter_ProtocolB"))
     }
 
     func testClassGenericRequirement() {
-        XCTAssertNotRedundantPublicAccessibility((.protocol, "PublicTypeUsedAsPublicClassGenericRequirement_Protocol"))
-    }
-
-    // MARK: - Private
-
-    private func XCTAssertRedundantPublicAccessibility(_ description: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = materialize(description, in: graph.allDeclarationsUnmodified) else { return }
-
-        if !graph.redundantPublicAccessibility.keys.contains(declaration) {
-            XCTFail("Expected declaration to have redundant public accessibility: \(declaration)", file: file, line: line)
-        }
-    }
-
-    private func XCTAssertRedundantPublicAccessibility(_ description: DeclarationDescription, descendentOf parentDescriptions: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
-        guard let parentDeclaration = materialize(parentDescriptions, in: graph.allDeclarationsUnmodified),
-              let descendent = materialize(description, in: parentDeclaration.descendentDeclarations)
-        else { return }
-
-        if !graph.redundantPublicAccessibility.keys.contains(descendent) {
-            XCTFail("Expected declaration to have redundant public accessibility: \(descendent)", file: file, line: line)
-        }
-    }
-
-    func XCTAssertNotRedundantPublicAccessibility(_ description: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = materialize(description, in: graph.allDeclarationsUnmodified) else { return }
-
-        if graph.redundantPublicAccessibility.keys.contains(declaration) {
-            XCTFail("Expected declaration to not have redundant public accessibility: \(declaration)", file: file, line: line)
-        }
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicClassGenericRequirement_Protocol"))
     }
 }

@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 import PathKit
-import TestShared
+@testable import TestShared
 @testable import PeripheryKit
 
 class PropertyVisitorTest: XCTestCase {

@@ -1,22 +1,11 @@
 import XCTest
 import PathKit
 import Shared
-import TestShared
+@testable import TestShared
 @testable import XcodeSupport
 @testable import PeripheryKit
 
 class SwiftUIProjectTest: SourceGraphTestCase {
-    static private var graph: SourceGraph!
-
-    override var graph: SourceGraph! {
-        get {
-            Self.graph
-        }
-        set {
-            Self.graph = newValue
-        }
-    }
-
     override static func setUp() {
         super.setUp()
 
@@ -41,14 +30,14 @@ class SwiftUIProjectTest: SourceGraphTestCase {
     }
 
     func testRetainsMainAppEntryPoint() {
-        XCTAssertReferenced((.struct, "SwiftUIProjectApp"))
+        assertReferenced(.struct("SwiftUIProjectApp"))
     }
 
     func testRetainsPreviewProvider() {
-        XCTAssertReferenced((.struct, "ContentView_Previews"))
+        assertReferenced(.struct("ContentView_Previews"))
     }
 
     func testRetainsLibraryContentProvider() {
-        XCTAssertReferenced((.struct, "LibraryViewContent"))
+        assertReferenced(.struct("LibraryViewContent"))
     }
 }
