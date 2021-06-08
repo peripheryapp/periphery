@@ -16,23 +16,25 @@ class RetentionTest: SourceGraphTestCase {
         let configuration: Configuration = inject()
         configuration.outputFormat = .json
 
-        let package = try! SPM.Package.load()
-        fixtureTarget = package.targets.first { $0.name == "RetentionFixtures" }!
-        objcFixtureTarget = package.targets.first { $0.name == "ObjcRetentionFixtures" }
+        ProjectRootPath.chdir {
+            let package = try! SPM.Package.load()
+            fixtureTarget = package.targets.first { $0.name == "RetentionFixtures" }!
+            objcFixtureTarget = package.targets.first { $0.name == "ObjcRetentionFixtures" }
 
-        var targets = [fixtureTarget]
+            var targets = [fixtureTarget]
 
-        #if os(macOS)
-        targets.append(objcFixtureTarget)
-        #endif
+#if os(macOS)
+            targets.append(objcFixtureTarget)
+#endif
 
-        driver = SPMProjectDriver(
-            package: package,
-            targets: targets.compactMap { $0 },
-            configuration: configuration,
-            logger: inject()
-        )
-        try! driver.build()
+            driver = SPMProjectDriver(
+                package: package,
+                targets: targets.compactMap { $0 },
+                configuration: configuration,
+                logger: inject()
+            )
+            try! driver.build()
+        }
     }
 
     func testNonReferencedClass() {
