@@ -9,7 +9,15 @@ var dependencies: [Package.Dependency] = [
     .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0")
 ]
 
-#if swift(>=5.4)
+#if swift(>=5.5)
+dependencies.append(
+    .package(
+        name: "SwiftSyntax",
+        url: "https://github.com/apple/swift-syntax",
+        .branch("release/5.5-05142021")
+    )
+)
+#elseif swift(>=5.4)
 dependencies.append(
     .package(
         name: "SwiftSyntax",
