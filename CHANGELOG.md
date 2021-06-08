@@ -2,6 +2,20 @@
 
 ##### Breaking
 
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.6.0 (2021-06-08)
+
+##### Breaking
+
 - Removed support for Swift <= 5.2.
 
 ##### Enhancements
