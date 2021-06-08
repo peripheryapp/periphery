@@ -1,6 +1,6 @@
 import Foundation
 import PathKit
-import TestShared
+@testable import TestShared
 
 var UIKitProjectPath: Path {
     return ProjectRootPath + "Tests/XcodeTests/UIKitProject/UIKitProject.xcodeproj"

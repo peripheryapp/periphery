@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 import PathKit
 import SwiftSyntax
-import TestShared
+@testable import TestShared
 @testable import PeripheryKit
 
 class TypeSyntaxInspectorTest: XCTestCase {

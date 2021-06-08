@@ -1,22 +1,11 @@
 import XCTest
 import PathKit
 import Shared
-import TestShared
+@testable import TestShared
 @testable import XcodeSupport
 @testable import PeripheryKit
 
 class UIKitProjectTest: SourceGraphTestCase {
-    static private var graph: SourceGraph!
-
-    override var graph: SourceGraph! {
-        get {
-            Self.graph
-        }
-        set {
-            Self.graph = newValue
-        }
-    }
-
     override static func setUp() {
         super.setUp()
 
@@ -41,50 +30,60 @@ class UIKitProjectTest: SourceGraphTestCase {
     }
 
     func testRetainsMainAppEntryPoint() {
-        XCTAssertReferenced((.class, "AppDelegate"))
+        assertReferenced(.class("AppDelegate"))
     }
 
     func testRetainsSceneDelegateReferencedInInfoPlist() {
-        XCTAssertReferenced((.class, "SceneDelegate"))
+        assertReferenced(.class("SceneDelegate"))
     }
 
     func testRetainsExtensionPrincipalClassReferencedInInfoPlist() {
-        XCTAssertReferenced((.class, "NotificationService"))
+        assertReferenced(.class("NotificationService"))
     }
 
     func testRetainsXibReferencedClass() {
-        XCTAssertReferenced((.class, "XibViewController"))
-        XCTAssertReferenced((.class, "XibView"))
-        XCTAssertReferenced((.varInstance, "button"), descendentOf: (.class, "XibViewController"))
-        XCTAssertReferenced((.varInstance, "controllerProperty"), descendentOf: (.class, "XibViewController"))
-        XCTAssertReferenced((.varInstance, "viewProperty"), descendentOf: (.class, "XibView"))
-        XCTAssertReferenced((.functionMethodInstance, "click(_:)"), descendentOf: (.class, "XibViewController"))
+        assertReferenced(.class("XibViewController")) {
+            self.assertReferenced(.varInstance("button"))
+            self.assertReferenced(.varInstance("controllerProperty"))
+            self.assertReferenced(.functionMethodInstance("click(_:)"))
+        }
+        assertReferenced(.class("XibView")) {
+            self.assertReferenced(.varInstance("viewProperty"))
+        }
     }
 
     func testRetainsInspectablePropertyInExtension() {
-        XCTAssertReferenced((.varInstance, "customBorderColor"), descendentOf: (.extensionClass, "UIView"))
+        assertReferenced(.extensionClass("UIView")) {
+            self.assertReferenced(.varInstance("customBorderColor"))
+        }
     }
 
     func testRetainsIBActionReferencedViaSubclass() {
-        XCTAssertReferenced((.functionMethodInstance, "clickFromSubclass(_:)"), descendentOf: (.class, "XibViewController2Base"))
+        assertReferenced(.class("XibViewController2Base")) {
+            self.assertReferenced(.functionMethodInstance("clickFromSubclass(_:)"))
+        }
     }
 
     func testRetainsStoryboardReferencedClass() {
-        XCTAssertReferenced((.class, "StoryboardViewController"))
-        XCTAssertReferenced((.varInstance, "button"), descendentOf: (.class, "StoryboardViewController"))
-        XCTAssertReferenced((.functionMethodInstance, "click(_:)"), descendentOf: (.class, "StoryboardViewController"))
+        assertReferenced(.class("StoryboardViewController")) {
+            self.assertReferenced(.varInstance("button"))
+            self.assertReferenced(.functionMethodInstance("click(_:)"))
+        }
     }
 
     func testRetainsMethodReferencedByObjcSelector() {
-        XCTAssertReferenced((.functionMethodInstance, "selectorMethod()"), descendentOf: (.class, "XibViewController"))
-        XCTAssertReferenced((.functionMethodInstance, "addTargetMethod()"), descendentOf: (.class, "XibViewController"))
+        assertReferenced(.class("XibViewController")) {
+            self.assertReferenced(.functionMethodInstance("selectorMethod()"))
+            self.assertReferenced(.functionMethodInstance("addTargetMethod()"))
+        }
     }
 
     func testMultiTargetFile() {
-        XCTAssertReferenced((.struct, "MultiTargetStruct"))
-        XCTAssertReferenced((.varStatic, "usedInBoth"), descendentOf: (.struct, "MultiTargetStruct"))
-        XCTAssertReferenced((.varStatic, "usedInApp"), descendentOf: (.struct, "MultiTargetStruct"))
-        XCTAssertReferenced((.varStatic, "usedInExt"), descendentOf: (.struct, "MultiTargetStruct"))
-        XCTAssertNotReferenced((.varStatic, "unused"), descendentOf: (.struct, "MultiTargetStruct"))
+        assertReferenced(.struct("MultiTargetStruct")) {
+            self.assertReferenced(.varStatic("usedInBoth"))
+            self.assertReferenced(.varStatic("usedInApp"))
+            self.assertReferenced(.varStatic("usedInExt"))
+            self.assertNotReferenced(.varStatic("unused"))
+        }
     }
 }

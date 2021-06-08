@@ -1,21 +1,10 @@
 import XCTest
 import PathKit
 import Shared
-import TestShared
+@testable import TestShared
 @testable import PeripheryKit
 
 class SPMProjectTest: SourceGraphTestCase {
-    static private var graph: SourceGraph!
-
-    override var graph: SourceGraph! {
-        get {
-            Self.graph
-        }
-        set {
-            Self.graph = newValue
-        }
-    }
-
     override static func setUp() {
         super.setUp()
 
@@ -39,11 +28,11 @@ class SPMProjectTest: SourceGraphTestCase {
     }
 
     func testMainEntryFile() {
-        XCTAssertReferenced((.functionFree, "main()"))
+        assertReferenced(.functionFree("main()"))
     }
 
     func testCrossModuleReference() {
-        XCTAssertReferenced((.class, "PublicCrossModuleReferenced"))
-        XCTAssertNotReferenced((.class, "PublicCrossModuleNotReferenced"))
+        assertReferenced(.class("PublicCrossModuleReferenced"))
+        assertNotReferenced(.class("PublicCrossModuleNotReferenced"))
     }
 }

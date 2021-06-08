@@ -1,6 +1,6 @@
 import Foundation
 import PathKit
-import TestShared
+@testable import TestShared
 
 var AccessabilityProjectPath: Path {
     return ProjectRootPath + "Tests/AccessibilityTests/AccessibilityProject"
