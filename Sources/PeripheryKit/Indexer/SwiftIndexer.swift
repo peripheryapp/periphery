@@ -64,7 +64,7 @@ public final class SwiftIndexer {
         }
 
         let indexedPaths = Set(unitsByFile.keys)
-        let unindexedPaths = allSourceFiles.subtracting(indexedPaths)
+        let unindexedPaths = allSourceFiles.subtracting(excludedPaths).subtracting(indexedPaths)
 
         if !unindexedPaths.isEmpty {
             unindexedPaths.forEach { logger.debug("[index:swift] Source file not indexed: \($0)") }
