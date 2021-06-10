@@ -16,7 +16,7 @@ final class GuidedSetup: SetupGuideHelpers {
 
     private let configuration: Configuration
 
-    func perform() throws {
+    func perform() throws -> Project {
         print(colorize("Welcome to Periphery!", .boldGreen))
         print("This guided setup will help you select the appropriate configuration for your project.\n")
         var projectGuides: [ProjectSetupGuide] = [SPMProjectSetupGuide.make()]
@@ -41,6 +41,9 @@ final class GuidedSetup: SetupGuideHelpers {
             fatalError("Failed to identify project type.")
         }
 
+        let project = Project(kind: projectGuide.projectKind)
+        try project.validateEnvironment()
+
         print(colorize("*", .boldGreen) + " Inspecting project...\n")
 
         let commonGuide = CommonSetupGuide.make()
@@ -57,6 +60,8 @@ final class GuidedSetup: SetupGuideHelpers {
 
         print(colorize("\n*", .boldGreen) + " Executing command:")
         print(colorize(formatScanCommand(options: options, didSave: shouldSave) + "\n", .bold))
+
+        return project
     }
 
     // MARK: - Private
