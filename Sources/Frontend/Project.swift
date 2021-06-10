@@ -8,21 +8,21 @@ import XcodeSupport
 #endif
 
 final class Project {
-    static func identify() throws -> Self {
+    static func identify() -> Self {
         let configuration: Configuration = inject()
 
         if configuration.workspace != nil || configuration.project != nil {
-            return try self.init(kind: .xcode)
+            return self.init(kind: .xcode)
         } else if SPM.isSupported {
-            return try self.init(kind: .spm)
+            return self.init(kind: .spm)
         }
 
-        return try self.init(kind: .xcode)
+        return self.init(kind: .xcode)
     }
 
     let kind: ProjectKind
 
-    init(kind: ProjectKind) throws {
+    init(kind: ProjectKind) {
         self.kind = kind
     }
 

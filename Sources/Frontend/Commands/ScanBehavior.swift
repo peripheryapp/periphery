@@ -34,25 +34,27 @@ final class ScanBehavior {
     }
 
     func main(_ block: (Project) throws -> [ScanResult]) -> Result<(), PeripheryError> {
+        let project: Project
+
         if configuration.guidedSetup {
             do {
-                try GuidedSetup.make().perform()
+                project = try GuidedSetup.make().perform()
             } catch let error as PeripheryError {
                 return .failure(error)
             } catch {
                 return .failure(.underlyingError(error))
             }
-        }
+        } else {
+            project = Project.identify()
 
-        let project: Project
-
-        do {
-            project = try Project.identify()
-            try project.validateEnvironment()
-        } catch let error as PeripheryError {
-            return .failure(error)
-        } catch {
-            return .failure(.underlyingError(error))
+            do {
+                // Guided setup performs validation itself once the type has been determined.
+                try project.validateEnvironment()
+            } catch let error as PeripheryError {
+                return .failure(error)
+            } catch {
+                return .failure(.underlyingError(error))
+            }
         }
 
         let updateChecker = UpdateChecker.make()
