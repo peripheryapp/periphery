@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix `--index-exclude` resulting in an error about unindexed files.
 
 ## 2.6.0 (2021-06-08)
 
