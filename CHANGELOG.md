@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Fix `--index-exclude` resulting in an error about unindexed files.
+- Fix an error during guided setup when `xcodebuild` is not setup for command line use.
 
 ## 2.6.0 (2021-06-08)
 
