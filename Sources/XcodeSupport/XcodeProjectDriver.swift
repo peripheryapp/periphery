@@ -1,5 +1,5 @@
 import Foundation
-import PathKit
+import SystemPackage
 import PeripheryKit
 import Shared
 
@@ -23,7 +23,7 @@ public final class XcodeProjectDriver {
         let missingTargetNames = Set(configuration.targets).subtracting(targets.map { $0.name })
 
         if let name = missingTargetNames.first {
-            throw PeripheryError.invalidTarget(name: name, project: project.path.lastComponent)
+            throw PeripheryError.invalidTarget(name: name, project: project.path.lastComponent?.string ?? "")
         }
 
         // Ensure schemes exist within the project
@@ -31,7 +31,7 @@ public final class XcodeProjectDriver {
         let validSchemeNames = Set(schemes.map { $0.name })
 
         if let scheme = Set(configuration.schemes).subtracting(validSchemeNames).first {
-            throw PeripheryError.invalidScheme(name: scheme, project: project.path.lastComponent)
+            throw PeripheryError.invalidScheme(name: scheme, project: project.path.lastComponent?.string ?? "")
         }
 
         return self.init(
@@ -134,7 +134,7 @@ extension XcodeProjectDriver: ProjectDriver {
             storePath = try xcodebuild.indexStorePath(project: project, schemes: Array(schemes))
         }
 
-        let sourceFiles = try targets.reduce(into: [Path: [String]]()) { result, target in
+        let sourceFiles = try targets.reduce(into: [FilePath: [String]]()) { result, target in
             try target.sourceFiles().forEach { result[$0, default: []].append(target.name) }
         }
 

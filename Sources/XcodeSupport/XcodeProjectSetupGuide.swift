@@ -1,5 +1,5 @@
 import Foundation
-import PathKit
+import SystemPackage
 import Shared
 
 public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide {
@@ -35,7 +35,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
 
         if let project = project {
             guard !project.targets.isEmpty else {
-                throw PeripheryError.guidedSetupError(message: "Failed to identify any targets in \(project.path.lastComponent)")
+                throw PeripheryError.guidedSetupError(message: "Failed to identify any targets in \(project.path.lastComponent?.string ?? "")")
             }
 
             let targets = project.targets.map { $0.name }.sorted()
@@ -79,9 +79,9 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
     // MARK: - Private
 
     private func getPodSchemes(in project: XcodeProjectlike) throws -> [String] {
-        let path = project.sourceRoot + "Pods/Pods.xcodeproj"
+        let path = project.sourceRoot.appending("Pods/Pods.xcodeproj")
         guard path.exists else { return [] }
-        return try xcodebuild.schemes(type: "project", path: path.absolute().string)
+        return try xcodebuild.schemes(type: "project", path: path.lexicallyNormalized().string)
     }
 
     private func filter(_ schemes: Set<XcodeScheme>, _ project: XcodeProjectlike) throws -> [XcodeScheme] {
@@ -97,7 +97,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
 
         if paths.count > 1 {
             print(colorize("Found multiple workspaces, please select the one that defines the schemes for building your project:", .bold))
-            let workspaces = paths.map { $0.relativeTo(Path.current).string }
+            let workspaces = paths.map { $0.relativeTo(FilePath.current).string }
             workspace = select(single: workspaces)
             print("")
         } else {
@@ -112,7 +112,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
         return nil
     }
 
-    private func workspacePaths() -> [Path] {
+    private func workspacePaths() -> [FilePath] {
         recursiveGlob("*.xcworkspace")
             .filter {
                 // Swift Package Manager generates a xcworkspace inside the xcodeproj that isn't useful.
@@ -129,7 +129,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
 
         if paths.count > 1 {
             print(colorize("Found multiple projects, please select the one that defines the schemes for building your project:", .bold))
-            let projects = paths.map { $0.relativeTo(Path.current).string }
+            let projects = paths.map { $0.relativeTo(FilePath.current).string }
             project = select(single: projects)
             print("")
         } else {
@@ -144,11 +144,11 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
         return nil
     }
 
-    private func projectPaths() -> [Path] {
+    private func projectPaths() -> [FilePath] {
         recursiveGlob("*.xcodeproj")
     }
 
-    private func recursiveGlob(_ glob: String) -> [Path] {
-        return Path.current.glob(glob) + Path.current.glob("**/\(glob)")
+    private func recursiveGlob(_ glob: String) -> [FilePath] {
+        return FilePath.current.glob(glob) + FilePath.current.glob("**/\(glob)")
     }
 }

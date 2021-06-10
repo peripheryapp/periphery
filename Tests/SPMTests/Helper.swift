@@ -1,7 +1,7 @@
 import Foundation
-import PathKit
+import SystemPackage
 @testable import TestShared
 
-var SPMProjectPath: Path {
-    return ProjectRootPath + "Tests/SPMTests/SPMProject"
+var SPMProjectPath: FilePath {
+    return ProjectRootPath.appending("Tests/SPMTests/SPMProject")
 }

@@ -1,5 +1,5 @@
 import Foundation
-import PathKit
+import SystemPackage
 import Shared
 
 public final class SPMProjectDriver {
@@ -57,9 +57,9 @@ extension SPMProjectDriver: ProjectDriver {
     }
 
     public func index(graph: SourceGraph) throws {
-        let sourceFiles = targets.reduce(into: [Path: [String]]()) { result, target in
+        let sourceFiles = targets.reduce(into: [FilePath: [String]]()) { result, target in
             let targetPath = absolutePath(for: target)
-            target.sources.forEach { result[targetPath + $0, default: []].append(target.name) }
+            target.sources.forEach { result[targetPath.appending($0), default: []].append(target.name) }
         }
 
         let storePath: String
@@ -67,7 +67,7 @@ extension SPMProjectDriver: ProjectDriver {
         if let path = configuration.indexStorePath {
             storePath = path
         } else {
-            storePath = (Path(package.path) + ".build/debug/index/store").string
+            storePath = FilePath(package.path).appending(".build/debug/index/store").string
         }
 
         try SwiftIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
@@ -77,11 +77,11 @@ extension SPMProjectDriver: ProjectDriver {
 
     // MARK: - Private
 
-    private func absolutePath(for target: SPM.Target) -> Path {
+    private func absolutePath(for target: SPM.Target) -> FilePath {
         if SwiftVersion.current.version.isVersion(greaterThanOrEqualTo: "5.4") {
-            return Path(package.path) + Path(target.path)
+            return FilePath(package.path).appending(target.path)
         } else {
-            return Path(target.path)
+            return FilePath(target.path)
         }
     }
 }

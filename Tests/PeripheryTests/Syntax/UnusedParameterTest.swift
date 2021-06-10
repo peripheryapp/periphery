@@ -1,6 +1,5 @@
 import Foundation
 import XCTest
-import PathKit
 @testable import TestShared
 @testable import PeripheryKit
 
@@ -210,7 +209,7 @@ class UnusedParameterTest: XCTestCase {
         let testName = String(name.split(separator: ".", maxSplits: 1).last!)
         #endif
 
-        let path = ProjectRootPath + "Tests/Fixtures/UnusedParameterFixtures/\(testName).swift"
+        let path = ProjectRootPath.appending( "Tests/Fixtures/UnusedParameterFixtures/\(testName).swift")
         return SourceFile(path: path, modules: ["UnusedParameterFixtures"])
     }
 

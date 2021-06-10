@@ -1,5 +1,5 @@
 import Foundation
-import PathKit
+import SystemPackage
 import PeripheryKit
 import Shared
 
@@ -13,7 +13,7 @@ final class Project {
 
         if configuration.workspace != nil || configuration.project != nil {
             return try self.init(kind: .xcode)
-        } else if (Path.current + "Package.swift").exists {
+        } else if SPM.isSupported {
             return try self.init(kind: .spm)
         }
 

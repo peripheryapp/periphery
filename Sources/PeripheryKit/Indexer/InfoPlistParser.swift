@@ -1,17 +1,17 @@
 import Foundation
+import SystemPackage
 import AEXML
-import PathKit
 
 struct InfoPlistReference {
-    let infoPlistPath: Path
+    let infoPlistPath: FilePath
     let className: String
 }
 
 final class InfoPlistParser {
     private static let elements = ["UISceneClassName", "UISceneDelegateClassName", "NSExtensionPrincipalClass"]
-    private let path: Path
+    private let path: FilePath
 
-    required init(path: Path) {
+    required init(path: FilePath) {
         self.path = path
     }
 

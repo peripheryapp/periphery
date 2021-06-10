@@ -1,11 +1,12 @@
 import Foundation
-import PathKit
 import SwiftSyntax
 import SwiftIndexStore
+import SystemPackage
+
 import Shared
 
 public final class SwiftIndexer {
-    public static func make(storePath: String, sourceFiles: [Path: [String]], graph: SourceGraph) throws -> Self {
+    public static func make(storePath: String, sourceFiles: [FilePath: [String]], graph: SourceGraph) throws -> Self {
         let storeURL = URL(fileURLWithPath: storePath)
 
         return self.init(
@@ -17,7 +18,7 @@ public final class SwiftIndexer {
             configuration: inject())
     }
 
-    private let sourceFiles: [Path: [String]]
+    private let sourceFiles: [FilePath: [String]]
     private let graph: SourceGraph
     private let logger: Logger
     private let configuration: Configuration
@@ -25,7 +26,7 @@ public final class SwiftIndexer {
     private let indexStoreURL: URL
 
     required init(
-        sourceFiles: [Path: [String]],
+        sourceFiles: [FilePath: [String]],
         graph: SourceGraph,
         indexStore: IndexStore,
         indexStoreURL: URL,
@@ -42,13 +43,13 @@ public final class SwiftIndexer {
 
     public func perform() throws {
         let excludedPaths = configuration.indexExcludeSourceFiles
-        var unitsByFile: [Path: [IndexStoreUnit]] = [:]
+        var unitsByFile: [FilePath: [IndexStoreUnit]] = [:]
         let allSourceFiles = Set(sourceFiles.keys)
 
         try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
             guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
 
-            let file = Path(filePath)
+            let file = FilePath(filePath)
 
             guard !excludedPaths.contains(file) else {
                 self.logger.debug("[index:swift] Excluding \(file.string)")

@@ -1,16 +1,17 @@
 import Foundation
 import XcodeProj
+import SystemPackage
 import PathKit
 import PeripheryKit
 import Shared
 
 final class XcodeProject: XcodeProjectlike {
-    private static var cache: [Path: XcodeProject] = [:]
+    private static var cache: [FilePath: XcodeProject] = [:]
 
-    static func tryMake(path: Path, referencedBy refPath: Path) throws -> XcodeProject? {
+    static func tryMake(path: FilePath, referencedBy refPath: FilePath) throws -> XcodeProject? {
         if !path.exists {
             let logger: Logger = inject()
-            logger.warn("No such project exists at '\(path.absolute())', referenced by '\(refPath)'.")
+            logger.warn("No such project exists at '\(path.lexicallyNormalized())', referenced by '\(refPath)'.")
             return nil
         }
 
@@ -18,10 +19,10 @@ final class XcodeProject: XcodeProjectlike {
     }
 
     static func make(path: String) throws -> XcodeProject {
-        return try make(path: Path(path))
+        return try make(path: FilePath(path))
     }
 
-    static func make(path: Path) throws -> XcodeProject {
+    static func make(path: FilePath) throws -> XcodeProject {
         if let cached = cache[path] {
             return cached
         }
@@ -30,8 +31,8 @@ final class XcodeProject: XcodeProjectlike {
     }
 
     let type: String = "project"
-    let path: Path
-    let sourceRoot: Path
+    let path: FilePath
+    let sourceRoot: FilePath
     let xcodeProject: XcodeProj
     let name: String
 
@@ -39,16 +40,16 @@ final class XcodeProject: XcodeProjectlike {
 
     private(set) var targets: Set<XcodeTarget> = []
 
-    required init(path: Path, xcodebuild: Xcodebuild, logger: Logger) throws {
+    required init(path: FilePath, xcodebuild: Xcodebuild, logger: Logger) throws {
         logger.debug("[xcode:project] Loading \(path)")
 
         self.path = path
         self.xcodebuild = xcodebuild
-        self.name = self.path.lastComponentWithoutExtension
-        self.sourceRoot = self.path.parent()
+        self.name = self.path.lastComponent?.stem ?? ""
+        self.sourceRoot = self.path.removingLastComponent()
 
         do {
-            self.xcodeProject = try XcodeProj(pathString: self.path.absolute().string)
+            self.xcodeProject = try XcodeProj(pathString: self.path.lexicallyNormalized().string)
         } catch let error {
             throw PeripheryError.underlyingError(error)
         }
@@ -59,11 +60,11 @@ final class XcodeProject: XcodeProjectlike {
         var subProjects: [XcodeProject] = []
 
         // Don't search for sub projects within CocoaPods.
-        if !path.contains("Pods.xcodeproj") {
+        if !path.components.contains("Pods.xcodeproj") {
             subProjects = try xcodeProject.pbxproj.fileReferences
                 .filter { $0.path?.hasSuffix(".xcodeproj") ?? false }
-                .compactMap { try $0.fullPath(sourceRoot: sourceRoot) }
-                .compactMap { try XcodeProject.tryMake(path: $0, referencedBy: path) }
+                .compactMap { try $0.fullPath(sourceRoot: Path(sourceRoot.string))?.absolute().string }
+                .compactMap { try XcodeProject.tryMake(path: FilePath($0), referencedBy: path) }
         }
 
         targets = Set(xcodeProject.pbxproj.nativeTargets
@@ -81,7 +82,7 @@ final class XcodeProject: XcodeProjectlike {
 
 extension XcodeProject: Hashable {
     func hash(into hasher: inout Hasher) {
-        hasher.combine(path.absolute().string)
+        hasher.combine(path.lexicallyNormalized().string)
     }
 }
 

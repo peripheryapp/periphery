@@ -1,5 +1,4 @@
 import Foundation
-import PathKit
 
 public class SourceLocation {
     public let file: SourceFile
@@ -23,7 +22,7 @@ public class SourceLocation {
     }()
 
     private lazy var shortDescriptionInternal: String = {
-        buildDescription(path: file.path.lastComponent)
+        buildDescription(path: file.path.lastComponent?.string ?? "")
     }()
 }
 

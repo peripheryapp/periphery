@@ -1,5 +1,5 @@
 import Foundation
-import PathKit
+import SystemPackage
 import Yams
 
 public final class Configuration: Singleton {
@@ -177,10 +177,10 @@ public final class Configuration: Singleton {
         FileManager.default.createFile(atPath: Self.defaultConfigurationFile, contents: data)
     }
 
-    public func load(from path: Path?) throws {
+    public func load(from path: FilePath?) throws {
         guard let path = try configurationPath(withUserProvided: path) else { return }
 
-        let encodedYAML = try path.read(.utf8)
+        let encodedYAML = try String(contentsOf: path.url)
         let yaml = try Yams.load(yaml: encodedYAML) as? [String: Any] ?? [:]
 
         for (key, value) in yaml {
@@ -235,38 +235,38 @@ public final class Configuration: Singleton {
 
     // MARK: - Helpers
 
-    public var indexExcludeSourceFiles: [Path] {
+    public var indexExcludeSourceFiles: [FilePath] {
         return indexExclude.flatMap { glob($0) }
     }
 
-    public var reportExcludeSourceFiles: [Path] {
+    public var reportExcludeSourceFiles: [FilePath] {
         return reportExclude.flatMap { glob($0) }
     }
 
     // MARK: - Private
 
-    private func glob(_ pattern: String) -> [Path] {
-        var patternPath = Path(pattern)
+    private func glob(_ pattern: String) -> [FilePath] {
+        var patternPath = FilePath(pattern)
 
         if patternPath.isRelative {
-            patternPath = Path.current + patternPath
+            patternPath = FilePath.current.pushing(patternPath)
         }
 
-        return Path.glob(patternPath.string).map {
-            return $0.isRelative ? $0.relativeTo(Path.current) : $0
+        return FilePath.glob(patternPath.string).map {
+            $0.isRelative ? $0.relativeTo(FilePath.current) : $0
         }
     }
 
-    private func configurationPath(withUserProvided path: Path?) throws -> Path? {
+    private func configurationPath(withUserProvided path: FilePath?) throws -> FilePath? {
         if let path = path {
             if !path.exists {
-                throw PeripheryError.pathDoesNotExist(path: path.absolute().string)
+                throw PeripheryError.pathDoesNotExist(path: path.lexicallyNormalized().string)
             }
 
             return path
         }
 
-        return [Path(Self.defaultConfigurationFile), Path(".periphery.yaml")].first { $0.exists }
+        return [FilePath(Self.defaultConfigurationFile), FilePath(".periphery.yaml")].first { $0.exists }
     }
 }
 

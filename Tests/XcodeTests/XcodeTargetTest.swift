@@ -9,7 +9,9 @@ class XcodeTargetTest: XCTestCase {
         let project = try! XcodeProject.make(path: UIKitProjectPath)
         let target = project.targets.first { $0.name == "UIKitProject" }!
 
-        XCTAssertTrue(try target.sourceFiles().contains { $0.relativeTo(ProjectRootPath) == "Tests/XcodeTests/UIKitProject/UIKitProject/FileInGroupWithoutFolder.swift" })
+        XCTAssertTrue(try target.sourceFiles().contains {
+            $0.relativeTo(ProjectRootPath).string == "Tests/XcodeTests/UIKitProject/UIKitProject/FileInGroupWithoutFolder.swift"
+        })
     }
 
     func testIsTestTarget() {

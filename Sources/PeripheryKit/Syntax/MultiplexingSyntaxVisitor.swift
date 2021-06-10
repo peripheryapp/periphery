@@ -1,5 +1,5 @@
 import Foundation
-import PathKit
+import SystemPackage
 import SwiftSyntax
 
 protocol PeripherySyntaxVisitor {

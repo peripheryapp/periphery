@@ -1,6 +1,6 @@
 import Foundation
 import XcodeProj
-import PathKit
+import SystemPackage
 import PeripheryKit
 import Shared
 
@@ -13,8 +13,8 @@ final class XcodeWorkspace: XcodeProjectlike {
     }
 
     let type: String = "workspace"
-    let path: Path
-    let sourceRoot: Path
+    let path: FilePath
+    let sourceRoot: FilePath
 
     private let xcodebuild: Xcodebuild
     private let configuration: Configuration
@@ -25,20 +25,20 @@ final class XcodeWorkspace: XcodeProjectlike {
     required init(path: String, xcodebuild: Xcodebuild, configuration: Configuration, logger: Logger) throws {
         logger.debug("[xcode:workspace] Loading \(path)")
 
-        self.path = Path(path)
+        self.path = FilePath(path)
         self.xcodebuild = xcodebuild
         self.configuration = configuration
-        self.sourceRoot = self.path.parent()
+        self.sourceRoot = self.path.removingLastComponent()
 
         do {
-            self.xcworkspace = try XCWorkspace(pathString: self.path.absolute().string)
+            self.xcworkspace = try XCWorkspace(pathString: self.path.string)
         } catch let error {
             throw PeripheryError.underlyingError(error)
         }
 
         let projectPaths = collectProjectPaths(in: xcworkspace.data.children)
         targets = Set(try projectPaths
-            .compactMap { try XcodeProject.tryMake(path: (sourceRoot + $0), referencedBy: self.path) }
+                        .compactMap { try XcodeProject.tryMake(path: (sourceRoot.pushing( $0)), referencedBy: self.path) }
             .flatMap { $0.targets })
     }
 
@@ -51,15 +51,15 @@ final class XcodeWorkspace: XcodeProjectlike {
 
     // MARK: - Private
 
-    private func collectProjectPaths(in elements: [XCWorkspaceDataElement], groups: [XCWorkspaceDataGroup] = []) -> [Path] {
-        var paths: [Path] = []
+    private func collectProjectPaths(in elements: [XCWorkspaceDataElement], groups: [XCWorkspaceDataGroup] = []) -> [FilePath] {
+        var paths: [FilePath] = []
 
         for child in elements {
             switch child {
             case .file(let ref):
-                let basePath = Path(groups.map { $0.location.path }.joined(separator: "/"))
-                let path = Path(ref.location.path)
-                let fullPath = basePath + path
+                let basePath = FilePath(groups.map { $0.location.path }.joined(separator: "/"))
+                let path = FilePath(ref.location.path)
+                let fullPath = basePath.pushing(path)
 
                 if fullPath.extension == "xcodeproj" && shouldLoadProject(fullPath) {
                     paths.append(fullPath)
@@ -72,7 +72,7 @@ final class XcodeWorkspace: XcodeProjectlike {
         return paths
     }
 
-    private func shouldLoadProject(_ path: Path) -> Bool {
+    private func shouldLoadProject(_ path: FilePath) -> Bool {
         if configuration.guidedSetup && path.string.contains("Pods.xcodeproj") {
             return false
         }

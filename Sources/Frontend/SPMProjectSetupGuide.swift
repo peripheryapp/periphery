@@ -1,5 +1,5 @@
 import Foundation
-import PathKit
+import SystemPackage
 import PeripheryKit
 import Shared
 
@@ -20,7 +20,7 @@ final class SPMProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide {
     }
 
     var isSupported: Bool {
-        (Path.current + "Package.swift").exists
+        SPM.isSupported
     }
 
     func perform() throws {

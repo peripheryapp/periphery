@@ -1,4 +1,3 @@
-import PathKit
 import Shared
 
 final class RedundantExplicitPublicAccessibilityMarker: SourceGraphVisitor {

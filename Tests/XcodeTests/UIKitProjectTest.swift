@@ -1,5 +1,4 @@
 import XCTest
-import PathKit
 import Shared
 @testable import TestShared
 @testable import XcodeSupport
@@ -24,7 +23,6 @@ class UIKitProjectTest: SourceGraphTestCase {
         )
 
         try! driver.build()
-        graph = SourceGraph()
         try! driver.index(graph: graph)
         try! Analyzer.perform(graph: graph)
     }

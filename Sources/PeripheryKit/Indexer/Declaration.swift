@@ -1,5 +1,4 @@
 import Foundation
-import PathKit
 
 public final class Declaration {
     public enum Kind: String, RawRepresentable, CaseIterable {

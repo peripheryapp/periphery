@@ -1,16 +1,16 @@
 import Foundation
 import AEXML
-import PathKit
+import SystemPackage
 
 struct XibReference {
-    let xibPath: Path
+    let xibPath: FilePath
     let className: String
 }
 
 final class XibParser {
-    private let path: Path
+    private let path: FilePath
 
-    required init(path: Path) {
+    required init(path: FilePath) {
         self.path = path
     }
 

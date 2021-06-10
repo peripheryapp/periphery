@@ -1,5 +1,5 @@
 import XCTest
-import PathKit
+import SystemPackage
 import Shared
 @testable import TestShared
 @testable import PeripheryKit
@@ -1389,14 +1389,13 @@ class RetentionTest: SourceGraphTestCase {
             name: target.name,
             path: target.path,
             moduleType: target.moduleType,
-            sources: [testFixturePath.string])
+            sources: [testFixturePath.lastComponent?.string ?? ""])
 
         Self.driver.setTargets([newFixtureTarget])
 
-        let graph = SourceGraph()
+        graph = SourceGraph()
         try! Self.driver.index(graph: graph)
         try! Analyzer.perform(graph: graph)
-        self.graph = graph
         try testBlock()
 
         // Reset configuration to defaults.
@@ -1410,8 +1409,8 @@ class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    private func fixturePath(for file: String, objc: Bool) -> Path {
+    private func fixturePath(for file: String, objc: Bool) -> FilePath {
         let fixtureFolder = objc ? "ObjcRetentionFixtures" : "RetentionFixtures"
-        return ProjectRootPath + "Tests/Fixtures/\(fixtureFolder)/\(file).swift"
+        return ProjectRootPath.appending("Tests/Fixtures/\(fixtureFolder)/\(file).swift")
     }
 }

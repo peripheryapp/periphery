@@ -1,6 +1,5 @@
 import Foundation
 import XCTest
-import PathKit
 @testable import TestShared
 @testable import PeripheryKit
 
@@ -151,7 +150,7 @@ class FunctionVisitorTest: XCTestCase {
     // MARK: - Private
 
     private var fixturePath: SourceFile {
-        let path = ProjectRootPath + "Tests/Fixtures/FunctionVisitorFixtures/FunctionVisitorFixture.swift"
+        let path = ProjectRootPath.appending( "Tests/Fixtures/FunctionVisitorFixtures/FunctionVisitorFixture.swift")
         return SourceFile(path: path, modules: ["FunctionVisitorFixtures"])
     }
 
