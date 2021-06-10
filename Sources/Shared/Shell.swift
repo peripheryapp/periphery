@@ -64,7 +64,7 @@ open class Shell: Singleton {
             return ProcessInfo.processInfo.environment
         }
 
-        return pristineEnv.trimmed
+        var newEnv = pristineEnv.trimmed
             .split(separator: "\n").map { line -> (String, String) in
                 let pair = line.split(separator: "=", maxSplits: 1)
                 return (String(pair.first ?? ""), String(pair.last ?? ""))
@@ -72,6 +72,15 @@ open class Shell: Singleton {
             .reduce(into: [String: String]()) { (result, pair) in
                 result[pair.0] = pair.1
             }
+
+        let preservedKeys = ["PATH"]
+        preservedKeys.forEach { key in
+            if let value = ProcessInfo.processInfo.environment[key] {
+                newEnv[key] = value
+            }
+        }
+
+        return newEnv
     }()
 
     @discardableResult

@@ -1,7 +1,6 @@
 import Foundation
 import XCTest
 import SystemPackage
-import PathKit
 
 class FilePathTest: XCTestCase {
     func testRelativeTo() {
