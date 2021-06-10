@@ -51,11 +51,6 @@ final class BaseLogger: Singleton {
         log(text, output: stderr)
     }
 
-    func hint(_ text: String) {
-        let text = colorize("hint: ", .boldMagenta) + colorize(text, .bold)
-        log(text, output: stdout)
-    }
-
     // MARK: - Private
 
     private func log(_ line: String, output: UnsafeMutablePointer<FILE>) {
@@ -89,9 +84,5 @@ public final class Logger: Singleton {
 
     public func warn(_ text: String) {
         baseLogger.warn(text)
-    }
-
-    public func hint(_ text: String) {
-        baseLogger.hint(text)
     }
 }
