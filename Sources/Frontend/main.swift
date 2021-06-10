@@ -23,9 +23,5 @@ do {
     var command = try PeripheryCommand.parseAsRoot()
     try command.run()
 } catch {
-    if  let error = error as? PeripheryError,
-        let hint = error.hint {
-        logger.hint(hint)
-    }
     PeripheryCommand.exit(withError: error)
 }

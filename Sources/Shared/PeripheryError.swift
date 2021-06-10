@@ -61,21 +61,6 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
         }
     }
 
-    public var hint: String? {
-        switch self {
-        case .xcodebuildNotConfigured:
-            return "You may need to change the path to your Xcode.app if it has a different name."
-        case let .shellCommandFailed(_, _, _, output):
-            if output.contains("EXPANDED_CODE_SIGN_IDENTITY: unbound variable") {
-                return "You appear to be affected by a bug in CocoaPods (https://github.com/CocoaPods/CocoaPods/issues/8000). Please upgrade to CocoaPods >= 1.6.0, run 'pod install' and try again."
-            }
-
-            return nil
-        default:
-            return nil
-        }
-    }
-
     public var description: String {
         return errorDescription!
     }
