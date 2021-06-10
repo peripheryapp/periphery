@@ -1,7 +1,7 @@
 import Foundation
+import SystemPackage
 import Shared
 import PeripheryKit
-import PathKit
 
 final class ScanBehavior {
     static func make() -> Self {
@@ -18,10 +18,10 @@ final class ScanBehavior {
 
     func setup(_ configPath: String?) -> Result<(), PeripheryError> {
         do {
-            var path: Path?
+            var path: FilePath?
 
             if let configPath = configPath {
-                path = Path(configPath)
+                path = FilePath(configPath)
             }
             try configuration.load(from: path)
         } catch let error as PeripheryError {

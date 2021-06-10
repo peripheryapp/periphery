@@ -1,18 +1,18 @@
-import PathKit
 import Shared
+import SystemPackage
 
 public final class InfoPlistIndexer {
-    public static func make(infoPlistFiles: Set<Path>, graph: SourceGraph) -> Self {
+    public static func make(infoPlistFiles: Set<FilePath>, graph: SourceGraph) -> Self {
         return self.init(infoPlistFiles: infoPlistFiles,
                          graph: graph,
                          logger: inject())
     }
 
-    private let infoPlistFiles: Set<Path>
+    private let infoPlistFiles: Set<FilePath>
     private let graph: SourceGraph
     private let logger: Logger
 
-    required init(infoPlistFiles: Set<Path>, graph: SourceGraph, logger: Logger) {
+    required init(infoPlistFiles: Set<FilePath>, graph: SourceGraph, logger: Logger) {
         self.infoPlistFiles = infoPlistFiles
         self.graph = graph
         self.logger = logger

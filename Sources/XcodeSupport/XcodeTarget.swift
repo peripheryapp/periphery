@@ -1,5 +1,6 @@
 import Foundation
 import XcodeProj
+import SystemPackage
 import PathKit
 import PeripheryKit
 import Shared
@@ -13,9 +14,9 @@ final class XcodeTarget {
     let project: XcodeProject
 
     private let target: PBXTarget
-    private var sourceFiles_: Set<Path> = []
-    private var xibFiles_: Set<Path> = []
-    private var infoPlistFiles_: Set<Path> = []
+    private var sourceFiles_: Set<FilePath> = []
+    private var xibFiles_: Set<FilePath> = []
+    private var infoPlistFiles_: Set<FilePath> = []
     private var didIdentifySourceFiles = false
     private var didIdentifyXibFiles = false
     private var didIdentifyInfoPlistFiles = false
@@ -33,7 +34,7 @@ final class XcodeTarget {
         return target.name
     }
 
-    func sourceFiles() throws -> Set<Path> {
+    func sourceFiles() throws -> Set<FilePath> {
         if didIdentifySourceFiles {
             return sourceFiles_
         }
@@ -43,7 +44,7 @@ final class XcodeTarget {
         return sourceFiles_
     }
 
-    func xibFiles() throws -> Set<Path> {
+    func xibFiles() throws -> Set<FilePath> {
         if didIdentifyXibFiles {
             return xibFiles_
         }
@@ -53,7 +54,7 @@ final class XcodeTarget {
         return xibFiles_
     }
 
-    func infoPlistFiles() throws -> Set<Path> {
+    func infoPlistFiles() throws -> Set<FilePath> {
         if didIdentifyInfoPlistFiles {
             return infoPlistFiles_
         }
@@ -70,10 +71,10 @@ final class XcodeTarget {
 
         sourceFiles_ = Set(try phases.flatMap {
             try ($0.files ?? []).compactMap {
-                let sourceRoot = project.sourceRoot.absolute()
-                if let path = try $0.file?.fullPath(sourceRoot: sourceRoot),
+                let sourceRoot = project.sourceRoot.lexicallyNormalized()
+                if let path = try $0.file?.fullPath(sourceRoot: Path(sourceRoot.string)),
                    path.extension?.lowercased() == "swift" {
-                    return path
+                    return FilePath(path.absolute().string)
                 }
 
                 return nil
@@ -86,10 +87,10 @@ final class XcodeTarget {
 
         xibFiles_ = Set(try phases.flatMap {
             try ($0.files ?? []).compactMap {
-                let sourceRoot = project.sourceRoot.absolute()
-                if let path = try $0.file?.fullPath(sourceRoot: sourceRoot),
+                let sourceRoot = project.sourceRoot.lexicallyNormalized()
+                if let path = try $0.file?.fullPath(sourceRoot: Path(sourceRoot.string)),
                     ["xib", "storyboard"].contains(path.extension?.lowercased()) {
-                    return path
+                    return FilePath(path.absolute().string)
                 }
 
                 return nil
@@ -104,14 +105,14 @@ final class XcodeTarget {
         infoPlistFiles_ = Set(files.map { parseInfoPlistSetting($0) })
     }
 
-    private func parseInfoPlistSetting(_ setting: String) -> Path {
+    private func parseInfoPlistSetting(_ setting: String) -> FilePath {
         var setting = setting.replacingOccurrences(of: "$(SRCROOT)", with: "")
 
         if setting.hasPrefix("/") {
             setting.removeFirst()
         }
 
-        return project.sourceRoot.absolute() + setting
+        return project.sourceRoot.lexicallyNormalized().appending(setting)
     }
 }
 

@@ -1,18 +1,18 @@
-import PathKit
 import Shared
+import SystemPackage
 
 public final class XibIndexer {
-    public static func make(xibFiles: Set<Path>, graph: SourceGraph) -> Self {
+    public static func make(xibFiles: Set<FilePath>, graph: SourceGraph) -> Self {
         return self.init(xibFiles: xibFiles,
                          graph: graph,
                          logger: inject())
     }
 
-    private let xibFiles: Set<Path>
+    private let xibFiles: Set<FilePath>
     private let graph: SourceGraph
     private let logger: Logger
 
-    required init(xibFiles: Set<Path>, graph: SourceGraph, logger: Logger) {
+    required init(xibFiles: Set<FilePath>, graph: SourceGraph, logger: Logger) {
         self.xibFiles = xibFiles
         self.graph = graph
         self.logger = logger

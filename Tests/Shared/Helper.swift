@@ -1,7 +1,6 @@
 import Foundation
-import PathKit
+import SystemPackage
 
-var ProjectRootPath: Path {
-    let file = #file
-    return Path(file) + "../../.."
+var ProjectRootPath: FilePath {
+    FilePath(#filePath).appending("../../..").lexicallyNormalized()
 }

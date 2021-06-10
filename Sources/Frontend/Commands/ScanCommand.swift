@@ -1,6 +1,5 @@
 import Foundation
 import ArgumentParser
-import PathKit
 import Shared
 
 struct ScanCommand: FrontendCommand {

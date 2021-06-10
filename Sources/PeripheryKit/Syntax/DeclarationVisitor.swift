@@ -1,5 +1,4 @@
 import Foundation
-import PathKit
 import SwiftSyntax
 
 final class DeclarationVisitor: PeripherySyntaxVisitor {

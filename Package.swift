@@ -2,7 +2,7 @@
 import PackageDescription
 
 var dependencies: [Package.Dependency] = [
-    .package(url: "https://github.com/kylef/PathKit", from: "1.0.0"),
+    .package(url: "https://github.com/apple/swift-system", from: "0.0.0"),
     .package(url: "https://github.com/jpsim/Yams", from: "4.0.0"),
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "0.3.0"),
@@ -66,7 +66,7 @@ var targets: [PackageDescription.Target] = [
         name: "PeripheryKit",
         dependencies: [
             .target(name: "Shared"),
-            .product(name: "PathKit", package: "PathKit"),
+            .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "AEXML", package: "AEXML"),
             .product(name: "SwiftSyntax", package: "SwiftSyntax"),
             .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
@@ -75,7 +75,8 @@ var targets: [PackageDescription.Target] = [
     .target(
         name: "Shared",
         dependencies: [
-            .product(name: "Yams", package: "Yams")
+            .product(name: "Yams", package: "Yams"),
+            .product(name: "SystemPackage", package: "swift-system")
         ]
     ),
     .target(

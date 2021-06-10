@@ -1,6 +1,5 @@
 import Foundation
 import XCTest
-import PathKit
 import SwiftSyntax
 @testable import TestShared
 @testable import PeripheryKit
@@ -111,7 +110,7 @@ class TypeSyntaxInspectorTest: XCTestCase {
     // MARK: - Private
 
     private var fixturePath: SourceFile {
-        let path = ProjectRootPath + "Tests/Fixtures/TypeSyntaxInspectorFixtures/TypeSyntaxInspectorFixture.swift"
+        let path = ProjectRootPath.appending( "Tests/Fixtures/TypeSyntaxInspectorFixtures/TypeSyntaxInspectorFixture.swift")
         return SourceFile(path: path, modules: ["TypeSyntaxInspectorFixtures"])
     }
 

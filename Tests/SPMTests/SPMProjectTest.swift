@@ -1,5 +1,4 @@
 import XCTest
-import PathKit
 import Shared
 @testable import TestShared
 @testable import PeripheryKit
@@ -21,7 +20,6 @@ class SPMProjectTest: SourceGraphTestCase {
             )
 
             try! driver.build()
-            graph = SourceGraph()
             try! driver.index(graph: graph)
             try! Analyzer.perform(graph: graph)
         }

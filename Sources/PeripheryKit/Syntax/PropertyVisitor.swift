@@ -1,6 +1,5 @@
 import Foundation
 import Shared
-import PathKit
 import SwiftSyntax
 
 final class PropertyVisitor: PeripherySyntaxVisitor {

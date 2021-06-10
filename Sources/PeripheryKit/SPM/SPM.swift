@@ -1,7 +1,12 @@
 import Foundation
+import SystemPackage
 import Shared
 
 public struct SPM {
+    public static var isSupported: Bool {
+        FilePath.current.appending("Package.swift").exists
+    }
+
     public struct Package: Decodable {
         public static func load() throws -> Self {
             let shell: Shell = inject()

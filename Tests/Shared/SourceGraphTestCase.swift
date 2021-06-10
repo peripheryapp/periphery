@@ -1,9 +1,8 @@
 import XCTest
-import PathKit
 import PeripheryKit
 
 open class SourceGraphTestCase: XCTestCase {
-    static var graph: SourceGraph!
+    static var graph = SourceGraph()
 
     var graph: SourceGraph! {
         get {

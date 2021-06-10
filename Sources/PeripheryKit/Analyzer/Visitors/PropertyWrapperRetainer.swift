@@ -1,5 +1,4 @@
 import Foundation
-import PathKit
 import Shared
 
 final class PropertyWrapperRetainer: SourceGraphVisitor {

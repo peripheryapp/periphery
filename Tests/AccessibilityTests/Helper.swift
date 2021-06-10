@@ -1,7 +1,7 @@
 import Foundation
-import PathKit
+import SystemPackage
 @testable import TestShared
 
-var AccessabilityProjectPath: Path {
-    return ProjectRootPath + "Tests/AccessibilityTests/AccessibilityProject"
+var AccessabilityProjectPath: FilePath {
+    return ProjectRootPath.appending("Tests/AccessibilityTests/AccessibilityProject")
 }

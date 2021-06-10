@@ -1,6 +1,5 @@
 .release
 Packages
-Periphery.xcodeproj
 
 # Xcode
 .DS_Store

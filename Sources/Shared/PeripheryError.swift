@@ -1,5 +1,4 @@
 import Foundation
-import PathKit
 
 public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case shellCommandFailed(cmd: String, args: [String], status: Int32, output: String)

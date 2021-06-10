@@ -1,5 +1,5 @@
 import Foundation
-import PathKit
+import SystemPackage
 import PeripheryKit
 import Shared
 
@@ -30,7 +30,7 @@ public final class Xcodebuild: Injectable {
     func build(project: XcodeProjectlike, scheme: XcodeScheme, allSchemes: [XcodeScheme], additionalArguments: [String] = [], buildForTesting: Bool = false) throws -> String {
         let cmd = buildForTesting ? "build-for-testing" : "build"
         let args = [
-            "-\(project.type)", "'\(project.path.absolute().string)'",
+            "-\(project.type)", "'\(project.path.lexicallyNormalized().string)'",
             "-scheme", "'\(scheme.name)'",
             "-parallelizeTargets",
             "-derivedDataPath", "'\(try derivedDataPath(for: project, schemes: allSchemes).string)'",
@@ -51,11 +51,11 @@ public final class Xcodebuild: Injectable {
     }
 
     func indexStorePath(project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> String {
-        (try derivedDataPath(for: project, schemes: schemes) + "Index/DataStore").string
+        (try derivedDataPath(for: project, schemes: schemes).appending("Index/DataStore")).string
     }
 
     func schemes(project: XcodeProjectlike) throws -> [String] {
-        return try schemes(type: project.type, path: project.path.absolute().string)
+        return try schemes(type: project.type, path: project.path.lexicallyNormalized().string)
     }
 
     func schemes(type: String, path: String) throws -> [String] {
@@ -84,7 +84,7 @@ public final class Xcodebuild: Injectable {
 
     func buildSettings(for project: XcodeProjectlike, scheme: String) throws -> String {
         let args = [
-            "-\(project.type)", project.path.absolute().string,
+            "-\(project.type)", project.path.lexicallyNormalized().string,
             "-showBuildSettings",
             "-scheme", scheme
         ]
@@ -101,7 +101,7 @@ public final class Xcodebuild: Injectable {
 
     // MARK: - Private
 
-    private func derivedDataPath(for project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> Path {
+    private func derivedDataPath(for project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> FilePath {
         // Given a project with two schemes: A and B, a scenario can arise where the index store contains conflicting
         // data. If scheme A is built, then the source file modified and then scheme B built, the index store will
         // contain two records for that source file. One reflects the state of the file when scheme A was built, and the
@@ -109,11 +109,11 @@ public final class Xcodebuild: Injectable {
 
         let projectHash = project.name.djb2Hex
         let schemesHash = schemes.map { $0.name }.joined().djb2Hex
-        return try (cachePath() + "DerivedData-\(projectHash)-\(schemesHash)")
+        return try (cachePath().appending("DerivedData-\(projectHash)-\(schemesHash)"))
     }
 
-    private func cachePath() throws -> Path {
+    private func cachePath() throws -> FilePath {
         let url = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        return Path(url.appendingPathComponent("com.github.peripheryapp").path)
+        return FilePath(url.appendingPathComponent("com.github.peripheryapp").path)
     }
 }

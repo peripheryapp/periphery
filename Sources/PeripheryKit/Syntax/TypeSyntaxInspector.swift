@@ -1,6 +1,5 @@
 import Foundation
 import SwiftSyntax
-import PathKit
 import Shared
 
 struct TypeSyntaxInspector {

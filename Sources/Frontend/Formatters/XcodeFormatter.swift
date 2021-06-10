@@ -32,9 +32,9 @@ final class XcodeFormatter: OutputFormatter {
     // MARK: - Private
 
     private func prefix(for location: SourceLocation) -> String {
-        let absPath = location.file.path.absolute()
-        let path = absPath.components.dropLast().joined(separator: "/").dropFirst()
-        let file = colorize(absPath.lastComponentWithoutExtension, .bold)
+        let absPath = location.file.path.lexicallyNormalized()
+        let path = absPath.removingLastComponent().string
+        let file = colorize(absPath.lastComponent?.stem ?? "", .bold)
         let ext = absPath.extension ?? "swift"
         let lineNum = colorize(String(location.line), .bold)
         let column = location.column

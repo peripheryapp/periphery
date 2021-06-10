@@ -56,6 +56,15 @@
         }
       },
       {
+        "package": "swift-system",
+        "repositoryURL": "https://github.com/apple/swift-system",
+        "state": {
+          "branch": null,
+          "revision": "2bc160bfe34d843ae5ff47168080add24dfd7eac",
+          "version": "0.0.2"
+        }
+      },
+      {
         "package": "XcodeProj",
         "repositoryURL": "https://github.com/tuist/xcodeproj",
         "state": {
