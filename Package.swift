@@ -10,13 +10,23 @@ var dependencies: [Package.Dependency] = [
 ]
 
 #if swift(>=5.5)
-dependencies.append(
-    .package(
-        name: "SwiftSyntax",
-        url: "https://github.com/apple/swift-syntax",
-        .branch("release/5.5-05142021")
+    #if os(macOS)
+    dependencies.append(
+        .package(
+            name: "SwiftSyntax",
+            url: "https://github.com/apple/swift-syntax",
+            .branch("release/5.5-05142021")
+        )
     )
-)
+    #else
+    dependencies.append(
+        .package(
+            name: "SwiftSyntax",
+            url: "https://github.com/apple/swift-syntax",
+            .branch("release/5.5")
+        )
+    )
+    #endif
 #elseif swift(>=5.4)
 dependencies.append(
     .package(
