@@ -22,11 +22,9 @@ final class RedundantProtocolMarker: SourceGraphVisitor {
             // E.g a protocol may inherit Comparable and implement the operator '<', however we have no way to see
             // that '<' is used when calling sort().
             let inheritsForeignProtocol = graph
-                .superclassReferences(of: protocolDecl)
+                .inheritedTypeReferences(of: protocolDecl)
                 .filter { !($0.kind == .typealias && $0.name == "AnyObject") }
-                .contains {
-                    graph.explicitDeclaration(withUsr: $0.usr) == nil
-                }
+                .contains { graph.isExternal($0) }
 
             guard !inheritsForeignProtocol else { continue }
 

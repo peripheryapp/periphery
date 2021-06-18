@@ -28,9 +28,9 @@ final class XibReferenceRetainer: SourceGraphVisitor {
         for xibClass in referencedClasses {
             graph.markRetained(xibClass)
 
-            let superclasses = graph.superclasses(of: xibClass)
-            let superclassesDecls = superclasses.map { $0.declarations }.joined()
-            let allDecls = xibClass.declarations.union(superclassesDecls)
+            let inheritedDecls = graph.inheritedDeclarations(of: xibClass)
+            let descendentInheritedDecls = inheritedDecls.map { $0.declarations }.joined()
+            let allDecls = xibClass.declarations.union(descendentInheritedDecls)
 
             for declaration in allDecls {
                 if declaration.attributes.contains(where: { ibAttributes.contains($0) }) {

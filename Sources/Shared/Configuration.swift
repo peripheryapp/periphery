@@ -40,6 +40,9 @@ public final class Configuration: Singleton {
     @Setting(key: "retain_assign_only_property_types", defaultValue: [], valueSanitizer: PropertyTypeSanitizer.sanitize)
     public var retainAssignOnlyPropertyTypes: [String]
 
+    @Setting(key: "external_encodable_protocols", defaultValue: [])
+    public var externalEncodableProtocols: [String]
+
     @Setting(key: "retain_objc_accessible", defaultValue: false)
     public var retainObjcAccessible: Bool
 
@@ -129,6 +132,10 @@ public final class Configuration: Singleton {
             config[$retainAssignOnlyPropertyTypes.key] = retainAssignOnlyPropertyTypes
         }
 
+        if $externalEncodableProtocols.hasNonDefaultValue {
+            config[$externalEncodableProtocols.key] = externalEncodableProtocols
+        }
+
         if $retainUnusedProtocolFuncParams.hasNonDefaultValue {
             config[$retainUnusedProtocolFuncParams.key] = retainUnusedProtocolFuncParams
         }
@@ -205,6 +212,8 @@ public final class Configuration: Singleton {
                 $retainAssignOnlyProperties.assign(value)
             case $retainAssignOnlyPropertyTypes.key:
                 $retainAssignOnlyPropertyTypes.assign(value)
+            case $externalEncodableProtocols.key:
+                $externalEncodableProtocols.assign(value)
             case $retainObjcAccessible.key:
                 $retainObjcAccessible.assign(value)
             case $retainUnusedProtocolFuncParams.key:

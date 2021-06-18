@@ -110,7 +110,11 @@ public final class Declaration {
         }
 
         var isDiscreteConformableKind: Bool {
-            [.class, .struct, .enum].contains(self)
+            Self.discreteConformableKinds.contains(self)
+        }
+
+        static var discreteConformableKinds: Set<Kind> {
+            return [.class, .struct, .enum]
         }
 
         static var accessorKinds: Set<Kind> {
@@ -197,7 +201,7 @@ public final class Declaration {
         Set(declarations.flatMap { $0.descendentDeclarations }).union(declarations).union(unusedParameters)
     }
 
-    var immediateSuperclassReferences: Set<Reference> {
+    var immediateInheritedTypeReferences: Set<Reference> {
         let superclassReferences = related.filter { [.class, .struct, .protocol].contains($0.kind) }
 
         // Innherited typealiases are References instead of a Related.

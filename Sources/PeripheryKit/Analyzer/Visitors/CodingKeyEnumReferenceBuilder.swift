@@ -16,11 +16,11 @@ final class CodingKeyEnumReferenceBuilder: SourceGraphVisitor {
         for enumDeclaration in graph.declarations(ofKind: .enum) {
             guard let parent = enumDeclaration.parent else { continue }
 
-            let isCodingKey = graph.superclassReferences(of: enumDeclaration).contains {
+            let isCodingKey = graph.inheritedTypeReferences(of: enumDeclaration).contains {
                 $0.kind == .protocol && $0.name == "CodingKey"
             }
 
-            let isParentCodable = graph.superclassReferences(of: parent).contains {
+            let isParentCodable = graph.inheritedTypeReferences(of: parent).contains {
                 [.protocol, .typealias].contains($0.kind) && ["Codable", "Decodable", "Encodable"].contains($0.name)
             }
 
