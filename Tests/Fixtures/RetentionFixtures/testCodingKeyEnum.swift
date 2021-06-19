@@ -19,6 +19,14 @@ public class FixtureClass75: Decodable {
     }
 }
 
+public class FixtureClass203: Encodable {
+    var someVar: String?
+
+    enum CodingKeys: CodingKey {
+        case someVar
+    }
+}
+
 public class FixtureClass111: Codable { // Codable is a typealias, so it has different behaviour.
     var someVar: String?
 

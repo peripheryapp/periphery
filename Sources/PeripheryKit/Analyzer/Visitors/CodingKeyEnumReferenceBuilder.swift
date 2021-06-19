@@ -1,15 +1,6 @@
 import Foundation
 
-/// Builds a reference from a Decodable class to any child enum that conforms to CodingKey.
-///
-/// public class SomeClass: Decodable {
-///     var someVar: String?
-///
-///     enum CodingKeys: CodingKey {
-///         case someVar
-///     }
-/// }
-///
+/// Builds a reference from a `Codable` conforming type to any child enum that conforms to `CodingKey`.
 final class CodingKeyEnumReferenceBuilder: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
@@ -29,11 +20,11 @@ final class CodingKeyEnumReferenceBuilder: SourceGraphVisitor {
                 $0.kind == .protocol && $0.name == "CodingKey"
             }
 
-            let isParentDecodable = graph.superclassReferences(of: parent).contains {
-                [.protocol, .typealias].contains($0.kind) && ["Codable", "Decodable"].contains($0.name)
+            let isParentCodable = graph.superclassReferences(of: parent).contains {
+                [.protocol, .typealias].contains($0.kind) && ["Codable", "Decodable", "Encodable"].contains($0.name)
             }
 
-            if isCodingKey && isParentDecodable {
+            if isCodingKey && isParentCodable {
                 for usr in enumDeclaration.usrs {
                     let newReference = Reference(kind: .enum, usr: usr, location: enumDeclaration.location)
                     newReference.name = enumDeclaration.name

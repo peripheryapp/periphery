@@ -561,11 +561,14 @@ class RetentionTest: SourceGraphTestCase {
             assertReferenced(.class("FixtureClass75")) {
                 self.assertReferenced(.enum("CodingKeys"))
             }
+            assertReferenced(.class("FixtureClass203")) {
+                self.assertReferenced(.enum("CodingKeys"))
+            }
             assertReferenced(.class("FixtureClass111")) {
                 self.assertReferenced(.enum("CodingKeys"))
             }
             assertReferenced(.class("FixtureClass76")) {
-                // Not referenced because the enclosing class does not conform to Decodable.
+                // Not referenced because the enclosing class does not conform to Codable.
                 self.assertNotReferenced(.enum("CodingKeys"))
             }
         }
