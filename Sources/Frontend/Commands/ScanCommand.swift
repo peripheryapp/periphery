@@ -23,10 +23,10 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Path to your project's .xcodeproj - supply this option if your project doesn't have an .xcworkspace. Xcode projects only")
     var project: String?
 
-    @Option(help: "Comma separatered list of schemes that must be built in order to produce the targets passed to the --targets option. Xcode projects only", transform: split(by: ","))
+    @Option(help: "Comma-separated list of schemes that must be built in order to produce the targets passed to the --targets option. Xcode projects only", transform: split(by: ","))
     var schemes: [String] = []
 
-    @Option(help: "Comma separatered list of target names to scan. Requied for Xcode projects. Optional for Swift Package Manager projects, default behavior is to scan all targets defined in Package.swift", transform: split(by: ","))
+    @Option(help: "Comma-separated list of target names to scan. Requied for Xcode projects. Optional for Swift Package Manager projects, default behavior is to scan all targets defined in Package.swift", transform: split(by: ","))
     var targets: [String] = []
 
     @Option(help: "Output format (allowed: \(OutputFormat.allValueStrings.joined(separator: ", ")))")
@@ -50,7 +50,7 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Retain properties that are assigned, but never used")
     var retainAssignOnlyProperties: Bool = false
 
-    @Option(help: "Comma separatered list of property types to retain if the property is assigned, but never read", transform: split(by: ","))
+    @Option(help: "Comma-separated list of property types to retain if the property is assigned, but never read", transform: split(by: ","))
     var retainAssignOnlyPropertyTypes: [String] = []
 
     @Flag(help: "Retain declarations that are exposed to Objective-C implicitly by inheriting NSObject classes, or explicitly with the @objc and @objcMembers attributes")
