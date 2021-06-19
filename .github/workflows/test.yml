@@ -4,8 +4,6 @@ on:
     branches:
       - master
   pull_request: {}
-env:
-  cache_version: 1
 jobs:
   macOS:
     strategy:
@@ -28,9 +26,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: .build
-        key: ${{ env.cache_version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-${{ hashFiles('**/Package.*') }}
+        key: ${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-${{ hashFiles('**/Package.*') }}
         restore-keys: |
-          ${{ env.cache_version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-
+          ${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: swift package resolve
@@ -48,10 +46,13 @@ jobs:
         include:
           - swift: nightly-5.5
             container: "swiftlang/swift:nightly-5.5-focal"
+            cache-version: 1
           - swift: 5.4
             container: "swift:5.4"
+            cache-version: 1
           - swift: 5.3
             container: "swift:5.3"
+            cache-version: 1
     runs-on: ubuntu-20.04
     container: ${{ matrix.container }}
     name: Linux
@@ -67,9 +68,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: .build
-        key: ${{ env.cache_version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-${{ hashFiles('**/Package.*') }}
+        key: ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-${{ hashFiles('**/Package.*') }}
         restore-keys: |
-          ${{ env.cache_version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-
+          ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: swift package resolve
