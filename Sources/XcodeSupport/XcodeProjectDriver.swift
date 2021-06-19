@@ -97,10 +97,10 @@ extension XcodeProjectDriver: ProjectDriver {
 
         if !testTargetNames.isEmpty {
             let allTestTargets = try schemes.flatMap { try $0.testTargets() }
-            let missingTestTargets = Set(testTargetNames).subtracting(allTestTargets)
+            let missingTestTargets = Set(testTargetNames).subtracting(allTestTargets).sorted()
 
-            if let name = missingTestTargets.first {
-                throw PeripheryError.testTargetNotBuildable(name: name)
+            if !missingTestTargets.isEmpty {
+                throw PeripheryError.testTargetsNotBuildable(names: missingTestTargets)
             }
         }
 
