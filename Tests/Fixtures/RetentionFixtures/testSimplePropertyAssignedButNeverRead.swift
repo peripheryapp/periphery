@@ -3,6 +3,7 @@ import Foundation
 public class FixtureClass70 {
     static var simpleStaticUnreadVar: String!
     var simpleUnreadVar: String
+    var simpleUnreadShadowedVar: String
     var complexUnreadVar1: String {
         willSet {
             print("complex")
@@ -23,12 +24,14 @@ public class FixtureClass70 {
 
     init() {
         simpleUnreadVar = "Hello"
+        simpleUnreadShadowedVar = "Hello"
         complexUnreadVar1 = "Hello"
         readVar = "Hello"
         FixtureClass70.simpleStaticUnreadVar = "Hello"
     }
 
-    public func someMethod() {
+    public func someMethod(simpleUnreadShadowedVar: String) {
+        self.simpleUnreadShadowedVar = simpleUnreadShadowedVar
         simpleUnreadVar = "World"
         complexUnreadVar1 = "Hello"
         complexUnreadVar2 = "Hello"

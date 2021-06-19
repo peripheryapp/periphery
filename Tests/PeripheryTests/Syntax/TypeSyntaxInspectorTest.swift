@@ -120,7 +120,6 @@ class TypeSyntaxInspectorTest: XCTestCase {
 }
 
 private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
-    private let file: SourceFile
     private let syntax: SourceFileSyntax
     private let locationConverter: SourceLocationConverter
     private let sourceLocationBuilder: SourceLocationBuilder
@@ -130,7 +129,6 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
     var results: [PeripheryKit.SourceLocation: Result] = [:]
 
     init(file: SourceFile) throws {
-        self.file = file
         self.syntax = try SyntaxParser.parse(file.path.url)
         self.locationConverter = .init(file: file.path.string, tree: syntax)
         self.sourceLocationBuilder = .init(file: file, locationConverter: locationConverter)

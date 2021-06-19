@@ -1194,7 +1194,7 @@ class RetentionTest: SourceGraphTestCase {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass70")) {
                 self.assertNotReferenced(.varInstance("simpleUnreadVar"))
-                self.assertReferenced(.functionMethodInstance("someMethod()"))
+                self.assertNotReferenced(.varInstance("simpleUnreadShadowedVar"))
                 self.assertNotReferenced(.varStatic("simpleStaticUnreadVar"))
                 self.assertReferenced(.varInstance("complexUnreadVar1"))
                 self.assertReferenced(.varInstance("complexUnreadVar2"))
@@ -1208,6 +1208,7 @@ class RetentionTest: SourceGraphTestCase {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass70")) {
                 self.assertReferenced(.varInstance("simpleUnreadVar"))
+                self.assertReferenced(.varInstance("simpleUnreadShadowedVar"))
                 self.assertReferenced(.varStatic("simpleStaticUnreadVar"))
                 self.assertReferenced(.varInstance("complexUnreadVar1"))
                 self.assertReferenced(.varInstance("complexUnreadVar2"))
