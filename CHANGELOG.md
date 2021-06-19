@@ -12,6 +12,7 @@
 
 - Fix `--index-exclude` resulting in an error about unindexed files.
 - Fix an error during guided setup when `xcodebuild` is not setup for command line use.
+- `CodingKey` enums of `Encodable` conforming types are now also retained like `Decodable` types.
 
 ## 2.6.0 (2021-06-08)
 
