@@ -41,8 +41,9 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphVisitor {
                     continue
                 }
 
-                let getterName = "getter:\(propertyName)"
-                let hasGetterReference = caller.references.contains { $0.kind == .functionAccessorGetter && $0.name == getterName }
+                let propertyGetterUSRs = property.declarations.first { $0.kind == .functionAccessorGetter }?.usrs ?? []
+                let hasGetterReference = caller.references
+                    .contains { $0.kind == .functionAccessorGetter && propertyGetterUSRs.contains($0.usr) }
 
                 if !hasGetterReference {
                     assignOnlyProperties[property, default: []].append(propertyReference)
