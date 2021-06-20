@@ -4,6 +4,11 @@ on:
     branches:
       - master
   pull_request: {}
+env:
+  swift_package_resolve: swift package resolve
+  swift_build: swift build --build-tests
+  swift_test: swift test
+  periphery_scan: ./.build/debug/periphery scan --quiet --skip-build
 jobs:
   macOS:
     strategy:
@@ -25,19 +30,21 @@ jobs:
       id: cache-resolved-dependencies
       uses: actions/cache@v2
       with:
-        path: .build
-        key: ${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-${{ hashFiles('**/Package.*') }}
+        path: |
+          .build
+          Package.resolved
+        key: ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-${{ hashFiles('**/Package.*') }}
         restore-keys: |
-          ${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-
+          ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
-      run: swift package resolve
+      run: ${{ env.swift_package_resolve }}
     - name: Build
-      run: swift build --build-tests
+      run: ${{ env.swift_build }}
     - name: Test
-      run: swift test
+      run: ${{ env.swift_test }}
     - name: Scan
-      run: ./.build/debug/periphery scan --quiet --skip-build --strict
+      run: ${{ env.periphery_scan }} --strict
   linux:
     strategy:
       fail-fast: false
@@ -67,16 +74,18 @@ jobs:
       id: cache-resolved-dependencies
       uses: actions/cache@v2
       with:
-        path: .build
+        path: |
+          .build
+          Package.resolved
         key: ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-${{ hashFiles('**/Package.*') }}
         restore-keys: |
           ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
-      run: swift package resolve
+      run: ${{ env.swift_package_resolve }}
     - name: Build
-      run: swift build --build-tests --enable-test-discovery
+      run: ${{ env.swift_build }} --enable-test-discovery
     - name: Test
-      run: swift test --enable-test-discovery
+      run: ${{ env.swift_test }} --enable-test-discovery
     - name: Scan
-      run: ./.build/debug/periphery scan --quiet --skip-build
+      run: ${{ env.periphery_scan }}
