@@ -7,9 +7,6 @@ class SPMProjectTest: SourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        let configuration: Configuration = inject()
-        configuration.outputFormat = .json
-
         SPMProjectPath.chdir {
             let package = try! SPM.Package.load()
             let driver = SPMProjectDriver(

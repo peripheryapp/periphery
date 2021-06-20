@@ -4,17 +4,15 @@ import Shared
 @testable import TestShared
 @testable import PeripheryKit
 
-class RetentionTest: SourceGraphTestCase {
-    static var fixtureTarget: SPM.Target!
-    static var objcFixtureTarget: SPM.Target?
-    static var driver: SPMProjectDriver!
+final class RetentionTest: SourceGraphTestCase {
+    private static var fixtureTarget: SPM.Target!
+    private static var objcFixtureTarget: SPM.Target?
+    private static var driver: SPMProjectDriver!
+
     private let performKnownFailures = false
 
     static override func setUp() {
         super.setUp()
-
-        let configuration: Configuration = inject()
-        configuration.outputFormat = .json
 
         ProjectRootPath.chdir {
             let package = try! SPM.Package.load()
@@ -509,7 +507,6 @@ class RetentionTest: SourceGraphTestCase {
     }
 
     func testFunctionAccessorsRetainReferences() {
-        let configuration = inject(Configuration.self)
         configuration.retainAssignOnlyProperties = true
 
         analyze(retainPublic: true) {
@@ -543,7 +540,6 @@ class RetentionTest: SourceGraphTestCase {
     }
 
     func testInstanceVarReferencedInClosure() {
-        let configuration = inject(Configuration.self)
         configuration.retainAssignOnlyProperties = true
 
         analyze(retainPublic: true) {
@@ -752,7 +748,6 @@ class RetentionTest: SourceGraphTestCase {
     }
 
     func testRetainsAssignOnlyPropertyTypes() {
-        let configuration = inject(Configuration.self)
         configuration.retainAssignOnlyProperties = false
         configuration.retainAssignOnlyPropertyTypes = ["CustomType", "(CustomType, String)", "Swift.Double"]
 
@@ -875,7 +870,6 @@ class RetentionTest: SourceGraphTestCase {
     }
 
     func testRetainUnusedProtocolFuncParams() {
-        let configuration = inject(Configuration.self)
         configuration.retainUnusedProtocolFuncParams = true
 
         analyze(retainPublic: true) {
@@ -1202,7 +1196,6 @@ class RetentionTest: SourceGraphTestCase {
             }
         }
 
-        let configuration = inject(Configuration.self)
         configuration.retainAssignOnlyProperties = true
 
         analyze(retainPublic: true) {
@@ -1378,7 +1371,6 @@ class RetentionTest: SourceGraphTestCase {
         #endif
 
         let testFixturePath = fixturePath(for: testName, objc: objc)
-        let configuration = inject(Configuration.self)
         configuration.retainPublic = retainPublic
         configuration.retainObjcAccessible = retainObjcAccessible
 
@@ -1401,10 +1393,6 @@ class RetentionTest: SourceGraphTestCase {
         try! Self.driver.index(graph: graph)
         try! Analyzer.perform(graph: graph)
         try testBlock()
-
-        // Reset configuration to defaults.
-        configuration.retainAssignOnlyProperties = false
-        configuration.retainUnusedProtocolFuncParams = false
 
         if (testRun?.failureCount ?? 0) > 0 {
             print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")

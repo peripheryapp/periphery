@@ -1,8 +1,10 @@
 import XCTest
 import PeripheryKit
+import Shared
 
 open class SourceGraphTestCase: XCTestCase {
     static var graph = SourceGraph()
+    static var configuration: Configuration!
 
     var graph: SourceGraph! {
         get {
@@ -13,7 +15,20 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
+    var configuration: Configuration { Self.configuration }
+
     private var scopedDeclarationStack: [Declaration] = []
+
+    class open override func setUp() {
+        super.setUp()
+        configuration = inject()
+        configuration.quiet = true
+    }
+
+    open override func setUp() {
+        super.setUp()
+        configuration.reset()
+    }
 
     func assertReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, file: file, line: line) else { return }
