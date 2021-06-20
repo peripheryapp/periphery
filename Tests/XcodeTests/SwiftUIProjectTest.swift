@@ -10,9 +10,6 @@ class SwiftUIProjectTest: SourceGraphTestCase {
 
         let project = try! XcodeProject.make(path: SwiftUIProjectPath)
 
-        let configuration: Configuration = inject()
-        configuration.outputFormat = .json
-
         let driver = XcodeProjectDriver(
             logger: inject(),
             configuration: configuration,

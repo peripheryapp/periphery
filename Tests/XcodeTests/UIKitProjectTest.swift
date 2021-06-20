@@ -10,9 +10,6 @@ class UIKitProjectTest: SourceGraphTestCase {
 
         let project = try! XcodeProject.make(path: UIKitProjectPath)
 
-        let configuration: Configuration = inject()
-        configuration.outputFormat = .json
-
         let driver = XcodeProjectDriver(
             logger: inject(),
             configuration: configuration,

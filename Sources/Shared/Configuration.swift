@@ -233,6 +233,30 @@ public final class Configuration: Singleton {
         }
     }
 
+    public func reset() {
+        $workspace.reset()
+        $project.reset()
+        $schemes.reset()
+        $targets.reset()
+        $indexExclude.reset()
+        $reportExclude.reset()
+        $outputFormat.reset()
+        $retainPublic.reset()
+        $retainAssignOnlyProperties.reset()
+        $retainAssignOnlyPropertyTypes.reset()
+        $retainObjcAccessible.reset()
+        $retainUnusedProtocolFuncParams.reset()
+        $disableRedundantPublicAnalysis.reset()
+        $verbose.reset()
+        $quiet.reset()
+        $disableUpdateCheck.reset()
+        $strict.reset()
+        $indexStorePath.reset()
+        $skipBuild.reset()
+        $cleanBuild.reset()
+        $buildArguments.reset()
+    }
+
     // MARK: - Helpers
 
     public var indexExcludeSourceFiles: [FilePath] {
@@ -305,5 +329,9 @@ public final class Configuration: Singleton {
 
     func assign(_ value: Any) {
         wrappedValue = valueConverter(value) ?? defaultValue
+    }
+
+    func reset() {
+        wrappedValue = defaultValue
     }
 }
