@@ -180,10 +180,6 @@ final class RetentionTest: SourceGraphTestCase {
 
     func testRedundantProtocolThatInheritsAnyObject() {
         analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass120"))
-            assertReferenced(.protocol("FixtureProtocol120"))
-            assertRedundantProtocol("FixtureProtocol120", implementedBy: .class("FixtureClass120"))
-
             assertReferenced(.class("FixtureClass121"))
             assertReferenced(.protocol("FixtureProtocol121"))
             assertRedundantProtocol("FixtureProtocol121", implementedBy: .class("FixtureClass121"))
