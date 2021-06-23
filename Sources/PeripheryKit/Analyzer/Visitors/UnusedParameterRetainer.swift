@@ -61,7 +61,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
 
         if let classDeclaration = methodDeclaration.parent, classDeclaration.kind == .class {
             let allClassDeclarations = [classDeclaration]
-                + graph.superclasses(of: classDeclaration)
+                + graph.inheritedDeclarations(of: classDeclaration)
                 + graph.subclasses(of: classDeclaration)
 
             allMethodDeclarations = allClassDeclarations.flatMap { declaration in
@@ -97,7 +97,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
             .lazy
             .filter { $0.kind == referenceKind }
             .filter { $0.name == methodDeclaration.name }
-            .filter { self.graph.explicitDeclaration(withUsr: $0.usr) == nil }
+            .filter { self.graph.isExternal($0) }
 
         guard !foreignReferences.isEmpty else {
             return

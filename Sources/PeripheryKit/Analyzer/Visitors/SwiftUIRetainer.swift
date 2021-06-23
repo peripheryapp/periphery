@@ -23,8 +23,7 @@ final class SwiftUIRetainer: SourceGraphVisitor {
             .declarations(ofKinds: [.class, .struct])
             .filter {
                 $0.related.contains {
-                    let isExternal = graph.explicitDeclaration(withUsr: $0.usr) == nil
-                    return isExternal && $0.kind == .protocol && specialProtocols.contains($0.name ?? "")
+                    graph.isExternal($0) && $0.kind == .protocol && specialProtocols.contains($0.name ?? "")
                 }
             }
             .forEach { decl in

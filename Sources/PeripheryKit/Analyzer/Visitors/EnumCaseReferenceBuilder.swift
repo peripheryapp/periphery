@@ -39,7 +39,7 @@ final class EnumCaseReferenceBuilder: SourceGraphVisitor {
             return true
         }
 
-        return graph.superclassReferences(of: enumDeclaration).contains {
+        return graph.inheritedTypeReferences(of: enumDeclaration).contains {
             $0.kind == .protocol && $0.name == "RawRepresentable"
         }
     }

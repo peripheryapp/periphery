@@ -43,7 +43,7 @@ public final class Analyzer {
         ObjCAccessibleRetainer.self,
         XCTestRetainer.self,
         SwiftUIRetainer.self,
-        StructImplicitConstructorPropertyRetainer.self,
+        EncodablePropertyRetainer.self,
         StringInterpolationAppendInterpolationRetainer.self,
         PropertyWrapperRetainer.self,
         OptionalProtocolMemberRetainer.self,

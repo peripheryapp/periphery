@@ -30,6 +30,7 @@
   - [Assign-only Properties](#assign-only-properties)
   - [Redundant Public Accessibility](#redundant-public-accessibility)
   - [Objective-C](#objective-c)
+  - [Encodable](#encodable)
 - [Comment Commands](#comment-commands)
 - [Xcode Integration](#xcode-integration)
 - [Excluding Files](#excluding-files)
@@ -323,9 +324,22 @@ Periphery cannot analyze Objective-C code since types may be dynamically typed.
 
 By default Periphery does not assume that declarations accessible by the Objective-C runtime are in use. If your project is a mix of Swift & Objective-C, you can enable this behavior with the `--retain-objc-accessible` option. Swift declarations that are accessible by the Objective-C runtime are those that are explicitly attributed with `@objc` or `@objcMembers`, and classes that inherit `NSObject` either directly or indirectly via another class.
 
+### Encodable
+
+Conformance to `Encodable` (inc. implicitly via `Codable`) causes synthesis of additional code not visible to Periphery, and thus Periphery is unable to determine if the properties of conforming types are referenced from synthesized code. Therefore, all such properties must be retained in order to avoid false-positive results in the situation where the properties are only referenced via the initializer. For example:
+
+```swift
+struct SomeStruct: Encodable {
+    let someProperty: String // Not unused, automatically retained.
+}
+let data = try JSONEncoder().encode(SomeStruct(someProperty: "value"))
+```
+
+This property retention behavior is automatic, even when `Encodable` conformance is inherited via another protocol. However, if a protocol that inherits `Encodable` is declared in an external module that Periphery has not analyzed, it cannot detect the inheritance of `Encodable`. In this situation you can use the `--external-encodable-protocols` option enable this behavior for the given protocols.
+
 ## Comment Commands
 
-For whatever reason, you may want to keep some unused code. Source code comment commands can be used to instruct Periphery to ignore specific declarations, and exclude them from the results.
+For whatever reason, you may want to keep some unused code. Source code comment commands can be used to ignore specific declarations, and exclude them from the results.
 
 An ignore comment command can be placed directly on the line above any declaration to ignore it, and all descendent declarations:
 

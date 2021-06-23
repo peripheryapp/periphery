@@ -41,7 +41,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
 
                 if !unimplementedProtoDecls.isEmpty {
                     // Find all superclasses.
-                    let superclassDecls = graph.superclassReferences(of: conformingClass)
+                    let superclassDecls = graph.inheritedTypeReferences(of: conformingClass)
                         .filter { $0.kind == .class }
                         .compactMap { graph.explicitDeclaration(withUsr: $0.usr) }
                         .flatMap { $0.declarations }

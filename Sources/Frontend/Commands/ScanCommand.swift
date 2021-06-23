@@ -53,6 +53,9 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Comma-separated list of property types to retain if the property is assigned, but never read", transform: split(by: ","))
     var retainAssignOnlyPropertyTypes: [String] = []
 
+    @Option(help: "Comma-separated list of external protocols that inherit Encodable. Properties of types conforming to these protocols will be retained", transform: split(by: ","))
+    var externalEncodableProtocols: [String] = []
+
     @Flag(help: "Retain declarations that are exposed to Objective-C implicitly by inheriting NSObject classes, or explicitly with the @objc and @objcMembers attributes")
     var retainObjcAccessible: Bool = false
 
@@ -132,6 +135,10 @@ struct ScanCommand: FrontendCommand {
 
         if !retainAssignOnlyPropertyTypes.isEmpty {
             configuration.retainAssignOnlyPropertyTypes = retainAssignOnlyPropertyTypes
+        }
+
+        if !externalEncodableProtocols.isEmpty {
+            configuration.externalEncodableProtocols = externalEncodableProtocols
         }
 
         if isExplicit("retain-objc-accessible") {

@@ -27,7 +27,7 @@ public final class SourceGraph {
     var infoPlistReferences: [InfoPlistReference] = []
 
     public var unreachableDeclarations: Set<Declaration> {
-        return allDeclarations.subtracting(reachableDeclarations)
+        allDeclarations.subtracting(reachableDeclarations)
     }
 
     public init() {
@@ -41,15 +41,19 @@ public final class SourceGraph {
     }
 
     func declarations(ofKind kind: Declaration.Kind) -> Set<Declaration> {
-        return allDeclarationsByKind[kind] ?? []
+        allDeclarationsByKind[kind] ?? []
+    }
+
+    func declarations(ofKinds kinds: Set<Declaration.Kind>) -> Set<Declaration> {
+        declarations(ofKinds: Array(kinds))
     }
 
     func declarations(ofKinds kinds: [Declaration.Kind]) -> Set<Declaration> {
-        return Set(kinds.compactMap { allDeclarationsByKind[$0] }.joined())
+        Set(kinds.compactMap { allDeclarationsByKind[$0] }.joined())
     }
 
     func explicitDeclaration(withUsr usr: String) -> Declaration? {
-        return allExplicitDeclarationsByUsr[usr]
+        allExplicitDeclarationsByUsr[usr]
     }
 
     func references(to decl: Declaration) -> Set<Reference> {
@@ -178,28 +182,30 @@ public final class SourceGraph {
         }
     }
 
+    func isExternal(_ reference: Reference) -> Bool {
+        explicitDeclaration(withUsr: reference.usr) == nil
+    }
+
     func accept(visitor: SourceGraphVisitor.Type) throws {
         try visitor.make(graph: self).visit()
     }
 
-    func superclassReferences(of decl: Declaration) -> [Reference] {
+    func inheritedTypeReferences(of decl: Declaration) -> [Reference] {
         var references: [Reference] = []
 
-        for reference in decl.immediateSuperclassReferences {
+        for reference in decl.immediateInheritedTypeReferences {
             references.append(reference)
 
-            if let superclassDecl = explicitDeclaration(withUsr: reference.usr) {
-                references = superclassReferences(of: superclassDecl) + references
+            if let inheritedDecl = explicitDeclaration(withUsr: reference.usr) {
+                references = inheritedTypeReferences(of: inheritedDecl) + references
             }
         }
 
         return references
     }
 
-    func superclasses(of decl: Declaration) -> [Declaration] {
-        return superclassReferences(of: decl).compactMap {
-            explicitDeclaration(withUsr: $0.usr)
-        }
+    func inheritedDeclarations(of decl: Declaration) -> [Declaration] {
+        inheritedTypeReferences(of: decl).compactMap { explicitDeclaration(withUsr: $0.usr) }
     }
 
     func immediateSubclasses(of decl: Declaration) -> [Declaration] {
