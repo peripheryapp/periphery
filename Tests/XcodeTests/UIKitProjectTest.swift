@@ -81,4 +81,13 @@ class UIKitProjectTest: SourceGraphTestCase {
             self.assertNotReferenced(.varStatic("unused"))
         }
     }
+
+    func testRetainsCoreDataValueTransformerSubclass() {
+        assertReferenced(.class("EntityValueTransformer")) {
+            self.assertReferenced(.functionMethodInstance("transformedValue(_:)"))
+            self.assertNotRedundantPublicAccessibility(.functionMethodInstance("transformedValue(_:)"))
+        }
+        // ValueTransformer subclasses are referenced by generated code that Periphery cannot analyze.
+        assertNotRedundantPublicAccessibility(.class("EntityValueTransformer"))
+    }
 }

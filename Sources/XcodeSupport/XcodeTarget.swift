@@ -16,9 +16,11 @@ final class XcodeTarget {
     private let target: PBXTarget
     private var sourceFiles_: Set<FilePath> = []
     private var xibFiles_: Set<FilePath> = []
+    private var xcDataModelFiles_: Set<FilePath> = []
     private var infoPlistFiles_: Set<FilePath> = []
     private var didIdentifySourceFiles = false
     private var didIdentifyXibFiles = false
+    private var didIdentifyXCDataModelFiles = false
     private var didIdentifyInfoPlistFiles = false
 
     required init(project: XcodeProject, target: PBXTarget) {
@@ -54,6 +56,16 @@ final class XcodeTarget {
         return xibFiles_
     }
 
+    func xcdatamodelFiles() throws -> Set<FilePath> {
+        if didIdentifyXCDataModelFiles {
+            return xcDataModelFiles_
+        }
+
+        try identifyXCDataModelFiles()
+        didIdentifyXCDataModelFiles = true
+        return xcDataModelFiles_
+    }
+
     func infoPlistFiles() throws -> Set<FilePath> {
         if didIdentifyInfoPlistFiles {
             return infoPlistFiles_
@@ -68,10 +80,10 @@ final class XcodeTarget {
 
     private func identifySourceFiles() throws {
         let phases = project.xcodeProject.pbxproj.sourcesBuildPhases.filter { target.buildPhases.contains($0) }
+        let sourceRoot = project.sourceRoot.lexicallyNormalized()
 
         sourceFiles_ = Set(try phases.flatMap {
             try ($0.files ?? []).compactMap {
-                let sourceRoot = project.sourceRoot.lexicallyNormalized()
                 if let path = try $0.file?.fullPath(sourceRoot: Path(sourceRoot.string)),
                    path.extension?.lowercased() == "swift" {
                     return FilePath(path.absolute().string)
@@ -84,12 +96,28 @@ final class XcodeTarget {
 
     private func identifyXibFiles() throws {
         let phases = project.xcodeProject.pbxproj.resourcesBuildPhases.filter { target.buildPhases.contains($0) }
+        let sourceRoot = project.sourceRoot.lexicallyNormalized()
 
         xibFiles_ = Set(try phases.flatMap {
             try ($0.files ?? []).compactMap {
-                let sourceRoot = project.sourceRoot.lexicallyNormalized()
                 if let path = try $0.file?.fullPath(sourceRoot: Path(sourceRoot.string)),
                     ["xib", "storyboard"].contains(path.extension?.lowercased()) {
+                    return FilePath(path.absolute().string)
+                }
+
+                return nil
+            }
+        })
+    }
+
+    private func identifyXCDataModelFiles() throws {
+        let phases = project.xcodeProject.pbxproj.sourcesBuildPhases.filter { target.buildPhases.contains($0) }
+        let sourceRoot = project.sourceRoot.lexicallyNormalized()
+
+        xcDataModelFiles_ = Set(try phases.flatMap {
+            try ($0.files ?? []).compactMap {
+                if let path = try $0.file?.fullPath(sourceRoot: Path(sourceRoot.string)),
+                   path.extension == "xcdatamodeld" {
                     return FilePath(path.absolute().string)
                 }
 
