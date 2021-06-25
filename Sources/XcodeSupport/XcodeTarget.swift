@@ -22,7 +22,7 @@ final class XcodeTarget {
     }
 
     var isTestTarget: Bool {
-        target.productType?.rawValue.contains("test") ?? false
+        target.productType?.rawValue.lowercased().contains("test") ?? false
     }
 
     var name: String {
