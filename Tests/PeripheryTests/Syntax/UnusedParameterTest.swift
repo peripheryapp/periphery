@@ -6,61 +6,61 @@ import XCTest
 class UnusedParameterTest: XCTestCase {
     func testSimpleUnused() {
         analyze()
-        XCTAssertUnused("param", of: "myFunc(param:)")
+        assertUnused("param", in: "myFunc(param:)")
     }
 
     func testShadowed() {
         analyze()
-        XCTAssertUnused("param", of: "myFunc1(param:)")
-        XCTAssertUnused("param", of: "myFunc2(param:)")
-        XCTAssertUnused("param", of: "myFunc3(param:)")
+        assertUnused("param", in: "myFunc1(param:)")
+        assertUnused("param", in: "myFunc2(param:)")
+        assertUnused("param", in: "myFunc3(param:)")
     }
 
     func testShadowedAfterUse() {
         analyze()
-        XCTAssertUsed("param", of: "myFunc(param:)")
+        assertUsed("param", in: "myFunc(param:)")
     }
 
     func testLocalVariableAssignment() {
         analyze()
-        XCTAssertUsed("param1", of: "myFunc(param1:param2:)")
-        XCTAssertUsed("param2", of: "myFunc(param1:param2:)")
+        assertUsed("param1", in: "myFunc(param1:param2:)")
+        assertUsed("param2", in: "myFunc(param1:param2:)")
     }
 
     func testSimpleFunctionCall() {
         analyze()
-        XCTAssertUsed("param", of: "myFunc(param:)")
+        assertUsed("param", in: "myFunc(param:)")
     }
 
     func testFunctionCallWithNamedParameter() {
         analyze()
-        XCTAssertUsed("param1", of: "myFunc(param1:param2:)")
-        XCTAssertUnused("param2", of: "myFunc(param1:param2:)")
+        assertUsed("param1", in: "myFunc(param1:param2:)")
+        assertUnused("param2", in: "myFunc(param1:param2:)")
     }
 
     func testStringInterpolation() {
         analyze()
-        XCTAssertUsed("param1", of: "myFunc(param1:param2:param3:param4:)")
-        XCTAssertUsed("param2", of: "myFunc(param1:param2:param3:param4:)")
-        XCTAssertUsed("param3", of: "myFunc(param1:param2:param3:param4:)")
-        XCTAssertUsed("param4", of: "myFunc(param1:param2:param3:param4:)")
+        assertUsed("param1", in: "myFunc(param1:param2:param3:param4:)")
+        assertUsed("param2", in: "myFunc(param1:param2:param3:param4:)")
+        assertUsed("param3", in: "myFunc(param1:param2:param3:param4:)")
+        assertUsed("param4", in: "myFunc(param1:param2:param3:param4:)")
     }
 
     func testInitializer() {
         analyze()
-        XCTAssertUsed("param1", of: "init(param1:param2:)")
-        XCTAssertUnused("param2", of: "init(param1:param2:)")
+        assertUsed("param1", in: "init(param1:param2:)")
+        assertUnused("param2", in: "init(param1:param2:)")
     }
 
     func testUsedInInitializerCall() {
         analyze()
-        XCTAssertUsed("param1", of: "myFunc(param1:param2:)")
-        XCTAssertUsed("param2", of: "myFunc(param1:param2:)")
+        assertUsed("param1", in: "myFunc(param1:param2:)")
+        assertUsed("param2", in: "myFunc(param1:param2:)")
     }
 
     func testReturn() {
         analyze()
-        XCTAssertUsed("param", of: "myFunc(param:)")
+        assertUsed("param", in: "myFunc(param:)")
     }
 
     func testIgnoreProtocolDeclaration() {
@@ -70,48 +70,48 @@ class UnusedParameterTest: XCTestCase {
 
     func testParamForGenericSpecialization() {
         analyze()
-        XCTAssertUsed("param1", of: "myFunc(param1:param2:param3:)")
-        XCTAssertUsed("param2", of: "myFunc(param1:param2:param3:)")
-        XCTAssertUsed("param3", of: "myFunc(param1:param2:param3:)")
+        assertUsed("param1", in: "myFunc(param1:param2:param3:)")
+        assertUsed("param2", in: "myFunc(param1:param2:param3:)")
+        assertUsed("param3", in: "myFunc(param1:param2:param3:)")
     }
 
     func testIgnoredParameter() {
         analyze()
-        XCTAssertUsed("_", of: "myFunc(_:)")
+        assertUsed("_", in: "myFunc(_:)")
     }
 
     func testShadowedByBlockParameter() {
         analyze()
-        XCTAssertUnused("param1", of: "myFunc(param1:param2:param3:param4:)")
-        XCTAssertUnused("param2", of: "myFunc(param1:param2:param3:param4:)")
-        XCTAssertUsed("param3", of: "myFunc(param1:param2:param3:param4:)")
-        XCTAssertUsed("param4", of: "myFunc(param1:param2:param3:param4:)")
+        assertUnused("param1", in: "myFunc(param1:param2:param3:param4:)")
+        assertUnused("param2", in: "myFunc(param1:param2:param3:param4:)")
+        assertUsed("param3", in: "myFunc(param1:param2:param3:param4:)")
+        assertUsed("param4", in: "myFunc(param1:param2:param3:param4:)")
     }
 
     func testBlockParameter() {
         analyze()
-        XCTAssertUsed("block", of: "myFunc(block:)")
+        assertUsed("block", in: "myFunc(block:)")
     }
 
     func testLocalVarDeclaredInBlock() {
         analyze()
-        XCTAssertUnused("param", of: "myFunc(param:)")
+        assertUnused("param", in: "myFunc(param:)")
     }
 
     func testSubscriptArgument() {
         analyze()
-        XCTAssertUsed("param", of: "myFunc(param:)")
+        assertUsed("param", in: "myFunc(param:)")
     }
 
     func testNestedFunction() {
         analyze()
-        XCTAssertUsed("param", of: "myFunc(param:)")
+        assertUsed("param", in: "myFunc(param:)")
     }
 
     func testFatalErrorFunction() {
         analyze()
-        XCTAssertUsed("param", of: "myFunc(param:)")
-        XCTAssertUsed("param", of: "init(param:)")
+        assertUsed("param", in: "myFunc(param:)")
+        assertUsed("param", in: "init(param:)")
     }
 
     func testParameterPosition() {
@@ -178,13 +178,13 @@ class UnusedParameterTest: XCTestCase {
 
     func testIBActionAnnotatedFunction() {
         analyze()
-        XCTAssertUsed("param", of: "myFunc(param:)")
+        assertUsed("param", in: "myFunc(param:)")
     }
 
     func testBackquote() {
         analyze()
-        XCTAssertUsed("class", of: "myFunc(class:func:)")
-        XCTAssertUnused("func", of: "myFunc(class:func:)")
+        assertUsed("class", in: "myFunc(class:func:)")
+        assertUnused("func", in: "myFunc(class:func:)")
     }
 
     // MARK: - Private
@@ -213,7 +213,7 @@ class UnusedParameterTest: XCTestCase {
         return SourceFile(path: path, modules: ["UnusedParameterFixtures"])
     }
 
-    private func XCTAssertUnused(_ name: String, of functionName: String, file: StaticString = #file, line: UInt = #line) {
+    private func assertUnused(_ name: String, in functionName: String, file: StaticString = #file, line: UInt = #line) {
         let function = functions.first { $0.fullName == functionName }
 
         if let function = function {
@@ -225,7 +225,7 @@ class UnusedParameterTest: XCTestCase {
         }
     }
 
-    private func XCTAssertUsed(_ name: String, of functionName: String, file: StaticString = #file, line: UInt = #line) {
+    private func assertUsed(_ name: String, in functionName: String, file: StaticString = #file, line: UInt = #line) {
         let function = functions.first { $0.fullName == functionName }
 
         if let function = function {
