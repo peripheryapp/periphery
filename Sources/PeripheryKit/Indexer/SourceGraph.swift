@@ -13,6 +13,7 @@ public final class SourceGraph {
     private(set) var retainedDeclarations: Set<Declaration> = []
     private(set) var potentialAssignOnlyProperties: Set<Declaration> = []
     private(set) var ignoredDeclarations: Set<Declaration> = []
+    private(set) var assetReferences: Set<AssetReference> = []
 
     private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
@@ -22,9 +23,6 @@ public final class SourceGraph {
 
     private var _allDeclarationsUnmodified: Set<Declaration> = []
     public var allDeclarationsUnmodified: Set<Declaration> { _allDeclarationsUnmodified }
-
-    var xibReferences: [XibReference] = []
-    var infoPlistReferences: [InfoPlistReference] = []
 
     public var unreachableDeclarations: Set<Declaration> {
         allDeclarations.subtracting(reachableDeclarations)
@@ -73,6 +71,12 @@ public final class SourceGraph {
     func markRedundantPublicAccessibility(_ declaration: Declaration, modules: Set<String>) {
         mutationQueue.sync {
             redundantPublicAccessibility[declaration] = modules
+        }
+    }
+
+    func unmarkRedundantPublicAccessibility(_ declaration: Declaration) {
+        mutationQueue.sync {
+            _ = redundantPublicAccessibility.removeValue(forKey: declaration)
         }
     }
 
@@ -167,6 +171,12 @@ public final class SourceGraph {
                 parent.references.remove(reference)
                 parent.related.remove(reference)
             }
+        }
+    }
+
+    func add(_ assetReference: AssetReference) {
+        mutationQueue.sync {
+            _ = assetReferences.insert(assetReference)
         }
     }
 

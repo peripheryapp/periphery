@@ -90,7 +90,7 @@ public final class SwiftIndexer {
             )
         }
 
-        try JobPool<Void>().forEach(jobs) { job in
+        try JobPool(jobs: jobs).forEach { job in
             let elapsed = try Benchmark.measure {
                 try job.perform()
             }

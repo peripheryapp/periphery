@@ -19,20 +19,16 @@ public final class XibIndexer {
     }
 
     public func perform() throws {
-        let workPool = JobPool<[XibReference]>()
-        let results = try workPool.map(Array(xibFiles)) { [weak self] xibPath in
-            guard let strongSelf = self else { return nil }
-
-            var references: [XibReference] = []
+        try JobPool(jobs: Array(xibFiles)).forEach { [weak self] xibPath in
+            guard let self = self else { return }
 
             let elapsed = try Benchmark.measure {
-                references = try XibParser(path: xibPath).parse()
+                try XibParser(path: xibPath)
+                    .parse()
+                    .forEach { self.graph.add($0) }
             }
 
-            strongSelf.logger.debug("[index:xib] \(xibPath.string) (\(elapsed))s")
-            return references
+            self.logger.debug("[index:xib] \(xibPath.string) (\(elapsed))s")
         }
-
-        graph.xibReferences = Array(results.joined())
     }
 }

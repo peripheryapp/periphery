@@ -36,8 +36,7 @@ public final class Analyzer {
         AssociatedTypeTypeAliasReferenceBuilder.self,
 
         UnusedParameterRetainer.self,
-        XibReferenceRetainer.self,
-        InfoPlistReferenceRetainer.self,
+        AssetReferenceRetainer.self,
         EntryPointAttributeRetainer.self,
         PubliclyAccessibleRetainer.self,
         ObjCAccessibleRetainer.self,

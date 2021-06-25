@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="18154" systemVersion="20E232" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="EntityOne" representedClassName="EntityOne" syncable="YES" codeGenerationType="class">
+        <attribute name="someString" optional="YES" attributeType="String"/>
+        <attribute name="someTransformable" optional="YES" attributeType="Transformable" valueTransformerName="" customClassName="EntityValueTransformer"/>
+        <relationship name="entityTwo" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EntityOne" inverseName="entityTwo" inverseEntity="EntityOne"/>
+        <fetchedProperty name="someFetchedProperty" optional="YES">
+            <fetchRequest name="fetchedPropertyFetchRequest" entity="EntityOne"/>
+        </fetchedProperty>
+    </entity>
+    <entity name="EntityTwo" representedClassName="EntityTwo" syncable="YES" codeGenerationType="class"/>
+    <elements>
+        <element name="EntityOne" positionX="-63" positionY="-18" width="128" height="95"/>
+        <element name="EntityTwo" positionX="-54" positionY="0" width="128" height="29"/>
+    </elements>
+</model>

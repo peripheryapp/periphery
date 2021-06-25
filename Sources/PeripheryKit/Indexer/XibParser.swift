@@ -2,11 +2,6 @@ import Foundation
 import AEXML
 import SystemPackage
 
-struct XibReference {
-    let xibPath: FilePath
-    let className: String
-}
-
 final class XibParser {
     private let path: FilePath
 
@@ -14,30 +9,27 @@ final class XibParser {
         self.path = path
     }
 
-    func parse() throws -> [XibReference] {
+    func parse() throws -> [AssetReference] {
         guard let data = FileManager.default.contents(atPath: path.string) else { return [] }
-
         let structure = try AEXMLDocument(xml: data)
-        let elements = filter(structure.root)
-        return elements.compactMap {
-            guard let customClass = $0.attributes["customClass"] else { return nil }
-            return XibReference(xibPath: path, className: customClass)
+        return references(from: structure.root).map {
+            AssetReference(absoluteName: $0, source: .interfaceBuilder)
         }
     }
 
     // MARK: - Private
 
-    private func filter(_ element: AEXMLElement) -> [AEXMLElement] {
-        var elements: [AEXMLElement] = []
+    private func references(from element: AEXMLElement) -> [String] {
+        var names: [String] = []
 
         for child in element.children {
-            if child.attributes["customClass"] != nil {
-                elements.append(child)
+            if let name = child.attributes["customClass"] {
+                names.append(name)
             }
 
-            elements += filter(child)
+            names += references(from: child)
         }
 
-        return elements
+        return names
     }
 }

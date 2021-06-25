@@ -2,11 +2,6 @@ import Foundation
 import SystemPackage
 import AEXML
 
-struct InfoPlistReference {
-    let infoPlistPath: FilePath
-    let className: String
-}
-
 final class InfoPlistParser {
     private static let elements = ["UISceneClassName", "UISceneDelegateClassName", "NSExtensionPrincipalClass"]
     private let path: FilePath
@@ -15,15 +10,14 @@ final class InfoPlistParser {
         self.path = path
     }
 
-    func parse() throws -> [InfoPlistReference] {
+    func parse() throws -> [AssetReference] {
         guard let data = FileManager.default.contents(atPath: path.string) else { return [] }
 
         let structure = try AEXMLDocument(xml: data)
         let elements = filter(structure.root)
 
-        return elements.compactMap {
-            guard let className = $0.string.split(separator: ".").last else { return nil }
-            return InfoPlistReference(infoPlistPath: path, className: String(className))
+        return elements.map {
+            AssetReference(absoluteName: $0.string, source: .infoPlist)
         }
     }
 

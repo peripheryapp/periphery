@@ -19,20 +19,16 @@ public final class InfoPlistIndexer {
     }
 
     public func perform() throws {
-        let workPool = JobPool<[InfoPlistReference]>()
-        let results = try workPool.map(Array(infoPlistFiles)) { [weak self] path in
-            guard let strongSelf = self else { return nil }
-
-            var references: [InfoPlistReference] = []
+        try JobPool(jobs: Array(infoPlistFiles)).forEach { [weak self] path in
+            guard let self = self else { return }
 
             let elapsed = try Benchmark.measure {
-                references = try InfoPlistParser(path: path).parse()
+                try InfoPlistParser(path: path)
+                    .parse()
+                    .forEach { self.graph.add($0)  }
             }
 
-            strongSelf.logger.debug("[index:infoplist] \(path.string) (\(elapsed))s")
-            return references
+            self.logger.debug("[index:infoplist] \(path.string) (\(elapsed))s")
         }
-
-        graph.infoPlistReferences = Array(results.joined())
     }
 }
