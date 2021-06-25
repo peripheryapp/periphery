@@ -14,14 +14,7 @@ final class XcodeTarget {
     let project: XcodeProject
 
     private let target: PBXTarget
-    private var sourceFiles_: Set<FilePath> = []
-    private var xibFiles_: Set<FilePath> = []
-    private var xcDataModelFiles_: Set<FilePath> = []
-    private var infoPlistFiles_: Set<FilePath> = []
-    private var didIdentifySourceFiles = false
-    private var didIdentifyXibFiles = false
-    private var didIdentifyXCDataModelFiles = false
-    private var didIdentifyInfoPlistFiles = false
+    private var files: [ProjectFileKind: Set<FilePath>] = [:]
 
     required init(project: XcodeProject, target: PBXTarget) {
         self.project = project
@@ -29,95 +22,39 @@ final class XcodeTarget {
     }
 
     var isTestTarget: Bool {
-        return target.productType?.rawValue.contains("test") ?? false
+        target.productType?.rawValue.contains("test") ?? false
     }
 
     var name: String {
-        return target.name
+        target.name
     }
 
-    func sourceFiles() throws -> Set<FilePath> {
-        if didIdentifySourceFiles {
-            return sourceFiles_
-        }
+    func identifyFiles() throws {
+        let sourcesBuildPhases = project.xcodeProject.pbxproj.sourcesBuildPhases
+        let resourcesBuildPhases = project.xcodeProject.pbxproj.resourcesBuildPhases
 
-        try identifySourceFiles()
-        didIdentifySourceFiles = true
-        return sourceFiles_
-    }
-
-    func xibFiles() throws -> Set<FilePath> {
-        if didIdentifyXibFiles {
-            return xibFiles_
-        }
-
-        try identifyXibFiles()
-        didIdentifyXibFiles = true
-        return xibFiles_
-    }
-
-    func xcdatamodelFiles() throws -> Set<FilePath> {
-        if didIdentifyXCDataModelFiles {
-            return xcDataModelFiles_
-        }
-
-        try identifyXCDataModelFiles()
-        didIdentifyXCDataModelFiles = true
-        return xcDataModelFiles_
-    }
-
-    func infoPlistFiles() throws -> Set<FilePath> {
-        if didIdentifyInfoPlistFiles {
-            return infoPlistFiles_
-        }
-
+        try identifyFiles(kind: .swift, in: sourcesBuildPhases)
+        try identifyFiles(kind: .xcDataModel, in: sourcesBuildPhases)
+        try identifyFiles(kind: .xcMappingModel, in: sourcesBuildPhases)
+        try identifyFiles(kind: .interfaceBuilder, in: resourcesBuildPhases)
         try identifyInfoPlistFiles()
-        didIdentifyInfoPlistFiles = true
-        return infoPlistFiles_
+    }
+
+    func files(kind: ProjectFileKind) -> Set<FilePath> {
+        files[kind, default: []]
     }
 
     // MARK: - Private
 
-    private func identifySourceFiles() throws {
-        let phases = project.xcodeProject.pbxproj.sourcesBuildPhases.filter { target.buildPhases.contains($0) }
+    private func identifyFiles(kind: ProjectFileKind, in buildPhases: [PBXBuildPhase]) throws {
+        let targetPhases = buildPhases.filter { target.buildPhases.contains($0) }
         let sourceRoot = project.sourceRoot.lexicallyNormalized()
 
-        sourceFiles_ = Set(try phases.flatMap {
+        files[kind] = Set(try targetPhases.flatMap {
             try ($0.files ?? []).compactMap {
                 if let path = try $0.file?.fullPath(sourceRoot: Path(sourceRoot.string)),
-                   path.extension?.lowercased() == "swift" {
-                    return FilePath(path.absolute().string)
-                }
-
-                return nil
-            }
-        })
-    }
-
-    private func identifyXibFiles() throws {
-        let phases = project.xcodeProject.pbxproj.resourcesBuildPhases.filter { target.buildPhases.contains($0) }
-        let sourceRoot = project.sourceRoot.lexicallyNormalized()
-
-        xibFiles_ = Set(try phases.flatMap {
-            try ($0.files ?? []).compactMap {
-                if let path = try $0.file?.fullPath(sourceRoot: Path(sourceRoot.string)),
-                    ["xib", "storyboard"].contains(path.extension?.lowercased()) {
-                    return FilePath(path.absolute().string)
-                }
-
-                return nil
-            }
-        })
-    }
-
-    private func identifyXCDataModelFiles() throws {
-        let phases = project.xcodeProject.pbxproj.sourcesBuildPhases.filter { target.buildPhases.contains($0) }
-        let sourceRoot = project.sourceRoot.lexicallyNormalized()
-
-        xcDataModelFiles_ = Set(try phases.flatMap {
-            try ($0.files ?? []).compactMap {
-                if let path = try $0.file?.fullPath(sourceRoot: Path(sourceRoot.string)),
-                   path.extension == "xcdatamodeld" {
+                   let ext = path.extension,
+                   kind.extensions.contains(ext.lowercased()) {
                     return FilePath(path.absolute().string)
                 }
 
@@ -127,10 +64,10 @@ final class XcodeTarget {
     }
 
     private func identifyInfoPlistFiles() throws {
-        let files = target.buildConfigurationList?.buildConfigurations.compactMap {
+        let plistFiles = target.buildConfigurationList?.buildConfigurations.compactMap {
             $0.buildSettings["INFOPLIST_FILE"] as? String
         } ?? []
-        infoPlistFiles_ = Set(files.map { parseInfoPlistSetting($0) })
+        files[.infoPlist] = Set(plistFiles.map { parseInfoPlistSetting($0) })
     }
 
     private func parseInfoPlistSetting(_ setting: String) -> FilePath {

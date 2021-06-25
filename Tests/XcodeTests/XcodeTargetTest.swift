@@ -8,8 +8,9 @@ class XcodeTargetTest: XCTestCase {
     func testSourceFileInGroupWithoutFolder() throws {
         let project = try! XcodeProject.make(path: UIKitProjectPath)
         let target = project.targets.first { $0.name == "UIKitProject" }!
+        try target.identifyFiles()
 
-        XCTAssertTrue(try target.sourceFiles().contains {
+        XCTAssertTrue(target.files(kind: .swift).contains {
             $0.relativeTo(ProjectRootPath).string == "Tests/XcodeTests/UIKitProject/UIKitProject/FileInGroupWithoutFolder.swift"
         })
     }
