@@ -2,13 +2,7 @@ import Foundation
 import SystemPackage
 
 struct AssetReference: Hashable {
-    enum Source {
-        case interfaceBuilder
-        case infoPlist
-        case xcDataModel
-    }
-
-    init(absoluteName: String, source: Source) {
+    init(absoluteName: String, source: ProjectFileKind) {
         if let name = absoluteName.split(separator: ".").last {
             self.name = String(name)
         } else {
@@ -18,5 +12,5 @@ struct AssetReference: Hashable {
     }
 
     let name: String
-    let source: Source
+    let source: ProjectFileKind
 }

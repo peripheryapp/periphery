@@ -29,6 +29,9 @@
 		3CD46111256C034C00856DAC /* MultiTargetStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD46107256C02FE00856DAC /* MultiTargetStruct.swift */; };
 		3CD46115256C034D00856DAC /* MultiTargetStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD46107256C02FE00856DAC /* MultiTargetStruct.swift */; };
 		3CD8FF922683ACBB001951CD /* EntityValueTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD8FF912683ACBB001951CD /* EntityValueTransformer.swift */; };
+		3CE3F7CC2685DEFB0047231C /* OldModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3CE3F7CA2685DEFB0047231C /* OldModel.xcdatamodeld */; };
+		3CE3F7CE2685DF0F0047231C /* ModelMapping.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3CE3F7CD2685DF0F0047231C /* ModelMapping.xcmappingmodel */; };
+		3CE3F7D02685E07C0047231C /* CustomEntityMigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CE3F7CF2685E07C0047231C /* CustomEntityMigrationPolicy.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -107,6 +110,9 @@
 		3C9EFBA72684E1B70071E973 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		3CD46107256C02FE00856DAC /* MultiTargetStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiTargetStruct.swift; sourceTree = "<group>"; };
 		3CD8FF912683ACBB001951CD /* EntityValueTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityValueTransformer.swift; sourceTree = "<group>"; };
+		3CE3F7CB2685DEFB0047231C /* OldModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = OldModel.xcdatamodel; sourceTree = "<group>"; };
+		3CE3F7CD2685DF0F0047231C /* ModelMapping.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = ModelMapping.xcmappingmodel; sourceTree = "<group>"; };
+		3CE3F7CF2685E07C0047231C /* CustomEntityMigrationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomEntityMigrationPolicy.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,6 +224,9 @@
 				3C9EFBA62684E1B70071E973 /* Model.xcdatamodeld */,
 				3CD4610D256C032500856DAC /* MultiTarget */,
 				3C849663255405B000900DA9 /* Preview Content */,
+				3CE3F7CA2685DEFB0047231C /* OldModel.xcdatamodeld */,
+				3CE3F7CD2685DF0F0047231C /* ModelMapping.xcmappingmodel */,
+				3CE3F7CF2685E07C0047231C /* CustomEntityMigrationPolicy.swift */,
 			);
 			path = UIKitProject;
 			sourceTree = "<group>";
@@ -441,12 +450,15 @@
 				3C5E4E58255C25D200BF728D /* AppDelegate.swift in Sources */,
 				3C1FED0D2556D7C60001BD58 /* FileInGroupWithoutFolder.swift in Sources */,
 				3CD46111256C034C00856DAC /* MultiTargetStruct.swift in Sources */,
+				3CE3F7CC2685DEFB0047231C /* OldModel.xcdatamodeld in Sources */,
 				3C3ABC09256526F900EAB309 /* XibViewController2.swift in Sources */,
 				3C9B06EA25547CEC00E45614 /* StoryboardViewController.swift in Sources */,
+				3CE3F7D02685E07C0047231C /* CustomEntityMigrationPolicy.swift in Sources */,
 				3C9EFBA82684E1B70071E973 /* Model.xcdatamodeld in Sources */,
 				3C9B06BE25542DB200E45614 /* XibViewController.swift in Sources */,
 				3CD8FF922683ACBB001951CD /* EntityValueTransformer.swift in Sources */,
 				3C84966E255405F600900DA9 /* SceneDelegate.swift in Sources */,
+				3CE3F7CE2685DF0F0047231C /* ModelMapping.xcmappingmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -836,6 +848,16 @@
 			);
 			currentVersion = 3C9EFBA72684E1B70071E973 /* Model.xcdatamodel */;
 			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+		3CE3F7CA2685DEFB0047231C /* OldModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				3CE3F7CB2685DEFB0047231C /* OldModel.xcdatamodel */,
+			);
+			currentVersion = 3CE3F7CB2685DEFB0047231C /* OldModel.xcdatamodel */;
+			path = OldModel.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
 		};

@@ -90,4 +90,8 @@ class UIKitProjectTest: SourceGraphTestCase {
         // ValueTransformer subclasses are referenced by generated code that Periphery cannot analyze.
         assertNotRedundantPublicAccessibility(.class("EntityValueTransformer"))
     }
+
+    func testRetainsCoreDataEntityMigrationPolicySubclass() {
+        assertReferenced(.class("CustomEntityMigrationPolicy"))
+    }
 }

@@ -134,19 +134,24 @@ extension XcodeProjectDriver: ProjectDriver {
             storePath = try xcodebuild.indexStorePath(project: project, schemes: Array(schemes))
         }
 
-        let sourceFiles = try targets.reduce(into: [FilePath: [String]]()) { result, target in
-            try target.sourceFiles().forEach { result[$0, default: []].append(target.name) }
+        try targets.forEach { try $0.identifyFiles() }
+
+        let sourceFiles = targets.reduce(into: [FilePath: [String]]()) { result, target in
+            target.files(kind: .swift).forEach { result[$0, default: []].append(target.name) }
         }
 
         try SwiftIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
 
-        let xibFiles = try Set(targets.map { try $0.xibFiles() }.joined())
+        let xibFiles = Set(targets.map { $0.files(kind: .interfaceBuilder) }.joined())
         try XibIndexer.make(xibFiles: xibFiles, graph: graph).perform()
 
-        let xcdatamodelFiles = try Set(targets.map { try $0.xcdatamodelFiles() }.joined())
-        try XCDataModelIndexer.make(files: xcdatamodelFiles, graph: graph).perform()
+        let xcDataModelFiles = Set(targets.map { $0.files(kind: .xcDataModel) }.joined())
+        try XCDataModelIndexer.make(files: xcDataModelFiles, graph: graph).perform()
 
-        let infoPlistFiles = try Set(targets.map { try $0.infoPlistFiles() }.joined())
+        let xcMappingModelFiles = Set(targets.map { $0.files(kind: .xcMappingModel) }.joined())
+        try XCMappingModelIndexer.make(files: xcMappingModelFiles, graph: graph).perform()
+
+        let infoPlistFiles = Set(targets.map { $0.files(kind: .infoPlist) }.joined())
         try InfoPlistIndexer.make(infoPlistFiles: infoPlistFiles, graph: graph).perform()
 
         graph.indexingComplete()

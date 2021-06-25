@@ -6,6 +6,7 @@
 
 ##### Enhancements
 
+- `NSEntityMigrationPolicy` subclasses referenced by `.xcmappingmodel` are now retained.
 - `ValueTransformer` subclasses referenced by `.xcdatamodeld` are now retained.
 - Properties of types directly or indirectly conforming to `Encodable` are now automatically retained. The `--external-encodable-protocols` option has been added to instruct Periphery that the specified external protocols also inherit `Encodable`.
 
