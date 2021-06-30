@@ -1241,6 +1241,13 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testCircularTypeInheritance() {
+        analyze {
+            // Intentionally blank.
+            // Fixture contains a circular reference that shouldn't cause a stack overflow.
+        }
+    }
+
     // MARK: - Objective-C
 
     #if os(macOS)

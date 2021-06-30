@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix crash caused by cyclic inherited type references.
 
 ## 2.7.0 (2021-06-29)
 
