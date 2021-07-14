@@ -56,7 +56,7 @@ jobs:
             cache-version: 2
           - swift: 5.4
             container: "swift:5.4"
-            cache-version: 1
+            cache-version: 2
           - swift: 5.3
             container: "swift:5.3"
             cache-version: 1
