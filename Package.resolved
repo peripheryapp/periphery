@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "9564d61b08a5335ae0a36f789a7d71493eacadfc",
-          "version": "0.3.2"
+          "revision": "986d191f94cec88f6350056da59c2e59e83d1229",
+          "version": "0.4.3"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/kateinoigakukun/swift-indexstore",
         "state": {
           "branch": null,
-          "revision": "5ab719380249264ed96c9b6d49d5b6a96aa4e7b1",
-          "version": "0.1.4"
+          "revision": "60c1df777190e94cf7c53506424c8bf66d21e183",
+          "version": null
         }
       },
       {
