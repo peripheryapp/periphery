@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Added folder exclusion from report
 
 ##### Bug Fixes
 
