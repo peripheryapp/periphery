@@ -399,7 +399,7 @@ Both exclusion options described below accept a path glob, either absolute or re
 
 ### Excluding Results
 
-To exclude the results from certain files, pass the `--report-exclude <globs>` option to the `scan` command.
+To exclude the results from certain files, pass the `--report-exclude <globs>` option to the `scan` command. Full folders can also be excluded by passing a relative path to the directory, e.g. `Sources/Frontend/`
 
 ### Excluding Indexed Files
 
