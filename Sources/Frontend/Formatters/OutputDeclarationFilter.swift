@@ -1,6 +1,7 @@
 import Foundation
-import Shared
 import PeripheryKit
+import Shared
+import SystemPackage
 
 final class OutputDeclarationFilter: Injectable {
     static func make() -> Self {
@@ -17,13 +18,25 @@ final class OutputDeclarationFilter: Injectable {
 
     func filter(_ declarations: [ScanResult]) -> [ScanResult] {
         let excludedSourceFiles = configuration.reportExcludeSourceFiles
+        var visited: [FilePath: Bool] = [:]
 
         excludedSourceFiles.forEach {
             logger.debug("[report:exclude] \($0.string)")
         }
+        
+        return declarations.filter { result in
 
-        return declarations.filter {
-            !excludedSourceFiles.contains($0.declaration.location.file.path)
+            let path = result.declaration.location.file.path
+
+            if let previous = visited[path] {
+
+                return previous
+            }
+
+            let contains = !excludedSourceFiles.contains { path.starts(with: $0) }
+            visited[path] = contains
+
+            return contains
         }
     }
 }
