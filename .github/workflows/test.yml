@@ -14,17 +14,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        xcode: [12.5, 12.4, 12.3, 12.2, 12.1]
+        xcode: ["13.0", "12.5.1", "12.4", "12.3", "12.2", "12.1"]
         include:
-          - xcode: 12.5
+          - xcode: "13.0"
             macos: macOS-11
-          - xcode: 12.4
+          - xcode: "12.5.1"
             macos: macOS-11
-          - xcode: 12.3
+          - xcode: "12.4"
+            macos: macOS-11
+          - xcode: "12.3"
             macos: macOS-10.15
-          - xcode: 12.2
+          - xcode: "12.2"
             macos: macOS-10.15
-          - xcode: 12.1
+          - xcode: "12.1"
             macos: macOS-10.15
     runs-on: ${{ matrix.macos }}
     name: macOS
@@ -65,10 +67,10 @@ jobs:
           - swift: nightly-5.5
             container: "swiftlang/swift:nightly-5.5-focal"
             cache-version: 2
-          - swift: 5.4
+          - swift: "5.4"
             container: "swift:5.4"
             cache-version: 2
-          - swift: 5.3
+          - swift: "5.3"
             container: "swift:5.3"
             cache-version: 1
     runs-on: ubuntu-20.04
