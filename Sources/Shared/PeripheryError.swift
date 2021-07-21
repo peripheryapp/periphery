@@ -6,7 +6,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case usageError(String)
     case underlyingError(Error)
     case invalidScheme(name: String, project: String)
-    case invalidTarget(name: String, project: String)
+    case invalidTargets(names: [String], project: String)
     case testTargetsNotBuildable(names: [String])
     case sourceGraphIntegrityError(message: String)
     case guidedSetupError(message: String)
@@ -33,8 +33,11 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             return "(\(type(of: error))) \(String(describing: error))" 
         case let .invalidScheme(name, project):
             return "Scheme '\(name)' does not exist in '\(project)'."
-        case let .invalidTarget(name, project):
-            return "Target '\(name)' does not exist in '\(project)'."
+        case let .invalidTargets(names, project):
+            let formattedNames = names.map { "'\($0)'" }.joined(separator: ", ")
+            let declinedTarget = names.count == 1 ? "Target" : "Targets"
+            let conjugatedDo = names.count == 1 ? "does" : "do"
+            return "\(declinedTarget) \(formattedNames) \(conjugatedDo) not exist in '\(project)'."
         case .testTargetsNotBuildable(let names):
             let joinedNames = names.joined(separator: "', '")
             return "The following test targets are not built by any of the given schemes: '\(joinedNames)'"

@@ -101,4 +101,4 @@ jobs:
     - name: Test
       run: ${{ env.swift_test }} --enable-test-discovery
     - name: Scan
-      run: ${{ env.periphery_scan }}
+      run: ${{ env.periphery_scan }} --config .periphery.linux.yml

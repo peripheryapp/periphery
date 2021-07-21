@@ -16,6 +16,11 @@ public final class SPMProjectDriver {
             targets = package.swiftTargets
         } else {
             targets = package.swiftTargets.filter { configuration.targets.contains($0.name) }
+            let invalidTargetNames = Set(configuration.targets).subtracting(targets.map { $0.name })
+
+            if !invalidTargetNames.isEmpty {
+                throw PeripheryError.invalidTargets(names: invalidTargetNames.sorted(), project: SPM.packageFile)
+            }
         }
 
         return self.init(package: package, targets: targets, configuration: configuration, logger: inject())

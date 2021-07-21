@@ -20,10 +20,10 @@ public final class XcodeProjectDriver {
 
         // Ensure targets are part of the project
         let targets = project.targets.filter { configuration.targets.contains($0.name) }
-        let missingTargetNames = Set(configuration.targets).subtracting(targets.map { $0.name })
+        let invalidTargetNames = Set(configuration.targets).subtracting(targets.map { $0.name })
 
-        if let name = missingTargetNames.first {
-            throw PeripheryError.invalidTarget(name: name, project: project.path.lastComponent?.string ?? "")
+        if !invalidTargetNames.isEmpty {
+            throw PeripheryError.invalidTargets(names: invalidTargetNames.sorted(), project: project.path.lastComponent?.string ?? "")
         }
 
         // Ensure schemes exist within the project
