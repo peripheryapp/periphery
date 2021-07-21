@@ -12,5 +12,8 @@ class SwiftVersionParserTest: XCTestCase {
 
         let v3 = try SwiftVersionParser.parse("Swift version 5.4-dev (LLVM e2976fe639d1f50, Swift ce587f0a137bf18)\nTarget: x86_64-apple-darwin20.2.0")
         XCTAssertEqual(v3, "5.4")
+
+        let v4 = try SwiftVersionParser.parse("swift-driver version: 1.26.5 Apple Swift version 5.5 (swiftlang-1300.0.24.13 clang-1300.0.25.10)\nTarget: x86_64-apple-macosx11.0")
+        XCTAssertEqual(v4, "5.5")
     }
 }

@@ -256,6 +256,7 @@ public final class Configuration: Singleton {
         $retainObjcAccessible.reset()
         $retainUnusedProtocolFuncParams.reset()
         $disableRedundantPublicAnalysis.reset()
+        $externalEncodableProtocols.reset()
         $verbose.reset()
         $quiet.reset()
         $disableUpdateCheck.reset()
@@ -267,6 +268,14 @@ public final class Configuration: Singleton {
     }
 
     // MARK: - Helpers
+
+    public func apply<T: Equatable>(_ path: KeyPath<Configuration, Setting<T>>, _ value: T) {
+        let setting = self[keyPath: path]
+
+        if setting.defaultValue != value {
+            setting.wrappedValue = value
+        }
+    }
 
     public var indexExcludeSourceFiles: [FilePath] {
         return indexExclude.flatMap { glob($0) }
@@ -307,17 +316,17 @@ public final class Configuration: Singleton {
     typealias ValueConverter = (Any) -> Value?
     typealias ValueSanitizer = (Value) -> Value
 
-    let key: String
+    fileprivate let defaultValue: Value
+    fileprivate let key: String
 
-    private let defaultValue: Value
     private let valueConverter: ValueConverter
     private let valueSanitizer: ValueSanitizer
     private var value: Value
 
-    init(key: String,
-         defaultValue: Value,
-         valueConverter: @escaping ValueConverter = { $0 as? Value },
-         valueSanitizer: @escaping ValueSanitizer = { $0 }) {
+    fileprivate init(key: String,
+                     defaultValue: Value,
+                     valueConverter: @escaping ValueConverter = { $0 as? Value },
+                     valueSanitizer: @escaping ValueSanitizer = { $0 }) {
         self.key = key
         self.value = defaultValue
         self.defaultValue = defaultValue
@@ -332,15 +341,15 @@ public final class Configuration: Singleton {
 
     public var projectedValue: Setting { self }
 
-    var hasNonDefaultValue: Bool {
+    fileprivate var hasNonDefaultValue: Bool {
         value != defaultValue
     }
 
-    func assign(_ value: Any) {
+    fileprivate func assign(_ value: Any) {
         wrappedValue = valueConverter(value) ?? defaultValue
     }
 
-    func reset() {
+    fileprivate func reset() {
         wrappedValue = defaultValue
     }
 }
