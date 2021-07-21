@@ -8,11 +8,13 @@ struct ScanCommand: FrontendCommand {
         abstract: "Scan for unused code"
     )
 
+    private static let defaultConfig = Configuration.make()
+
     @Argument(help: "Arguments following '--' will be passed to the underlying build tool, which is either 'swift build' or 'xcodebuild' depending on your project")
-    var buildArguments: [String] = []
+    var buildArguments: [String] = defaultConfig.buildArguments
 
     @Flag(help: "Enable guided setup")
-    var setup: Bool = false
+    var setup: Bool = defaultConfig.guidedSetup
 
     @Option(help: "Path to configuration file. By default Periphery will look for .periphery.yml in the current directory")
     var config: String?
@@ -24,61 +26,61 @@ struct ScanCommand: FrontendCommand {
     var project: String?
 
     @Option(help: "Comma-separated list of schemes that must be built in order to produce the targets passed to the --targets option. Xcode projects only", transform: split(by: ","))
-    var schemes: [String] = []
+    var schemes: [String] = defaultConfig.schemes
 
     @Option(help: "Comma-separated list of target names to scan. Requied for Xcode projects. Optional for Swift Package Manager projects, default behavior is to scan all targets defined in Package.swift", transform: split(by: ","))
-    var targets: [String] = []
+    var targets: [String] = defaultConfig.targets
 
     @Option(help: "Output format (allowed: \(OutputFormat.allValueStrings.joined(separator: ", ")))")
-    var format: OutputFormat = .default
+    var format: OutputFormat = defaultConfig.outputFormat
 
     @Option(help: "Path glob of source files which should be excluded from indexing. Declarations and references within these files will not be considered during analysis. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
-    var indexExclude: [String] = []
+    var indexExclude: [String] = defaultConfig.indexExclude
 
     @Option(help: "Path glob of source files which should be excluded from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
-    var reportExclude: [String] = []
+    var reportExclude: [String] = defaultConfig.reportExclude
 
     @Option(help: "Path to index store to use. Implies '--skip-build'")
     var indexStorePath: String?
 
     @Flag(help: "Retain all public declarations - you'll likely want to enable this if you're scanning a framework/library project")
-    var retainPublic: Bool = false
+    var retainPublic: Bool = defaultConfig.retainPublic
 
     @Flag(help: "Disable identification of redundant public accessibility")
-    var disableRedundantPublicAnalysis: Bool = false
+    var disableRedundantPublicAnalysis: Bool = defaultConfig.disableRedundantPublicAnalysis
 
     @Flag(help: "Retain properties that are assigned, but never used")
-    var retainAssignOnlyProperties: Bool = false
+    var retainAssignOnlyProperties: Bool = defaultConfig.retainAssignOnlyProperties
 
     @Option(help: "Comma-separated list of property types to retain if the property is assigned, but never read", transform: split(by: ","))
-    var retainAssignOnlyPropertyTypes: [String] = []
+    var retainAssignOnlyPropertyTypes: [String] = defaultConfig.retainAssignOnlyPropertyTypes
 
     @Option(help: "Comma-separated list of external protocols that inherit Encodable. Properties of types conforming to these protocols will be retained", transform: split(by: ","))
-    var externalEncodableProtocols: [String] = []
+    var externalEncodableProtocols: [String] = defaultConfig.externalEncodableProtocols
 
     @Flag(help: "Retain declarations that are exposed to Objective-C implicitly by inheriting NSObject classes, or explicitly with the @objc and @objcMembers attributes")
-    var retainObjcAccessible: Bool = false
+    var retainObjcAccessible: Bool = defaultConfig.retainObjcAccessible
 
     @Flag(help: "Retain unused protocol function parameters, even if the parameter is unused in all conforming functions")
-    var retainUnusedProtocolFuncParams: Bool = false
+    var retainUnusedProtocolFuncParams: Bool = defaultConfig.retainUnusedProtocolFuncParams
 
     @Flag(help: "Clean existing build artifacts before building")
-    var cleanBuild: Bool = false
+    var cleanBuild: Bool = defaultConfig.cleanBuild
 
     @Flag(help: "Skip the project build step")
-    var skipBuild: Bool = false
+    var skipBuild: Bool = defaultConfig.skipBuild
 
     @Flag(help: "Exit with non-zero status if any unused code is found")
-    var strict: Bool = false
+    var strict: Bool = defaultConfig.strict
 
     @Flag(help: "Disable checking for updates")
-    var disableUpdateCheck: Bool = false
+    var disableUpdateCheck: Bool = defaultConfig.disableUpdateCheck
 
     @Flag(help: "Enable verbose logging")
-    var verbose: Bool = false
+    var verbose: Bool = defaultConfig.verbose
 
     @Flag(help: "Only output results")
-    var quiet: Bool = false
+    var quiet: Bool = defaultConfig.quiet
 
     func run() throws {
         let scanBehavior = ScanBehavior.make()
@@ -88,96 +90,29 @@ struct ScanCommand: FrontendCommand {
         }
 
         let configuration = inject(Configuration.self)
-
-        if workspace != nil {
-            configuration.workspace = workspace
-        }
-
-        if project != nil {
-            configuration.project = project
-        }
-
-        if !indexExclude.isEmpty {
-            configuration.indexExclude = indexExclude
-        }
-
-        if !reportExclude.isEmpty {
-            configuration.reportExclude = reportExclude
-        }
-
-        if !targets.isEmpty {
-            configuration.targets = targets
-        }
-
-        if !schemes.isEmpty {
-            configuration.schemes = schemes
-        }
-
-        if !buildArguments.isEmpty {
-            configuration.buildArguments = buildArguments
-        }
-
-        if let indexStorePath = indexStorePath {
-            configuration.indexStorePath = indexStorePath
-        }
-
-        if isExplicit("format") {
-            configuration.outputFormat = format
-        }
-
-        if isExplicit("retain-public") {
-            configuration.retainPublic = retainPublic
-        }
-
-        if isExplicit("retain-assign-only-properties") {
-            configuration.retainAssignOnlyProperties = retainAssignOnlyProperties
-        }
-
-        if !retainAssignOnlyPropertyTypes.isEmpty {
-            configuration.retainAssignOnlyPropertyTypes = retainAssignOnlyPropertyTypes
-        }
-
-        if !externalEncodableProtocols.isEmpty {
-            configuration.externalEncodableProtocols = externalEncodableProtocols
-        }
-
-        if isExplicit("retain-objc-accessible") {
-            configuration.retainObjcAccessible = retainObjcAccessible
-        }
-
-        if isExplicit("retain-unused-protocol-func-params") {
-            configuration.retainUnusedProtocolFuncParams = retainUnusedProtocolFuncParams
-        }
-
-        if isExplicit("disable-redundant-public-analysis") {
-            configuration.disableRedundantPublicAnalysis = disableRedundantPublicAnalysis
-        }
-
-        if isExplicit("skip-build") {
-            configuration.skipBuild = skipBuild
-        }
-
-        if isExplicit("clean-build") {
-            configuration.cleanBuild = cleanBuild
-        }
-
-        if isExplicit("disable-update-check") {
-            configuration.disableUpdateCheck = disableUpdateCheck
-        }
-
-        if isExplicit("verbose") {
-            configuration.verbose = verbose
-        }
-
-        if isExplicit("quiet") {
-            configuration.quiet = quiet
-        }
-
-        if isExplicit("strict") {
-            configuration.strict = strict
-        }
-
         configuration.guidedSetup = setup
+        configuration.apply(\.$workspace, workspace)
+        configuration.apply(\.$project, project)
+        configuration.apply(\.$schemes, schemes)
+        configuration.apply(\.$targets, targets)
+        configuration.apply(\.$indexExclude, indexExclude)
+        configuration.apply(\.$reportExclude, reportExclude)
+        configuration.apply(\.$outputFormat, format)
+        configuration.apply(\.$retainPublic, retainPublic)
+        configuration.apply(\.$retainAssignOnlyProperties, retainAssignOnlyProperties)
+        configuration.apply(\.$retainAssignOnlyPropertyTypes, retainAssignOnlyPropertyTypes)
+        configuration.apply(\.$retainObjcAccessible, retainObjcAccessible)
+        configuration.apply(\.$retainUnusedProtocolFuncParams, retainUnusedProtocolFuncParams)
+        configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
+        configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
+        configuration.apply(\.$verbose, verbose)
+        configuration.apply(\.$quiet, quiet)
+        configuration.apply(\.$disableUpdateCheck, disableUpdateCheck)
+        configuration.apply(\.$strict, strict)
+        configuration.apply(\.$indexStorePath, indexStorePath)
+        configuration.apply(\.$skipBuild, skipBuild)
+        configuration.apply(\.$cleanBuild, cleanBuild)
+        configuration.apply(\.$buildArguments, buildArguments)
 
         try scanBehavior.main { project in
             try Scan.make().perform(project: project)
@@ -185,10 +120,6 @@ struct ScanCommand: FrontendCommand {
     }
 
     // MARK: - Private
-
-    private func isExplicit(_ arg: String) -> Bool {
-        CommandLine.arguments.contains { $0.hasSuffix(arg) }
-    }
 
     private static func split(by delimiter: Character) -> (String?) -> [String] {
         return { options in options?.split(separator: delimiter).map(String.init) ?? [] }
