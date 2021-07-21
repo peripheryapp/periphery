@@ -1,0 +1,8 @@
+targets:
+- Frontend
+- Shared
+- PeripheryKit
+- TestShared
+- PeripheryTests
+- SPMTests
+- AccessibilityTests

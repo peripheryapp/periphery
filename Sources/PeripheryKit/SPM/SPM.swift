@@ -3,8 +3,10 @@ import SystemPackage
 import Shared
 
 public struct SPM {
+    static let packageFile = "Package.swift"
+
     public static var isSupported: Bool {
-        FilePath.current.appending("Package.swift").exists
+        FilePath.current.appending(packageFile).exists
     }
 
     public struct Package: Decodable {
