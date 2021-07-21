@@ -5,8 +5,10 @@ final class SwiftUIRetainer: SourceGraphVisitor {
         return self.init(graph: graph)
     }
 
+    private static let specialProtocolNames = ["PreviewProvider", "LibraryContentProvider"]
+    private static let applicationDelegateAdaptorStructNames = ["UIApplicationDelegateAdaptor", "NSApplicationDelegateAdaptor"]
+
     private let graph: SourceGraph
-    private let specialProtocols = ["PreviewProvider", "LibraryContentProvider"]
 
     required init(graph: SourceGraph) {
         self.graph = graph
@@ -14,6 +16,7 @@ final class SwiftUIRetainer: SourceGraphVisitor {
 
     func visit() {
         retainSpecialProtocolConformances()
+        retanApplicationDelegateAdaptors()
     }
 
     // MARK: - Private
@@ -21,13 +24,26 @@ final class SwiftUIRetainer: SourceGraphVisitor {
     private func retainSpecialProtocolConformances() {
         graph
             .declarations(ofKinds: [.class, .struct])
+            .lazy
             .filter {
                 $0.related.contains {
-                    graph.isExternal($0) && $0.kind == .protocol && specialProtocols.contains($0.name ?? "")
+                    self.graph.isExternal($0) && $0.kind == .protocol && Self.specialProtocolNames.contains($0.name ?? "")
                 }
             }
-            .forEach { decl in
-                graph.markRetained(decl)
+            .forEach { graph.markRetained($0) }
+    }
+
+    private func retanApplicationDelegateAdaptors() {
+        graph
+            .mainAttributedDeclarations
+            .lazy
+            .flatMap { $0.declarations }
+            .filter { $0.kind == .varInstance }
+            .filter {
+                $0.references.contains {
+                    $0.kind == .struct && Self.applicationDelegateAdaptorStructNames.contains($0.name ?? "")
+                }
             }
+            .forEach { graph.markRetained($0) }
     }
 }

@@ -14,6 +14,7 @@ public final class SourceGraph {
     private(set) var potentialAssignOnlyProperties: Set<Declaration> = []
     private(set) var ignoredDeclarations: Set<Declaration> = []
     private(set) var assetReferences: Set<AssetReference> = []
+    private(set) var mainAttributedDeclarations: Set<Declaration> = []
 
     private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
@@ -95,6 +96,12 @@ public final class SourceGraph {
     func markPotentialAssignOnlyProperty(_ declaration: Declaration) {
         mutationQueue.sync {
             _ = potentialAssignOnlyProperties.insert(declaration)
+        }
+    }
+
+    func markMainAttributed(_ declaration: Declaration) {
+        mutationQueue.sync {
+            _ = mainAttributedDeclarations.insert(declaration)
         }
     }
 

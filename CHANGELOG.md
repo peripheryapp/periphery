@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- SwiftUI @(UI/NS)ApplicationDelegateAdaptor wrapped properties and now retained.
 
 ##### Bug Fixes
 

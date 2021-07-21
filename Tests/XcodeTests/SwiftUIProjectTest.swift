@@ -35,4 +35,14 @@ class SwiftUIProjectTest: SourceGraphTestCase {
     func testRetainsLibraryContentProvider() {
         assertReferenced(.struct("LibraryViewContent"))
     }
+
+    func testRetainsUIApplicationDelegateAdaptorProperty() {
+        assertReferenced(.struct("SwiftUIProjectApp")) {
+            self.assertReferenced(.varInstance("appDelegate"))
+        }
+    }
+
+    func testRetainsUIApplicationDelegateAdaptorReferencedType() {
+        assertReferenced(.class("AppDelegate"))
+    }
 }
