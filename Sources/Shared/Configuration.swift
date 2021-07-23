@@ -277,27 +277,15 @@ public final class Configuration: Singleton {
         }
     }
 
-    public var indexExcludeSourceFiles: [FilePath] {
-        return indexExclude.flatMap { glob($0) }
+    public var indexExcludeSourceFiles: Set<FilePath> {
+        Set(indexExclude.flatMap { FilePath.glob($0) })
     }
 
-    public var reportExcludeSourceFiles: [FilePath] {
-        return reportExclude.flatMap { glob($0) }
+    public var reportExcludeSourceFiles: Set<FilePath> {
+        Set(reportExclude.flatMap { FilePath.glob($0) })
     }
 
     // MARK: - Private
-
-    private func glob(_ pattern: String) -> [FilePath] {
-        var patternPath = FilePath(pattern)
-
-        if patternPath.isRelative {
-            patternPath = FilePath.current.pushing(patternPath)
-        }
-
-        return FilePath.glob(patternPath.string).map {
-            $0.isRelative ? $0.relativeTo(FilePath.current) : $0
-        }
-    }
 
     private func configurationPath(withUserProvided path: FilePath?) throws -> FilePath? {
         if let path = path {

@@ -2,7 +2,7 @@
 
 ##### Breaking
 
-- None.
+- `--index-exclude` and `--report-exclude` options now accept Bash version 4 glob syntax. Therefore, recursive globs "**" are now supported.
 
 ##### Enhancements
 
