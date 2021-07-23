@@ -1,4 +1,5 @@
 import Foundation
+import SystemPackage
 import Shared
 import PeripheryKit
 
@@ -18,12 +19,21 @@ final class OutputDeclarationFilter: Injectable {
     func filter(_ declarations: [ScanResult]) -> [ScanResult] {
         let excludedSourceFiles = configuration.reportExcludeSourceFiles
 
-        excludedSourceFiles.forEach {
-            logger.debug("[report:exclude] \($0.string)")
-        }
+        var reportedExclusions: Set<FilePath> = []
 
         return declarations.filter {
-            !excludedSourceFiles.contains($0.declaration.location.file.path)
+            let path = $0.declaration.location.file.path
+
+            if excludedSourceFiles.contains(path) {
+                if !reportedExclusions.contains(path) {
+                    self.logger.debug("[report:exclude] \(path)")
+                    reportedExclusions.insert(path)
+                }
+
+                return false
+            }
+
+            return true
         }
     }
 }

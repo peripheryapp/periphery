@@ -277,13 +277,13 @@ public final class Configuration: Singleton {
         }
     }
 
-    public var indexExcludeSourceFiles: Set<FilePath> {
+    public lazy var indexExcludeSourceFiles: Set<FilePath> = {
         Set(indexExclude.flatMap { FilePath.glob($0) })
-    }
+    }()
 
-    public var reportExcludeSourceFiles: Set<FilePath> {
+    public lazy var reportExcludeSourceFiles: Set<FilePath> = {
         Set(reportExclude.flatMap { FilePath.glob($0) })
-    }
+    }()
 
     // MARK: - Private
 
