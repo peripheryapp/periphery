@@ -53,3 +53,9 @@ public extension FilePath {
         Self.fileManagager
     }
 }
+
+extension FilePath: Comparable {
+    public static func < (lhs: FilePath, rhs: FilePath) -> Bool {
+        return lhs.lexicallyNormalized().string < rhs.lexicallyNormalized().string
+    }
+}

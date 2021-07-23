@@ -113,7 +113,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
     }
 
     private func workspacePaths() -> [FilePath] {
-        recursiveGlob("*.xcworkspace")
+        FilePath.glob("**/*.xcworkspace")
             .filter {
                 // Swift Package Manager generates a xcworkspace inside the xcodeproj that isn't useful.
                 !$0.string.contains(".xcodeproj/")
@@ -129,11 +129,11 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
 
         if paths.count > 1 {
             print(colorize("Found multiple projects, please select the one that defines the schemes for building your project:", .bold))
-            let projects = paths.map { $0.relativeTo(FilePath.current).string }
+            let projects = paths.map { $0.relativeTo(FilePath.current).string }.sorted()
             project = select(single: projects)
             print("")
         } else {
-            project = paths.last?.string.trimmed
+            project = paths.first?.string.trimmed
         }
 
         if let project = project {
@@ -144,11 +144,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
         return nil
     }
 
-    private func projectPaths() -> [FilePath] {
-        recursiveGlob("*.xcodeproj")
-    }
-
-    private func recursiveGlob(_ glob: String) -> [FilePath] {
-        return FilePath.current.glob(glob) + FilePath.current.glob("**/\(glob)")
+    private func projectPaths() -> Set<FilePath> {
+        FilePath.glob("**/*.xcodeproj")
     }
 }

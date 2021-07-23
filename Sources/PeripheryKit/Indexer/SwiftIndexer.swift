@@ -51,12 +51,12 @@ public final class SwiftIndexer {
 
             let file = FilePath(filePath)
 
-            guard !excludedPaths.contains(file) else {
-                self.logger.debug("[index:swift] Excluding \(file.string)")
-                return true
-            }
-
             if allSourceFiles.contains(file) {
+                guard !excludedPaths.contains(file) else {
+                    self.logger.debug("[index:swift] Excluding \(file.string)")
+                    return true
+                }
+
                 unitsByFile[file, default: []].append(unit)
             }
 
