@@ -2,6 +2,20 @@
 
 ##### Breaking
 
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.8.0 (2021-07-23)
+
+##### Breaking
+
 - `--index-exclude` and `--report-exclude` options now accept Bash version 4 glob syntax. Therefore, recursive globs "**" are now supported.
 
 ##### Enhancements
