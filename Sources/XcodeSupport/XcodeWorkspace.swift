@@ -5,7 +5,7 @@ import PeripheryKit
 import Shared
 
 final class XcodeWorkspace: XcodeProjectlike {
-    static func make(path: String) throws -> Self {
+    static func make(path: FilePath) throws -> Self {
         return try self.init(path: path,
                              xcodebuild: inject(),
                              configuration: inject(),
@@ -22,10 +22,10 @@ final class XcodeWorkspace: XcodeProjectlike {
 
     private(set) var targets: Set<XcodeTarget> = []
 
-    required init(path: String, xcodebuild: Xcodebuild, configuration: Configuration, logger: Logger) throws {
+    required init(path: FilePath, xcodebuild: Xcodebuild, configuration: Configuration, logger: Logger) throws {
         logger.debug("[xcode:workspace] Loading \(path)")
 
-        self.path = FilePath(path)
+        self.path = path
         self.xcodebuild = xcodebuild
         self.configuration = configuration
         self.sourceRoot = self.path.removingLastComponent()

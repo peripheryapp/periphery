@@ -7,6 +7,7 @@
 ##### Enhancements
 
 - SwiftUI @(UI/NS)ApplicationDelegateAdaptor wrapped properties and now retained.
+- All file types can now be excluded from indexing.
 
 ##### Bug Fixes
 

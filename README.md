@@ -395,7 +395,7 @@ You're ready to roll. You should now see the new scheme in the dropdown. Select 
 
 ## Excluding Files
 
-Both exclusion options described below accept a path glob, either absolute or relative to your project directory. You may specify multiple globs by separating them with a pipe character, e.g `"Foo.swift|{Bar,Baz}.swift|path/to/*.swift"`. Recursive (`**`) globs are not supported at this time.
+Both exclusion options described below accept a Bash v4 style path glob, either absolute or relative to your project directory. You may specify multiple globs by separating them with a pipe character, e.g `"Sources/Single.swift|**/Generated/*.swift|**/*.{xib,storyboard}"`.
 
 ### Excluding Results
 
@@ -403,7 +403,7 @@ To exclude the results from certain files, pass the `--report-exclude <globs>` o
 
 ### Excluding Indexed Files
 
-To exclude files from being indexed, pass the `--index-exclude <glob>` option to the `scan` command. Excluding files from the index phase means that any declarations and references contained within the files will not be seen by Periphery. Periphery will be behave as if the files do not exist. This option can be used to exclude generated code that holds references to non-generated code.
+To exclude files from being indexed, pass the `--index-exclude <globs>` option to the `scan` command. Excluding files from the index phase means that any declarations and references contained within the files will not be seen by Periphery. Periphery will be behave as if the files do not exist. For example, this option can be used to exclude generated code that holds references to non-generated code, or exclude all `.xib` and `.storyboard` files that hold references to code.
 
 ## Continuous Integration
 
