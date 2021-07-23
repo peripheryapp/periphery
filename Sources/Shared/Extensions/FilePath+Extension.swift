@@ -6,6 +6,16 @@ public extension FilePath {
         Self(fileManagager.currentDirectoryPath)
     }
 
+    static func makeAbsolute(_ path: String, relativeTo relativePath: FilePath = .current) -> FilePath {
+        var filePath = FilePath(path)
+
+        if filePath.isRelative {
+            filePath = relativePath.appending(path)
+        }
+
+        return filePath
+    }
+
     var exists: Bool {
         fileManager.fileExists(atPath: lexicallyNormalized().string)
     }

@@ -91,22 +91,23 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             .filter { !podSchemes.contains($0.name) }
     }
 
-    private func identifyWorkspace() -> String? {
-        var workspace: String?
+    private func identifyWorkspace() -> FilePath? {
+        var workspacePath: FilePath?
         let paths = workspacePaths()
 
         if paths.count > 1 {
             print(colorize("Found multiple workspaces, please select the one that defines the schemes for building your project:", .bold))
-            let workspaces = paths.map { $0.relativeTo(FilePath.current).string }
-            workspace = select(single: workspaces)
+            let workspaces = paths.map { $0.relativeTo(.current).string }
+            let workspace = select(single: workspaces)
+            workspacePath = FilePath.makeAbsolute(workspace)
             print("")
         } else {
-            workspace = paths.last?.string.trimmed
+            workspacePath = paths.first
         }
 
-        if let workspace = workspace {
-            configuration.workspace = workspace
-            return workspace
+        if let workspacePath = workspacePath {
+            configuration.workspace = workspacePath.relativeTo(.current).string
+            return workspacePath
         }
 
         return nil
@@ -123,22 +124,23 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             }
     }
 
-    private func identifyProject() -> String? {
-        var project: String?
+    private func identifyProject() -> FilePath? {
+        var projectPath: FilePath?
         let paths = projectPaths()
 
         if paths.count > 1 {
             print(colorize("Found multiple projects, please select the one that defines the schemes for building your project:", .bold))
-            let projects = paths.map { $0.relativeTo(FilePath.current).string }.sorted()
-            project = select(single: projects)
+            let projects = paths.map { $0.relativeTo(.current).string }.sorted()
+            let project = select(single: projects)
+            projectPath = FilePath.makeAbsolute(project)
             print("")
         } else {
-            project = paths.first?.string.trimmed
+            projectPath = paths.first
         }
 
-        if let project = project {
-            configuration.project = project
-            return project
+        if let projectPath = projectPath {
+            configuration.project = projectPath.relativeTo(.current).string
+            return projectPath
         }
 
         return nil

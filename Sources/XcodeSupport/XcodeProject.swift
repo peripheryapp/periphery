@@ -18,10 +18,6 @@ final class XcodeProject: XcodeProjectlike {
         return try make(path: path)
     }
 
-    static func make(path: String) throws -> XcodeProject {
-        return try make(path: FilePath(path))
-    }
-
     static func make(path: FilePath) throws -> XcodeProject {
         if let cached = cache[path] {
             return cached

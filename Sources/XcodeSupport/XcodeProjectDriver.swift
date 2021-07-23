@@ -11,9 +11,9 @@ public final class XcodeProjectDriver {
         let project: XcodeProjectlike
 
         if let workspacePath = configuration.workspace {
-            project = try XcodeWorkspace.make(path: workspacePath)
+            project = try XcodeWorkspace.make(path: .makeAbsolute(workspacePath))
         } else if let projectPath = configuration.project {
-            project = try XcodeProject.make(path: projectPath)
+            project = try XcodeProject.make(path: .makeAbsolute(projectPath))
         } else {
             throw PeripheryError.usageError("Expected --workspace or --project option.")
         }

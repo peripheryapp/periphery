@@ -1,25 +1,34 @@
 import Shared
 import SystemPackage
 
-public final class XibIndexer {
+public final class XibIndexer: IndexExcludable {
     public static func make(xibFiles: Set<FilePath>, graph: SourceGraph) -> Self {
-        return self.init(xibFiles: xibFiles,
-                         graph: graph,
-                         logger: inject())
+        return self.init(
+            xibFiles: xibFiles,
+            graph: graph,
+            logger: inject(),
+            configuration: inject()
+        )
     }
 
     private let xibFiles: Set<FilePath>
     private let graph: SourceGraph
     private let logger: Logger
 
-    required init(xibFiles: Set<FilePath>, graph: SourceGraph, logger: Logger) {
+    let configuration: Configuration
+
+    required init(xibFiles: Set<FilePath>, graph: SourceGraph, logger: Logger, configuration: Configuration) {
         self.xibFiles = xibFiles
         self.graph = graph
         self.logger = logger
+        self.configuration = configuration
     }
 
     public func perform() throws {
-        try JobPool(jobs: Array(xibFiles)).forEach { [weak self] xibPath in
+        let (includedFiles, excludedFiles) = filterIndexExcluded(from: xibFiles)
+        excludedFiles.forEach { self.logger.debug("[index:xib] Excluding \($0.string)") }
+
+        try JobPool(jobs: Array(includedFiles)).forEach { [weak self] xibPath in
             guard let self = self else { return }
 
             let elapsed = try Benchmark.measure {
@@ -28,7 +37,7 @@ public final class XibIndexer {
                     .forEach { self.graph.add($0) }
             }
 
-            self.logger.debug("[index:xib] \(xibPath.string) (\(elapsed))s")
+            self.logger.debug("[index:xib] \(xibPath.string) (\(elapsed)s)")
         }
     }
 }
