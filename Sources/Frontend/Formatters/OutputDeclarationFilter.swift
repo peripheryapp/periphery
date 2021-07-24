@@ -9,11 +9,11 @@ final class OutputDeclarationFilter: Injectable {
     }
 
     private let configuration: Configuration
-    private let logger: Logger
+    private let logger: ContextualLogger
 
     required init(configuration: Configuration, logger: Logger) {
         self.configuration = configuration
-        self.logger = logger
+        self.logger = logger.contextualized(with: "report:exclude")
     }
 
     func filter(_ declarations: [ScanResult]) -> [ScanResult] {
@@ -26,7 +26,7 @@ final class OutputDeclarationFilter: Injectable {
 
             if excludedSourceFiles.contains(path) {
                 if !reportedExclusions.contains(path) {
-                    self.logger.debug("[report:exclude] \(path)")
+                    self.logger.debug(path.string)
                     reportedExclusions.insert(path)
                 }
 

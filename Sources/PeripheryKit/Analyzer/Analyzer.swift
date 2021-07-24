@@ -56,11 +56,11 @@ public final class Analyzer {
     ]
 
     private let graph: SourceGraph
-    private let logger: Logger
+    private let logger: ContextualLogger
 
     required init(graph: SourceGraph, logger: Logger) {
         self.graph = graph
-        self.logger = logger
+        self.logger = logger.contextualized(with: "analyze:visit")
     }
 
     func perform() throws {
@@ -68,7 +68,7 @@ public final class Analyzer {
             let elapsed = try Benchmark.measure {
                 try graph.accept(visitor: visitor)
             }
-            logger.debug("[analyze:visit] \(visitor) (\(elapsed)s)")
+            logger.debug("\(visitor) (\(elapsed)s)")
         }
     }
 }

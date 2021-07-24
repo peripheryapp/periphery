@@ -34,6 +34,7 @@ final class ScanBehavior {
     }
 
     func main(_ block: (Project) throws -> [ScanResult]) -> Result<(), PeripheryError> {
+        logger.contextualized(with: "version").debug(PeripheryVersion)
         let project: Project
 
         if configuration.guidedSetup {

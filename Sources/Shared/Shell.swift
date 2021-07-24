@@ -46,13 +46,17 @@ final class ReadableStream {
 
 open class Shell: Singleton {
     public static func make() -> Self {
-        return self.init()
+        return self.init(logger: inject())
     }
 
     private var tasks: Set<Process> = []
     private var tasksQueue = DispatchQueue(label: "Shell.tasksQueue")
 
-    required public init() {}
+    private let logger: ContextualLogger
+
+    required public init(logger: Logger) {
+        self.logger = logger.contextualized(with: "shell")
+    }
 
     public func interruptRunning() {
         tasksQueue.sync { tasks.forEach { $0.interrupt() } }
@@ -112,9 +116,7 @@ open class Shell: Singleton {
         task.standardOutput = pipe
         task.standardError = stderr ? pipe : nil
 
-        let logger: Logger = inject()
-        logger.debug("[shell] \(launchPath) \(newArgs.joined(separator: " "))")
-
+        logger.debug("\(launchPath) \(newArgs.joined(separator: " "))")
         tasksQueue.sync { _ = tasks.insert(task) }
 
         task.launch()

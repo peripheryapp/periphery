@@ -13,20 +13,20 @@ public final class InfoPlistIndexer: IndexExcludable {
 
     private let infoPlistFiles: Set<FilePath>
     private let graph: SourceGraph
-    private let logger: Logger
+    private let logger: ContextualLogger
 
     let configuration: Configuration
 
     required init(infoPlistFiles: Set<FilePath>, graph: SourceGraph, logger: Logger, configuration: Configuration) {
         self.infoPlistFiles = infoPlistFiles
         self.graph = graph
-        self.logger = logger
+        self.logger = logger.contextualized(with: "index:infoplist")
         self.configuration = configuration
     }
 
     public func perform() throws {
         let (includedFiles, excludedFiles) = filterIndexExcluded(from: infoPlistFiles)
-        excludedFiles.forEach { self.logger.debug("[index:infoplist] Excluding \($0.string)") }
+        excludedFiles.forEach { self.logger.debug("Excluding \($0.string)") }
 
         try JobPool(jobs: Array(includedFiles)).forEach { [weak self] path in
             guard let self = self else { return }
@@ -37,7 +37,7 @@ public final class InfoPlistIndexer: IndexExcludable {
                     .forEach { self.graph.add($0)  }
             }
 
-            self.logger.debug("[index:infoplist] \(path.string) (\(elapsed)s)")
+            self.logger.debug("\(path.string) (\(elapsed)s)")
         }
     }
 }
