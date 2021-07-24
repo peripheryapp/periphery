@@ -10,7 +10,7 @@ final class UpdateChecker: Singleton {
         return self.init(logger: inject(), configuration: inject())
     }
 
-    private let logger: Logger
+    private let logger: ContextualLogger
     private let configuration: Configuration
     private let urlSession: URLSession
     private let latestReleaseURL: URL
@@ -19,7 +19,7 @@ final class UpdateChecker: Singleton {
     private var error: Error?
 
     required init(logger: Logger, configuration: Configuration) {
-        self.logger = logger
+        self.logger = logger.contextualized(with: "update-check")
         self.configuration = configuration
         let config = URLSessionConfiguration.ephemeral
         urlSession = URLSession(configuration: config)
@@ -44,7 +44,7 @@ final class UpdateChecker: Singleton {
             guard let strongSelf = self else { return }
 
             if let error = error {
-                strongSelf.logger.debug("[update:check] ERROR: \(error.localizedDescription)")
+                strongSelf.logger.debug("error: \(error.localizedDescription)")
                 strongSelf.error = error
                 strongSelf.semaphore.signal()
                 return
@@ -61,7 +61,7 @@ final class UpdateChecker: Singleton {
 
                     let message = "Failed to identify latest release tag in: \(json)"
                     strongSelf.error = PeripheryError.updateCheckError(message: message)
-                    strongSelf.logger.debug("[update:check] \(message)")
+                    strongSelf.logger.debug(message)
                     strongSelf.semaphore.signal()
                     return
             }
@@ -76,7 +76,7 @@ final class UpdateChecker: Singleton {
     func notifyIfAvailable() {
         guard let latestVersion = latestVersion else { return }
 
-        logger.debug("[update-checker] latest: \(latestVersion)")
+        logger.debug("latest: \(latestVersion)")
 
         guard latestVersion.isVersion(greaterThan: PeripheryVersion) else { return }
 

@@ -12,7 +12,7 @@ class XcodebuildTest: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        shell = ShellMock()
+        shell = ShellMock.make()
         xcodebuild = Xcodebuild(shell: shell)
         project = try! XcodeProject.make(path: UIKitProjectPath)
     }

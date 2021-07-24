@@ -37,7 +37,7 @@ final class XcodeProject: XcodeProjectlike {
     private(set) var targets: Set<XcodeTarget> = []
 
     required init(path: FilePath, xcodebuild: Xcodebuild, logger: Logger) throws {
-        logger.debug("[xcode:project] Loading \(path)")
+        logger.contextualized(with: "xcode:project").debug("Loading \(path)")
 
         self.path = path
         self.xcodebuild = xcodebuild

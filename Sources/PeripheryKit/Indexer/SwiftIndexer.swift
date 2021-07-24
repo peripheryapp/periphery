@@ -20,7 +20,7 @@ public final class SwiftIndexer {
 
     private let sourceFiles: [FilePath: [String]]
     private let graph: SourceGraph
-    private let logger: Logger
+    private let logger: ContextualLogger
     private let configuration: Configuration
     private let indexStore: IndexStore
     private let indexStoreURL: URL
@@ -37,7 +37,7 @@ public final class SwiftIndexer {
         self.graph = graph
         self.indexStore = indexStore
         self.indexStoreURL = indexStoreURL
-        self.logger = logger
+        self.logger = logger.contextualized(with: "index:swift")
         self.configuration = configuration
     }
 
@@ -53,7 +53,7 @@ public final class SwiftIndexer {
 
             if allSourceFiles.contains(file) {
                 guard !excludedPaths.contains(file) else {
-                    self.logger.debug("[index:swift] Excluding \(file.string)")
+                    self.logger.debug("Excluding \(file.string)")
                     return true
                 }
 
@@ -67,7 +67,7 @@ public final class SwiftIndexer {
         let unindexedPaths = allSourceFiles.subtracting(excludedPaths).subtracting(indexedPaths)
 
         if !unindexedPaths.isEmpty {
-            unindexedPaths.forEach { logger.debug("[index:swift] Source file not indexed: \($0)") }
+            unindexedPaths.forEach { logger.debug("Source file not indexed: \($0)") }
             let targets: Set<String> = Set(unindexedPaths.flatMap { sourceFiles[$0] ?? [] })
             throw PeripheryError.unindexedTargetsError(targets: targets, indexStorePath: indexStoreURL.path)
         }
@@ -95,7 +95,7 @@ public final class SwiftIndexer {
                 try job.perform()
             }
 
-            self.logger.debug("[index:swift] \(job.file.path) (\(elapsed)s)")
+            self.logger.debug("\(job.file.path) (\(elapsed)s)")
         }
     }
 
@@ -107,7 +107,7 @@ public final class SwiftIndexer {
         private let units: [IndexStoreUnit]
         private let graph: SourceGraph
         private let indexStore: IndexStore
-        private let logger: Logger
+        private let logger: ContextualLogger
         private let configuration: Configuration
 
         required init(
@@ -115,7 +115,7 @@ public final class SwiftIndexer {
             units: [IndexStoreUnit],
             graph: SourceGraph,
             indexStore: IndexStore,
-            logger: Logger,
+            logger: ContextualLogger,
             configuration: Configuration
         ) {
             self.file = file
@@ -332,7 +332,7 @@ public final class SwiftIndexer {
         private func identifyDeclaredPropertyTypes(for decls: [Declaration], using propertiesByLocation: [SourceLocation: PropertyVisitor.Result]) {
             for decl in decls {
                 guard let property = propertiesByLocation[decl.location] else {
-                    logger.debug("[index:swift] Failed to identify property declaration at '\(decl.location)' for property type identification.")
+                    logger.debug("Failed to identify property declaration at '\(decl.location)' for property type identification.")
                     continue
                 }
 
@@ -346,7 +346,7 @@ public final class SwiftIndexer {
         private func identifyPropertyReferenceRoles(for decls: [Declaration], using propertiesByLocation: [SourceLocation: PropertyVisitor.Result]) {
             for decl in decls {
                 guard let property = propertiesByLocation[decl.location] else {
-                    logger.debug("[index:swift] Failed to identify property declaration at '\(decl.location)' for reference role identification.")
+                    logger.debug("Failed to identify property declaration at '\(decl.location)' for reference role identification.")
                     continue
                 }
 
@@ -364,7 +364,7 @@ public final class SwiftIndexer {
         private func identifyFunctionReferenceRoles(for decls: [Declaration], using functionsByLocation: [SourceLocation: FunctionVisitor.Result]) {
             for decl in decls {
                 guard let function = functionsByLocation[decl.location] else {
-                    logger.debug("[index:swift] Failed to identify function declaration at '\(decl.location)' for reference role identification.")
+                    logger.debug("Failed to identify function declaration at '\(decl.location)' for reference role identification.")
                     continue
                 }
 
@@ -388,7 +388,7 @@ public final class SwiftIndexer {
         private func identifyConformableReferenceRoles(for decls: [Declaration], using conformablesByLocation: [SourceLocation: ConformableVisitor.Result]) {
             for decl in decls {
                 guard let conformable = conformablesByLocation[decl.location] else {
-                    logger.debug("[index:swift] Failed to identify conformable declaration at '\(decl.location)' for reference role identification.")
+                    logger.debug("Failed to identify conformable declaration at '\(decl.location)' for reference role identification.")
                     continue
                 }
 
@@ -426,7 +426,7 @@ public final class SwiftIndexer {
             for metadata in declarationMetadatas {
                 guard let decls = declsByLocation[metadata.location] else {
                     // The declaration may not exist if the code was not compiled due to build conditions, e.g #if.
-                    logger.debug("[index:swift] Expected declaration at \(metadata.location)")
+                    logger.debug("Expected declaration at \(metadata.location)")
                     continue
                 }
 
@@ -479,7 +479,7 @@ public final class SwiftIndexer {
             for (function, params) in paramsByFunction {
                 guard let functionDecl = functionDelcsByLocation[function.location] else {
                     // The declaration may not exist if the code was not compiled due to build conditions, e.g #if.
-                    logger.debug("[index:swift] Failed to associate indexed function for parameter function '\(function.name)' at \(function.location).")
+                    logger.debug("Failed to associate indexed function for parameter function '\(function.name)' at \(function.location).")
                     continue
                 }
 

@@ -35,7 +35,7 @@ final class BaseLogger: Singleton {
     private let outputQueue: DispatchQueue
 
     required init() {
-        self.outputQueue = DispatchQueue(label: "Logger.outputQueue")
+        self.outputQueue = DispatchQueue(label: "BaseLogger.outputQueue")
     }
 
     func info(_ text: String) {
@@ -63,7 +63,7 @@ final class BaseLogger: Singleton {
     }
 }
 
-public final class Logger: Singleton {
+public final class Logger: Injectable {
     public static func make() -> Self {
         return self.init(baseLogger: inject(), configuration: inject())
     }
@@ -74,6 +74,10 @@ public final class Logger: Singleton {
     required init(baseLogger: BaseLogger, configuration: Configuration) {
         self.baseLogger = baseLogger
         self.configuration = configuration
+    }
+
+    public func contextualized(with context: String) -> ContextualLogger {
+        .init(logger: self, context: context)
     }
 
     public func info(_ text: String, canQuiet: Bool = true) {
@@ -93,5 +97,18 @@ public final class Logger: Singleton {
 
     public func error(_ text: String) {
         baseLogger.error(text)
+    }
+}
+
+public struct ContextualLogger {
+    let logger: Logger
+    let context: String
+
+    public func info(_ text: String) {
+        logger.info("[\(context)] \(text)")
+    }
+
+    public func debug(_ text: String) {
+        logger.debug("[\(context)] \(text)")
     }
 }
