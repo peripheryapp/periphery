@@ -109,12 +109,25 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
     }
 
     func visit(_ node: VariableDeclSyntax) {
-        parse(
-            modifiers: node.modifiers,
-            attributes: node.attributes,
-            trivia: node.leadingTrivia,
-            at: node.bindings.positionAfterSkippingLeadingTrivia
-        )
+        for binding in node.bindings {
+            if binding.pattern.is(IdentifierPatternSyntax.self) {
+                parse(
+                    modifiers: node.modifiers,
+                    attributes: node.attributes,
+                    trivia: node.leadingTrivia,
+                    at: binding.positionAfterSkippingLeadingTrivia
+                )
+            } else if let tuplePatternSyntyax = binding.pattern.as(TuplePatternSyntax.self) {
+                for element in tuplePatternSyntyax.elements {
+                    parse(
+                        modifiers: node.modifiers,
+                        attributes: node.attributes,
+                        trivia: node.leadingTrivia,
+                        at: element.positionAfterSkippingLeadingTrivia
+                    )
+                }
+            }
+        }
     }
 
     func visit(_ node: TypealiasDeclSyntax) {

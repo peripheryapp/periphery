@@ -25,3 +25,17 @@ extension Fixture114: Fixture114Protocol {
     // param is ignored becuse the protocol ignores it.
     public func protocolFunc(param: String) {}
 }
+
+public class FixtureClass116 {
+    // periphery:ignore
+    func someFunc() {}
+
+    // periphery:ignore
+    let simpleProperty = 0
+
+    // periphery:ignore
+    let (tuplePropertyA, tuplePropertyB) = (0, 0)
+
+    // periphery:ignore
+    let multiBindingPropertyA = 0, multiBindingPropertyB = 0
+}

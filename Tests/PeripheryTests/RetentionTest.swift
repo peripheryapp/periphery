@@ -1156,6 +1156,14 @@ final class RetentionTest: SourceGraphTestCase {
                     self.assertReferenced(.varParameter("param"))
                 }
             }
+            assertReferenced(.class("FixtureClass116")) {
+                self.assertReferenced(.functionMethodInstance("someFunc()"))
+                self.assertReferenced(.varInstance("simpleProperty"))
+                self.assertReferenced(.varInstance("tuplePropertyA"))
+                self.assertReferenced(.varInstance("tuplePropertyB"))
+                self.assertReferenced(.varInstance("multiBindingPropertyA"))
+                self.assertReferenced(.varInstance("multiBindingPropertyB"))
+            }
         }
     }
 
