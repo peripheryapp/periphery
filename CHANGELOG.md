@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.8.1 (2021-08-01)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix comment ignore command for properties with multiple bindings.
 
 ## 2.8.0 (2021-07-23)
