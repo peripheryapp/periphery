@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix comment ignore command for properties with multiple bindings.
 
 ## 2.8.0 (2021-07-23)
 
