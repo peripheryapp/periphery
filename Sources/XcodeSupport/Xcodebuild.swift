@@ -72,10 +72,9 @@ public final class Xcodebuild: Injectable {
         // Note: this is likely not needed since `stderr: false` was added, but we might as well
         // keep it.
         let startIndex = lines.firstIndex { $0.trimmed == "{" }
-        let jsonString = lines.suffix(from: startIndex ?? 0).joined()
+        let jsonString = lines.suffix(from: startIndex ?? 0).joined(separator: "\n")
 
-        guard let jsonData = jsonString.data(using: .utf8),
-            let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
+        guard let json = try deserialize(jsonString),
             let details = json[type] as? [String: Any],
             let schemes = details["schemes"] as? [String] else { return [] }
 
@@ -100,6 +99,15 @@ public final class Xcodebuild: Injectable {
     }
 
     // MARK: - Private
+
+    private func deserialize(_ jsonString: String) throws -> [String: Any]? {
+        do {
+            guard let jsonData = jsonString.data(using: .utf8) else { return nil }
+            return try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
+        } catch {
+            throw PeripheryError.jsonDeserializationError(error: error, json: jsonString)
+        }
+    }
 
     private func derivedDataPath(for project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> FilePath {
         // Given a project with two schemes: A and B, a scenario can arise where the index store contains conflicting
