@@ -18,6 +18,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case swiftVersionParseError(fullVersion: String)
     case swiftVersionUnsupportedError(version: String)
     case unindexedTargetsError(targets: Set<String>, indexStorePath: String)
+    case jsonDeserializationError(error: Error, json: String)
 
     public var errorDescription: String? {
         switch self {
@@ -30,7 +31,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
         case let .usageError(message):
             return message
         case let .underlyingError(error):
-            return "(\(type(of: error))) \(String(describing: error))" 
+            return describe(error)
         case let .invalidScheme(name, project):
             return "Scheme '\(name)' does not exist in '\(project)'."
         case let .invalidTargets(names, project):
@@ -62,10 +63,18 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             return "The index store at '\(indexStorePath)' does not contain data for the following targets: \(joinedTargets). Either the index store is outdated, or you have requested to scan targets that have not been built."
         case let .swiftVersionUnsupportedError(version):
             return "This version of Periphery only supports Swift >= 5.3, you're using \(version)."
+        case let .jsonDeserializationError(error, json):
+            return "JSON deserialization failed: \(describe(error))\nJSON:\n\(json)"
         }
     }
 
     public var description: String {
         return errorDescription!
+    }
+
+    // MARK: - Private
+
+    private func describe(_ error: Error) -> String {
+        "(\(type(of: error))) \(String(describing: error))"
     }
 }
