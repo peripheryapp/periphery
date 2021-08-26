@@ -143,13 +143,13 @@ protocol Greeter {
 }
 
 class InformalGreeter: Greeter {
-  func greet(name: String) {
-      print("Sup " + name + ".")
-  }
+    func greet(name: String) {
+        print("Sup " + name + ".")
+    }
 
-  func farewell(name: String) { // 'name' is unused
-    print("Cya.")
-  }
+    func farewell(name: String) { // 'name' is unused
+      print("Cya.")
+    }
 }
 ```
 
@@ -178,7 +178,7 @@ class InformalGreeter: BaseGreeter {
     }
 
     override func farewell(name: String) { // 'name' is unused
-      print("Cya.")
+        print("Cya.")
     }
 }
 ```
@@ -203,11 +203,11 @@ class Base {
 class Subclass: Base {
     init(custom: String) {
         super.init(param: custom)
-      }
+    }
 
     required init(param: String) {
         fatalError("init(param:) has not been implemented")
-      }
+    }
 }
 ```
 
@@ -223,13 +223,13 @@ protocol MyProtocol { // 'MyProtocol' is redundant
 class MyClass1: MyProtocol { // 'MyProtocol' conformance is redundant
     func someMethod() {
         print("Hello from MyClass1!")
-  }
+    }
 }
 
 class MyClass2: MyProtocol { // 'MyProtocol' conformance is redundant
     func someMethod() {
         print("Hello from MyClass2!")
-  }
+    }
 }
 
 let myClass1 = MyClass1()
