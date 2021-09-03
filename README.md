@@ -55,7 +55,7 @@ Install Homebrew:
 Now install Periphery itself:
 
 ```
-brew tap peripheryapp/periphery && brew install periphery
+brew install peripheryapp/periphery/periphery
 ```
 
 ### [Swift Package Manager](https://swift.org/package-manager/)
