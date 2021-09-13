@@ -84,12 +84,6 @@ pod 'Periphery'
 
 Now run `pod install`, the Periphery executable will be downloaded and placed at `Pods/Periphery/periphery`.
 
-### [Mint](https://github.com/yonaskolb/Mint)
-
-```
-mint install peripheryapp/periphery
-```
-
 ## How To Use
 
 ### The `scan` Command
