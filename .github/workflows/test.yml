@@ -9,6 +9,7 @@ env:
   swift_build: swift build --build-tests
   swift_test: swift test
   periphery_scan: ./.build/debug/periphery scan --quiet --skip-build
+  cache_version: 1
 jobs:
   macOS:
     strategy:
@@ -40,9 +41,9 @@ jobs:
         path: |
           .build
           Package.resolved
-        key: ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-${{ hashFiles('**/Package.*') }}
+        key: ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('**/Package.swift', '**/Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-
+          ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}
@@ -84,9 +85,9 @@ jobs:
         path: |
           .build
           Package.resolved
-        key: ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-${{ hashFiles('**/Package.*') }}
+        key: ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('**/Package.swift', '**/Package.resolved') }}
         restore-keys: |
-          ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-spm-deps-
+          ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}
