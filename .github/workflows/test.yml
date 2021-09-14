@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        xcode: ["13.0", "12.5.1", "12.4", "12.3", "12.2", "12.1"]
+        xcode: ["13.0", "12.5.1", "12.4"]
         include:
           - xcode: "13.0"
             macos: macOS-11
@@ -22,12 +22,6 @@ jobs:
             macos: macOS-11
           - xcode: "12.4"
             macos: macOS-11
-          - xcode: "12.3"
-            macos: macOS-10.15
-          - xcode: "12.2"
-            macos: macOS-10.15
-          - xcode: "12.1"
-            macos: macOS-10.15
     runs-on: ${{ matrix.macos }}
     name: macOS
     steps:
