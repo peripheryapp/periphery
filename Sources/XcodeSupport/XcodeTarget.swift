@@ -1,7 +1,6 @@
 import Foundation
 import XcodeProj
 import SystemPackage
-import PathKit
 import PeripheryKit
 import Shared
 
@@ -52,10 +51,11 @@ final class XcodeTarget {
 
         files[kind] = Set(try targetPhases.flatMap {
             try ($0.files ?? []).compactMap {
-                if let path = try $0.file?.fullPath(sourceRoot: Path(sourceRoot.string)),
-                   let ext = path.extension,
-                   kind.extensions.contains(ext.lowercased()) {
-                    return FilePath(path.absolute().string)
+                if let stringPath = try $0.file?.fullPath(sourceRoot: sourceRoot.string) {
+                    let path = FilePath(stringPath)
+                    if let ext = path.extension, kind.extensions.contains(ext.lowercased()) {
+                        return path
+                    }
                 }
 
                 return nil

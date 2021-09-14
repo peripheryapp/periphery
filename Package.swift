@@ -2,31 +2,21 @@
 import PackageDescription
 
 var dependencies: [Package.Dependency] = [
-    .package(url: "https://github.com/apple/swift-system", from: "0.0.0"),
+    .package(url: "https://github.com/apple/swift-system", from: "1.0.0"),
     .package(url: "https://github.com/jpsim/Yams", from: "4.0.0"),
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
-    .package(url: "https://github.com/apple/swift-argument-parser", from: "0.4.0"),
-    .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", .revision("60c1df777190e94cf7c53506424c8bf66d21e183"))
+    .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
+    .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0")
 ]
 
 #if swift(>=5.5)
-    #if os(macOS)
-    dependencies.append(
-        .package(
-            name: "SwiftSyntax",
-            url: "https://github.com/apple/swift-syntax",
-            .revision("9a8d3d8b9fb42bdd9cffc18219b5efb584b5b998")
-        )
+dependencies.append(
+    .package(
+        name: "SwiftSyntax",
+        url: "https://github.com/apple/swift-syntax",
+        .branch("release/5.5")
     )
-    #else
-    dependencies.append(
-        .package(
-            name: "SwiftSyntax",
-            url: "https://github.com/apple/swift-syntax",
-            .branch("release/5.5")
-        )
-    )
-    #endif
+)
 #elseif swift(>=5.4)
 dependencies.append(
     .package(
@@ -52,7 +42,7 @@ dependencies.append(
     .package(
         name: "XcodeProj",
         url: "https://github.com/tuist/xcodeproj",
-        from: "7.0.0"
+        from: "8.0.0"
     )
 )
 #endif
