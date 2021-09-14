@@ -1,7 +1,6 @@
 import Foundation
 import XcodeProj
 import SystemPackage
-import PathKit
 import PeripheryKit
 import Shared
 
@@ -59,7 +58,7 @@ final class XcodeProject: XcodeProjectlike {
         if !path.components.contains("Pods.xcodeproj") {
             subProjects = try xcodeProject.pbxproj.fileReferences
                 .filter { $0.path?.hasSuffix(".xcodeproj") ?? false }
-                .compactMap { try $0.fullPath(sourceRoot: Path(sourceRoot.string))?.absolute().string }
+                .compactMap { try $0.fullPath(sourceRoot: sourceRoot.string) }
                 .compactMap { try XcodeProject.tryMake(path: FilePath($0), referencedBy: path) }
         }
 
