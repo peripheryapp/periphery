@@ -24,7 +24,7 @@ private final class Injector {
             singletons[identifier] = singleton
         }
 
-        if singletonQueue.getSpecific(key: singletonQueueSpecificKey) == nil {
+        if DispatchQueue.getSpecific(key: singletonQueueSpecificKey) == nil {
             singletonQueue.sync(execute: block)
         } else {
             block()
