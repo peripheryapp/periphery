@@ -50,9 +50,9 @@
         "package": "SwiftSyntax",
         "repositoryURL": "https://github.com/apple/swift-syntax",
         "state": {
-          "branch": "release/5.5",
-          "revision": "2ca29758ed04c0a209221db59f922d4faf539f03",
-          "version": null
+          "branch": null,
+          "revision": "75e60475d9d8fd5bbc16a12e0eaa2cb01b0c322e",
+          "version": "0.50500.0"
         }
       },
       {
