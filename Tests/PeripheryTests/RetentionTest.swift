@@ -734,6 +734,16 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testRetainsFunctionParametersOnProtocolMembersImpletedByExternalType() {
+        analyze(retainPublic: true) {
+            assertReferenced(.protocol("FixtureProtocol125")) {
+                self.assertReferenced(.functionMethodInstance("object(forKey:)")) {
+                    self.assertReferenced(.varParameter("key"))
+                }
+            }
+        }
+    }
+
     func testDoesNotRetainDescendantsOfUnusedDeclaration() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass99Outer")) {
