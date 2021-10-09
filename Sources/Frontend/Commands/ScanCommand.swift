@@ -28,7 +28,7 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Comma-separated list of schemes that must be built in order to produce the targets passed to the --targets option. Xcode projects only", transform: split(by: ","))
     var schemes: [String] = defaultConfig.schemes
 
-    @Option(help: "Comma-separated list of target names to scan. Requied for Xcode projects. Optional for Swift Package Manager projects, default behavior is to scan all targets defined in Package.swift", transform: split(by: ","))
+    @Option(help: "Comma-separated list of target names to scan. Required for Xcode projects. Optional for Swift Package Manager projects, default behavior is to scan all targets defined in Package.swift", transform: split(by: ","))
     var targets: [String] = defaultConfig.targets
 
     @Option(help: "Output format (allowed: \(OutputFormat.allValueStrings.joined(separator: ", ")))")
