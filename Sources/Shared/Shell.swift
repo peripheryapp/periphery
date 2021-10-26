@@ -46,15 +46,17 @@ final class ReadableStream {
 
 open class Shell: Singleton {
     public static func make() -> Self {
-        return self.init(logger: inject())
+        return self.init(environment: ProcessInfo.processInfo.environment, logger: inject())
     }
 
     private var tasks: Set<Process> = []
     private var tasksQueue = DispatchQueue(label: "Shell.tasksQueue")
 
+    private let environment: [String: String]
     private let logger: ContextualLogger
 
-    required public init(logger: Logger) {
+    required public init(environment: [String: String], logger: Logger) {
+        self.environment = environment
         self.logger = logger.contextualized(with: "shell")
     }
 
@@ -63,9 +65,9 @@ open class Shell: Singleton {
     }
 
     private lazy var pristineEnvironment: [String: String] = {
-        let shell = ProcessInfo.processInfo.environment["SHELL"] ?? "/bin/bash"
+        let shell = environment["SHELL"] ?? "/bin/bash"
         guard let pristineEnv = try? exec([shell, "-lc", "env"], stderr: false, environment: [:]) else {
-            return ProcessInfo.processInfo.environment
+            return environment
         }
 
         var newEnv = pristineEnv.trimmed
@@ -79,7 +81,7 @@ open class Shell: Singleton {
 
         let preservedKeys = ["PATH"]
         preservedKeys.forEach { key in
-            if let value = ProcessInfo.processInfo.environment[key] {
+            if let value = environment[key] {
                 newEnv[key] = value
             }
         }
