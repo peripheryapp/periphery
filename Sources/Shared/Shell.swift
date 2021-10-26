@@ -64,7 +64,7 @@ open class Shell: Singleton {
         tasksQueue.sync { tasks.forEach { $0.interrupt() } }
     }
 
-    private lazy var pristineEnvironment: [String: String] = {
+    lazy var pristineEnvironment: [String: String] = {
         let shell = environment["SHELL"] ?? "/bin/bash"
         guard let pristineEnv = try? exec([shell, "-lc", "env"], stderr: false, environment: [:]) else {
             return environment
