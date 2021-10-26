@@ -79,7 +79,7 @@ open class Shell: Singleton {
                 result[pair.0] = pair.1
             }
 
-        let preservedKeys = ["PATH"]
+        let preservedKeys = ["PATH", "DEVELOPER_DIR"]
         preservedKeys.forEach { key in
             if let value = environment[key] {
                 newEnv[key] = value
