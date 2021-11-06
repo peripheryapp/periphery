@@ -420,9 +420,33 @@ Periphery supports both macOS and Linux. macOS supports both Xcode and Swift Pac
 
 ## Troubleshooting
 
-### Erroneous results in one or more files, such as false-positives and incorrect source file locations.
+### Erroneous results in one or more files, such as false-positives and incorrect source file locations
 
 It's possible for the index store to become corrupt, or out of sync with the source file. This can happen, for example, if you forcefully terminate (^C) a scan. To rectify this, you can pass the `--clean-build` flag to the scan command to force removal of existing build artifacts.
+
+### Code referenced within preprocessor macro conditional branch is unused
+
+When Periphery builds your project it uses the default build configuration, which is typically 'debug'. If you use preprocessor macros to conditionally compile code, Periphery will only have visibility into the branches that are compiled. In the example below, `releaseName` will be reported as unused as it is only referenced within the non-debug branch of the macro.
+
+```swift
+struct BuildInfo {
+    let debugName = "debug"
+    let releaseName = "release" // 'releaseName' is unused
+
+    var name: String {
+        #if DEBUG
+        debugName
+        #else
+        releaseName
+        #endif
+    }
+}
+```
+
+You've a few options to workaround this:
+ - Use [Comment Commands](#comment-commands) to explicitly ignore `releaseName`.
+ - Filter the results to remove known instances.
+ - Run Periphery once for each build configuration and merge the results. You can pass arguments to the underlying build by specifying them after `--`, e.g `periphery scan ... -- -configuration release`.
 
 ## Known Bugs
 
