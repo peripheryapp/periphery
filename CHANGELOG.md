@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - The `DEVELOPER_DIR` environment variable is now respected.
+- Updated `XcodeProj` dependency resolves building with Xcode 13.
 
 ## 2.8.1 (2021-08-01)
 
