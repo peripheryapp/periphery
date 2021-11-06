@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- The `DEVELOPER_DIR` environment variable is now respected.
 
 ## 2.8.1 (2021-08-01)
 
