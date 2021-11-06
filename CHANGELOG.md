@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix false positive when a class inherits a class with the same name from another module.
 
 ## 2.8.2 (2021-11-06)
 

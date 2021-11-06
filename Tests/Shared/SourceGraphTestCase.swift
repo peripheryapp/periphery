@@ -17,7 +17,7 @@ open class SourceGraphTestCase: XCTestCase {
 
     var configuration: Configuration { Self.configuration }
 
-    private var scopedDeclarationStack: [Declaration] = []
+    private var scopeStack: [DeclarationScope] = []
 
     class open override func setUp() {
         super.setUp()
@@ -37,9 +37,9 @@ open class SourceGraphTestCase: XCTestCase {
             XCTFail("Expected declaration to be referenced: \(declaration)", file: file, line: line)
         }
 
-        scopedDeclarationStack.append(declaration)
+        scopeStack.append(.declaration(declaration))
         scopedAssertions?()
-        scopedDeclarationStack.removeLast()
+        scopeStack.removeLast()
     }
 
     func assertNotReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
@@ -49,9 +49,9 @@ open class SourceGraphTestCase: XCTestCase {
             XCTFail("Expected declaration to not be referenced: \(declaration)", file: file, line: line)
         }
 
-        scopedDeclarationStack.append(declaration)
+        scopeStack.append(.declaration(declaration))
         scopedAssertions?()
-        scopedDeclarationStack.removeLast()
+        scopeStack.removeLast()
     }
 
     func assertRedundantProtocol(_ name: String, implementedBy conformances: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
@@ -85,9 +85,9 @@ open class SourceGraphTestCase: XCTestCase {
             XCTFail("Expected \(description) to have \(accessibility) accessibility, but found \(declaration.accessibility.value).", file: file, line: line)
         }
 
-        scopedDeclarationStack.append(declaration)
+        scopeStack.append(.declaration(declaration))
         scopedAssertions?()
-        scopedDeclarationStack.removeLast()
+        scopeStack.removeLast()
     }
 
     func assertRedundantPublicAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
@@ -97,9 +97,9 @@ open class SourceGraphTestCase: XCTestCase {
             XCTFail("Expected declaration to have redundant public accessibility: \(declaration)", file: file, line: line)
         }
 
-        scopedDeclarationStack.append(declaration)
+        scopeStack.append(.declaration(declaration))
         scopedAssertions?()
-        scopedDeclarationStack.removeLast()
+        scopeStack.removeLast()
     }
 
     func assertNotRedundantPublicAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
@@ -109,9 +109,9 @@ open class SourceGraphTestCase: XCTestCase {
             XCTFail("Expected declaration to not have redundant public accessibility: \(declaration)", file: file, line: line)
         }
 
-        scopedDeclarationStack.append(declaration)
+        scopeStack.append(.declaration(declaration))
         scopedAssertions?()
-        scopedDeclarationStack.removeLast()
+        scopeStack.removeLast()
     }
 
     func assertUsedParameter(_ name: String, file: StaticString = #file, line: UInt = #line) {
@@ -122,18 +122,34 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
-    // MARK: - Private
+    func module(_ name: String, scopedAssertions: (() -> Void)? = nil) {
+        scopeStack.append(.module(name))
+        scopedAssertions?()
+        scopeStack.removeLast()
+    }
 
-    private func materialize(_ description: DeclarationDescription, in defaultDeclarationSet: Set<Declaration>? = nil, fail: Bool = true, file: StaticString, line: UInt) -> Declaration? {
-        let scopedDeclarations: Set<Declaration>
-
-        if let scopedDeclaration = scopedDeclarationStack.last {
-            scopedDeclarations = scopedDeclaration.declarations.union(scopedDeclaration.unusedParameters)
-        } else {
-            scopedDeclarations = defaultDeclarationSet ?? graph.rootDeclarations
+    func materialize(_ descriptions: [DeclarationDescription], in defaultDeclarations: Set<Declaration>? = nil, fail: Bool = true, file: StaticString = #file, line: UInt = #line) throws -> Declaration? {
+        let allDeclarations = defaultDeclarations ?? graph.rootDeclarations
+        let scopeDescriptions = descriptions.dropLast()
+        let scopedDeclarations = scopeDescriptions.reduce(into: allDeclarations) { result, description in
+            if description.kind == .module {
+                result = result.filter { $0.location.file.modules.contains(description.name) }
+            } else {
+                if let declaration = materialize(description, in: result, file: file, line: line) {
+                    result = [declaration]
+                }
+            }
         }
 
-        if let declaration = scopedDeclarations.first(where: { $0.kind == description.kind && $0.name == description.name }) {
+        return materialize(try XCTUnwrap(descriptions.last), in: scopedDeclarations, fail: fail, file: file, line: line)
+    }
+
+    // MARK: - Private
+
+    private func materialize(_ description: DeclarationDescription, in defaultDeclarations: Set<Declaration>? = nil, fail: Bool = true, file: StaticString, line: UInt) -> Declaration? {
+        let declarations = scopedDeclarations(from: defaultDeclarations)
+
+        if let declaration = declarations.first(where: { $0.kind == description.kind && $0.name == description.name }) {
             return declaration
         }
 
@@ -142,5 +158,24 @@ open class SourceGraphTestCase: XCTestCase {
         }
 
         return nil
+    }
+
+    private func scopedDeclarations(from defaultDeclarations: Set<Declaration>? = nil) -> Set<Declaration> {
+        let allDeclarations = defaultDeclarations ?? graph.rootDeclarations
+
+        guard !scopeStack.isEmpty else {
+            return allDeclarations
+        }
+
+        return scopeStack.reduce(into: allDeclarations) { result, scope in
+            switch scope {
+            case let .declaration(declaration):
+                if result.contains(declaration) {
+                    result = declaration.declarations.union(declaration.unusedParameters)
+                }
+            case let .module(module):
+                result = result.filter { $0.location.file.modules.contains(module) }
+            }
+        }
     }
 }

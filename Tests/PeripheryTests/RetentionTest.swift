@@ -5,8 +5,9 @@ import Shared
 @testable import PeripheryKit
 
 final class RetentionTest: SourceGraphTestCase {
-    private static var fixtureTarget: SPM.Target!
-    private static var objcFixtureTarget: SPM.Target?
+    private static var retentionFixturesTarget: SPM.Target!
+    private static var crossModuleRetentionFixturesTarget: SPM.Target!
+    private static var objcRetentionFixturesTarget: SPM.Target?
     private static var driver: SPMProjectDriver!
 
     private let performKnownFailures = false
@@ -16,13 +17,14 @@ final class RetentionTest: SourceGraphTestCase {
 
         ProjectRootPath.chdir {
             let package = try! SPM.Package.load()
-            fixtureTarget = package.targets.first { $0.name == "RetentionFixtures" }!
-            objcFixtureTarget = package.targets.first { $0.name == "ObjcRetentionFixtures" }
+            crossModuleRetentionFixturesTarget = package.targets.first { $0.name == "CrossModuleRetentionFixtures" }!
+            retentionFixturesTarget = package.targets.first { $0.name == "RetentionFixtures" }!
+            objcRetentionFixturesTarget = package.targets.first { $0.name == "ObjcRetentionFixtures" }
 
-            var targets = [fixtureTarget]
+            var targets = [retentionFixturesTarget]
 
 #if os(macOS)
-            targets.append(objcFixtureTarget)
+            targets.append(objcRetentionFixturesTarget)
 #endif
 
             driver = SPMProjectDriver(
@@ -1256,6 +1258,23 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testCrossModuleInheritanceWithSameName() {
+        let retainFixture: [DeclarationDescription] = [
+            .module(Self.retentionFixturesTarget.name),
+            .class("FixtureClass129")
+        ]
+
+        analyze(crossModule: true, retain: retainFixture) {
+            module(Self.retentionFixturesTarget.name) {
+                self.assertReferenced(.class("FixtureClass129"))
+            }
+
+            module(Self.crossModuleRetentionFixturesTarget.name) {
+                self.assertReferenced(.class("FixtureClass129"))
+            }
+        }
+    }
+
     // MARK: - Objective-C
 
     #if os(macOS)
@@ -1400,7 +1419,9 @@ final class RetentionTest: SourceGraphTestCase {
     private func analyze(retainPublic: Bool = false,
                          retainObjcAccessible: Bool = false,
                          objc: Bool = false,
-                         _ testBlock: () throws -> Void
+                         crossModule: Bool = false,
+                         retain retainDeclarationDescriptions: [DeclarationDescription] = [],
+                         testBlock: () throws -> Void
     ) rethrows {
         #if os(macOS)
         let testName = String(name.split(separator: " ").last!).replacingOccurrences(of: "]", with: "")
@@ -1417,7 +1438,7 @@ final class RetentionTest: SourceGraphTestCase {
             return
         }
 
-        let target = objc ? Self.objcFixtureTarget! : Self.fixtureTarget!
+        let target = objc ? Self.objcRetentionFixturesTarget! : Self.retentionFixturesTarget!
 
         let newFixtureTarget = SPM.Target(
             name: target.name,
@@ -1425,10 +1446,22 @@ final class RetentionTest: SourceGraphTestCase {
             moduleType: target.moduleType,
             sources: [testFixturePath.lastComponent?.string ?? ""])
 
-        Self.driver.setTargets([newFixtureTarget])
+        var targets = [newFixtureTarget]
+
+        if crossModule {
+            targets.append(Self.crossModuleRetentionFixturesTarget)
+        }
+
+        Self.driver.setTargets(targets)
 
         graph = SourceGraph()
         try! Self.driver.index(graph: graph)
+
+        if !retainDeclarationDescriptions.isEmpty,
+           let declaration = try! materialize(retainDeclarationDescriptions, fail: true) {
+            graph.markRetained(declaration)
+        }
+
         try! Analyzer.perform(graph: graph)
         try testBlock()
 
