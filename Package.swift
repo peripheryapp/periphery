@@ -80,7 +80,10 @@ var targets: [PackageDescription.Target] = [
         ]
     ),
     .target(
-        name: "RetentionFixturesCrossModule"
+        name: "ExternalModuleFixtures"
+    ),
+    .target(
+        name: "CrossModuleRetentionFixtures"
     ),
     .target(
         name: "TestShared",
@@ -91,7 +94,7 @@ var targets: [PackageDescription.Target] = [
     ),
     .target(
         name: "RetentionFixtures",
-        dependencies: ["RetentionFixturesCrossModule"],
+        dependencies: ["ExternalModuleFixtures", "CrossModuleRetentionFixtures"],
         path: "Tests/Fixtures/RetentionFixtures"
     ),
     .target(

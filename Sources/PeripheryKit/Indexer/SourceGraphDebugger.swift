@@ -40,6 +40,10 @@ final class SourceGraphDebugger {
         let inset = String(repeating: "··", count: depth)
         print(inset + declaration.description)
 
+        for reference in declaration.related.sorted() {
+            describe(reference, depth: depth + 1)
+        }
+
         for reference in declaration.references.sorted() {
             describe(reference, depth: depth + 1)
         }

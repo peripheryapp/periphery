@@ -9,6 +9,10 @@ struct DeclarationDescription: CustomStringConvertible {
         return "(\(kind.rawValue), \"\(name)\")"
     }
 
+    static func `module`(_ name: String) -> Self {
+        self.init(kind: .module, name: name)
+    }
+
     static func `class`(_ name: String) -> Self {
         self.init(kind: .class, name: name)
     }
