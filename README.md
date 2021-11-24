@@ -452,13 +452,13 @@ You've a few options to workaround this:
 
 Due to some underlying bugs in Swift, Periphery may in some instances report incorrect results. You can encourage Apple to fix these issues by voting for them on the Swift JIRA.
 
-| ID    | Title |
-| :---  | ---   |
-| [SR-14181](https://bugs.swift.org/browse/SR-14181) | Index store does not relate constructor referenced via Self |
-| [SR-14162](https://bugs.swift.org/browse/SR-14162) | Index store does not relate static property getter used as subscript key |
-| [SR-13930](https://bugs.swift.org/browse/SR-13930) | Index store does not relate objc optional protocol method implemented in subclass |
-| [SR-13792](https://bugs.swift.org/browse/SR-13792) | Index store should relate appendInterpolation from string literals |
-| [SR-13768](https://bugs.swift.org/browse/SR-13768) | Index store does not relate constructor via literal notation |
-| [SR-13767](https://bugs.swift.org/browse/SR-13767) | Index store reference occurrence incorrectly related for lazy variable |
-| [SR-13766](https://bugs.swift.org/browse/SR-13766) | Index store does not correctly relate variable type |
-| [SR-7093](https://bugs.swift.org/browse/SR-7093) | Index does not include reference to constructor of class/struct with generic types |
+| ID    | Title | Fixed in Swift 5.6 |
+| :---  | ---   | ---                |
+| [SR-13766](https://bugs.swift.org/browse/SR-13766) | Index store does not correctly relate variable type | ✅ |
+| [SR-14181](https://bugs.swift.org/browse/SR-14181) | Index store does not relate constructor referenced via Self | |
+| [SR-14162](https://bugs.swift.org/browse/SR-14162) | Index store does not relate static property getter used as subscript key | |
+| [SR-13930](https://bugs.swift.org/browse/SR-13930) | Index store does not relate objc optional protocol method implemented in subclass | |
+| [SR-13792](https://bugs.swift.org/browse/SR-13792) | Index store should relate appendInterpolation from string literals | |
+| [SR-13768](https://bugs.swift.org/browse/SR-13768) | Index store does not relate constructor via literal notation | |
+| [SR-13767](https://bugs.swift.org/browse/SR-13767) | Index store reference occurrence incorrectly related for lazy variable | |
+| [SR-7093](https://bugs.swift.org/browse/SR-7093) | Index does not include reference to constructor of class/struct with generic types | |
