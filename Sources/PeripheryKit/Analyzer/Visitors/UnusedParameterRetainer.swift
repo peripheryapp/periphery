@@ -29,25 +29,35 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
                 .filter { $0.kind == .extensionProtocol && $0.name == protoDecl.name }
                 .compactMap { graph.explicitDeclaration(withUsr: $0.usr) }
 
-            // Since protocol declarations have no body, their params wil always be unused,
+            // Since protocol declarations have no body, their params will always be unused,
             // and thus present in functionDecls.
             let protoFuncDecls = protoDecl.declarations.filter { functionDecls.contains($0) }
 
             for protoFuncDecl in protoFuncDecls {
-                let conformingDecls = protoFuncDecl.related
-                    .filter { $0.kind.isFunctionKind && $0.name == protoFuncDecl.name }
-                    .compactMap { graph.explicitDeclaration(withUsr: $0.usr) }
                 let extFuncDecls = extDecls.flatMap {
                     $0.declarations.filter { $0.kind.isFunctionKind && $0.name == protoFuncDecl.name }
                 }
+                let conformingDecls = protoFuncDecl.related
+                    .filter { $0.kind.isFunctionKind && $0.name == protoFuncDecl.name }
+                    .compactMap { graph.explicitDeclaration(withUsr: $0.usr) }
+                    .filter { !extFuncDecls.contains($0) }
 
-                let allFunctionDecls = conformingDecls + extFuncDecls + [protoFuncDecl]
-
-                for functionDecl in allFunctionDecls {
-                    if configuration.retainUnusedProtocolFuncParams {
+                if conformingDecls.isEmpty {
+                    // This protocol function declaration is not implemented, though it may still be referenced from an
+                    // existential type. Leaving the function parameters as unused would put produce awkward results.
+                    let allFunctionDecls = extFuncDecls + [protoFuncDecl]
+                    for functionDecl in allFunctionDecls {
                         functionDecl.unusedParameters.forEach { graph.markRetained($0) }
-                    } else {
-                        retain(params: functionDecl.unusedParameters, usedIn: allFunctionDecls)
+                    }
+                } else {
+                    let allFunctionDecls = conformingDecls + extFuncDecls + [protoFuncDecl]
+
+                    for functionDecl in allFunctionDecls {
+                        if configuration.retainUnusedProtocolFuncParams {
+                            functionDecl.unusedParameters.forEach { graph.markRetained($0) }
+                        } else {
+                            retain(params: functionDecl.unusedParameters, usedIn: allFunctionDecls)
+                        }
                     }
                 }
             }

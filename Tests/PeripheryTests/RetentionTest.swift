@@ -734,16 +734,6 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testRetainsFunctionParametersOnProtocolMembersImpletedByExternalType() {
-        analyze(retainPublic: true) {
-            assertReferenced(.protocol("FixtureProtocol125")) {
-                self.assertReferenced(.functionMethodInstance("object(forKey:)")) {
-                    self.assertReferenced(.varParameter("key"))
-                }
-            }
-        }
-    }
-
     func testDoesNotRetainDescendantsOfUnusedDeclaration() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass99Outer")) {
@@ -772,6 +762,238 @@ final class RetentionTest: SourceGraphTestCase {
                 self.assertNotReferenced(.varInstance("notRetainedTupleProperty"))
                 self.assertNotReferenced(.varInstance("notRetainedDestructuredPropertyB"))
                 self.assertNotReferenced(.varInstance("notRetainedMultipleBindingPropertyB"))
+            }
+        }
+    }
+
+    func testNestedDeclarations() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass102")) {
+                self.assertReferenced(.functionMethodInstance("nested1()"))
+                self.assertReferenced(.functionMethodInstance("nested2()"))
+            }
+        }
+    }
+
+    func testIdenticallyNamedVarsInStaticAndInstanceScopes() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass95")) {
+                self.assertReferenced(.varInstance("someVar"))
+                self.assertReferenced(.varStatic("someVar"))
+            }
+        }
+    }
+
+    func testProtocolConformingMembersAreRetained() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass27")) {
+                self.assertReferenced(.functionMethodInstance("protocolMethod()"))
+                self.assertReferenced(.functionMethodClass("staticProtocolMethod()"))
+                self.assertReferenced(.varClass("staticProtocolVar"))
+            }
+            assertReferenced(.protocol("FixtureProtocol27"))
+            assertReferenced(.class("FixtureClass28")) {
+                self.assertReferenced(.functionMethodStatic("overrideStaticProtocolMethod()"))
+                self.assertReferenced(.varStatic("overrideStaticProtocolVar"))
+            }
+            assertReferenced(.class("FixtureClass28Base")) {
+                self.assertReferenced(.functionMethodClass("overrideStaticProtocolMethod()"))
+                self.assertReferenced(.varClass("overrideStaticProtocolVar"))
+            }
+            assertReferenced(.protocol("FixtureProtocol28"))
+        }
+    }
+
+    func testProtocolConformedByStaticMethodOutsideExtension() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass64")) // public
+            assertReferenced(.class("FixtureClass65")) // retained by FixtureClass64
+            assertReferenced(.functionOperatorInfix("==(_:_:)")) // Equatable
+        }
+    }
+
+    func testClassRetainedByUnusedInstanceVariable() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass71")) {
+                self.assertNotReferenced(.varInstance("someVar"))
+            }
+            assertNotReferenced(.class("FixtureClass72"))
+        }
+    }
+
+    func testStaticPropertyDeclaredWithCompositeValuesIsNotRetained() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass38")) {
+                self.assertNotReferenced(.varStatic("propertyA"))
+                self.assertNotReferenced(.varStatic("propertyB"))
+            }
+        }
+    }
+
+    func testRetainImplicitDeclarations() {
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct2")) {
+                self.assertReferenced(.functionConstructor("init(someVar:)"))
+            }
+        }
+    }
+
+    func testRetainsPropertyWrappers() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("Fixture111")) {
+                self.assertReferenced(.varInstance("someVar"))
+                self.assertReferenced(.functionMethodStatic("buildBlock()"))
+            }
+            assertReferenced(.class("Fixture111Wrapper")) {
+                self.assertReferenced(.varInstance("wrappedValue"))
+                self.assertReferenced(.varInstance("projectedValue"))
+            }
+        }
+    }
+
+    func testRetainsStringInterpolationAppendInterpolation() {
+        analyze(retainPublic: true) {
+            assertReferenced(.extensionStruct("DefaultStringInterpolation")) {
+                self.assertReferenced(.functionMethodInstance("appendInterpolation(test:)"))
+            }
+        }
+    }
+
+    func testIgnoreComments() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("Fixture113")) {
+                self.assertReferenced(.functionMethodInstance("someFunc(param:)")) {
+                    self.assertReferenced(.varParameter("param"))
+                }
+            }
+            assertReferenced(.class("Fixture114")) {
+                self.assertReferenced(.functionMethodInstance("referencedFunc()"))
+                self.assertReferenced(.functionMethodInstance("someFunc(a:b:c:)")) {
+                    self.assertReferenced(.varParameter("b"))
+                    self.assertReferenced(.varParameter("c"))
+                }
+                self.assertReferenced(.functionMethodInstance("protocolFunc(param:)")) {
+                    self.assertReferenced(.varParameter("param"))
+                }
+            }
+            assertReferenced(.protocol("Fixture114Protocol")) {
+                self.assertReferenced(.functionMethodInstance("protocolFunc(param:)")) {
+                    self.assertReferenced(.varParameter("param"))
+                }
+            }
+            assertReferenced(.class("FixtureClass116")) {
+                self.assertReferenced(.functionMethodInstance("someFunc()"))
+                self.assertReferenced(.varInstance("simpleProperty"))
+                self.assertReferenced(.varInstance("tuplePropertyA"))
+                self.assertReferenced(.varInstance("tuplePropertyB"))
+                self.assertReferenced(.varInstance("multiBindingPropertyA"))
+                self.assertReferenced(.varInstance("multiBindingPropertyB"))
+            }
+        }
+    }
+
+    func testIgnoreAllComment() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("Fixture115")) {
+                self.assertReferenced(.functionMethodInstance("someFunc(param:)")) {
+                    self.assertReferenced(.varParameter("param"))
+                }
+            }
+            assertReferenced(.class("Fixture116"))
+        }
+    }
+
+    func testSimplePropertyAssignedButNeverRead() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass70")) {
+                self.assertNotReferenced(.varInstance("simpleUnreadVar"))
+                self.assertNotReferenced(.varInstance("simpleUnreadShadowedVar"))
+                self.assertNotReferenced(.varStatic("simpleStaticUnreadVar"))
+                self.assertReferenced(.varInstance("complexUnreadVar1"))
+                self.assertReferenced(.varInstance("complexUnreadVar2"))
+                self.assertReferenced(.varInstance("readVar"))
+            }
+        }
+
+        configuration.retainAssignOnlyProperties = true
+
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass70")) {
+                self.assertReferenced(.varInstance("simpleUnreadVar"))
+                self.assertReferenced(.varInstance("simpleUnreadShadowedVar"))
+                self.assertReferenced(.varStatic("simpleStaticUnreadVar"))
+                self.assertReferenced(.varInstance("complexUnreadVar1"))
+                self.assertReferenced(.varInstance("complexUnreadVar2"))
+                self.assertReferenced(.varInstance("readVar"))
+            }
+        }
+    }
+
+    func testRetainsProtocolsViaCompositeTypealias() {
+        analyze(retainPublic: true) {
+            assertReferenced(.protocol("Fixture200"))
+            assertReferenced(.protocol("Fixture201"))
+            assertReferenced(.typealias("Fixture202"))
+        }
+    }
+
+    func testRetainsEncodableProperties() {
+        let configuration = inject(Configuration.self)
+        // CustomStringConvertible doesn't actually inherit Encodable, we're just using it because we don't have an
+        // external module in which to declare our own type.
+        configuration.externalEncodableProtocols = ["CustomStringConvertible"]
+
+        analyze(retainPublic: true) {
+            self.assertReferenced(.class("FixtureClass204")) {
+                self.assertReferenced(.varInstance("someVar"))
+            }
+
+            self.assertReferenced(.class("FixtureClass205")) {
+                self.assertReferenced(.varInstance("someVar"))
+            }
+
+            self.assertReferenced(.class("FixtureClass206")) {
+                self.assertReferenced(.varInstance("someVar"))
+            }
+
+            self.assertReferenced(.class("FixtureClass207")) {
+                self.assertReferenced(.varInstance("someVar"))
+            }
+
+            self.assertReferenced(.class("FixtureClass208")) {
+                self.assertReferenced(.varInstance("someVar"))
+            }
+
+            self.assertReferenced(.class("FixtureClass209")) {
+                self.assertReferenced(.varInstance("someVar"))
+            }
+
+            self.assertReferenced(.class("FixtureClass210")) {
+                self.assertReferenced(.varInstance("someVar"))
+            }
+        }
+    }
+
+    func testCircularTypeInheritance() {
+        analyze {
+            // Intentionally blank.
+            // Fixture contains a circular reference that shouldn't cause a stack overflow.
+        }
+    }
+
+    func testCrossModuleInheritanceWithSameName() {
+        let retainFixture: [DeclarationDescription] = [
+            .module(Self.retentionFixturesTarget.name),
+            .class("FixtureClass129")
+        ]
+
+        analyze(crossModule: true, retain: retainFixture) {
+            module(Self.retentionFixturesTarget.name) {
+                self.assertReferenced(.class("FixtureClass129"))
+            }
+
+            module(Self.crossModuleRetentionFixturesTarget.name) {
+                self.assertReferenced(.class("FixtureClass129"))
             }
         }
     }
@@ -1053,234 +1275,27 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testNestedDeclarations() {
+    func testRetainsFunctionParametersOnProtocolMembersImplementedByExternalType() {
         analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass102")) {
-                self.assertReferenced(.functionMethodInstance("nested1()"))
-                self.assertReferenced(.functionMethodInstance("nested2()"))
+            assertReferenced(.protocol("FixtureProtocol125")) {
+                self.assertReferenced(.functionMethodInstance("object(forKey:)")) {
+                    self.assertReferenced(.varParameter("key"))
+                }
             }
         }
     }
 
-    func testIdenticallyNamedVarsInStaticAndInstanceScopes() {
+    func testRetainsFunctionParametersOnUnimplementedProtocolMembers() {
         analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass95")) {
-                self.assertReferenced(.varInstance("someVar"))
-                self.assertReferenced(.varStatic("someVar"))
-            }
-        }
-    }
-
-    func testProtocolConformingMembersAreRetained() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass27")) {
-                self.assertReferenced(.functionMethodInstance("protocolMethod()"))
-                self.assertReferenced(.functionMethodClass("staticProtocolMethod()"))
-                self.assertReferenced(.varClass("staticProtocolVar"))
-            }
-            assertReferenced(.protocol("FixtureProtocol27"))
-            assertReferenced(.class("FixtureClass28")) {
-                self.assertReferenced(.functionMethodStatic("overrideStaticProtocolMethod()"))
-                self.assertReferenced(.varStatic("overrideStaticProtocolVar"))
-            }
-            assertReferenced(.class("FixtureClass28Base")) {
-                self.assertReferenced(.functionMethodClass("overrideStaticProtocolMethod()"))
-                self.assertReferenced(.varClass("overrideStaticProtocolVar"))
-            }
-            assertReferenced(.protocol("FixtureProtocol28"))
-        }
-    }
-
-    func testProtocolConformedByStaticMethodOutsideExtension() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass64")) // public
-            assertReferenced(.class("FixtureClass65")) // retained by FixtureClass64
-            assertReferenced(.functionOperatorInfix("==(_:_:)")) // Equatable
-        }
-    }
-
-    func testClassRetainedByUnusedInstanceVariable() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass71")) {
-                self.assertNotReferenced(.varInstance("someVar"))
-            }
-            assertNotReferenced(.class("FixtureClass72"))
-        }
-    }
-
-    func testStaticPropertyDeclaredWithCompositeValuesIsNotRetained() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass38")) {
-                self.assertNotReferenced(.varStatic("propertyA"))
-                self.assertNotReferenced(.varStatic("propertyB"))
-            }
-        }
-    }
-
-    func testRetainImplicitDeclarations() {
-        analyze(retainPublic: true) {
-            assertReferenced(.struct("FixtureStruct2")) {
-                self.assertReferenced(.functionConstructor("init(someVar:)"))
-            }
-        }
-    }
-
-    func testRetainsPropertyWrappers() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("Fixture111")) {
-                self.assertReferenced(.varInstance("someVar"))
-                self.assertReferenced(.functionMethodStatic("buildBlock()"))
-            }
-            assertReferenced(.class("Fixture111Wrapper")) {
-                self.assertReferenced(.varInstance("wrappedValue"))
-                self.assertReferenced(.varInstance("projectedValue"))
-            }
-        }
-    }
-
-    func testRetainsStringInterpolationAppendInterpolation() {
-        analyze(retainPublic: true) {
-            assertReferenced(.extensionStruct("DefaultStringInterpolation")) {
-                self.assertReferenced(.functionMethodInstance("appendInterpolation(test:)"))
-            }
-        }
-    }
-
-    func testIgnoreComments() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("Fixture113")) {
-                self.assertReferenced(.functionMethodInstance("someFunc(param:)")) {
+            assertReferenced(.protocol("FixtureProtocol126")) {
+                self.assertReferenced(.functionMethodInstance("unimplementedFunc(param:)")) {
                     self.assertReferenced(.varParameter("param"))
                 }
             }
-            assertReferenced(.class("Fixture114")) {
-                self.assertReferenced(.functionMethodInstance("referencedFunc()"))
-                self.assertReferenced(.functionMethodInstance("someFunc(a:b:c:)")) {
-                    self.assertReferenced(.varParameter("b"))
-                    self.assertReferenced(.varParameter("c"))
-                }
-                self.assertReferenced(.functionMethodInstance("protocolFunc(param:)")) {
+            assertReferenced(.extensionProtocol("FixtureProtocol126")) {
+                self.assertReferenced(.functionMethodInstance("unimplementedFunc(param:)")) {
                     self.assertReferenced(.varParameter("param"))
                 }
-            }
-            assertReferenced(.protocol("Fixture114Protocol")) {
-                self.assertReferenced(.functionMethodInstance("protocolFunc(param:)")) {
-                    self.assertReferenced(.varParameter("param"))
-                }
-            }
-            assertReferenced(.class("FixtureClass116")) {
-                self.assertReferenced(.functionMethodInstance("someFunc()"))
-                self.assertReferenced(.varInstance("simpleProperty"))
-                self.assertReferenced(.varInstance("tuplePropertyA"))
-                self.assertReferenced(.varInstance("tuplePropertyB"))
-                self.assertReferenced(.varInstance("multiBindingPropertyA"))
-                self.assertReferenced(.varInstance("multiBindingPropertyB"))
-            }
-        }
-    }
-
-    func testIgnoreAllComment() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("Fixture115")) {
-                self.assertReferenced(.functionMethodInstance("someFunc(param:)")) {
-                    self.assertReferenced(.varParameter("param"))
-                }
-            }
-            assertReferenced(.class("Fixture116"))
-        }
-    }
-
-    func testSimplePropertyAssignedButNeverRead() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass70")) {
-                self.assertNotReferenced(.varInstance("simpleUnreadVar"))
-                self.assertNotReferenced(.varInstance("simpleUnreadShadowedVar"))
-                self.assertNotReferenced(.varStatic("simpleStaticUnreadVar"))
-                self.assertReferenced(.varInstance("complexUnreadVar1"))
-                self.assertReferenced(.varInstance("complexUnreadVar2"))
-                self.assertReferenced(.varInstance("readVar"))
-            }
-        }
-
-        configuration.retainAssignOnlyProperties = true
-
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass70")) {
-                self.assertReferenced(.varInstance("simpleUnreadVar"))
-                self.assertReferenced(.varInstance("simpleUnreadShadowedVar"))
-                self.assertReferenced(.varStatic("simpleStaticUnreadVar"))
-                self.assertReferenced(.varInstance("complexUnreadVar1"))
-                self.assertReferenced(.varInstance("complexUnreadVar2"))
-                self.assertReferenced(.varInstance("readVar"))
-            }
-        }
-    }
-
-    func testRetainsProtocolsViaCompositeTypealias() {
-        analyze(retainPublic: true) {
-            assertReferenced(.protocol("Fixture200"))
-            assertReferenced(.protocol("Fixture201"))
-            assertReferenced(.typealias("Fixture202"))
-        }
-    }
-
-    func testRetainsEncodableProperties() {
-        let configuration = inject(Configuration.self)
-        // CustomStringConvertible doesn't actually inherit Encodable, we're just using it because we don't have an
-        // external module in which to declare our own type.
-        configuration.externalEncodableProtocols = ["CustomStringConvertible"]
-
-        analyze(retainPublic: true) {
-            self.assertReferenced(.class("FixtureClass204")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass205")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass206")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass207")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass208")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass209")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass210")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-        }
-    }
-
-    func testCircularTypeInheritance() {
-        analyze {
-            // Intentionally blank.
-            // Fixture contains a circular reference that shouldn't cause a stack overflow.
-        }
-    }
-
-    func testCrossModuleInheritanceWithSameName() {
-        let retainFixture: [DeclarationDescription] = [
-            .module(Self.retentionFixturesTarget.name),
-            .class("FixtureClass129")
-        ]
-
-        analyze(crossModule: true, retain: retainFixture) {
-            module(Self.retentionFixturesTarget.name) {
-                self.assertReferenced(.class("FixtureClass129"))
-            }
-
-            module(Self.crossModuleRetentionFixturesTarget.name) {
-                self.assertReferenced(.class("FixtureClass129"))
             }
         }
     }
