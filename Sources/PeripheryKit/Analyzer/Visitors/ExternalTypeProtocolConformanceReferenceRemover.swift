@@ -33,6 +33,10 @@ final class ExternalTypeProtocolConformanceReferenceRemover: SourceGraphVisitor 
                     protocolDecls.contains(parentDecl)
                 else { continue  }
 
+                // Retain all parameters from the protocol declaration as altering the function signature would break
+                // conformance.
+                relatedDecl.unusedParameters.forEach { graph.markRetained($0) }
+
                 // Remove the related reference.
                 graph.remove(relatedRef)
             }
