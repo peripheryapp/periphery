@@ -30,3 +30,17 @@ _ = PublicTypeUsedAsPublicClassGenericParameterRetainer<PublicTypeUsedAsPublicCl
 _ = PublicTypeUsedAsPublicClassGenericRequirementRetainer<PublicTypeUsedAsPublicClassGenericRequirement_ConformingClass>()
 
 _ = NotRedundantPublicTestableImportClass().testableProperty
+
+// Inheritance
+_ = PublicClassInheritingPublicClass()
+_ = PublicClassInheritingPublicExternalClassRetainer()
+
+// Conformance
+_ = PublicClassAdoptingPublicProtocol()
+_ = PublicClassAdoptingInternalProtocol()
+_ = InternalClassAdoptingPublicProtocolRetainer()
+
+// Refining
+let _: PublicProtocolRefiningPublicProtocol? = nil
+_ = InternalProtocolRefiningPublicProtocolRetainer()
+

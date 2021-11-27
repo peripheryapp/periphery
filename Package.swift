@@ -106,12 +106,8 @@ var targets: [PackageDescription.Target] = [
         path: "Tests/Fixtures/TypeSyntaxInspectorFixtures"
     ),
     .target(
-        name: "FunctionVisitorFixtures",
-        path: "Tests/Fixtures/FunctionVisitorFixtures"
-    ),
-    .target(
-        name: "PropertyVisitorFixtures",
-        path: "Tests/Fixtures/PropertyVisitorFixtures"
+        name: "DeclarationVisitorFixtures",
+        path: "Tests/Fixtures/DeclarationVisitorFixtures"
     ),
     .testTarget(
         name: "PeripheryTests",

@@ -49,24 +49,12 @@ public final class Declaration {
             rawValue.hasPrefix("function")
         }
 
-        var isAccessibilityModifiableFunctionKind: Bool {
-            rawValue.hasPrefix("function.method")
-                || rawValue.hasPrefix("function.operator")
-                || rawValue == "function.subscript"
-                || rawValue == "function.free"
-                || rawValue == "function.constructor"
-        }
-
         static var variableKinds: Set<Kind> {
             Set(Kind.allCases.filter { $0.isVariableKind })
         }
 
         var isVariableKind: Bool {
             rawValue.hasPrefix("var")
-        }
-
-        var isAccessibilityModifiableVariableKind: Bool {
-            isVariableKind
         }
 
         static var globalKinds: Set<Kind> = [

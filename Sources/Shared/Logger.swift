@@ -104,10 +104,6 @@ public struct ContextualLogger {
     let logger: Logger
     let context: String
 
-    public func info(_ text: String) {
-        logger.info("[\(context)] \(text)")
-    }
-
     public func debug(_ text: String) {
         logger.debug("[\(context)] \(text)")
     }

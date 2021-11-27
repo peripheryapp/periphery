@@ -48,7 +48,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphVisitor {
             // because it would lead to many warnings of questionable value. For example, it's common for a set of
             // properties to be marked public, even if they're not yet all used cross module.
         } else {
-            // Declaration is not explicitly public, any explicit public descendents are therefore redundant.
+            // Declaration is not explicitly public, any explicit public descendants are therefore redundant.
             markExplicitPublicDescendentDeclarations(from: decl)
         }
     }
