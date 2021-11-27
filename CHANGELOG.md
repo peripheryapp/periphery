@@ -13,6 +13,7 @@
 - Fix false positive when a class inherits a class with the same name from another module.
 - Retain parameters on protocol function members implemented by an external type.
 - Unused function parameters on unimplemented protocol function members are now retained, as the function may still be referenced from an existential type.
+- Fix incorrect redundant public accessibility on a public superclass when a subclass is used in another module.
 
 ## 2.8.2 (2021-11-06)
 

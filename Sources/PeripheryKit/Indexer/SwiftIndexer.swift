@@ -220,32 +220,16 @@ public final class SwiftIndexer {
 
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: file)
             let declarationVisitor = multiplexingSyntaxVisitor.add(DeclarationVisitor.self)
-            let propertyVisitor = multiplexingSyntaxVisitor.add(PropertyVisitor.self)
-            let functionVisitor = multiplexingSyntaxVisitor.add(FunctionVisitor.self)
-            let conformableVisitor = multiplexingSyntaxVisitor.add(ConformableVisitor.self)
             let importVisitor = multiplexingSyntaxVisitor.add(ImportVisitor.self)
 
             multiplexingSyntaxVisitor.visit()
 
             file.importStatements = importVisitor.importStatements
-            let propertyByLocation = propertyVisitor.resultsByLocation
-            let functionByLocation = functionVisitor.resultsByLocation
-            let conformableByLocation = conformableVisitor.resultsByLocation
-            let explicitDeclarations = decls.filter { !$0.isImplicit }
-            let propertyDeclarations = explicitDeclarations.filter { $0.kind.isAccessibilityModifiableVariableKind }
-            let functionDeclarations = explicitDeclarations.filter { $0.kind.isAccessibilityModifiableFunctionKind }
-            let conformableDeclarations = explicitDeclarations.filter { $0.kind.isDiscreteConformableKind }
-
             establishDeclarationHierarchy()
-            associateDanglingReferences(for: explicitDeclarations)
-            identifyDeclaredPropertyTypes(for: propertyDeclarations, using: propertyByLocation)
-            identifyPropertyReferenceRoles(for: propertyDeclarations, using: propertyByLocation)
-            identifyFunctionReferenceRoles(for: functionDeclarations, using: functionByLocation)
-            identifyConformableReferenceRoles(for: conformableDeclarations, using: conformableByLocation)
-
-            applyDeclarationMetadata(for: decls, using: declarationVisitor.results)
+            associateDanglingReferences(for: decls.filter { !$0.isImplicit })
+            applyDeclarationMetadata(for: decls, using: declarationVisitor)
             identifyUnusedParameters(for: decls.filter { $0.kind.isFunctionKind }, syntaxVisitor: multiplexingSyntaxVisitor)
-            applyCommentCommands(for: decls, syntaxVisitor: multiplexingSyntaxVisitor)
+            applyCommentCommands(for: decls, using: multiplexingSyntaxVisitor)
         }
 
         private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
@@ -327,84 +311,7 @@ public final class SwiftIndexer {
             }
         }
 
-        // The index store does not provide type information, thus we use the declared type information from the source
-        // file. This type information may be used during analysis.
-        private func identifyDeclaredPropertyTypes(for decls: [Declaration], using propertiesByLocation: [SourceLocation: PropertyVisitor.Result]) {
-            for decl in decls {
-                guard let property = propertiesByLocation[decl.location] else {
-                    logger.debug("Failed to identify property declaration at '\(decl.location)' for property type identification.")
-                    continue
-                }
-
-                graph.mutating {
-                    decl.declaredType = property.type
-                }
-            }
-        }
-
-        // Identify the role of references from property declarations.
-        private func identifyPropertyReferenceRoles(for decls: [Declaration], using propertiesByLocation: [SourceLocation: PropertyVisitor.Result]) {
-            for decl in decls {
-                guard let property = propertiesByLocation[decl.location] else {
-                    logger.debug("Failed to identify property declaration at '\(decl.location)' for reference role identification.")
-                    continue
-                }
-
-                graph.mutating {
-                    for ref in decl.references {
-                        if property.typeLocations.contains(ref.location) {
-                            ref.role = .varType
-                        }
-                    }
-                }
-            }
-        }
-
-        // Identify the role of references from function declarations.
-        private func identifyFunctionReferenceRoles(for decls: [Declaration], using functionsByLocation: [SourceLocation: FunctionVisitor.Result]) {
-            for decl in decls {
-                guard let function = functionsByLocation[decl.location] else {
-                    logger.debug("Failed to identify function declaration at '\(decl.location)' for reference role identification.")
-                    continue
-                }
-
-                graph.mutating {
-                    for ref in decl.references {
-                        if function.returnTypeLocations.contains(ref.location) {
-                            ref.role = .returnType
-                        } else if function.parameterTypeLocations.contains(ref.location) {
-                            ref.role = .parameterType
-                        } else if function.genericParameterLocations.contains(ref.location) {
-                            ref.role = .genericParameterType
-                        } else if function.genericConformanceRequirementLocations.contains(ref.location) {
-                            ref.role = .genericRequirementType
-                        }
-                    }
-                }
-            }
-        }
-
-        // Identify the role of references from conformable declarations.
-        private func identifyConformableReferenceRoles(for decls: [Declaration], using conformablesByLocation: [SourceLocation: ConformableVisitor.Result]) {
-            for decl in decls {
-                guard let conformable = conformablesByLocation[decl.location] else {
-                    logger.debug("Failed to identify conformable declaration at '\(decl.location)' for reference role identification.")
-                    continue
-                }
-
-                graph.mutating {
-                    for ref in decl.references {
-                        if conformable.genericParameterLocations.contains(ref.location) {
-                            ref.role = .genericParameterType
-                        } else if conformable.genericConformanceRequirementLocations.contains(ref.location) {
-                            ref.role = .genericRequirementType
-                        }
-                    }
-                }
-            }
-        }
-
-        private func applyCommentCommands(for decls: [Declaration], syntaxVisitor: MultiplexingSyntaxVisitor) {
+        private func applyCommentCommands(for decls: [Declaration], using syntaxVisitor: MultiplexingSyntaxVisitor) {
             let fileCommands = CommentCommand.parseCommands(in: syntaxVisitor.syntax.leadingTrivia)
 
             if fileCommands.contains(.ignoreAll) {
@@ -418,26 +325,41 @@ public final class SwiftIndexer {
             }
         }
 
-        private func applyDeclarationMetadata(for decls: [Declaration], using declarationMetadatas: [DeclarationVisitor.Result]) {
-            let declsByLocation = decls.reduce(into: [SourceLocation: [Declaration]]()) { (result, decl) in
-                result[decl.location, default: []].append(decl)
-            }
+        private func applyDeclarationMetadata(for decls: [Declaration], using declarationVisitor: DeclarationVisitor) {
+            let declarationsByLocation = declarationVisitor.resultsByLocation
 
-            for metadata in declarationMetadatas {
-                guard let decls = declsByLocation[metadata.location] else {
-                    // The declaration may not exist if the code was not compiled due to build conditions, e.g #if.
-                    logger.debug("Expected declaration at \(metadata.location)")
-                    continue
-                }
+            for decl in decls {
+                guard let result = declarationsByLocation[decl.location] else { continue }
 
-                for decl in decls {
-                    if let accessibility = metadata.accessibility {
+                graph.mutating {
+                    if let accessibility = result.accessibility {
                         decl.accessibility = .init(value: accessibility, isExplicit: true)
                     }
 
-                    decl.attributes = Set(metadata.attributes)
-                    decl.modifiers = Set(metadata.modifiers)
-                    decl.commentCommands = Set(metadata.commentCommands)
+                    decl.attributes = Set(result.attributes)
+                    decl.modifiers = Set(result.modifiers)
+                    decl.commentCommands = Set(result.commentCommands)
+                    decl.declaredType = result.variableType
+
+                    for ref in decl.references.union(decl.related) {
+                        if result.inheritedTypeLocations.contains(ref.location) {
+                            if decl.kind == .class, ref.kind == .class {
+                                ref.role = .inheritedClassType
+                            } else if decl.kind == .protocol, ref.kind == .protocol {
+                                ref.role = .refinedProtocolType
+                            }
+                        } else if result.variableTypeLocations.contains(ref.location) {
+                            ref.role = .varType
+                        } else if result.functionReturnTypeLocations.contains(ref.location) {
+                            ref.role = .returnType
+                        } else if result.functionParameterTypeLocations.contains(ref.location) {
+                            ref.role = .parameterType
+                        } else if result.genericParameterLocations.contains(ref.location) {
+                            ref.role = .genericParameterType
+                        } else if result.genericConformanceRequirementLocations.contains(ref.location) {
+                            ref.role = .genericRequirementType
+                        }
+                    }
                 }
             }
         }

@@ -5,6 +5,8 @@ public final class Reference {
         case parameterType
         case genericParameterType
         case genericRequirementType
+        case inheritedClassType
+        case refinedProtocolType
         case unknown
 
         static var publiclyExposableRoles: [Role] {
@@ -13,7 +15,9 @@ public final class Reference {
                 .returnType,
                 .parameterType,
                 .genericParameterType,
-                .genericRequirementType
+                .genericRequirementType,
+                .inheritedClassType,
+                .refinedProtocolType
             ]
         }
     }
