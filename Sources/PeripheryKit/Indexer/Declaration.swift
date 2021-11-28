@@ -117,6 +117,10 @@ public final class Declaration {
             rawValue.hasPrefix("function.accessor")
         }
 
+        static var toplevelAttributableKind: Set<Kind> {
+            [.class, .struct, .enum]
+        }
+
         public var displayName: String? {
             switch self {
             case .class:

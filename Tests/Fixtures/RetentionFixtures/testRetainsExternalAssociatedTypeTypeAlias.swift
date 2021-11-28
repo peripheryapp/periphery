@@ -1,5 +1,5 @@
 import Foundation
-import RetentionFixturesCrossModule
+import ExternalModuleFixtures
 
 struct Fixture110: ExternalAssociatedType {
     typealias Value = Void
