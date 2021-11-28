@@ -745,27 +745,6 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testRetainsAssignOnlyPropertyTypes() {
-        configuration.retainAssignOnlyProperties = false
-        configuration.retainAssignOnlyPropertyTypes = ["CustomType", "(CustomType, String)", "Swift.Double"]
-
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass123")) {
-                self.assertReferenced(.varInstance("retainedSimpleProperty"))
-                self.assertReferenced(.varInstance("retainedModulePrefixedProperty"))
-                self.assertReferenced(.varInstance("retainedTupleProperty"))
-                self.assertReferenced(.varInstance("retainedDestructuredPropertyA"))
-                self.assertReferenced(.varInstance("retainedMultipleBindingPropertyA"))
-
-                self.assertNotReferenced(.varInstance("notRetainedSimpleProperty"))
-                self.assertNotReferenced(.varInstance("notRetainedModulePrefixedProperty"))
-                self.assertNotReferenced(.varInstance("notRetainedTupleProperty"))
-                self.assertNotReferenced(.varInstance("notRetainedDestructuredPropertyB"))
-                self.assertNotReferenced(.varInstance("notRetainedMultipleBindingPropertyB"))
-            }
-        }
-    }
-
     func testNestedDeclarations() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass102")) {
@@ -903,32 +882,6 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testSimplePropertyAssignedButNeverRead() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass70")) {
-                self.assertNotReferenced(.varInstance("simpleUnreadVar"))
-                self.assertNotReferenced(.varInstance("simpleUnreadShadowedVar"))
-                self.assertNotReferenced(.varStatic("simpleStaticUnreadVar"))
-                self.assertReferenced(.varInstance("complexUnreadVar1"))
-                self.assertReferenced(.varInstance("complexUnreadVar2"))
-                self.assertReferenced(.varInstance("readVar"))
-            }
-        }
-
-        configuration.retainAssignOnlyProperties = true
-
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass70")) {
-                self.assertReferenced(.varInstance("simpleUnreadVar"))
-                self.assertReferenced(.varInstance("simpleUnreadShadowedVar"))
-                self.assertReferenced(.varStatic("simpleStaticUnreadVar"))
-                self.assertReferenced(.varInstance("complexUnreadVar1"))
-                self.assertReferenced(.varInstance("complexUnreadVar2"))
-                self.assertReferenced(.varInstance("readVar"))
-            }
-        }
-    }
-
     func testRetainsProtocolsViaCompositeTypealias() {
         analyze(retainPublic: true) {
             assertReferenced(.protocol("Fixture200"))
@@ -1012,6 +965,66 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
     #endif
+
+    // MARK: - Assign-only properties
+
+    func testSimplePropertyAssignedButNeverRead() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass70")) {
+                self.assertNotReferenced(.varInstance("simpleUnreadVar"))
+                self.assertNotReferenced(.varInstance("simpleUnreadShadowedVar"))
+                self.assertNotReferenced(.varInstance("simpleUnreadVarAssignedMultiple"))
+                self.assertNotReferenced(.varStatic("simpleStaticUnreadVar"))
+                self.assertReferenced(.varInstance("complexUnreadVar1"))
+                self.assertReferenced(.varInstance("complexUnreadVar2"))
+                self.assertReferenced(.varInstance("readVar"))
+            }
+        }
+
+        configuration.retainAssignOnlyProperties = true
+
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass70")) {
+                self.assertReferenced(.varInstance("simpleUnreadVar"))
+                self.assertReferenced(.varInstance("simpleUnreadShadowedVar"))
+                self.assertReferenced(.varInstance("simpleUnreadVarAssignedMultiple"))
+                self.assertReferenced(.varStatic("simpleStaticUnreadVar"))
+                self.assertReferenced(.varInstance("complexUnreadVar1"))
+                self.assertReferenced(.varInstance("complexUnreadVar2"))
+                self.assertReferenced(.varInstance("readVar"))
+            }
+        }
+    }
+
+    func testSimpleAssignOnlyPropertyNameConflict() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass131")) {
+                self.assertNotReferenced(.varInstance("someProperty"))
+                self.assertReferenced(.varStatic("someProperty"))
+            }
+        }
+    }
+
+    func testRetainsAssignOnlyPropertyTypes() {
+        configuration.retainAssignOnlyProperties = false
+        configuration.retainAssignOnlyPropertyTypes = ["CustomType", "(CustomType, String)", "Swift.Double"]
+
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass123")) {
+                self.assertReferenced(.varInstance("retainedSimpleProperty"))
+                self.assertReferenced(.varInstance("retainedModulePrefixedProperty"))
+                self.assertReferenced(.varInstance("retainedTupleProperty"))
+                self.assertReferenced(.varInstance("retainedDestructuredPropertyA"))
+                self.assertReferenced(.varInstance("retainedMultipleBindingPropertyA"))
+
+                self.assertNotReferenced(.varInstance("notRetainedSimpleProperty"))
+                self.assertNotReferenced(.varInstance("notRetainedModulePrefixedProperty"))
+                self.assertNotReferenced(.varInstance("notRetainedTupleProperty"))
+                self.assertNotReferenced(.varInstance("notRetainedDestructuredPropertyB"))
+                self.assertNotReferenced(.varInstance("notRetainedMultipleBindingPropertyB"))
+            }
+        }
+    }
 
     // MARK: - Unused Parameters
 

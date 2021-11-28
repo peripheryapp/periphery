@@ -15,6 +15,8 @@
 - Unused function parameters on unimplemented protocol function members are now retained, as the function may still be referenced from an existential type.
 - Fix incorrect redundant public accessibility on a public superclass when a subclass is used in another module.
 - Result Builder static methods are now retained.
+- Assign-only properties that are assigned multiple times in the same method are now correctly identified as assign-only.
+- Fix issue where properties with identical names at different scopes could cause inconsistent results from assign-only property analysis.
 
 ## 2.8.2 (2021-11-06)
 
