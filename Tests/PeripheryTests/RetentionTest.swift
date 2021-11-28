@@ -998,12 +998,27 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    #if swift(>=5.4)
+    func testRetainsResultBuilderMethods() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass130")) {
+                self.assertReferenced(.functionMethodStatic("buildExpression(_:)"))
+                self.assertReferenced(.functionMethodStatic("buildOptional(_:)"))
+                self.assertReferenced(.functionMethodStatic("buildEither(first:)"))
+                self.assertReferenced(.functionMethodStatic("buildEither(second:)"))
+                self.assertReferenced(.functionMethodStatic("buildArray(_:)"))
+                self.assertReferenced(.functionMethodStatic("buildBlock(_:)"))
+            }
+        }
+    }
+    #endif
+
     // MARK: - Unused Parameters
 
     func testRetainsParamUsedInOverriddenMethod() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass101Base")) {
-                // Not used and not overriden.
+                // Not used and not overridden.
                 self.assertReferenced(.functionMethodInstance("func1(param:)")) {
                     self.assertNotReferenced(.varParameter("param"))
                 }

@@ -14,7 +14,7 @@ final class PropertyWrapperRetainer: SourceGraphVisitor {
     }
 
     func visit() {
-        for decl in graph.declarations(ofKinds: [.struct, .class]) {
+        for decl in graph.declarations(ofKinds: Declaration.Kind.toplevelAttributableKind) {
             if decl.attributes.contains("propertyWrapper") {
                 decl.declarations
                     .filter { $0.kind == .varInstance && specialProperties.contains($0.name ?? "") }

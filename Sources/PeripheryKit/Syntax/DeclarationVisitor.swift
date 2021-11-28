@@ -240,15 +240,18 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         genericWhereClause: GenericWhereClauseSyntax? = nil,
         at position: AbsolutePosition
     ) {
-        let modifierNames = modifiers?.map { $0.name.text } ?? []
+        let modifierNames = modifiers?.withoutTrivia().map { $0.name.text } ?? []
         let accessibility = modifierNames.mapFirst { Accessibility(rawValue: $0) }
-
+        let attributeNames = attributes?.withoutTrivia().compactMap {
+            AttributeSyntax($0)?.attributeName.text ?? CustomAttributeSyntax($0)?.attributeName.firstToken?.text
+        } ?? []
         let location = sourceLocationBuilder.location(at: position)
+
         results.append((
             location,
             accessibility,
             modifierNames,
-            attributes?.compactMap { AttributeSyntax($0)?.attributeName.text } ?? [],
+            attributeNames,
             CommentCommand.parseCommands(in: trivia),
             type(for: variableType),
             typeLocations(for: variableType),
