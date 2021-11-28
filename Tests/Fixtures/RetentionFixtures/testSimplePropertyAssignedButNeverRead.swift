@@ -4,6 +4,7 @@ public class FixtureClass70 {
     static var simpleStaticUnreadVar: String!
     var simpleUnreadVar: String
     var simpleUnreadShadowedVar: String
+    var simpleUnreadVarAssignedMultiple: String
     var complexUnreadVar1: String {
         willSet {
             print("complex")
@@ -25,6 +26,8 @@ public class FixtureClass70 {
     init() {
         simpleUnreadVar = "Hello"
         simpleUnreadShadowedVar = "Hello"
+        simpleUnreadVarAssignedMultiple = "1"
+        simpleUnreadVarAssignedMultiple = "2"
         complexUnreadVar1 = "Hello"
         readVar = "Hello"
         FixtureClass70.simpleStaticUnreadVar = "Hello"
