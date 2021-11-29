@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.8.3 (2021-11-29)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix false positive when a class inherits a class with the same name from another module.
 - Retain parameters on protocol function members implemented by an external type.
 - Unused function parameters on unimplemented protocol function members are now retained, as the function may still be referenced from an existential type.
