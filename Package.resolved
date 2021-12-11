@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "d2930e8fcf9c33162b9fcc1d522bc975e2d4179b",
-          "version": "1.0.1"
+          "revision": "e1465042f195f374b94f915ba8ca49de24300a0d",
+          "version": "1.0.2"
         }
       },
       {
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/apple/swift-system",
         "state": {
           "branch": null,
-          "revision": "ce8b4910730114fa1eb46967a031a04f7594f42d",
-          "version": "1.0.0"
+          "revision": "836bc4557b74fe6d2660218d56e3ce96aff76574",
+          "version": "1.1.1"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/tuist/xcodeproj",
         "state": {
           "branch": null,
-          "revision": "64c4b956c1095dbba7a07107005342a25f1c5d6b",
-          "version": "8.5.0"
+          "revision": "aa2a42c7a744ca18b5918771fdd6cf40f9753db5",
+          "version": "8.6.0"
         }
       },
       {
