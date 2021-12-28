@@ -90,12 +90,24 @@ public final class SwiftIndexer {
             )
         }
 
+        let phaseOneLogger = logger.contextualized(with: "phase:one")
+
         try JobPool(jobs: jobs).forEach { job in
             let elapsed = try Benchmark.measure {
-                try job.perform()
+                try job.phaseOne()
             }
 
-            self.logger.debug("\(job.file.path) (\(elapsed)s)")
+            phaseOneLogger.debug("\(job.file.path) (\(elapsed)s)")
+        }
+
+        let phaseTwoLogger = logger.contextualized(with: "phase:two")
+
+        try JobPool(jobs: jobs).forEach { job in
+            let elapsed = try Benchmark.measure {
+                try job.phaseTwo()
+            }
+
+            phaseTwoLogger.debug("\(job.file.path) (\(elapsed)s)")
         }
     }
 
@@ -159,7 +171,10 @@ public final class SwiftIndexer {
             }
         }
 
-        func perform() throws {
+        /// Phase one reads the index store and establishes the declaration hierarchy and the majority of references.
+        /// Some references may depend upon declarations in other files, and thus their association is deferred until
+        /// phase two.
+        func phaseOne() throws {
             var rawDeclsByKey: [RawDeclaration.Key: [(RawDeclaration, [RawRelation])]] = [:]
 
             for unit in units {
@@ -193,8 +208,6 @@ public final class SwiftIndexer {
                 }
             }
 
-            var decls: [Declaration] = []
-
             for (key, values) in rawDeclsByKey {
                 let usrs = Set(values.map { $0.0.usr })
                 let decl = Declaration(kind: key.kind, usrs: usrs, location: key.location)
@@ -215,9 +228,14 @@ public final class SwiftIndexer {
                 try parseDeclaration(decl, relations)
 
                 graph.add(decl)
-                decls.append(decl)
+                declarations.append(decl)
             }
 
+            establishDeclarationHierarchy()
+        }
+
+        /// Phase two associates latent references, and performs other actions that depend on the completed source graph.
+        func phaseTwo() throws {
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: file)
             let declarationVisitor = multiplexingSyntaxVisitor.add(DeclarationVisitor.self)
             let importVisitor = multiplexingSyntaxVisitor.add(ImportVisitor.self)
@@ -225,16 +243,17 @@ public final class SwiftIndexer {
             multiplexingSyntaxVisitor.visit()
 
             file.importStatements = importVisitor.importStatements
-            establishDeclarationHierarchy()
-            associateDanglingReferences(for: decls.filter { !$0.isImplicit })
-            applyDeclarationMetadata(for: decls, using: declarationVisitor)
-            identifyUnusedParameters(for: decls.filter { $0.kind.isFunctionKind }, syntaxVisitor: multiplexingSyntaxVisitor)
-            applyCommentCommands(for: decls, using: multiplexingSyntaxVisitor)
+
+            associateLatentReferences()
+            associateDanglingReferences()
+            applyDeclarationMetadata(using: declarationVisitor)
+            identifyUnusedParameters(using: multiplexingSyntaxVisitor)
+            applyCommentCommands(using: multiplexingSyntaxVisitor)
         }
 
+        private var declarations: [Declaration] = []
         private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
-        private var referencedDeclsByUsr: [String: Set<Reference>] = [:]
-        private var referencedUsrsByDecl: [Declaration: [Reference]] = [:]
+        private var referencesByUsr: [String: Set<Reference>] = [:]
         private var danglingReferences: [Reference] = []
         private var varParameterUsrs: Set<String> = []
 
@@ -256,37 +275,34 @@ public final class SwiftIndexer {
 
                     parentDecl.declarations.formUnion(decls)
                 }
+            }
+        }
 
-                for (usr, refs) in referencedDeclsByUsr {
-                    guard let decl = graph.explicitDeclaration(withUsr: usr) else {
-                        danglingReferences.append(contentsOf: refs)
-                        continue
-                    }
-
-                    for ref in refs {
-                        associateUnsafe(ref, with: decl)
-                    }
+        private func associateLatentReferences() {
+            for (usr, refs) in referencesByUsr {
+                guard let decl = graph.explicitDeclaration(withUsr: usr) else {
+                    danglingReferences.append(contentsOf: refs)
+                    continue
                 }
 
-                for (decl, refs) in referencedUsrsByDecl {
-                    for ref in refs {
-                        associateUnsafe(ref, with: decl)
-                    }
+                for ref in refs {
+                    associateUnsafe(ref, with: decl)
                 }
             }
         }
 
-        // Workaround for https://bugs.swift.org/browse/SR-13766
         // Swift does not associate some type references with the containing declaration, resulting in references
-        // with no clear parent.
-        private func associateDanglingReferences(for declarations: [Declaration]) {
+        // with no clear parent. Property references are one example: https://bugs.swift.org/browse/SR-13766.
+        private func associateDanglingReferences() {
+            let explicitDeclarations = declarations.filter { !$0.isImplicit }
+
             guard !danglingReferences.isEmpty else { return }
 
-            let declsByLocation = declarations
+            let declsByLocation = explicitDeclarations
                 .reduce(into: [SourceLocation: [Declaration]]()) { (result, decl) in
                     result[decl.location, default: []].append(decl)
                 }
-            let declsByLine = declarations
+            let declsByLine = explicitDeclarations
                 .reduce(into: [Int64: [Declaration]]()) { (result, decl) in
                     result[decl.location.line, default: []].append(decl)
                 }
@@ -311,13 +327,13 @@ public final class SwiftIndexer {
             }
         }
 
-        private func applyCommentCommands(for decls: [Declaration], using syntaxVisitor: MultiplexingSyntaxVisitor) {
+        private func applyCommentCommands(using syntaxVisitor: MultiplexingSyntaxVisitor) {
             let fileCommands = CommentCommand.parseCommands(in: syntaxVisitor.syntax.leadingTrivia)
 
             if fileCommands.contains(.ignoreAll) {
-                retainHierarchy(decls)
+                retainHierarchy(declarations)
             } else {
-                for decl in decls {
+                for decl in declarations {
                     if decl.commentCommands.contains(.ignore) {
                         retainHierarchy([decl])
                     }
@@ -325,10 +341,10 @@ public final class SwiftIndexer {
             }
         }
 
-        private func applyDeclarationMetadata(for decls: [Declaration], using declarationVisitor: DeclarationVisitor) {
+        private func applyDeclarationMetadata(using declarationVisitor: DeclarationVisitor) {
             let declarationsByLocation = declarationVisitor.resultsByLocation
 
-            for decl in decls {
+            for decl in declarations {
                 guard let result = declarationsByLocation[decl.location] else { continue }
 
                 graph.mutating {
@@ -388,8 +404,9 @@ public final class SwiftIndexer {
             }
         }
 
-        private func identifyUnusedParameters(for decls: [Declaration], syntaxVisitor: MultiplexingSyntaxVisitor) {
-            let functionDelcsByLocation = decls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
+        private func identifyUnusedParameters(using syntaxVisitor: MultiplexingSyntaxVisitor) {
+            let functionDecls = declarations.filter { $0.kind.isFunctionKind }
+            let functionDelcsByLocation = functionDecls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
 
             let analyzer = UnusedParameterAnalyzer()
             let paramsByFunction = analyzer.analyze(
@@ -491,8 +508,10 @@ public final class SwiftIndexer {
                         reference.name = baseFunc.name
                         reference.isRelated = true
 
-                        graph.add(reference)
-                        self.referencedUsrsByDecl[decl, default: []].append(reference)
+                        graph.mutating {
+                            graph.addUnsafe(reference)
+                            associateUnsafe(reference, with: decl)
+                        }
                     }
                 }
 
@@ -509,7 +528,7 @@ public final class SwiftIndexer {
                             }
 
                             graph.add(reference)
-                            self.referencedDeclsByUsr[referencerUsr, default: []].insert(reference)
+                            self.referencesByUsr[referencerUsr, default: []].insert(reference)
                         }
                     }
                 }
@@ -532,7 +551,7 @@ public final class SwiftIndexer {
                         reference.name = baseFunc.name
                         reference.isRelated = true
 
-                        self.referencedDeclsByUsr[occurrenceUsr, default: []].insert(reference)
+                        self.referencesByUsr[occurrenceUsr, default: []].insert(reference)
                         refs.append(reference)
                     }
                 }
@@ -573,7 +592,7 @@ public final class SwiftIndexer {
                         }
 
                         refs.append(ref)
-                        self.referencedDeclsByUsr[referencerUsr, default: []].insert(ref)
+                        self.referencesByUsr[referencerUsr, default: []].insert(ref)
                     }
                 }
 

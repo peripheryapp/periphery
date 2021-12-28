@@ -104,6 +104,10 @@ public struct ContextualLogger {
     let logger: Logger
     let context: String
 
+    public func contextualized(with innerContext: String) -> ContextualLogger {
+        logger.contextualized(with: "\(context):\(innerContext)")
+    }
+
     public func debug(_ text: String) {
         logger.debug("[\(context)] \(text)")
     }

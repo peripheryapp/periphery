@@ -266,7 +266,11 @@ extension Declaration: CustomStringConvertible {
 
 extension Declaration: Comparable {
     public static func < (lhs: Declaration, rhs: Declaration) -> Bool {
-        lhs.location < rhs.location
+        if lhs.location == rhs.location {
+            return lhs.usrs.sorted().joined() < rhs.usrs.sorted().joined()
+        }
+
+        return lhs.location < rhs.location
     }
 }
 
