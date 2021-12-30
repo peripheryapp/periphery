@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.8.4 (2021-12-30)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix false positive when protocols requirements are satisfied in another file from the one that declares the conformance.
 - Fix redundant public accessibility analysis of enum associated value types.
 - Fix redundant public accessibility analysis of aliased types.
