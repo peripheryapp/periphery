@@ -31,8 +31,10 @@ _ = PublicTypeUsedAsPublicClassGenericRequirementRetainer<PublicTypeUsedAsPublic
 
 _ = NotRedundantPublicTestableImportClass().testableProperty
 
-// Enums
+// Typealias
+let _: PublicTypealiasWithClosureType? = nil
 
+// Enum
 switch PublicEnumWithAssociatedValue.getSomeCase() {
 case let .someCase(a, b):
     _ = a.value
