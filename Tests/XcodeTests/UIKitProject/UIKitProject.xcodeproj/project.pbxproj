@@ -3,12 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		3C1A70B4256BBAB300E07E4A /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1A70B3256BBAB300E07E4A /* NotificationService.swift */; };
-		3C1A70B8256BBAB300E07E4A /* NotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 3C1A70B1256BBAB300E07E4A /* NotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3C1A70B8256BBAB300E07E4A /* NotificationServiceExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3C1A70B1256BBAB300E07E4A /* NotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3C1FED002556D5AB0001BD58 /* UIKitProjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FECFF2556D5AB0001BD58 /* UIKitProjectTests.swift */; };
 		3C1FED0D2556D7C60001BD58 /* FileInGroupWithoutFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FED0C2556D7C60001BD58 /* FileInGroupWithoutFolder.swift */; };
 		3C1FED1E2556D91D0001BD58 /* Target_With_Spaces.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C1FED172556D91C0001BD58 /* Target_With_Spaces.framework */; };
@@ -32,6 +32,7 @@
 		3CE3F7CC2685DEFB0047231C /* OldModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3CE3F7CA2685DEFB0047231C /* OldModel.xcdatamodeld */; };
 		3CE3F7CE2685DF0F0047231C /* ModelMapping.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3CE3F7CD2685DF0F0047231C /* ModelMapping.xcmappingmodel */; };
 		3CE3F7D02685E07C0047231C /* CustomEntityMigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CE3F7CF2685E07C0047231C /* CustomEntityMigrationPolicy.swift */; };
+		73AF86CD2968A93900BED352 /* LocalPackageTarget in Frameworks */ = {isa = PBXBuildFile; productRef = 73AF86CC2968A93900BED352 /* LocalPackageTarget */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,15 +60,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		3C1A70B9256BBAB300E07E4A /* Embed App Extensions */ = {
+		3C1A70B9256BBAB300E07E4A /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				3C1A70B8256BBAB300E07E4A /* NotificationServiceExtension.appex in Embed App Extensions */,
+				3C1A70B8256BBAB300E07E4A /* NotificationServiceExtension.appex in Embed Foundation Extensions */,
 			);
-			name = "Embed App Extensions";
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		3C1FED232556D91D0001BD58 /* Embed Frameworks */ = {
@@ -113,6 +114,7 @@
 		3CE3F7CB2685DEFB0047231C /* OldModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = OldModel.xcdatamodel; sourceTree = "<group>"; };
 		3CE3F7CD2685DF0F0047231C /* ModelMapping.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = ModelMapping.xcmappingmodel; sourceTree = "<group>"; };
 		3CE3F7CF2685E07C0047231C /* CustomEntityMigrationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomEntityMigrationPolicy.swift; sourceTree = "<group>"; };
+		73AF86C3296881F900BED352 /* LocalPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = LocalPackage; path = LocalPackages/LocalPackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +143,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				73AF86CD2968A93900BED352 /* LocalPackageTarget in Frameworks */,
 				3C1FED1E2556D91D0001BD58 /* Target_With_Spaces.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -186,11 +189,13 @@
 		3C849651255405AD00900DA9 = {
 			isa = PBXGroup;
 			children = (
+				73AF86C2296881F900BED352 /* LocalPackages */,
 				3C84965C255405AD00900DA9 /* UIKitProject */,
 				3C1FECFE2556D5AB0001BD58 /* UIKitProjectTests */,
 				3C1FED182556D91C0001BD58 /* Target With Spaces */,
 				3C1A70B2256BBAB300E07E4A /* NotificationServiceExtension */,
 				3C84965B255405AD00900DA9 /* Products */,
+				73F8B878296880AC004B1A5E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -245,6 +250,21 @@
 				3CD46107256C02FE00856DAC /* MultiTargetStruct.swift */,
 			);
 			path = MultiTarget;
+			sourceTree = "<group>";
+		};
+		73AF86C2296881F900BED352 /* LocalPackages */ = {
+			isa = PBXGroup;
+			children = (
+				73AF86C3296881F900BED352 /* LocalPackage */,
+			);
+			name = LocalPackages;
+			sourceTree = "<group>";
+		};
+		73F8B878296880AC004B1A5E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -321,15 +341,19 @@
 				3C849657255405AD00900DA9 /* Frameworks */,
 				3C849658255405AD00900DA9 /* Resources */,
 				3C1FED232556D91D0001BD58 /* Embed Frameworks */,
-				3C1A70B9256BBAB300E07E4A /* Embed App Extensions */,
+				3C1A70B9256BBAB300E07E4A /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				73AF86CB2968A93100BED352 /* PBXTargetDependency */,
 				3C1FED1D2556D91D0001BD58 /* PBXTargetDependency */,
 				3C1A70B7256BBAB300E07E4A /* PBXTargetDependency */,
 			);
 			name = UIKitProject;
+			packageProductDependencies = (
+				73AF86CC2968A93900BED352 /* LocalPackageTarget */,
+			);
 			productName = UIKitProject;
 			productReference = 3C84965A255405AD00900DA9 /* UIKitProject.app */;
 			productType = "com.apple.product-type.application";
@@ -341,7 +365,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1220;
-				LastUpgradeCheck = 1220;
+				LastUpgradeCheck = 1420;
 				TargetAttributes = {
 					3C1A70B0256BBAB300E07E4A = {
 						CreatedOnToolsVersion = 12.2;
@@ -479,6 +503,10 @@
 			isa = PBXTargetDependency;
 			target = 3C1FED162556D91C0001BD58 /* Target With Spaces */;
 			targetProxy = 3C1FED1C2556D91D0001BD58 /* PBXContainerItemProxy */;
+		};
+		73AF86CB2968A93100BED352 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 73AF86CA2968A93100BED352 /* LocalPackageTarget */;
 		};
 /* End PBXTargetDependency section */
 
@@ -839,6 +867,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		73AF86CA2968A93100BED352 /* LocalPackageTarget */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LocalPackageTarget;
+		};
+		73AF86CC2968A93900BED352 /* LocalPackageTarget */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LocalPackageTarget;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		3C9EFBA62684E1B70071E973 /* Model.xcdatamodeld */ = {

@@ -7,6 +7,7 @@
 ##### Enhancements
 
 - Add `clear-cache` command.
+- Add support for analyzing local SwiftPM packages in Xcode projects.
 
 ##### Bug Fixes
 

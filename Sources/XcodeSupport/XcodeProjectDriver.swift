@@ -19,8 +19,28 @@ public final class XcodeProjectDriver {
         }
 
         // Ensure targets are part of the project
-        let targets = project.targets.filter { configuration.targets.contains($0.name) }
-        let invalidTargetNames = Set(configuration.targets).subtracting(targets.map { $0.name })
+        var invalidTargetNames: [String] = []
+
+        var targets: Set<XcodeTarget> = []
+        var packageTargets: [SPM.Package: Set<SPM.Target>] = [:]
+
+        for targetName in configuration.targets {
+            if let target = project.targets.first(where: { $0.name == targetName }) {
+                targets.insert(target)
+            } else {
+                let parts = targetName.split(separator: ".", maxSplits: 1)
+
+                if let packageName = parts.first,
+                   let targetName = parts.last,
+                   let package = project.packageTargets.keys.first(where: { $0.name == packageName }),
+                   let target = project.packageTargets[package]?.first(where: { $0.name == targetName })
+                {
+                    packageTargets[package, default: []].insert(target)
+                } else {
+                    invalidTargetNames.append(targetName)
+                }
+            }
+        }
 
         if !invalidTargetNames.isEmpty {
             throw PeripheryError.invalidTargets(names: invalidTargetNames.sorted(), project: project.path.lastComponent?.string ?? "")
@@ -37,7 +57,8 @@ public final class XcodeProjectDriver {
         return self.init(
             project: project,
             schemes: schemes,
-            targets: targets
+            targets: targets,
+            packageTargets: packageTargets
         )
     }
 
@@ -47,6 +68,7 @@ public final class XcodeProjectDriver {
     private let project: XcodeProjectlike
     private let schemes: Set<XcodeScheme>
     private let targets: Set<XcodeTarget>
+    private let packageTargets: [SPM.Package: Set<SPM.Target>]
 
     init(
         logger: Logger = .init(),
@@ -54,7 +76,8 @@ public final class XcodeProjectDriver {
         xcodebuild: Xcodebuild = .init(),
         project: XcodeProjectlike,
         schemes: Set<XcodeScheme>,
-        targets: Set<XcodeTarget>
+        targets: Set<XcodeTarget>,
+        packageTargets: [SPM.Package: Set<SPM.Target>]
     ) {
         self.logger = logger
         self.configuration = configuration
@@ -62,6 +85,7 @@ public final class XcodeProjectDriver {
         self.project = project
         self.schemes = schemes
         self.targets = targets
+        self.packageTargets = packageTargets
     }
 
     // MARK: - Private
@@ -89,7 +113,9 @@ public final class XcodeProjectDriver {
 
 extension XcodeProjectDriver: ProjectDriver {
     public func build() throws {
-        // Ensure test targets are built by chosen schemes
+        // Ensure test targets are built by chosen schemes.
+        // SwiftPM test targets are not considered here because xcodebuild does not include them
+        // in the output of -showBuildSettings
         let testTargetNames = targets.filter { $0.isTestTarget }.map { $0.name }
 
         if !testTargetNames.isEmpty {
@@ -113,7 +139,13 @@ extension XcodeProjectDriver: ProjectDriver {
                 logger.info("\(asterisk) Building \(scheme.name)...")
             }
 
-            let buildForTesting = !Set(try scheme.testTargets()).isDisjoint(with: testTargetNames)
+            // Because xcodebuild -showBuildSettings doesn't include package test targets, we can't
+            // validate that the requested package test targets are actually built by the scheme.
+            // We'll just assume they are and attempt a test build. If this assumption was false,
+            // an `unindexedTargetsError` will be thrown.
+            let containsXcodeTestTargets = !Set(try scheme.testTargets()).isDisjoint(with: testTargetNames)
+            let containsPackageTestTargets = packageTargets.values.contains { $0.contains(where: \.isTestTarget) }
+            let buildForTesting = containsXcodeTestTargets || containsPackageTestTargets
             try xcodebuild.build(project: project,
                                  scheme: scheme,
                                  allSchemes: Array(schemes),
@@ -133,8 +165,20 @@ extension XcodeProjectDriver: ProjectDriver {
 
         try targets.forEach { try $0.identifyFiles() }
 
-        let sourceFiles = targets.reduce(into: [FilePath: [String]]()) { result, target in
-            target.files(kind: .swift).forEach { result[$0, default: []].append(target.name) }
+        var sourceFiles: [FilePath: [String]] = [:]
+
+        for target in targets {
+            target.files(kind: .swift).forEach { sourceFiles[$0, default: []].append(target.name) }
+        }
+
+        for (package, targets) in packageTargets {
+            let packageRoot = FilePath(package.path)
+
+            for target in targets {
+                target.sourcePaths.forEach {
+                    let absolutePath = packageRoot.pushing($0)
+                    sourceFiles[absolutePath, default: []].append(target.name) }
+            }
         }
 
         try SwiftIndexer(sourceFiles: sourceFiles, graph: graph, indexStoreURL: URL(fileURLWithPath: storePath)).perform()

@@ -34,6 +34,7 @@ final class XcodeProject: XcodeProjectlike {
     private let xcodebuild: Xcodebuild
 
     private(set) var targets: Set<XcodeTarget> = []
+    private(set) var packageTargets: [SPM.Package: Set<SPM.Target>] = [:]
 
     required init(path: FilePath, xcodebuild: Xcodebuild = .init(), logger: Logger = .init()) throws {
         logger.contextualized(with: "xcode:project").debug("Loading \(path)")
@@ -49,7 +50,7 @@ final class XcodeProject: XcodeProjectlike {
             throw PeripheryError.underlyingError(error)
         }
 
-        // Cache before loading sub-projects to avoid infinate loop from cyclic project references.
+        // Cache before loading sub-projects to avoid infinite loop from cyclic project references.
         XcodeProject.cache[path] = self
 
         var subProjects: [XcodeProject] = []
@@ -65,6 +66,43 @@ final class XcodeProject: XcodeProjectlike {
         targets = Set(xcodeProject.pbxproj.nativeTargets
             .map { XcodeTarget(project: self, target: $0) }
             + subProjects.flatMap { $0.targets })
+
+        let packageTargetNames = Set(targets.flatMap { $0.packageDependencyNames })
+
+        if !packageTargetNames.isEmpty {
+            var packages: [SPM.Package] = []
+
+            // The project file does not provide a clear way to identify file references for local SPM packages.
+            // We need to iterate over all references and check for folders containing a Package.swift file.
+            for fileRef in xcodeProject.pbxproj.fileReferences {
+                // To avoid checking every single file reference, narrow our search down to the known file types Xcode uses
+                // for package references.
+                guard ["wrapper", "folder", "text"].contains(fileRef.lastKnownFileType),
+                      let fullPath = try fileRef.fullPath(sourceRoot: sourceRoot.string)
+                else { continue }
+
+                let packagePath = FilePath(fullPath)
+
+                if packagePath.appending("Package.swift").exists {
+                    try packagePath.chdir {
+                        let package = try SPM.Package.load()
+                        packages.append(package)
+                    }
+                }
+            }
+
+            packageTargets = packageTargetNames.reduce(into: .init(), { result, targetName in
+                for package in packages {
+                    if let target = package.targets.first(where: { $0.name == targetName }) {
+                        result[package, default: []].insert(target)
+
+                        // Also include any test targets that depend upon this target, as they may be built by a scheme.
+                        let testTargets = package.testTargets.filter { $0.depends(on: target) }
+                        result[package, default: []].formUnion(testTargets)
+                    }
+                }
+            })
+        }
     }
 
     func schemes() throws -> Set<XcodeScheme> {

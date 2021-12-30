@@ -3,7 +3,7 @@ import SystemPackage
 
 public extension FilePath {
     static var current: FilePath {
-        Self(fileManagager.currentDirectoryPath)
+        Self(fileManager.currentDirectoryPath)
     }
 
     static func makeAbsolute(_ path: String, relativeTo relativePath: FilePath = .current) -> FilePath {
@@ -24,10 +24,10 @@ public extension FilePath {
         URL(fileURLWithPath: lexicallyNormalized().string)
     }
 
-    func chdir(closure: () -> Void) {
+    func chdir(closure: () throws -> Void) rethrows {
         let previous = Self.current
         _ = fileManager.changeCurrentDirectoryPath(string)
-        closure()
+        try closure()
         _ = fileManager.changeCurrentDirectoryPath(previous.string)
     }
 
@@ -55,12 +55,12 @@ public extension FilePath {
 
     // MARK: - Private
 
-    private static var fileManagager: FileManager {
+    private static var fileManager: FileManager {
         FileManager.default
     }
 
     private var fileManager: FileManager {
-        Self.fileManagager
+        Self.fileManager
     }
 }
 

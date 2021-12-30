@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1220"
+   LastUpgradeVersion = "1420"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -36,6 +36,16 @@
                BuildableName = "UIKitProjectTests.xctest"
                BlueprintName = "UIKitProjectTests"
                ReferencedContainer = "container:UIKitProject.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "LocalPackageTargetTests"
+               BuildableName = "LocalPackageTargetTests"
+               BlueprintName = "LocalPackageTargetTests"
+               ReferencedContainer = "container:LocalPackages/LocalPackage">
             </BuildableReference>
          </TestableReference>
       </Testables>

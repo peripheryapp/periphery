@@ -38,6 +38,10 @@ final class XcodeTarget {
         files[kind, default: []]
     }
 
+    var packageDependencyNames: Set<String> {
+        Set(target.packageProductDependencies.map { $0.productName })
+    }
+
     // MARK: - Private
 
     private func identifyFiles(kind: ProjectFileKind, in buildPhases: [PBXBuildPhase]) throws {
