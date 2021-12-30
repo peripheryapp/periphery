@@ -54,6 +54,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             attributes: node.attributes,
             trivia: node.leadingTrivia,
             inheritanceClause: node.inheritanceClause,
+            genericWhereClause: node.genericWhereClause,
             at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
@@ -63,6 +64,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
+            inheritanceClause: node.inheritanceClause,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
             at: node.identifier.positionAfterSkippingLeadingTrivia
@@ -74,6 +76,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
+            inheritanceClause: node.inheritanceClause,
             genericParameterClause: node.genericParameters,
             genericWhereClause: node.genericWhereClause,
             at: node.identifier.positionAfterSkippingLeadingTrivia
@@ -103,6 +106,8 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
+            inheritanceClause: node.inheritanceClause,
+            genericWhereClause: node.genericWhereClause,
             at: position
         )
     }
@@ -207,6 +212,9 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
+            variableType: node.initializer?.value,
+            genericParameterClause: node.genericParameterClause,
+            genericWhereClause: node.genericWhereClause,
             at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
@@ -216,6 +224,8 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
+            inheritanceClause: node.inheritanceClause,
+            genericWhereClause: node.genericWhereClause,
             at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
