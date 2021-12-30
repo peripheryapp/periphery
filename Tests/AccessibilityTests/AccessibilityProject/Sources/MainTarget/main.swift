@@ -31,6 +31,14 @@ _ = PublicTypeUsedAsPublicClassGenericRequirementRetainer<PublicTypeUsedAsPublic
 
 _ = NotRedundantPublicTestableImportClass().testableProperty
 
+// Enums
+
+switch PublicEnumWithAssociatedValue.getSomeCase() {
+case let .someCase(a, b):
+    _ = a.value
+    _ = b.value
+}
+
 // Inheritance
 _ = PublicClassInheritingPublicClass()
 _ = PublicClassInheritingPublicExternalClassRetainer()

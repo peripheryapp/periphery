@@ -366,9 +366,9 @@ public final class SwiftIndexer {
                             }
                         } else if result.variableTypeLocations.contains(ref.location) {
                             ref.role = .varType
-                        } else if result.functionReturnTypeLocations.contains(ref.location) {
+                        } else if result.returnTypeLocations.contains(ref.location) {
                             ref.role = .returnType
-                        } else if result.functionParameterTypeLocations.contains(ref.location) {
+                        } else if result.parameterTypeLocations.contains(ref.location) {
                             ref.role = .parameterType
                         } else if result.genericParameterLocations.contains(ref.location) {
                             ref.role = .genericParameterType

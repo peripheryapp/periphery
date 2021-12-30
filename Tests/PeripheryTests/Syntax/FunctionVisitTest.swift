@@ -16,59 +16,59 @@ class FunctionVisitTest: XCTestCase {
 
     func testFunctionWithSimpleReturnType() throws {
         let result = results[fixtureLocation(line: 1)]
-        XCTAssertEqual(result?.functionReturnTypeLocations, [fixtureLocation(line: 1, column: 40)])
-        XCTAssertTrue(result?.functionParameterTypeLocations.isEmpty ?? false)
+        XCTAssertEqual(result?.returnTypeLocations, [fixtureLocation(line: 1, column: 40)])
+        XCTAssertTrue(result?.parameterTypeLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericParameterLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericConformanceRequirementLocations.isEmpty ?? false)
     }
 
     func testFunctionWithTupleReturnType() throws {
         let result = results[fixtureLocation(line: 5)]
-        XCTAssertEqual(result?.functionReturnTypeLocations, [
+        XCTAssertEqual(result?.returnTypeLocations, [
             fixtureLocation(line: 5, column: 40),
             fixtureLocation(line: 5, column: 48),
         ])
-        XCTAssertTrue(result?.functionParameterTypeLocations.isEmpty ?? false)
+        XCTAssertTrue(result?.parameterTypeLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericParameterLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericConformanceRequirementLocations.isEmpty ?? false)
     }
 
     func testFunctionWithPrefixedReturnType() throws {
         let result = results[fixtureLocation(line: 9)]
-        XCTAssertEqual(result?.functionReturnTypeLocations, [
+        XCTAssertEqual(result?.returnTypeLocations, [
             fixtureLocation(line: 9, column: 42),
             fixtureLocation(line: 9, column: 48),
         ])
-        XCTAssertTrue(result?.functionParameterTypeLocations.isEmpty ?? false)
+        XCTAssertTrue(result?.parameterTypeLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericParameterLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericConformanceRequirementLocations.isEmpty ?? false)
     }
 
     func testFunctionWithClosureReturnType() throws {
         let result = results[fixtureLocation(line: 13)]
-        XCTAssertEqual(result?.functionReturnTypeLocations, [
+        XCTAssertEqual(result?.returnTypeLocations, [
             fixtureLocation(line: 13, column: 42),
             fixtureLocation(line: 13, column: 50),
         ])
-        XCTAssertTrue(result?.functionParameterTypeLocations.isEmpty ?? false)
+        XCTAssertTrue(result?.parameterTypeLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericParameterLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericConformanceRequirementLocations.isEmpty ?? false)
     }
 
     func testFunctionWithArguments() throws {
         let result = results[fixtureLocation(line: 18)]
-        XCTAssertEqual(result?.functionParameterTypeLocations, [
+        XCTAssertEqual(result?.parameterTypeLocations, [
             fixtureLocation(line: 18, column: 31),
             fixtureLocation(line: 18, column: 42)
         ])
-        XCTAssertTrue(result?.functionReturnTypeLocations.isEmpty ?? false)
+        XCTAssertTrue(result?.returnTypeLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericParameterLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericConformanceRequirementLocations.isEmpty ?? false)
     }
 
     func testFunctionWithGenericArguments() throws {
         let result = results[fixtureLocation(line: 20)]
-        XCTAssertEqual(result?.functionParameterTypeLocations, [
+        XCTAssertEqual(result?.parameterTypeLocations, [
             fixtureLocation(line: 20, column: 70)
         ])
         XCTAssertEqual(result?.genericParameterLocations, [
@@ -78,33 +78,33 @@ class FunctionVisitTest: XCTestCase {
         XCTAssertEqual(result?.genericConformanceRequirementLocations, [
             fixtureLocation(line: 20, column: 87),
         ])
-        XCTAssertTrue(result?.functionReturnTypeLocations.isEmpty ?? false)
+        XCTAssertTrue(result?.returnTypeLocations.isEmpty ?? false)
     }
 
     func testFunctionWithSomeReturnType() throws {
         let result = results[fixtureLocation(line: 23)]
-        XCTAssertEqual(result?.functionReturnTypeLocations, [
+        XCTAssertEqual(result?.returnTypeLocations, [
             fixtureLocation(line: 23, column: 43)
         ])
-        XCTAssertTrue(result?.functionParameterTypeLocations.isEmpty ?? false)
+        XCTAssertTrue(result?.parameterTypeLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericParameterLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericConformanceRequirementLocations.isEmpty ?? false)
     }
 
     func testInitializerWithArguments() throws {
         let result = results[fixtureLocation(line: 26, column: 5)]
-        XCTAssertEqual(result?.functionParameterTypeLocations, [
+        XCTAssertEqual(result?.parameterTypeLocations, [
             fixtureLocation(line: 26, column: 13),
             fixtureLocation(line: 26, column: 24),
         ])
-        XCTAssertTrue(result?.functionReturnTypeLocations.isEmpty ?? false)
+        XCTAssertTrue(result?.returnTypeLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericParameterLocations.isEmpty ?? false)
         XCTAssertTrue(result?.genericConformanceRequirementLocations.isEmpty ?? false)
     }
 
     func testInitializerWithGenericArguments() throws {
         let result = results[fixtureLocation(line: 30, column: 5)]
-        XCTAssertEqual(result?.functionParameterTypeLocations, [
+        XCTAssertEqual(result?.parameterTypeLocations, [
             fixtureLocation(line: 30, column: 46)
         ])
         XCTAssertEqual(result?.genericParameterLocations, [
@@ -114,16 +114,16 @@ class FunctionVisitTest: XCTestCase {
         XCTAssertEqual(result?.genericConformanceRequirementLocations, [
             fixtureLocation(line: 30, column: 63),
         ])
-        XCTAssertTrue(result?.functionReturnTypeLocations.isEmpty ?? false)
+        XCTAssertTrue(result?.returnTypeLocations.isEmpty ?? false)
     }
 
     func testSubscriptWithArguments() throws {
         let result = results[fixtureLocation(line: 34, column: 5)]
-        XCTAssertEqual(result?.functionParameterTypeLocations, [
+        XCTAssertEqual(result?.parameterTypeLocations, [
             fixtureLocation(line: 34, column: 18),
             fixtureLocation(line: 34, column: 26),
         ])
-        XCTAssertEqual(result?.functionReturnTypeLocations, [
+        XCTAssertEqual(result?.returnTypeLocations, [
             fixtureLocation(line: 34, column: 37)
         ])
         XCTAssertTrue(result?.genericParameterLocations.isEmpty ?? false)
@@ -132,10 +132,10 @@ class FunctionVisitTest: XCTestCase {
 
     func testSubscriptWithGenericArguments() throws {
         let result = results[fixtureLocation(line: 35, column: 5)]
-        XCTAssertEqual(result?.functionParameterTypeLocations, [
+        XCTAssertEqual(result?.parameterTypeLocations, [
             fixtureLocation(line: 35, column: 51)
         ])
-        XCTAssertEqual(result?.functionReturnTypeLocations, [
+        XCTAssertEqual(result?.returnTypeLocations, [
             fixtureLocation(line: 35, column: 62)
         ])
         XCTAssertEqual(result?.genericParameterLocations, [
