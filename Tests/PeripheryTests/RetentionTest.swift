@@ -966,6 +966,14 @@ final class RetentionTest: SourceGraphTestCase {
     }
     #endif
 
+    func testRetainsCallAsFunction() {
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct1")) {
+                self.assertReferenced(.functionMethodInstance("callAsFunction(_:)"))
+            }
+        }
+    }
+
     // MARK: - Assign-only properties
 
     func testSimplePropertyAssignedButNeverRead() {
