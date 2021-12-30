@@ -22,6 +22,8 @@ public class FixtureClass70 {
         }
     }
     var readVar: String
+    // periphery:ignore
+    var ignoredSimpleUnreadVar: String
 
     init() {
         simpleUnreadVar = "Hello"
@@ -30,6 +32,7 @@ public class FixtureClass70 {
         simpleUnreadVarAssignedMultiple = "2"
         complexUnreadVar1 = "Hello"
         readVar = "Hello"
+        ignoredSimpleUnreadVar = "Hello"
         FixtureClass70.simpleStaticUnreadVar = "Hello"
     }
 
@@ -38,6 +41,6 @@ public class FixtureClass70 {
         simpleUnreadVar = "World"
         complexUnreadVar1 = "Hello"
         complexUnreadVar2 = "Hello"
-        print(readVar.count)
+        print(readVar)
     }
 }

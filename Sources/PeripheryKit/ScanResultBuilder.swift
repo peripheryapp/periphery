@@ -2,7 +2,7 @@ import Foundation
 
 public struct ScanResultBuilder {
     public static func build(for graph: SourceGraph) -> [ScanResult] {
-        let assignOnlyProperties = graph.potentialAssignOnlyProperties.intersection(graph.unreachableDeclarations)
+        let assignOnlyProperties = graph.assignOnlyProperties
         let removableDeclarations = graph.unreachableDeclarations.subtracting(assignOnlyProperties)
         let redundantProtocols = graph.redundantProtocols.filter { !removableDeclarations.contains($0.0) }
         let redundantPublicAccessibility = graph.redundantPublicAccessibility.filter { !removableDeclarations.contains($0.0) }

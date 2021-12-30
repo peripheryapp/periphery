@@ -22,7 +22,7 @@ public class Fixture114 {
 }
 
 extension Fixture114: Fixture114Protocol {
-    // param is ignored becuse the protocol ignores it.
+    // param is ignored because the protocol ignores it.
     public func protocolFunc(param: String) {}
 }
 
@@ -38,4 +38,17 @@ public class FixtureClass116 {
 
     // periphery:ignore
     let multiBindingPropertyA = 0, multiBindingPropertyB = 0
+
+    // periphery:ignore
+    var assignOnlyProperty = 0
+
+    public func retain() {
+        assignOnlyProperty = 1
+    }
 }
+
+// periphery:ignore
+// redundant protocol
+public protocol Fixture205Protocol {}
+// periphery:ignore
+public class Fixture205: Fixture205Protocol {}

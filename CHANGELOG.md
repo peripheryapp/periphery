@@ -13,6 +13,7 @@
 - Fix false positive when protocols requirements are satisfied in another file from the one that declares the conformance.
 - Fix redundant public accessibility analysis of enum associated value types.
 - Fix redundant public accessibility analysis of aliased types.
+- Comment commands can now retain redundant protocols.
 
 ## 2.8.3 (2021-11-29)
 

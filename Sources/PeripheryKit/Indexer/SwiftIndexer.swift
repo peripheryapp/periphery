@@ -406,7 +406,7 @@ public final class SwiftIndexer {
 
         private func identifyUnusedParameters(using syntaxVisitor: MultiplexingSyntaxVisitor) {
             let functionDecls = declarations.filter { $0.kind.isFunctionKind }
-            let functionDelcsByLocation = functionDecls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
+            let functionDeclsByLocation = functionDecls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
 
             let analyzer = UnusedParameterAnalyzer()
             let paramsByFunction = analyzer.analyze(
@@ -416,7 +416,7 @@ public final class SwiftIndexer {
                 parseProtocols: true)
 
             for (function, params) in paramsByFunction {
-                guard let functionDecl = functionDelcsByLocation[function.location] else {
+                guard let functionDecl = functionDeclsByLocation[function.location] else {
                     // The declaration may not exist if the code was not compiled due to build conditions, e.g #if.
                     logger.debug("Failed to associate indexed function for parameter function '\(function.name)' at \(function.location).")
                     continue

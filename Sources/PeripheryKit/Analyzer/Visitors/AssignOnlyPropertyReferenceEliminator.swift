@@ -31,6 +31,9 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphVisitor {
                     !property.isComplexProperty
                 else { continue }
 
+                // Ensure the property hasn't been been explicitly retained, e.g by a comment command.
+                guard !graph.isRetained(property) else { continue }
+
                 // A protocol property can technically be assigned and never used when the protocol is used as an existential
                 // type, however communicating that succinctly would be very tricky, and most likely just lead to confusion.
                 // Here we filter out protocol properties and thus restrict this analysis only to concrete properties.
