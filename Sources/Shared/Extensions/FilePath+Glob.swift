@@ -17,7 +17,7 @@ public extension FilePath {
             pattern: absolutePattern,
             blacklistedDirectories: [".build", "node_modules"],
             logger: inject()
-        ).paths.map { FilePath($0) })
+        ).paths.map { FilePath($0).lexicallyNormalized() })
     }
 }
 

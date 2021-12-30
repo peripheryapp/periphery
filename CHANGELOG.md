@@ -14,6 +14,7 @@
 - Fix redundant public accessibility analysis of enum associated value types.
 - Fix redundant public accessibility analysis of aliased types.
 - Comment commands can now retain redundant protocols.
+- Fix excluding paths that contain relative components, e.g `--report-exclude "../file.swift"`.
 
 ## 2.8.3 (2021-11-29)
 
