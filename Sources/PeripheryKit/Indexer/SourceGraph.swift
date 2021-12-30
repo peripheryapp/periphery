@@ -29,6 +29,10 @@ public final class SourceGraph {
         allDeclarations.subtracting(reachableDeclarations)
     }
 
+    public var assignOnlyProperties: Set<Declaration> {
+        return potentialAssignOnlyProperties.intersection(unreachableDeclarations)
+    }
+
     public init() {
         mutationQueue = DispatchQueue(label: "SourceGraph.mutationQueue")
     }

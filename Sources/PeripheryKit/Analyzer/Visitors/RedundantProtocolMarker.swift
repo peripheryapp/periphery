@@ -17,8 +17,11 @@ final class RedundantProtocolMarker: SourceGraphVisitor {
         let protocolDecls = graph.declarations(ofKind: .protocol)
 
         for protocolDecl in protocolDecls {
+            // Ensure the protocol hasn't been been explicitly retained, e.g by a comment command.
+            guard !graph.isRetained(protocolDecl) else { continue }
+
             // Ensure the protocol doesn't inherit an external protocol.
-            // The foreign protool may be used only by external code which is not visibile to us.
+            // The foreign protocol may be used only by external code which is not visible to us.
             // E.g a protocol may inherit Comparable and implement the operator '<', however we have no way to see
             // that '<' is used when calling sort().
             let inheritsForeignProtocol = graph

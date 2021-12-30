@@ -867,7 +867,12 @@ final class RetentionTest: SourceGraphTestCase {
                 self.assertReferenced(.varInstance("tuplePropertyB"))
                 self.assertReferenced(.varInstance("multiBindingPropertyA"))
                 self.assertReferenced(.varInstance("multiBindingPropertyB"))
+                self.assertReferenced(.varInstance("assignOnlyProperty"))
+                self.assertNotAssignOnlyProperty(.varInstance("assignOnlyProperty"))
             }
+            assertReferenced(.class("Fixture205"))
+            assertReferenced(.protocol("Fixture205Protocol"))
+            assertNotRedundantProtocol("Fixture205Protocol")
         }
     }
 
@@ -977,15 +982,33 @@ final class RetentionTest: SourceGraphTestCase {
     // MARK: - Assign-only properties
 
     func testSimplePropertyAssignedButNeverRead() {
+        configuration.retainAssignOnlyProperties = false
+
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass70")) {
                 self.assertNotReferenced(.varInstance("simpleUnreadVar"))
+                self.assertAssignOnlyProperty(.varInstance("simpleUnreadVar"))
+
                 self.assertNotReferenced(.varInstance("simpleUnreadShadowedVar"))
+                self.assertAssignOnlyProperty(.varInstance("simpleUnreadShadowedVar"))
+
                 self.assertNotReferenced(.varInstance("simpleUnreadVarAssignedMultiple"))
+                self.assertAssignOnlyProperty(.varInstance("simpleUnreadVarAssignedMultiple"))
+
                 self.assertNotReferenced(.varStatic("simpleStaticUnreadVar"))
+                self.assertAssignOnlyProperty(.varStatic("simpleStaticUnreadVar"))
+
                 self.assertReferenced(.varInstance("complexUnreadVar1"))
+                self.assertNotAssignOnlyProperty(.varInstance("complexUnreadVar1"))
+
                 self.assertReferenced(.varInstance("complexUnreadVar2"))
+                self.assertNotAssignOnlyProperty(.varInstance("complexUnreadVar2"))
+
                 self.assertReferenced(.varInstance("readVar"))
+                self.assertNotAssignOnlyProperty(.varInstance("readVar"))
+
+                self.assertReferenced(.varInstance("ignoredSimpleUnreadVar"))
+                self.assertNotAssignOnlyProperty(.varInstance("ignoredSimpleUnreadVar"))
             }
         }
 
@@ -994,12 +1017,28 @@ final class RetentionTest: SourceGraphTestCase {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass70")) {
                 self.assertReferenced(.varInstance("simpleUnreadVar"))
+                self.assertNotAssignOnlyProperty(.varInstance("simpleUnreadVar"))
+
                 self.assertReferenced(.varInstance("simpleUnreadShadowedVar"))
+                self.assertNotAssignOnlyProperty(.varInstance("simpleUnreadShadowedVar"))
+
                 self.assertReferenced(.varInstance("simpleUnreadVarAssignedMultiple"))
+                self.assertNotAssignOnlyProperty(.varInstance("simpleUnreadVarAssignedMultiple"))
+
                 self.assertReferenced(.varStatic("simpleStaticUnreadVar"))
+                self.assertNotAssignOnlyProperty(.varStatic("simpleStaticUnreadVar"))
+
                 self.assertReferenced(.varInstance("complexUnreadVar1"))
+                self.assertNotAssignOnlyProperty(.varInstance("complexUnreadVar1"))
+
                 self.assertReferenced(.varInstance("complexUnreadVar2"))
+                self.assertNotAssignOnlyProperty(.varInstance("complexUnreadVar2"))
+
                 self.assertReferenced(.varInstance("readVar"))
+                self.assertNotAssignOnlyProperty(.varInstance("readVar"))
+
+                self.assertReferenced(.varInstance("ignoredSimpleUnreadVar"))
+                self.assertNotAssignOnlyProperty(.varInstance("ignoredSimpleUnreadVar"))
             }
         }
     }

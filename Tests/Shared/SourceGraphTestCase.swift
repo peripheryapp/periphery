@@ -122,6 +122,30 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
+    func assertAssignOnlyProperty(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, file: file, line: line) else { return }
+
+        if !graph.assignOnlyProperties.contains(declaration) {
+            XCTFail("Expected property to be assign-only: \(declaration)", file: file, line: line)
+        }
+
+        scopeStack.append(.declaration(declaration))
+        scopedAssertions?()
+        scopeStack.removeLast()
+    }
+
+    func assertNotAssignOnlyProperty(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, file: file, line: line) else { return }
+
+        if graph.assignOnlyProperties.contains(declaration) {
+            XCTFail("Expected property to not be assign-only: \(declaration)", file: file, line: line)
+        }
+
+        scopeStack.append(.declaration(declaration))
+        scopedAssertions?()
+        scopeStack.removeLast()
+    }
+
     func module(_ name: String, scopedAssertions: (() -> Void)? = nil) {
         scopeStack.append(.module(name))
         scopedAssertions?()
