@@ -9,6 +9,7 @@ protocol PeripherySyntaxVisitor {
     func visit(_ node: ProtocolDeclSyntax)
     func visit(_ node: StructDeclSyntax)
     func visit(_ node: EnumDeclSyntax)
+    func visit(_ node: EnumCaseDeclSyntax)
     func visit(_ node: ExtensionDeclSyntax)
     func visit(_ node: FunctionDeclSyntax)
     func visit(_ node: InitializerDeclSyntax)
@@ -27,6 +28,7 @@ extension PeripherySyntaxVisitor {
     func visit(_ node: ProtocolDeclSyntax) { }
     func visit(_ node: StructDeclSyntax) { }
     func visit(_ node: EnumDeclSyntax) { }
+    func visit(_ node: EnumCaseDeclSyntax) { }
     func visit(_ node: ExtensionDeclSyntax) { }
     func visit(_ node: FunctionDeclSyntax) { }
     func visit(_ node: InitializerDeclSyntax) { }
@@ -79,6 +81,11 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+        visitors.forEach { $0.visit(node) }
+        return .visitChildren
+    }
+
+    override func visit(_ node: EnumCaseDeclSyntax) -> SyntaxVisitorContinueKind {
         visitors.forEach { $0.visit(node) }
         return .visitChildren
     }

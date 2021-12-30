@@ -133,4 +133,14 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
     func testClassGenericRequirement() {
         assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicClassGenericRequirement_Protocol"))
     }
+
+    func testEnumAssociatedValue() {
+        assertNotRedundantPublicAccessibility(.enum("PublicEnumWithAssociatedValue"))
+        assertNotRedundantPublicAccessibility(.struct("PublicAssociatedValueA")) {
+            self.assertNotRedundantPublicAccessibility(.varInstance("value"))
+        }
+        assertNotRedundantPublicAccessibility(.struct("PublicAssociatedValueB")) {
+            self.assertNotRedundantPublicAccessibility(.varInstance("value"))
+        }
+    }
 }

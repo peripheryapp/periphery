@@ -14,8 +14,8 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         commentCommands: [CommentCommand],
         variableType: String?,
         variableTypeLocations: Set<SourceLocation>,
-        functionParameterTypeLocations: Set<SourceLocation>,
-        functionReturnTypeLocations: Set<SourceLocation>,
+        parameterTypeLocations: Set<SourceLocation>,
+        returnTypeLocations: Set<SourceLocation>,
         inheritedTypeLocations: Set<SourceLocation>,
         genericParameterLocations: Set<SourceLocation>,
         genericConformanceRequirementLocations: Set<SourceLocation>
@@ -80,6 +80,18 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
+    func visit(_ node: EnumCaseDeclSyntax) {
+        for element in node.elements {
+            parse(
+                modifiers: node.modifiers,
+                attributes: node.attributes,
+                trivia: node.leadingTrivia,
+                parameterClause: element.associatedValue,
+                at: element.identifier.positionAfterSkippingLeadingTrivia
+            )
+        }
+    }
+
     func visit(_ node: ExtensionDeclSyntax) {
         var position = node.extendedType.positionAfterSkippingLeadingTrivia
 
@@ -100,8 +112,8 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            functionParameterClause: node.signature.input,
-            functionReturnClause: node.signature.output,
+            parameterClause: node.signature.input,
+            returnClause: node.signature.output,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
             at: node.identifier.positionAfterSkippingLeadingTrivia
@@ -113,7 +125,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            functionParameterClause: node.parameters,
+            parameterClause: node.parameters,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
             at: node.initKeyword.positionAfterSkippingLeadingTrivia
@@ -134,8 +146,8 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            functionParameterClause: node.indices,
-            functionReturnClause: node.result,
+            parameterClause: node.indices,
+            returnClause: node.result,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
             at: node.subscriptKeyword.positionAfterSkippingLeadingTrivia
@@ -233,8 +245,8 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         attributes: AttributeListSyntax?,
         trivia: Trivia?,
         variableType: TypeSyntax? = nil,
-        functionParameterClause: ParameterClauseSyntax? = nil,
-        functionReturnClause: ReturnClauseSyntax? = nil,
+        parameterClause: ParameterClauseSyntax? = nil,
+        returnClause: ReturnClauseSyntax? = nil,
         inheritanceClause: TypeInheritanceClauseSyntax? = nil,
         genericParameterClause: GenericParameterClauseSyntax? = nil,
         genericWhereClause: GenericWhereClauseSyntax? = nil,
@@ -255,8 +267,8 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             CommentCommand.parseCommands(in: trivia),
             type(for: variableType),
             typeLocations(for: variableType),
-            typeLocations(for: functionParameterClause),
-            typeLocations(for: functionReturnClause),
+            typeLocations(for: parameterClause),
+            typeLocations(for: returnClause),
             typeLocations(for: inheritanceClause),
             typeLocations(for: genericParameterClause),
             typeLocations(for: genericWhereClause)
