@@ -101,6 +101,25 @@ class FilePathGlobTest : XCTestCase {
         }
     }
 
+    func testRelativeParent() {
+        FilePath("\(baseDir)/dir1").chdir() {
+            let pattern = "../bar"
+            let paths = FilePath.glob(pattern).sorted()
+            XCTAssertPathsEqual(paths, [
+                "\(baseDir)/bar"
+            ])
+        }
+
+        FilePath("\(baseDir)/dir1/dir2").chdir() {
+            let pattern = "../../**/*.ext"
+            let paths = FilePath.glob(pattern).sorted()
+            XCTAssertPathsEqual(paths, [
+                "\(baseDir)/dir1/dir2/dir3/file2.ext",
+                "\(baseDir)/dir1/file1.ext"
+            ])
+        }
+    }
+
     // MARK: - Private
 
     private func XCTAssertPathsEqual(_ filePaths: [FilePath], _ stringPaths: [String], file: StaticString = #file, line: UInt = #line) {
