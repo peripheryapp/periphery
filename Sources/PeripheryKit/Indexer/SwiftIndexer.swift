@@ -285,8 +285,10 @@ public final class SwiftIndexer {
                     continue
                 }
 
-                for ref in refs {
-                    associateUnsafe(ref, with: decl)
+                graph.mutating {
+                    for ref in refs {
+                        associateUnsafe(ref, with: decl)
+                    }
                 }
             }
         }

@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix a crash while indexing.
 
 ## 2.8.4 (2021-12-30)
 
