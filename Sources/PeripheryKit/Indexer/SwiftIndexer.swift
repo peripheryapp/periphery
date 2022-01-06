@@ -280,14 +280,13 @@ public final class SwiftIndexer {
 
         private func associateLatentReferences() {
             for (usr, refs) in referencesByUsr {
-                guard let decl = graph.explicitDeclaration(withUsr: usr) else {
-                    danglingReferences.append(contentsOf: refs)
-                    continue
-                }
-
                 graph.mutating {
-                    for ref in refs {
-                        associateUnsafe(ref, with: decl)
+                    if let decl = graph.explicitDeclaration(withUsr: usr) {
+                        for ref in refs {
+                            associateUnsafe(ref, with: decl)
+                        }
+                    } else {
+                        danglingReferences.append(contentsOf: refs)
                     }
                 }
             }
@@ -433,15 +432,16 @@ public final class SwiftIndexer {
                     }
                 }
 
-                for param in params {
-                    let paramDecl = param.declaration
-                    paramDecl.parent = functionDecl
-                    functionDecl.unusedParameters.insert(paramDecl)
-                    graph.add(paramDecl)
+                graph.mutating {
+                    for param in params {
+                        let paramDecl = param.declaration
+                        paramDecl.parent = functionDecl
+                        functionDecl.unusedParameters.insert(paramDecl)
+                        graph.addUnsafe(paramDecl)
 
-                    if ignoredParamNames.contains(param.name) ||
-                        (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) {
-                        graph.markRetained(paramDecl)
+                        if (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) || ignoredParamNames.contains(param.name) {
+                            graph.markRetainedUnsafe(paramDecl)
+                        }
                     }
                 }
             }
