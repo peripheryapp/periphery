@@ -93,8 +93,12 @@ public final class SourceGraph {
 
     func markRetained(_ declaration: Declaration) {
         mutationQueue.sync {
-            _ = retainedDeclarations.insert(declaration)
+            markRetainedUnsafe(declaration)
         }
+    }
+
+    func markRetainedUnsafe(_ declaration: Declaration) {
+        _ = retainedDeclarations.insert(declaration)
     }
 
     func markPotentialAssignOnlyProperty(_ declaration: Declaration) {
@@ -117,12 +121,16 @@ public final class SourceGraph {
 
     func add(_ declaration: Declaration) {
         mutationQueue.sync {
-            allDeclarations.insert(declaration)
-            allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
+            addUnsafe(declaration)
+        }
+    }
 
-            if !declaration.isImplicit {
-                declaration.usrs.forEach { allExplicitDeclarationsByUsr[$0] = declaration }
-            }
+    func addUnsafe(_ declaration: Declaration) {
+        allDeclarations.insert(declaration)
+        allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
+
+        if !declaration.isImplicit {
+            declaration.usrs.forEach { allExplicitDeclarationsByUsr[$0] = declaration }
         }
     }
 
