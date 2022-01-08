@@ -113,15 +113,11 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
         return nil
     }
 
-    private func workspacePaths() -> [FilePath] {
-        FilePath.glob("**/*.xcworkspace")
-            .filter {
-                // Swift Package Manager generates a xcworkspace inside the xcodeproj that isn't useful.
-                !$0.string.contains(".xcodeproj/")
-            }
-            .filter {
-                !$0.components.contains(".swiftpm")
-            }
+    private func workspacePaths() -> Set<FilePath> {
+        paths(matching: "**/*.xcworkspace").filter {
+            // Swift Package Manager generates a xcworkspace inside the xcodeproj that isn't useful.
+            !$0.string.contains(".xcodeproj/")
+        }
     }
 
     private func identifyProject() -> FilePath? {
@@ -147,6 +143,14 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
     }
 
     private func projectPaths() -> Set<FilePath> {
-        FilePath.glob("**/*.xcodeproj")
+        paths(matching: "**/*.xcodeproj")
+    }
+
+    private func paths(matching glob: String) -> Set<FilePath> {
+        FilePath.glob(glob).filter {
+            !$0.components.contains(".swiftpm") &&
+            !$0.components.contains("gems") &&
+            !$0.components.contains(".gems")
+        }
     }
 }
