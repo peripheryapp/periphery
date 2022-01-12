@@ -49,7 +49,7 @@ Install Homebrew:
 > You can skip this step if you already have Homebrew installed.
 
 ```
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
 Now install Periphery itself:
