@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Output is now line buffered when writing to a fifo/pipe.
 
 ##### Bug Fixes
 

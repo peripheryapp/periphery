@@ -68,6 +68,16 @@ public final class Logger: Injectable {
         return self.init(baseLogger: inject(), configuration: inject())
     }
 
+    public static func configureBuffering() {
+        var info = stat()
+        fstat(STDOUT_FILENO, &info)
+
+        if (info.st_mode & S_IFMT) == S_IFIFO {
+            setlinebuf(stdout)
+            setlinebuf(stderr)
+        }
+    }
+
     private let baseLogger: BaseLogger
     private let configuration: Configuration
 

@@ -3,6 +3,7 @@ import ArgumentParser
 import PeripheryKit
 import Shared
 
+Logger.configureBuffering()
 private let logger = inject(Logger.self)
 
 struct PeripheryCommand: FrontendCommand {
