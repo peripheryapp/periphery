@@ -59,8 +59,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ["5.5", "5.4", "5.3"]
+        swift: ["5.6", "5.5", "5.4", "5.3"]
         include:
+          - swift: "5.6"
+            container: "swiftlang/swift:nightly-5.6-focal"
+            cache-version: 1
           - swift: "5.5"
             container: "swift:5.5"
             cache-version: 2
