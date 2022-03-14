@@ -2,7 +2,7 @@ import Foundation
 
 class InterfaceBuilderPropertyRetainer {
     private let graph: SourceGraph
-    private let ibAttributes = ["IBOutlet", "IBAction", "IBInspectable"]
+    private let ibAttributes = ["IBOutlet", "IBAction", "IBInspectable", "IBSegueAction"]
 
     required init(graph: SourceGraph) {
         self.graph = graph
