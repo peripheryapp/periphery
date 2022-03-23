@@ -8,8 +8,15 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0")
 ]
-
-#if swift(>=5.5)
+#if swift(>=5.6)
+dependencies.append(
+    .package(
+        name: "SwiftSyntax",
+        url: "https://github.com/apple/swift-syntax",
+        .exact("0.50600.1")
+    )
+)
+#elseif swift(>=5.5)
 dependencies.append(
     .package(
         name: "SwiftSyntax",
@@ -57,6 +64,23 @@ var frontendDependencies: [PackageDescription.Target.Dependency] = [
 frontendDependencies.append(.target(name: "XcodeSupport"))
 #endif
 
+var peripheryKitDependencies: [PackageDescription.Target.Dependency] = [
+    .target(name: "Shared"),
+    .product(name: "SystemPackage", package: "swift-system"),
+    .product(name: "AEXML", package: "AEXML"),
+    .product(name: "SwiftSyntax", package: "SwiftSyntax"),
+    .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
+]
+
+#if swift(>=5.6)
+peripheryKitDependencies.append(
+    .product(
+        name: "SwiftSyntaxParser",
+        package: "SwiftSyntax"
+    )
+)
+#endif
+
 var targets: [PackageDescription.Target] = [
     .target(
         name: "Frontend",
@@ -64,13 +88,7 @@ var targets: [PackageDescription.Target] = [
     ),
     .target(
         name: "PeripheryKit",
-        dependencies: [
-            .target(name: "Shared"),
-            .product(name: "SystemPackage", package: "swift-system"),
-            .product(name: "AEXML", package: "AEXML"),
-            .product(name: "SwiftSyntax", package: "SwiftSyntax"),
-            .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
-        ]
+        dependencies: peripheryKitDependencies
     ),
     .target(
         name: "Shared",
