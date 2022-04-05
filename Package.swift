@@ -7,7 +7,8 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0"),
-    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax", .exact("0.50600.1"))
+    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax", .exact("0.50600.1")),
+    .package(name: "StaticSwiftSyntaxParser", url: "https://gist.github.com/liamnichols/92f8fdcf2864d0fd1619a18828acafb8.git", .branch("main"))
 ]
 
 #if os(macOS)
@@ -59,15 +60,8 @@ var targets: [PackageDescription.Target] = [
             .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "AEXML", package: "AEXML"),
             .product(name: "SwiftSyntax", package: "SwiftSyntax"),
-            .product(name: "SwiftSyntaxParser", package: "SwiftSyntax"),
-            .target(name: "lib_InternalSwiftSyntaxParser"),
+            .product(name: "StaticSwiftSyntaxParser", package: "StaticSwiftSyntaxParser"),
             .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
-        ],
-        // Pass `-dead_strip_dylibs` to ignore the dynamic version of `lib_InternalSwiftSyntaxParser`
-        // that ships with SwiftSyntax because we want the static version from
-        // `StaticInternalSwiftSyntaxParser`.
-        linkerSettings: [
-            .unsafeFlags(["-Xlinker", "-dead_strip_dylibs"])
         ]
     ),
     .target(
@@ -129,11 +123,6 @@ var targets: [PackageDescription.Target] = [
             .target(name: "PeripheryKit")
         ],
         exclude: ["AccessibilityProject"]
-    ),
-    .binaryTarget(
-        name: "lib_InternalSwiftSyntaxParser",
-        url: "https://github.com/keith/StaticInternalSwiftSyntaxParser/releases/download/5.6/lib_InternalSwiftSyntaxParser.xcframework.zip",
-        checksum: "88d748f76ec45880a8250438bd68e5d6ba716c8042f520998a438db87083ae9d"
     )
 ]
 
