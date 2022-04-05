@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "StaticSwiftSyntaxParser",
+        "repositoryURL": "https://gist.github.com/liamnichols/92f8fdcf2864d0fd1619a18828acafb8.git",
+        "state": {
+          "branch": "main",
+          "revision": "6e4cb9eb406d6acb5174202380d5407b132f7672",
+          "version": null
+        }
+      },
+      {
         "package": "AEXML",
         "repositoryURL": "https://github.com/tadija/AEXML",
         "state": {
