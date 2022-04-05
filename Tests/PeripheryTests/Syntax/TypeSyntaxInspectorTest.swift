@@ -1,9 +1,7 @@
 import Foundation
 import XCTest
 import SwiftSyntax
-#if swift(>=5.6)
 import SwiftSyntaxParser
-#endif
 @testable import TestShared
 @testable import PeripheryKit
 
