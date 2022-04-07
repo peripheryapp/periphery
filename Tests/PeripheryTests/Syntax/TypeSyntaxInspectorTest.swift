@@ -1,7 +1,9 @@
 import Foundation
 import XCTest
 import SwiftSyntax
+#if canImport(SwiftSyntaxParser)
 import SwiftSyntaxParser
+#endif
 @testable import TestShared
 @testable import PeripheryKit
 
