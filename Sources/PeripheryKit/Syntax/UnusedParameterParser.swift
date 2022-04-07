@@ -1,7 +1,9 @@
 import Foundation
 import SystemPackage
 import SwiftSyntax
+#if canImport(SwiftSyntaxParser)
 import SwiftSyntaxParser
+#endif
 
 protocol Item: AnyObject {
     var items: [Item] { get }
