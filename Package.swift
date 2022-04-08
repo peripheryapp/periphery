@@ -1,9 +1,10 @@
 // swift-tools-version:5.3
 import PackageDescription
 
-// Use the appropriate version of SwiftSyntax based on the current compiler
-#if compiler(>=5.5)
+#if os(macOS) && compiler(>=5.5) || compiler(>=5.6)
 let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50600.1")
+#elseif compiler(>=5.5)
+let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50500.0")
 #elseif compiler(>=5.4)
 let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50400.0")
 #elseif compiler(>=5.3)
@@ -21,7 +22,6 @@ var dependencies: [Package.Dependency] = [
     .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax", swiftSyntaxVersion)
 ]
 
-// When on macOS, using SwiftSyntax for 5.6, also include StaticSwiftSyntaxParser to statically link internal dependencies
 #if os(macOS) && compiler(>=5.5)
 dependencies.append(
     .package(
@@ -60,10 +60,9 @@ var peripheryKitDependencies: [PackageDescription.Target.Dependency] = [
     .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
 ]
 
-// Using Swift 5.5+, we need the SwiftSyntaxParser library, but on macOS specifically we also want to use the statically linked version
 #if os(macOS) && compiler(>=5.5)
 peripheryKitDependencies.append(.product(name: "StaticSwiftSyntaxParser", package: "StaticSwiftSyntaxParser"))
-#elseif compiler(>=5.5)
+#elseif compiler(>=5.6)
 peripheryKitDependencies.append(.product(name: "SwiftSyntaxParser", package: "SwiftSyntax"))
 #endif
 
