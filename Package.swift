@@ -1,10 +1,10 @@
 // swift-tools-version:5.3
 import PackageDescription
 
-#if os(macOS) && compiler(>=5.5) || compiler(>=5.6)
-let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50600.1")
+#if compiler(>=5.6)
+let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50600.1-static")
 #elseif compiler(>=5.5)
-let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50500.0")
+let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50500.0-static")
 #elseif compiler(>=5.4)
 let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50400.0")
 #elseif compiler(>=5.3)
@@ -19,18 +19,8 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0"),
-    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax", swiftSyntaxVersion)
+    .package(name: "SwiftSyntax", url: "https://github.com/liamnichols/swift-syntax", swiftSyntaxVersion)
 ]
-
-#if os(macOS) && compiler(>=5.5)
-dependencies.append(
-    .package(
-        name: "StaticSwiftSyntaxParser",
-        url: "https://gist.github.com/liamnichols/92f8fdcf2864d0fd1619a18828acafb8.git",
-        .branch("main")
-    )
-)
-#endif
 
 #if os(macOS)
 dependencies.append(
@@ -60,9 +50,7 @@ var peripheryKitDependencies: [PackageDescription.Target.Dependency] = [
     .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
 ]
 
-#if os(macOS) && compiler(>=5.5)
-peripheryKitDependencies.append(.product(name: "StaticSwiftSyntaxParser", package: "StaticSwiftSyntaxParser"))
-#elseif compiler(>=5.6)
+#if compiler(>=5.6)
 peripheryKitDependencies.append(.product(name: "SwiftSyntaxParser", package: "SwiftSyntax"))
 #endif
 

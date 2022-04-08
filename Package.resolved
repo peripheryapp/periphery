@@ -2,15 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "StaticSwiftSyntaxParser",
-        "repositoryURL": "https://gist.github.com/liamnichols/92f8fdcf2864d0fd1619a18828acafb8.git",
-        "state": {
-          "branch": "main",
-          "revision": "4134efa908ee6932f62f243cd1815000e51f44c6",
-          "version": null
-        }
-      },
-      {
         "package": "AEXML",
         "repositoryURL": "https://github.com/tadija/AEXML",
         "state": {
@@ -57,11 +48,11 @@
       },
       {
         "package": "SwiftSyntax",
-        "repositoryURL": "https://github.com/apple/swift-syntax",
+        "repositoryURL": "https://github.com/liamnichols/swift-syntax",
         "state": {
           "branch": null,
-          "revision": "0b6c22b97f8e9320bca62e82cdbee601cf37ad3f",
-          "version": "0.50600.1"
+          "revision": "8a82bdb5d1558d130f732ef9f27dc1cd6f6696ea",
+          "version": "0.50600.1-static"
         }
       },
       {
