@@ -43,7 +43,7 @@ jobs:
         path: |
           .build
           Package.resolved
-        key: ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('**/Package.swift', '**/Package.resolved') }}
+        key: ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
         restore-keys: |
           ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-
     - name: Resolve dependencies
@@ -59,8 +59,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ["5.5", "5.4", "5.3"]
+        swift: ["5.6", "5.5", "5.4", "5.3"]
         include:
+          - swift: "5.6"
+            container: "swift:5.6"
+            cache-version: 2
           - swift: "5.5"
             container: "swift:5.5"
             cache-version: 2
@@ -87,7 +90,7 @@ jobs:
         path: |
           .build
           Package.resolved
-        key: ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('**/Package.swift', '**/Package.resolved') }}
+        key: ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
         restore-keys: |
           ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-
     - name: Resolve dependencies
