@@ -48,7 +48,7 @@
       },
       {
         "package": "SwiftSyntax",
-        "repositoryURL": "https://github.com/liamnichols/swift-syntax",
+        "repositoryURL": "https://github.com/peripheryapp/swift-syntax",
         "state": {
           "branch": null,
           "revision": "8a82bdb5d1558d130f732ef9f27dc1cd6f6696ea",
