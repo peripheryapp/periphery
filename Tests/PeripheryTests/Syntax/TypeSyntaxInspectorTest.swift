@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 import SwiftSyntax
-#if swift(>=5.6)
+#if canImport(SwiftSyntaxParser)
 import SwiftSyntaxParser
 #endif
 @testable import TestShared

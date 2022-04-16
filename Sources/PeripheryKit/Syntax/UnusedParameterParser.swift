@@ -1,7 +1,7 @@
 import Foundation
 import SystemPackage
 import SwiftSyntax
-#if swift(>=5.6)
+#if canImport(SwiftSyntaxParser)
 import SwiftSyntaxParser
 #endif
 

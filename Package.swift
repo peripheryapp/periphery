@@ -1,48 +1,26 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 import PackageDescription
+
+#if compiler(>=5.6)
+let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50600.1-static")
+#elseif compiler(>=5.5)
+let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50500.0-static")
+#elseif compiler(>=5.4)
+let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50400.0")
+#elseif compiler(>=5.3)
+let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50300.0")
+#else
+fatalError("This version of Periphery does not support Swift <= 5.2.")
+#endif
 
 var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-system", from: "1.0.0"),
     .package(url: "https://github.com/jpsim/Yams", from: "4.0.0"),
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
-    .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0")
+    .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0"),
+    .package(name: "SwiftSyntax", url: "https://github.com/peripheryapp/swift-syntax", swiftSyntaxVersion)
 ]
-#if swift(>=5.6)
-dependencies.append(
-    .package(
-        name: "SwiftSyntax",
-        url: "https://github.com/apple/swift-syntax",
-        .exact("0.50600.1")
-    )
-)
-#elseif swift(>=5.5)
-dependencies.append(
-    .package(
-        name: "SwiftSyntax",
-        url: "https://github.com/apple/swift-syntax",
-        .exact("0.50500.0")
-    )
-)
-#elseif swift(>=5.4)
-dependencies.append(
-    .package(
-        name: "SwiftSyntax",
-        url: "https://github.com/apple/swift-syntax",
-        .exact("0.50400.0")
-    )
-)
-#elseif swift(>=5.3)
-dependencies.append(
-    .package(
-        name: "SwiftSyntax",
-        url: "https://github.com/apple/swift-syntax",
-        .exact("0.50300.0")
-    )
-)
-#else
-fatalError("This version of Periphery does not support Swift <= 5.2.")
-#endif
 
 #if os(macOS)
 dependencies.append(
@@ -72,13 +50,8 @@ var peripheryKitDependencies: [PackageDescription.Target.Dependency] = [
     .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
 ]
 
-#if swift(>=5.6)
-peripheryKitDependencies.append(
-    .product(
-        name: "SwiftSyntaxParser",
-        package: "SwiftSyntax"
-    )
-)
+#if compiler(>=5.6)
+peripheryKitDependencies.append(.product(name: "SwiftSyntaxParser", package: "SwiftSyntax"))
 #endif
 
 var targets: [PackageDescription.Target] = [
