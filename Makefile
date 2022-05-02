@@ -1,9 +1,22 @@
-RELEASE_BUILD_FLAGS=-c release --disable-sandbox --arch x86_64 --arch arm64
-BIN_PATH=$(shell swift build $(RELEASE_BUILD_FLAGS) --show-bin-path)/periphery
+BUILD_PATH=.build
+SWIFT_BUILD_FLAGS=--configuration release --disable-sandbox --build-path ${BUILD_PATH}
 
-build_release:
-	@swift build $(RELEASE_BUILD_FLAGS)
-	@install_name_tool -add_rpath @loader_path ${BIN_PATH}
+EXECUTABLE_X86_64=$(shell swift build ${SWIFT_BUILD_FLAGS} --arch x86_64 --show-bin-path)/periphery
+EXECUTABLE_ARM64=$(shell swift build ${SWIFT_BUILD_FLAGS} --arch arm64 --show-bin-path)/periphery
+EXECUTABLE=${BUILD_PATH}/periphery
+
+clean:
+	@swift package clean
+
+build_x86_64:
+	@swift build ${SWIFT_BUILD_FLAGS} --arch x86_64
+
+build_arm64:
+	@swift build ${SWIFT_BUILD_FLAGS} --arch arm64
+
+build_release: clean build_x86_64 build_arm64
+	@lipo -create -output ${EXECUTABLE} ${EXECUTABLE_X86_64} ${EXECUTABLE_ARM64}
+	@strip -rSTX ${EXECUTABLE}
 
 show_bin_path:
-	@echo ${BIN_PATH}
+	@echo ${EXECUTABLE}
