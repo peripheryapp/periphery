@@ -42,7 +42,6 @@ rm -rf "$bin_path"
 make build_release
 rm -rf .release
 mkdir .release
-cp "$(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib" .release
 cp "$bin_path" .release/
 cp LICENSE.md .release/
 cp scripts/release_notes.md.template .release/release_notes.md
@@ -51,7 +50,7 @@ cp scripts/release_notes.md.template .release/release_notes.md
 cd .release
 codesign --force --options=runtime --sign "$signature" periphery
 zip_filename="periphery-v${version}.zip"
-zip "${zip_filename}" periphery LICENSE.md lib_InternalSwiftSyntaxParser.dylib
+zip "${zip_filename}" periphery LICENSE.md
 codesign --force --options=runtime --sign "$signature" "${zip_filename}"
 xcrun altool --notarize-app --primary-bundle-id "${bundle_id}" --password "${password}" --file "${zip_filename}"
 

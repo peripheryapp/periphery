@@ -45,7 +45,6 @@ public final class Analyzer {
         EncodablePropertyRetainer.self,
         StringInterpolationAppendInterpolationRetainer.self,
         PropertyWrapperRetainer.self,
-        OptionalProtocolMemberRetainer.self,
         ResultBuilderRetainer.self,
 
         PlainExtensionEliminator.self,

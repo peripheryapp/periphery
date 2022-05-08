@@ -83,10 +83,6 @@ extension SPMProjectDriver: ProjectDriver {
     // MARK: - Private
 
     private func absolutePath(for target: SPM.Target) -> FilePath {
-        if SwiftVersion.current.version.isVersion(greaterThanOrEqualTo: "5.4") {
-            return FilePath(package.path).appending(target.path)
-        } else {
-            return FilePath(target.path)
-        }
+        FilePath(package.path).appending(target.path)
     }
 }

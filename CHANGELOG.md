@@ -2,15 +2,16 @@
 
 ##### Breaking
 
-- None.
+- Swift 5.5 or later is now required.
 
 ##### Enhancements
 
+- Add support for Swift 5.6.
 - Output is now line buffered when writing to a fifo/pipe.
 
 ##### Bug Fixes
 
-- None.
+- IBSegueAction annotated functions are now retained.
 
 ## 2.8.6 (2022-01-06)
 

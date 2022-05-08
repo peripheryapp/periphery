@@ -5,17 +5,13 @@ import PackageDescription
 let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50600.1-static")
 #elseif compiler(>=5.5)
 let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50500.0-static")
-#elseif compiler(>=5.4)
-let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50400.0")
-#elseif compiler(>=5.3)
-let swiftSyntaxVersion: Package.Dependency.Requirement = .exact("0.50300.0")
 #else
-fatalError("This version of Periphery does not support Swift <= 5.2.")
+fatalError("This version of Periphery requires Swift >= 5.5.")
 #endif
 
 var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-system", from: "1.0.0"),
-    .package(url: "https://github.com/jpsim/Yams", from: "4.0.0"),
+    .package(url: "https://github.com/jpsim/Yams", from: "5.0.0"),
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0"),
