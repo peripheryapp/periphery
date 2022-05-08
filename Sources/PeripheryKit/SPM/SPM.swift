@@ -47,12 +47,7 @@ public struct SPM {
 
         func build(additionalArguments: [String]) throws {
             let shell: Shell = inject()
-            var args: [String] = ["swift", "build", "--target", name] + additionalArguments
-
-            if SwiftVersion.current.version.isVersion(lessThan: "5.4") {
-                args.append("--enable-test-discovery")
-            }
-
+            let args: [String] = ["swift", "build", "--target", name] + additionalArguments
             try shell.exec(args)
         }
     }

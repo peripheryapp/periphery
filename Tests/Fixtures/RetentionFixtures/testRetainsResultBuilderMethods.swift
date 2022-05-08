@@ -1,4 +1,3 @@
-#if swift(>=5.4)
 import Foundation
 
 @resultBuilder
@@ -41,4 +40,3 @@ public class FixtureClass130Retainer {
         content()
     }
 }
-#endif

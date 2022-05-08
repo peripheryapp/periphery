@@ -30,10 +30,7 @@ final class Project {
         let logger: Logger = inject()
 
         logger.debug(SwiftVersion.current.fullVersion)
-
-        if SwiftVersion.current.version.isVersion(lessThanOrEqualTo: "5.2") {
-            throw PeripheryError.swiftVersionUnsupportedError(version: SwiftVersion.current.fullVersion)
-        }
+        try SwiftVersion.current.validateVersion()
 
         switch kind {
         case .xcode:

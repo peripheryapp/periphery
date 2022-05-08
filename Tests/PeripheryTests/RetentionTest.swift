@@ -956,7 +956,6 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    #if swift(>=5.4)
     func testRetainsResultBuilderMethods() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass130")) {
@@ -969,7 +968,6 @@ final class RetentionTest: SourceGraphTestCase {
             }
         }
     }
-    #endif
 
     func testRetainsCallAsFunction() {
         analyze(retainPublic: true) {
