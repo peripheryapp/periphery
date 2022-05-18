@@ -57,7 +57,7 @@ final class XcodeWorkspace: XcodeProjectlike {
         for child in elements {
             switch child {
             case .file(let ref):
-                let basePath = FilePath(groups.map { $0.location.path }.joined(separator: "/"))
+                let basePath = FilePath(groups.map { $0.location.path }.filter { !$0.isEmpty }.joined(separator: "/"))
                 let path = FilePath(ref.location.path)
                 let fullPath = basePath.pushing(path)
 
