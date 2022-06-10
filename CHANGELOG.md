@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Add `--report-include` option to filter reported violations with an allowlist.
 
 ##### Bug Fixes
 

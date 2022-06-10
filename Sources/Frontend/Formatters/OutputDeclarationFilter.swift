@@ -13,11 +13,12 @@ final class OutputDeclarationFilter: Injectable {
 
     required init(configuration: Configuration, logger: Logger) {
         self.configuration = configuration
-        self.logger = logger.contextualized(with: "report:exclude")
+        self.logger = logger.contextualized(with: "report:filter")
     }
 
     func filter(_ declarations: [ScanResult]) -> [ScanResult] {
         let excludedSourceFiles = configuration.reportExcludeSourceFiles
+        let includedSourceFiles = configuration.reportIncludeSourceFiles
 
         var reportedExclusions: Set<FilePath> = []
 
@@ -30,6 +31,10 @@ final class OutputDeclarationFilter: Injectable {
                     reportedExclusions.insert(path)
                 }
 
+                return false
+            }
+
+            if !includedSourceFiles.isEmpty && !includedSourceFiles.contains(path) {
                 return false
             }
 
