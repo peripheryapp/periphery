@@ -40,6 +40,9 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Path glob of source files which should be excluded from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var reportExclude: [String] = defaultConfig.reportExclude
 
+    @Option(help: "Path glob of source files which should be included from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
+    var reportInclude: [String] = defaultConfig.reportInclude
+
     @Option(help: "Path to index store to use. Implies '--skip-build'")
     var indexStorePath: String?
 
@@ -97,6 +100,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$targets, targets)
         configuration.apply(\.$indexExclude, indexExclude)
         configuration.apply(\.$reportExclude, reportExclude)
+        configuration.apply(\.$reportInclude, reportInclude)
         configuration.apply(\.$outputFormat, format)
         configuration.apply(\.$retainPublic, retainPublic)
         configuration.apply(\.$retainAssignOnlyProperties, retainAssignOnlyProperties)

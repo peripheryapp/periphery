@@ -34,6 +34,9 @@ public final class Configuration: Singleton {
     @Setting(key: "report_exclude", defaultValue: [])
     public var reportExclude: [String]
 
+    @Setting(key: "report_include", defaultValue: [])
+    public var reportInclude: [String]
+
     @Setting(key: "build_arguments", defaultValue: [])
     public var buildArguments: [String]
 
@@ -283,6 +286,10 @@ public final class Configuration: Singleton {
 
     public lazy var reportExcludeSourceFiles: Set<FilePath> = {
         Set(reportExclude.flatMap { FilePath.glob($0) })
+    }()
+
+    public lazy var reportIncludeSourceFiles: Set<FilePath> = {
+        Set(reportInclude.flatMap { FilePath.glob($0) })
     }()
 
     // MARK: - Private
