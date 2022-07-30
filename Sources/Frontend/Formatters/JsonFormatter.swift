@@ -19,6 +19,7 @@ final class JsonFormatter: OutputFormatter {
         for result in results {
             let object: [AnyHashable: Any] = [
                 "kind": result.declaration.kind.rawValue,
+                "modules": Array(result.declaration.location.file.modules),
                 "name": result.declaration.name ?? "",
                 "modifiers": Array(result.declaration.modifiers),
                 "attributes": Array(result.declaration.attributes),
@@ -34,6 +35,7 @@ final class JsonFormatter: OutputFormatter {
                 for ref in references {
                     let object: [AnyHashable: Any] = [
                         "kind": ref.kind.rawValue,
+                        "modules": Array(result.declaration.location.file.modules),
                         "name": ref.name ?? "",
                         "modifiers": [],
                         "attributes": [],
