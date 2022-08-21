@@ -448,6 +448,22 @@ You've a few options to workaround this:
  - Filter the results to remove known instances.
  - Run Periphery once for each build configuration and merge the results. You can pass arguments to the underlying build by specifying them after `--`, e.g `periphery scan ... -- -configuration release`.
 
+### Swift package is platform-specific
+
+Periphery uses `swift build` to compile a Swift package which will fail if the Swift package is platform-specific (e.g. to iOS).
+
+As a workaround, you can manually build the Swift package with `xcodebuild` and then use the `--skip-build` and `--index-store-path` options to target the index store previously produced by `xcodebuild`.
+
+Example:
+
+```bash
+# 1. use xcodebuild
+xcodebuild -scheme MyScheme -destination 'platform=iOS Simulator,OS=15.5,name=iPhone 13' -derivedDataPath '../dd' clean build
+
+# 2. use produced index store for scanning
+periphery scan --skip-build --index-store-path '../dd/Index/DataStore/'
+```
+
 ## Known Bugs
 
 Due to some underlying bugs in Swift, Periphery may in some instances report incorrect results. You can encourage Apple to fix these issues by voting for them on the Swift JIRA.
