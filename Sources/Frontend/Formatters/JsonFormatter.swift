@@ -35,7 +35,6 @@ final class JsonFormatter: OutputFormatter {
                 for ref in references {
                     let object: [AnyHashable: Any] = [
                         "kind": ref.kind.rawValue,
-                        "modules": Array(result.declaration.location.file.modules),
                         "name": ref.name ?? "",
                         "modifiers": [],
                         "attributes": [],
