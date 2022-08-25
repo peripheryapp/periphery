@@ -19,6 +19,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case swiftVersionUnsupportedError(version: String, minimumVersion: String)
     case unindexedTargetsError(targets: Set<String>, indexStorePath: String)
     case jsonDeserializationError(error: Error, json: String)
+    case indexStoreNotFound(derivedDataPath: String)
 
     public var errorDescription: String? {
         switch self {
@@ -65,6 +66,8 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             return "This version of Periphery only supports Swift >= \(minimumVersion), you're using \(version)."
         case let .jsonDeserializationError(error, json):
             return "JSON deserialization failed: \(describe(error))\nJSON:\n\(json)"
+        case let .indexStoreNotFound(derivedDataPath):
+            return "Failed to find index datastore at path: \(derivedDataPath)"
         }
     }
 
