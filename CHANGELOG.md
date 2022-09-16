@@ -7,6 +7,7 @@
 ##### Enhancements
 
 - Add `--report-include` option to filter reported violations with an allowlist.
+- Support for reading Xcode 14 generated index stores.
 
 ##### Bug Fixes
 

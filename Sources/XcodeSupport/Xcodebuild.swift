@@ -51,7 +51,15 @@ public final class Xcodebuild: Injectable {
     }
 
     func indexStorePath(project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> String {
-        (try derivedDataPath(for: project, schemes: schemes).appending("Index/DataStore")).string
+        let derivedDataPath = try derivedDataPath(for: project, schemes: schemes)
+        let pathsToTry = ["Index/DataStore", "Index.noindex/DataStore"]
+            .map { derivedDataPath.appending($0).string }
+        guard let path = pathsToTry.first(where: { path in
+            return FileManager.default.fileExists(atPath: path)
+        }) else {
+            throw PeripheryError.indexStoreNotFound(derivedDataPath: derivedDataPath.string)
+        }
+        return path
     }
 
     func schemes(project: XcodeProjectlike) throws -> [String] {
