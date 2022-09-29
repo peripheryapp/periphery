@@ -35,7 +35,7 @@ struct TypeSyntaxInspector {
         } else if let dictType = typeSyntax.as(DictionaryTypeSyntax.self) {
             // Dictionary type.
             return typeLocations(for: dictType.keyType).union(typeLocations(for: dictType.valueType))
-        } else if let someType = typeSyntax.as(SomeTypeSyntax.self) {
+        } else if let someType = typeSyntax.as(ConstrainedSugarTypeSyntax.self) {
             // Some type.
             return typeLocations(for: someType.baseType)
         } else if let implicitUnwrappedOptionalType = typeSyntax.as(ImplicitlyUnwrappedOptionalTypeSyntax.self) {

@@ -308,7 +308,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
     private func typeLocations(for clause: ReturnClauseSyntax?) -> Set<SourceLocation> {
         guard let returnTypeSyntax = clause?.returnType else { return [] }
 
-        if let someReturnType = returnTypeSyntax.as(SomeTypeSyntax.self) {
+        if let someReturnType = returnTypeSyntax.as(ConstrainedSugarTypeSyntax.self) {
             return typeSyntaxInspector.typeLocations(for: someReturnType.baseType)
         }
 

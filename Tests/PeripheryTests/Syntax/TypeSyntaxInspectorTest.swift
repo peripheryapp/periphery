@@ -154,7 +154,7 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
 
     override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind {
         if let returnTypeSyntax = node.signature.output?.returnType {
-            if let someTypeSyntax = returnTypeSyntax.as(SomeTypeSyntax.self) {
+            if let someTypeSyntax = returnTypeSyntax.as(ConstrainedSugarTypeSyntax.self) {
                 addResult(for: someTypeSyntax.baseType)
             } else {
                 addResult(for: returnTypeSyntax)
