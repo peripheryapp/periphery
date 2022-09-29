@@ -1,5 +1,5 @@
 BUILD_PATH=.build
-SWIFT_BUILD_FLAGS=--configuration release --disable-sandbox --build-path ${BUILD_PATH}
+SWIFT_BUILD_FLAGS=--configuration release --disable-sandbox --scratch-path ${BUILD_PATH}
 
 EXECUTABLE_X86_64=$(shell swift build ${SWIFT_BUILD_FLAGS} --arch x86_64 --show-bin-path)/periphery
 EXECUTABLE_ARM64=$(shell swift build ${SWIFT_BUILD_FLAGS} --arch arm64 --show-bin-path)/periphery

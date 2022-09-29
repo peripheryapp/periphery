@@ -2,7 +2,7 @@
 
 ##### Breaking
 
-- None.
+- Swift 5.6 or later is now required.
 
 ##### Enhancements
 
