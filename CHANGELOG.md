@@ -2,6 +2,20 @@
 
 ##### Breaking
 
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.10.0 (2022-10-10)
+
+##### Breaking
+
 - Swift 5.6 or later is now required.
 
 ##### Enhancements
