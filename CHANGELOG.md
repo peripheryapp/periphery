@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix error building with SwiftPM and Swift 5.7: `the target 'PeripheryKit' in product 'periphery' contains unsafe build flags`
 
 ## 2.10.0 (2022-10-10)
 

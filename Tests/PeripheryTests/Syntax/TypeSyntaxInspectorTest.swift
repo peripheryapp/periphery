@@ -90,7 +90,10 @@ class TypeSyntaxInspectorTest: XCTestCase {
     func testGenericFunction() {
         let genericFunctionArgument = results[fixtureLocation(line: 15, column: 58)]
         XCTAssertEqual(genericFunctionArgument?.type, "T.Type")
-        XCTAssertEqual(genericFunctionArgument?.locations, [fixtureLocation(line: 15, column: 58)])
+        XCTAssertEqual(genericFunctionArgument?.locations, [
+            fixtureLocation(line: 15, column: 58),
+            fixtureLocation(line: 15, column: 60)
+        ])
 
         let genericParamClause = results[fixtureLocation(line: 15, column: 25)]
         XCTAssertEqual(genericParamClause?.type, "StringProtocol & AnyObject")
@@ -136,6 +139,7 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
         self.locationConverter = .init(file: file.path.string, tree: syntax)
         self.sourceLocationBuilder = .init(file: file, locationConverter: locationConverter)
         self.typeSyntaxInspector = .init(sourceLocationBuilder: sourceLocationBuilder)
+        super.init(viewMode: .sourceAccurate)
     }
 
     func visit() {

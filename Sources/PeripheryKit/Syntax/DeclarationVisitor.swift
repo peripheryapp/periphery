@@ -130,7 +130,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            parameterClause: node.parameters,
+            parameterClause: node.signature.input,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
             at: node.initKeyword.positionAfterSkippingLeadingTrivia
@@ -212,7 +212,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            variableType: node.initializer?.value,
+            variableType: node.initializer.value,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
             at: node.identifier.positionAfterSkippingLeadingTrivia
