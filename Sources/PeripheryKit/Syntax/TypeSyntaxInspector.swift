@@ -13,7 +13,7 @@ struct TypeSyntaxInspector {
         if let simpleType = typeSyntax.as(SimpleTypeIdentifierSyntax.self) {
             // Simple type.
             let location = nameTypeLocation(for: simpleType.name)
-            let genericTypeLocations = Set(simpleType.genericArgumentClause?.arguments.flatMap { typeLocations(for:$0.argumentType) } ?? [])
+            let genericTypeLocations = Set(simpleType.genericArgumentClause?.arguments.flatMap { typeLocations(for: $0.argumentType) } ?? [])
             return genericTypeLocations.union([location])
         } else if let optionalType = typeSyntax.as(OptionalTypeSyntax.self) {
             // Optional type.

@@ -166,7 +166,7 @@ struct UnusedParameterParser {
     // MARK: - Private
 
     private func parse<T: Item>(node: SyntaxProtocol, collecting: T.Type) -> [T] {
-        return parse(children: node.children, collecting: collecting)
+        return parse(children: node.children(viewMode: .sourceAccurate), collecting: collecting)
     }
 
     private func parse<T: Item>(children: SyntaxChildren, collecting: T.Type) -> [T] {
@@ -205,7 +205,7 @@ struct UnusedParameterParser {
         } else if let node = node.as(InitializerDeclSyntax.self) {
             parsed = parse(initializerDecl: node, collector)
         } else {
-            let items = node.children.compactMap { parse(node: $0, collector) }
+            let items = node.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) }
             if items.count > 0 {
                 parsed = GenericItem(node: node, items: items)
             } else {
@@ -224,15 +224,21 @@ struct UnusedParameterParser {
         var metatype: String?
 
         if let optionalType = syntax.type?.as(OptionalTypeSyntax.self) {
-            if let metatypeSyntax = optionalType.children.mapFirst({ $0.as(MetatypeTypeSyntax.self) }) {
+            if let metatypeSyntax = optionalType.children(viewMode: .sourceAccurate).mapFirst({ $0.as(MetatypeTypeSyntax.self) }) {
                 metatype = metatypeSyntax.description
+            } else if let memberType = optionalType.children(viewMode: .sourceAccurate).mapFirst({ $0.as(MemberTypeIdentifierSyntax.self) }) {
+                metatype = parseMetatype(from: memberType)
             }
         } else if let optionalType = syntax.type?.as(ImplicitlyUnwrappedOptionalTypeSyntax.self) {
-            if let metatypeSyntax = optionalType.children.mapFirst({ $0.as(MetatypeTypeSyntax.self) }) {
+            if let metatypeSyntax = optionalType.children(viewMode: .sourceAccurate).mapFirst({ $0.as(MetatypeTypeSyntax.self) }) {
                 metatype = metatypeSyntax.description
+            } else if let memberType = optionalType.children(viewMode: .sourceAccurate).mapFirst({ $0.as(MemberTypeIdentifierSyntax.self) }) {
+                metatype = parseMetatype(from: memberType)
             }
         } else if let metatypeSyntax = syntax.type?.as(MetatypeTypeSyntax.self) {
             metatype = metatypeSyntax.description
+        } else if let memberType = syntax.type?.as(MemberTypeIdentifierSyntax.self) {
+            metatype = parseMetatype(from: memberType)
         }
 
         let positionSyntax: SyntaxProtocol = (syntax.secondName ?? syntax.firstName) ?? syntax
@@ -244,9 +250,19 @@ struct UnusedParameterParser {
                          location: location)
     }
 
+    private func parseMetatype(from syntax: MemberTypeIdentifierSyntax) -> String? {
+        // Workaround change in latest SwiftSyntax where T.Type and T.Protocol are no longer a MetatypeTypeSyntax.
+        let memberName = syntax.name.text
+        if memberName == "Type" || memberName == "Protocol" {
+            return syntax.description
+        }
+
+        return nil
+    }
+
     private func parse<T>(closureExpr syntax: ClosureExprSyntax, _ collector: Collector<T>?) -> Closure? {
-        let signature = syntax.children.mapFirst { $0.as(ClosureSignatureSyntax.self) }
-        let rawParams = signature?.input?.children.compactMap { $0.as(ClosureParamSyntax.self) }
+        let signature = syntax.children(viewMode: .sourceAccurate).mapFirst { $0.as(ClosureSignatureSyntax.self) }
+        let rawParams = signature?.input?.children(viewMode: .sourceAccurate).compactMap { $0.as(ClosureParamSyntax.self) }
         let params = rawParams?.map { $0.name.text } ?? []
         let items = syntax.statements.compactMap { parse(node: $0.item, collector) }
         return Closure(params: params, items: items)
@@ -262,7 +278,7 @@ struct UnusedParameterParser {
                 return [pattern.identifier.text]
             } else if let pattern = pattern.as(TuplePatternSyntax.self) {
                 return pattern.elements.compactMap {
-                    let token = $0.pattern.children.mapFirst { $0.as(TokenSyntax.self) }
+                    let token = $0.pattern.children(viewMode: .sourceAccurate).mapFirst { $0.as(TokenSyntax.self) }
                     return token?.text
                 }
             } else {
@@ -271,7 +287,7 @@ struct UnusedParameterParser {
         }
 
         let items = bindings.flatMap {
-            return $0.initializer?.children.compactMap { parse(node: $0, collector) } ?? []
+            return $0.initializer?.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) } ?? []
         }
 
         return Variable(names: names, items: items)
@@ -294,7 +310,7 @@ struct UnusedParameterParser {
     }
 
     private func parse<T>(initializerDecl syntax: InitializerDeclSyntax, _ collector: Collector<T>?) -> Item? {
-        return build(function: syntax.parameters,
+        return build(function: syntax.signature,
                      attributes: syntax.attributes,
                      genericParams: syntax.genericParameterClause,
                      body: syntax.body,
@@ -318,11 +334,11 @@ struct UnusedParameterParser {
         }
 
         // Swift supports nested functions, so it's possible this function captures a param from an outer function.
-        let params = parse(children: syntax.children, collecting: Parameter.self)
+        let params = parse(children: syntax.children(viewMode: .sourceAccurate), collecting: Parameter.self)
         let items = parse(node: body, collector)?.items ?? []
         let fullName = buildFullName(for: name, with: params)
         let genericParamNames = genericParams?.genericParameterList.compactMap { $0.name.text } ?? []
-        let attributeNames = attributes?.children.compactMap { AttributeSyntax($0)?.attributeName.text } ?? []
+        let attributeNames = attributes?.children(viewMode: .sourceAccurate).compactMap { AttributeSyntax($0)?.attributeName.text } ?? []
 
         let function = Function(
             name: name,

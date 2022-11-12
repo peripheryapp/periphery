@@ -1,27 +1,13 @@
 // swift-tools-version:5.5
 import PackageDescription
 
-#if os(macOS)
-private let staticSwiftSyntax = true
-#else
-private let staticSwiftSyntax = false
-#endif
-
-#if compiler(>=5.7)
-let swiftSyntaxVersion: Version = "0.50700.0"
-let staticInternalSwiftSyntaxParserVersion = "5.7"
-let staticInternalSwiftSyntaxParserChecksum = "99803975d10b2664fc37cc223a39b4e37fe3c79d3d6a2c44432007206d49db15"
-#else
-fatalError("This version of Periphery requires Swift >= 5.7 to build from source.")
-#endif
-
 var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-system", from: "1.0.0"),
     .package(url: "https://github.com/jpsim/Yams", from: "5.0.0"),
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0"),
-    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact(swiftSyntaxVersion))
+    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .revision("2c46bac26cdc05822bc47d2687dbbe559c4a3e0a"))
 ]
 
 #if os(macOS)
@@ -44,16 +30,6 @@ var frontendDependencies: [PackageDescription.Target.Dependency] = [
 frontendDependencies.append(.target(name: "XcodeSupport"))
 #endif
 
-var peripheryKitDependencies: [PackageDescription.Target.Dependency] = [
-    .target(name: "Shared"),
-    .product(name: "SystemPackage", package: "swift-system"),
-    .product(name: "AEXML", package: "AEXML"),
-    .product(name: "SwiftSyntax", package: "SwiftSyntax"),
-    .product(name: "SwiftSyntaxParser", package: "SwiftSyntax"),
-    .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
-]
-+ (staticSwiftSyntax ? ["lib_InternalSwiftSyntaxParser"] : [])
-
 var targets: [PackageDescription.Target] = [
     .executableTarget(
         name: "Frontend",
@@ -61,11 +37,14 @@ var targets: [PackageDescription.Target] = [
     ),
     .target(
         name: "PeripheryKit",
-        dependencies: peripheryKitDependencies,
-        // Pass `-dead_strip_dylibs` to ignore the dynamic version of `lib_InternalSwiftSyntaxParser`
-        // that ships with SwiftSyntax because we want the static version from
-        // `StaticInternalSwiftSyntaxParser`.
-        linkerSettings: staticSwiftSyntax ? [.unsafeFlags(["-Xlinker", "-dead_strip_dylibs"])] : []
+        dependencies: [
+            .target(name: "Shared"),
+            .product(name: "SystemPackage", package: "swift-system"),
+            .product(name: "AEXML", package: "AEXML"),
+            .product(name: "SwiftSyntax", package: "SwiftSyntax"),
+            .product(name: "SwiftSyntaxParser", package: "SwiftSyntax"),
+            .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
+        ]
     ),
     .target(
         name: "Shared",
@@ -151,17 +130,13 @@ targets.append(contentsOf: [
             .target(name: "XcodeSupport")
         ],
         exclude: ["UIKitProject", "SwiftUIProject"]
-    ),
-    .binaryTarget(
-        name: "lib_InternalSwiftSyntaxParser",
-        url: "https://github.com/keith/StaticInternalSwiftSyntaxParser/releases/download/\(staticInternalSwiftSyntaxParserVersion)/lib_InternalSwiftSyntaxParser.xcframework.zip",
-        checksum: staticInternalSwiftSyntaxParserChecksum
     )
 ])
 #endif
 
 let package = Package(
     name: "Periphery",
+    platforms: [.macOS(.v12)],
     products: [
         .executable(name: "periphery", targets: ["Frontend"])
     ],

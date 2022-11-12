@@ -56,6 +56,7 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
         self.syntax = try SyntaxParser.parse(file.path.url)
         self.locationConverter = SourceLocationConverter(file: file.path.string, tree: syntax)
         self.sourceLocationBuilder = SourceLocationBuilder(file: file, locationConverter: locationConverter)
+        super.init(viewMode: .sourceAccurate)
     }
 
     func add<T: PeripherySyntaxVisitor>(_ visitorType: T.Type) -> T {
