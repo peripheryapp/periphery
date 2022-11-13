@@ -197,20 +197,24 @@ struct UnusedParameterParser {
         } else if let node = node.as(ClosureExprSyntax.self) {
             parsed = parse(closureExpr: node, collector)
         } else if let node = node.as(IdentifierExprSyntax.self) {
-            parsed = parse(identifierExpr: node)
+            parsed = parse(identifier: node.identifier)
         } else if let node = node.as(FunctionParameterSyntax.self) {
             parsed = parse(functionParameter: node)
         } else if let node = node.as(FunctionDeclSyntax.self) {
             parsed = parse(functionDecl: node, collector)
         } else if let node = node.as(InitializerDeclSyntax.self) {
             parsed = parse(initializerDecl: node, collector)
-        } else {
-            let items = node.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) }
-            if items.count > 0 {
-                parsed = GenericItem(node: node, items: items)
+        } else if let optBindingCondition = node.as(OptionalBindingConditionSyntax.self) {
+            if optBindingCondition.initializer == nil,
+               (optBindingCondition.parent?.parent?.parent?.is(IfStmtSyntax.self) ?? false),
+               let pattern = optBindingCondition.pattern.as(IdentifierPatternSyntax.self) {
+                // Handle `if let x {}` syntax.
+                parsed = parse(identifier: pattern.identifier)
             } else {
-                parsed = nil
+                parsed = parse(childrenFrom: node, collector)
             }
+        } else {
+            parsed = parse(childrenFrom: node, collector)
         }
 
         if let collector = collector, let parsed = parsed {
@@ -218,6 +222,14 @@ struct UnusedParameterParser {
         }
 
         return parsed
+    }
+
+    private func parse<T>(childrenFrom node: Syntax, _ collector: Collector<T>?) -> Item? {
+        let items = node.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) }
+        if items.count > 0 {
+            return GenericItem(node: node, items: items)
+        }
+        return nil
     }
 
     private func parse(functionParameter syntax: FunctionParameterSyntax) -> Item {
@@ -293,9 +305,9 @@ struct UnusedParameterParser {
         return Variable(names: names, items: items)
     }
 
-    private func parse(identifierExpr syntax: IdentifierExprSyntax) -> Item {
+    private func parse(identifier: TokenSyntax) -> Item {
         // Strip backquotes so that '`class`' becomes just 'class'.
-        let name = syntax.identifier.text.replacingOccurrences(of: "`", with: "")
+        let name = identifier.text.replacingOccurrences(of: "`", with: "")
         return Identifier(name: name)
     }
 

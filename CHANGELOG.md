@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Fix error building with SwiftPM and Swift 5.7: `the target 'PeripheryKit' in product 'periphery' contains unsafe build flags`
+- Fix unused parameter analysis for shorthand if-let syntax.
 
 ## 2.10.0 (2022-10-10)
 
