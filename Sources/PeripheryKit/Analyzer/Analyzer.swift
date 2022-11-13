@@ -52,7 +52,8 @@ public final class Analyzer {
         AssignOnlyPropertyReferenceEliminator.self,
 
         DeclarationMarker.self,
-        RedundantProtocolMarker.self
+        RedundantProtocolMarker.self,
+        IfLetShorthandPropertyReferenceRetainer.self
     ]
 
     private let graph: SourceGraph

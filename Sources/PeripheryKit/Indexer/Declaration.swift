@@ -171,6 +171,7 @@ public final class Declaration {
     public var commentCommands: Set<CommentCommand> = []
     public var references: Set<Reference> = []
     public var declaredType: String?
+    public var ifLetShorthandIdentifiers: Set<String> = []
 
     public var parent: Declaration?
     var related: Set<Reference> = []
@@ -196,7 +197,7 @@ public final class Declaration {
     var immediateInheritedTypeReferences: Set<Reference> {
         let superclassReferences = related.filter { [.class, .struct, .protocol].contains($0.kind) }
 
-        // Innherited typealiases are References instead of a Related.
+        // Inherited typealiases are References instead of a Related.
         let typealiasReferences = references.filter { $0.kind == .typealias }
         return superclassReferences.union(typealiasReferences)
     }
