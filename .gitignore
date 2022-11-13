@@ -22,3 +22,6 @@ DerivedData
 *.gcda
 *.gcno
 .swiftpm
+
+# VSCode
+.vscode/*

@@ -23,8 +23,10 @@ class UnusedParameterTest: XCTestCase {
 
     func testLocalVariableAssignment() {
         analyze()
-        assertUsed("param1", in: "myFunc(param1:param2:)")
-        assertUsed("param2", in: "myFunc(param1:param2:)")
+        assertUsed("param1", in: "myFunc(param1:param2:param3:param4:)")
+        assertUsed("param2", in: "myFunc(param1:param2:param3:param4:)")
+        assertUsed("param3", in: "myFunc(param1:param2:param3:param4:)")
+        assertUsed("param4", in: "myFunc(param1:param2:param3:param4:)")
     }
 
     func testSimpleFunctionCall() {
