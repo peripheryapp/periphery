@@ -33,7 +33,6 @@ public final class Analyzer {
         DefaultConstructorReferenceBuilder.self,
         ComplexPropertyAccessorReferenceBuilder.self,
         EnumCaseReferenceBuilder.self,
-        AssociatedTypeTypeAliasReferenceBuilder.self,
 
         UnusedParameterRetainer.self,
         AssetReferenceRetainer.self,

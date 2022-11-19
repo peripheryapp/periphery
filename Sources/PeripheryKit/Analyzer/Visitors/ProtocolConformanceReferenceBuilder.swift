@@ -87,7 +87,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
 
             var equivalentDeclarationKinds = [equivalentDeclarationKind]
 
-            // A comforming declaration can be declared either 'class' or 'static', whereas
+            // A conforming declaration can be declared either 'class' or 'static', whereas
             // protocol members can only be declared as 'static'.
             if equivalentDeclarationKind == .functionMethodStatic {
                 equivalentDeclarationKinds.append(.functionMethodClass)
@@ -97,6 +97,8 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphVisitor {
                 equivalentDeclarationKinds.append(.varClass)
             } else if equivalentDeclarationKind == .varClass {
                 equivalentDeclarationKinds.append(.varStatic)
+            } else if equivalentDeclarationKind == .associatedtype {
+                equivalentDeclarationKinds.append(contentsOf: Declaration.Kind.concreteTypeDeclarableKinds)
             }
 
             guard equivalentDeclarationKinds.contains(conformingDeclaration.kind),
