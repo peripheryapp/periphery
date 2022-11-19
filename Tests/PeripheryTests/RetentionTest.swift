@@ -977,6 +977,26 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testIfLetShorthandSyntax() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass117")) {
+                self.assertReferenced(.varInstance("simpleProperty"))
+                self.assertNotAssignOnlyProperty(.varInstance("simpleProperty"))
+
+                self.assertReferenced(.varInstance("complexProperty"))
+                self.assertReferenced(.varInstance("propertyReferencedFromExtension"))
+                self.assertReferenced(.varInstance("computedPropertyInExtension"))
+                self.assertReferenced(.varInstance("propertyReferencedFromNestedFunction"))
+                self.assertReferenced(.varInstance("propertyReferencedFromPropertyAccessor"))
+            }
+
+            // This property should be referenced, but the if-let shorthand workaround doesn't
+            // handle properties at global (file) scope. This will remain broken until the
+            // issue is resolved in Swift: https://github.com/apple/swift/issues/61509.
+            self.assertNotReferenced(.varGlobal("fixtureClass117StaticProperty"))
+        }
+    }
+
     // MARK: - Assign-only properties
 
     func testSimplePropertyAssignedButNeverRead() {

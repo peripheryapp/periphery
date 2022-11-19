@@ -12,6 +12,7 @@
 
 - Fix error building with SwiftPM and Swift 5.7: `the target 'PeripheryKit' in product 'periphery' contains unsafe build flags`
 - Fix unused parameter analysis for shorthand if-let syntax.
+- Workaround Swift shorthand if-let syntax bug (https://github.com/apple/swift/issues/61509). Global properties are not handled by this workaround.
 
 ## 2.10.0 (2022-10-10)
 

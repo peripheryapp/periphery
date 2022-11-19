@@ -73,6 +73,10 @@ struct DeclarationDescription: CustomStringConvertible {
         self.init(kind: .varStatic, name: name)
     }
 
+    static func varGlobal(_ name: String) -> Self {
+        self.init(kind: .varGlobal, name: name)
+    }
+
     static func varClass(_ name: String) -> Self {
         self.init(kind: .varClass, name: name)
     }

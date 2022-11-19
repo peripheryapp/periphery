@@ -18,12 +18,15 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         returnTypeLocations: Set<SourceLocation>,
         inheritedTypeLocations: Set<SourceLocation>,
         genericParameterLocations: Set<SourceLocation>,
-        genericConformanceRequirementLocations: Set<SourceLocation>
+        genericConformanceRequirementLocations: Set<SourceLocation>,
+        ifLetShorthandIdentifiers: Set<String>
     )
 
     private let sourceLocationBuilder: SourceLocationBuilder
     private let typeSyntaxInspector: TypeSyntaxInspector
     private(set) var results: [Result] = []
+    private var ifLetShorthandIdentifiers: Set<String> = []
+    private var functionDeclStackDepth = 0
 
     var resultsByLocation: [SourceLocation: Result] {
         results.reduce(into: [SourceLocation: Result]()) { (dict, result) in
@@ -36,7 +39,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         self.typeSyntaxInspector = .init(sourceLocationBuilder: sourceLocationBuilder)
     }
 
-    func visit(_ node: ClassDeclSyntax) {
+    func visitPost(_ node: ClassDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -48,7 +51,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: ProtocolDeclSyntax) {
+    func visitPost(_ node: ProtocolDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -59,7 +62,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: StructDeclSyntax) {
+    func visitPost(_ node: StructDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -71,7 +74,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: EnumDeclSyntax) {
+    func visitPost(_ node: EnumDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -83,7 +86,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: EnumCaseDeclSyntax) {
+    func visitPost(_ node: EnumCaseDeclSyntax) {
         for element in node.elements {
             parse(
                 modifiers: node.modifiers,
@@ -95,7 +98,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         }
     }
 
-    func visit(_ node: ExtensionDeclSyntax) {
+    func visitPost(_ node: ExtensionDeclSyntax) {
         var position = node.extendedType.positionAfterSkippingLeadingTrivia
 
         if let memberType = node.extendedType.as(MemberTypeIdentifierSyntax.self) {
@@ -113,6 +116,12 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
     }
 
     func visit(_ node: FunctionDeclSyntax) {
+        functionDeclStackDepth += 1
+    }
+
+    func visitPost(_ node: FunctionDeclSyntax) {
+        functionDeclStackDepth -= 1
+
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -125,7 +134,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: InitializerDeclSyntax) {
+    func visitPost(_ node: InitializerDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -137,7 +146,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: DeinitializerDeclSyntax) {
+    func visitPost(_ node: DeinitializerDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -146,7 +155,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: SubscriptDeclSyntax) {
+    func visitPost(_ node: SubscriptDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -159,7 +168,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: VariableDeclSyntax) {
+    func visitPost(_ node: VariableDeclSyntax) {
         for binding in node.bindings {
             if binding.pattern.is(IdentifierPatternSyntax.self) {
                 parse(
@@ -207,7 +216,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         }
     }
 
-    func visit(_ node: TypealiasDeclSyntax) {
+    func visitPost(_ node: TypealiasDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -219,7 +228,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: AssociatedtypeDeclSyntax) {
+    func visitPost(_ node: AssociatedtypeDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -230,7 +239,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: OperatorDeclSyntax) {
+    func visitPost(_ node: OperatorDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -239,13 +248,21 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: PrecedenceGroupDeclSyntax) {
+    func visitPost(_ node: PrecedenceGroupDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
             at: node.identifier.positionAfterSkippingLeadingTrivia
         )
+    }
+
+    func visit(_ node: OptionalBindingConditionSyntax) {
+        guard node.initializer == nil,
+              node.parent?.parent?.parent?.is(IfStmtSyntax.self) ?? false,
+              let identifier = node.pattern.as(IdentifierPatternSyntax.self)?.identifier
+        else { return }
+        ifLetShorthandIdentifiers.insert(identifier.text)
     }
 
     // MARK: - Private
@@ -268,6 +285,14 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             AttributeSyntax($0)?.attributeName.text ?? CustomAttributeSyntax($0)?.attributeName.firstToken?.text
         } ?? []
         let location = sourceLocationBuilder.location(at: position)
+        var ifLetShorthandIdentifiers = Set<String>()
+
+        // Only associate if-let shorthand identifiers in nested functions with the top-most
+        // function.
+        if functionDeclStackDepth == 0 {
+            ifLetShorthandIdentifiers = self.ifLetShorthandIdentifiers
+            self.ifLetShorthandIdentifiers.removeAll()
+        }
 
         results.append((
             location,
@@ -281,7 +306,8 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             typeLocations(for: returnClause),
             typeLocations(for: inheritanceClause),
             typeLocations(for: genericParameterClause),
-            typeLocations(for: genericWhereClause)
+            typeLocations(for: genericWhereClause),
+            ifLetShorthandIdentifiers
         ))
     }
 
