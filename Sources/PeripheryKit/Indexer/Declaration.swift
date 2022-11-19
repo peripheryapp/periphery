@@ -105,6 +105,10 @@ public final class Declaration {
             return [.class, .struct, .enum]
         }
 
+        static var concreteTypeDeclarableKinds: Set<Kind> {
+            return [.class, .struct, .enum, .typealias]
+        }
+
         static var accessorKinds: Set<Kind> {
             Set(Kind.allCases.filter { $0.isAccessorKind })
         }

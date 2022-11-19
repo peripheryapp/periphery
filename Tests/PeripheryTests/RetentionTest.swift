@@ -584,9 +584,20 @@ final class RetentionTest: SourceGraphTestCase {
 
     func testRetainsExternalTypeExtension() {
         analyze() {
-            assertReferenced(.extensionProtocol("Sequence")) // protocol
-            assertReferenced(.extensionStruct("Array")) // struct
-            assertReferenced(.extensionClass("NumberFormatter")) // class
+            assertReferenced(.extensionProtocol("Sequence"))
+            assertReferenced(.extensionStruct("Array"))
+            assertReferenced(.extensionClass("NumberFormatter"))
+        }
+    }
+
+    func testRetainsInferredAssociatedType() {
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct120")) {
+                self.assertReferenced(.enum("AssociatedType"))
+            }
+            assertReferenced(.protocol("FixtureProtocol120")) {
+                self.assertReferenced(.associatedtype("AssociatedType"))
+            }
         }
     }
 
