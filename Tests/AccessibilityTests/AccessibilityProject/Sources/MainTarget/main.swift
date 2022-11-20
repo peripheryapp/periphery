@@ -54,3 +54,6 @@ _ = InternalClassAdoptingPublicProtocolRetainer()
 let _: PublicProtocolRefiningPublicProtocol? = nil
 _ = InternalProtocolRefiningPublicProtocolRetainer()
 
+// Closure
+let _ = PublicTypeUsedInPublicClosureRetainer().closure
+
