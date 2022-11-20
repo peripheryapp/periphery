@@ -75,7 +75,11 @@ public final class SwiftIndexer {
         let jobs = try unitsByFile.map { (file, units) -> Job in
             let modules = try units.reduce(into: Set<String>()) { (set, unit) in
                 if let name = try indexStore.moduleName(for: unit) {
-                    set.insert(name)
+                    let (didInsert, _) = set.insert(name)
+                    if !didInsert {
+                        let targets = try Set(units.compactMap { try indexStore.target(for: $0) })
+                        throw PeripheryError.conflictingIndexUnitsError(file: file, module: name, unitTargets: targets)
+                    }
                 }
             }
             let sourceFile = SourceFile(path: file, modules: modules)
