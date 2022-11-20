@@ -14,6 +14,7 @@
 - Fix unused parameter analysis for shorthand if-let syntax.
 - Workaround Swift shorthand if-let syntax bug (https://github.com/apple/swift/issues/61509). Global properties are not handled by this workaround.
 - Fix retaining inferred associated types.
+- Fix redundant public accessibility analysis for types used in closure signatures.
 
 ## 2.10.0 (2022-10-10)
 

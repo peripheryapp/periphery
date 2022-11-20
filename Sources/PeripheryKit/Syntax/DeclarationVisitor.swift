@@ -171,11 +171,15 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
     func visitPost(_ node: VariableDeclSyntax) {
         for binding in node.bindings {
             if binding.pattern.is(IdentifierPatternSyntax.self) {
+                let closureSignature = binding.initializer?.value.as(ClosureExprSyntax.self)?.signature
+                let closureParameters = closureSignature?.input?.as(ParameterClauseSyntax.self)
                 parse(
                     modifiers: node.modifiers,
                     attributes: node.attributes,
                     trivia: node.leadingTrivia,
                     variableType: binding.typeAnnotation?.type,
+                    parameterClause: closureParameters,
+                    returnClause: closureSignature?.output,
                     at: binding.positionAfterSkippingLeadingTrivia
                 )
             } else if let tuplePatternSyntax = binding.pattern.as(TuplePatternSyntax.self) {

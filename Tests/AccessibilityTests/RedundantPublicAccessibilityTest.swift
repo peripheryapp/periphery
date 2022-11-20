@@ -148,4 +148,9 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
         assertNotRedundantPublicAccessibility(.typealias("PublicTypealiasWithClosureType"))
         assertNotRedundantPublicAccessibility(.struct("PublicTypealiasStruct"))
     }
+
+    func testPublicTypeUsedInPublicClosure() {
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedInPublicClosureReturnType"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedInPublicClosureInputType"))
+    }
 }
