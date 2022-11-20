@@ -7,7 +7,7 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(name: "SwiftIndexStore", url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0"),
-    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .revision("2c46bac26cdc05822bc47d2687dbbe559c4a3e0a"))
+    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .revision("a82041008d2c678a97407fbd0ce420d3ab047538"))
 ]
 
 #if os(macOS)
