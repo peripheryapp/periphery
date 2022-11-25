@@ -992,6 +992,7 @@ final class RetentionTest: SourceGraphTestCase {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass117")) {
                 self.assertReferenced(.varInstance("simpleProperty"))
+                self.assertReferenced(.varInstance("guardedSimpleProperty"))
                 self.assertNotAssignOnlyProperty(.varInstance("simpleProperty"))
 
                 self.assertReferenced(.varInstance("complexProperty"))
