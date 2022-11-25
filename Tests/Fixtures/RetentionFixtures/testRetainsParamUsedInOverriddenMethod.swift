@@ -15,6 +15,9 @@ public class FixtureClass101Base {
 
     // Overridden, unused.
     public func func5(param: String) {}
+
+    // Overriden, declared in subclass extension.
+    public func func6(param: String) {}
 }
 
 public class FixtureClass101Subclass1: FixtureClass101Base {

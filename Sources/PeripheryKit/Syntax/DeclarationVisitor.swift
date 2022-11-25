@@ -263,8 +263,9 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
 
     func visit(_ node: OptionalBindingConditionSyntax) {
         guard node.initializer == nil,
-              node.parent?.parent?.parent?.is(IfStmtSyntax.self) ?? false,
-              let identifier = node.pattern.as(IdentifierPatternSyntax.self)?.identifier
+              let identifier = node.pattern.as(IdentifierPatternSyntax.self)?.identifier,
+              let parentStmt = node.parent?.parent?.parent,
+              (parentStmt.is(IfStmtSyntax.self) || parentStmt.is(GuardStmtSyntax.self))
         else { return }
         ifLetShorthandIdentifiers.insert(identifier.text)
     }

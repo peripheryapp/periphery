@@ -2,6 +2,7 @@ var fixtureClass117StaticProperty: String?
 
 public class FixtureClass117 {
     var simpleProperty: String?
+    var guardedSimpleProperty: String?
     var complexProperty: String? {
         get { nil }
         set { }
@@ -24,22 +25,13 @@ public class FixtureClass117 {
     public func retain() {
         simpleProperty = ""
 
-        if let simpleProperty {
-            _ = simpleProperty
-        }
-
-        if let complexProperty {
-            _ = complexProperty
-        }
-
-        if let fixtureClass117StaticProperty {
-            _ = fixtureClass117StaticProperty
-        }
+        if let simpleProperty {}
+        guard let guardedSimpleProperty else { return }
+        if let complexProperty {}
+        if let fixtureClass117StaticProperty {}
 
         func nested() {
-            if let propertyReferencedFromNestedFunction {
-                _ = propertyReferencedFromNestedFunction
-            }
+            if let propertyReferencedFromNestedFunction {}
         }
     }
 }
@@ -50,12 +42,7 @@ extension FixtureClass117 {
     }
 
     public func retain2() {
-        if let propertyReferencedFromExtension {
-            _ = propertyReferencedFromExtension
-        }
-
-        if let computedPropertyInExtension {
-            _ = computedPropertyInExtension
-        }
+        if let propertyReferencedFromExtension {}
+        if let computedPropertyInExtension {}
     }
 }

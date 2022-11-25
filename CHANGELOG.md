@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix guard-let shorthand syntax.
 
 ## 2.10.1 (2022-11-20)
 
