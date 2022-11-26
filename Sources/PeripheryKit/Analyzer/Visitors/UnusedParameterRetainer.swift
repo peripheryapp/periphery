@@ -15,32 +15,25 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
     }
 
     func visit() throws {
-        let paramDecls = graph.declarations(ofKind: .varParameter)
-        let functionDecls: Set<Declaration> = Set(paramDecls.compactMap { $0.parent })
+        let functionDecls = graph
+            .declarations(ofKind: .varParameter) // These are only unused params.
+            .compactMap { $0.parent }
 
-        for functionDecl in functionDecls {
-            retainIfNeeded(params: functionDecl.unusedParameters, inMethod: functionDecl)
-        }
+        retainParams(inFunctions: Set(functionDecls))
 
-        let protocolDecls = graph.declarations(ofKind: .protocol)
-
-        for protoDecl in protocolDecls {
-            let extDecls = protoDecl.references
-                .filter { $0.kind == .extensionProtocol && $0.name == protoDecl.name }
-                .compactMap { graph.explicitDeclaration(withUsr: $0.usr) }
-
-            // Since protocol declarations have no body, their params will always be unused,
-            // and thus present in functionDecls.
+        for protoDecl in graph.declarations(ofKind: .protocol) {
             let protoFuncDecls = protoDecl.declarations.filter { functionDecls.contains($0) }
 
             for protoFuncDecl in protoFuncDecls {
-                let extFuncDecls = extDecls.flatMap {
-                    $0.declarations.filter { $0.kind.isFunctionKind && $0.name == protoFuncDecl.name }
-                }
-                let conformingDecls = protoFuncDecl.related
-                    .filter { $0.kind.isFunctionKind && $0.name == protoFuncDecl.name }
-                    .compactMap { graph.explicitDeclaration(withUsr: $0.usr) }
-                    .filter { !extFuncDecls.contains($0) }
+                let relatedFuncDecls = protoFuncDecl.related
+                    .filter { $0.kind.isFunctionKind }
+                    .reduce(into: Set<Declaration>()) { result, ref in
+                        if let decl = graph.explicitDeclaration(withUsr: ref.usr) {
+                            result.insert(decl)
+                        }
+                    }
+                let extFuncDecls = relatedFuncDecls.filter { $0.parent?.kind.isExtensionKind ?? false }
+                let conformingDecls = relatedFuncDecls.subtracting(extFuncDecls)
 
                 if conformingDecls.isEmpty {
                     // This protocol function declaration is not implemented, though it may still be referenced from an
@@ -50,13 +43,14 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
                         functionDecl.unusedParameters.forEach { graph.markRetained($0) }
                     }
                 } else {
-                    let allFunctionDecls = conformingDecls + extFuncDecls + [protoFuncDecl]
+                    let overrideDecls = conformingDecls.flatMap { graph.allOverrideDeclarations(fromBase:$0) }
+                    let allFunctionDecls = conformingDecls + overrideDecls + extFuncDecls + [protoFuncDecl]
 
                     for functionDecl in allFunctionDecls {
                         if configuration.retainUnusedProtocolFuncParams {
                             functionDecl.unusedParameters.forEach { graph.markRetained($0) }
                         } else {
-                            retain(params: functionDecl.unusedParameters, usedIn: allFunctionDecls)
+                            retain(params: Array(functionDecl.unusedParameters), usedIn: allFunctionDecls)
                         }
                     }
                 }
@@ -66,72 +60,34 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
 
     // MARK: - Private
 
-    private func retainIfNeeded(params: Set<Declaration>, inMethod methodDeclaration: Declaration) {
-        let allMethodDeclarations: [Declaration]
+    private func retainParams(inFunctions functionDecls: Set<Declaration>) {
+        var visitedDecls: Set<Declaration> = []
 
-        if let classDeclaration = methodDeclaration.parent, classDeclaration.kind == .class {
-            let allClassDeclarations = [classDeclaration]
-                + graph.inheritedDeclarations(of: classDeclaration)
-                + graph.subclasses(of: classDeclaration)
+        for functionDecl in Set(functionDecls) {
+            guard !visitedDecls.contains(functionDecl) else { continue }
 
-            allMethodDeclarations = allClassDeclarations.flatMap { declaration in
-                declaration
-                    .declarations
-                    .lazy
-                    .filter { $0.kind == methodDeclaration.kind }
-                    .filter { $0.name == methodDeclaration.name }
+            let (baseFunctionDecl, didResolveBase) = graph.baseDeclaration(fromOverride: functionDecl)
+            let overrideFunctionDecls = graph.allOverrideDeclarations(fromBase: baseFunctionDecl)
+            let allFunctionDecls = overrideFunctionDecls + [baseFunctionDecl]
+            visitedDecls.formUnion(allFunctionDecls)
+
+            if didResolveBase {
+                if baseFunctionDecl.accessibility.value == .open && configuration.retainPublic {
+                    retainAllUnusedParams(inMethods: allFunctionDecls)
+                } else if hasExternalRelatedReferences(from: baseFunctionDecl) {
+                    retainAllUnusedParams(inMethods: allFunctionDecls)
+                } else {
+                    let params = allFunctionDecls.flatMap { $0.unusedParameters }
+                    retain(params: params, usedIn: allFunctionDecls)
+                }
+            } else {
+                retainAllUnusedParams(inMethods: allFunctionDecls)
             }
-
-            retainIfNeeded(
-                params: params,
-                inOverridenMethods: allMethodDeclarations
-            )
-        } else {
-            allMethodDeclarations = [methodDeclaration]
         }
-
-        retainParamsIfNeeded(inForeignProtocolMethods: allMethodDeclarations)
     }
 
-    private func retainParamsIfNeeded(inForeignProtocolMethods methodDeclarations: [Declaration]) {
-        guard let methodDeclaration = methodDeclarations.first else {
-            return
-        }
-
-        guard let referenceKind = methodDeclaration.kind.referenceEquivalent else {
-            return
-        }
-
-        let foreignReferences = methodDeclaration
-            .related
-            .lazy
-            .filter { $0.kind == referenceKind }
-            .filter { $0.name == methodDeclaration.name }
-            .filter { self.graph.isExternal($0) }
-
-        guard !foreignReferences.isEmpty else {
-            return
-        }
-
-        methodDeclarations
-            .lazy
-            .flatMap { $0.unusedParameters }
-            .forEach { graph.markRetained($0) }
-    }
-
-    private func retainIfNeeded(params: Set<Declaration>, inOverridenMethods methodDeclarations: [Declaration]) {
-        guard let baseDeclaration = methodDeclarations.first(where: { !$0.modifiers.contains("override") }) else {
-            // Must be overriding a declaration in a foreign class.
-            return retainAllUnusedParams(inMethods: methodDeclarations)
-        }
-
-        guard baseDeclaration.accessibility.value != .open || !configuration.retainPublic else {
-            // Parameters can be used in methods that are overridden from the outside
-            return retainAllUnusedParams(inMethods: methodDeclarations)
-        }
-
-        // Retain all params that are used in any of the functions.
-        return retain(params: params, usedIn: methodDeclarations)
+    private func hasExternalRelatedReferences(from decl: Declaration) -> Bool {
+        decl.relatedEquivalentReferences.contains { graph.isExternal($0) }
     }
 
     private func retainAllUnusedParams(inMethods methodDeclarations: [Declaration]) {
@@ -141,7 +97,7 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
             .forEach { graph.markRetained($0) }
     }
 
-    private func retain(params: Set<Declaration>, usedIn functionDecls: [Declaration]) {
+    private func retain(params: [Declaration], usedIn functionDecls: [Declaration]) {
         for param in params {
             if isParam(param, usedInAnyOf: functionDecls) {
                 graph.markRetained(param)
@@ -153,13 +109,13 @@ final class UnusedParameterRetainer: SourceGraphVisitor {
         for decl in decls {
             let matchingParam = decl.unusedParameters.first { $0.name == param.name }
 
-            if let param = matchingParam, graph.isRetained(param) {
-                // Already retained by a prior analysis.
+            if matchingParam == nil {
+                // Used
                 return true
             }
 
-            if matchingParam == nil {
-                // Used
+            if let param = matchingParam, graph.isRetained(param) {
+                // Already retained by a prior analysis, e.g by an ignore command.
                 return true
             }
         }

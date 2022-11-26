@@ -221,6 +221,14 @@ public final class Declaration {
         }
     }
 
+    var isOverride: Bool {
+        modifiers.contains("override")
+    }
+
+    var relatedEquivalentReferences: [Reference] {
+        related.filter { $0.kind == kind.referenceEquivalent && $0.name == name }
+    }
+
     init(kind: Kind, usrs: Set<String>, location: SourceLocation) {
         self.kind = kind
         self.usrs = usrs

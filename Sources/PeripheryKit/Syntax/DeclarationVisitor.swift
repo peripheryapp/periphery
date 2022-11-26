@@ -115,7 +115,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: FunctionDeclSyntax) {
+    func visit(_: FunctionDeclSyntax) {
         functionDeclStackDepth += 1
     }
 

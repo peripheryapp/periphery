@@ -173,8 +173,14 @@ open class SourceGraphTestCase: XCTestCase {
     private func materialize(_ description: DeclarationDescription, in defaultDeclarations: Set<Declaration>? = nil, fail: Bool = true, file: StaticString, line: UInt) -> Declaration? {
         let declarations = scopedDeclarations(from: defaultDeclarations)
 
-        if let declaration = declarations.first(where: { $0.kind == description.kind && $0.name == description.name }) {
-            return declaration
+        let matchingDeclarations = declarations.filter { $0.kind == description.kind && $0.name == description.name }
+
+        if let line = description.line {
+            if let declaration = matchingDeclarations.first(where: { $0.location.line == line }) {
+                return declaration
+            }
+        } else {
+            return matchingDeclarations.first
         }
 
         if fail {
