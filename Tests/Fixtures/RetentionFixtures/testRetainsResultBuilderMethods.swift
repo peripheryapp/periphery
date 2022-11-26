@@ -29,6 +29,14 @@ class FixtureClass130 {
     static func buildBlock(_ components: Component...) -> Component {
         Array(components.joined())
     }
+
+    static func buildFinalResult(_ component: FixtureClass130.Component) -> Component {
+        component
+    }
+
+    static func buildLimitedAvailability(_ component: FixtureClass130.Component) -> Component {
+        component
+    }
 }
 
 public class FixtureClass130Retainer {
