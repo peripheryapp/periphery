@@ -13,7 +13,9 @@ final class ResultBuilderRetainer: SourceGraphVisitor {
         "buildEither(first:)",
         "buildEither(second:)",
         "buildArray(_:)",
-        "buildBlock(_:)"
+        "buildBlock(_:)",
+        "buildFinalResult(_:)",
+        "buildLimitedAvailability(_:)",
     ])
 
     required init(graph: SourceGraph) {

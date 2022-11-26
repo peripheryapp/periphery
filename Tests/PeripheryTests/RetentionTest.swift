@@ -987,6 +987,8 @@ final class RetentionTest: SourceGraphTestCase {
                 self.assertReferenced(.functionMethodStatic("buildEither(second:)"))
                 self.assertReferenced(.functionMethodStatic("buildArray(_:)"))
                 self.assertReferenced(.functionMethodStatic("buildBlock(_:)"))
+                self.assertReferenced(.functionMethodStatic("buildFinalResult(_:)"))
+                self.assertReferenced(.functionMethodStatic("buildLimitedAvailability(_:)"))
             }
         }
     }
