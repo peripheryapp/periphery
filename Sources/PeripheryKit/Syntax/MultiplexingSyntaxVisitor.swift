@@ -14,7 +14,7 @@ protocol PeripherySyntaxVisitor {
     func visit(_ node: EnumDeclSyntax)
     func visit(_ node: EnumCaseDeclSyntax)
     func visit(_ node: ExtensionDeclSyntax)
-    func visit(_ node: FunctionDeclSyntax)
+    func visit(_: FunctionDeclSyntax)
     func visit(_ node: InitializerDeclSyntax)
     func visit(_ node: DeinitializerDeclSyntax)
     func visit(_ node: SubscriptDeclSyntax)
@@ -52,7 +52,7 @@ extension PeripherySyntaxVisitor {
     func visit(_ node: EnumDeclSyntax) { }
     func visit(_ node: EnumCaseDeclSyntax) { }
     func visit(_ node: ExtensionDeclSyntax) { }
-    func visit(_ node: FunctionDeclSyntax) { }
+    func visit(_: FunctionDeclSyntax) { }
     func visit(_ node: InitializerDeclSyntax) { }
     func visit(_ node: DeinitializerDeclSyntax) { }
     func visit(_ node: SubscriptDeclSyntax) { }

@@ -274,4 +274,34 @@ public final class SourceGraph {
 
         return nil
     }
+
+    func baseDeclaration(fromOverride decl: Declaration) -> (Declaration, Bool) {
+        guard decl.isOverride else { return (decl, true) }
+
+        let baseDecl = references(to: decl)
+            .filter {
+                $0.isRelated &&
+                $0.kind == decl.kind.referenceEquivalent &&
+                $0.name == decl.name
+            }
+            .compactMap { $0.parent }
+            .first
+
+        guard let baseDecl = baseDecl else {
+            // Base reference is external, return the current function as it's the closest.
+            return (decl, false)
+        }
+
+        return baseDeclaration(fromOverride: baseDecl)
+    }
+
+    func allOverrideDeclarations(fromBase decl: Declaration) -> Set<Declaration> {
+        decl.relatedEquivalentReferences
+            .compactMap { explicitDeclaration(withUsr: $0.usr) }
+            .reduce(into: .init()) { result, decl in
+                guard decl.isOverride else { return }
+                result.insert(decl)
+                result.formUnion(allOverrideDeclarations(fromBase: decl))
+            }
+    }
 }

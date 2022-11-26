@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Fix guard-let shorthand syntax.
+- Fix accuracy of unused parameter analysis for overridden and protocol conforming functions.
 
 ## 2.10.1 (2022-11-20)
 

@@ -9,6 +9,8 @@ public protocol FixtureProtocol104 {
     func func3(param: String)
     // Unused in extension, but used in conformance.
     func func4(param: String)
+    // Unused, same name but different type to validate accuracy.
+    func func4(param: Int)
     // param used in multiple conformances
     static func func5(param: String)
     // Used only in override
@@ -23,6 +25,7 @@ extension FixtureProtocol104 {
     }
 
     public func func4(param: String) {}
+    public func func4(param: Int) {}
 }
 
 public class FixtureClass104Class1: FixtureProtocol104 {
@@ -47,6 +50,8 @@ public class FixtureClass104Class2: FixtureProtocol104 {
     public func func4(param: String) {
         print(param)
     }
+
+    public func func4(param: Int) {}
 
     public static func func5(param: String) {
         print(param)
