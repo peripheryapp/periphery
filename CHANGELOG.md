@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.10.2 (2022-11-27)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix guard-let shorthand syntax.
 - Fix accuracy of unused parameter analysis for overridden and protocol conforming functions.
 - Fix retaining `buildFinalResult(_:)` and `buildLimitedAvailability(_:)` result builder methods.
