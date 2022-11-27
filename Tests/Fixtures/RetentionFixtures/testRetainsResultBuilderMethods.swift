@@ -30,11 +30,11 @@ class FixtureClass130 {
         Array(components.joined())
     }
 
-    static func buildFinalResult(_ component: FixtureClass130.Component) -> Component {
+    static func buildFinalResult(_ component: Component) -> Component {
         component
     }
 
-    static func buildLimitedAvailability(_ component: FixtureClass130.Component) -> Component {
+    static func buildLimitedAvailability(_ component: Component) -> Component {
         component
     }
 }

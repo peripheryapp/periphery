@@ -361,7 +361,7 @@ public final class SwiftIndexer {
                     decl.modifiers = Set(result.modifiers)
                     decl.commentCommands = Set(result.commentCommands)
                     decl.declaredType = result.variableType
-                    decl.ifLetShorthandIdentifiers = result.ifLetShorthandIdentifiers
+                    decl.letShorthandIdentifiers = result.letShorthandIdentifiers
 
                     for ref in decl.references.union(decl.related) {
                         if result.inheritedTypeLocations.contains(ref.location) {

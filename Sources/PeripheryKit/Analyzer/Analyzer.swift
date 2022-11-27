@@ -52,7 +52,7 @@ public final class Analyzer {
 
         DeclarationMarker.self,
         RedundantProtocolMarker.self,
-        IfLetShorthandPropertyReferenceRetainer.self
+        LetShorthandPropertyReferenceRetainer.self
     ]
 
     private let graph: SourceGraph

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Workaround for https://github.com/apple/swift/issues/61509.
-final class IfLetShorthandPropertyReferenceRetainer: SourceGraphVisitor {
+final class LetShorthandPropertyReferenceRetainer: SourceGraphVisitor {
     static func make(graph: SourceGraph) -> Self {
         return self.init(graph: graph)
     }
@@ -21,7 +21,7 @@ final class IfLetShorthandPropertyReferenceRetainer: SourceGraphVisitor {
         for property in properties {
             guard let propertyName = property.name,
                   let parent = property.parent,
-                  parent.declarations.contains(where: { $0.ifLetShorthandIdentifiers.contains(propertyName) })
+                  parent.declarations.contains(where: { $0.letShorthandIdentifiers.contains(propertyName) })
             else { continue }
             graph.markReachable(property)
         }

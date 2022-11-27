@@ -19,13 +19,13 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         inheritedTypeLocations: Set<SourceLocation>,
         genericParameterLocations: Set<SourceLocation>,
         genericConformanceRequirementLocations: Set<SourceLocation>,
-        ifLetShorthandIdentifiers: Set<String>
+        letShorthandIdentifiers: Set<String>
     )
 
     private let sourceLocationBuilder: SourceLocationBuilder
     private let typeSyntaxInspector: TypeSyntaxInspector
     private(set) var results: [Result] = []
-    private var ifLetShorthandIdentifiers: Set<String> = []
+    private var letShorthandIdentifiers: Set<String> = []
     private var functionDeclStackDepth = 0
 
     var resultsByLocation: [SourceLocation: Result] {
@@ -267,7 +267,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
               let parentStmt = node.parent?.parent?.parent,
               (parentStmt.is(IfStmtSyntax.self) || parentStmt.is(GuardStmtSyntax.self))
         else { return }
-        ifLetShorthandIdentifiers.insert(identifier.text)
+        letShorthandIdentifiers.insert(identifier.text)
     }
 
     // MARK: - Private
@@ -290,13 +290,13 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             AttributeSyntax($0)?.attributeName.text ?? CustomAttributeSyntax($0)?.attributeName.firstToken?.text
         } ?? []
         let location = sourceLocationBuilder.location(at: position)
-        var ifLetShorthandIdentifiers = Set<String>()
+        var letShorthandIdentifiers = Set<String>()
 
-        // Only associate if-let shorthand identifiers in nested functions with the top-most
+        // Only associate let shorthand identifiers in nested functions with the top-most
         // function.
         if functionDeclStackDepth == 0 {
-            ifLetShorthandIdentifiers = self.ifLetShorthandIdentifiers
-            self.ifLetShorthandIdentifiers.removeAll()
+            letShorthandIdentifiers = self.letShorthandIdentifiers
+            self.letShorthandIdentifiers.removeAll()
         }
 
         results.append((
@@ -312,7 +312,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             typeLocations(for: inheritanceClause),
             typeLocations(for: genericParameterClause),
             typeLocations(for: genericWhereClause),
-            ifLetShorthandIdentifiers
+            letShorthandIdentifiers
         ))
     }
 

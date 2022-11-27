@@ -175,7 +175,7 @@ public final class Declaration {
     public var commentCommands: Set<CommentCommand> = []
     public var references: Set<Reference> = []
     public var declaredType: String?
-    public var ifLetShorthandIdentifiers: Set<String> = []
+    public var letShorthandIdentifiers: Set<String> = []
 
     public var parent: Declaration?
     var related: Set<Reference> = []
