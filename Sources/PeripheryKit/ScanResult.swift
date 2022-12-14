@@ -6,6 +6,7 @@ public struct ScanResult {
         case assignOnlyProperty
         case redundantProtocol(references: Set<Reference>)
         case redundantPublicAccessibility(modules: Set<String>)
+        case superfluousIgnore
     }
 
     public let declaration: Declaration

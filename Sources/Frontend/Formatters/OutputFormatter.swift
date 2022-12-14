@@ -20,6 +20,8 @@ extension OutputFormatter {
             return "redundantProtocol"
         case .redundantPublicAccessibility:
             return "redundantPublicAccessibility"
+        case .superfluousIgnore:
+            return "superfluousIgnore"
         }
     }
 
@@ -49,6 +51,8 @@ extension OutputFormatter {
             case let .redundantPublicAccessibility(modules):
                 let modulesJoined = modules.joined(separator: ", ")
                 description += " is declared public, but not used outside of \(modulesJoined)"
+            case .superfluousIgnore:
+                description += " is used, but marked ignore"
             }
         } else {
             description += "unused"
