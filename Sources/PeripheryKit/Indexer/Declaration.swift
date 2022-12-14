@@ -105,6 +105,10 @@ public final class Declaration {
             return [.class, .struct, .enum]
         }
 
+        static var concreteTypeDeclarableKinds: Set<Kind> {
+            return [.class, .struct, .enum, .typealias]
+        }
+
         static var accessorKinds: Set<Kind> {
             Set(Kind.allCases.filter { $0.isAccessorKind })
         }
@@ -171,6 +175,7 @@ public final class Declaration {
     public var commentCommands: Set<CommentCommand> = []
     public var references: Set<Reference> = []
     public var declaredType: String?
+    public var letShorthandIdentifiers: Set<String> = []
 
     public var parent: Declaration?
     var related: Set<Reference> = []
@@ -196,7 +201,7 @@ public final class Declaration {
     var immediateInheritedTypeReferences: Set<Reference> {
         let superclassReferences = related.filter { [.class, .struct, .protocol].contains($0.kind) }
 
-        // Innherited typealiases are References instead of a Related.
+        // Inherited typealiases are References instead of a Related.
         let typealiasReferences = references.filter { $0.kind == .typealias }
         return superclassReferences.union(typealiasReferences)
     }
@@ -214,6 +219,14 @@ public final class Declaration {
 
             return false
         }
+    }
+
+    var isOverride: Bool {
+        modifiers.contains("override")
+    }
+
+    var relatedEquivalentReferences: [Reference] {
+        related.filter { $0.kind == kind.referenceEquivalent && $0.name == name }
     }
 
     init(kind: Kind, usrs: Set<String>, location: SourceLocation) {

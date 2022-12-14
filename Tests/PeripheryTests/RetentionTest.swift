@@ -347,7 +347,7 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testUnusedOverridenMethod() {
+    func testUnusedOverriddenMethod() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass81Base")) {
                 self.assertNotReferenced(.functionMethodInstance("someMethod()"))
@@ -358,7 +358,7 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testOverridenMethodRetainedBySuper() {
+    func testOverriddenMethodRetainedBySuper() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass82Base")) {
                 self.assertReferenced(.functionMethodInstance("someMethod()"))
@@ -584,9 +584,20 @@ final class RetentionTest: SourceGraphTestCase {
 
     func testRetainsExternalTypeExtension() {
         analyze() {
-            assertReferenced(.extensionProtocol("Sequence")) // protocol
-            assertReferenced(.extensionStruct("Array")) // struct
-            assertReferenced(.extensionClass("NumberFormatter")) // class
+            assertReferenced(.extensionProtocol("Sequence"))
+            assertReferenced(.extensionStruct("Array"))
+            assertReferenced(.extensionClass("NumberFormatter"))
+        }
+    }
+
+    func testRetainsInferredAssociatedType() {
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct120")) {
+                self.assertReferenced(.enum("AssociatedType"))
+            }
+            assertReferenced(.protocol("FixtureProtocol120")) {
+                self.assertReferenced(.associatedtype("AssociatedType"))
+            }
         }
     }
 
@@ -870,6 +881,17 @@ final class RetentionTest: SourceGraphTestCase {
                 self.assertReferenced(.varInstance("assignOnlyProperty"))
                 self.assertNotAssignOnlyProperty(.varInstance("assignOnlyProperty"))
             }
+            assertReferenced(.class("FixtureClass212")) {
+                self.assertReferenced(.functionMethodInstance("protocolFunc(param:)")) {
+                    self.assertReferenced(.varParameter("param"))
+                }
+            }
+            assertReferenced(.class("FixtureClass213")) {
+                self.assertReferenced(.functionMethodInstance("someFunc(a:b:c:)")) {
+                    self.assertReferenced(.varParameter("b"))
+                    self.assertReferenced(.varParameter("c"))
+                }
+            }
             assertReferenced(.class("Fixture205"))
             assertReferenced(.protocol("Fixture205Protocol"))
             assertNotRedundantProtocol("Fixture205Protocol")
@@ -965,6 +987,8 @@ final class RetentionTest: SourceGraphTestCase {
                 self.assertReferenced(.functionMethodStatic("buildEither(second:)"))
                 self.assertReferenced(.functionMethodStatic("buildArray(_:)"))
                 self.assertReferenced(.functionMethodStatic("buildBlock(_:)"))
+                self.assertReferenced(.functionMethodStatic("buildFinalResult(_:)"))
+                self.assertReferenced(.functionMethodStatic("buildLimitedAvailability(_:)"))
             }
         }
     }
@@ -974,6 +998,27 @@ final class RetentionTest: SourceGraphTestCase {
             assertReferenced(.struct("FixtureStruct1")) {
                 self.assertReferenced(.functionMethodInstance("callAsFunction(_:)"))
             }
+        }
+    }
+
+    func testLetShorthandSyntax() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass117")) {
+                self.assertReferenced(.varInstance("simpleProperty"))
+                self.assertReferenced(.varInstance("guardedSimpleProperty"))
+                self.assertNotAssignOnlyProperty(.varInstance("simpleProperty"))
+
+                self.assertReferenced(.varInstance("complexProperty"))
+                self.assertReferenced(.varInstance("propertyReferencedFromExtension"))
+                self.assertReferenced(.varInstance("computedPropertyInExtension"))
+                self.assertReferenced(.varInstance("propertyReferencedFromNestedFunction"))
+                self.assertReferenced(.varInstance("propertyReferencedFromPropertyAccessor"))
+            }
+
+            // This property should be referenced, but the let shorthand workaround doesn't
+            // handle properties at global (file) scope. This will remain broken until the
+            // issue is resolved in Swift: https://github.com/apple/swift/issues/61509.
+            self.assertNotReferenced(.varGlobal("fixtureClass117StaticProperty"))
         }
     }
 
@@ -1092,13 +1137,26 @@ final class RetentionTest: SourceGraphTestCase {
                 }
 
                 // Used in override.
-                self.assertReferenced(.functionMethodInstance("func4(param:)")) {
+                // func4(param: String)
+                self.assertReferenced(.functionMethodInstance("func4(param:)", line: 14)) {
                     self.assertReferenced(.varParameter("param"))
+                }
+
+                // Not used in any function.
+                // func4(param: Int)
+                self.assertReferenced(.functionMethodInstance("func4(param:)", line: 17)) {
+                    self.assertNotReferenced(.varParameter("param"))
                 }
 
                 // Not used in any function.
                 self.assertReferenced(.functionMethodInstance("func5(param:)")) {
                     self.assertNotReferenced(.varParameter("param"))
+                }
+
+                // Overridden in multiple subclass branches.
+                self.assertReferenced(.functionMethodInstance("func7(param1:param2:)")) {
+                    self.assertReferenced(.varParameter("param1"))
+                    self.assertNotReferenced(.varParameter("param2"))
                 }
             }
 
@@ -1112,17 +1170,50 @@ final class RetentionTest: SourceGraphTestCase {
                 self.assertReferenced(.functionMethodInstance("func3(param:)")) {
                     self.assertUsedParameter("param")
                 }
+
+                // Not used in any function.
+                // func4(param: Int)
+                self.assertReferenced(.functionMethodInstance("func4(param:)", line: 36)) {
+                    self.assertNotReferenced(.varParameter("param"))
+                }
+
+                // Overridden in multiple subclass branches.
+                self.assertReferenced(.functionMethodInstance("func7(param1:param2:)")) {
+                    self.assertUsedParameter("param1")
+                    self.assertNotReferenced(.varParameter("param2"))
+                }
             }
 
             assertReferenced(.class("FixtureClass101Subclass2")) {
                 // The param is used.
-                self.assertReferenced(.functionMethodInstance("func4(param:)")) {
+                // func4(param: String)
+                self.assertReferenced(.functionMethodInstance("func4(param:)", line: 44)) {
                     self.assertUsedParameter("param")
+                }
+
+                // Not used in any function.
+                // func4(param: Int)
+                self.assertReferenced(.functionMethodInstance("func4(param:)", line: 48)) {
+                    self.assertNotReferenced(.varParameter("param"))
                 }
 
                 // Not used in any function.
                 self.assertReferenced(.functionMethodInstance("func5(param:)")) {
                     self.assertNotReferenced(.varParameter("param"))
+                }
+
+                // Overridden in multiple subclass branches.
+                self.assertReferenced(.functionMethodInstance("func7(param1:param2:)")) {
+                    self.assertReferenced(.varParameter("param1"))
+                    self.assertNotReferenced(.varParameter("param2"))
+                }
+            }
+
+            assertReferenced(.class("FixtureClass101Subclass3")) {
+                // Overridden in multiple subclass branches.
+                self.assertReferenced(.functionMethodInstance("func7(param1:param2:)")) {
+                    self.assertReferenced(.varParameter("param1"))
+                    self.assertNotReferenced(.varParameter("param2"))
                 }
             }
 
@@ -1223,8 +1314,15 @@ final class RetentionTest: SourceGraphTestCase {
                 }
 
                 // Unused in extension, but used in conformance.
-                self.assertReferenced(.functionMethodInstance("func4(param:)")) {
+                // func4(param: String)
+                self.assertReferenced(.functionMethodInstance("func4(param:)", line: 11)) {
                     self.assertReferenced(.varParameter("param"))
+                }
+
+                // Unused.
+                // func4(param: Int)
+                self.assertReferenced(.functionMethodInstance("func4(param:)", line: 13)) {
+                    self.assertNotReferenced(.varParameter("param"))
                 }
 
                 // Used in a conformance.
@@ -1245,8 +1343,15 @@ final class RetentionTest: SourceGraphTestCase {
                 }
 
                 // Used in a conformance by another class.
-                self.assertReferenced(.functionMethodInstance("func4(param:)")) {
+                // func4(param: String)
+                self.assertReferenced(.functionMethodInstance("func4(param:)", line: 27)) {
                     self.assertReferenced(.varParameter("param"))
+                }
+
+                // Unused.
+                // func4(param: Int)
+                self.assertReferenced(.functionMethodInstance("func4(param:)", line: 28)) {
+                    self.assertNotReferenced(.varParameter("param"))
                 }
             }
 
@@ -1299,8 +1404,15 @@ final class RetentionTest: SourceGraphTestCase {
                 }
 
                 // The param is used.
-                self.assertReferenced(.functionMethodInstance("func4(param:)")) {
+                // func4(param: String)
+                self.assertReferenced(.functionMethodInstance("func4(param:)", line: 50)) {
                     self.assertUsedParameter("param")
+                }
+
+                // Unused.
+                // func4(param: Int)
+                self.assertReferenced(.functionMethodInstance("func4(param:)", line: 54)) {
+                    self.assertNotReferenced(.varParameter("param"))
                 }
 
                 // The param is used.

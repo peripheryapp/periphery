@@ -206,9 +206,10 @@ struct UnusedParameterParser {
             parsed = parse(initializerDecl: node, collector)
         } else if let optBindingCondition = node.as(OptionalBindingConditionSyntax.self) {
             if optBindingCondition.initializer == nil,
-               (optBindingCondition.parent?.parent?.parent?.is(IfStmtSyntax.self) ?? false),
-               let pattern = optBindingCondition.pattern.as(IdentifierPatternSyntax.self) {
-                // Handle `if let x {}` syntax.
+               let pattern = optBindingCondition.pattern.as(IdentifierPatternSyntax.self),
+               let parentStmt = optBindingCondition.parent?.parent?.parent,
+               (parentStmt.is(IfStmtSyntax.self) || parentStmt.is(GuardStmtSyntax.self)) {
+                // Handle `let x {}` syntax.
                 parsed = parse(identifier: pattern.identifier)
             } else {
                 parsed = parse(childrenFrom: node, collector)

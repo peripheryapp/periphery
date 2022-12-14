@@ -71,7 +71,7 @@ public final class Reference {
         static var protocolMemberConformingKinds: [Kind] {
             // Protocols cannot declare 'class' members, yet classes can fulfill the requirement with either a 'class'
             // or 'static' member.
-            protocolMemberKinds + [.varClass, .functionMethodClass]
+            protocolMemberKinds + [.varClass, .functionMethodClass, .associatedtype]
         }
 
         var isProtocolMemberKind: Bool {

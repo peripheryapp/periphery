@@ -1,4 +1,5 @@
 import Foundation
+import SystemPackage
 
 public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case shellCommandFailed(cmd: String, args: [String], status: Int32, output: String)
@@ -20,6 +21,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case unindexedTargetsError(targets: Set<String>, indexStorePath: String)
     case jsonDeserializationError(error: Error, json: String)
     case indexStoreNotFound(derivedDataPath: String)
+    case conflictingIndexUnitsError(file: FilePath, module: String, unitTargets: Set<String>)
 
     public var errorDescription: String? {
         switch self {
@@ -68,6 +70,13 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             return "JSON deserialization failed: \(describe(error))\nJSON:\n\(json)"
         case let .indexStoreNotFound(derivedDataPath):
             return "Failed to find index datastore at path: \(derivedDataPath)"
+        case let .conflictingIndexUnitsError(file, module, targets):
+            var parts = ["Found conflicting index store units for '\(file)' in module '\(module)'."]
+            if targets.count > 1 {
+                parts.append("The units have conflicting build targets: \(targets.sorted().joined(separator: ", ")).")
+            }
+            parts.append("If you passed the '--index-store-path' option, ensure that Xcode is not open with a project that may write to this index store while Periphery is running.")
+            return parts.joined(separator: " ")
         }
     }
 

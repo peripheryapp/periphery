@@ -10,8 +10,42 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.10.2 (2022-11-27)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- Fix guard-let shorthand syntax.
+- Fix accuracy of unused parameter analysis for overridden and protocol conforming functions.
+- Fix retaining `buildFinalResult(_:)` and `buildLimitedAvailability(_:)` result builder methods.
+
+## 2.10.1 (2022-11-20)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix error building with SwiftPM and Swift 5.7: `the target 'PeripheryKit' in product 'periphery' contains unsafe build flags`
 - Fix unused parameter analysis for shorthand if-let syntax.
+- Workaround Swift shorthand if-let syntax bug (https://github.com/apple/swift/issues/61509). Global properties are not handled by this workaround.
+- Fix retaining inferred associated types.
+- Fix redundant public accessibility analysis for types used in closure signatures.
+- Conflicting index store units are now detected and result in an error.
 
 ## 2.10.0 (2022-10-10)
 

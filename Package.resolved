@@ -39,11 +39,11 @@
       },
       {
         "package": "SwiftIndexStore",
-        "repositoryURL": "https://github.com/kateinoigakukun/swift-indexstore",
+        "repositoryURL": "https://github.com/ileitch/swift-indexstore",
         "state": {
           "branch": null,
-          "revision": "ea41d13796dbbc4dc36d97ba5edb20a021aaf4e4",
-          "version": "0.1.5"
+          "revision": "f4e55301ca7d6d25057c514bea0e7407a1620f5f",
+          "version": null
         }
       },
       {
@@ -51,7 +51,7 @@
         "repositoryURL": "https://github.com/apple/swift-syntax.git",
         "state": {
           "branch": null,
-          "revision": "2c46bac26cdc05822bc47d2687dbbe559c4a3e0a",
+          "revision": "a82041008d2c678a97407fbd0ce420d3ab047538",
           "version": null
         }
       },

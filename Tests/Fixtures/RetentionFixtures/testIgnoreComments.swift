@@ -47,6 +47,16 @@ public class FixtureClass116 {
     }
 }
 
+public class FixtureClass212: Fixture114Protocol {
+    // param is ignored because the protocol ignores it.
+    public func protocolFunc(param: String) {}
+}
+
+public class FixtureClass213: Fixture114 {
+    // params a & b are ignored because the base class ignores them.
+    public override func someFunc(a: String, b: String, c: String) {}
+}
+
 // periphery:ignore
 // redundant protocol
 public protocol Fixture205Protocol {}
