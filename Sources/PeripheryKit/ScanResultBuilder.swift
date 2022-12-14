@@ -6,9 +6,7 @@ public struct ScanResultBuilder {
         let removableDeclarations = graph.unreachableDeclarations.subtracting(assignOnlyProperties)
         let redundantProtocols = graph.redundantProtocols.filter { !removableDeclarations.contains($0.0) }
         let redundantPublicAccessibility = graph.redundantPublicAccessibility.filter { !removableDeclarations.contains($0.0) }
-        let ignoredButUsedDeclarations = graph.reachableDeclarations.filter { $0.commentCommands.contains(.ignore) }
-
-        let ignoredAndUnused = graph.ignoredDeclarations.filter { !ignoredButUsedDeclarations.contains($0) }
+        let ignoredButUsedDeclarations = graph.reachableDeclarations.filter { graph.userIgnoredDeclarations.contains($0) }
 
         let annotatedRemovableDeclarations: [ScanResult] = removableDeclarations.map {
             .init(declaration: $0, annotation: .unused)
@@ -36,7 +34,7 @@ public struct ScanResultBuilder {
             .filter {
                 !$0.declaration.isImplicit &&
                 !$0.declaration.kind.isAccessorKind &&
-                !ignoredAndUnused.contains($0.declaration)
+                (!graph.ignoredDeclarations.contains($0.declaration) || ignoredButUsedDeclarations.contains($0.declaration))
             }
     }
 }

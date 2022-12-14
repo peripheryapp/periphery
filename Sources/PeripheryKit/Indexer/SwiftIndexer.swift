@@ -336,10 +336,14 @@ public final class SwiftIndexer {
             let fileCommands = CommentCommand.parseCommands(in: syntaxVisitor.syntax.leadingTrivia)
 
             if fileCommands.contains(.ignoreAll) {
+                for decl in declarations {
+                    graph.markUserIgnored(decl)
+                }
                 retainHierarchy(declarations)
             } else {
                 for decl in declarations {
                     if decl.commentCommands.contains(.ignore) {
+                        graph.markUserIgnored(decl)
                         retainHierarchy([decl])
                     }
                 }

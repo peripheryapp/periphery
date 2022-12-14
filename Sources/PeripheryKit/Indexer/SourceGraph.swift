@@ -13,6 +13,7 @@ public final class SourceGraph {
     private(set) var retainedDeclarations: Set<Declaration> = []
     private(set) var potentialAssignOnlyProperties: Set<Declaration> = []
     private(set) var ignoredDeclarations: Set<Declaration> = []
+    private(set) var userIgnoredDeclarations: Set<Declaration> = []
     private(set) var assetReferences: Set<AssetReference> = []
     private(set) var mainAttributedDeclarations: Set<Declaration> = []
 
@@ -88,6 +89,12 @@ public final class SourceGraph {
     func markIgnored(_ declaration: Declaration) {
         mutationQueue.sync {
             _ = ignoredDeclarations.insert(declaration)
+        }
+    }
+
+    func markUserIgnored(_ declaration: Declaration) {
+        mutationQueue.sync {
+            _ = userIgnoredDeclarations.insert(declaration)
         }
     }
 
