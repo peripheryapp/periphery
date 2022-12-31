@@ -7,7 +7,7 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(name: "SwiftIndexStore", url: "https://github.com/ileitch/swift-indexstore", .revision("f4e55301ca7d6d25057c514bea0e7407a1620f5f")),
-    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .revision("a82041008d2c678a97407fbd0ce420d3ab047538"))
+    .package(url: "https://github.com/peripheryapp/swift-syntax", .exact("1.0.0"))
 ]
 
 #if os(macOS)
@@ -41,8 +41,8 @@ var targets: [PackageDescription.Target] = [
             .target(name: "Shared"),
             .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "AEXML", package: "AEXML"),
-            .product(name: "SwiftSyntax", package: "SwiftSyntax"),
-            .product(name: "SwiftSyntaxParser", package: "SwiftSyntax"),
+            .product(name: "SwiftSyntax", package: "swift-syntax"),
+            .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
             .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
         ]
     ),

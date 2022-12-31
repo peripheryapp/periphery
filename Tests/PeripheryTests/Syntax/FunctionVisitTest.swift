@@ -69,8 +69,7 @@ class FunctionVisitTest: XCTestCase {
     func testFunctionWithGenericArguments() throws {
         let result = results[fixtureLocation(line: 20)]
         XCTAssertEqual(result?.parameterTypeLocations, [
-            fixtureLocation(line: 20, column: 70),
-            fixtureLocation(line: 20, column: 72)
+            fixtureLocation(line: 20, column: 70)
         ])
         XCTAssertEqual(result?.genericParameterLocations, [
             fixtureLocation(line: 20, column: 37),
@@ -107,7 +106,6 @@ class FunctionVisitTest: XCTestCase {
         let result = results[fixtureLocation(line: 30, column: 5)]
         XCTAssertEqual(result?.parameterTypeLocations, [
             fixtureLocation(line: 30, column: 46),
-            fixtureLocation(line: 30, column: 48)
         ])
         XCTAssertEqual(result?.genericParameterLocations, [
             fixtureLocation(line: 30, column: 13),
@@ -135,8 +133,7 @@ class FunctionVisitTest: XCTestCase {
     func testSubscriptWithGenericArguments() throws {
         let result = results[fixtureLocation(line: 35, column: 5)]
         XCTAssertEqual(result?.parameterTypeLocations, [
-            fixtureLocation(line: 35, column: 51),
-            fixtureLocation(line: 35, column: 53)
+            fixtureLocation(line: 35, column: 51)
         ])
         XCTAssertEqual(result?.returnTypeLocations, [
             fixtureLocation(line: 35, column: 62)
