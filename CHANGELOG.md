@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix retaining CodingKeys enum in a struct whose Codable conformance is declared in an extension.
 
 ## 2.10.2 (2022-11-27)
 

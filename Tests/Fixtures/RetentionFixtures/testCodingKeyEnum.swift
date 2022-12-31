@@ -40,3 +40,13 @@ public class FixtureClass76 { // Doesn't conform to Codable, so the enum is unus
         case someVar
     }
 }
+
+public struct FixtureClass120 {
+  let someVar: String
+
+  enum CodingKeys: CodingKey {
+      case someVar
+  }
+}
+
+extension FixtureClass120: Decodable {}
