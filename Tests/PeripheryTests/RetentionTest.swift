@@ -1566,6 +1566,15 @@ final class RetentionTest: SourceGraphTestCase {
 
     // MARK: - Known Failures
 
+    func testMainActorAnnotation() {
+        guard performKnownFailures else { return }
+
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass132"))
+            assertReferenced(.class("FixtureClass133"))
+        }
+    }
+
     // https://bugs.swift.org/browse/SR-14181
     func testSelfReferencedConstructor() {
         guard performKnownFailures else { return }
