@@ -1025,6 +1025,15 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
+    func testDoesNotRetainLazyProperty() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass36")) {
+                self.assertNotReferenced(.varInstance("someLazyVar"))
+                self.assertNotReferenced(.varInstance("someVar"))
+            }
+        }
+    }
+
     // MARK: - Assign-only properties
 
     func testSimplePropertyAssignedButNeverRead() {
@@ -1620,18 +1629,6 @@ final class RetentionTest: SourceGraphTestCase {
             }
             assertReferenced(.protocol("FixtureProtocol100")) {
                 self.assertReferenced(.varInstance("someGetSetVar"))
-            }
-        }
-    }
-
-    // https://bugs.swift.org/browse/SR-13767
-    func testDoesNotRetainLazyProperty() {
-        guard performKnownFailures else { return }
-
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass36")) {
-                self.assertNotReferenced(.varInstance("someLazyVar"))
-                self.assertNotReferenced(.varInstance("someVar"))
             }
         }
     }
