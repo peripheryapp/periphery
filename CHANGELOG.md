@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Fix retaining CodingKeys enum in a struct whose Codable conformance is declared in an extension.
+- Used tagged dependencies to prevent "unsafe build flags" error from SwiftPM.
 
 ## 2.10.2 (2022-11-27)
 

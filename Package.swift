@@ -6,7 +6,7 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/jpsim/Yams", from: "5.0.0"),
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
-    .package(name: "SwiftIndexStore", url: "https://github.com/ileitch/swift-indexstore", .revision("f4e55301ca7d6d25057c514bea0e7407a1620f5f")),
+    .package(url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.0.0"),
     .package(url: "https://github.com/peripheryapp/swift-syntax", .exact("1.0.0"))
 ]
 
@@ -43,7 +43,7 @@ var targets: [PackageDescription.Target] = [
             .product(name: "AEXML", package: "AEXML"),
             .product(name: "SwiftSyntax", package: "swift-syntax"),
             .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
-            .product(name: "SwiftIndexStore", package: "SwiftIndexStore")
+            .product(name: "SwiftIndexStore", package: "swift-indexstore")
         ]
     ),
     .target(
