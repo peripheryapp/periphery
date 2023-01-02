@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.10.3 (2023-01-02)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix retaining CodingKeys enum in a struct whose Codable conformance is declared in an extension.
 - Used tagged dependencies to prevent "unsafe build flags" error from SwiftPM.
 - Fix old index store use by including Xcode version hash in DerivedData directory name.
