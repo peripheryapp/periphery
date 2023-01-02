@@ -1681,7 +1681,7 @@ final class RetentionTest: SourceGraphTestCase {
             graph.markRetained(declaration)
         }
 
-        try! Analyzer.perform(graph: graph)
+        try! SourceGraphMutatorRunner.perform(graph: graph)
         try testBlock()
 
         if (testRun?.failureCount ?? 0) > 0 {

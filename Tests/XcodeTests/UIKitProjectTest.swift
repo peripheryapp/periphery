@@ -21,7 +21,7 @@ class UIKitProjectTest: SourceGraphTestCase {
 
         try! driver.build()
         try! driver.index(graph: graph)
-        try! Analyzer.perform(graph: graph)
+        try! SourceGraphMutatorRunner.perform(graph: graph)
     }
 
     func testRetainsMainAppEntryPoint() {

@@ -46,7 +46,7 @@ final class Scan: Injectable {
             logger.info("\(asterisk) Analyzing...\n")
         }
 
-        try Analyzer.perform(graph: graph)
+        try SourceGraphMutatorRunner.perform(graph: graph)
         return ScanResultBuilder.build(for: graph)
     }
 }

@@ -1,0 +1,27 @@
+import Foundation
+
+// https://bugs.swift.org/browse/SR-13792
+// The index store does not contain references to `appendInterpolation` functions from their use in string literals.
+final class StringInterpolationAppendInterpolationRetainer: SourceGraphMutator {
+    static func make(graph: SourceGraph) -> Self {
+        return self.init(graph: graph)
+    }
+
+    private let graph: SourceGraph
+
+    required init(graph: SourceGraph) {
+        self.graph = graph
+    }
+
+    func mutate() {
+        graph.declarations(ofKind: .extensionStruct)
+            .forEach {
+                $0.declarations.filter {
+                    $0.kind == .functionMethodInstance &&
+                        ($0.name ?? "").hasPrefix("appendInterpolation(")
+                }.forEach {
+                    graph.markRetained($0)
+                }
+            }
+    }
+}

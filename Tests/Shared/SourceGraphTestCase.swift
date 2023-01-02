@@ -33,7 +33,7 @@ open class SourceGraphTestCase: XCTestCase {
     func assertReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, file: file, line: line) else { return }
 
-        if !graph.reachableDeclarations.contains(declaration) {
+        if !graph.usedDeclarations.contains(declaration) {
             XCTFail("Expected declaration to be referenced: \(declaration)", file: file, line: line)
         }
 
@@ -45,7 +45,7 @@ open class SourceGraphTestCase: XCTestCase {
     func assertNotReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, file: file, line: line) else { return }
 
-        if !graph.unreachableDeclarations.contains(declaration) {
+        if !graph.unusedDeclarations.contains(declaration) {
             XCTFail("Expected declaration to not be referenced: \(declaration)", file: file, line: line)
         }
 
