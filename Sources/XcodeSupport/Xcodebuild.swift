@@ -48,7 +48,7 @@ public final class Xcodebuild {
 
     func indexStorePath(project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> String {
         let derivedDataPath = try derivedDataPath(for: project, schemes: schemes)
-        let pathsToTry = ["Index/DataStore", "Index.noindex/DataStore"]
+        let pathsToTry = ["Index.noindex/DataStore", "Index/DataStore"]
             .map { derivedDataPath.appending($0).string }
         guard let path = pathsToTry.first(where: { path in
             return FileManager.default.fileExists(atPath: path)
@@ -119,9 +119,11 @@ public final class Xcodebuild {
         // contain two records for that source file. One reflects the state of the file when scheme A was built, and the
         // other when B was built. We must therefore key the DerivedData path with the full list of schemes being built.
 
+        let xcodeVersionHash = try version().djb2Hex
         let projectHash = project.name.djb2Hex
         let schemesHash = schemes.map { $0.name }.joined().djb2Hex
-        return try (cachePath().appending("DerivedData-\(projectHash)-\(schemesHash)"))
+
+        return try (cachePath().appending("DerivedData-\(xcodeVersionHash)-\(projectHash)-\(schemesHash)"))
     }
 
     private func cachePath() throws -> FilePath {
