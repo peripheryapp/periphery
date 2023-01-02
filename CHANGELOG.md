@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Add `clear-cache` command.
 
 ##### Bug Fixes
 

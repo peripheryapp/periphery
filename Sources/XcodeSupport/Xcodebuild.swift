@@ -123,11 +123,6 @@ public final class Xcodebuild {
         let projectHash = project.name.djb2Hex
         let schemesHash = schemes.map { $0.name }.joined().djb2Hex
 
-        return try (cachePath().appending("DerivedData-\(xcodeVersionHash)-\(projectHash)-\(schemesHash)"))
-    }
-
-    private func cachePath() throws -> FilePath {
-        let url = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        return FilePath(url.appendingPathComponent("com.github.peripheryapp").path)
+        return try Constants.cachePath().appending("DerivedData-\(xcodeVersionHash)-\(projectHash)-\(schemesHash)")
     }
 }
