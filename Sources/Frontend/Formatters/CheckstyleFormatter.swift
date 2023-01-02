@@ -3,17 +3,7 @@ import Shared
 import PeripheryKit
 
 final class CheckstyleFormatter: OutputFormatter {
-    static func make() -> Self {
-        return self.init(logger: inject())
-    }
-
-    private let logger: Logger
-
-    required init(logger: Logger) {
-        self.logger = logger
-    }
-
-    func perform(_ results: [ScanResult]) {
+    func format(_ results: [ScanResult]) -> String {
         let parts = results.flatMap { describe($0, colored: false) }
         let xml = [
             "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<checkstyle version=\"4.3\">",
@@ -23,7 +13,7 @@ final class CheckstyleFormatter: OutputFormatter {
                 .map(generateForFile).joined(),
             "\n</checkstyle>"
         ].joined()
-        logger.info(xml, canQuiet: false)
+        return xml
     }
 
     // MARK: - Private

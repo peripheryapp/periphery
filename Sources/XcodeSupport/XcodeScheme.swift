@@ -3,10 +3,6 @@ import PeripheryKit
 import Shared
 
 final class XcodeScheme {
-    static func make(project: XcodeProjectlike, name: String) throws -> Self {
-        return try self.init(project: project, name: name, xcodebuild: inject())
-    }
-
     let project: XcodeProjectlike
     let name: String
 
@@ -14,7 +10,7 @@ final class XcodeScheme {
     private let xcodebuild: Xcodebuild
     private var testTargetsProperty: [String] = []
 
-    required init(project: XcodeProjectlike, name: String, xcodebuild: Xcodebuild) throws {
+    required init(project: XcodeProjectlike, name: String, xcodebuild: Xcodebuild = .init()) throws {
         self.project = project
         self.name = name
         self.xcodebuild = xcodebuild

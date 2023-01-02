@@ -4,14 +4,10 @@ import Shared
 import PeripheryKit
 
 final class ScanBehavior {
-    static func make() -> Self {
-        return self.init(configuration: inject(), logger: inject())
-    }
-
     private let configuration: Configuration
     private let logger: Logger
 
-    required init(configuration: Configuration, logger: Logger) {
+    required init(configuration: Configuration = .shared, logger: Logger = .init()) {
         self.configuration = configuration
         self.logger = logger
     }
@@ -39,7 +35,7 @@ final class ScanBehavior {
 
         if configuration.guidedSetup {
             do {
-                project = try GuidedSetup.make().perform()
+                project = try GuidedSetup().perform()
             } catch let error as PeripheryError {
                 return .failure(error)
             } catch {
@@ -58,16 +54,17 @@ final class ScanBehavior {
             }
         }
 
-        let updateChecker = UpdateChecker.make()
+        let updateChecker = UpdateChecker()
         updateChecker.run()
 
         let results: [ScanResult]
 
         do {
             results = try block(project)
-            let filteredResults = OutputDeclarationFilter.make().filter(results)
+            let filteredResults = OutputDeclarationFilter().filter(results)
             let sortedResults = filteredResults.sorted { $0.declaration < $1.declaration }
-            try configuration.outputFormat.formatter.make().perform(sortedResults)
+            let output = try configuration.outputFormat.formatter.init().format(sortedResults)
+            logger.info(output, canQuiet: false)
 
             if filteredResults.count > 0,
                 configuration.outputFormat.supportsAuxiliaryOutput {

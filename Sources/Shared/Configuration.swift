@@ -2,14 +2,11 @@ import Foundation
 import SystemPackage
 import Yams
 
-public final class Configuration: Singleton {
+public final class Configuration {
     public static var defaultConfigurationFile = ".periphery.yml"
+    public static let shared = Configuration()
 
-    public static func make() -> Self {
-        return self.init(logger: inject())
-    }
-
-    required init(logger: BaseLogger) {
+    public init(logger: BaseLogger = .shared) {
         self.logger = logger
     }
 
@@ -311,7 +308,7 @@ public final class Configuration: Singleton {
     typealias ValueConverter = (Any) -> Value?
     typealias ValueSanitizer = (Value) -> Value
 
-    fileprivate let defaultValue: Value
+    public let defaultValue: Value
     fileprivate let key: String
 
     private let valueConverter: ValueConverter

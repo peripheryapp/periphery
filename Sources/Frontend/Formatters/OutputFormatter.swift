@@ -3,8 +3,8 @@ import Shared
 import PeripheryKit
 
 protocol OutputFormatter: AnyObject {
-    static func make() -> Self
-    func perform(_ results: [ScanResult]) throws
+    init()
+    func format(_ results: [ScanResult]) throws -> String
 }
 
 extension OutputFormatter {

@@ -5,11 +5,7 @@ import Shared
 import FoundationNetworking
 #endif
 
-final class UpdateChecker: Singleton {
-    static func make() -> Self {
-        return self.init(logger: inject(), configuration: inject())
-    }
-
+final class UpdateChecker {
     private let logger: Logger
     private let debugLogger: ContextualLogger
     private let configuration: Configuration
@@ -19,7 +15,7 @@ final class UpdateChecker: Singleton {
     private let semaphore: DispatchSemaphore
     private var error: Error?
 
-    required init(logger: Logger, configuration: Configuration) {
+    required init(logger: Logger = .init(), configuration: Configuration = .shared) {
         self.logger = logger
         self.debugLogger = logger.contextualized(with: "update-check")
         self.configuration = configuration

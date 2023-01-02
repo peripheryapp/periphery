@@ -15,13 +15,13 @@ class XcodebuildSettingsParserTest: XCTestCase {
     override static func setUp() {
         super.setUp()
 
-        project = try! XcodeProject.make(path: UIKitProjectPath)
+        project = try! XcodeProject(path: UIKitProjectPath)
     }
 
     override func setUp() {
         super.setUp()
 
-        xcodebuild = Xcodebuild.make()
+        xcodebuild = Xcodebuild()
     }
 
     func testBuildTargets() {

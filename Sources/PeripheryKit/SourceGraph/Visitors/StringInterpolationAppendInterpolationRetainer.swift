@@ -1,15 +1,12 @@
 import Foundation
+import Shared
 
 // https://bugs.swift.org/browse/SR-13792
 // The index store does not contain references to `appendInterpolation` functions from their use in string literals.
 final class StringInterpolationAppendInterpolationRetainer: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph) {
+    required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 

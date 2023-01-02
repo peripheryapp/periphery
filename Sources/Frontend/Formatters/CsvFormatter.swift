@@ -3,18 +3,8 @@ import Shared
 import PeripheryKit
 
 final class CsvFormatter: OutputFormatter {
-    static func make() -> Self {
-        return self.init(logger: inject())
-    }
-
-    private let logger: Logger
-
-    required init(logger: Logger) {
-        self.logger = logger
-    }
-
-    func perform(_ results: [ScanResult]) {
-        logger.info("Kind,Name,Modifiers,Attributes,Accessibility,IDs,Location,Hints", canQuiet: false)
+    func format(_ results: [ScanResult]) -> String {
+        var lines: [String] = ["Kind,Name,Modifiers,Attributes,Accessibility,IDs,Location,Hints"]
 
         for result in results {
             let line = format(
@@ -27,7 +17,7 @@ final class CsvFormatter: OutputFormatter {
                 location: result.declaration.location,
                 hint: describe(result.annotation)
             )
-            logger.info(line, canQuiet: false)
+            lines.append(line)
 
             switch result.annotation {
             case let .redundantProtocol(references: references):
@@ -41,12 +31,14 @@ final class CsvFormatter: OutputFormatter {
                         usrs: [ref.usr],
                         location: ref.location,
                         hint: redundantConformanceHint)
-                    logger.info(line, canQuiet: false)
+                    lines.append(line)
                 }
             default:
                 break
             }
         }
+
+        return lines.joined(separator: "\n")
     }
 
     // MARK: - Private

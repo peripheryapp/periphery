@@ -2,13 +2,9 @@ import Foundation
 import Shared
 
 final class CommonSetupGuide: SetupGuideHelpers, SetupGuide {
-    static func make() -> Self {
-        return self.init(configuration: inject())
-    }
-
     private let configuration: Configuration
 
-    required init(configuration: Configuration) {
+    required init(configuration: Configuration = .shared) {
         self.configuration = configuration
         super.init()
     }

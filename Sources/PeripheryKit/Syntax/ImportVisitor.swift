@@ -2,13 +2,11 @@ import Foundation
 import SwiftSyntax
 
 final class ImportVisitor: PeripherySyntaxVisitor {
-    static func make(sourceLocationBuilder: SourceLocationBuilder) -> Self {
-        self.init()
-    }
-
     typealias ImportStatement = (parts: [String], isTestable: Bool)
 
     var importStatements: [ImportStatement] = []
+
+    init(sourceLocationBuilder: SourceLocationBuilder) {}
 
     func visit(_ node: ImportDeclSyntax) {
         let parts = node.path.map { $0.name.text }

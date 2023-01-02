@@ -62,13 +62,3 @@ final class SourceGraphDebugger {
         }
     }
 }
-
-extension SourceGraphDebugger: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
-    func mutate() {
-        describeGraph()
-    }
-}

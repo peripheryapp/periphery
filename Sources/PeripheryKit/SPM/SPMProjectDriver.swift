@@ -3,8 +3,8 @@ import SystemPackage
 import Shared
 
 public final class SPMProjectDriver {
-    public static func make() throws -> Self {
-        let configuration: Configuration = inject()
+    public static func build() throws -> Self {
+        let configuration = Configuration.shared
         let package = try SPM.Package.load()
         let targets: [SPM.Target]
 
@@ -23,7 +23,7 @@ public final class SPMProjectDriver {
             }
         }
 
-        return self.init(package: package, targets: targets, configuration: configuration, logger: inject())
+        return self.init(package: package, targets: targets, configuration: configuration, logger: .init())
     }
 
     private let package: SPM.Package
@@ -31,7 +31,7 @@ public final class SPMProjectDriver {
     private let configuration: Configuration
     private let logger: Logger
 
-    init(package: SPM.Package, targets: [SPM.Target], configuration: Configuration, logger: Logger) {
+    init(package: SPM.Package, targets: [SPM.Target], configuration: Configuration, logger: Logger = .init()) {
         self.package = package
         self.targets = targets
         self.configuration = configuration
@@ -75,7 +75,7 @@ extension SPMProjectDriver: ProjectDriver {
             storePath = FilePath(package.path).appending(".build/debug/index/store").string
         }
 
-        try SwiftIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
+        try SwiftIndexer(sourceFiles: sourceFiles, graph: graph, indexStoreURL: URL(fileURLWithPath: storePath)).perform()
 
         graph.indexingComplete()
     }

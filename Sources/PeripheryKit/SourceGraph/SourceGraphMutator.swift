@@ -1,6 +1,7 @@
 import Foundation
+import Shared
 
 protocol SourceGraphMutator: AnyObject {
-    static func make(graph: SourceGraph) -> Self
+    init(graph: SourceGraph, configuration: Configuration)
     func mutate() throws
 }

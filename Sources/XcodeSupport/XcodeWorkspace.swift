@@ -5,13 +5,6 @@ import PeripheryKit
 import Shared
 
 final class XcodeWorkspace: XcodeProjectlike {
-    static func make(path: FilePath) throws -> Self {
-        return try self.init(path: path,
-                             xcodebuild: inject(),
-                             configuration: inject(),
-                             logger: inject())
-    }
-
     let type: String = "workspace"
     let path: FilePath
     let sourceRoot: FilePath
@@ -22,7 +15,7 @@ final class XcodeWorkspace: XcodeProjectlike {
 
     private(set) var targets: Set<XcodeTarget> = []
 
-    required init(path: FilePath, xcodebuild: Xcodebuild, configuration: Configuration, logger: Logger) throws {
+    required init(path: FilePath, xcodebuild: Xcodebuild = .init(), configuration: Configuration = .shared, logger: Logger = .init()) throws {
         logger.contextualized(with: "xcode:workspace").debug("Loading \(path)")
 
         self.path = path
@@ -38,13 +31,13 @@ final class XcodeWorkspace: XcodeProjectlike {
 
         let projectPaths = collectProjectPaths(in: xcworkspace.data.children)
         targets = Set(try projectPaths
-                        .compactMap { try XcodeProject.tryMake(path: (sourceRoot.pushing( $0)), referencedBy: self.path) }
+                        .compactMap { try XcodeProject.build(path: (sourceRoot.pushing( $0)), referencedBy: self.path) }
             .flatMap { $0.targets })
     }
 
     func schemes() throws -> Set<XcodeScheme> {
         let schemes = try xcodebuild.schemes(project: self).map {
-            try XcodeScheme.make(project: self, name: $0)
+            try XcodeScheme(project: self, name: $0)
         }
         return Set(schemes)
     }

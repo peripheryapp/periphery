@@ -1,16 +1,12 @@
 import Foundation
+import Shared
 
 final class SwiftUIRetainer: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
+    private let graph: SourceGraph
     private static let specialProtocolNames = ["PreviewProvider", "LibraryContentProvider"]
     private static let applicationDelegateAdaptorStructNames = ["UIApplicationDelegateAdaptor", "NSApplicationDelegateAdaptor"]
 
-    private let graph: SourceGraph
-
-    required init(graph: SourceGraph) {
+    required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 

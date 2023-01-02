@@ -44,10 +44,10 @@ final class ReadableStream {
     }
 }
 
-open class Shell: Singleton {
-    public static func make() -> Self {
-        return self.init(environment: ProcessInfo.processInfo.environment, logger: inject())
-    }
+open class Shell {
+    public static let shared: Shell = {
+        return Shell(environment: ProcessInfo.processInfo.environment, logger: Logger())
+    }()
 
     private var tasks: Set<Process> = []
     private var tasksQueue = DispatchQueue(label: "Shell.tasksQueue")

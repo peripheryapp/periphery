@@ -2,16 +2,11 @@ import Foundation
 import Shared
 import PeripheryKit
 
-final class Scan: Injectable {
-    static func make() -> Self {
-        return self.init(configuration: inject(),
-                         logger: inject())
-    }
-
+final class Scan {
     private let configuration: Configuration
     private let logger: Logger
 
-    required init(configuration: Configuration, logger: Logger) {
+    required init(configuration: Configuration = .shared, logger: Logger = .init()) {
         self.configuration = configuration
         self.logger = logger
     }

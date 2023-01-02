@@ -1,14 +1,11 @@
 import Foundation
+import Shared
 
 /// Workaround for https://github.com/apple/swift/issues/61509.
 final class LetShorthandPropertyReferenceMarker: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph) {
+    required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 

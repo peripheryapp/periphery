@@ -7,22 +7,22 @@ import Shared
 final class XcodeProject: XcodeProjectlike {
     private static var cache: [FilePath: XcodeProject] = [:]
 
-    static func tryMake(path: FilePath, referencedBy refPath: FilePath) throws -> XcodeProject? {
+    static func build(path: FilePath, referencedBy refPath: FilePath) throws -> XcodeProject? {
         if !path.exists {
-            let logger: Logger = inject()
+            let logger = Logger()
             logger.warn("No such project exists at '\(path.lexicallyNormalized())', referenced by '\(refPath)'.")
             return nil
         }
 
-        return try make(path: path)
+        return try build(path: path)
     }
 
-    static func make(path: FilePath) throws -> XcodeProject {
+    static func build(path: FilePath) throws -> XcodeProject {
         if let cached = cache[path] {
             return cached
         }
 
-        return try self.init(path: path, xcodebuild: inject(), logger: inject())
+        return try self.init(path: path)
     }
 
     let type: String = "project"
@@ -35,7 +35,7 @@ final class XcodeProject: XcodeProjectlike {
 
     private(set) var targets: Set<XcodeTarget> = []
 
-    required init(path: FilePath, xcodebuild: Xcodebuild, logger: Logger) throws {
+    required init(path: FilePath, xcodebuild: Xcodebuild = .init(), logger: Logger = .init()) throws {
         logger.contextualized(with: "xcode:project").debug("Loading \(path)")
 
         self.path = path
@@ -59,17 +59,17 @@ final class XcodeProject: XcodeProjectlike {
             subProjects = try xcodeProject.pbxproj.fileReferences
                 .filter { $0.path?.hasSuffix(".xcodeproj") ?? false }
                 .compactMap { try $0.fullPath(sourceRoot: sourceRoot.string) }
-                .compactMap { try XcodeProject.tryMake(path: FilePath($0), referencedBy: path) }
+                .compactMap { try XcodeProject.build(path: FilePath($0), referencedBy: path) }
         }
 
         targets = Set(xcodeProject.pbxproj.nativeTargets
-            .map { XcodeTarget.make(project: self, target: $0) }
+            .map { XcodeTarget(project: self, target: $0) }
             + subProjects.flatMap { $0.targets })
     }
 
     func schemes() throws -> Set<XcodeScheme> {
         let schemes = try xcodebuild.schemes(project: self).map {
-            try XcodeScheme.make(project: self, name: $0)
+            try XcodeScheme(project: self, name: $0)
         }
         return Set(schemes)
     }

@@ -1,14 +1,11 @@
 import Foundation
+import Shared
 
 /// Builds references to enum cases of enums that are raw representable.
 final class EnumCaseReferenceBuilder: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph) {
+    required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 

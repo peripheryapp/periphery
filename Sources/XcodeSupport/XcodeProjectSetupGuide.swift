@@ -3,14 +3,10 @@ import SystemPackage
 import Shared
 
 public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide {
-    public static func make() -> Self {
-        return self.init(configuration: inject(), xcodebuild: inject())
-    }
-
     private let configuration: Configuration
     private let xcodebuild: Xcodebuild
 
-    required init(configuration: Configuration, xcodebuild: Xcodebuild) {
+    public required init(configuration: Configuration = .shared, xcodebuild: Xcodebuild = .init()) {
         self.configuration = configuration
         self.xcodebuild = xcodebuild
         super.init()
@@ -28,9 +24,9 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
         var project: XcodeProjectlike?
 
         if let workspacePath = identifyWorkspace() {
-            project = try XcodeWorkspace.make(path: workspacePath)
+            project = try XcodeWorkspace(path: workspacePath)
         } else if let projectPath = identifyProject() {
-            project = try XcodeProject.make(path: projectPath)
+            project = try XcodeProject(path: projectPath)
         }
 
         if let project = project {

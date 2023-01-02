@@ -16,7 +16,7 @@ public extension FilePath {
         return Set(Glob(
             pattern: absolutePattern,
             blacklistedDirectories: [".build", "node_modules"],
-            logger: inject()
+            logger: Logger()
         ).paths.map { FilePath($0).lexicallyNormalized() })
     }
 }

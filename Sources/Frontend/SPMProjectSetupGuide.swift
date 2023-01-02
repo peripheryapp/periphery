@@ -4,13 +4,9 @@ import PeripheryKit
 import Shared
 
 final class SPMProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide {
-    static func make() -> Self {
-        return self.init(configuration: inject())
-    }
-
     private let configuration: Configuration
 
-    init(configuration: Configuration) {
+    init(configuration: Configuration = .shared) {
         self.configuration = configuration
         super.init()
     }

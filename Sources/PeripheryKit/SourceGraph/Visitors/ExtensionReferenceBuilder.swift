@@ -1,15 +1,12 @@
 import Foundation
+import Shared
 
 /// Folds all references and declarations that exist within an extension into the
 /// class/struct that is being extended and removes the extension declaration.
 final class ExtensionReferenceBuilder: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph) {
+    required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 

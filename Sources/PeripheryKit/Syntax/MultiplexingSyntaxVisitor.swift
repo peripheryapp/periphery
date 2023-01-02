@@ -4,7 +4,7 @@ import SwiftSyntax
 import SwiftSyntaxParser
 
 protocol PeripherySyntaxVisitor {
-    static func make(sourceLocationBuilder: SourceLocationBuilder) -> Self
+    init(sourceLocationBuilder: SourceLocationBuilder)
 
     func visit(_ node: ClassDeclSyntax)
     func visit(_ node: ProtocolDeclSyntax)
@@ -96,7 +96,7 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
     }
 
     func add<T: PeripherySyntaxVisitor>(_ visitorType: T.Type) -> T {
-        let visitor = visitorType.make(sourceLocationBuilder: sourceLocationBuilder)
+        let visitor = visitorType.init(sourceLocationBuilder: sourceLocationBuilder)
         visitors.append(visitor)
         return visitor
     }

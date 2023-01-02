@@ -11,8 +11,7 @@ public struct SPM {
 
     public struct Package: Decodable {
         public static func load() throws -> Self {
-            let shell: Shell = inject()
-            let jsonString = try shell.exec(["swift", "package", "describe", "--type", "json"], stderr: false)
+            let jsonString = try Shell.shared.exec(["swift", "package", "describe", "--type", "json"], stderr: false)
 
             guard let jsonData = jsonString.data(using: .utf8) else {
                 throw PeripheryError.packageError(message: "Failed to read swift package description.")
@@ -33,8 +32,7 @@ public struct SPM {
         }
 
         func clean() throws {
-            let shell: Shell = inject()
-            try shell.exec(["swift", "package", "clean"])
+            try Shell.shared.exec(["swift", "package", "clean"])
         }
     }
 
@@ -46,9 +44,8 @@ public struct SPM {
         let sources: [String]
 
         func build(additionalArguments: [String]) throws {
-            let shell: Shell = inject()
             let args: [String] = ["swift", "build", "--target", name] + additionalArguments
-            try shell.exec(args)
+            try Shell.shared.exec(args)
         }
     }
 }

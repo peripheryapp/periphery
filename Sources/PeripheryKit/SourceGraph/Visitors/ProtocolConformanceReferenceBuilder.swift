@@ -1,21 +1,18 @@
 import Foundation
+import Shared
 
 final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph) {
+    required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 
     func mutate() {
-        let nonInvertableReferences = referenceConformingDeclarationsImplementedInSuperclass()
-        // These nonInvertableReferences were just created, and are already in their correct place.
+        let nonInvertibleReferences = referenceConformingDeclarationsImplementedInSuperclass()
+        // These nonInvertibleReferences were just created, and are already in their correct place.
         // We're passing them here to the next step so that they're not inverted.
-        invertReferencesFromProtocolToDeclaration(nonInvertableReferences)
+        invertReferencesFromProtocolToDeclaration(nonInvertibleReferences)
     }
 
     // MARK: - Private

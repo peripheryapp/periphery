@@ -27,14 +27,12 @@ public func colorize(_ text: String, _ color: ANSIColor) -> String {
     return "\(color.rawValue)\(text)\u{001B}[0;0m"
 }
 
-final class BaseLogger: Singleton {
-    static func make() -> Self {
-        return self.init()
-    }
+public final class BaseLogger {
+    public static let shared = BaseLogger()
 
     private let outputQueue: DispatchQueue
 
-    required init() {
+    private init() {
         self.outputQueue = DispatchQueue(label: "BaseLogger.outputQueue")
     }
 
@@ -63,11 +61,7 @@ final class BaseLogger: Singleton {
     }
 }
 
-public final class Logger: Injectable {
-    public static func make() -> Self {
-        return self.init(baseLogger: inject(), configuration: inject())
-    }
-
+public final class Logger {
     public static func configureBuffering() {
         var info = stat()
         fstat(STDOUT_FILENO, &info)
@@ -81,7 +75,7 @@ public final class Logger: Injectable {
     private let baseLogger: BaseLogger
     private let configuration: Configuration
 
-    required init(baseLogger: BaseLogger, configuration: Configuration) {
+    public required init(baseLogger: BaseLogger = .shared, configuration: Configuration = .shared) {
         self.baseLogger = baseLogger
         self.configuration = configuration
     }

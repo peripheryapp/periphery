@@ -6,7 +6,7 @@ import XCTest
 
 class XcodeTargetTest: XCTestCase {
     func testSourceFileInGroupWithoutFolder() throws {
-        let project = try! XcodeProject.make(path: UIKitProjectPath)
+        let project = try! XcodeProject(path: UIKitProjectPath)
         let target = project.targets.first { $0.name == "UIKitProject" }!
         try target.identifyFiles()
 
@@ -16,7 +16,7 @@ class XcodeTargetTest: XCTestCase {
     }
 
     func testIsTestTarget() {
-        let project = try! XcodeProject.make(path: UIKitProjectPath)
+        let project = try! XcodeProject(path: UIKitProjectPath)
         let projectTarget = project.targets.first { $0.name == "UIKitProject" }!
         let testTarget = project.targets.first { $0.name == "UIKitProjectTests" }!
 

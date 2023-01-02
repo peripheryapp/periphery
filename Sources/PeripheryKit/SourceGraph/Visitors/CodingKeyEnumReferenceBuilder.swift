@@ -1,14 +1,11 @@
 import Foundation
+import Shared
 
 /// Builds a reference from a `Codable` conforming type to any child enum that conforms to `CodingKey`.
 final class CodingKeyEnumReferenceBuilder: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph) {
+    required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 

@@ -6,10 +6,6 @@ import Shared
 /// The Swift compiler synthesizes code for `Encodable` that is not exposed in the index store. We therefore must
 /// assume that all properties are in use, as they may be referenced by synthesized code.
 final class EncodablePropertyRetainer: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph, configuration: inject())
-    }
-
     private let graph: SourceGraph
     private let configuration: Configuration
 

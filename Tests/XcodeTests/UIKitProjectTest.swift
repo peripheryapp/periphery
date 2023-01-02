@@ -8,14 +8,12 @@ class UIKitProjectTest: SourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        let project = try! XcodeProject.make(path: UIKitProjectPath)
+        let project = try! XcodeProject(path: UIKitProjectPath)
 
         let driver = XcodeProjectDriver(
-            logger: inject(),
             configuration: configuration,
-            xcodebuild: inject(),
             project: project,
-            schemes: [try! XcodeScheme.make(project: project, name: "UIKitProject")],
+            schemes: [try! XcodeScheme(project: project, name: "UIKitProject")],
             targets: project.targets
         )
 

@@ -1,27 +1,16 @@
 import Shared
 import SystemPackage
 
-public final class XCDataModelIndexer: IndexExcludable {
-    public static func make(files: Set<FilePath>, graph: SourceGraph) -> Self {
-        return self.init(
-            files: files,
-            graph: graph,
-            logger: inject(),
-            configuration: inject()
-        )
-    }
-
+public final class XCDataModelIndexer: Indexer {
     private let files: Set<FilePath>
     private let graph: SourceGraph
     private let logger: ContextualLogger
 
-    let configuration: Configuration
-
-    required init(files: Set<FilePath>, graph: SourceGraph, logger: Logger, configuration: Configuration) {
+    public required init(files: Set<FilePath>, graph: SourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
         self.files = files
         self.graph = graph
         self.logger = logger.contextualized(with: "index:xcdatamodel")
-        self.configuration = configuration
+        super.init(configuration: configuration)
     }
 
     public func perform() throws {

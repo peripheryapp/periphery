@@ -30,8 +30,7 @@ final class RetentionTest: SourceGraphTestCase {
             driver = SPMProjectDriver(
                 package: package,
                 targets: targets.compactMap { $0 },
-                configuration: configuration,
-                logger: inject()
+                configuration: configuration
             )
             try! driver.build()
         }
@@ -921,7 +920,7 @@ final class RetentionTest: SourceGraphTestCase {
     }
 
     func testRetainsEncodableProperties() {
-        let configuration = inject(Configuration.self)
+        let configuration = Configuration.shared
         // CustomStringConvertible doesn't actually inherit Encodable, we're just using it because we don't have an
         // external module in which to declare our own type.
         configuration.externalEncodableProtocols = ["CustomStringConvertible"]

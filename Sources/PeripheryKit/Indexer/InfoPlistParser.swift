@@ -1,13 +1,15 @@
 import Foundation
 import SystemPackage
 import AEXML
+import Shared
 
-final class InfoPlistParser {
+final class InfoPlistParser: Indexer {
     private static let elements = ["UISceneClassName", "UISceneDelegateClassName", "NSExtensionPrincipalClass"]
     private let path: FilePath
 
-    required init(path: FilePath) {
+    required init(path: FilePath, configuration: Configuration = .shared) {
         self.path = path
+        super.init(configuration: configuration)
     }
 
     func parse() throws -> [AssetReference] {

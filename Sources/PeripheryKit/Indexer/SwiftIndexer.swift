@@ -2,22 +2,9 @@ import Foundation
 import SwiftSyntax
 import SwiftIndexStore
 import SystemPackage
-
 import Shared
 
-public final class SwiftIndexer {
-    public static func make(storePath: String, sourceFiles: [FilePath: [String]], graph: SourceGraph) throws -> Self {
-        let storeURL = URL(fileURLWithPath: storePath)
-
-        return self.init(
-            sourceFiles: sourceFiles,
-            graph: graph,
-            indexStore: try .open(store: storeURL, lib: .open()),
-            indexStoreURL: storeURL,
-            logger: inject(),
-            configuration: inject())
-    }
-
+public final class SwiftIndexer: Indexer {
     private let sourceFiles: [FilePath: [String]]
     private let graph: SourceGraph
     private let logger: ContextualLogger
@@ -25,50 +12,46 @@ public final class SwiftIndexer {
     private let indexStore: IndexStore
     private let indexStoreURL: URL
 
-    required init(
+    public required init(
         sourceFiles: [FilePath: [String]],
         graph: SourceGraph,
-        indexStore: IndexStore,
         indexStoreURL: URL,
-        logger: Logger,
-        configuration: Configuration
-    ) {
+        logger: Logger = .init(),
+        configuration: Configuration = .shared
+    ) throws {
         self.sourceFiles = sourceFiles
         self.graph = graph
-        self.indexStore = indexStore
+        self.indexStore = try .open(store: indexStoreURL, lib: .open())
         self.indexStoreURL = indexStoreURL
         self.logger = logger.contextualized(with: "index:swift")
         self.configuration = configuration
+        super.init(configuration: configuration)
     }
 
     public func perform() throws {
-        let excludedPaths = configuration.indexExcludeSourceFiles
         var unitsByFile: [FilePath: [IndexStoreUnit]] = [:]
         let allSourceFiles = Set(sourceFiles.keys)
+        let (includedFiles, excludedFiles) = filterIndexExcluded(from: allSourceFiles)
+        excludedFiles.forEach { self.logger.debug("Excluding \($0.string)") }
 
         try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
             guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
 
             let file = FilePath(filePath)
 
-            if allSourceFiles.contains(file) {
-                guard !excludedPaths.contains(file) else {
-                    self.logger.debug("Excluding \(file.string)")
-                    return true
-                }
-
+            if includedFiles.contains(file) {
                 unitsByFile[file, default: []].append(unit)
             }
 
             return true
         }
 
-        let indexedPaths = Set(unitsByFile.keys)
-        let unindexedPaths = allSourceFiles.subtracting(excludedPaths).subtracting(indexedPaths)
+        let indexedFiles = Set(unitsByFile.keys)
+        let unindexedFiles = allSourceFiles.subtracting(excludedFiles).subtracting(indexedFiles)
 
-        if !unindexedPaths.isEmpty {
-            unindexedPaths.forEach { logger.debug("Source file not indexed: \($0)") }
-            let targets: Set<String> = Set(unindexedPaths.flatMap { sourceFiles[$0] ?? [] })
+        if !unindexedFiles.isEmpty {
+            unindexedFiles.forEach { logger.debug("Source file not indexed: \($0)") }
+            let targets: Set<String> = Set(unindexedFiles.flatMap { sourceFiles[$0] ?? [] })
             throw PeripheryError.unindexedTargetsError(targets: targets, indexStorePath: indexStoreURL.path)
         }
 

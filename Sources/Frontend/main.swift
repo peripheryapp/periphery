@@ -4,7 +4,6 @@ import PeripheryKit
 import Shared
 
 Logger.configureBuffering()
-private let logger = inject(Logger.self)
 
 struct PeripheryCommand: FrontendCommand {
     static let configuration = CommandConfiguration(
@@ -14,9 +13,9 @@ struct PeripheryCommand: FrontendCommand {
 }
 
 signal(SIGINT) { _ in
+    let logger = Logger()
     logger.warn("Termination can result in a corrupt index. Try the '--clean-build' flag if you get erroneous results, such as false-positives and incorrect source file locations.")
-    let shell: Shell = inject()
-    shell.interruptRunning()
+    Shell.shared.interruptRunning()
     exit(0)
 }
 

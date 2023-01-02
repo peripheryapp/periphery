@@ -1,10 +1,6 @@
 import Shared
 
 final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph, configuration: inject())
-    }
-
     private let graph: SourceGraph
     private let configuration: Configuration
 

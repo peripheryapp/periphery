@@ -4,16 +4,16 @@ import PeripheryKit
 import Shared
 
 public final class XcodeProjectDriver {
-    public static func make() throws -> Self {
-        let configuration: Configuration = inject()
+    public static func build() throws -> Self {
+        let configuration = Configuration.shared
         try validateConfiguration(configuration: configuration)
 
         let project: XcodeProjectlike
 
         if let workspacePath = configuration.workspace {
-            project = try XcodeWorkspace.make(path: .makeAbsolute(workspacePath))
+            project = try XcodeWorkspace(path: .makeAbsolute(workspacePath))
         } else if let projectPath = configuration.project {
-            project = try XcodeProject.make(path: .makeAbsolute(projectPath))
+            project = try XcodeProject(path: .makeAbsolute(projectPath))
         } else {
             throw PeripheryError.usageError("Expected --workspace or --project option.")
         }
@@ -35,9 +35,6 @@ public final class XcodeProjectDriver {
         }
 
         return self.init(
-            logger: inject(),
-            configuration: configuration,
-            xcodebuild: inject(),
             project: project,
             schemes: schemes,
             targets: targets
@@ -52,9 +49,9 @@ public final class XcodeProjectDriver {
     private let targets: Set<XcodeTarget>
 
     init(
-        logger: Logger,
-        configuration: Configuration,
-        xcodebuild: Xcodebuild,
+        logger: Logger = .init(),
+        configuration: Configuration = .shared,
+        xcodebuild: Xcodebuild = .init(),
         project: XcodeProjectlike,
         schemes: Set<XcodeScheme>,
         targets: Set<XcodeTarget>
@@ -140,19 +137,19 @@ extension XcodeProjectDriver: ProjectDriver {
             target.files(kind: .swift).forEach { result[$0, default: []].append(target.name) }
         }
 
-        try SwiftIndexer.make(storePath: storePath, sourceFiles: sourceFiles, graph: graph).perform()
+        try SwiftIndexer(sourceFiles: sourceFiles, graph: graph, indexStoreURL: URL(fileURLWithPath: storePath)).perform()
 
         let xibFiles = Set(targets.map { $0.files(kind: .interfaceBuilder) }.joined())
-        try XibIndexer.make(xibFiles: xibFiles, graph: graph).perform()
+        try XibIndexer(xibFiles: xibFiles, graph: graph).perform()
 
         let xcDataModelFiles = Set(targets.map { $0.files(kind: .xcDataModel) }.joined())
-        try XCDataModelIndexer.make(files: xcDataModelFiles, graph: graph).perform()
+        try XCDataModelIndexer(files: xcDataModelFiles, graph: graph).perform()
 
         let xcMappingModelFiles = Set(targets.map { $0.files(kind: .xcMappingModel) }.joined())
-        try XCMappingModelIndexer.make(files: xcMappingModelFiles, graph: graph).perform()
+        try XCMappingModelIndexer(files: xcMappingModelFiles, graph: graph).perform()
 
         let infoPlistFiles = Set(targets.map { $0.files(kind: .infoPlist) }.joined())
-        try InfoPlistIndexer.make(infoPlistFiles: infoPlistFiles, graph: graph).perform()
+        try InfoPlistIndexer(infoPlistFiles: infoPlistFiles, graph: graph).perform()
 
         graph.indexingComplete()
     }

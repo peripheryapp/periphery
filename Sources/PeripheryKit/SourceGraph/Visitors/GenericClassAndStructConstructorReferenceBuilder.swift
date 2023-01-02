@@ -1,16 +1,13 @@
 import Foundation
+import Shared
 
 /// https://bugs.swift.org/browse/SR-7093
 /// Constructors on a class/struct with generic type parameters are not referenced despite being used.
-/// We therefore must reference the constrcutor from the class/struct.
+/// We therefore must reference the constructor from the class/struct.
 final class GenericClassAndStructConstructorReferenceBuilder: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph) {
+    required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 

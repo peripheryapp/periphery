@@ -3,17 +3,7 @@ import Shared
 import PeripheryKit
 
 final class JsonFormatter: OutputFormatter {
-    static func make() -> Self {
-        return self.init(logger: inject())
-    }
-
-    private let logger: Logger
-
-    required init(logger: Logger) {
-        self.logger = logger
-    }
-
-    func perform(_ results: [ScanResult]) throws {
+    func format(_ results: [ScanResult]) throws -> String {
         var jsonObject: [Any] = []
 
         for result in results {
@@ -52,6 +42,6 @@ final class JsonFormatter: OutputFormatter {
 
         let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted])
         let json = String(data: data, encoding: .utf8)
-        logger.info(json ?? "", canQuiet: false)
+        return json ?? ""
     }
 }

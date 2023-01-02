@@ -6,11 +6,7 @@ import XcodeSupport
 #endif
 
 final class GuidedSetup: SetupGuideHelpers {
-    static func make() -> Self {
-        return self.init(configuration: inject())
-    }
-
-    required init(configuration: Configuration) {
+    required init(configuration: Configuration = .shared) {
         self.configuration = configuration
     }
 
@@ -19,10 +15,10 @@ final class GuidedSetup: SetupGuideHelpers {
     func perform() throws -> Project {
         print(colorize("Welcome to Periphery!", .boldGreen))
         print("This guided setup will help you select the appropriate configuration for your project.\n")
-        var projectGuides: [ProjectSetupGuide] = [SPMProjectSetupGuide.make()]
+        var projectGuides: [ProjectSetupGuide] = [SPMProjectSetupGuide()]
 
         #if os(macOS)
-        projectGuides.append(XcodeProjectSetupGuide.make())
+        projectGuides.append(XcodeProjectSetupGuide())
         #endif
 
         let supportedProjectGuides = projectGuides.filter { $0.isSupported }
@@ -46,7 +42,7 @@ final class GuidedSetup: SetupGuideHelpers {
 
         print(colorize("*", .boldGreen) + " Inspecting project...\n")
 
-        let commonGuide = CommonSetupGuide.make()
+        let commonGuide = CommonSetupGuide()
         let guides: [SetupGuide] = [projectGuide, commonGuide]
         try guides.forEach { try $0.perform() }
         let options = Array(guides.map { $0.commandLineOptions }.joined())

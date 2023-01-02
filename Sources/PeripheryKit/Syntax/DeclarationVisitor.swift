@@ -2,10 +2,6 @@ import Foundation
 import SwiftSyntax
 
 final class DeclarationVisitor: PeripherySyntaxVisitor {
-    static func make(sourceLocationBuilder: SourceLocationBuilder) -> Self {
-        self.init(sourceLocationBuilder: sourceLocationBuilder)
-    }
-
     typealias Result = (
         location: SourceLocation,
         accessibility: Accessibility?,

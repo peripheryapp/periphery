@@ -3,15 +3,11 @@ import SystemPackage
 import Shared
 import PeripheryKit
 
-final class OutputDeclarationFilter: Injectable {
-    static func make() -> Self {
-        return self.init(configuration: inject(), logger: inject())
-    }
-
+final class OutputDeclarationFilter {
     private let configuration: Configuration
     private let logger: ContextualLogger
 
-    required init(configuration: Configuration, logger: Logger) {
+    required init(configuration: Configuration = .shared, logger: Logger = .init()) {
         self.configuration = configuration
         self.logger = logger.contextualized(with: "report:filter")
     }

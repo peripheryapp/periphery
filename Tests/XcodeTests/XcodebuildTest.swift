@@ -12,9 +12,9 @@ class XcodebuildTest: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        shell = ShellMock.make()
+        shell = ShellMock()
         xcodebuild = Xcodebuild(shell: shell)
-        project = try! XcodeProject.make(path: UIKitProjectPath)
+        project = try! XcodeProject(path: UIKitProjectPath)
     }
 }
 
@@ -26,13 +26,13 @@ class XcodebuildBuildProjectTest: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        shell = inject(Shell.self)
+        shell = Shell.shared
         xcodebuild = Xcodebuild(shell: shell)
-        project = try! XcodeProject.make(path: UIKitProjectPath)
+        project = try! XcodeProject(path: UIKitProjectPath)
     }
 
     func testBuildSchemeWithWhitespace() throws {
-        let scheme = try XcodeScheme.make(project: project, name: "Scheme With Spaces")
+        let scheme = try XcodeScheme(project: project, name: "Scheme With Spaces")
         try xcodebuild.build(project: project, scheme: scheme, allSchemes: [scheme])
     }
 }
@@ -49,6 +49,10 @@ class XcodebuildSchemesTest: XcodebuildTest {
 
 class ShellMock: Shell {
     var output: String = ""
+
+    convenience init() {
+        self.init(environment: ProcessInfo.processInfo.environment, logger: Logger())
+    }
 
     override func exec(_ args: [String], stderr: Bool = true) throws -> String {
         return output

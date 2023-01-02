@@ -1,12 +1,14 @@
 import Foundation
 import AEXML
 import SystemPackage
+import Shared
 
-final class XibParser {
+final class XibParser: Indexer {
     private let path: FilePath
 
-    required init(path: FilePath) {
+    required init(path: FilePath, configuration: Configuration = .shared) {
         self.path = path
+        super.init(configuration: configuration)
     }
 
     func parse() throws -> [AssetReference] {

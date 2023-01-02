@@ -9,7 +9,7 @@ import XcodeSupport
 
 final class Project {
     static func identify() -> Self {
-        let configuration: Configuration = inject()
+        let configuration = Configuration.shared
 
         if configuration.workspace != nil || configuration.project != nil {
             return self.init(kind: .xcode)
@@ -27,7 +27,7 @@ final class Project {
     }
 
     func validateEnvironment() throws {
-        let logger: Logger = inject()
+        let logger = Logger()
 
         logger.debug(SwiftVersion.current.fullVersion)
         try SwiftVersion.current.validateVersion()
@@ -38,7 +38,7 @@ final class Project {
             fatalError("Xcode projects are not supported on Linux.")
             #else
             do {
-                let xcodebuild: Xcodebuild = inject()
+                let xcodebuild = Xcodebuild()
                 logger.debug(try xcodebuild.version())
             } catch {
                 throw PeripheryError.xcodebuildNotConfigured
@@ -55,10 +55,10 @@ final class Project {
             #if os(Linux)
             fatalError("Xcode projects are not supported on Linux.")
             #else
-            return try XcodeProjectDriver.make()
+            return try XcodeProjectDriver.build()
             #endif
         case .spm:
-            return try SPMProjectDriver.make()
+            return try SPMProjectDriver.build()
         }
     }
 }

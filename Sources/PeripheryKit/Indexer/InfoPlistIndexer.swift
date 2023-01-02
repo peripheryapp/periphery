@@ -1,27 +1,16 @@
 import Shared
 import SystemPackage
 
-public final class InfoPlistIndexer: IndexExcludable {
-    public static func make(infoPlistFiles: Set<FilePath>, graph: SourceGraph) -> Self {
-        return self.init(
-            infoPlistFiles: infoPlistFiles,
-            graph: graph,
-            logger: inject(),
-            configuration: inject()
-        )
-    }
-
+public final class InfoPlistIndexer: Indexer {
     private let infoPlistFiles: Set<FilePath>
     private let graph: SourceGraph
     private let logger: ContextualLogger
 
-    let configuration: Configuration
-
-    required init(infoPlistFiles: Set<FilePath>, graph: SourceGraph, logger: Logger, configuration: Configuration) {
+    public required init(infoPlistFiles: Set<FilePath>, graph: SourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
         self.infoPlistFiles = infoPlistFiles
         self.graph = graph
         self.logger = logger.contextualized(with: "index:infoplist")
-        self.configuration = configuration
+        super.init(configuration: configuration)
     }
 
     public func perform() throws {

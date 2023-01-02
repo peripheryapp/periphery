@@ -3,30 +3,17 @@ import Shared
 import PeripheryKit
 
 final class XcodeFormatter: OutputFormatter {
-    static func make() -> Self {
-        return self.init(logger: inject())
-    }
-
-    private let logger: Logger
-
-    required init(logger: Logger) {
-        self.logger = logger
-    }
-
-    func perform(_ results: [ScanResult]) throws {
+    func format(_ results: [ScanResult]) throws -> String {
         guard results.count > 0 else {
-            logger.info(colorize("* ", .boldGreen) + colorize("No unused code detected.", .bold))
-            return
+            return colorize("* ", .boldGreen) + colorize("No unused code detected.", .bold)
         }
 
-        for result in results {
-            let descriptions = describe(result, colored: true)
-
-            for (location, description) in descriptions {
-                let line = prefix(for: location) + description
-                logger.info(line, canQuiet: false)
+        return results.flatMap { result in
+            describe(result, colored: true).map { (location, description) in
+                prefix(for: location) + description
             }
         }
+        .joined(separator: "\n")
     }
 
     // MARK: - Private

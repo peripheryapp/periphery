@@ -9,8 +9,8 @@ struct CheckUpdateCommand: FrontendCommand {
     )
 
     func run() throws {
-        let logger: Logger = inject()
-        let checker = UpdateChecker.make()
+        let logger = Logger()
+        let checker = UpdateChecker()
         DispatchQueue.global().async { checker.run() }
         let latestVersion = try checker.wait().get()
         if latestVersion.isVersion(greaterThan: PeripheryVersion) {

@@ -3,11 +3,7 @@ import Shared
 
 public final class SourceGraphMutatorRunner {
     public static func perform(graph: SourceGraph) throws {
-        try make(graph: graph).perform()
-    }
-
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph, logger: inject())
+        try self.init(graph: graph).perform()
     }
 
     private let mutators: [SourceGraphMutator.Type] = [
@@ -60,16 +56,18 @@ public final class SourceGraphMutatorRunner {
 
     private let graph: SourceGraph
     private let logger: ContextualLogger
+    private let configuration: Configuration
 
-    required init(graph: SourceGraph, logger: Logger) {
+    required init(graph: SourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
         self.graph = graph
         self.logger = logger.contextualized(with: "mutator:run")
+        self.configuration = configuration
     }
 
     func perform() throws {
         for mutator in mutators {
             let elapsed = try Benchmark.measure {
-                try mutator.make(graph: graph).mutate()
+                try mutator.init(graph: graph, configuration: configuration).mutate()
             }
             logger.debug("\(mutator) (\(elapsed)s)")
         }

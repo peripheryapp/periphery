@@ -2,14 +2,10 @@ import Foundation
 import Shared
 
 final class PropertyWrapperRetainer: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
     private let graph: SourceGraph
     private let specialProperties = ["wrappedValue", "projectedValue"]
 
-    required init(graph: SourceGraph) {
+    required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 

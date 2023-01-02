@@ -1,11 +1,8 @@
 import Foundation
+import Shared
 
 /// Retains static methods used by the Result Builder language feature.
 final class ResultBuilderRetainer: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
     private let graph: SourceGraph
     private let resultBuilderMethods = Set<String>([
         "buildExpression(_:)",
@@ -18,7 +15,7 @@ final class ResultBuilderRetainer: SourceGraphMutator {
         "buildLimitedAvailability(_:)",
     ])
 
-    required init(graph: SourceGraph) {
+    required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 

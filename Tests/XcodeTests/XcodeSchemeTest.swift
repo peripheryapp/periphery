@@ -7,8 +7,8 @@ class XcodeSchemeTest: XCTestCase {
     private var scheme: XcodeScheme!
 
     override func setUp() {
-        let project = try! XcodeProject.make(path: UIKitProjectPath)
-        scheme = try! XcodeScheme.make(project: project, name: "UIKitProject")
+        let project = try! XcodeProject(path: UIKitProjectPath)
+        scheme = try! XcodeScheme(project: project, name: "UIKitProject")
     }
 
     func testTargets() throws {

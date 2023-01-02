@@ -12,8 +12,7 @@ class SPMProjectTest: SourceGraphTestCase {
             let driver = SPMProjectDriver(
                 package: package,
                 targets: package.targets,
-                configuration: configuration,
-                logger: inject()
+                configuration: configuration
             )
 
             try! driver.build()

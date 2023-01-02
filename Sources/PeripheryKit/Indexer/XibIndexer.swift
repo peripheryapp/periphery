@@ -1,27 +1,16 @@
 import Shared
 import SystemPackage
 
-public final class XibIndexer: IndexExcludable {
-    public static func make(xibFiles: Set<FilePath>, graph: SourceGraph) -> Self {
-        return self.init(
-            xibFiles: xibFiles,
-            graph: graph,
-            logger: inject(),
-            configuration: inject()
-        )
-    }
-
+public final class XibIndexer: Indexer {
     private let xibFiles: Set<FilePath>
     private let graph: SourceGraph
     private let logger: ContextualLogger
 
-    let configuration: Configuration
-
-    required init(xibFiles: Set<FilePath>, graph: SourceGraph, logger: Logger, configuration: Configuration) {
+    public required init(xibFiles: Set<FilePath>, graph: SourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
         self.xibFiles = xibFiles
         self.graph = graph
         self.logger = logger.contextualized(with: "index:xib")
-        self.configuration = configuration
+        super.init(configuration: configuration)
     }
 
     public func perform() throws {

@@ -1,14 +1,11 @@
 import Foundation
+import Shared
 
 /// Retains extensions of types for which we do not have a declaration.
 final class UnknownTypeExtensionRetainer: SourceGraphMutator {
-    static func make(graph: SourceGraph) -> Self {
-        return self.init(graph: graph)
-    }
-
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph) {
+    required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 

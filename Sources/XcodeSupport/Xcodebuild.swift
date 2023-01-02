@@ -3,14 +3,10 @@ import SystemPackage
 import PeripheryKit
 import Shared
 
-public final class Xcodebuild: Injectable {
+public final class Xcodebuild {
     private let shell: Shell
 
-    public static func make() -> Self {
-        return self.init(shell: inject())
-    }
-
-    required init(shell: Shell) {
+    public required init(shell: Shell = .shared) {
         self.shell = shell
     }
 
