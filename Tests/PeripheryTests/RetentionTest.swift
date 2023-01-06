@@ -1117,7 +1117,10 @@ final class RetentionTest: SourceGraphTestCase {
                 self.assertReferenced(.varInstance("retainedTupleProperty"))
                 self.assertReferenced(.varInstance("retainedDestructuredPropertyA"))
                 self.assertReferenced(.varInstance("retainedMultipleBindingPropertyA"))
+
+                #if canImport(Combine)
                 self.assertReferenced(.varInstance("retainedAnyCancellable"))
+                #endif
 
                 self.assertNotReferenced(.varInstance("notRetainedSimpleProperty"))
                 self.assertNotReferenced(.varInstance("notRetainedModulePrefixedProperty"))
