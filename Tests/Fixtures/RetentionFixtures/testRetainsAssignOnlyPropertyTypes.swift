@@ -1,3 +1,5 @@
+import Combine
+
 public class FixtureClass123 {
     struct CustomType {}
 
@@ -9,6 +11,7 @@ public class FixtureClass123 {
     var notRetainedTupleProperty: (Int, CustomType)?
     var (retainedDestructuredPropertyA, notRetainedDestructuredPropertyB): (CustomType, Swift.String) = (.init(), "2")
     var retainedMultipleBindingPropertyA: CustomType?, notRetainedMultipleBindingPropertyB: Int?
+    var retainedAnyCancellable: AnyCancellable?
 
     public func someFunc() {
         retainedSimpleProperty = CustomType()
@@ -25,5 +28,8 @@ public class FixtureClass123 {
 
         retainedMultipleBindingPropertyA = .init()
         notRetainedMultipleBindingPropertyB = 1
+
+        let subject = CurrentValueSubject<Bool, Never>(true)
+        retainedAnyCancellable = subject.sink { _ in }
     }
 }

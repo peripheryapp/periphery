@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- AnyCancellable properties are now excluded from assign-only property analysis.
 
 ## 2.10.3 (2023-01-02)
 

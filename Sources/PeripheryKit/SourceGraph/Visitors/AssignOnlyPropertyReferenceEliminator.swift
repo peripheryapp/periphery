@@ -4,10 +4,12 @@ import Shared
 final class AssignOnlyPropertyReferenceEliminator: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
+    private let retainAssignOnlyPropertyTypes: [String]
 
     required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
         self.configuration = configuration
+        self.retainAssignOnlyPropertyTypes = ["AnyCancellable"] + configuration.retainAssignOnlyPropertyTypes
     }
 
     func mutate() throws {
@@ -57,7 +59,7 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphMutator {
 
         for (property, references) in assignOnlyProperties {
             if let declaredType = property.declaredType,
-               configuration.retainAssignOnlyPropertyTypes.contains(declaredType) {
+               retainAssignOnlyPropertyTypes.contains(declaredType) {
                 continue
             }
 
