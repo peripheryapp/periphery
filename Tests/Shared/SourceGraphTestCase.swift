@@ -174,20 +174,19 @@ open class SourceGraphTestCase: XCTestCase {
         let declarations = scopedDeclarations(from: defaultDeclarations)
 
         let matchingDeclarations = declarations.filter { $0.kind == description.kind && $0.name == description.name }
+        var matchedDeclaration: Declaration?
 
         if let line = description.line {
-            if let declaration = matchingDeclarations.first(where: { $0.location.line == line }) {
-                return declaration
-            }
+            matchedDeclaration = matchingDeclarations.first(where: { $0.location.line == line })
         } else {
-            return matchingDeclarations.first
+            matchedDeclaration = matchingDeclarations.first
         }
 
-        if fail {
+        if matchedDeclaration == nil, fail {
             XCTFail("Declaration not found: \(description).", file: file, line: line)
         }
 
-        return nil
+        return matchedDeclaration
     }
 
     private func scopedDeclarations(from defaultDeclarations: Set<Declaration>? = nil) -> Set<Declaration> {
