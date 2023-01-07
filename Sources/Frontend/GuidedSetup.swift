@@ -17,7 +17,7 @@ final class GuidedSetup: SetupGuideHelpers {
         print("This guided setup will help you select the appropriate configuration for your project.\n")
         var projectGuides: [ProjectSetupGuide] = [SPMProjectSetupGuide()]
 
-        #if os(macOS)
+        #if canImport(XcodeSupport)
         projectGuides.append(XcodeProjectSetupGuide())
         #endif
 

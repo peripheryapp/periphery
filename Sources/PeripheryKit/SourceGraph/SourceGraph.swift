@@ -22,9 +22,6 @@ public final class SourceGraph {
 
     private let mutationQueue: DispatchQueue
 
-    private var _allDeclarationsUnmodified: Set<Declaration> = []
-    public var allDeclarationsUnmodified: Set<Declaration> { _allDeclarationsUnmodified }
-
     public var unusedDeclarations: Set<Declaration> {
         allDeclarations.subtracting(usedDeclarations)
     }
@@ -40,7 +37,6 @@ public final class SourceGraph {
     public func indexingComplete() {
         rootDeclarations = allDeclarations.filter { $0.parent == nil }
         rootReferences = allReferences.filter { $0.parent == nil }
-        _allDeclarationsUnmodified = allDeclarations
     }
 
     func declarations(ofKind kind: Declaration.Kind) -> Set<Declaration> {

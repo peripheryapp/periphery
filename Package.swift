@@ -54,12 +54,6 @@ var targets: [PackageDescription.Target] = [
         ]
     ),
     .target(
-        name: "ExternalModuleFixtures"
-    ),
-    .target(
-        name: "CrossModuleRetentionFixtures"
-    ),
-    .target(
         name: "TestShared",
         dependencies: [
             .target(name: "PeripheryKit")
@@ -67,8 +61,22 @@ var targets: [PackageDescription.Target] = [
         path: "Tests/Shared"
     ),
     .target(
+        name: "ExternalModuleFixtures",
+        path: "Tests/Fixtures/ExternalModuleFixtures"
+    ),
+    .target(
+        name: "CrossModuleRetentionFixtures",
+        dependencies: [
+            .target(name: "CrossModuleRetentionSupportFixtures")
+        ],
+        path: "Tests/Fixtures/CrossModuleRetentionFixtures"
+    ),
+    .target(
+        name: "CrossModuleRetentionSupportFixtures",
+        path: "Tests/Fixtures/CrossModuleRetentionSupportFixtures"
+    ),
+    .target(
         name: "RetentionFixtures",
-        dependencies: ["ExternalModuleFixtures", "CrossModuleRetentionFixtures"],
         path: "Tests/Fixtures/RetentionFixtures"
     ),
     .target(

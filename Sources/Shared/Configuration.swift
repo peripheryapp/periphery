@@ -277,9 +277,21 @@ public final class Configuration {
         }
     }
 
-    public lazy var indexExcludeSourceFiles: Set<FilePath> = {
-        Set(indexExclude.flatMap { FilePath.glob($0) })
-    }()
+    private var _indexExcludeSourceFiles: Set<FilePath>?
+    public var indexExcludeSourceFiles: Set<FilePath> {
+        get {
+            if let files = _indexExcludeSourceFiles {
+                return files
+            }
+
+            let files = Set(indexExclude.flatMap { FilePath.glob($0) })
+            _indexExcludeSourceFiles = files
+            return files
+        }
+        set {
+            _indexExcludeSourceFiles = newValue
+        }
+    }
 
     public lazy var reportExcludeSourceFiles: Set<FilePath> = {
         Set(reportExclude.flatMap { FilePath.glob($0) })

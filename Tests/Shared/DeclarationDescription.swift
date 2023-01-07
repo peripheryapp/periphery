@@ -14,10 +14,6 @@ struct DeclarationDescription: CustomStringConvertible {
         return "(\(parts.joined(separator: ", ")))"
     }
 
-    static func `module`(_ name: String, line: Int? = nil) -> Self {
-        self.init(kind: .module, name: name, line: line)
-    }
-
     static func `class`(_ name: String, line: Int? = nil) -> Self {
         self.init(kind: .class, name: name, line: line)
     }

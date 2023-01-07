@@ -34,15 +34,15 @@ final class Project {
 
         switch kind {
         case .xcode:
-            #if os(Linux)
-            fatalError("Xcode projects are not supported on Linux.")
-            #else
+            #if canImport(XcodeSupport)
             do {
                 let xcodebuild = Xcodebuild()
                 logger.debug(try xcodebuild.version())
             } catch {
                 throw PeripheryError.xcodebuildNotConfigured
             }
+            #else
+            fatalError("Xcode projects are not supported on this platform.")
             #endif
         default:
             break
@@ -52,10 +52,10 @@ final class Project {
     func driver() throws -> ProjectDriver {
         switch kind {
         case .xcode:
-            #if os(Linux)
-            fatalError("Xcode projects are not supported on Linux.")
-            #else
+            #if canImport(XcodeSupport)
             return try XcodeProjectDriver.build()
+            #else
+            fatalError("Xcode projects are not supported on this platform.")
             #endif
         case .spm:
             return try SPMProjectDriver.build()
