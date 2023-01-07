@@ -34,11 +34,16 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
                 throw PeripheryError.guidedSetupError(message: "Failed to identify any targets in \(project.path.lastComponent?.string ?? "")")
             }
 
-            let targets = project.targets.map { $0.name }.sorted()
-            let schemes = try filter(project.schemes(), project).map { $0.name }.sorted()
+            var targets = project.targets.map { $0.name }
+            targets += project.packageTargets.flatMap { (package, targets) in
+                targets.map { "\(package.name).\($0.name)" }
+            }
+            targets = targets.sorted()
 
             print(colorize("Select build targets to analyze:", .bold))
             configuration.targets = select(multiple: targets, allowAll: true).selectedValues
+
+            let schemes = try filter(project.schemes(), project).map { $0.name }.sorted()
 
             print(colorize("\nSelect the schemes necessary to build your chosen targets:", .bold))
             configuration.schemes = select(multiple: schemes, allowAll: false).selectedValues

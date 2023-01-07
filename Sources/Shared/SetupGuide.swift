@@ -25,8 +25,8 @@ open class SetupGuideHelpers {
 
         for (index, option) in options.enumerated() {
             let paddingCount = maxPaddingCount - String(index + 1).count
-            let pading = String(repeating: " ", count: paddingCount)
-            print(pading + colorize("\(index + 1) ", .boldGreen) + option)
+            let padding = String(repeating: " ", count: paddingCount)
+            print(padding + colorize("\(index + 1) ", .boldGreen) + option)
         }
     }
 

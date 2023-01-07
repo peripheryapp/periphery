@@ -1,5 +1,5 @@
-.release
-Packages
+/.release
+/Packages
 
 # Xcode
 .DS_Store

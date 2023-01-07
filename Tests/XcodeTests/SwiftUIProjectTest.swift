@@ -14,7 +14,8 @@ class SwiftUIProjectTest: SourceGraphTestCase {
             configuration: configuration,
             project: project,
             schemes: [try! XcodeScheme(project: project, name: "SwiftUIProject")],
-            targets: project.targets
+            targets: project.targets,
+            packageTargets: [:]
         )
 
         try! driver.build()
