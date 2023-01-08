@@ -4,36 +4,13 @@ import Shared
 @testable import TestShared
 @testable import PeripheryKit
 
-final class RetentionTest: SourceGraphTestCase {
-    private static var retentionFixturesTarget: SPM.Target!
-    private static var crossModuleRetentionFixturesTarget: SPM.Target!
-    private static var objcRetentionFixturesTarget: SPM.Target?
-    private static var driver: SPMProjectDriver!
-
-    private let performKnownFailures = false
-
+final class RetentionTest: FixtureSourceGraphTestCase {
     static override func setUp() {
         super.setUp()
 
-        ProjectRootPath.chdir {
-            let package = try! SPM.Package.load()
-            crossModuleRetentionFixturesTarget = package.targets.first { $0.name == "CrossModuleRetentionFixtures" }!
-            retentionFixturesTarget = package.targets.first { $0.name == "RetentionFixtures" }!
-            objcRetentionFixturesTarget = package.targets.first { $0.name == "ObjcRetentionFixtures" }
+        configuration.targets = ["RetentionFixtures"]
 
-            var targets = [retentionFixturesTarget]
-
-#if os(macOS)
-            targets.append(objcRetentionFixturesTarget)
-#endif
-
-            driver = SPMProjectDriver(
-                package: package,
-                targets: targets.compactMap { $0 },
-                configuration: configuration
-            )
-            try! driver.build()
-        }
+        build(driver: SPMProjectDriver.self)
     }
 
     func testNonReferencedClass() {
@@ -963,23 +940,6 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    func testCrossModuleInheritanceWithSameName() {
-        let retainFixture: [DeclarationDescription] = [
-            .module(Self.retentionFixturesTarget.name),
-            .class("FixtureClass129")
-        ]
-
-        analyze(crossModule: true, retain: retainFixture) {
-            module(Self.retentionFixturesTarget.name) {
-                self.assertReferenced(.class("FixtureClass129"))
-            }
-
-            module(Self.crossModuleRetentionFixturesTarget.name) {
-                self.assertReferenced(.class("FixtureClass129"))
-            }
-        }
-    }
-
     func testRetainsResultBuilderMethods() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass130")) {
@@ -1500,82 +1460,6 @@ final class RetentionTest: SourceGraphTestCase {
         }
     }
 
-    // MARK: - Objective-C
-
-    #if os(macOS)
-
-    // https://bugs.swift.org/browse/SR-13930
-    func testRetainsOptionalProtocolMethodImplementedInSubclass() {
-        guard performKnownFailures else { return }
-
-        analyze(retainPublic: true, objc: true) {
-            assertReferenced(.class("FixtureClass125Base"))
-            assertReferenced(.class("FixtureClass125")) {
-                self.assertReferenced(.functionMethodInstance("fileManager(_:shouldRemoveItemAtPath:)"))
-            }
-        }
-    }
-
-    func testRetainsOptionalProtocolMethod() {
-        analyze(retainPublic: true, objc: true) {
-            assertReferenced(.class("FixtureClass127")) {
-                self.assertReferenced(.functionMethodInstance("someFunc()"))
-            }
-            assertReferenced(.protocol("FixtureProtocol127")) {
-                self.assertReferenced(.functionMethodInstance("optionalFunc()"))
-            }
-        }
-    }
-
-    func testRetainsObjcAnnotatedClass() {
-        analyze(retainObjcAccessible: true, objc: true) {
-            assertReferenced(.class("FixtureClass21"))
-        }
-    }
-
-    func testRetainsImplicitlyObjcAccessibleClass() {
-        analyze(retainObjcAccessible: true, objc: true) {
-            assertReferenced(.class("FixtureClass126"))
-        }
-    }
-
-    func testRetainsObjcAnnotatedMembers() {
-        analyze(retainObjcAccessible: true, objc: true) {
-            assertReferenced(.class("FixtureClass22")) {
-                self.assertReferenced(.varInstance("someVar"))
-                self.assertReferenced(.functionMethodInstance("someMethod()"))
-                self.assertReferenced(.functionMethodInstance("somePrivateMethod()"))
-            }
-        }
-    }
-
-    func testDoesNotRetainObjcAnnotatedWithoutOption() {
-        analyze(objc: true) {
-            assertNotReferenced(.class("FixtureClass23"))
-        }
-    }
-
-    func testDoesNotRetainMembersOfObjcAnnotatedClass() {
-        analyze(retainObjcAccessible: true, objc: true) {
-            assertReferenced(.class("FixtureClass24")) {
-                self.assertNotReferenced(.functionMethodInstance("someMethod()"))
-                self.assertNotReferenced(.varInstance("someVar"))
-            }
-        }
-    }
-
-    func testObjcMembersAnnotationRetainsMembers() {
-        analyze(retainObjcAccessible: true, objc: true) {
-            assertReferenced(.class("FixtureClass25")) {
-                self.assertReferenced(.varInstance("someVar"))
-                self.assertReferenced(.functionMethodInstance("someMethod()"))
-                self.assertNotReferenced(.functionMethodInstance("somePrivateMethod()"))
-            }
-        }
-    }
-
-    #endif
-
     // MARK: - Known Failures
 
     func testMainActorAnnotation() {
@@ -1634,71 +1518,5 @@ final class RetentionTest: SourceGraphTestCase {
                 self.assertReferenced(.varInstance("someGetSetVar"))
             }
         }
-    }
-
-    // MARK: - Private
-
-    private func analyze(retainPublic: Bool = false,
-                         retainObjcAccessible: Bool = false,
-                         objc: Bool = false,
-                         crossModule: Bool = false,
-                         retain retainDeclarationDescriptions: [DeclarationDescription] = [],
-                         testBlock: () throws -> Void
-    ) rethrows {
-        #if os(macOS)
-        let testName = String(name.split(separator: " ").last!).replacingOccurrences(of: "]", with: "")
-        #else
-        let testName = String(name.split(separator: ".", maxSplits: 1).last!)
-        #endif
-
-        let testFixturePath = fixturePath(for: testName, objc: objc)
-        configuration.retainPublic = retainPublic
-        configuration.retainObjcAccessible = retainObjcAccessible
-
-        if !testFixturePath.exists {
-            XCTFail("\(testFixturePath.string) does not exist.")
-            return
-        }
-
-        let target = objc ? Self.objcRetentionFixturesTarget! : Self.retentionFixturesTarget!
-
-        let newFixtureTarget = SPM.Target(
-            name: target.name,
-            sources: [testFixturePath.lastComponent?.string ?? ""],
-            path: target.path,
-            moduleType: target.moduleType,
-            type: target.type,
-            targetDependencies: target.targetDependencies
-        )
-
-        var targets = [newFixtureTarget]
-
-        if crossModule {
-            targets.append(Self.crossModuleRetentionFixturesTarget)
-        }
-
-        Self.driver.setTargets(targets)
-
-        graph = SourceGraph()
-        try! Self.driver.index(graph: graph)
-
-        if !retainDeclarationDescriptions.isEmpty,
-           let declaration = try! materialize(retainDeclarationDescriptions, fail: true) {
-            graph.markRetained(declaration)
-        }
-
-        try! SourceGraphMutatorRunner.perform(graph: graph)
-        try testBlock()
-
-        if (testRun?.failureCount ?? 0) > 0 {
-            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-            SourceGraphDebugger(graph: graph).describeGraph()
-            print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
-        }
-    }
-
-    private func fixturePath(for file: String, objc: Bool) -> FilePath {
-        let fixtureFolder = objc ? "ObjcRetentionFixtures" : "RetentionFixtures"
-        return ProjectRootPath.appending("Tests/Fixtures/\(fixtureFolder)/\(file).swift")
     }
 }

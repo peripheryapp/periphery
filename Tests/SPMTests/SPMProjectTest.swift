@@ -7,18 +7,10 @@ class SPMProjectTest: SourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        SPMProjectPath.chdir {
-            let package = try! SPM.Package.load()
-            let driver = SPMProjectDriver(
-                package: package,
-                targets: package.targets,
-                configuration: configuration
-            )
+        configuration.targets = ["SPMProjectKit", "Frontend"]
 
-            try! driver.build()
-            try! driver.index(graph: graph)
-            try! SourceGraphMutatorRunner.perform(graph: graph)
-        }
+        build(driver: SPMProjectDriver.self, projectPath: SPMProjectPath)
+        index()
     }
 
     func testMainEntryFile() {

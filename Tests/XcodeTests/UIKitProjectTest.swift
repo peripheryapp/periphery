@@ -12,10 +12,8 @@ class UIKitProjectTest: SourceGraphTestCase {
         configuration.schemes = ["UIKitProject"]
         configuration.targets = ["UIKitProject", "NotificationServiceExtension", "UIKitProjectTests", "LocalPackage.LocalPackageTarget", "LocalPackage.LocalPackageTargetTests"]
 
-        let driver = try! XcodeProjectDriver.build()
-        try! driver.build()
-        try! driver.index(graph: graph)
-        try! SourceGraphMutatorRunner.perform(graph: graph)
+        build(driver: XcodeProjectDriver.self)
+        index()
     }
 
     func testRetainsMainAppEntryPoint() {

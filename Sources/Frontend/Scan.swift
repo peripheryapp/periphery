@@ -17,8 +17,10 @@ final class Scan {
             configuration.skipBuild = true
         }
 
-        let configYaml = try configuration.asYaml()
-        logger.debug("[configuration:begin]\n\(configYaml.trimmed)\n[configuration:end]")
+        if configuration.verbose {
+            let configYaml = try configuration.asYaml()
+            logger.debug("[configuration:begin]\n\(configYaml.trimmed)\n[configuration:end]")
+        }
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)

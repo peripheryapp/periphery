@@ -8,19 +8,12 @@ class SwiftUIProjectTest: SourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        let project = try! XcodeProject(path: SwiftUIProjectPath)
+        configuration.project = SwiftUIProjectPath.string
+        configuration.schemes = ["SwiftUIProject"]
+        configuration.targets = ["SwiftUIProject"]
 
-        let driver = XcodeProjectDriver(
-            configuration: configuration,
-            project: project,
-            schemes: [try! XcodeScheme(project: project, name: "SwiftUIProject")],
-            targets: project.targets,
-            packageTargets: [:]
-        )
-
-        try! driver.build()
-        try! driver.index(graph: graph)
-        try! SourceGraphMutatorRunner.perform(graph: graph)
+        build(driver: XcodeProjectDriver.self)
+        index()
     }
 
     func testRetainsMainAppEntryPoint() {

@@ -1,20 +1,16 @@
 import XCTest
-import PeripheryKit
+import SystemPackage
+@testable import PeripheryKit
 import Shared
 
 open class SourceGraphTestCase: XCTestCase {
-    static var graph = SourceGraph()
+    static var driver: ProjectDriver!
     static var configuration: Configuration!
+    static var graph = SourceGraph()
 
-    var graph: SourceGraph! {
-        get {
-            Self.graph
-        }
-        set {
-            Self.graph = newValue
-        }
-    }
+    private static var allIndexedDeclarations: Set<Declaration> = []
 
+    let performKnownFailures = false
     var configuration: Configuration { Self.configuration }
 
     private var scopeStack: [DeclarationScope] = []
@@ -30,10 +26,34 @@ open class SourceGraphTestCase: XCTestCase {
         configuration.reset()
     }
 
+    override open func tearDown() {
+        super.tearDown()
+
+        if (testRun?.failureCount ?? 0) > 0 {
+            print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+            SourceGraphDebugger(graph: Self.graph).describeGraph()
+            print("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+        }
+    }
+
+    static func build(driver driverType: ProjectDriver.Type, projectPath: FilePath = ProjectRootPath) {
+        projectPath.chdir {
+            driver = try! driverType.build()
+            try! driver.build()
+        }
+    }
+
+    static func index() {
+        graph = SourceGraph()
+        try! Self.driver.index(graph: graph)
+        allIndexedDeclarations = graph.allDeclarations
+        try! SourceGraphMutatorRunner.perform(graph: graph)
+    }
+
     func assertReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, file: file, line: line) else { return }
 
-        if !graph.usedDeclarations.contains(declaration) {
+        if !Self.graph.usedDeclarations.contains(declaration) {
             XCTFail("Expected declaration to be referenced: \(declaration)", file: file, line: line)
         }
 
@@ -45,7 +65,7 @@ open class SourceGraphTestCase: XCTestCase {
     func assertNotReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, file: file, line: line) else { return }
 
-        if !graph.unusedDeclarations.contains(declaration) {
+        if !Self.graph.unusedDeclarations.contains(declaration) {
             XCTFail("Expected declaration to not be referenced: \(declaration)", file: file, line: line)
         }
 
@@ -57,7 +77,7 @@ open class SourceGraphTestCase: XCTestCase {
     func assertRedundantProtocol(_ name: String, implementedBy conformances: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(.protocol(name), file: file, line: line) else { return }
 
-        if let references = graph.redundantProtocols[declaration] {
+        if let references = Self.graph.redundantProtocols[declaration] {
             let decls = references.compactMap { $0.parent }
 
             for conformance in conformances {
@@ -73,7 +93,7 @@ open class SourceGraphTestCase: XCTestCase {
     func assertNotRedundantProtocol(_ name: String, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(.protocol(name), file: file, line: line) else { return }
 
-        if graph.redundantProtocols.keys.contains(declaration) {
+        if Self.graph.redundantProtocols.keys.contains(declaration) {
             XCTFail("Expected '\(name)' to not be redundant.", file: file, line: line)
         }
     }
@@ -91,9 +111,9 @@ open class SourceGraphTestCase: XCTestCase {
     }
 
     func assertRedundantPublicAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = materialize(description, in: graph.allDeclarationsUnmodified, file: file, line: line) else { return }
+        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
 
-        if !graph.redundantPublicAccessibility.keys.contains(declaration) {
+        if !Self.graph.redundantPublicAccessibility.keys.contains(declaration) {
             XCTFail("Expected declaration to have redundant public accessibility: \(declaration)", file: file, line: line)
         }
 
@@ -103,9 +123,9 @@ open class SourceGraphTestCase: XCTestCase {
     }
 
     func assertNotRedundantPublicAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = materialize(description, in: graph.allDeclarationsUnmodified, file: file, line: line) else { return }
+        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
 
-        if graph.redundantPublicAccessibility.keys.contains(declaration) {
+        if Self.graph.redundantPublicAccessibility.keys.contains(declaration) {
             XCTFail("Expected declaration to not have redundant public accessibility: \(declaration)", file: file, line: line)
         }
 
@@ -125,7 +145,7 @@ open class SourceGraphTestCase: XCTestCase {
     func assertAssignOnlyProperty(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, file: file, line: line) else { return }
 
-        if !graph.assignOnlyProperties.contains(declaration) {
+        if !Self.graph.assignOnlyProperties.contains(declaration) {
             XCTFail("Expected property to be assign-only: \(declaration)", file: file, line: line)
         }
 
@@ -137,7 +157,7 @@ open class SourceGraphTestCase: XCTestCase {
     func assertNotAssignOnlyProperty(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, file: file, line: line) else { return }
 
-        if graph.assignOnlyProperties.contains(declaration) {
+        if Self.graph.assignOnlyProperties.contains(declaration) {
             XCTFail("Expected property to not be assign-only: \(declaration)", file: file, line: line)
         }
 
@@ -150,22 +170,6 @@ open class SourceGraphTestCase: XCTestCase {
         scopeStack.append(.module(name))
         scopedAssertions?()
         scopeStack.removeLast()
-    }
-
-    func materialize(_ descriptions: [DeclarationDescription], in defaultDeclarations: Set<Declaration>? = nil, fail: Bool = true, file: StaticString = #file, line: UInt = #line) throws -> Declaration? {
-        let allDeclarations = defaultDeclarations ?? graph.rootDeclarations
-        let scopeDescriptions = descriptions.dropLast()
-        let scopedDeclarations = scopeDescriptions.reduce(into: allDeclarations) { result, description in
-            if description.kind == .module {
-                result = result.filter { $0.location.file.modules.contains(description.name) }
-            } else {
-                if let declaration = materialize(description, in: result, file: file, line: line) {
-                    result = [declaration]
-                }
-            }
-        }
-
-        return materialize(try XCTUnwrap(descriptions.last), in: scopedDeclarations, fail: fail, file: file, line: line)
     }
 
     // MARK: - Private
@@ -190,7 +194,7 @@ open class SourceGraphTestCase: XCTestCase {
     }
 
     private func scopedDeclarations(from defaultDeclarations: Set<Declaration>? = nil) -> Set<Declaration> {
-        let allDeclarations = defaultDeclarations ?? graph.rootDeclarations
+        let allDeclarations = defaultDeclarations ?? Self.graph.rootDeclarations
 
         guard !scopeStack.isEmpty else {
             return allDeclarations

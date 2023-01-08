@@ -27,7 +27,7 @@ public final class SPMProjectDriver {
     }
 
     private let package: SPM.Package
-    private var targets: [SPM.Target]
+    let targets: [SPM.Target]
     private let configuration: Configuration
     private let logger: Logger
 
@@ -36,10 +36,6 @@ public final class SPMProjectDriver {
         self.targets = targets
         self.configuration = configuration
         self.logger = logger
-    }
-
-    func setTargets(_ targets: [SPM.Target]) {
-        self.targets = targets
     }
 }
 
