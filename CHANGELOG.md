@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.11.0 (2023-01-08)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Add `clear-cache` command.
 - Add support for analyzing local SwiftPM packages in Xcode projects.
 
