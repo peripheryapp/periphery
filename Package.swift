@@ -77,6 +77,9 @@ var targets: [PackageDescription.Target] = [
     ),
     .target(
         name: "RetentionFixtures",
+        dependencies: [
+            .target(name: "ExternalModuleFixtures")
+        ],
         path: "Tests/Fixtures/RetentionFixtures"
     ),
     .target(
