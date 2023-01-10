@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Enums that conform to SwiftUI special Provider protocols are now retained, as was already the case for structs and classes.
 
 ## 2.11.0 (2023-01-08)
 

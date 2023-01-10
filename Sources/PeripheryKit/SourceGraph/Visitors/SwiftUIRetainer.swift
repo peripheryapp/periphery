@@ -12,14 +12,14 @@ final class SwiftUIRetainer: SourceGraphMutator {
 
     func mutate() {
         retainSpecialProtocolConformances()
-        retanApplicationDelegateAdaptors()
+        retainApplicationDelegateAdaptors()
     }
 
     // MARK: - Private
 
     private func retainSpecialProtocolConformances() {
         graph
-            .declarations(ofKinds: [.class, .struct])
+            .declarations(ofKinds: [.class, .struct, .enum])
             .lazy
             .filter {
                 $0.related.contains {
@@ -29,7 +29,7 @@ final class SwiftUIRetainer: SourceGraphMutator {
             .forEach { graph.markRetained($0) }
     }
 
-    private func retanApplicationDelegateAdaptors() {
+    private func retainApplicationDelegateAdaptors() {
         graph
             .mainAttributedDeclarations
             .lazy
@@ -37,7 +37,7 @@ final class SwiftUIRetainer: SourceGraphMutator {
             .filter { $0.kind == .varInstance }
             .filter {
                 $0.references.contains {
-                    $0.kind == .struct && Self.applicationDelegateAdaptorStructNames.contains($0.name ?? "")
+                    ($0.kind == .struct || $0.kind == .enum) && Self.applicationDelegateAdaptorStructNames.contains($0.name ?? "")
                 }
             }
             .forEach { graph.markRetained($0) }
