@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Add CodeClimate output formatter available via the `--format codeclimate` option. 
 
 ##### Bug Fixes
 

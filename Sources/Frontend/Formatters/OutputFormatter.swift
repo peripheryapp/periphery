@@ -65,6 +65,8 @@ extension OutputFormat {
             return XcodeFormatter.self
         case .csv:
             return CsvFormatter.self
+        case .codeclimate:
+            return CodeClimateFormatter.self
         case .json:
             return JsonFormatter.self
         case .checkstyle:

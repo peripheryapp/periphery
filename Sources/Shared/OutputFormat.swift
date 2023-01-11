@@ -5,6 +5,7 @@ public enum OutputFormat: String, CaseIterable {
     case csv
     case json
     case checkstyle
+    case codeclimate
 
     public static let `default` = OutputFormat.xcode
 
