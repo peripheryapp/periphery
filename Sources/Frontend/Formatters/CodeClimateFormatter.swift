@@ -20,9 +20,20 @@ final class CodeClimateFormatter: OutputFormatter {
                 .map { $0.1 }
                 .joined(separator: ", ")
             
+            let fingerprint: String
+            if result.declaration.kind == .varParameter,
+                let parentFingerprint = result.declaration.parent?.usrs.joined(separator: "."),
+                let argumentName = result.declaration.name {
+                // As function parameters do not have a mangled name that can be used for the fingerprint
+                // we take the mangled name of the function and append the position
+                fingerprint = "\(parentFingerprint)-\(argumentName)"
+            } else {
+                fingerprint = result.declaration.usrs.joined(separator: ".")
+            }
+            
             let object: [AnyHashable: Any] = [
                 "description": description,
-                "fingerprint": result.declaration.usrs.joined(separator: "."),
+                "fingerprint": fingerprint,
                 "severity": "major",
                 "location": location
             ]
