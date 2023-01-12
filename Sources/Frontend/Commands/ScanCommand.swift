@@ -1,5 +1,6 @@
 import Foundation
 import ArgumentParser
+import SystemPackage
 import Shared
 
 struct ScanCommand: FrontendCommand {
@@ -23,6 +24,9 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Path to your project's .xcodeproj - supply this option if your project doesn't have an .xcworkspace. Xcode projects only")
     var project: String?
 
+    @Option(parsing: .upToNextOption, help: "Path to file targets mapping. For use with third-party build systems. Multiple paths may be specified")
+    var fileTargetsPath: [FilePath] = defaultConfiguration.$fileTargetsPath.defaultValue
+
     @Option(help: "Comma-separated list of schemes that must be built in order to produce the targets passed to the --targets option. Xcode projects only", transform: split(by: ","))
     var schemes: [String] = defaultConfiguration.$schemes.defaultValue
 
@@ -41,10 +45,10 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Path glob of source files which should be included from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var reportInclude: [String] = defaultConfiguration.$reportInclude.defaultValue
 
-    @Option(help: "Path to index store to use. Implies '--skip-build'")
-    var indexStorePath: String?
+    @Option(parsing: .upToNextOption, help: "Path to the index store. Multiple paths may be specified. Implies '--skip-build'")
+    var indexStorePath: [FilePath] = defaultConfiguration.$indexStorePath.defaultValue
 
-    @Flag(help: "Retain all public declarations - you'll likely want to enable this if you're scanning a framework/library project")
+    @Flag(help: "Retain all public declarations, recommended for framework/library projects")
     var retainPublic: Bool = defaultConfiguration.$retainPublic.defaultValue
 
     @Flag(help: "Disable identification of redundant public accessibility")
@@ -96,6 +100,7 @@ struct ScanCommand: FrontendCommand {
         configuration.guidedSetup = setup
         configuration.apply(\.$workspace, workspace)
         configuration.apply(\.$project, project)
+        configuration.apply(\.$fileTargetsPath, fileTargetsPath)
         configuration.apply(\.$schemes, schemes)
         configuration.apply(\.$targets, targets)
         configuration.apply(\.$indexExclude, indexExclude)
@@ -131,3 +136,9 @@ struct ScanCommand: FrontendCommand {
 }
 
 extension OutputFormat: ExpressibleByArgument {}
+
+extension FilePath: ExpressibleByArgument {
+    public init?(argument: String) {
+        self.init(argument)
+    }
+}

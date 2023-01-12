@@ -46,13 +46,11 @@ public final class Xcodebuild {
         try shell.exec(["rm", "-rf", try derivedDataPath(for: project, schemes: allSchemes).string])
     }
 
-    func indexStorePath(project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> String {
+    func indexStorePath(project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> FilePath {
         let derivedDataPath = try derivedDataPath(for: project, schemes: schemes)
         let pathsToTry = ["Index.noindex/DataStore", "Index/DataStore"]
-            .map { derivedDataPath.appending($0).string }
-        guard let path = pathsToTry.first(where: { path in
-            return FileManager.default.fileExists(atPath: path)
-        }) else {
+            .map { derivedDataPath.appending($0) }
+        guard let path = pathsToTry.first(where: { $0.exists }) else {
             throw PeripheryError.indexStoreNotFound(derivedDataPath: derivedDataPath.string)
         }
         return path

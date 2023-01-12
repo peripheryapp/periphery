@@ -58,20 +58,20 @@ extension SPMProjectDriver: ProjectDriver {
     }
 
     public func index(graph: SourceGraph) throws {
-        let sourceFiles = targets.reduce(into: [FilePath: [String]]()) { result, target in
+        let sourceFiles = targets.reduce(into: [FilePath: Set<String>]()) { result, target in
             let targetPath = absolutePath(for: target)
-            target.sources.forEach { result[targetPath.appending($0), default: []].append(target.name) }
+            target.sources.forEach { result[targetPath.appending($0), default: []].insert(target.name) }
         }
 
-        let storePath: String
+        let storePaths: [FilePath]
 
-        if let path = configuration.indexStorePath {
-            storePath = path
+        if !configuration.indexStorePath.isEmpty {
+            storePaths = configuration.indexStorePath
         } else {
-            storePath = FilePath(package.path).appending(".build/debug/index/store").string
+            storePaths = [FilePath(package.path).appending(".build/debug/index/store")]
         }
 
-        try SwiftIndexer(sourceFiles: sourceFiles, graph: graph, indexStoreURL: URL(fileURLWithPath: storePath)).perform()
+        try SwiftIndexer(sourceFiles: sourceFiles, graph: graph, indexStorePaths: storePaths).perform()
 
         graph.indexingComplete()
     }

@@ -12,7 +12,7 @@ final class Scan {
     }
 
     func perform(project: Project) throws -> [ScanResult] {
-        if configuration.indexStorePath != nil, !configuration.skipBuild {
+        if !configuration.indexStorePath.isEmpty, !configuration.skipBuild {
             logger.warn("The '--index-store-path' option implies '--skip-build', specify it to silence this warning")
             configuration.skipBuild = true
         }

@@ -155,20 +155,20 @@ extension XcodeProjectDriver: ProjectDriver {
     }
 
     public func index(graph: SourceGraph) throws {
-        let storePath: String
+        let storePaths: [FilePath]
 
-        if let path = configuration.indexStorePath {
-            storePath = path
+        if !configuration.indexStorePath.isEmpty {
+            storePaths = configuration.indexStorePath
         } else {
-            storePath = try xcodebuild.indexStorePath(project: project, schemes: Array(schemes))
+            storePaths = [try xcodebuild.indexStorePath(project: project, schemes: Array(schemes))]
         }
 
         try targets.forEach { try $0.identifyFiles() }
 
-        var sourceFiles: [FilePath: [String]] = [:]
+        var sourceFiles: [FilePath: Set<String>] = [:]
 
         for target in targets {
-            target.files(kind: .swift).forEach { sourceFiles[$0, default: []].append(target.name) }
+            target.files(kind: .swift).forEach { sourceFiles[$0, default: []].insert(target.name) }
         }
 
         for (package, targets) in packageTargets {
@@ -177,11 +177,11 @@ extension XcodeProjectDriver: ProjectDriver {
             for target in targets {
                 target.sourcePaths.forEach {
                     let absolutePath = packageRoot.pushing($0)
-                    sourceFiles[absolutePath, default: []].append(target.name) }
+                    sourceFiles[absolutePath, default: []].insert(target.name) }
             }
         }
 
-        try SwiftIndexer(sourceFiles: sourceFiles, graph: graph, indexStoreURL: URL(fileURLWithPath: storePath)).perform()
+        try SwiftIndexer(sourceFiles: sourceFiles, graph: graph, indexStorePaths: storePaths).perform()
 
         let xibFiles = Set(targets.map { $0.files(kind: .interfaceBuilder) }.joined())
         try XibIndexer(xibFiles: xibFiles, graph: graph).perform()
