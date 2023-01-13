@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.12.0 (2023-01-13)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Add CodeClimate output formatter available via the `--format codeclimate` option. 
 - Add support for third-party build systems, such as Bazel.
 
