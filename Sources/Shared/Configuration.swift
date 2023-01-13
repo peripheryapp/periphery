@@ -16,6 +16,9 @@ public final class Configuration {
     @Setting(key: "project", defaultValue: nil)
     public var project: String?
 
+    @Setting(key: "file_targets_path", defaultValue: [], valueConverter: filePathConverter)
+    public var fileTargetsPath: [FilePath]
+
     @Setting(key: "format", defaultValue: .default, valueConverter: { OutputFormat(anyValue: $0) })
     public var outputFormat: OutputFormat
 
@@ -70,8 +73,8 @@ public final class Configuration {
     @Setting(key: "strict", defaultValue: false)
     public var strict: Bool
 
-    @Setting(key: "index_store_path", defaultValue: nil)
-    public var indexStorePath: String?
+    @Setting(key: "index_store_path", defaultValue: [], valueConverter: filePathConverter)
+    public var indexStorePath: [FilePath]
 
     @Setting(key: "skip_build", defaultValue: false)
     public var skipBuild: Bool
@@ -94,6 +97,10 @@ public final class Configuration {
 
         if $project.hasNonDefaultValue {
             config[$project.key] = project
+        }
+
+        if $fileTargetsPath.hasNonDefaultValue {
+            config[$fileTargetsPath.key] = fileTargetsPath.map { $0.string }
         }
 
         if $schemes.hasNonDefaultValue {
@@ -161,7 +168,7 @@ public final class Configuration {
         }
 
         if $indexStorePath.hasNonDefaultValue {
-            config[$indexStorePath.key] = indexStorePath
+            config[$indexStorePath.key] = indexStorePath.map { $0.string }
         }
 
         if $skipBuild.hasNonDefaultValue {
@@ -196,6 +203,8 @@ public final class Configuration {
                 $workspace.assign(value)
             case $project.key:
                 $project.assign(value)
+            case $fileTargetsPath.key:
+                $fileTargetsPath.assign(value)
             case $schemes.key:
                 $schemes.assign(value)
             case $targets.key:
@@ -245,6 +254,7 @@ public final class Configuration {
     public func reset() {
         $workspace.reset()
         $project.reset()
+        $fileTargetsPath.reset()
         $schemes.reset()
         $targets.reset()
         $indexExclude.reset()
@@ -356,4 +366,14 @@ public final class Configuration {
     fileprivate func reset() {
         wrappedValue = defaultValue
     }
+}
+
+private let filePathConverter: (Any) -> [FilePath]? = { value in
+    if let path = value as? String {
+        return [FilePath(path)]
+    } else if let paths = value as? [String] {
+        return paths.map { FilePath($0) }
+    }
+
+    return nil
 }

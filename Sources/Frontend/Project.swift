@@ -13,6 +13,8 @@ final class Project {
 
         if configuration.workspace != nil || configuration.project != nil {
             return self.init(kind: .xcode)
+        } else if !configuration.fileTargetsPath.isEmpty {
+            return self.init(kind: .generic)
         } else if SPM.isSupported {
             return self.init(kind: .spm)
         }
@@ -59,6 +61,8 @@ final class Project {
             #endif
         case .spm:
             return try SPMProjectDriver.build()
+        case .generic:
+            return try GenericProjectDriver.build()
         }
     }
 }

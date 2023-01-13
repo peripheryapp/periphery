@@ -3,7 +3,7 @@ import SystemPackage
 
 public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case shellCommandFailed(cmd: String, args: [String], status: Int32, output: String)
-    case shellOuputEncodingFailed(cmd: String, args: [String], encoding: String.Encoding)
+    case shellOutputEncodingFailed(cmd: String, args: [String], encoding: String.Encoding)
     case usageError(String)
     case underlyingError(Error)
     case invalidScheme(name: String, project: String)
@@ -18,7 +18,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case packageError(message: String)
     case swiftVersionParseError(fullVersion: String)
     case swiftVersionUnsupportedError(version: String, minimumVersion: String)
-    case unindexedTargetsError(targets: Set<String>, indexStorePath: String)
+    case unindexedTargetsError(targets: Set<String>, indexStorePaths: [FilePath])
     case jsonDeserializationError(error: Error, json: String)
     case indexStoreNotFound(derivedDataPath: String)
     case conflictingIndexUnitsError(file: FilePath, module: String, unitTargets: Set<String>)
@@ -28,7 +28,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
         case let .shellCommandFailed(cmd, args, status, output):
             let joinedArgs = args.joined(separator: " ")
             return "Shell command '\(cmd) \(joinedArgs)' returned exit status '\(status)':\n\(output)"
-        case let .shellOuputEncodingFailed(cmd, args, encoding):
+        case let .shellOutputEncodingFailed(cmd, args, encoding):
             let joinedArgs = args.joined(separator: " ")
             return "Shell command '\(cmd) \(joinedArgs)' output encoding to \(encoding) failed."
         case let .usageError(message):

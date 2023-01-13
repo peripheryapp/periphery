@@ -36,7 +36,7 @@ final class ReadableStream {
         task.waitUntilExit()
 
         guard let result = String(data: data, encoding: encoding) else {
-            throw PeripheryError.shellOuputEncodingFailed(cmd: cmd, args: args, encoding: encoding)
+            throw PeripheryError.shellOutputEncodingFailed(cmd: cmd, args: args, encoding: encoding)
         }
 
         output += result

@@ -5,45 +5,48 @@ import SystemPackage
 import Shared
 
 public final class SwiftIndexer: Indexer {
-    private let sourceFiles: [FilePath: [String]]
+    private let sourceFiles: [FilePath: Set<String>]
     private let graph: SourceGraph
     private let logger: ContextualLogger
     private let configuration: Configuration
-    private let indexStore: IndexStore
-    private let indexStoreURL: URL
+    private let indexStorePaths: [FilePath]
 
     public required init(
-        sourceFiles: [FilePath: [String]],
+        sourceFiles: [FilePath: Set<String>],
         graph: SourceGraph,
-        indexStoreURL: URL,
+        indexStorePaths: [FilePath],
         logger: Logger = .init(),
         configuration: Configuration = .shared
-    ) throws {
+    ) {
         self.sourceFiles = sourceFiles
         self.graph = graph
-        self.indexStore = try .open(store: indexStoreURL, lib: .open())
-        self.indexStoreURL = indexStoreURL
+        self.indexStorePaths = indexStorePaths
         self.logger = logger.contextualized(with: "index:swift")
         self.configuration = configuration
         super.init(configuration: configuration)
     }
 
     public func perform() throws {
-        var unitsByFile: [FilePath: [IndexStoreUnit]] = [:]
+        var unitsByFile: [FilePath: [(IndexStore, IndexStoreUnit)]] = [:]
         let allSourceFiles = Set(sourceFiles.keys)
         let (includedFiles, excludedFiles) = filterIndexExcluded(from: allSourceFiles)
         excludedFiles.forEach { self.logger.debug("Excluding \($0.string)") }
 
-        try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
-            guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
+        for indexStorePath in indexStorePaths {
+            logger.debug("Reading \(indexStorePath)")
+            let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: .open())
 
-            let file = FilePath(filePath)
+            try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
+                guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
 
-            if includedFiles.contains(file) {
-                unitsByFile[file, default: []].append(unit)
+                let file = FilePath(filePath)
+
+                if includedFiles.contains(file) {
+                    unitsByFile[file, default: []].append((indexStore, unit))
+                }
+
+                return true
             }
-
-            return true
         }
 
         let indexedFiles = Set(unitsByFile.keys)
@@ -52,15 +55,16 @@ public final class SwiftIndexer: Indexer {
         if !unindexedFiles.isEmpty {
             unindexedFiles.forEach { logger.debug("Source file not indexed: \($0)") }
             let targets: Set<String> = Set(unindexedFiles.flatMap { sourceFiles[$0] ?? [] })
-            throw PeripheryError.unindexedTargetsError(targets: targets, indexStorePath: indexStoreURL.path)
+            throw PeripheryError.unindexedTargetsError(targets: targets, indexStorePaths: indexStorePaths)
         }
 
         let jobs = try unitsByFile.map { (file, units) -> Job in
-            let modules = try units.reduce(into: Set<String>()) { (set, unit) in
+            let modules = try units.reduce(into: Set<String>()) { (set, tuple) in
+                let (indexStore, unit) = tuple
                 if let name = try indexStore.moduleName(for: unit) {
                     let (didInsert, _) = set.insert(name)
                     if !didInsert {
-                        let targets = try Set(units.compactMap { try indexStore.target(for: $0) })
+                        let targets = try Set(units.compactMap { try indexStore.target(for: $0.1) })
                         throw PeripheryError.conflictingIndexUnitsError(file: file, module: name, unitTargets: targets)
                     }
                 }
@@ -71,7 +75,6 @@ public final class SwiftIndexer: Indexer {
                 file: sourceFile,
                 units: units,
                 graph: graph,
-                indexStore: indexStore,
                 logger: logger,
                 configuration: configuration
             )
@@ -103,24 +106,21 @@ public final class SwiftIndexer: Indexer {
     private class Job {
         let file: SourceFile
 
-        private let units: [IndexStoreUnit]
+        private let units: [(IndexStore, IndexStoreUnit)]
         private let graph: SourceGraph
-        private let indexStore: IndexStore
         private let logger: ContextualLogger
         private let configuration: Configuration
 
         required init(
             file: SourceFile,
-            units: [IndexStoreUnit],
+            units: [(IndexStore, IndexStoreUnit)],
             graph: SourceGraph,
-            indexStore: IndexStore,
             logger: ContextualLogger,
             configuration: Configuration
         ) {
             self.file = file
             self.units = units
             self.graph = graph
-            self.indexStore = indexStore
             self.logger = logger
             self.configuration = configuration
         }
@@ -164,7 +164,7 @@ public final class SwiftIndexer: Indexer {
         func phaseOne() throws {
             var rawDeclsByKey: [RawDeclaration.Key: [(RawDeclaration, [RawRelation])]] = [:]
 
-            for unit in units {
+            for (indexStore, unit) in units {
                 try indexStore.forEachRecordDependencies(for: unit) { dependency in
                     guard case let .record(record) = dependency else { return true }
 
@@ -175,17 +175,17 @@ public final class SwiftIndexer: Indexer {
                               else { return true }
 
                         if !occurrence.roles.intersection([.definition, .declaration]).isEmpty {
-                            if let (decl, relations) = try parseRawDeclaration(occurrence, usr, location) {
+                            if let (decl, relations) = try parseRawDeclaration(occurrence, usr, location, indexStore) {
                                 rawDeclsByKey[decl.key, default: []].append((decl, relations))
                             }
                         }
 
                         if !occurrence.roles.intersection([.reference]).isEmpty {
-                            try parseReference(occurrence, usr, location)
+                            try parseReference(occurrence, usr, location, indexStore)
                         }
 
                         if !occurrence.roles.intersection([.implicit]).isEmpty {
-                            try parseImplicit(occurrence, usr, location)
+                            try parseImplicit(occurrence, usr, location, indexStore)
                         }
 
                         return true
@@ -438,7 +438,8 @@ public final class SwiftIndexer: Indexer {
         private func parseRawDeclaration(
             _ occurrence: IndexStoreOccurrence,
             _ usr: String,
-            _ location: SourceLocation
+            _ location: SourceLocation,
+            _ indexStore: IndexStore
         ) throws -> (RawDeclaration, [RawRelation])? {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
             else { return nil }
@@ -528,7 +529,8 @@ public final class SwiftIndexer: Indexer {
         private func parseImplicit(
             _ occurrence: IndexStoreOccurrence,
             _ occurrenceUsr: String,
-            _ location: SourceLocation
+            _ location: SourceLocation,
+            _ indexStore: IndexStore
         ) throws {
             var refs = [Reference]()
 
@@ -557,7 +559,8 @@ public final class SwiftIndexer: Indexer {
         private func parseReference(
             _ occurrence: IndexStoreOccurrence,
             _ occurrenceUsr: String,
-            _ location: SourceLocation
+            _ location: SourceLocation,
+            _ indexStore: IndexStore
         ) throws {
             guard let kind = transformReferenceKind(occurrence.symbol.kind, occurrence.symbol.subKind)
                   else { return }
