@@ -44,6 +44,7 @@ public final class SourceGraphMutatorRunner {
         StringInterpolationAppendInterpolationRetainer.self,
         PropertyWrapperRetainer.self,
         ResultBuilderRetainer.self,
+        MainActorRetainer.self,
 
         PlainExtensionEliminator.self,
         AncestralReferenceEliminator.self,
