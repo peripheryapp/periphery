@@ -62,7 +62,8 @@ class ShellMock: Shell {
 private let XcodebuildListOutputs = [
     XcodebuildListOutputA,
     XcodebuildListOutputB,
-    XcodebuildListOutputC
+    XcodebuildListOutputC,
+    XcodebuildListOutputD
 ]
 
 private let XcodebuildListOutputA = """
@@ -173,4 +174,17 @@ NSLocalizedRecoverySuggestion = "Please unlock your device and reattach. (0xE800
         "name" : "Periphery"
     }
 }
+"""
+
+private let XcodebuildListOutputD = """
+{
+    "project" : {
+        "schemes" : [
+            "SchemeA",
+            "SchemeB",
+        ],
+        "name" : "Periphery"
+    }
+}
+build session not created after 15 seconds - still waiting
 """
