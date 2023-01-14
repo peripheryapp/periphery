@@ -1460,16 +1460,16 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    // MARK: - Known Failures
-
     func testMainActorAnnotation() {
-        guard performKnownFailures else { return }
-
         analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass132"))
+            assertReferenced(.class("FixtureClass132")) {
+                self.assertReferenced(.functionConstructor("init(value:)"))
+            }
             assertReferenced(.class("FixtureClass133"))
         }
     }
+
+    // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-14181
     func testSelfReferencedConstructor() {
