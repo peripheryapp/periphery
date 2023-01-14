@@ -15,13 +15,15 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         inheritedTypeLocations: Set<SourceLocation>,
         genericParameterLocations: Set<SourceLocation>,
         genericConformanceRequirementLocations: Set<SourceLocation>,
-        letShorthandIdentifiers: Set<String>
+        letShorthandIdentifiers: Set<String>,
+        hasCapitalSelfFunctionCall: Bool
     )
 
     private let sourceLocationBuilder: SourceLocationBuilder
     private let typeSyntaxInspector: TypeSyntaxInspector
     private(set) var results: [Result] = []
     private var letShorthandIdentifiers: Set<String> = []
+    private var didVisitCapitalSelfFunctionCall: Bool = false
     private var functionDeclStackDepth = 0
 
     var resultsByLocation: [SourceLocation: Result] {
@@ -43,6 +45,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             inheritanceClause: node.inheritanceClause,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
+            consumeCapitalSelfFunctionCalls: true,
             at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
@@ -66,6 +69,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             inheritanceClause: node.inheritanceClause,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
+            consumeCapitalSelfFunctionCalls: true,
             at: node.identifier.positionAfterSkippingLeadingTrivia
         )
     }
@@ -107,6 +111,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             trivia: node.leadingTrivia,
             inheritanceClause: node.inheritanceClause,
             genericWhereClause: node.genericWhereClause,
+            consumeCapitalSelfFunctionCalls: true,
             at: position
         )
     }
@@ -266,6 +271,13 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         letShorthandIdentifiers.insert(identifier.text)
     }
 
+    func visit(_ node: FunctionCallExprSyntax) {
+        if let identifierExpr = node.calledExpression.as(IdentifierExprSyntax.self),
+           identifierExpr.identifier.rawTokenKind == .capitalSelfKeyword {
+            didVisitCapitalSelfFunctionCall = true
+        }
+    }
+
     // MARK: - Private
 
     private func parse(
@@ -278,6 +290,7 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
         inheritanceClause: TypeInheritanceClauseSyntax? = nil,
         genericParameterClause: GenericParameterClauseSyntax? = nil,
         genericWhereClause: GenericWhereClauseSyntax? = nil,
+        consumeCapitalSelfFunctionCalls: Bool = false,
         at position: AbsolutePosition
     ) {
         let modifierNames = modifiers?.withoutTrivia().map { $0.name.text } ?? []
@@ -295,6 +308,12 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             self.letShorthandIdentifiers.removeAll()
         }
 
+        var didVisitCapitalSelfFunctionCall = false
+        if consumeCapitalSelfFunctionCalls {
+            didVisitCapitalSelfFunctionCall = self.didVisitCapitalSelfFunctionCall
+            self.didVisitCapitalSelfFunctionCall = false
+        }
+
         results.append((
             location,
             accessibility,
@@ -308,7 +327,8 @@ final class DeclarationVisitor: PeripherySyntaxVisitor {
             typeLocations(for: inheritanceClause),
             typeLocations(for: genericParameterClause),
             typeLocations(for: genericWhereClause),
-            letShorthandIdentifiers
+            letShorthandIdentifiers,
+            didVisitCapitalSelfFunctionCall
         ))
     }
 

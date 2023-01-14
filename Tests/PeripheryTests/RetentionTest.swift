@@ -1469,19 +1469,23 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    // MARK: - Known Failures
-
     // https://bugs.swift.org/browse/SR-14181
+    // https://github.com/peripheryapp/periphery/issues/264
     func testSelfReferencedConstructor() {
-        guard performKnownFailures else { return }
-
         analyze(retainPublic: true) {
             assertReferenced(.struct("FixtureStruct3")) {
-                self.assertReferenced(.varStatic("instance"))
-                self.assertReferenced(.functionConstructor("init(someVar:)"))
+                self.assertReferenced(.functionConstructor("init(value:)"))
+            }
+            assertReferenced(.struct("FixtureStruct4")) {
+                self.assertReferenced(.functionConstructor("init(value:)"))
+            }
+            assertReferenced(.struct("FixtureStruct5")) {
+                self.assertNotReferenced(.functionConstructor("init(value:)"))
             }
         }
     }
+
+    // MARK: - Known Failures
 
     // https://bugs.swift.org/browse/SR-14162
     func testStaticMemberUsedAsSubscriptKey() {
