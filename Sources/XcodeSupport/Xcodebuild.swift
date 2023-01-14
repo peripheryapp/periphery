@@ -67,14 +67,18 @@ public final class Xcodebuild {
             "-json"
         ]
 
-        let lines = try shell.exec(["xcodebuild"] + args, stderr: false).split(separator: "\n").map { String($0) }
+        let lines = try shell.exec(["xcodebuild"] + args, stderr: false).split(separator: "\n").map { String($0).trimmed }
 
-        // xcodebuild may output unrelated warnings, we need to strip it out otherwise
+        // xcodebuild may output unrelated warnings, we need to strip them out otherwise
         // JSON parsing will fail.
-        // Note: this is likely not needed since `stderr: false` was added, but we might as well
-        // keep it.
-        let startIndex = lines.firstIndex { $0.trimmed == "{" }
-        let jsonString = lines.suffix(from: startIndex ?? 0).joined(separator: "\n")
+        let startIndex = lines.firstIndex { $0 == "{" } ?? 0
+        var jsonLines = lines.suffix(from: startIndex)
+
+        if let lastIndex = jsonLines.lastIndex(where: { $0 == "}" }) {
+            jsonLines = jsonLines.prefix(upTo: lastIndex + 1)
+        }
+
+        let jsonString = jsonLines.joined(separator: "\n")
 
         guard let json = try deserialize(jsonString),
             let details = json[type] as? [String: Any],

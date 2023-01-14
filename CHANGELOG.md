@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix JSON deserialization crash caused by unrelated warnings in the output from `xcodebuild -list -json`.
 
 ## 2.12.0 (2023-01-13)
 
