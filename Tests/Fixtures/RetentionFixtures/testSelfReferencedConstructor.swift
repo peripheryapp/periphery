@@ -1,18 +1,28 @@
 import Foundation
 
 struct FixtureStruct3 {
-    static let instance = Self(someVar: 123)
+    static let instance = Self(value: 1)
+    init(value: Int) {}
+}
 
-    let someVar: Int
+struct FixtureStruct4 {
+    init(value: Int) {}
+}
 
-    init(someVar: Int) {
-        self.someVar = someVar
+extension FixtureStruct4 {
+    static func someFunc() {
+        _ = Self(value: 1)
     }
 }
 
+struct FixtureStruct5 {
+    init(value: Int) {}
+}
 
 public struct FixtureStruct3Retainer {
     public func retainer() {
-        print(FixtureStruct3.instance.someVar)
+        _ = FixtureStruct3.instance
+        FixtureStruct4.someFunc()
+        _ = FixtureStruct5.self
     }
 }

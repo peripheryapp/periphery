@@ -345,6 +345,7 @@ public final class SwiftIndexer: Indexer {
                     decl.commentCommands = Set(result.commentCommands)
                     decl.declaredType = result.variableType
                     decl.letShorthandIdentifiers = result.letShorthandIdentifiers
+                    decl.hasCapitalSelfFunctionCall = result.hasCapitalSelfFunctionCall
 
                     for ref in decl.references.union(decl.related) {
                         if result.inheritedTypeLocations.contains(ref.location) {

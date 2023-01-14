@@ -176,6 +176,7 @@ public final class Declaration {
     public var references: Set<Reference> = []
     public var declaredType: String?
     public var letShorthandIdentifiers: Set<String> = []
+    public var hasCapitalSelfFunctionCall: Bool = false
 
     public var parent: Declaration?
     var related: Set<Reference> = []

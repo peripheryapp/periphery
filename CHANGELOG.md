@@ -12,6 +12,7 @@
 
 - Fix JSON deserialization crash caused by unrelated warnings in the output from `xcodebuild -list -json`.
 - Retain all `@MainActor` annotated types and their constructors to workaround a bug in Swift 5.7.
+- Retain all constructors on types instantiated via `Self(...)` to workaround false positives caused by a bug in Swift.
 
 ## 2.12.0 (2023-01-13)
 

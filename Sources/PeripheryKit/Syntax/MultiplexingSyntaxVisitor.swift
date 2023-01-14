@@ -23,6 +23,7 @@ protocol PeripherySyntaxVisitor {
     func visit(_ node: PrecedenceGroupDeclSyntax)
     func visit(_ node: ImportDeclSyntax)
     func visit(_ node: OptionalBindingConditionSyntax)
+    func visit(_ node: FunctionCallExprSyntax)
 
     func visitPost(_ node: ClassDeclSyntax)
     func visitPost(_ node: ProtocolDeclSyntax)
@@ -41,6 +42,7 @@ protocol PeripherySyntaxVisitor {
     func visitPost(_ node: PrecedenceGroupDeclSyntax)
     func visitPost(_ node: ImportDeclSyntax)
     func visitPost(_ node: OptionalBindingConditionSyntax)
+    func visitPost(_ node: FunctionCallExprSyntax)
 }
 
 extension PeripherySyntaxVisitor {
@@ -61,6 +63,7 @@ extension PeripherySyntaxVisitor {
     func visit(_ node: PrecedenceGroupDeclSyntax) { }
     func visit(_ node: ImportDeclSyntax) { }
     func visit(_ node: OptionalBindingConditionSyntax) {}
+    func visit(_ node: FunctionCallExprSyntax) {}
 
     func visitPost(_ node: ClassDeclSyntax) {}
     func visitPost(_ node: ProtocolDeclSyntax) {}
@@ -79,6 +82,7 @@ extension PeripherySyntaxVisitor {
     func visitPost(_ node: PrecedenceGroupDeclSyntax) {}
     func visitPost(_ node: ImportDeclSyntax) {}
     func visitPost(_ node: OptionalBindingConditionSyntax) {}
+    func visitPost(_ node: FunctionCallExprSyntax) {}
 }
 
 final class MultiplexingSyntaxVisitor: SyntaxVisitor {
@@ -190,6 +194,11 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
         return .visitChildren
     }
 
+    override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
+        visitors.forEach { $0.visit(node) }
+        return .visitChildren
+    }
+
     override func visitPost(_ node: ClassDeclSyntax) {
         visitors.forEach { $0.visitPost(node) }
     }
@@ -255,6 +264,10 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
     }
 
     override func visitPost(_ node: OptionalBindingConditionSyntax) {
+        visitors.forEach { $0.visitPost(node) }
+    }
+
+    override func visitPost(_ node: FunctionCallExprSyntax) {
         visitors.forEach { $0.visitPost(node) }
     }
 }
