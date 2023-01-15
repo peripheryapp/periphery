@@ -95,6 +95,8 @@ The scan command is Periphery's primary function. To begin a guided setup, simpl
 periphery scan --setup
 ```
 
+> Automatic setup only works for Xcode and SwiftPM projects, to use Periphery with non-Apple build systems such as Bazel, see [Build Systems](#build-systems).
+
 After answering a few questions, Periphery will print out the full scan command and execute it.
 
 The guided setup is only intended for introductory purposes, once you are familiar with Periphery you can try some more advanced options, all of which can be seen with `periphery help scan`.
@@ -430,6 +432,8 @@ A file-target mapping file contains a simple mapping of source files to build ta
 }
 ```
 
+> **Tip**
+>
 > Relative paths are assumed to be relative to the current directory.
 
 You can then invoke periphery as follows:
@@ -438,6 +442,8 @@ You can then invoke periphery as follows:
 periphery scan --file-targets-path map.json --index-store-path index/store
 ``` 
 
+> **Tip**
+>
 > Both options support multiple paths.
 
 ## Platforms
