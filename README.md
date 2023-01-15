@@ -95,7 +95,7 @@ The scan command is Periphery's primary function. To begin a guided setup, simpl
 periphery scan --setup
 ```
 
-> Automatic setup only works for Xcode and SwiftPM projects, to use Periphery with non-Apple build systems such as Bazel, see [Build Systems](#build-systems).
+> Guided setup only works for Xcode and SwiftPM projects, to use Periphery with non-Apple build systems such as Bazel, see [Build Systems](#build-systems).
 
 After answering a few questions, Periphery will print out the full scan command and execute it.
 
