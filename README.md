@@ -490,10 +490,10 @@ Example:
 
 ```bash
 # 1. use xcodebuild
-xcodebuild -scheme MyScheme -destination 'platform=iOS Simulator,OS=15.5,name=iPhone 13' -derivedDataPath '../dd' clean build
+xcodebuild -scheme MyScheme -destination 'platform=iOS Simulator,OS=16.2,name=iPhone 14' -derivedDataPath '../dd' clean build
 
 # 2. use produced index store for scanning
-periphery scan --skip-build --index-store-path '../dd/Index/DataStore/'
+periphery scan --skip-build --index-store-path '../dd/Index.noindex/DataStore/'
 ```
 
 ## Known Bugs
