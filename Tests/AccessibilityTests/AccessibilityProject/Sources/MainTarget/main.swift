@@ -6,9 +6,7 @@ PublicExtensionOnRedundantPublicKindRetainer().retain()
 IgnoreCommentCommandRetainer().retain()
 IgnoreAllCommentCommandRetainer().retain()
 
-_ = PublicTypeUsedAsPublicPropertyTypeRetainer().retain1
-_ = PublicTypeUsedAsPublicPropertyTypeRetainer().retain2
-_ = PublicTypeUsedAsPublicPropertyTypeRetainer().retain3
+_ = PublicTypeUsedAsPublicPropertyTypeRetainer().retain
 
 _ = PublicTypeUsedAsPublicInitializerParameterTypeRetainer()
 
@@ -28,6 +26,8 @@ PublicTypeUsedAsPublicFunctionGenericParameterRetainer().retain(PublicTypeUsedAs
 PublicTypeUsedAsPublicFunctionGenericRequirementRetainer().retain(PublicTypeUsedAsPublicFunctionGenericRequirement_ConformingClass.self)
 _ = PublicTypeUsedAsPublicClassGenericParameterRetainer<PublicTypeUsedAsPublicClassGenericParameter_ConformingClass>()
 _ = PublicTypeUsedAsPublicClassGenericRequirementRetainer<PublicTypeUsedAsPublicClassGenericRequirement_ConformingClass>()
+
+_ = PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnTypeRetainer().retain
 
 _ = NotRedundantPublicTestableImportClass().testableProperty
 

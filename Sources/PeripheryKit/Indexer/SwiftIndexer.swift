@@ -372,6 +372,7 @@ public final class SwiftIndexer: Indexer {
                 decl.declaredType = result.variableType
                 decl.letShorthandIdentifiers = result.letShorthandIdentifiers
                 decl.hasCapitalSelfFunctionCall = result.hasCapitalSelfFunctionCall
+                decl.hasGenericFunctionReturnedMetatypeParameters = result.hasGenericFunctionReturnedMetatypeParameters
 
                 for ref in decl.references.union(decl.related) {
                     if result.inheritedTypeLocations.contains(ref.location) {
@@ -390,6 +391,10 @@ public final class SwiftIndexer: Indexer {
                         ref.role = .genericParameterType
                     } else if result.genericConformanceRequirementLocations.contains(ref.location) {
                         ref.role = .genericRequirementType
+                    } else if result.variableInitFunctionCallLocations.contains(ref.location) {
+                        ref.role = .variableInitFunctionCall
+                    } else if result.functionCallMetatypeArgumentLocations.contains(ref.location) {
+                        ref.role = .functionCallMetatypeArgument
                     }
                 }
             }

@@ -7,18 +7,17 @@ public final class Reference {
         case genericRequirementType
         case inheritedClassType
         case refinedProtocolType
+        case variableInitFunctionCall
+        case functionCallMetatypeArgument
         case unknown
 
-        static var publiclyExposableRoles: [Role] {
-            return [
-                .varType,
-                .returnType,
-                .parameterType,
-                .genericParameterType,
-                .genericRequirementType,
-                .inheritedClassType,
-                .refinedProtocolType
-            ]
+        var isPubliclyExposable: Bool {
+            switch self {
+            case .varType, .returnType, .parameterType, .genericParameterType, .genericRequirementType, .inheritedClassType, .refinedProtocolType, .functionCallMetatypeArgument:
+                return true
+            default:
+                return false
+            }
         }
     }
 

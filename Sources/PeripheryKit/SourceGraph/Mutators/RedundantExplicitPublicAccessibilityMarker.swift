@@ -74,8 +74,30 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
 
     private func isExposedPubliclyByAnotherDeclaration(_ decl: Declaration) -> Bool {
         let referenceDecls = graph.references(to: decl)
-            .filter { Reference.Role.publiclyExposableRoles.contains($0.role) }
-            .compactMap { $0.parent }
+            .compactMap {
+                if $0.role.isPubliclyExposable {
+                    if case .functionCallMetatypeArgument = $0.role {
+                        // This reference is a function metatype argument. If the called function
+                        // also has generic metatype parameters, and returns any of the generic
+                        // types, then we must assume the argument type is publicly accessible.
+                        // Note that this isn't 100% accurate, as the metatype argument may not
+                        // correspond to a generic type. However, it's too complex to match up
+                        // the call site arguments with function parameters, as parameters with
+                        // default types can cause misalignment between the positions of the two.
+                        if let functionRef = $0.parent?.references.first(where: { $0.role == .variableInitFunctionCall }),
+                           let functionDecl = graph.explicitDeclaration(withUsr: functionRef.usr),
+                           functionDecl.hasGenericFunctionReturnedMetatypeParameters {
+                            return $0.parent
+                        }
+
+                        return nil
+                    }
+
+                    return $0.parent
+                }
+
+                return nil
+            }
 
         return referenceDecls.contains { refDecl in
             refDecl.accessibility.value == .public || refDecl.accessibility.value == .open
