@@ -10,7 +10,6 @@ open class SourceGraphTestCase: XCTestCase {
 
     private static var allIndexedDeclarations: Set<Declaration> = []
 
-    let performKnownFailures = false
     var configuration: Configuration { Self.configuration }
 
     private var scopeStack: [DeclarationScope] = []
