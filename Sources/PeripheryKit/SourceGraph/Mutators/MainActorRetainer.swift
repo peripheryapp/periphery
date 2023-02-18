@@ -12,6 +12,8 @@ final class MainActorRetainer: SourceGraphMutator {
     }
 
     func mutate() {
+        guard SwiftVersion.current.version.isVersion(lessThanOrEqualTo: "5.7") else { return }
+
         for decl in graph.declarations(ofKinds: Declaration.Kind.toplevelAttributableKind) {
             if decl.attributes.contains("MainActor") {
                 graph.markRetained(decl)
