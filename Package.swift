@@ -53,7 +53,7 @@ var targets: [PackageDescription.Target] = [
             .product(name: "SystemPackage", package: "swift-system")
         ]
     ),
-    .target(
+    .testTarget(
         name: "TestShared",
         dependencies: [
             .target(name: "PeripheryKit")
