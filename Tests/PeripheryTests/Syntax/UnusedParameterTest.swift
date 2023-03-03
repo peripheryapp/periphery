@@ -111,6 +111,11 @@ class UnusedParameterTest: XCTestCase {
         assertUsed("param", in: "myFunc(param:)")
     }
 
+    func testNestedVariable() {
+        analyze()
+        assertUsed("param", in: "myFunc(param:)")
+    }
+
     func testFatalErrorFunction() {
         analyze()
         assertUsed("param", in: "myFunc(param:)")

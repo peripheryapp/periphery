@@ -282,7 +282,9 @@ struct UnusedParameterParser {
         }
 
         let items = bindings.flatMap {
-            return $0.initializer?.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) } ?? []
+            let initializerItems = $0.initializer?.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) } ?? []
+            let accessorItems = $0.accessor?.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) } ?? []
+            return initializerItems + accessorItems
         }
 
         return Variable(names: names, items: items)

@@ -15,6 +15,7 @@
 - Retain all constructors on types instantiated via `Self(...)` to workaround false positives caused by a bug in Swift.
 - `Set<AnyCancellable>` and `NSKeyValueObservation` are now included in the default values for `--retain-assign-only-property-types`.
 - Improve accuracy of guard-let shorthand workaround.
+- Fix unused parameter false positive result for parameter used within a nested computed variable.
 
 ## 2.12.0 (2023-01-13)
 
