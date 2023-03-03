@@ -5,11 +5,12 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
     private let retainAssignOnlyPropertyTypes: [String]
+    private let defaultRetainedTypes = ["AnyCancellable", "Set<AnyCancellable>", "[AnyCancellable]", "NSKeyValueObservation"]
 
     required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
         self.configuration = configuration
-        self.retainAssignOnlyPropertyTypes = ["AnyCancellable"] + configuration.retainAssignOnlyPropertyTypes
+        self.retainAssignOnlyPropertyTypes = defaultRetainedTypes + configuration.retainAssignOnlyPropertyTypes
     }
 
     func mutate() throws {
