@@ -32,6 +32,7 @@ public final class SourceGraphMutatorRunner {
         DefaultConstructorReferenceBuilder.self,
         ComplexPropertyAccessorReferenceBuilder.self,
         EnumCaseReferenceBuilder.self,
+        LetShorthandPropertyReferenceBuilder.self,
 
         UnusedParameterRetainer.self,
         AssetReferenceRetainer.self,
@@ -52,8 +53,7 @@ public final class SourceGraphMutatorRunner {
         AssignOnlyPropertyReferenceEliminator.self,
 
         UsedDeclarationMarker.self,
-        RedundantProtocolMarker.self,
-        LetShorthandPropertyReferenceMarker.self
+        RedundantProtocolMarker.self
     ]
 
     private let graph: SourceGraph

@@ -15,6 +15,7 @@ public final class SourceGraph {
     private(set) var ignoredDeclarations: Set<Declaration> = []
     private(set) var assetReferences: Set<AssetReference> = []
     private(set) var mainAttributedDeclarations: Set<Declaration> = []
+    private(set) var letShorthandContainerDeclarations: Set<Declaration> = []
 
     private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
@@ -106,6 +107,12 @@ public final class SourceGraph {
     func markMainAttributed(_ declaration: Declaration) {
         mutationQueue.sync {
             _ = mainAttributedDeclarations.insert(declaration)
+        }
+    }
+
+    func markLetShorthandContainer(_ declaration: Declaration) {
+        mutationQueue.sync {
+            _ = letShorthandContainerDeclarations.insert(declaration)
         }
     }
 

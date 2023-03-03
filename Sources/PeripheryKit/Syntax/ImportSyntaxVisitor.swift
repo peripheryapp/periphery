@@ -1,7 +1,7 @@
 import Foundation
 import SwiftSyntax
 
-final class ImportVisitor: PeripherySyntaxVisitor {
+final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
     typealias ImportStatement = (parts: [String], isTestable: Bool)
 
     var importStatements: [ImportStatement] = []

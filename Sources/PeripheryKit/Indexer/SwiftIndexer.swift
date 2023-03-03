@@ -224,16 +224,16 @@ public final class SwiftIndexer: Indexer {
         /// Phase two associates latent references, and performs other actions that depend on the completed source graph.
         func phaseTwo() throws {
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: file)
-            let declarationVisitor = multiplexingSyntaxVisitor.add(DeclarationVisitor.self)
-            let importVisitor = multiplexingSyntaxVisitor.add(ImportVisitor.self)
+            let declarationSyntaxVisitor = multiplexingSyntaxVisitor.add(DeclarationSyntaxVisitor.self)
+            let importSyntaxVisitor = multiplexingSyntaxVisitor.add(ImportSyntaxVisitor.self)
 
             multiplexingSyntaxVisitor.visit()
 
-            file.importStatements = importVisitor.importStatements
+            file.importStatements = importSyntaxVisitor.importStatements
 
             associateLatentReferences()
             associateDanglingReferences()
-            applyDeclarationMetadata(using: declarationVisitor)
+            visitDeclarations(using: declarationSyntaxVisitor)
             identifyUnusedParameters(using: multiplexingSyntaxVisitor)
             applyCommentCommands(using: multiplexingSyntaxVisitor)
         }
@@ -329,42 +329,52 @@ public final class SwiftIndexer: Indexer {
             }
         }
 
-        private func applyDeclarationMetadata(using declarationVisitor: DeclarationVisitor) {
+        private func visitDeclarations(using declarationVisitor: DeclarationSyntaxVisitor) {
             let declarationsByLocation = declarationVisitor.resultsByLocation
 
             for decl in declarations {
                 guard let result = declarationsByLocation[decl.location] else { continue }
 
-                graph.mutating {
-                    if let accessibility = result.accessibility {
-                        decl.accessibility = .init(value: accessibility, isExplicit: true)
-                    }
+                applyDeclarationMetadata(to: decl, with: result)
+                markLetShorthandContainerIfNeeded(declaration: decl)
+            }
+        }
 
-                    decl.attributes = Set(result.attributes)
-                    decl.modifiers = Set(result.modifiers)
-                    decl.commentCommands = Set(result.commentCommands)
-                    decl.declaredType = result.variableType
-                    decl.letShorthandIdentifiers = result.letShorthandIdentifiers
-                    decl.hasCapitalSelfFunctionCall = result.hasCapitalSelfFunctionCall
+        private func markLetShorthandContainerIfNeeded(declaration: Declaration) {
+            guard !declaration.letShorthandIdentifiers.isEmpty else { return }
+            graph.markLetShorthandContainer(declaration)
+        }
 
-                    for ref in decl.references.union(decl.related) {
-                        if result.inheritedTypeLocations.contains(ref.location) {
-                            if decl.kind == .class, ref.kind == .class {
-                                ref.role = .inheritedClassType
-                            } else if decl.kind == .protocol, ref.kind == .protocol {
-                                ref.role = .refinedProtocolType
-                            }
-                        } else if result.variableTypeLocations.contains(ref.location) {
-                            ref.role = .varType
-                        } else if result.returnTypeLocations.contains(ref.location) {
-                            ref.role = .returnType
-                        } else if result.parameterTypeLocations.contains(ref.location) {
-                            ref.role = .parameterType
-                        } else if result.genericParameterLocations.contains(ref.location) {
-                            ref.role = .genericParameterType
-                        } else if result.genericConformanceRequirementLocations.contains(ref.location) {
-                            ref.role = .genericRequirementType
+        private func applyDeclarationMetadata(to decl: Declaration, with result: DeclarationSyntaxVisitor.Result) {
+            graph.mutating {
+                if let accessibility = result.accessibility {
+                    decl.accessibility = .init(value: accessibility, isExplicit: true)
+                }
+
+                decl.attributes = Set(result.attributes)
+                decl.modifiers = Set(result.modifiers)
+                decl.commentCommands = Set(result.commentCommands)
+                decl.declaredType = result.variableType
+                decl.letShorthandIdentifiers = result.letShorthandIdentifiers
+                decl.hasCapitalSelfFunctionCall = result.hasCapitalSelfFunctionCall
+
+                for ref in decl.references.union(decl.related) {
+                    if result.inheritedTypeLocations.contains(ref.location) {
+                        if decl.kind == .class, ref.kind == .class {
+                            ref.role = .inheritedClassType
+                        } else if decl.kind == .protocol, ref.kind == .protocol {
+                            ref.role = .refinedProtocolType
                         }
+                    } else if result.variableTypeLocations.contains(ref.location) {
+                        ref.role = .varType
+                    } else if result.returnTypeLocations.contains(ref.location) {
+                        ref.role = .returnType
+                    } else if result.parameterTypeLocations.contains(ref.location) {
+                        ref.role = .parameterType
+                    } else if result.genericParameterLocations.contains(ref.location) {
+                        ref.role = .genericParameterType
+                    } else if result.genericConformanceRequirementLocations.contains(ref.location) {
+                        ref.role = .genericRequirementType
                     }
                 }
             }

@@ -1,7 +1,7 @@
 import Foundation
 import SwiftSyntax
 
-final class DeclarationVisitor: PeripherySyntaxVisitor {
+final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     typealias Result = (
         location: SourceLocation,
         accessibility: Accessibility?,

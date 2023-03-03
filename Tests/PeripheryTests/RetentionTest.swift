@@ -967,14 +967,17 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass117")) {
                 self.assertReferenced(.varInstance("simpleProperty"))
-                self.assertReferenced(.varInstance("guardedSimpleProperty"))
                 self.assertNotAssignOnlyProperty(.varInstance("simpleProperty"))
 
+                self.assertReferenced(.varInstance("guardedSimpleProperty"))
                 self.assertReferenced(.varInstance("complexProperty"))
                 self.assertReferenced(.varInstance("propertyReferencedFromExtension"))
                 self.assertReferenced(.varInstance("computedPropertyInExtension"))
                 self.assertReferenced(.varInstance("propertyReferencedFromNestedFunction"))
                 self.assertReferenced(.varInstance("propertyReferencedFromPropertyAccessor"))
+
+                self.assertReferenced(.varInstance("propertyReferencedFromDeepChain"))
+                self.assertNotAssignOnlyProperty(.varInstance("propertyReferencedFromDeepChain"))
             }
 
             // This property should be referenced, but the let shorthand workaround doesn't

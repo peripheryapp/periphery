@@ -10,11 +10,16 @@ public class FixtureClass117 {
     var propertyReferencedFromExtension: String?
     var propertyReferencedFromNestedFunction: String?
     var propertyReferencedFromPropertyAccessor: String?
+    var propertyReferencedFromDeepChain: String?
 
     public var retainedVar: String? {
         get {
             if let propertyReferencedFromPropertyAccessor {
                 return propertyReferencedFromPropertyAccessor
+            }
+
+            if let privateRetainedVar {
+                return privateRetainedVar
             }
 
             return nil
@@ -24,6 +29,7 @@ public class FixtureClass117 {
 
     public func retain() {
         simpleProperty = ""
+        propertyReferencedFromDeepChain = ""
 
         if let simpleProperty {}
         guard let guardedSimpleProperty else { return }
@@ -33,6 +39,10 @@ public class FixtureClass117 {
         func nested() {
             if let propertyReferencedFromNestedFunction {}
         }
+    }
+
+    private var privateRetainedVar: String? {
+        propertyReferencedFromDeepChain
     }
 }
 

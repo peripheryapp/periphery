@@ -4,12 +4,12 @@ import XCTest
 @testable import PeripheryKit
 
 class PropertyVisitTest: XCTestCase {
-    private var results: [PeripheryKit.SourceLocation: DeclarationVisitor.Result]!
+    private var results: [PeripheryKit.SourceLocation: DeclarationSyntaxVisitor.Result]!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
         let multiplexingVisitor = try MultiplexingSyntaxVisitor(file: fixturePath)
-        let visitor = multiplexingVisitor.add(DeclarationVisitor.self)
+        let visitor = multiplexingVisitor.add(DeclarationSyntaxVisitor.self)
         multiplexingVisitor.visit()
         results = visitor.resultsByLocation
     }
