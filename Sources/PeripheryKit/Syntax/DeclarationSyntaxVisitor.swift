@@ -24,7 +24,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     private(set) var results: [Result] = []
     private var letShorthandIdentifiers: Set<String> = []
     private var didVisitCapitalSelfFunctionCall: Bool = false
-    private var functionDeclStackDepth = 0
+    private var codeBlockStackDepth = 0
 
     var resultsByLocation: [SourceLocation: Result] {
         results.reduce(into: [SourceLocation: Result]()) { (dict, result) in
@@ -116,13 +116,15 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_: FunctionDeclSyntax) {
-        functionDeclStackDepth += 1
+    func visit(_: CodeBlockSyntax) {
+        codeBlockStackDepth += 1
+    }
+
+    func visitPost(_: CodeBlockSyntax) {
+        codeBlockStackDepth -= 1
     }
 
     func visitPost(_ node: FunctionDeclSyntax) {
-        functionDeclStackDepth -= 1
-
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -301,9 +303,9 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         let location = sourceLocationBuilder.location(at: position)
         var letShorthandIdentifiers = Set<String>()
 
-        // Only associate let shorthand identifiers in nested functions with the top-most
-        // function.
-        if functionDeclStackDepth == 0 {
+        // Only associate let shorthand identifiers in nested code blocks with the top-most
+        // code block.
+        if codeBlockStackDepth == 0 {
             letShorthandIdentifiers = self.letShorthandIdentifiers
             self.letShorthandIdentifiers.removeAll()
         }

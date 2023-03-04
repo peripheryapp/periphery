@@ -27,18 +27,23 @@ public class FixtureClass117 {
         set { }
     }
 
-    public func retain() {
+    public var retain: Bool {
         simpleProperty = ""
         propertyReferencedFromDeepChain = ""
 
+        // Nested code block to validate that the references are associated with the topmost code block.
+        let _ = [""].map { $0 }
+
         if let simpleProperty {}
-        guard let guardedSimpleProperty else { return }
+        guard let guardedSimpleProperty else { return false }
         if let complexProperty {}
         if let fixtureClass117StaticProperty {}
 
         func nested() {
             if let propertyReferencedFromNestedFunction {}
         }
+
+        return true
     }
 
     private var privateRetainedVar: String? {
