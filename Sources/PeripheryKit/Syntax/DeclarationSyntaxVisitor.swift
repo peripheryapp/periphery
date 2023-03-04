@@ -290,14 +290,14 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         guard node.initializer == nil,
               let identifier = node.pattern.as(IdentifierPatternSyntax.self)?.identifier,
               let parentStmt = node.parent?.parent?.parent,
-              (parentStmt.is(IfStmtSyntax.self) || parentStmt.is(GuardStmtSyntax.self))
+              (parentStmt.is(IfExprSyntax.self) || parentStmt.is(GuardStmtSyntax.self))
         else { return }
         letShorthandIdentifiers.insert(identifier.text)
     }
 
     func visit(_ node: FunctionCallExprSyntax) {
         if let identifierExpr = node.calledExpression.as(IdentifierExprSyntax.self),
-           identifierExpr.identifier.rawTokenKind == .capitalSelfKeyword {
+           identifierExpr.identifier.tokenKind == .keyword(.Self) {
             didVisitCapitalSelfFunctionCall = true
         }
     }
@@ -317,10 +317,10 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         consumeCapitalSelfFunctionCalls: Bool = false,
         at position: AbsolutePosition
     ) {
-        let modifierNames = modifiers?.withoutTrivia().map { $0.name.text } ?? []
+        let modifierNames = modifiers?.map { $0.name.text } ?? []
         let accessibility = modifierNames.mapFirst { Accessibility(rawValue: $0) }
-        let attributeNames = attributes?.withoutTrivia().compactMap {
-            AttributeSyntax($0)?.attributeName.text ?? CustomAttributeSyntax($0)?.attributeName.firstToken?.text
+        let attributeNames = attributes?.compactMap {
+            AttributeSyntax($0)?.attributeName.trimmedDescription ?? AttributeSyntax($0)?.attributeName.firstToken?.text
         } ?? []
         let location = sourceLocationBuilder.location(at: position)
         var letShorthandIdentifiers = Set<String>()

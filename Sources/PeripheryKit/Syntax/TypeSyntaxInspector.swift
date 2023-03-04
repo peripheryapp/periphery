@@ -28,7 +28,7 @@ struct TypeSyntaxInspector {
         } else if let funcType = typeSyntax.as(FunctionTypeSyntax.self) {
             // Function type.
             let locations = funcType.arguments.flatMap { typeLocations(for: $0.type) }
-            return typeLocations(for: funcType.returnType).union(locations)
+            return typeLocations(for: funcType.output.returnType).union(locations)
         } else if let arrayType = typeSyntax.as(ArrayTypeSyntax.self) {
             // Array type.
             return typeLocations(for: arrayType.elementType)

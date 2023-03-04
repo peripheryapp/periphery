@@ -206,7 +206,7 @@ struct UnusedParameterParser {
             if optBindingCondition.initializer == nil,
                let pattern = optBindingCondition.pattern.as(IdentifierPatternSyntax.self),
                let parentStmt = optBindingCondition.parent?.parent?.parent,
-               (parentStmt.is(IfStmtSyntax.self) || parentStmt.is(GuardStmtSyntax.self)) {
+               (parentStmt.is(IfExprSyntax.self) || parentStmt.is(GuardStmtSyntax.self)) {
                 // Handle `let x {}` syntax.
                 parsed = parse(identifier: pattern.identifier)
             } else {
@@ -335,7 +335,7 @@ struct UnusedParameterParser {
         let items = parse(node: body, collector)?.items ?? []
         let fullName = buildFullName(for: name, with: params)
         let genericParamNames = genericParams?.genericParameterList.compactMap { $0.name.text } ?? []
-        let attributeNames = attributes?.children(viewMode: .sourceAccurate).compactMap { AttributeSyntax($0)?.attributeName.text } ?? []
+        let attributeNames = attributes?.children(viewMode: .sourceAccurate).compactMap { AttributeSyntax($0)?.attributeName.trimmedDescription } ?? []
 
         let function = Function(
             name: name,
