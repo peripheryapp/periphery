@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.12.1 (2023-03-04)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix JSON deserialization crash caused by unrelated warnings in the output from `xcodebuild -list -json`.
 - Retain all `@MainActor` annotated types and their constructors to workaround a bug in Swift 5.7.
 - Retain all constructors on types instantiated via `Self(...)` to workaround false positives caused by a bug in Swift.
