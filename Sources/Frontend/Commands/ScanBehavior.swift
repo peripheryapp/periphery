@@ -77,12 +77,6 @@ final class ScanBehavior {
                         "\n   References to declarations identified as unused may reside in files that are members of other targets, e.g test targets." +
 
                         colorize("\n - ", .boldGreen) +
-                        "By default, Periphery does not assume that all public declarations are in use. " +
-                        "\n   You can instruct it to do so with the " +
-                        colorize("--retain-public", .bold) +
-                        " option." +
-
-                        colorize("\n - ", .boldGreen) +
                         "Periphery is a very precise tool, false positives often turn out to be correct after further investigation." +
 
                         colorize("\n - ", .boldGreen) +

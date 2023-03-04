@@ -36,13 +36,13 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Output format (allowed: \(OutputFormat.allValueStrings.joined(separator: ", ")))")
     var format: OutputFormat = defaultConfiguration.$outputFormat.defaultValue
 
-    @Option(help: "Path glob of source files which should be excluded from indexing. Declarations and references within these files will not be considered during analysis. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
+    @Option(help: "Path glob of source files to exclude from indexing. Declarations and references within these files will not be considered during analysis. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var indexExclude: [String] = defaultConfiguration.$indexExclude.defaultValue
 
-    @Option(help: "Path glob of source files which should be excluded from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
+    @Option(help: "Path glob of source files to exclude from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var reportExclude: [String] = defaultConfiguration.$reportExclude.defaultValue
 
-    @Option(help: "Path glob of source files which should be included from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
+    @Option(help: "Path glob of source files to include in the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var reportInclude: [String] = defaultConfiguration.$reportInclude.defaultValue
 
     @Option(parsing: .upToNextOption, help: "Path to the index store. Multiple paths may be specified. Implies '--skip-build'")

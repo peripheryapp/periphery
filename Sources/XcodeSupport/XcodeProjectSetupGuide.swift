@@ -52,7 +52,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
         }
 
         print(colorize("\nAssume Objective-C accessible declarations are in use?", .bold))
-        print(colorize("?", .boldYellow) + " Declarations exposed to the Objective-C runtime explicitly with @objc, or implicitly by inheriting NSObject will be assumed to be in use. You may want to choose 'Yes' here if your project contains a mix of Swift & Objective-C.")
+        print(colorize("?", .boldYellow) + " Declarations exposed to the Objective-C runtime explicitly with @objc, or implicitly by inheriting NSObject will be assumed to be in use. Choose 'No' if your project is pure Swift.")
         configuration.retainObjcAccessible = selectBoolean()
     }
 
