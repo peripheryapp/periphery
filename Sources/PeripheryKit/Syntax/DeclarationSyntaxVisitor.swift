@@ -24,7 +24,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     private(set) var results: [Result] = []
     private var letShorthandIdentifiers: Set<String> = []
     private var didVisitCapitalSelfFunctionCall: Bool = false
-    private var codeBlockStackDepth = 0
+    private var declarationBodyStackDepth = 0
 
     var resultsByLocation: [SourceLocation: Result] {
         results.reduce(into: [SourceLocation: Result]()) { (dict, result) in
@@ -116,15 +116,13 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_: CodeBlockSyntax) {
-        codeBlockStackDepth += 1
-    }
-
-    func visitPost(_: CodeBlockSyntax) {
-        codeBlockStackDepth -= 1
+    func visit(_: FunctionDeclSyntax) {
+        declarationBodyStackDepth += 1
     }
 
     func visitPost(_ node: FunctionDeclSyntax) {
+        declarationBodyStackDepth -= 1
+
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -137,7 +135,13 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
+    func visit(_: InitializerDeclSyntax) {
+        declarationBodyStackDepth += 1
+    }
+
     func visitPost(_ node: InitializerDeclSyntax) {
+        declarationBodyStackDepth -= 1
+
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -149,7 +153,13 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
+    func visit(_: DeinitializerDeclSyntax) {
+        declarationBodyStackDepth += 1
+    }
+
     func visitPost(_ node: DeinitializerDeclSyntax) {
+        declarationBodyStackDepth -= 1
+
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -158,7 +168,13 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
+    func visit(_: SubscriptDeclSyntax) {
+        declarationBodyStackDepth += 1
+    }
+
     func visitPost(_ node: SubscriptDeclSyntax) {
+        declarationBodyStackDepth -= 1
+
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -171,7 +187,13 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
+    func visit(_: VariableDeclSyntax) {
+        declarationBodyStackDepth += 1
+    }
+
     func visitPost(_ node: VariableDeclSyntax) {
+        declarationBodyStackDepth -= 1
+
         for binding in node.bindings {
             if binding.pattern.is(IdentifierPatternSyntax.self) {
                 let closureSignature = binding.initializer?.value.as(ClosureExprSyntax.self)?.signature
@@ -305,7 +327,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
 
         // Only associate let shorthand identifiers in nested code blocks with the top-most
         // code block.
-        if codeBlockStackDepth == 0 {
+        if declarationBodyStackDepth == 0 {
             letShorthandIdentifiers = self.letShorthandIdentifiers
             self.letShorthandIdentifiers.removeAll()
         }
