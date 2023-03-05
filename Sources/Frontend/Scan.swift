@@ -35,7 +35,7 @@ final class Scan {
             logger.info("\(asterisk) Indexing...")
         }
 
-        let graph = SourceGraph()
+        let graph = SourceGraph.shared
         try driver.index(graph: graph)
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
