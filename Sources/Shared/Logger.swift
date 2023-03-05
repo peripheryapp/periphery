@@ -1,5 +1,8 @@
 import Foundation
+
+#if canImport(os)
 import os
+#endif
 
 public enum ANSIColor: String {
     case bold = "\u{001B}[0;1m"
@@ -75,12 +78,14 @@ public final class Logger {
 
     private let baseLogger: BaseLogger
     private let configuration: Configuration
-    private let signposter: OSSignposter
+
+    #if canImport(os)
+    private let signposter = OSSignposter()
+    #endif
 
     public required init(baseLogger: BaseLogger = .shared, configuration: Configuration = .shared) {
         self.baseLogger = baseLogger
         self.configuration = configuration
-        self.signposter = OSSignposter()
     }
 
     public func contextualized(with context: String) -> ContextualLogger {
@@ -107,13 +112,20 @@ public final class Logger {
     }
 
     public func beginInterval(_ name: StaticString) -> SignpostInterval {
+        #if canImport(os)
         let id = signposter.makeSignpostID()
         let state = signposter.beginInterval(name, id: id)
         return .init(name: name, state: state)
+        #else
+        return SignpostInterval()
+        #endif
     }
 
     public func endInterval(_ interval: SignpostInterval) {
+        #if canImport(os)
         signposter.endInterval(interval.name, interval.state)
+        #endif
+
     }
 }
 
@@ -138,7 +150,11 @@ public struct ContextualLogger {
     }
 }
 
+#if canImport(os)
 public struct SignpostInterval {
     let name: StaticString
     let state: OSSignpostIntervalState
 }
+#else
+public struct SignpostInterval {}
+#endif
