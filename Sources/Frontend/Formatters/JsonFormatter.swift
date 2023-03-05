@@ -26,8 +26,8 @@ final class JsonFormatter: OutputFormatter {
                     let object: [AnyHashable: Any] = [
                         "kind": ref.kind.rawValue,
                         "name": ref.name ?? "",
-                        "modifiers": [],
-                        "attributes": [],
+                        "modifiers": Array<String>(),
+                        "attributes": Array<String>(),
                         "accessibility": "",
                         "ids": [ref.usr],
                         "hints": [redundantConformanceHint],

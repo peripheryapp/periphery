@@ -15,7 +15,7 @@ public extension FilePath {
 
         return Set(Glob(
             pattern: absolutePattern,
-            blacklistedDirectories: [".build", "node_modules"],
+            blacklistedDirectories: [".build", "node_modules", ".gems", "gems", ".swiftpm"],
             logger: Logger()
         ).paths.map { FilePath($0).lexicallyNormalized() })
     }

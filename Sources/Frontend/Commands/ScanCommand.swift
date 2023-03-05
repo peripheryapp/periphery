@@ -42,7 +42,7 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Path glob of source files to exclude from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var reportExclude: [String] = defaultConfiguration.$reportExclude.defaultValue
 
-    @Option(help: "Path glob of source files to include in the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
+    @Option(help: "Path glob of source files to include in the results. This option supersedes '--report-exclude'. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var reportInclude: [String] = defaultConfiguration.$reportInclude.defaultValue
 
     @Option(parsing: .upToNextOption, help: "Path to the index store. Multiple paths may be specified. Implies '--skip-build'")

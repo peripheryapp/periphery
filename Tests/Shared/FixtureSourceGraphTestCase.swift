@@ -13,7 +13,8 @@ class FixtureSourceGraphTestCase: SourceGraphTestCase {
     ) rethrows {
         configuration.retainPublic = retainPublic
         configuration.retainObjcAccessible = retainObjcAccessible
-        configuration.indexExcludeSourceFiles = Self.sourceFiles.subtracting([testFixturePath])
+        configuration.indexExclude = Self.sourceFiles.subtracting([testFixturePath]).map { $0.string }
+        configuration.resetIndexExcludeMatchers()
         Self.index()
         try testBlock()
     }
