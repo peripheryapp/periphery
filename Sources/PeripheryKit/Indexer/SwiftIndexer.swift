@@ -81,6 +81,7 @@ public final class SwiftIndexer: Indexer {
         }
 
         let phaseOneLogger = logger.contextualized(with: "phase:one")
+        let phaseOneInterval = logger.beginInterval("index:swift:phase:one")
 
         try JobPool(jobs: jobs).forEach { job in
             let elapsed = try Benchmark.measure {
@@ -90,7 +91,10 @@ public final class SwiftIndexer: Indexer {
             phaseOneLogger.debug("\(job.file.path) (\(elapsed)s)")
         }
 
+        logger.endInterval(phaseOneInterval)
+
         let phaseTwoLogger = logger.contextualized(with: "phase:two")
+        let phaseTwoInterval = logger.beginInterval("index:swift:phase:two")
 
         try JobPool(jobs: jobs).forEach { job in
             let elapsed = try Benchmark.measure {
@@ -99,6 +103,8 @@ public final class SwiftIndexer: Indexer {
 
             phaseTwoLogger.debug("\(job.file.path) (\(elapsed)s)")
         }
+
+        logger.endInterval(phaseTwoInterval)
     }
 
     // MARK: - Private

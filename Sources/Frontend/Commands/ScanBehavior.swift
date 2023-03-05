@@ -61,10 +61,12 @@ final class ScanBehavior {
 
         do {
             results = try block(project)
+            let interval = logger.beginInterval("scan:result:output")
             let filteredResults = OutputDeclarationFilter().filter(results)
             let sortedResults = filteredResults.sorted { $0.declaration < $1.declaration }
             let output = try configuration.outputFormat.formatter.init().format(sortedResults)
             logger.info(output, canQuiet: false)
+            logger.endInterval(interval)
 
             if filteredResults.count > 0,
                 configuration.outputFormat.supportsAuxiliaryOutput {

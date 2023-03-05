@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 public enum ANSIColor: String {
     case bold = "\u{001B}[0;1m"
@@ -74,10 +75,12 @@ public final class Logger {
 
     private let baseLogger: BaseLogger
     private let configuration: Configuration
+    private let signposter: OSSignposter
 
     public required init(baseLogger: BaseLogger = .shared, configuration: Configuration = .shared) {
         self.baseLogger = baseLogger
         self.configuration = configuration
+        self.signposter = OSSignposter()
     }
 
     public func contextualized(with context: String) -> ContextualLogger {
@@ -102,6 +105,16 @@ public final class Logger {
     public func error(_ text: String) {
         baseLogger.error(text)
     }
+
+    public func beginInterval(_ name: StaticString) -> SignpostInterval {
+        let id = signposter.makeSignpostID()
+        let state = signposter.beginInterval(name, id: id)
+        return .init(name: name, state: state)
+    }
+
+    public func endInterval(_ interval: SignpostInterval) {
+        signposter.endInterval(interval.name, interval.state)
+    }
 }
 
 public struct ContextualLogger {
@@ -115,4 +128,17 @@ public struct ContextualLogger {
     public func debug(_ text: String) {
         logger.debug("[\(context)] \(text)")
     }
+
+    public func beginInterval(_ name: StaticString) -> SignpostInterval {
+        logger.beginInterval(name)
+    }
+
+    public func endInterval(_ interval: SignpostInterval) {
+        logger.endInterval(interval)
+    }
+}
+
+public struct SignpostInterval {
+    let name: StaticString
+    let state: OSSignpostIntervalState
 }
