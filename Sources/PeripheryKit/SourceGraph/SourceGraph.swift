@@ -24,7 +24,7 @@ public final class SourceGraph {
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
 
-    private let mutationQueue: DispatchQueue
+    private let lock = UnfairLock()
 
     public var unusedDeclarations: Set<Declaration> {
         allDeclarations.subtracting(usedDeclarations)
@@ -32,10 +32,6 @@ public final class SourceGraph {
 
     public var assignOnlyProperties: Set<Declaration> {
         return potentialAssignOnlyProperties.intersection(unusedDeclarations)
-    }
-
-    public init() {
-        mutationQueue = DispatchQueue(label: "SourceGraph.mutationQueue")
     }
 
     public func indexingComplete() {
@@ -68,31 +64,31 @@ public final class SourceGraph {
     }
 
     func markRedundantProtocol(_ declaration: Declaration, references: Set<Reference>) {
-        mutationQueue.sync {
+        withLock {
             redundantProtocols[declaration] = references
         }
     }
 
     func markRedundantPublicAccessibility(_ declaration: Declaration, modules: Set<String>) {
-        mutationQueue.sync {
+        withLock {
             redundantPublicAccessibility[declaration] = modules
         }
     }
 
     func unmarkRedundantPublicAccessibility(_ declaration: Declaration) {
-        mutationQueue.sync {
+        withLock {
             _ = redundantPublicAccessibility.removeValue(forKey: declaration)
         }
     }
 
     func markIgnored(_ declaration: Declaration) {
-        mutationQueue.sync {
+        withLock {
             _ = ignoredDeclarations.insert(declaration)
         }
     }
 
     func markRetained(_ declaration: Declaration) {
-        mutationQueue.sync {
+        withLock {
             markRetainedUnsafe(declaration)
         }
     }
@@ -102,31 +98,31 @@ public final class SourceGraph {
     }
 
     func markPotentialAssignOnlyProperty(_ declaration: Declaration) {
-        mutationQueue.sync {
+        withLock {
             _ = potentialAssignOnlyProperties.insert(declaration)
         }
     }
 
     func markMainAttributed(_ declaration: Declaration) {
-        mutationQueue.sync {
+        withLock {
             _ = mainAttributedDeclarations.insert(declaration)
         }
     }
 
     func markLetShorthandContainer(_ declaration: Declaration) {
-        mutationQueue.sync {
+        withLock {
             _ = letShorthandContainerDeclarations.insert(declaration)
         }
     }
 
     func isRetained(_ declaration: Declaration) -> Bool {
-        mutationQueue.sync {
+        withLock {
             retainedDeclarations.contains(declaration)
         }
     }
 
     func add(_ declaration: Declaration) {
-        mutationQueue.sync {
+        withLock {
             addUnsafe(declaration)
         }
     }
@@ -141,7 +137,7 @@ public final class SourceGraph {
     }
 
     func remove(_ declaration: Declaration) {
-        mutationQueue.sync {
+        withLock {
             removeUnsafe(declaration)
         }
     }
@@ -157,7 +153,7 @@ public final class SourceGraph {
     }
 
     func add(_ reference: Reference) {
-        mutationQueue.sync {
+        withLock {
             addUnsafe(reference)
         }
     }
@@ -173,7 +169,7 @@ public final class SourceGraph {
     }
 
     func add(_ reference: Reference, from declaration: Declaration) {
-        mutationQueue.sync {
+        withLock {
             if reference.isRelated {
                 _ = declaration.related.insert(reference)
             } else {
@@ -185,14 +181,14 @@ public final class SourceGraph {
     }
 
     func remove(_ reference: Reference) {
-        mutationQueue.sync {
+        withLock {
             _ = allReferences.remove(reference)
             allReferences.subtract(reference.descendentReferences)
             allReferencesByUsr[reference.usr]?.remove(reference)
         }
 
         if let parent = reference.parent {
-            mutationQueue.sync {
+            withLock {
                 parent.references.remove(reference)
                 parent.related.remove(reference)
             }
@@ -200,19 +196,19 @@ public final class SourceGraph {
     }
 
     func add(_ assetReference: AssetReference) {
-        mutationQueue.sync {
+        withLock {
             _ = assetReferences.insert(assetReference)
         }
     }
 
     func markUsed(_ declaration: Declaration) {
-        mutationQueue.sync {
+        withLock {
             _ = usedDeclarations.insert(declaration)
         }
     }
 
     func isUsed(_ declaration: Declaration) -> Bool {
-        mutationQueue.sync {
+        withLock {
             usedDeclarations.contains(declaration)
         }
     }
@@ -259,8 +255,8 @@ public final class SourceGraph {
         return immediate + immediate.flatMap { subclasses(of: $0) }
     }
 
-    func mutating(_ block: () -> Void) {
-        mutationQueue.sync(execute: block)
+    func withLock<T>(_ block: () -> T) -> T {
+        lock.withLock(block)
     }
 
     func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {

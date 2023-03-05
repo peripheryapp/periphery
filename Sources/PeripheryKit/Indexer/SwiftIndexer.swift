@@ -251,7 +251,7 @@ public final class SwiftIndexer: Indexer {
         private var varParameterUsrs: Set<String> = []
 
         private func establishDeclarationHierarchy() {
-            graph.mutating {
+            graph.withLock {
                 for (parent, decls) in childDeclsByParentUsr {
                     guard let parentDecl = graph.explicitDeclaration(withUsr: parent) else {
                         if varParameterUsrs.contains(parent) {
@@ -273,7 +273,7 @@ public final class SwiftIndexer: Indexer {
 
         private func associateLatentReferences() {
             for (usr, refs) in referencesByUsr {
-                graph.mutating {
+                graph.withLock {
                     if let decl = graph.explicitDeclaration(withUsr: usr) {
                         for ref in refs {
                             associateUnsafe(ref, with: decl)
@@ -352,7 +352,7 @@ public final class SwiftIndexer: Indexer {
         }
 
         private func applyDeclarationMetadata(to decl: Declaration, with result: DeclarationSyntaxVisitor.Result) {
-            graph.mutating {
+            graph.withLock {
                 if let accessibility = result.accessibility {
                     decl.accessibility = .init(value: accessibility, isExplicit: true)
                 }
@@ -395,7 +395,7 @@ public final class SwiftIndexer: Indexer {
         }
 
         private func associate(_ ref: Reference, with decl: Declaration) {
-            graph.mutating {
+            graph.withLock {
                 associateUnsafe(ref, with: decl)
             }
         }
@@ -437,7 +437,7 @@ public final class SwiftIndexer: Indexer {
                     }
                 }
 
-                graph.mutating {
+                graph.withLock {
                     for param in params {
                         let paramDecl = param.declaration
                         paramDecl.parent = functionDecl
@@ -516,7 +516,7 @@ public final class SwiftIndexer: Indexer {
                         reference.name = baseFunc.name
                         reference.isRelated = true
 
-                        graph.mutating {
+                        graph.withLock {
                             graph.addUnsafe(reference)
                             associateUnsafe(reference, with: decl)
                         }
@@ -568,7 +568,7 @@ public final class SwiftIndexer: Indexer {
                 return true
             }
 
-            graph.mutating {
+            graph.withLock {
                 refs.forEach { graph.addUnsafe($0) }
             }
         }
@@ -619,7 +619,7 @@ public final class SwiftIndexer: Indexer {
                 danglingReferences.append(ref)
             }
 
-            graph.mutating {
+            graph.withLock {
                 refs.forEach { graph.addUnsafe($0) }
             }
         }
