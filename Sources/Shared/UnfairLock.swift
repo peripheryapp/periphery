@@ -1,32 +1,41 @@
 import Foundation
+import os
 
-public final class UnfairLock {
-  private let unfairLock: os_unfair_lock_t
+public final class UnfairLock: Lock {
+    private let lock: Lock
 
-  public init() {
-    self.unfairLock = .allocate(capacity: 1)
-      unfairLock.initialize(to: os_unfair_lock())
-  }
+    public init() {
+        if #available(macOS 13, *) {
+            lock = OSAllocatedUnfairLock()
+        } else {
+            lock = NSLock()
+        }
+    }
 
-  deinit {
-      unfairLock.deinitialize(count: 1)
-      unfairLock.deallocate()
-  }
+    @discardableResult
+    public func perform<T>(_ operation: () throws -> T) rethrows -> T {
+        try lock.perform(operation)
+    }
+}
 
-  @inline(__always)
-  public func lock() {
-    os_unfair_lock_lock(unfairLock)
-  }
+private protocol Lock {
+    @discardableResult
+    func perform<T>(_ operation: () throws -> T) rethrows -> T
+}
 
-  @inline(__always)
-  public func unlock() {
-    os_unfair_lock_unlock(unfairLock)
-  }
+@available(macOS 13, *)
+extension OSAllocatedUnfairLock: Lock where State == Void {
+    @discardableResult
+    func perform<T>(_ operation: () throws -> T) rethrows -> T {
+        lock()
+        let value = try operation()
+        unlock()
+        return value
+    }
+}
 
-  @inline(__always) @discardableResult
-  public func withLock<T>(_ operation: () throws -> T) rethrows -> T {
-    lock()
-    defer { unlock() }
-    return try operation()
-  }
+extension NSLock: Lock {
+    func perform<T>(_ operation: () throws -> T) rethrows -> T {
+        try withLock(operation)
+    }
 }

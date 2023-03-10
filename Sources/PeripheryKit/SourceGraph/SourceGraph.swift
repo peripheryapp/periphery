@@ -256,7 +256,7 @@ public final class SourceGraph {
     }
 
     func withLock<T>(_ block: () -> T) -> T {
-        lock.withLock(block)
+        lock.perform(block)
     }
 
     func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
