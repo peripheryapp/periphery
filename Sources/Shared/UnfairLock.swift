@@ -8,11 +8,15 @@ public final class UnfairLock: Lock {
     private let lock: Lock
 
     public init() {
+        #if canImport(os)
         if #available(macOS 13, *) {
             lock = OSAllocatedUnfairLock()
         } else {
             lock = NSLock()
         }
+        #else
+        lock = NSLock()
+        #endif
     }
 
     @discardableResult
