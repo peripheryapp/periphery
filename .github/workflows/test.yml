@@ -55,8 +55,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ["5.7"]
+        swift: ["5.8", "5.7"]
         include:
+          - swift: "5.8"
+            container: "swiftlang/swift:nightly-5.8-jammy"
+            cache-version: 1
           - swift: "5.7"
             container: "swift:5.7"
             cache-version: 1
@@ -84,8 +87,8 @@ jobs:
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}
     - name: Build
-      run: ${{ env.swift_build }} --enable-test-discovery
+      run: ${{ env.swift_build }}
     - name: Test
-      run: ${{ env.swift_test }} --enable-test-discovery
+      run: ${{ env.swift_test }}
     - name: Scan
       run: ${{ env.periphery_scan }} --config .periphery.linux.yml

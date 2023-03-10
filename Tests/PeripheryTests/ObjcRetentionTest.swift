@@ -6,6 +6,8 @@ import Shared
 
 #if os(macOS)
 final class ObjcRetentionTest: FixtureSourceGraphTestCase {
+    let performKnownFailures = false
+
     static override func setUp() {
         super.setUp()
 

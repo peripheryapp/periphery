@@ -5,6 +5,8 @@ import Shared
 @testable import PeripheryKit
 
 final class RetentionTest: FixtureSourceGraphTestCase {
+    let performKnownFailures = false
+
     static override func setUp() {
         super.setUp()
 
@@ -980,10 +982,14 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 self.assertNotAssignOnlyProperty(.varInstance("propertyReferencedFromDeepChain"))
             }
 
+            #if swift(>=5.8)
+            self.assertReferenced(.varGlobal("fixtureClass117StaticProperty"))
+            #else
             // This property should be referenced, but the let shorthand workaround doesn't
             // handle properties at global (file) scope. This will remain broken until the
             // issue is resolved in Swift: https://github.com/apple/swift/issues/61509.
             self.assertNotReferenced(.varGlobal("fixtureClass117StaticProperty"))
+            #endif
         }
     }
 

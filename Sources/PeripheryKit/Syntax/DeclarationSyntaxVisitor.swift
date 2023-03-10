@@ -19,6 +19,8 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         hasCapitalSelfFunctionCall: Bool
     )
 
+    var letShorthandWorkaroundEnabled: Bool = false
+
     private let sourceLocationBuilder: SourceLocationBuilder
     private let typeSyntaxInspector: TypeSyntaxInspector
     private(set) var results: [Result] = []
@@ -287,6 +289,8 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     }
 
     func visit(_ node: OptionalBindingConditionSyntax) {
+        guard letShorthandWorkaroundEnabled else { return }
+
         guard node.initializer == nil,
               let identifier = node.pattern.as(IdentifierPatternSyntax.self)?.identifier,
               let parentStmt = node.parent?.parent?.parent,
