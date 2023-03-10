@@ -35,7 +35,8 @@ public final class Xcodebuild {
         let envs = [
             "CODE_SIGNING_ALLOWED=\"NO\"",
             "ENABLE_BITCODE=\"NO\"",
-            "DEBUG_INFORMATION_FORMAT=\"dwarf\""
+            "DEBUG_INFORMATION_FORMAT=\"dwarf\"",
+            "COMPILER_INDEX_STORE_ENABLE=\"YES\""
         ]
 
         let xcodebuild = "xcodebuild \((args + [cmd] + envs + additionalArguments).joined(separator: " "))"

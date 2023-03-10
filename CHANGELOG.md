@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- `COMPILER_INDEX_STORE_ENABLE` is now forcefully enabled as it's required for indexing.
 
 ## 2.12.1 (2023-03-04)
 
