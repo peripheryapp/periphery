@@ -1,5 +1,8 @@
 import Foundation
+
+#if canImport(os)
 import os
+#endif
 
 public final class UnfairLock: Lock {
     private let lock: Lock
