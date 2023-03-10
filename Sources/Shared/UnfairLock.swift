@@ -45,6 +45,9 @@ extension OSAllocatedUnfairLock: Lock where State == Void {
 
 extension NSLock: Lock {
     func perform<T>(_ operation: () throws -> T) rethrows -> T {
-        try withLock(operation)
+        lock()
+        let value = try operation()
+        unlock()
+        return value
     }
 }
