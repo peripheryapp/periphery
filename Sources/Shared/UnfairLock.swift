@@ -26,6 +26,7 @@ private protocol Lock {
     func perform<T>(_ operation: () throws -> T) rethrows -> T
 }
 
+#if canImport(os)
 @available(macOS 13, *)
 extension OSAllocatedUnfairLock: Lock where State == Void {
     @discardableResult
@@ -36,6 +37,7 @@ extension OSAllocatedUnfairLock: Lock where State == Void {
         return value
     }
 }
+#endif
 
 extension NSLock: Lock {
     func perform<T>(_ operation: () throws -> T) rethrows -> T {
