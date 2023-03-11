@@ -2,6 +2,7 @@ import Foundation
 import SystemPackage
 import Shared
 import PeripheryKit
+import FilenameMatcher
 
 final class OutputDeclarationFilter {
     private let configuration: Configuration
@@ -13,28 +14,28 @@ final class OutputDeclarationFilter {
     }
 
     func filter(_ declarations: [ScanResult]) -> [ScanResult] {
-        let excludedSourceFiles = configuration.reportExcludeSourceFiles
-        let includedSourceFiles = configuration.reportIncludeSourceFiles
-
-        var reportedExclusions: Set<FilePath> = []
+        if configuration.reportInclude.isEmpty && configuration.reportExclude.isEmpty {
+            return declarations
+        }
 
         return declarations.filter {
             let path = $0.declaration.location.file.path
 
-            if excludedSourceFiles.contains(path) {
-                if !reportedExclusions.contains(path) {
-                    self.logger.debug(path.string)
-                    reportedExclusions.insert(path)
+            if configuration.reportIncludeMatchers.isEmpty {
+                if configuration.reportExcludeMatchers.anyMatch(filename: path.string) {
+                    self.logger.debug("Excluding \(path.string)")
+                    return false
                 }
 
-                return false
+                return true
             }
 
-            if !includedSourceFiles.isEmpty && !includedSourceFiles.contains(path) {
-                return false
+            if configuration.reportIncludeMatchers.anyMatch(filename: path.string) {
+                self.logger.debug("Including \(path.string)")
+                return true
             }
 
-            return true
+            return false
         }
     }
 }

@@ -1,6 +1,7 @@
 import Foundation
 import SystemPackage
 import Yams
+import FilenameMatcher
 
 public final class Configuration {
     public static var defaultConfigurationFile = ".periphery.yml"
@@ -123,6 +124,10 @@ public final class Configuration {
             config[$reportExclude.key] = reportExclude
         }
 
+        if $reportInclude.hasNonDefaultValue {
+            config[$reportInclude.key] = reportInclude
+        }
+
         if $retainObjcAccessible.hasNonDefaultValue {
             config[$retainObjcAccessible.key] = retainObjcAccessible
         }
@@ -213,6 +218,8 @@ public final class Configuration {
                 $indexExclude.assign(value)
             case $reportExclude.key:
                 $reportExclude.assign(value)
+            case $reportInclude.key:
+                $reportInclude.assign(value)
             case $outputFormat.key:
                 $outputFormat.assign(value)
             case $retainPublic.key:
@@ -259,6 +266,7 @@ public final class Configuration {
         $targets.reset()
         $indexExclude.reset()
         $reportExclude.reset()
+        $reportInclude.reset()
         $outputFormat.reset()
         $retainPublic.reset()
         $retainAssignOnlyProperties.reset()
@@ -287,31 +295,40 @@ public final class Configuration {
         }
     }
 
-    private var _indexExcludeSourceFiles: Set<FilePath>?
-    public var indexExcludeSourceFiles: Set<FilePath> {
-        get {
-            if let files = _indexExcludeSourceFiles {
-                return files
-            }
+    private var _indexExcludeMatchers: [FilenameMatcher]?
+    public var indexExcludeMatchers: [FilenameMatcher] {
+        if let _indexExcludeMatchers {
+            return _indexExcludeMatchers
+        }
 
-            let files = Set(indexExclude.flatMap { FilePath.glob($0) })
-            _indexExcludeSourceFiles = files
-            return files
-        }
-        set {
-            _indexExcludeSourceFiles = newValue
-        }
+        let matchers = buildFilenameMatchers(with: indexExclude)
+        _indexExcludeMatchers = matchers
+        return matchers
     }
 
-    public lazy var reportExcludeSourceFiles: Set<FilePath> = {
-        Set(reportExclude.flatMap { FilePath.glob($0) })
+    public func resetIndexExcludeMatchers() {
+        _indexExcludeMatchers = nil
+    }
+
+    public lazy var reportExcludeMatchers: [FilenameMatcher] = {
+        buildFilenameMatchers(with: reportExclude)
     }()
 
-    public lazy var reportIncludeSourceFiles: Set<FilePath> = {
-        Set(reportInclude.flatMap { FilePath.glob($0) })
+    public lazy var reportIncludeMatchers: [FilenameMatcher] = {
+        buildFilenameMatchers(with: reportInclude)
     }()
 
     // MARK: - Private
+
+    private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {
+        let pwd = FilePath.current.string
+
+        return patterns.map {
+            let pattern = $0.hasPrefix("/") ? $0 : "\(pwd)/\($0)"
+            // TODO: respect filesystem case sensitivity.
+            return FilenameMatcher(pattern: pattern, caseSensitive: false)
+        }
+    }
 
     private func configurationPath(withUserProvided path: FilePath?) throws -> FilePath? {
         if let path = path {

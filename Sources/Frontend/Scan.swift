@@ -40,7 +40,7 @@ final class Scan {
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)
-            logger.info("\(asterisk) Analyzing...\n")
+            logger.info("\(asterisk) Analyzing...")
         }
 
         try SourceGraphMutatorRunner.perform(graph: graph)

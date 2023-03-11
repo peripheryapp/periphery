@@ -1,6 +1,7 @@
 import Foundation
 import SystemPackage
 import Shared
+import FilenameMatcher
 
 public class Indexer {
     private let configuration: Configuration
@@ -10,8 +11,9 @@ public class Indexer {
     }
 
     func filterIndexExcluded(from files: Set<FilePath>) -> (included: Set<FilePath>, excluded: Set<FilePath>) {
-        let excludedFiles = configuration.indexExcludeSourceFiles
-        let included = files.filter { !excludedFiles.contains($0) }
+        guard !configuration.indexExclude.isEmpty else { return (files, []) }
+
+        let included = files.filter { !configuration.indexExcludeMatchers.anyMatch(filename: $0.string) }
         return (included, files.subtracting(included))
     }
 }

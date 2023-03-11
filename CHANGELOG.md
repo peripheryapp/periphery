@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Significantly improve the performance of index and report filtering.
 
 ##### Bug Fixes
 

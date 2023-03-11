@@ -38,6 +38,15 @@
         }
       },
       {
+        "package": "swift-filename-matcher",
+        "repositoryURL": "https://github.com/ileitch/swift-filename-matcher",
+        "state": {
+          "branch": null,
+          "revision": "17eaeaf60f2703e3ef826de94149c88a78953fd3",
+          "version": "0.1.1"
+        }
+      },
+      {
         "package": "SwiftIndexStore",
         "repositoryURL": "https://github.com/kateinoigakukun/swift-indexstore",
         "state": {
