@@ -4,20 +4,6 @@ import Shared
 @testable import XcodeSupport
 @testable import PeripheryKit
 
-class XcodebuildTest: XCTestCase {
-    var shell: ShellMock!
-    var xcodebuild: Xcodebuild!
-    var project: XcodeProject!
-
-    override func setUp() {
-        super.setUp()
-
-        shell = ShellMock()
-        xcodebuild = Xcodebuild(shell: shell)
-        project = try! XcodeProject(path: UIKitProjectPath)
-    }
-}
-
 class XcodebuildBuildProjectTest: XCTestCase {
     var shell: Shell!
     var xcodebuild: Xcodebuild!
@@ -37,7 +23,19 @@ class XcodebuildBuildProjectTest: XCTestCase {
     }
 }
 
-class XcodebuildSchemesTest: XcodebuildTest {
+class XcodebuildSchemesTest: XCTestCase {
+    var shell: ShellMock!
+    var xcodebuild: Xcodebuild!
+    var project: XcodeProject!
+
+    override func setUp() {
+        super.setUp()
+
+        shell = ShellMock()
+        xcodebuild = Xcodebuild(shell: shell)
+        project = try! XcodeProject(path: UIKitProjectPath)
+    }
+
     func testParseSchemes() {
         for output in XcodebuildListOutputs {
             shell.output = output
