@@ -298,10 +298,9 @@ public final class SwiftIndexer: Indexer {
         // Swift does not associate some type references with the containing declaration, resulting in references
         // with no clear parent. Property references are one example: https://bugs.swift.org/browse/SR-13766.
         private func associateDanglingReferences() {
-            let explicitDeclarations = declarations.filter { !$0.isImplicit }
-
             guard !danglingReferences.isEmpty else { return }
 
+            let explicitDeclarations = declarations.filter { !$0.isImplicit }
             let declsByLocation = explicitDeclarations
                 .reduce(into: [SourceLocation: [Declaration]]()) { (result, decl) in
                     result[decl.location, default: []].append(decl)
@@ -626,7 +625,9 @@ public final class SwiftIndexer: Indexer {
 
                 // The index store doesn't contain any relations for this reference, save it so that we can attempt
                 // to associate it with the correct declaration later based on location.
-                danglingReferences.append(ref)
+                if ref.kind != .module {
+                    danglingReferences.append(ref)
+                }
             }
 
             graph.withLock {
