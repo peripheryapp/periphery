@@ -259,12 +259,16 @@ public final class SourceGraph {
         lock.perform(block)
     }
 
-    func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
+    func extendedDeclarationReference(forExtension extensionDeclaration: Declaration) throws -> Reference? {
         guard let extendedKind = extensionDeclaration.kind.extendedKind?.referenceEquivalent else {
             throw PeripheryError.sourceGraphIntegrityError(message: "Unknown extended reference kind for extension '\(extensionDeclaration.kind.rawValue)'")
         }
 
-        guard let extendedReference = extensionDeclaration.references.first(where: { $0.kind == extendedKind && $0.name == extensionDeclaration.name }) else { return nil }
+        return extensionDeclaration.references.first(where: { $0.kind == extendedKind && $0.name == extensionDeclaration.name })
+    }
+
+    func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
+        guard let extendedReference = try extendedDeclarationReference(forExtension: extensionDeclaration) else { return nil }
 
         if let extendedDeclaration = allExplicitDeclarationsByUsr[extendedReference.usr] {
             return extendedDeclaration

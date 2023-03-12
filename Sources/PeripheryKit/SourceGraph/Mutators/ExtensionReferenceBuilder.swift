@@ -11,16 +11,26 @@ final class ExtensionReferenceBuilder: SourceGraphMutator {
     }
 
     func mutate() throws {
-        // Don't fold protocol extensions as they must be treated differently.
-        let kinds = Declaration.Kind.extensionKinds.subtracting([.extensionProtocol])
-        try kinds.forEach { try foldExtension(kind: $0) }
+        try Declaration.Kind.extensionKinds.forEach { try foldExtension(kind: $0) }
     }
 
     // MARK: - Private
 
     private func foldExtension(kind: Declaration.Kind) throws {
         for extensionDeclaration in graph.declarations(ofKind: kind) {
-            guard let extendedDeclaration = try graph.extendedDeclaration(forExtension: extensionDeclaration) else { continue }
+            guard let extendedTypeReference = try graph.extendedDeclarationReference(forExtension: extensionDeclaration) else { continue }
+
+            guard let extendedDeclaration = graph.explicitDeclaration(withUsr: extendedTypeReference.usr) else {
+                // This is an extension on an external type and cannot be folded.
+                graph.markRetained(extensionDeclaration)
+                referenceExtendedTypeAliases(of: extendedTypeReference, from: extensionDeclaration)
+                continue
+            }
+
+            referenceExtendedTypeAliases(of: extendedTypeReference, from: extendedDeclaration)
+
+            // Don't fold protocol extensions as they must be treated differently.
+            guard kind != .extensionProtocol else { continue }
 
             extendedDeclaration.declarations.formUnion(extensionDeclaration.declarations)
             extendedDeclaration.references.formUnion(extensionDeclaration.references)
@@ -35,6 +45,20 @@ final class ExtensionReferenceBuilder: SourceGraphMutator {
             extensionDeclaration.references.forEach { $0.parent = extendedDeclaration }
 
             graph.remove(extensionDeclaration)
+        }
+    }
+
+    private func referenceExtendedTypeAliases(of extendedTypeReference: Reference, from extensionDeclaration: Declaration) {
+        // Extensions on type aliases reference the existing type, not the alias.
+        // We need to find the typealias and build a reference to it.
+        for aliasDecl in graph.declarations(ofKind: .typealias) {
+            if aliasDecl.references.contains(where: { $0.usr == extendedTypeReference.usr }) {
+                for usr in aliasDecl.usrs {
+                    let aliasReference = Reference(kind: .typealias, usr: usr, location: extensionDeclaration.location)
+                    aliasReference.name = aliasDecl.name
+                    graph.add(aliasReference, from: extensionDeclaration)
+                }
+            }
         }
     }
 }
