@@ -571,6 +571,33 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRetainsExtendedTypeAlias() {
+        analyze(retainPublic: true) {
+            assertReferenced(.typealias("Fixture214TypeAlias"))
+            assertReferenced(.class("FixtureClass214")) {
+                self.assertReferenced(.varInstance("someExtensionProperty"))
+            }
+        }
+    }
+
+    func testRetainsExtendedExternalTypeAlias() {
+        analyze(retainPublic: true) {
+            assertReferenced(.typealias("Fixture215TypeAlias"))
+            assertReferenced(.extensionStruct("Int")) {
+                self.assertReferenced(.varInstance("someExtensionProperty"))
+            }
+        }
+    }
+
+    func testRetainsExtendedProtocolTypeAlias() {
+        analyze(retainPublic: true) {
+            assertReferenced(.typealias("Fixture216TypeAlias"))
+            assertReferenced(.extensionProtocol("FixtureProtocol216")) {
+                self.assertReferenced(.varInstance("someExtensionProperty"))
+            }
+        }
+    }
+
     func testRetainsInferredAssociatedType() {
         analyze(retainPublic: true) {
             assertReferenced(.struct("FixtureStruct120")) {

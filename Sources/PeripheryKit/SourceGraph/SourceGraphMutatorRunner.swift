@@ -9,23 +9,17 @@ public final class SourceGraphMutatorRunner {
     private let mutators: [SourceGraphMutator.Type] = [
         // Must come before ExtensionReferenceBuilder.
         AccessibilityCascader.self,
-
         // Must come before ExtensionReferenceBuilder so that it can detect redundant accessibility on extensions.
         RedundantExplicitPublicAccessibilityMarker.self,
-
+        GenericClassAndStructConstructorReferenceBuilder.self,
         // Must come before ProtocolExtensionReferenceBuilder because it removes references
         // from the extension to the protocol, thus making them appear to be unknown.
-        UnknownTypeExtensionRetainer.self,
-
-        GenericClassAndStructConstructorReferenceBuilder.self,
         ExtensionReferenceBuilder.self,
-
         // Must come before ProtocolConformanceReferenceBuilder because it removes references to
         // conformed protocols, which CodingKeyEnumReferenceBuilder needs to inspect before removal.
         // It must also come after ExtensionReferenceBuilder as some types may declare conformance
         // to Codable in an extension.
         CodingKeyEnumReferenceBuilder.self,
-
         ProtocolExtensionReferenceBuilder.self,
         ProtocolConformanceReferenceBuilder.self,
         ExternalTypeProtocolConformanceReferenceRemover.self,
