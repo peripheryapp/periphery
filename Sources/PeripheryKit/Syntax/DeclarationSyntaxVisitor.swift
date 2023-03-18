@@ -392,9 +392,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
 
         let genericParameterNames = genericParameterClause
             .genericParameterList
-            .reduce(into: Set<String>()) { result, param in
-                result.insert(param.name.trimmedDescription)
-            }
+            .mapSet { $0.name.trimmedDescription }
 
         return parameterClause
             .parameterList

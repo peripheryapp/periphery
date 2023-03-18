@@ -22,4 +22,12 @@ public extension Sequence {
             result.insert(try transform(element))
         }
     }
+
+    func compactMapSet<T>(_ transform: (Element) throws -> T?) rethrows -> Set<T> {
+        try reduce(into: .init()) { result, element in
+            if let value = try transform(element) {
+                result.insert(value)
+            }
+        }
+    }
 }
