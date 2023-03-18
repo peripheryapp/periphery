@@ -31,7 +31,10 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
     }
 
     func testPublicTypeUsedAsPublicPropertyType() {
-        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyType"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyType1"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyType2"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyType3"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyType4"))
         assertNotRedundantPublicAccessibility(.struct("PublicTypeUsedAsPublicPropertyGenericArgumentType"))
         assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyArrayType"))
     }
@@ -143,5 +146,22 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
     func testPublicTypeUsedInPublicClosure() {
         assertNotRedundantPublicAccessibility(.class("PublicTypeUsedInPublicClosureReturnType"))
         assertNotRedundantPublicAccessibility(.class("PublicTypeUsedInPublicClosureInputType"))
+    }
+
+    func testFunctionMetatypeParameterUsedAsGenericReturnType() {
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType1"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType2"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType3"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType5"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType6"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType7"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType8"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType9"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType10_1"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType10_2"))
+        assertNotRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType10_3"))
+
+        // Destructured binding control.
+        assertRedundantPublicAccessibility(.protocol("PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType4"))
     }
 }

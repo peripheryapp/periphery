@@ -1,7 +1,7 @@
 import Foundation
 
-extension Sequence {
-    public func mapFirst<T>(_ transform: (Self.Element) throws -> T?) rethrows -> T? {
+public extension Sequence {
+    func mapFirst<T>(_ transform: (Element) throws -> T?) rethrows -> T? {
         for item in self {
             if let transformed = try transform(item) {
                 return transformed
@@ -9,5 +9,17 @@ extension Sequence {
         }
 
         return nil
+    }
+
+    func flatMapSet<T>(_ transform: (Element) throws -> Set<T>) rethrows -> Set<T> {
+        try reduce(into: .init()) { result, element in
+            result.formUnion(try transform(element))
+        }
+    }
+
+    func mapSet<T>(_ transform: (Element) throws -> T) rethrows -> Set<T> {
+        try reduce(into: .init()) { result, element in
+            result.insert(try transform(element))
+        }
     }
 }

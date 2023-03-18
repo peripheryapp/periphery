@@ -15,8 +15,11 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         inheritedTypeLocations: Set<SourceLocation>,
         genericParameterLocations: Set<SourceLocation>,
         genericConformanceRequirementLocations: Set<SourceLocation>,
+        variableInitFunctionCallLocations: Set<SourceLocation>,
+        functionCallMetatypeArgumentLocations: Set<SourceLocation>,
         letShorthandIdentifiers: Set<String>,
-        hasCapitalSelfFunctionCall: Bool
+        hasCapitalSelfFunctionCall: Bool,
+        hasGenericFunctionReturnedMetatypeParameters: Bool
     )
 
     var letShorthandWorkaroundEnabled: Bool = false
@@ -200,6 +203,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             if binding.pattern.is(IdentifierPatternSyntax.self) {
                 let closureSignature = binding.initializer?.value.as(ClosureExprSyntax.self)?.signature
                 let closureParameters = closureSignature?.input?.as(ParameterClauseSyntax.self)
+                let functionCallExpr = binding.initializer?.value.as(FunctionCallExprSyntax.self)
                 parse(
                     modifiers: node.modifiers,
                     attributes: node.attributes,
@@ -207,35 +211,15 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
                     variableType: binding.typeAnnotation?.type,
                     parameterClause: closureParameters,
                     returnClause: closureSignature?.output,
+                    variableInitFunctionCallExpr: functionCallExpr,
                     at: binding.positionAfterSkippingLeadingTrivia
                 )
             } else if let tuplePatternSyntax = binding.pattern.as(TuplePatternSyntax.self) {
-                // Destructuring binding.
-                let positions = tuplePatternSyntax.elements.map { $0.positionAfterSkippingLeadingTrivia }
-
-                if let typeSyntax = binding.typeAnnotation?.type {
-                    if let tupleType = typeSyntax.as(TupleTypeSyntax.self) {
-                        // Inspect elements individually, and associate each type with its corresponding identifier.
-                        for (position, elem) in zip(positions, tupleType.elements) {
-                            parse(
-                                modifiers: node.modifiers,
-                                attributes: node.attributes,
-                                trivia: node.leadingTrivia,
-                                variableType: elem.type,
-                                at: position
-                            )
-                        }
-                    }
-                } else {
-                    for position in positions {
-                        parse(
-                            modifiers: node.modifiers,
-                            attributes: node.attributes,
-                            trivia: node.leadingTrivia,
-                            at: position
-                        )
-                    }
-                }
+                visitVariableTupleBinding(
+                    node: node,
+                    pattern: tuplePatternSyntax,
+                    typeTuple: binding.typeAnnotation?.type.as(TupleTypeSyntax.self)?.elements,
+                    initializerTuple: binding.initializer?.value.as(TupleExprSyntax.self)?.elementList)
             } else {
                 parse(
                     modifiers: node.modifiers,
@@ -243,6 +227,33 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
                     trivia: node.leadingTrivia,
                     at: binding.positionAfterSkippingLeadingTrivia
                 )
+            }
+        }
+    }
+
+    func visitVariableTupleBinding(node: VariableDeclSyntax, pattern: TuplePatternSyntax, typeTuple: TupleTypeElementListSyntax?, initializerTuple: TupleExprElementListSyntax?) {
+        let elements = pattern.elements.map { $0 }
+        let types: [TupleTypeElementSyntax?] = typeTuple?.map { $0 } ?? Array(repeating: nil, count: elements.count)
+        let initializers: [TupleExprElementSyntax?] = initializerTuple?.map { $0 } ?? Array(repeating: nil, count: elements.count)
+
+        for (element, (type, initializer)) in zip(elements, zip(types, initializers)) {
+            if let elementTuplePattern = element.pattern.as(TuplePatternSyntax.self) {
+                let typeTuple = type?.type.as(TupleTypeSyntax.self)?.elements
+                let initializerTuple = initializer?.expression.as(TupleExprSyntax.self)?.elementList
+
+                visitVariableTupleBinding(
+                    node: node,
+                    pattern: elementTuplePattern,
+                    typeTuple: typeTuple,
+                    initializerTuple: initializerTuple)
+            } else {
+                parse(
+                    modifiers: node.modifiers,
+                    attributes: node.attributes,
+                    trivia: node.leadingTrivia,
+                    variableType: type?.type,
+                    variableInitFunctionCallExpr: initializer?.expression.as(FunctionCallExprSyntax.self),
+                    at: element.positionAfterSkippingLeadingTrivia)
             }
         }
     }
@@ -318,6 +329,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         inheritanceClause: TypeInheritanceClauseSyntax? = nil,
         genericParameterClause: GenericParameterClauseSyntax? = nil,
         genericWhereClause: GenericWhereClauseSyntax? = nil,
+        variableInitFunctionCallExpr: FunctionCallExprSyntax? = nil,
         consumeCapitalSelfFunctionCalls: Bool = false,
         at position: AbsolutePosition
     ) {
@@ -342,6 +354,12 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             self.didVisitCapitalSelfFunctionCall = false
         }
 
+        let returnClauseTypeLocations = typeNameLocations(for: returnClause)
+        let hasGenericFunctionReturnedMetatypeParameters = hasGenericFunctionReturnedMetatypeParameters(
+            genericParameterClause: genericParameterClause,
+            parameterClause: parameterClause,
+            returnClauseTypeLocations: returnClauseTypeLocations)
+
         results.append((
             location,
             accessibility,
@@ -351,13 +369,45 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             type(for: variableType),
             typeLocations(for: variableType),
             typeLocations(for: parameterClause),
-            typeLocations(for: returnClause),
+            Set(returnClauseTypeLocations.map { $0.location }),
             typeLocations(for: inheritanceClause),
             typeLocations(for: genericParameterClause),
             typeLocations(for: genericWhereClause),
+            locations(for: variableInitFunctionCallExpr),
+            functionCallMetatypeArgumentLocations(for: variableInitFunctionCallExpr),
             letShorthandIdentifiers,
-            didVisitCapitalSelfFunctionCall
+            didVisitCapitalSelfFunctionCall,
+            hasGenericFunctionReturnedMetatypeParameters
         ))
+    }
+
+    /// Determines whether the function has generic metatype parameters that are also returned.
+    /// For example: `func someFunc<T>(type: T.Type) -> T`.
+    private func hasGenericFunctionReturnedMetatypeParameters(
+        genericParameterClause: GenericParameterClauseSyntax?,
+        parameterClause: ParameterClauseSyntax?,
+        returnClauseTypeLocations: Set<TypeNameSourceLocation>
+    ) -> Bool {
+        guard let genericParameterClause, let parameterClause else { return false }
+
+        let genericParameterNames = genericParameterClause
+            .genericParameterList
+            .reduce(into: Set<String>()) { result, param in
+                result.insert(param.name.trimmedDescription)
+            }
+
+        return parameterClause
+            .parameterList
+            .contains {
+                if let baseTypeName = $0.type?.as(MetatypeTypeSyntax.self)?.baseType.trimmedDescription,
+                   genericParameterNames.contains(baseTypeName),
+                   returnClauseTypeLocations.contains(where: { $0.name == baseTypeName })
+                {
+                    return true
+                }
+
+                return false
+            }
     }
 
     private func type(for typeSyntax: TypeSyntax?) -> String? {
@@ -380,14 +430,14 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         })
     }
 
-    private func typeLocations(for clause: ReturnClauseSyntax?) -> Set<SourceLocation> {
+    private func typeNameLocations(for clause: ReturnClauseSyntax?) -> Set<TypeNameSourceLocation> {
         guard let returnTypeSyntax = clause?.returnType else { return [] }
 
         if let someReturnType = returnTypeSyntax.as(ConstrainedSugarTypeSyntax.self) {
-            return typeSyntaxInspector.typeLocations(for: someReturnType.baseType)
+            return typeSyntaxInspector.typeNameLocations(for: someReturnType.baseType)
         }
 
-        return typeSyntaxInspector.typeLocations(for: returnTypeSyntax)
+        return typeSyntaxInspector.typeNameLocations(for: returnTypeSyntax)
     }
 
     private func typeLocations(for clause: GenericParameterClauseSyntax?) -> Set<SourceLocation> {
@@ -416,5 +466,27 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         return clause.inheritedTypeCollection.reduce(into: .init()) { result, type in
             result.formUnion(typeSyntaxInspector.typeLocations(for: type.typeName))
         }
+    }
+
+    private func locations(for call: FunctionCallExprSyntax?) -> Set<SourceLocation> {
+        guard let call = call else { return [] }
+
+        return [sourceLocationBuilder.location(at: call.positionAfterSkippingLeadingTrivia)]
+    }
+
+    private func functionCallMetatypeArgumentLocations(for call: FunctionCallExprSyntax?) -> Set<SourceLocation> {
+        guard let call else { return [] }
+
+        return call
+            .argumentList
+            .reduce(into: .init(), { result, argument in
+                if let memberExpr = argument.expression.as(MemberAccessExprSyntax.self),
+                   memberExpr.name.tokenKind == .keyword(.`self`),
+                   let baseIdentifier = memberExpr.base?.as(IdentifierExprSyntax.self)
+                {
+                    let location = sourceLocationBuilder.location(at: baseIdentifier.positionAfterSkippingLeadingTrivia)
+                    result.insert(location)
+                }
+            })
     }
 }

@@ -12,6 +12,7 @@
 
 - `COMPILER_INDEX_STORE_ENABLE` is now forcefully enabled as it's required for indexing.
 - Fix false positive where a `typealias` is extended but otherwise unused.
+- Fix redundant accessibility analysis for function metatype arguments.
 
 ## 2.12.1 (2023-03-04)
 
