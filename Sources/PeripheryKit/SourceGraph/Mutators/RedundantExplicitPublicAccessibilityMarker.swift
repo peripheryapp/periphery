@@ -76,7 +76,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
         let referenceDecls = graph.references(to: decl)
             .compactMap {
                 if $0.role.isPubliclyExposable {
-                    if case .functionCallMetatypeArgument = $0.role {
+                    if $0.role == .functionCallMetatypeArgument {
                         // This reference is a function metatype argument. If the called function
                         // also has generic metatype parameters, and returns any of the generic
                         // types, then we must assume the argument type is publicly accessible.
@@ -91,6 +91,15 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
                         }
 
                         return nil
+                    } else if $0.role == .returnType, let parent = $0.parent {
+                        // This reference is a return type. If the parent is a function used as a
+                        // variable initializer, return the variable that references the function.
+                        let variableDecl = graph
+                            .references(to: parent)
+                            .mapFirst { $0.role == .variableInitFunctionCall ? $0.parent : nil }
+                        if let variableDecl {
+                            return variableDecl
+                        }
                     }
 
                     return $0.parent

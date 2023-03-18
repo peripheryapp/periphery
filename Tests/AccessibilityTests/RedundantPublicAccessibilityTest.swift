@@ -35,6 +35,7 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
         assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyType2"))
         assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyType3"))
         assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyType4"))
+        assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyType5"))
         assertNotRedundantPublicAccessibility(.struct("PublicTypeUsedAsPublicPropertyGenericArgumentType"))
         assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyArrayType"))
     }

@@ -13,7 +13,7 @@ public final class Reference {
 
         var isPubliclyExposable: Bool {
             switch self {
-            case .varType, .returnType, .parameterType, .genericParameterType, .genericRequirementType, .inheritedClassType, .refinedProtocolType, .functionCallMetatypeArgument:
+            case .varType, .returnType, .parameterType, .genericParameterType, .genericRequirementType, .inheritedClassType, .refinedProtocolType, .variableInitFunctionCall, .functionCallMetatypeArgument:
                 return true
             default:
                 return false
