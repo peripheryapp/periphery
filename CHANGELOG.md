@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.12.2 (2023-03-19)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Significantly improve the performance of index and report filtering.
 - Moderate improvements to indexing and analysis performance.
 
