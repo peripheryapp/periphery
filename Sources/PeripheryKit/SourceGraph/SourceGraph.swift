@@ -63,6 +63,10 @@ public final class SourceGraph {
         decl.usrs.contains { !allReferencesByUsr[$0, default: []].isEmpty }
     }
 
+    func hasReferences(to usr: String) -> Bool {
+        !allReferencesByUsr[usr, default: []].isEmpty
+    }
+
     func markRedundantProtocol(_ declaration: Declaration, references: Set<Reference>) {
         withLock {
             redundantProtocols[declaration] = references

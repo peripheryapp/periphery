@@ -1048,6 +1048,9 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 self.assertNotReferenced(.varStatic("simpleStaticUnreadVar"))
                 self.assertAssignOnlyProperty(.varStatic("simpleStaticUnreadVar"))
 
+                self.assertNotReferenced(.varInstance("inferredTypeUnreadVar"))
+                self.assertAssignOnlyProperty(.varInstance("inferredTypeUnreadVar"))
+
                 self.assertReferenced(.varInstance("complexUnreadVar1"))
                 self.assertNotAssignOnlyProperty(.varInstance("complexUnreadVar1"))
 

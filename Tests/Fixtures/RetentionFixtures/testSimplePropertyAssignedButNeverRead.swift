@@ -24,23 +24,26 @@ public class FixtureClass70 {
     var readVar: String
     // periphery:ignore
     var ignoredSimpleUnreadVar: String
+    var inferredTypeUnreadVar = someFunc()
 
     init() {
-        simpleUnreadVar = "Hello"
-        simpleUnreadShadowedVar = "Hello"
-        simpleUnreadVarAssignedMultiple = "1"
-        simpleUnreadVarAssignedMultiple = "2"
-        complexUnreadVar1 = "Hello"
-        readVar = "Hello"
-        ignoredSimpleUnreadVar = "Hello"
-        FixtureClass70.simpleStaticUnreadVar = "Hello"
+        simpleUnreadVar = ""
+        simpleUnreadShadowedVar = ""
+        simpleUnreadVarAssignedMultiple = ""
+        simpleUnreadVarAssignedMultiple = ""
+        complexUnreadVar1 = ""
+        readVar = ""
+        ignoredSimpleUnreadVar = ""
+        FixtureClass70.simpleStaticUnreadVar = ""
     }
 
     public func someMethod(simpleUnreadShadowedVar: String) {
         self.simpleUnreadShadowedVar = simpleUnreadShadowedVar
-        simpleUnreadVar = "World"
-        complexUnreadVar1 = "Hello"
-        complexUnreadVar2 = "Hello"
+        simpleUnreadVar = ""
+        complexUnreadVar1 = ""
+        complexUnreadVar2 = ""
         print(readVar)
     }
+
+    private static func someFunc() -> String { "" }
 }
