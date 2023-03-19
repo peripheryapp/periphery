@@ -7,6 +7,7 @@
 ##### Enhancements
 
 - Significantly improve the performance of index and report filtering.
+- Moderate improvements to indexing and analysis performance.
 
 ##### Bug Fixes
 

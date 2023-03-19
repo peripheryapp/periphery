@@ -92,18 +92,21 @@ public final class Reference {
 
     public let location: SourceLocation
     public let kind: Kind
+    public let isRelated: Bool
     public var name: String?
     public var parent: Declaration?
     public var references: Set<Reference> = []
     public let usr: String
     public var role: Role = .unknown
 
-    var isRelated: Bool = false
+    private let identifier: String
 
-    init(kind: Kind, usr: String, location: SourceLocation) {
+    init(kind: Kind, usr: String, location: SourceLocation, isRelated: Bool = false) {
         self.kind = kind
         self.usr = usr
+        self.isRelated = isRelated
         self.location = location
+        self.identifier = "\(usr.hashValue)-\(location.hashValue)-\(isRelated.hashValue)"
     }
 
     var descendentReferences: Set<Reference> {
@@ -113,19 +116,13 @@ public final class Reference {
 
 extension Reference: Hashable {
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(usr)
-        hasher.combine(location)
-        hasher.combine(isRelated)
+        hasher.combine(identifier)
     }
 }
 
 extension Reference: Equatable {
     public static func == (lhs: Reference, rhs: Reference) -> Bool {
-        let usrIsEqual = lhs.usr == rhs.usr
-        let locationIsEqual = lhs.location == rhs.location
-        let relatedIsEqual = lhs.isRelated == rhs.isRelated
-
-        return usrIsEqual && locationIsEqual && relatedIsEqual
+        lhs.identifier == rhs.identifier
     }
 }
 

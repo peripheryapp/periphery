@@ -153,7 +153,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertRedundantProtocol("FixtureProtocol114",
                                     implementedBy:
                                         .class("FixtureClass114"),
-                                        .extensionClass("FixtureClass115"),
+                                        .class("FixtureClass115"),
                                         .struct("FixtureStruct116"))
         }
     }

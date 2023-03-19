@@ -48,11 +48,11 @@
       },
       {
         "package": "SwiftIndexStore",
-        "repositoryURL": "https://github.com/kateinoigakukun/swift-indexstore",
+        "repositoryURL": "https://github.com/ileitch/swift-indexstore",
         "state": {
           "branch": null,
-          "revision": "94261f627b5f82214b676d55809bb814814a3817",
-          "version": "0.2.0"
+          "revision": "314cc506ab5e782a9fcf75bf9c82c56f581f8fef",
+          "version": "9.0.0"
         }
       },
       {

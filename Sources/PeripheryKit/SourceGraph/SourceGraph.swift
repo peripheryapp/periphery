@@ -160,12 +160,7 @@ public final class SourceGraph {
 
     func addUnsafe(_ reference: Reference) {
         _ = allReferences.insert(reference)
-
-        if allReferencesByUsr[reference.usr] == nil {
-            allReferencesByUsr[reference.usr] = []
-        }
-
-        allReferencesByUsr[reference.usr]?.insert(reference)
+        allReferencesByUsr[reference.usr, default: []].insert(reference)
     }
 
     func add(_ reference: Reference, from declaration: Declaration) {
