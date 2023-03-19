@@ -195,11 +195,11 @@ public final class SwiftIndexer: Indexer {
                             }
                         }
 
-                        if !occurrence.roles.intersection([.reference]).isEmpty {
+                        if occurrence.roles.contains(.reference) {
                             try parseReference(occurrence, usr, location, indexStore)
                         }
 
-                        if !occurrence.roles.intersection([.implicit]).isEmpty {
+                        if occurrence.roles.contains(.implicit) {
                             try parseImplicit(occurrence, usr, location, indexStore)
                         }
 
@@ -516,20 +516,23 @@ public final class SwiftIndexer: Indexer {
             _ relations: [RawRelation]
         ) throws {
             for rel in relations {
-                if !rel.roles.intersection([.childOf]).isEmpty {
+                if rel.roles.contains(.childOf) {
                     if let parentUsr = rel.symbol.usr {
                         self.childDeclsByParentUsr[parentUsr, default: []].insert(decl)
                     }
                 }
 
-                if !rel.roles.intersection([.overrideOf]).isEmpty {
+                if rel.roles.contains(.overrideOf) {
                     let baseFunc = rel.symbol
 
                     if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) {
-                        let reference = Reference(kind: baseFuncKind, usr: baseFuncUsr, location: decl.location)
+                        let reference = Reference(
+                            kind: baseFuncKind,
+                            usr: baseFuncUsr,
+                            location: decl.location,
+                            isRelated: true
+                        )
                         reference.name = baseFunc.name
-                        reference.isRelated = true
-
                         graph.withLock {
                             graph.addUnsafe(reference)
                             associateUnsafe(reference, with: decl)
@@ -542,13 +545,13 @@ public final class SwiftIndexer: Indexer {
 
                     if let referencerUsr = referencer.usr, let referencerKind = decl.kind.referenceEquivalent {
                         for usr in decl.usrs {
-                            let reference = Reference(kind: referencerKind, usr: usr, location: decl.location)
+                            let reference = Reference(
+                                kind: referencerKind,
+                                usr: usr,
+                                location: decl.location,
+                                isRelated: rel.roles.contains(.baseOf)
+                            )
                             reference.name = decl.name
-
-                            if rel.roles.contains(.baseOf) {
-                                reference.isRelated = true
-                            }
-
                             graph.add(reference)
                             self.referencesByUsr[referencerUsr, default: []].insert(reference)
                         }
@@ -566,14 +569,17 @@ public final class SwiftIndexer: Indexer {
             var refs = [Reference]()
 
             indexStore.forEachRelations(for: occurrence) { rel -> Bool in
-                if !rel.roles.intersection([.overrideOf]).isEmpty {
+                if rel.roles.contains(.overrideOf) {
                     let baseFunc = rel.symbol
 
                     if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) {
-                        let reference = Reference(kind: baseFuncKind, usr: baseFuncUsr, location: location)
+                        let reference = Reference(
+                            kind: baseFuncKind,
+                            usr: baseFuncUsr,
+                            location: location,
+                            isRelated: true
+                        )
                         reference.name = baseFunc.name
-                        reference.isRelated = true
-
                         self.referencesByUsr[occurrenceUsr, default: []].insert(reference)
                         refs.append(reference)
                     }
@@ -608,13 +614,13 @@ public final class SwiftIndexer: Indexer {
                     let referencer = rel.symbol
 
                     if let referencerUsr = referencer.usr {
-                        let ref = Reference(kind: kind, usr: occurrenceUsr, location: location)
+                        let ref = Reference(
+                            kind: kind,
+                            usr: occurrenceUsr,
+                            location: location,
+                            isRelated: rel.roles.contains(.baseOf)
+                        )
                         ref.name = occurrence.symbol.name
-
-                        if rel.roles.contains(.baseOf) {
-                            ref.isRelated = true
-                        }
-
                         refs.append(ref)
                         self.referencesByUsr[referencerUsr, default: []].insert(ref)
                     }

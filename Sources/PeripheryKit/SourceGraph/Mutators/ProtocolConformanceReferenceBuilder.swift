@@ -23,9 +23,12 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
 
         for proto in protocols {
             // Find all classes that implement this protocol.
-            let conformingClasses = graph.declarations(ofKind: .class).filter {
-                $0.related.contains { proto.usrs.contains($0.usr) }
-            }
+            let conformingClasses = graph.references(to: proto)
+                .reduce(into: Set<Declaration>()) { result, ref in
+                    if ref.isRelated, let parent = ref.parent, parent.kind == .class {
+                        result.insert(parent)
+                    }
+                }
 
             for conformingClass in conformingClasses {
                 // Find declarations defined by the protocol not defined in the class.
@@ -56,11 +59,13 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                             guard let referenceKind = declInSuperclass.kind.referenceEquivalent else { continue }
 
                             for usr in declInSuperclass.usrs {
-                                let reference = Reference(kind: referenceKind,
-                                                          usr: usr,
-                                                          location: declInSuperclass.location)
+                                let reference = Reference(
+                                    kind: referenceKind,
+                                    usr: usr,
+                                    location: declInSuperclass.location,
+                                    isRelated: true
+                                )
                                 reference.name = declInSuperclass.name
-                                reference.isRelated = true
                                 reference.parent = unimplementedProtoDecl
                                 graph.add(reference, from: unimplementedProtoDecl)
                                 newReferences.insert(reference)
@@ -113,12 +118,14 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                 }
 
                 for usr in conformingDeclaration.usrs {
-                    let newReference = Reference(kind: relatedReference.kind,
-                                                 usr: usr,
-                                                 location: relatedReference.location)
+                    let newReference = Reference(
+                        kind: relatedReference.kind,
+                        usr: usr,
+                        location: relatedReference.location,
+                        isRelated: true
+                    )
                     newReference.name = relatedReference.name
                     newReference.parent = protocolDeclaration
-                    newReference.isRelated = true
                     graph.add(newReference, from: protocolDeclaration)
                 }
             } else {

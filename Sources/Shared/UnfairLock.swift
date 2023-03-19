@@ -4,50 +4,54 @@ import Foundation
 import os
 #endif
 
-public final class UnfairLock: Lock {
-    private let lock: Lock
+public final class UnfairLock {
+    private var _osAllocatedUnfairLock: Any? = nil
+    private var _nsLock: Any? = nil
+
+    #if canImport(os)
+    @available(macOS 13, *)
+    private var osAllocatedUnfairLock: OSAllocatedUnfairLock<Void> {
+        _osAllocatedUnfairLock as! OSAllocatedUnfairLock
+    }
+    #endif
+
+    private var nsLock: NSLock {
+        _nsLock as! NSLock
+    }
 
     public init() {
         #if canImport(os)
         if #available(macOS 13, *) {
-            lock = OSAllocatedUnfairLock()
+            _osAllocatedUnfairLock = OSAllocatedUnfairLock()
         } else {
-            lock = NSLock()
+            _nsLock = NSLock()
         }
         #else
-        lock = NSLock()
+        _nsLock = NSLock()
         #endif
+
     }
 
     @discardableResult
+    @inline(__always)
     public func perform<T>(_ operation: () throws -> T) rethrows -> T {
-        try lock.perform(operation)
-    }
-}
-
-private protocol Lock {
-    @discardableResult
-    func perform<T>(_ operation: () throws -> T) rethrows -> T
-}
-
-#if canImport(os)
-@available(macOS 13, *)
-extension OSAllocatedUnfairLock: Lock where State == Void {
-    @discardableResult
-    func perform<T>(_ operation: () throws -> T) rethrows -> T {
-        lock()
+        #if canImport(os)
+        if #available(macOS 13, *) {
+            osAllocatedUnfairLock.lock()
+            let value = try operation()
+            osAllocatedUnfairLock.unlock()
+            return value
+        } else {
+            nsLock.lock()
+            let value = try operation()
+            nsLock.unlock()
+            return value
+        }
+        #else
+        nsLock.lock()
         let value = try operation()
-        unlock()
+        nsLock.unlock()
         return value
-    }
-}
-#endif
-
-extension NSLock: Lock {
-    func perform<T>(_ operation: () throws -> T) rethrows -> T {
-        lock()
-        let value = try operation()
-        unlock()
-        return value
+        #endif
     }
 }

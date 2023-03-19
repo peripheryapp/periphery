@@ -178,11 +178,13 @@ public final class Declaration {
     public var letShorthandIdentifiers: Set<String> = []
     public var hasCapitalSelfFunctionCall: Bool = false
     public var hasGenericFunctionReturnedMetatypeParameters: Bool = false
-
     public var parent: Declaration?
+
     var related: Set<Reference> = []
     var isImplicit: Bool = false
     var isObjcAccessible: Bool = false
+
+    private let identifier: String
 
     var ancestralDeclarations: Set<Declaration> {
         var maybeParent = parent
@@ -235,6 +237,7 @@ public final class Declaration {
         self.kind = kind
         self.usrs = usrs
         self.location = location
+        self.identifier = usrs.joined()
     }
 
     func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {
@@ -245,13 +248,13 @@ public final class Declaration {
 
 extension Declaration: Hashable {
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(usrs)
+        hasher.combine(identifier)
     }
 }
 
 extension Declaration: Equatable {
     public static func == (lhs: Declaration, rhs: Declaration) -> Bool {
-        lhs.usrs == rhs.usrs
+        lhs.identifier == rhs.identifier
     }
 }
 

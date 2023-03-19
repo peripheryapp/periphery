@@ -21,13 +21,18 @@ public enum ANSIColor: String {
     case gray = "\u{001B}[0;1;30m"
 }
 
-public func colorize(_ text: String, _ color: ANSIColor) -> String {
+private var isColorOutputCapable: Bool = {
     guard let term = ProcessInfo.processInfo.environment["TERM"],
         term.lowercased() != "dumb",
         isatty(fileno(stdout)) != 0 else {
-        return text
+        return false
     }
 
+    return true
+}()
+
+public func colorize(_ text: String, _ color: ANSIColor) -> String {
+    guard isColorOutputCapable else { return text }
     return "\(color.rawValue)\(text)\u{001B}[0;0m"
 }
 
