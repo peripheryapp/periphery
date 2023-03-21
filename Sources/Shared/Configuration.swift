@@ -321,13 +321,9 @@ public final class Configuration {
     // MARK: - Private
 
     private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {
+        // TODO: respect filesystem case sensitivity.
         let pwd = FilePath.current.string
-
-        return patterns.map {
-            let pattern = $0.hasPrefix("/") ? $0 : "\(pwd)/\($0)"
-            // TODO: respect filesystem case sensitivity.
-            return FilenameMatcher(pattern: pattern, caseSensitive: false)
-        }
+        return patterns.map { FilenameMatcher(relativePattern: $0, to: pwd, caseSensitive: false) }
     }
 
     private func configurationPath(withUserProvided path: FilePath?) throws -> FilePath? {
