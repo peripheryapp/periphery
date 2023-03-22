@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 2.12.3 (2023-03-22)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - Fix index/report exclude regression.
 
 ## 2.12.2 (2023-03-19)
