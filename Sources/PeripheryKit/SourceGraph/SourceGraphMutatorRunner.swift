@@ -7,6 +7,9 @@ public final class SourceGraphMutatorRunner {
     }
 
     private let mutators: [SourceGraphMutator.Type] = [
+        // Must come before all others as we need to observe all references prior to any mutations.
+        UnusedImportMarker.self,
+
         // Must come before ExtensionReferenceBuilder.
         AccessibilityCascader.self,
         ObjCAccessibleRetainer.self,

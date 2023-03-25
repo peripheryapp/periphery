@@ -71,6 +71,9 @@ public final class Configuration {
     @Setting(key: "disable_redundant_public_analysis", defaultValue: false)
     public var disableRedundantPublicAnalysis: Bool
 
+    @Setting(key: "enable_unused_import_analysis", defaultValue: false)
+    public var enableUnusedImportsAnalysis: Bool
+
     @Setting(key: "verbose", defaultValue: false)
     public var verbose: Bool
 
@@ -180,6 +183,10 @@ public final class Configuration {
             config[$disableRedundantPublicAnalysis.key] = disableRedundantPublicAnalysis
         }
 
+        if $enableUnusedImportsAnalysis.hasNonDefaultValue {
+            config[$enableUnusedImportsAnalysis.key] = enableUnusedImportsAnalysis
+        }
+
         if $verbose.hasNonDefaultValue {
             config[$verbose.key] = verbose
         }
@@ -270,6 +277,8 @@ public final class Configuration {
                 $retainSwiftUIPreviews.assign(value)
             case $disableRedundantPublicAnalysis.key:
                 $disableRedundantPublicAnalysis.assign(value)
+            case $enableUnusedImportsAnalysis.key:
+                $enableUnusedImportsAnalysis.assign(value)
             case $verbose.key:
                 $verbose.assign(value)
             case $quiet.key:
@@ -312,6 +321,7 @@ public final class Configuration {
         $retainUnusedProtocolFuncParams.reset()
         $retainSwiftUIPreviews.reset()
         $disableRedundantPublicAnalysis.reset()
+        $enableUnusedImportsAnalysis.reset()
         $externalEncodableProtocols.reset()
         $externalTestCaseClasses.reset()
         $verbose.reset()

@@ -2,8 +2,6 @@ import Foundation
 import SystemPackage
 
 class SourceFile {
-    typealias ImportStatement = (parts: [String], isTestable: Bool)
-
     let path: FilePath
     let modules: Set<String>
     var importStatements: [ImportStatement] = []

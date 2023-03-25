@@ -54,6 +54,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Disable identification of redundant public accessibility")
     var disableRedundantPublicAnalysis: Bool = defaultConfiguration.$disableRedundantPublicAnalysis.defaultValue
 
+    @Flag(help: "Enable identification of unused imports (experimental)")
+    var enableUnusedImportAnalysis: Bool = defaultConfiguration.$enableUnusedImportsAnalysis.defaultValue
+
     @Flag(help: "Retain properties that are assigned, but never used")
     var retainAssignOnlyProperties: Bool = defaultConfiguration.$retainAssignOnlyProperties.defaultValue
 
@@ -127,6 +130,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$retainUnusedProtocolFuncParams, retainUnusedProtocolFuncParams)
         configuration.apply(\.$retainSwiftUIPreviews, retainSwiftUIPreviews)
         configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
+        configuration.apply(\.$enableUnusedImportsAnalysis, enableUnusedImportAnalysis)
         configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
         configuration.apply(\.$externalTestCaseClasses, externalTestCaseClasses)
         configuration.apply(\.$verbose, verbose)

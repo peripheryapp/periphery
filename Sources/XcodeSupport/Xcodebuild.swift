@@ -1,6 +1,5 @@
 import Foundation
 import SystemPackage
-import PeripheryKit
 import Shared
 
 public final class Xcodebuild {

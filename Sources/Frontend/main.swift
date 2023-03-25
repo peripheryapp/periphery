@@ -1,6 +1,5 @@
 import Foundation
 import ArgumentParser
-import PeripheryKit
 import Shared
 
 Logger.configureBuffering()

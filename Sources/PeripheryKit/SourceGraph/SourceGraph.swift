@@ -17,10 +17,13 @@ public final class SourceGraph {
     private(set) var assetReferences: Set<AssetReference> = []
     private(set) var mainAttributedDeclarations: Set<Declaration> = []
     private(set) var allReferencesByUsr: [String: Set<Reference>] = [:]
+    private(set) var indexedModules: Set<String> = []
+    private(set) var unusedModuleImports: Set<Declaration> = []
 
     private var potentialAssignOnlyProperties: Set<Declaration> = []
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
+    private var moduleToExportingModules: [String: Set<String>] = [:]
 
     private let lock = UnfairLock()
 
@@ -150,12 +153,6 @@ public final class SourceGraph {
         declaration.usrs.forEach { allExplicitDeclarationsByUsr.removeValue(forKey: $0) }
     }
 
-    func add(_ reference: Reference) {
-        withLock {
-            addUnsafe(reference)
-        }
-    }
-
     func addUnsafe(_ reference: Reference) {
         _ = allReferences.insert(reference)
         allReferencesByUsr[reference.usr, default: []].insert(reference)
@@ -173,9 +170,9 @@ public final class SourceGraph {
             } else {
                 _ = declaration.references.insert(reference)
             }
-        }
 
-        add(reference)
+            addUnsafe(reference)
+        }
     }
 
     func remove(_ reference: Reference) {
@@ -213,6 +210,48 @@ public final class SourceGraph {
 
     func isExternal(_ reference: Reference) -> Bool {
         explicitDeclaration(withUsr: reference.usr) == nil
+    }
+
+    func addIndexedModules(_ modules: Set<String>) {
+        withLock {
+            indexedModules.formUnion(modules)
+        }
+    }
+
+    func addExportedModule(_ module: String, exportedBy exportingModules: Set<String>) {
+        withLock {
+            moduleToExportingModules[module, default: []].formUnion(exportingModules)
+        }
+    }
+
+    func isModule(_ module: String, exportedBy exportingModule: String) -> Bool {
+        withLock {
+            isModuleUnsafe(module, exportedBy: exportingModule)
+        }
+    }
+
+    private func isModuleUnsafe(_ module: String, exportedBy exportingModule: String) -> Bool {
+        let exportingModules = moduleToExportingModules[module, default: []]
+
+        if exportingModules.contains(exportingModule) {
+            // The module is exported directly.
+            return true
+        }
+
+        // Recursively check if the module is exported transitively.
+        return exportingModules.contains { nestedExportingModule in
+            return isModuleUnsafe(nestedExportingModule, exportedBy: exportingModule) &&
+            isModuleUnsafe(module, exportedBy: nestedExportingModule)
+        }
+    }
+
+    func markUnusedModuleImport(_ statement: ImportStatement) {
+        withLock {
+            let usr = "\(statement.location.description)-\(statement.module)"
+            let decl = Declaration(kind: .module, usrs: [usr], location: statement.location)
+            decl.name = statement.module
+            unusedModuleImports.insert(decl)
+        }
     }
 
     func inheritedTypeReferences(of decl: Declaration, seenDeclarations: Set<Declaration> = []) -> [Reference] {

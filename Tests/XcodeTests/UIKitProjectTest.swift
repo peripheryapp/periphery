@@ -1,8 +1,6 @@
 import XCTest
-import Shared
 @testable import TestShared
 @testable import XcodeSupport
-@testable import PeripheryKit
 
 class UIKitProjectTest: SourceGraphTestCase {
     override static func setUp() {
