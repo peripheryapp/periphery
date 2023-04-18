@@ -51,8 +51,14 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Retain all public declarations, recommended for framework/library projects")
     var retainPublic: Bool = defaultConfiguration.$retainPublic.defaultValue
 
-    @Flag(help: "Disable identification of redundant public accessibility")
-    var disableRedundantPublicAnalysis: Bool = defaultConfiguration.$disableRedundantPublicAnalysis.defaultValue
+	@Flag(help: "Disable identification of redundant public accessibility")
+	var disableRedundantPublicAnalysis: Bool = defaultConfiguration.$disableRedundantPublicAnalysis.defaultValue
+
+	@Flag(help: "Disable identification of redundant internal accessibility")
+	var disableRedundantInternalAnalysis: Bool = defaultConfiguration.$disableRedundantInternalAnalysis.defaultValue
+
+	@Flag(help: "Disable identification of redundant fileprivate accessibility")
+	var disableRedundantFilePrivateAnalysis: Bool = defaultConfiguration.$disableRedundantFilePrivateAnalysis.defaultValue
 
     @Flag(help: "Retain properties that are assigned, but never used")
     var retainAssignOnlyProperties: Bool = defaultConfiguration.$retainAssignOnlyProperties.defaultValue
@@ -113,6 +119,8 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$retainObjcAccessible, retainObjcAccessible)
         configuration.apply(\.$retainUnusedProtocolFuncParams, retainUnusedProtocolFuncParams)
         configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
+        configuration.apply(\.$disableRedundantInternalAnalysis, disableRedundantInternalAnalysis)
+        configuration.apply(\.$disableRedundantFilePrivateAnalysis, disableRedundantFilePrivateAnalysis)
         configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
         configuration.apply(\.$verbose, verbose)
         configuration.apply(\.$quiet, quiet)

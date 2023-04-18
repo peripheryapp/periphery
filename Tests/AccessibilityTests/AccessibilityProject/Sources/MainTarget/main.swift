@@ -57,3 +57,10 @@ _ = InternalProtocolRefiningPublicProtocolRetainer()
 // Closure
 let _ = PublicTypeUsedInPublicClosureRetainer().closure
 
+// Support for tests for items being overly public
+
+_ = RedundantInternalClassComponents()
+_ = NotRedundantInternalClassComponents()
+_ = NotRedundantInternalClassComponents_Support()
+_ = RedundantFilePrivateComponents()
+_ = NotRedundantFilePrivateComponents()

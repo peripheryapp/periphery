@@ -133,6 +133,55 @@ open class SourceGraphTestCase: XCTestCase {
         scopeStack.removeLast()
     }
 
+    func assertRedundantInternalAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
+
+        if !Self.graph.redundantInternalAccessibility.keys.contains(declaration) {
+            XCTFail("Expected declaration to have redundant internal accessibility: \(declaration)", file: file, line: line)
+        }
+
+        scopeStack.append(.declaration(declaration))
+        scopedAssertions?()
+        scopeStack.removeLast()
+    }
+
+    func assertNotRedundantInternalAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
+
+        if Self.graph.redundantInternalAccessibility.keys.contains(declaration) {
+            XCTFail("Expected declaration to not have redundant internal accessibility: \(declaration)", file: file, line: line)
+        }
+
+        scopeStack.append(.declaration(declaration))
+        scopedAssertions?()
+        scopeStack.removeLast()
+    }
+
+	func assertRedundantFilePrivateAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+		guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
+
+		if !Self.graph.redundantFilePrivateAccessibility.keys.contains(declaration) {
+			XCTFail("Expected declaration to have redundant fileprivate accessibility: \(declaration)", file: file, line: line)
+		}
+
+		scopeStack.append(.declaration(declaration))
+		scopedAssertions?()
+		scopeStack.removeLast()
+	}
+
+	func assertNotRedundantFilePrivateAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+		guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
+
+		if Self.graph.redundantFilePrivateAccessibility.keys.contains(declaration) {
+			XCTFail("Expected declaration to not have redundant fileprivate accessibility: \(declaration)", file: file, line: line)
+		}
+
+		scopeStack.append(.declaration(declaration))
+		scopedAssertions?()
+		scopeStack.removeLast()
+	}
+
+
     func assertUsedParameter(_ name: String, file: StaticString = #file, line: UInt = #line) {
         let declaration = materialize(.varParameter(name), fail: false, file: file, line: line)
 

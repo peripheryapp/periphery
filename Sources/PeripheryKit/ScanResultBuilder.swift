@@ -10,6 +10,8 @@ public struct ScanResultBuilder {
         let removableDeclarations = graph.unusedDeclarations.subtracting(assignOnlyProperties)
         let redundantProtocols = graph.redundantProtocols.filter { !removableDeclarations.contains($0.0) }
         let redundantPublicAccessibility = graph.redundantPublicAccessibility.filter { !removableDeclarations.contains($0.0) }
+        let redundantInternalAccessibility = graph.redundantInternalAccessibility.filter { !removableDeclarations.contains($0.0) }
+        let redundantFilePrivateAccessibility = graph.redundantFilePrivateAccessibility.filter { !removableDeclarations.contains($0.0) }
 
         let annotatedRemovableDeclarations: [ScanResult] = removableDeclarations.map {
             .init(declaration: $0, annotation: .unused)
@@ -23,10 +25,18 @@ public struct ScanResultBuilder {
         let annotatedRedundantPublicAccessibility: [ScanResult] = redundantPublicAccessibility.map {
             .init(declaration: $0.0, annotation: .redundantPublicAccessibility(modules: $0.1))
         }
+        let annotatedRedundantInternalAccessibility: [ScanResult] = redundantInternalAccessibility.map {
+            .init(declaration: $0.0, annotation: .redundantInternalAccessibility(file: $0.1))
+        }
+        let annotatedRedundantFilePrivateAccessibility: [ScanResult] = redundantFilePrivateAccessibility.map {
+            .init(declaration: $0.0, annotation: .redundantFilePrivateAccessibility(file: $0.1))
+        }
         let allAnnotatedDeclarations = annotatedRemovableDeclarations +
             annotatedAssignOnlyProperties +
             annotatedRedundantProtocols +
-            annotatedRedundantPublicAccessibility
+            annotatedRedundantPublicAccessibility +
+			annotatedRedundantInternalAccessibility +
+			annotatedRedundantFilePrivateAccessibility
 
         let result = allAnnotatedDeclarations
             .filter {

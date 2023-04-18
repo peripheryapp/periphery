@@ -20,6 +20,10 @@ extension OutputFormatter {
             return "redundantProtocol"
         case .redundantPublicAccessibility:
             return "redundantPublicAccessibility"
+        case .redundantInternalAccessibility:
+            return "redundantInternalAccessibility"
+        case .redundantFilePrivateAccessibility:
+            return "redundantFilePrivateAccessibility"
         }
     }
 
@@ -49,6 +53,10 @@ extension OutputFormatter {
             case let .redundantPublicAccessibility(modules):
                 let modulesJoined = modules.joined(separator: ", ")
                 description += " is declared public, but not used outside of \(modulesJoined)"
+            case .redundantInternalAccessibility:
+				description += " is internal, but not used outside of file"
+            case .redundantFilePrivateAccessibility:
+				description += " is declared fileprivate, but not used outside of its scope"
             }
         } else {
             description += "unused"

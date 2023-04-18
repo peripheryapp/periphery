@@ -10,6 +10,8 @@ public final class SourceGraph {
     private(set) public var redundantProtocols: [Declaration: Set<Reference>] = [:]
     private(set) public var rootDeclarations: Set<Declaration> = []
     private(set) public var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
+    private(set) public var redundantInternalAccessibility: [Declaration: SourceFile] = [:]
+    private(set) public var redundantFilePrivateAccessibility: [Declaration: SourceFile] = [:]
 
     private(set) var rootReferences: Set<Reference> = []
     private(set) var allReferences: Set<Reference> = []
@@ -78,6 +80,30 @@ public final class SourceGraph {
     func unmarkRedundantPublicAccessibility(_ declaration: Declaration) {
         withLock {
             _ = redundantPublicAccessibility.removeValue(forKey: declaration)
+        }
+    }
+
+    func markRedundantInternalAccessibility(_ declaration: Declaration, file: SourceFile) {
+        withLock {
+            redundantInternalAccessibility[declaration] = file
+        }
+    }
+
+    func unmarkRedundantInternalAccessibility(_ declaration: Declaration) {
+        withLock {
+            _ = redundantInternalAccessibility.removeValue(forKey: declaration)
+        }
+    }
+
+    func markRedundantFilePrivateAccessibility(_ declaration: Declaration, file: SourceFile) {
+        withLock {
+            redundantFilePrivateAccessibility[declaration] = file
+        }
+    }
+
+    func unmarkRedundantFilePrivateAccessibility(_ declaration: Declaration) {
+        withLock {
+            _ = redundantFilePrivateAccessibility.removeValue(forKey: declaration)
         }
     }
 
