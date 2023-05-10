@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix handling of relative paths in `--file-targets-path`.
 
 ## 2.12.3 (2023-03-22)
 
