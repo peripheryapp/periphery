@@ -15,8 +15,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        xcode: ["14.2", "14.1"]
+        xcode: ["14.3", "14.2", "14.1"]
         include:
+          - xcode: "14.3"
+            macos: macOS-13
           - xcode: "14.2"
             macos: macOS-12
           - xcode: "14.1"
@@ -58,7 +60,7 @@ jobs:
         swift: ["5.8", "5.7"]
         include:
           - swift: "5.8"
-            container: "swiftlang/swift:nightly-5.8-jammy"
+            container: "swift:5.8"
             cache-version: 1
           - swift: "5.7"
             container: "swift:5.7"
