@@ -10,7 +10,11 @@ public extension FilePath {
         var filePath = FilePath(path)
 
         if filePath.isRelative {
-            filePath = relativePath.appending(path)
+            if path.hasPrefix("./") {
+                filePath = relativePath.appending(String(path.dropFirst(2)))
+            } else {
+                filePath = relativePath.appending(path)
+            }
         }
 
         return filePath
