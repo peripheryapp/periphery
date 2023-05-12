@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Improve indexing performance when multiple index stores are provided.
 
 ##### Bug Fixes
 

@@ -31,27 +31,35 @@ public final class SwiftIndexer: Indexer {
     }
 
     public func perform() throws {
-        var unitsByFile: [FilePath: [(IndexStore, IndexStoreUnit)]] = [:]
         let allSourceFiles = Set(sourceFiles.keys)
         let (includedFiles, excludedFiles) = filterIndexExcluded(from: allSourceFiles)
         excludedFiles.forEach { self.logger.debug("Excluding \($0.string)") }
 
-        for indexStorePath in indexStorePaths {
-            logger.debug("Reading \(indexStorePath)")
-            let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: .open())
+        let unitsByFile: [FilePath: [(IndexStore, IndexStoreUnit)]] = try JobPool(jobs: indexStorePaths)
+            .map { [logger] indexStorePath in
+                logger.debug("Reading \(indexStorePath)")
+                var unitsByFile: [FilePath: [(IndexStore, IndexStoreUnit)]] = [:]
+                let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: .open())
 
-            try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
-                guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
+                try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
+                    guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
 
-                let file = FilePath.makeAbsolute(filePath)
+                    let file = FilePath.makeAbsolute(filePath)
 
-                if includedFiles.contains(file) {
-                    unitsByFile[file, default: []].append((indexStore, unit))
+                    if includedFiles.contains(file) {
+                        unitsByFile[file, default: []].append((indexStore, unit))
+                    }
+
+                    return true
                 }
 
-                return true
+                return unitsByFile
             }
-        }
+            .reduce(into: .init(), { result, unitsByFile in
+                for (file, tuples) in unitsByFile {
+                    result[file, default: []].append(contentsOf: tuples)
+                }
+            })
 
         let indexedFiles = Set(unitsByFile.keys)
         let unindexedFiles = allSourceFiles.subtracting(excludedFiles).subtracting(indexedFiles)
