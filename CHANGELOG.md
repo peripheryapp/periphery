@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Fix handling of relative paths in `--file-targets-path`.
+- Fix redundant public accessibility false positives when `--retain-objc-accessible` is enabled.
 
 ## 2.12.3 (2023-03-22)
 

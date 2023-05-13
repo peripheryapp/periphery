@@ -34,7 +34,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     private func validate(_ decl: Declaration) throws {
         // Check if the declaration is public, and is referenced cross module.
         if decl.accessibility.isExplicitly(.public) {
-            if try !isReferencedCrossModule(decl) && !isExposedPubliclyByAnotherDeclaration(decl) {
+            if try !isReferencedCrossModule(decl) && !isExposedPubliclyByAnotherDeclaration(decl) && !graph.isRetained(decl) {
                 // Public accessibility is redundant.
                 mark(decl)
                 markExplicitPublicDescendentDeclarations(from: decl)
