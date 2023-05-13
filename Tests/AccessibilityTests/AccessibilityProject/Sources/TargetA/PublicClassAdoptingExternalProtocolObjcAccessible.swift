@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import ExternalTarget
 
@@ -6,3 +7,4 @@ import ExternalTarget
     public override init() {}
     public func someExternalProtocolMethod() {}
 }
+#endif

@@ -107,6 +107,7 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
         assertNotRedundantPublicAccessibility(.class("PublicClassAdoptingPublicProtocol"))
     }
 
+    #if os(macOS)
     func testPublicClassAdoptingExternalProtocolObjcAccessible() {
         configuration.retainObjcAccessible = true
         Self.index()
@@ -115,6 +116,7 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
             self.assertNotRedundantPublicAccessibility(.functionMethodInstance("someExternalProtocolMethod()"))
         }
     }
+    #endif
 
     func testPublicClassAdoptingInternalProtocol() {
         Self.index()
