@@ -362,6 +362,13 @@ func someFunc(used: String, unusedOne: String, unusedTwo: String) {
 
 The `// periphery:ignore:all` command can be placed at the top of the source file to ignore the entire contents of the file. Note that the comment must be placed above any code, including import statements.
 
+Comment commands also support trailing comments following a hyphen so that you can include an explanation on the same line:
+
+```swift
+// periphery:ignore - explanation of why this is necessary
+class MyClass {}
+```
+
 ## Xcode Integration
 
 Before setting up Xcode integration, we highly recommend you first get Periphery working in a terminal, as you will be using the exact same command via Xcode.

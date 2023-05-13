@@ -898,6 +898,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 self.assertReferenced(.varInstance("multiBindingPropertyA"))
                 self.assertReferenced(.varInstance("multiBindingPropertyB"))
                 self.assertReferenced(.varInstance("assignOnlyProperty"))
+                self.assertReferenced(.varInstance("commentWithTrailingDescription"))
                 self.assertNotAssignOnlyProperty(.varInstance("assignOnlyProperty"))
             }
             assertReferenced(.class("FixtureClass212")) {
