@@ -338,7 +338,7 @@ This property retention behavior is automatic, even when `Encodable` conformance
 
 ### XCTestCase
 
-Any class that inherits `XCTestCase` is automatically retained along with its test methods. However, when a class inherits from `XCTestCase` indirectly via another class, e.g `UnitTestCase`, and that class resides in a target that isn't scanned by Periphery, you need to use the `--external-test-case-classes UnitTestCase` option to instruct Periphery to treat `UnitTestCase` as an `XCTestCase` subclass.
+Any class that inherits `XCTestCase` is automatically retained along with its test methods. However, when a class inherits `XCTestCase` indirectly via another class, e.g `UnitTestCase`, and that class resides in a target that isn't scanned by Periphery, you need to use the `--external-test-case-classes UnitTestCase` option to instruct Periphery to treat `UnitTestCase` as an `XCTestCase` subclass.
 
 ## Comment Commands
 
