@@ -32,6 +32,7 @@
   - [Redundant Public Accessibility](#redundant-public-accessibility)
   - [Objective-C](#objective-c)
   - [Encodable](#encodable)
+  - [XCTestCase](#xctestcase)
 - [Comment Commands](#comment-commands)
 - [Xcode Integration](#xcode-integration)
 - [Excluding Files](#excluding-files)
