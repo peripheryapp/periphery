@@ -438,11 +438,22 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         analyze() {
             assertReferenced(.class("FixtureClass34")) {
                 self.assertReferenced(.functionMethodInstance("testSomething()"))
+                self.assertNotReferenced(.functionMethodInstance("testNotATest(param:)"))
                 self.assertReferenced(.functionMethodInstance("setUp()"))
                 self.assertReferenced(.functionMethodStatic("setUp()"))
             }
             assertReferenced(.class("FixtureClass34Subclass")) {
                 self.assertReferenced(.functionMethodInstance("testSubclass()"))
+            }
+        }
+    }
+
+    func testExternalXCTestCaseClass() {
+        configuration.externalTestCaseClasses = ["ExternalTestCase"]
+
+        analyze {
+            assertReferenced(.class("FixtureClass217")) {
+                self.assertReferenced(.functionMethodInstance("testSomeTestCase()"))
             }
         }
     }

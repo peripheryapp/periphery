@@ -63,6 +63,9 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Comma-separated list of external protocols that inherit Encodable. Properties of types conforming to these protocols will be retained", transform: split(by: ","))
     var externalEncodableProtocols: [String] = defaultConfiguration.$externalEncodableProtocols.defaultValue
 
+    @Option(parsing: .upToNextOption, help: "Names of XCTestCase subclasses that reside in external targets")
+    var externalTestCaseClasses: [String] = defaultConfiguration.$externalTestCaseClasses.defaultValue
+
     @Flag(help: "Retain declarations that are exposed to Objective-C implicitly by inheriting NSObject classes, or explicitly with the @objc and @objcMembers attributes")
     var retainObjcAccessible: Bool = defaultConfiguration.$retainObjcAccessible.defaultValue
 
@@ -114,6 +117,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$retainUnusedProtocolFuncParams, retainUnusedProtocolFuncParams)
         configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
         configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
+        configuration.apply(\.$externalTestCaseClasses, externalTestCaseClasses)
         configuration.apply(\.$verbose, verbose)
         configuration.apply(\.$quiet, quiet)
         configuration.apply(\.$disableUpdateCheck, disableUpdateCheck)

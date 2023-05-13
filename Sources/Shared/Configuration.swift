@@ -47,6 +47,9 @@ public final class Configuration {
     @Setting(key: "external_encodable_protocols", defaultValue: [])
     public var externalEncodableProtocols: [String]
 
+    @Setting(key: "external_test_case_classes", defaultValue: [])
+    public var externalTestCaseClasses: [String]
+
     @Setting(key: "retain_objc_accessible", defaultValue: false)
     public var retainObjcAccessible: Bool
 
@@ -148,6 +151,10 @@ public final class Configuration {
             config[$externalEncodableProtocols.key] = externalEncodableProtocols
         }
 
+        if $externalTestCaseClasses.hasNonDefaultValue {
+            config[$externalTestCaseClasses.key] = externalTestCaseClasses
+        }
+
         if $retainUnusedProtocolFuncParams.hasNonDefaultValue {
             config[$retainUnusedProtocolFuncParams.key] = retainUnusedProtocolFuncParams
         }
@@ -230,6 +237,8 @@ public final class Configuration {
                 $retainAssignOnlyPropertyTypes.assign(value)
             case $externalEncodableProtocols.key:
                 $externalEncodableProtocols.assign(value)
+            case $externalTestCaseClasses.key:
+                $externalTestCaseClasses.assign(value)
             case $retainObjcAccessible.key:
                 $retainObjcAccessible.assign(value)
             case $retainUnusedProtocolFuncParams.key:
@@ -275,6 +284,7 @@ public final class Configuration {
         $retainUnusedProtocolFuncParams.reset()
         $disableRedundantPublicAnalysis.reset()
         $externalEncodableProtocols.reset()
+        $externalTestCaseClasses.reset()
         $verbose.reset()
         $quiet.reset()
         $disableUpdateCheck.reset()

@@ -335,6 +335,10 @@ let data = try JSONEncoder().encode(SomeStruct(someProperty: "value"))
 
 This property retention behavior is automatic, even when `Encodable` conformance is inherited via another protocol. However, if a protocol that inherits `Encodable` is declared in an external module that Periphery has not analyzed, it cannot detect the inheritance of `Encodable`. In this situation you can use the `--external-encodable-protocols` option enable this behavior for the given protocols.
 
+### XCTestCase
+
+Any class that inherits `XCTestCase` is automatically retained along with its test methods. However, when a class inherits from `XCTestCase` directly via another class, e.g `UnitTestCase`, and that class resides in a target that isn't scanned by Periphery, you need to use the `--external-test-case-classes UnitTestCase` option to instruct Periphery to treat `UnitTestCase` as an `XCTestCase` subclass.
+
 ## Comment Commands
 
 For whatever reason, you may want to keep some unused code. Source code comment commands can be used to ignore specific declarations, and exclude them from the results.

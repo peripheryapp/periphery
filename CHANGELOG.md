@@ -7,6 +7,7 @@
 ##### Enhancements
 
 - Improve indexing performance when multiple index stores are provided.
+- Added `--external-test-case-classes` option to allow external types to be treated as XCTestCase subclasses.
 
 ##### Bug Fixes
 
