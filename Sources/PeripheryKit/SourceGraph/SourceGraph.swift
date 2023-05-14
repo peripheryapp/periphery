@@ -235,19 +235,17 @@ public final class SourceGraph {
         inheritedTypeReferences(of: decl).compactMap { explicitDeclaration(withUsr: $0.usr) }
     }
 
-    func immediateSubclasses(of decl: Declaration) -> [Declaration] {
-        let allClasses = allDeclarationsByKind[.class] ?? []
-        return allClasses
-            .filter {
-                $0.related.contains(where: { ref in
-                    ref.kind == .class && decl.usrs.contains(ref.usr)
-                })
-            }.filter { $0 != decl }
+    func immediateSubclasses(of decl: Declaration) -> Set<Declaration> {
+        references(to: decl)
+            .filter { $0.isRelated && $0.kind == .class }
+            .flatMap { $0.parent?.usrs ?? [] }
+            .compactMapSet { explicitDeclaration(withUsr: $0) }
     }
 
-    func subclasses(of decl: Declaration) -> [Declaration] {
+    func subclasses(of decl: Declaration) -> Set<Declaration> {
         let immediate = immediateSubclasses(of: decl)
-        return immediate + immediate.flatMap { subclasses(of: $0) }
+        let allSubclasses = immediate.flatMapSet { subclasses(of: $0) }
+        return immediate.union(allSubclasses)
     }
 
     func withLock<T>(_ block: () -> T) -> T {
