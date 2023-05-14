@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.13.0 (2023-05-14)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Improve indexing performance when multiple index stores are provided.
 - Added `--external-test-case-classes` option to allow external types to be treated as XCTestCase subclasses.
 - Comment commands now support trailing comments, e.g `// periphery:ignore - explanation of why this is necessary`
