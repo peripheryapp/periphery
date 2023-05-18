@@ -26,6 +26,9 @@ struct ScanCommand: FrontendCommand {
 
     @Option(parsing: .upToNextOption, help: "Path to file targets mapping. For use with third-party build systems. Multiple paths may be specified")
     var fileTargetsPath: [FilePath] = defaultConfiguration.$fileTargetsPath.defaultValue
+    
+    @Option(help: "Working directory for paths in file targets mapping. For use with third-party build systems")
+    var workingDirectory: FilePath = defaultConfiguration.$workingDirectory.defaultValue
 
     @Option(help: "Comma-separated list of schemes that must be built in order to produce the targets passed to the --targets option. Xcode projects only", transform: split(by: ","))
     var schemes: [String] = defaultConfiguration.$schemes.defaultValue
@@ -104,6 +107,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$workspace, workspace)
         configuration.apply(\.$project, project)
         configuration.apply(\.$fileTargetsPath, fileTargetsPath)
+        configuration.apply(\.$workingDirectory, workingDirectory)
         configuration.apply(\.$schemes, schemes)
         configuration.apply(\.$targets, targets)
         configuration.apply(\.$indexExclude, indexExclude)

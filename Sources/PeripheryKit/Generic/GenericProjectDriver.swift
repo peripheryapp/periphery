@@ -20,7 +20,7 @@ public final class GenericProjectDriver {
                     .fileTargets
                     .reduce(into: [FilePath: Set<String>](), { (result, tuple) in
                         let (key, value) = tuple
-                        let path = FilePath.makeAbsolute(key)
+                        let path = FilePath.makeAbsolute(key, relativeTo: configuration.workingDirectory)
 
                         if !path.exists {
                             throw PeripheryError.pathDoesNotExist(path: path.string)

@@ -36,6 +36,9 @@ public final class SwiftIndexer: Indexer {
         excludedFiles.forEach { self.logger.debug("Excluding \($0.string)") }
 
         let unitsByFile: [FilePath: [(IndexStore, IndexStoreUnit)]] = try JobPool(jobs: indexStorePaths)
+            .map { [configuration] indexStorePath in
+                FilePath.makeAbsolute(indexStorePath.string, relativeTo: configuration.workingDirectory)
+            }
             .map { [logger] indexStorePath in
                 logger.debug("Reading \(indexStorePath)")
                 var unitsByFile: [FilePath: [(IndexStore, IndexStoreUnit)]] = [:]
@@ -44,7 +47,7 @@ public final class SwiftIndexer: Indexer {
                 try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
                     guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
 
-                    let file = FilePath.makeAbsolute(filePath)
+                    let file = FilePath.makeAbsolute(filePath, relativeTo: configuration.workingDirectory)
 
                     if includedFiles.contains(file) {
                         unitsByFile[file, default: []].append((indexStore, unit))

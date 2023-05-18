@@ -20,6 +20,9 @@ public final class Configuration {
     @Setting(key: "file_targets_path", defaultValue: [], valueConverter: filePathConverter)
     public var fileTargetsPath: [FilePath]
 
+    @Setting(key: "working_directory", defaultValue: FilePath.current)
+    public var workingDirectory: FilePath
+
     @Setting(key: "format", defaultValue: .default, valueConverter: { OutputFormat(anyValue: $0) })
     public var outputFormat: OutputFormat
 
