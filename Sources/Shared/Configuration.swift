@@ -53,6 +53,9 @@ public final class Configuration {
     @Setting(key: "retain_objc_accessible", defaultValue: false)
     public var retainObjcAccessible: Bool
 
+    @Setting(key: "retain_objc_annotated", defaultValue: false)
+    public var retainObjcAnnotated: Bool
+
     @Setting(key: "retain_public", defaultValue: false)
     public var retainPublic: Bool
 
@@ -135,6 +138,10 @@ public final class Configuration {
             config[$retainObjcAccessible.key] = retainObjcAccessible
         }
 
+        if $retainObjcAnnotated.hasNonDefaultValue {
+            config[$retainObjcAnnotated.key] = retainObjcAnnotated
+        }
+        
         if $retainPublic.hasNonDefaultValue {
             config[$retainPublic.key] = retainPublic
         }
@@ -241,6 +248,8 @@ public final class Configuration {
                 $externalTestCaseClasses.assign(value)
             case $retainObjcAccessible.key:
                 $retainObjcAccessible.assign(value)
+            case $retainObjcAnnotated.key:
+                $retainObjcAnnotated.assign(value)
             case $retainUnusedProtocolFuncParams.key:
                 $retainUnusedProtocolFuncParams.assign(value)
             case $disableRedundantPublicAnalysis.key:
@@ -281,6 +290,7 @@ public final class Configuration {
         $retainAssignOnlyProperties.reset()
         $retainAssignOnlyPropertyTypes.reset()
         $retainObjcAccessible.reset()
+        $retainObjcAnnotated.reset()
         $retainUnusedProtocolFuncParams.reset()
         $disableRedundantPublicAnalysis.reset()
         $externalEncodableProtocols.reset()

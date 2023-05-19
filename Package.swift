@@ -134,8 +134,12 @@ targets.append(contentsOf: [
         ]
     ),
     .target(
-        name: "ObjcRetentionFixtures",
-        path: "Tests/Fixtures/ObjcRetentionFixtures"
+        name: "ObjcAccessibleRetentionFixtures",
+        path: "Tests/Fixtures/ObjcAccessibleRetentionFixtures"
+    ),
+    .target(
+        name: "ObjcAnnotatedRetentionFixtures",
+        path: "Tests/Fixtures/ObjcAnnotatedRetentionFixtures"
     ),
     .testTarget(
         name: "XcodeTests",
