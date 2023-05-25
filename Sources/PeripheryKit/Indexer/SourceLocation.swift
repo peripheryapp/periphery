@@ -2,10 +2,10 @@ import Foundation
 
 public class SourceLocation {
     public let file: SourceFile
-    public let line: Int64
-    public let column: Int64
+    public let line: Int
+    public let column: Int
 
-    init(file: SourceFile, line: Int64, column: Int64) {
+    init(file: SourceFile, line: Int, column: Int) {
         self.file = file
         self.line = line
         self.column = column

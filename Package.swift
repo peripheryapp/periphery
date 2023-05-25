@@ -7,7 +7,7 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(url: "https://github.com/ileitch/swift-indexstore", from: "9.0.0"),
-    .package(url: "https://github.com/peripheryapp/swift-syntax", .exact("1.0.1")),
+    .package(url: "https://github.com/peripheryapp/swift-syntax", .exact("1.0.2")),
     .package(url: "https://github.com/ileitch/swift-filename-matcher", from: "0.0.0")
 ]
 
@@ -44,7 +44,7 @@ var targets: [PackageDescription.Target] = [
             .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "AEXML", package: "AEXML"),
             .product(name: "SwiftSyntax", package: "swift-syntax"),
-            .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+            .product(name: "SwiftParser", package: "swift-syntax"),
             .product(name: "SwiftIndexStore", package: "swift-indexstore"),
             .product(name: "FilenameMatcher", package: "swift-filename-matcher")
         ]

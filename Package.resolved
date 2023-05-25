@@ -56,12 +56,12 @@
         }
       },
       {
-        "package": "SwiftSyntax",
+        "package": "swift-syntax",
         "repositoryURL": "https://github.com/peripheryapp/swift-syntax",
         "state": {
           "branch": null,
-          "revision": "d81f0bfa1e14446a8c42e94ff6d44fddf866d72e",
-          "version": "1.0.1"
+          "revision": "56ef324e094ad1e655ae7d8c8dabadc7e6bd64e9",
+          "version": "1.0.2"
         }
       },
       {

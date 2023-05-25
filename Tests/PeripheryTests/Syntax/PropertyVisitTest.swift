@@ -118,6 +118,6 @@ class PropertyVisitTest: XCTestCase {
     }
 
     private func fixtureLocation(line: Int, column: Int = 9) -> SourceLocation {
-        SourceLocation(file: fixturePath, line: Int64(line), column: Int64(column))
+        SourceLocation(file: fixturePath, line: line, column: column)
     }
 }

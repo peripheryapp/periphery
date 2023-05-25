@@ -1,7 +1,7 @@
 import Foundation
 import SystemPackage
 import SwiftSyntax
-import SwiftSyntaxParser
+import SwiftParser
 
 protocol Item: AnyObject {
     var items: [Item] { get }
@@ -140,7 +140,8 @@ struct UnusedParameterParser {
     }
 
     static func parse(file: SourceFile, parseProtocols: Bool) throws -> [Function] {
-        let syntax = try SyntaxParser.parse(file.path.url)
+        let source = try String(contentsOf: file.path.url)
+        let syntax = Parser.parse(source: source)
         let locationConverter = SourceLocationConverter(file: file.path.string, tree: syntax)
         return parse(
             file: file,
@@ -234,22 +235,22 @@ struct UnusedParameterParser {
     private func parse(functionParameter syntax: FunctionParameterSyntax) -> Item {
         var metatype: String?
 
-        if let optionalType = syntax.type?.as(OptionalTypeSyntax.self) {
+        if let optionalType = syntax.type.as(OptionalTypeSyntax.self) {
             if let metatypeSyntax = optionalType.children(viewMode: .sourceAccurate).mapFirst({ $0.as(MetatypeTypeSyntax.self) }) {
                 metatype = metatypeSyntax.description
             }
-        } else if let optionalType = syntax.type?.as(ImplicitlyUnwrappedOptionalTypeSyntax.self) {
+        } else if let optionalType = syntax.type.as(ImplicitlyUnwrappedOptionalTypeSyntax.self) {
             if let metatypeSyntax = optionalType.children(viewMode: .sourceAccurate).mapFirst({ $0.as(MetatypeTypeSyntax.self) }) {
                 metatype = metatypeSyntax.description
             }
-        } else if let metatypeSyntax = syntax.type?.as(MetatypeTypeSyntax.self) {
+        } else if let metatypeSyntax = syntax.type.as(MetatypeTypeSyntax.self) {
             metatype = metatypeSyntax.description
         }
 
-        let positionSyntax: SyntaxProtocol = (syntax.secondName ?? syntax.firstName) ?? syntax
+        let positionSyntax: SyntaxProtocol = syntax.secondName ?? syntax.firstName
         let location = sourceLocation(of: positionSyntax.positionAfterSkippingLeadingTrivia)
 
-        return Parameter(firstName: syntax.firstName?.text,
+        return Parameter(firstName: syntax.firstName.text,
                          secondName: syntax.secondName?.text,
                          metatype: metatype,
                          location: location)
@@ -360,8 +361,8 @@ struct UnusedParameterParser {
     private func sourceLocation(of position: AbsolutePosition) -> SourceLocation {
         let location = locationConverter.location(for: position)
         return SourceLocation(file: file,
-                              line: Int64(location.line ?? 0),
-                              column: Int64(location.column ?? 0))
+                              line: location.line,
+                              column: location.column)
     }
 }
 
