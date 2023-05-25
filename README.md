@@ -514,7 +514,6 @@ Due to some underlying bugs in Swift, Periphery may in some instances report inc
 
 | ID    | Title |
 | :---  | :---  |
-| [61509](https://github.com/apple/swift/issues/61509) | Shorthand optional binding has no reference to original variable |
 | [56559](https://github.com/apple/swift/issues/56559) | Index store does not relate constructor referenced via Self |
 | [56541](https://github.com/apple/swift/issues/56541) | Index store does not relate static property getter used as subscript key |
 | [56327](https://github.com/apple/swift/issues/56327) | Index store does not relate objc optional protocol method implemented in subclass |
