@@ -5,13 +5,13 @@ import Shared
 @testable import PeripheryKit
 
 #if os(macOS)
-final class ObjcRetentionTest: FixtureSourceGraphTestCase {
+final class ObjcAccessibleRetentionTest: FixtureSourceGraphTestCase {
     let performKnownFailures = false
 
     static override func setUp() {
         super.setUp()
 
-        configuration.targets = ["ObjcRetentionFixtures"]
+        configuration.targets = ["ObjcAccessibleRetentionFixtures"]
 
         build(driver: SPMProjectDriver.self)
     }

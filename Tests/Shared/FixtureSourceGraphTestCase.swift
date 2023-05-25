@@ -1,5 +1,6 @@
 import SystemPackage
 @testable import PeripheryKit
+import XCTest
 
 class FixtureSourceGraphTestCase: SourceGraphTestCase {
     class override func setUp() {
@@ -9,12 +10,19 @@ class FixtureSourceGraphTestCase: SourceGraphTestCase {
 
     func analyze(retainPublic: Bool = false,
                  retainObjcAccessible: Bool = false,
+                 retainObjcAnnotated: Bool = false,
                  testBlock: () throws -> Void
     ) rethrows {
         configuration.retainPublic = retainPublic
         configuration.retainObjcAccessible = retainObjcAccessible
+        configuration.retainObjcAnnotated = retainObjcAnnotated
         configuration.indexExclude = Self.sourceFiles.subtracting([testFixturePath]).map { $0.string }
         configuration.resetIndexExcludeMatchers()
+
+        if !testFixturePath.exists {
+            fatalError("\(testFixturePath.string) does not exist")
+        }
+
         Self.index()
         try testBlock()
     }

@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Add the `--retain-objc-annotated` option.
 
 ##### Bug Fixes
 

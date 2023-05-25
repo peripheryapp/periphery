@@ -69,6 +69,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Retain declarations that are exposed to Objective-C implicitly by inheriting NSObject classes, or explicitly with the @objc and @objcMembers attributes")
     var retainObjcAccessible: Bool = defaultConfiguration.$retainObjcAccessible.defaultValue
 
+    @Flag(help: "Retain declarations that are exposed to Objective-C explicitly with the @objc and @objcMembers attributes")
+    var retainObjcAnnotated: Bool = defaultConfiguration.$retainObjcAnnotated.defaultValue
+
     @Flag(help: "Retain unused protocol function parameters, even if the parameter is unused in all conforming functions")
     var retainUnusedProtocolFuncParams: Bool = defaultConfiguration.$retainUnusedProtocolFuncParams.defaultValue
 
@@ -114,6 +117,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$retainAssignOnlyProperties, retainAssignOnlyProperties)
         configuration.apply(\.$retainAssignOnlyPropertyTypes, retainAssignOnlyPropertyTypes)
         configuration.apply(\.$retainObjcAccessible, retainObjcAccessible)
+        configuration.apply(\.$retainObjcAnnotated, retainObjcAnnotated)
         configuration.apply(\.$retainUnusedProtocolFuncParams, retainUnusedProtocolFuncParams)
         configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
         configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
