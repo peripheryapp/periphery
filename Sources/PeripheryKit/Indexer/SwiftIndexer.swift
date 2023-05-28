@@ -314,7 +314,7 @@ public final class SwiftIndexer: Indexer {
                     result[decl.location, default: []].append(decl)
                 }
             let declsByLine = explicitDeclarations
-                .reduce(into: [Int64: [Declaration]]()) { (result, decl) in
+                .reduce(into: [Int: [Declaration]]()) { (result, decl) in
                     result[decl.location.line, default: []].append(decl)
                 }
 
@@ -655,7 +655,7 @@ public final class SwiftIndexer: Indexer {
         }
 
         private func transformLocation(_ input: IndexStoreOccurrence.Location) -> SourceLocation? {
-            return SourceLocation(file: file, line: input.line, column: input.column)
+            return SourceLocation(file: file, line: Int(input.line), column: Int(input.column))
         }
 
         private func transformDeclarationKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Declaration.Kind? {

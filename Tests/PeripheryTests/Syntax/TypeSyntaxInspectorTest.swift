@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 import SwiftSyntax
-import SwiftSyntaxParser
+import SwiftParser
 @testable import TestShared
 @testable import PeripheryKit
 
@@ -118,7 +118,7 @@ class TypeSyntaxInspectorTest: XCTestCase {
     }
 
     private func fixtureLocation(line: Int, column: Int = 1) -> PeripheryKit.SourceLocation {
-        SourceLocation(file: fixturePath, line: Int64(line), column: Int64(column))
+        SourceLocation(file: fixturePath, line: line, column: column)
     }
 }
 
@@ -132,7 +132,8 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
     var results: [PeripheryKit.SourceLocation: Result] = [:]
 
     init(file: SourceFile) throws {
-        self.syntax = try SyntaxParser.parse(file.path.url)
+        let source = try String(contentsOf: file.path.url)
+        self.syntax = Parser.parse(source: source)
         self.locationConverter = .init(file: file.path.string, tree: syntax)
         self.sourceLocationBuilder = .init(file: file, locationConverter: locationConverter)
         self.typeSyntaxInspector = .init(sourceLocationBuilder: sourceLocationBuilder)
@@ -163,9 +164,7 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
         }
 
         for functionParameterSyntax in node.signature.input.parameterList {
-            if let typeSyntax = functionParameterSyntax.type {
-                addResult(for: typeSyntax)
-            }
+            addResult(for: functionParameterSyntax.type)
         }
 
         if let genericParameterList = node.genericParameterClause?.genericParameterList {

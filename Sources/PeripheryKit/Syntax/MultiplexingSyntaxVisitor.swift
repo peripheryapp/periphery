@@ -1,7 +1,7 @@
 import Foundation
 import SystemPackage
 import SwiftSyntax
-import SwiftSyntaxParser
+import SwiftParser
 
 protocol PeripherySyntaxVisitor {
     init(sourceLocationBuilder: SourceLocationBuilder)
@@ -93,7 +93,8 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
     private var visitors: [PeripherySyntaxVisitor] = []
 
     required init(file: SourceFile) throws {
-        self.syntax = try SyntaxParser.parse(file.path.url)
+        let source = try String(contentsOf: file.path.url)
+        self.syntax = Parser.parse(source: source)
         self.locationConverter = SourceLocationConverter(file: file.path.string, tree: syntax)
         self.sourceLocationBuilder = SourceLocationBuilder(file: file, locationConverter: locationConverter)
         super.init(viewMode: .sourceAccurate)

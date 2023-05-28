@@ -85,7 +85,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             attributes: node.attributes,
             trivia: node.leadingTrivia,
             inheritanceClause: node.inheritanceClause,
-            genericParameterClause: node.genericParameters,
+            genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
             at: node.identifier.positionAfterSkippingLeadingTrivia
         )
@@ -97,7 +97,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
                 modifiers: node.modifiers,
                 attributes: node.attributes,
                 trivia: node.leadingTrivia,
-                parameterClause: element.associatedValue,
+                enumCaseParameterClause: element.associatedValue,
                 at: element.identifier.positionAfterSkippingLeadingTrivia
             )
         }
@@ -202,14 +202,14 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         for binding in node.bindings {
             if binding.pattern.is(IdentifierPatternSyntax.self) {
                 let closureSignature = binding.initializer?.value.as(ClosureExprSyntax.self)?.signature
-                let closureParameters = closureSignature?.input?.as(ParameterClauseSyntax.self)
+                let closureParameters = closureSignature?.input?.as(ClosureParameterClauseSyntax.self)
                 let functionCallExpr = binding.initializer?.value.as(FunctionCallExprSyntax.self)
                 parse(
                     modifiers: node.modifiers,
                     attributes: node.attributes,
                     trivia: node.leadingTrivia,
                     variableType: binding.typeAnnotation?.type,
-                    parameterClause: closureParameters,
+                    closureParameterClause: closureParameters,
                     returnClause: closureSignature?.output,
                     variableInitFunctionCallExpr: functionCallExpr,
                     at: binding.positionAfterSkippingLeadingTrivia
@@ -325,6 +325,8 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         trivia: Trivia?,
         variableType: TypeSyntax? = nil,
         parameterClause: ParameterClauseSyntax? = nil,
+        closureParameterClause: ClosureParameterClauseSyntax? = nil,
+        enumCaseParameterClause: EnumCaseParameterClauseSyntax? = nil,
         returnClause: ReturnClauseSyntax? = nil,
         inheritanceClause: TypeInheritanceClauseSyntax? = nil,
         genericParameterClause: GenericParameterClauseSyntax? = nil,
@@ -336,7 +338,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         let modifierNames = modifiers?.map { $0.name.text } ?? []
         let accessibility = modifierNames.mapFirst { Accessibility(rawValue: $0) }
         let attributeNames = attributes?.compactMap {
-            AttributeSyntax($0)?.attributeName.trimmedDescription ?? AttributeSyntax($0)?.attributeName.firstToken?.text
+            AttributeSyntax($0)?.attributeName.trimmedDescription ?? AttributeSyntax($0)?.attributeName.firstToken(viewMode: .sourceAccurate)?.text
         } ?? []
         let location = sourceLocationBuilder.location(at: position)
         var letShorthandIdentifiers = Set<String>()
@@ -355,10 +357,19 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         }
 
         let returnClauseTypeLocations = typeNameLocations(for: returnClause)
+        let parameterClauseTypes = parameterClause?.parameterList.map { $0.type } ?? []
+        let closureParameterClauseTypes = closureParameterClause?.parameterList.compactMap { $0.type } ?? []
+        let enumCaseParameterClauseTypes = enumCaseParameterClause?.parameterList.map { $0.type } ?? []
         let hasGenericFunctionReturnedMetatypeParameters = hasGenericFunctionReturnedMetatypeParameters(
             genericParameterClause: genericParameterClause,
-            parameterClause: parameterClause,
+            parameterClauseTypes: parameterClauseTypes + closureParameterClauseTypes + enumCaseParameterClauseTypes,
             returnClauseTypeLocations: returnClauseTypeLocations)
+
+        let parameterClauseLocations = typeLocations(for: parameterClause)
+        let closureParameterClauseLocations = typeLocations(for: closureParameterClause)
+        let enumCaseParameterClauseLocations = typeLocations(for: enumCaseParameterClause)
+        let allParameterClauseLocations = parameterClauseLocations.union(enumCaseParameterClauseLocations)
+            .union(closureParameterClauseLocations)
 
         results.append((
             location,
@@ -368,7 +379,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             CommentCommand.parseCommands(in: trivia),
             type(for: variableType),
             typeLocations(for: variableType),
-            typeLocations(for: parameterClause),
+            allParameterClauseLocations,
             Set(returnClauseTypeLocations.map { $0.location }),
             typeLocations(for: inheritanceClause),
             typeLocations(for: genericParameterClause),
@@ -385,19 +396,18 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     /// For example: `func someFunc<T>(type: T.Type) -> T`.
     private func hasGenericFunctionReturnedMetatypeParameters(
         genericParameterClause: GenericParameterClauseSyntax?,
-        parameterClause: ParameterClauseSyntax?,
+        parameterClauseTypes: [TypeSyntaxProtocol],
         returnClauseTypeLocations: Set<TypeNameSourceLocation>
     ) -> Bool {
-        guard let genericParameterClause, let parameterClause else { return false }
+        guard let genericParameterClause else { return false }
 
         let genericParameterNames = genericParameterClause
             .genericParameterList
             .mapSet { $0.name.trimmedDescription }
 
-        return parameterClause
-            .parameterList
+        return parameterClauseTypes
             .contains {
-                if let baseTypeName = $0.type?.as(MetatypeTypeSyntax.self)?.baseType.trimmedDescription,
+                if let baseTypeName = $0.as(MetatypeTypeSyntax.self)?.baseType.trimmedDescription,
                    genericParameterNames.contains(baseTypeName),
                    returnClauseTypeLocations.contains(where: { $0.name == baseTypeName })
                 {
@@ -422,9 +432,25 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         guard let clause = clause else { return [] }
 
         return clause.parameterList.reduce(into: .init(), { result, param in
-            if let typeSyntax = param.type {
-                result.formUnion(typeSyntaxInspector.typeLocations(for: typeSyntax))
+            result.formUnion(typeSyntaxInspector.typeLocations(for: param.type))
+        })
+    }
+
+    private func typeLocations(for clause: ClosureParameterClauseSyntax?) -> Set<SourceLocation> {
+        guard let clause = clause else { return [] }
+
+        return clause.parameterList.reduce(into: .init(), { result, param in
+            if let type = param.type {
+                result.formUnion(typeSyntaxInspector.typeLocations(for: type))
             }
+        })
+    }
+
+    private func typeLocations(for clause: EnumCaseParameterClauseSyntax?) -> Set<SourceLocation> {
+        guard let clause = clause else { return [] }
+
+        return clause.parameterList.reduce(into: .init(), { result, param in
+            result.formUnion(typeSyntaxInspector.typeLocations(for: param.type))
         })
     }
 
