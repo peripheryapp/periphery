@@ -1556,19 +1556,4 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             }
         }
     }
-
-    // Broken as of Xcode 10.
-    // https://bugreport.apple.com/web/?problemID=44703843
-    func testGetSetPropertyWithDefaultImplementation() {
-        guard performKnownFailures else { return }
-
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass100")) {
-                self.assertReferenced(.varInstance("someGetSetVar"))
-            }
-            assertReferenced(.protocol("FixtureProtocol100")) {
-                self.assertReferenced(.varInstance("someGetSetVar"))
-            }
-        }
-    }
 }
