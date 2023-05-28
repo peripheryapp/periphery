@@ -304,7 +304,7 @@ public final class SwiftIndexer: Indexer {
         }
 
         // Swift does not associate some type references with the containing declaration, resulting in references
-        // with no clear parent. Property references are one example: https://bugs.swift.org/browse/SR-13766.
+        // with no clear parent. Property references are one example: https://github.com/apple/swift/issues/56163
         private func associateDanglingReferences() {
             guard !danglingReferences.isEmpty else { return }
 

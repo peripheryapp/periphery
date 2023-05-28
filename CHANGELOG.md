@@ -634,7 +634,7 @@
 - Properties named in struct implicit constructors are now retained.
 - Implicit declarations such as struct constructors are now retained.
 - A `typealias` that defines an `associatedtype` in an external protocol is now retained.
-- All custom `appendInterpolation` methods are now retained, as they cannot be identified as unused due to https://bugs.swift.org/browse/SR-13792.
+- All custom `appendInterpolation` methods are now retained, as they cannot be identified as unused due to https://github.com/apple/swift/issues/56189
 - Fixed path resolution for nested projects in Xcode workspaces.
 - `wrappedValue` and `projectedValue` properties in property wrappers are now retained.
 - `XCTestManifests.swift` is now treated as an entry point file like `LinuxMain.swift`.

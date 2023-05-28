@@ -1517,7 +1517,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    // https://bugs.swift.org/browse/SR-14181
+    // https://github.com/apple/swift/issues/64686
     // https://github.com/peripheryapp/periphery/issues/264
     func testSelfReferencedConstructor() {
         analyze(retainPublic: true) {
@@ -1535,7 +1535,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
     // MARK: - Known Failures
 
-    // https://bugs.swift.org/browse/SR-14162
+    // https://github.com/apple/swift/issues/56541
     func testStaticMemberUsedAsSubscriptKey() {
         guard performKnownFailures else { return }
 
@@ -1546,7 +1546,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    // https://bugs.swift.org/browse/SR-13768
+    // https://github.com/apple/swift/issues/56165
     func testCustomConstructorWithLiteral() {
         guard performKnownFailures else { return }
 

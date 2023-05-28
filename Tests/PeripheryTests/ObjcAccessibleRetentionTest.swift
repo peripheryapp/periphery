@@ -16,7 +16,7 @@ final class ObjcAccessibleRetentionTest: FixtureSourceGraphTestCase {
         build(driver: SPMProjectDriver.self)
     }
 
-    // https://bugs.swift.org/browse/SR-13930
+    // https://github.com/apple/swift/issues/56327
     func testRetainsOptionalProtocolMethodImplementedInSubclass() {
         guard performKnownFailures else { return }
 
