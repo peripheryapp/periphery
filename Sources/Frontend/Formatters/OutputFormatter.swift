@@ -47,7 +47,7 @@ extension OutputFormatter {
                     ($0.location, "Protocol '\(name)' conformance is redundant")
                 }
             case let .redundantPublicAccessibility(modules):
-                let modulesJoined = modules.joined(separator: ", ")
+                let modulesJoined = modules.sorted().joined(separator: ", ")
                 description += " is declared public, but not used outside of \(modulesJoined)"
             }
         } else {
