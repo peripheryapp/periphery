@@ -59,7 +59,7 @@ zip_filename="periphery-${version}.zip"
 zip "${zip_filename}" periphery LICENSE.md
 codesign "${zip_filename}"
 
-echo "\n${zip_filename} checksum:"
+echo -e "\n${zip_filename} checksum:"
 sha256=$( shasum -a 256 ${zip_filename} | awk '{print $1}' )
 echo ${sha256}
 
@@ -71,7 +71,7 @@ cp periphery "periphery-${version}-macos/bin"
 zip "${artifactbundle_zip_filename}" LICENSE.md info.json "periphery-${version}-macos/bin/periphery"
 codesign "${artifactbundle_zip_filename}"
 
-echo "\n${artifactbundle_zip_filename} checksum:"
+echo -e "\n${artifactbundle_zip_filename} checksum:"
 artifactbundle_sha256=$( shasum -a 256 ${artifactbundle_zip_filename} | awk '{print $1}' )
 echo ${artifactbundle_sha256}
 

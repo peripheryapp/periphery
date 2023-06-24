@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.14.0 (2023-06-24)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Add the `--retain-objc-annotated` option.
 - Added support for SwiftPM binary command plugin.
 
