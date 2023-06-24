@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.8
 import PackageDescription
 
 var dependencies: [Package.Dependency] = [
@@ -7,7 +7,7 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(url: "https://github.com/ileitch/swift-indexstore", from: "9.0.0"),
-    .package(url: "https://github.com/peripheryapp/swift-syntax", .exact("1.0.2")),
+    .package(url: "https://github.com/peripheryapp/swift-syntax", exact: "1.0.2"),
     .package(url: "https://github.com/ileitch/swift-filename-matcher", from: "0.0.0"),
 ]
 

@@ -11,10 +11,6 @@ public final class SwiftIndexer: Indexer {
     private let configuration: Configuration
     private let indexStorePaths: [FilePath]
 
-    private lazy var letShorthandWorkaroundEnabled: Bool = {
-        SwiftVersion.current.version.isVersion(lessThan: "5.8")
-    }()
-
     public required init(
         sourceFiles: [FilePath: Set<String>],
         graph: SourceGraph,
@@ -88,8 +84,7 @@ public final class SwiftIndexer: Indexer {
                 units: units,
                 graph: graph,
                 logger: logger,
-                configuration: configuration,
-                letShorthandWorkaroundEnabled: letShorthandWorkaroundEnabled
+                configuration: configuration
             )
         }
 
@@ -129,15 +124,13 @@ public final class SwiftIndexer: Indexer {
         private let graph: SourceGraph
         private let logger: ContextualLogger
         private let configuration: Configuration
-        private let letShorthandWorkaroundEnabled: Bool
 
         required init(
             file: SourceFile,
             units: [(IndexStore, IndexStoreUnit)],
             graph: SourceGraph,
             logger: ContextualLogger,
-            configuration: Configuration,
-            letShorthandWorkaroundEnabled: Bool
+            configuration: Configuration
 
         ) {
             self.file = file
@@ -145,7 +138,6 @@ public final class SwiftIndexer: Indexer {
             self.graph = graph
             self.logger = logger
             self.configuration = configuration
-            self.letShorthandWorkaroundEnabled = letShorthandWorkaroundEnabled
         }
 
         struct RawRelation {
@@ -248,7 +240,6 @@ public final class SwiftIndexer: Indexer {
         func phaseTwo() throws {
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: file)
             let declarationSyntaxVisitor = multiplexingSyntaxVisitor.add(DeclarationSyntaxVisitor.self)
-            declarationSyntaxVisitor.letShorthandWorkaroundEnabled = letShorthandWorkaroundEnabled
             let importSyntaxVisitor = multiplexingSyntaxVisitor.add(ImportSyntaxVisitor.self)
 
             multiplexingSyntaxVisitor.visit()

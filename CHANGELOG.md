@@ -2,7 +2,7 @@
 
 ##### Breaking
 
-- None.
+- Swift 5.7 is no longer supported.
 
 ##### Enhancements
 
