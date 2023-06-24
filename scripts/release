@@ -6,7 +6,7 @@ GREEN='\033[1;32m'
 NC='\033[0m' # No Color
 
 confirm () {
-  green "\n$1 (y/n): "
+  green "$1 (y/n): "
   read answer
 
   if [ $answer != "y" ]
@@ -19,9 +19,13 @@ green () {
   printf "${GREEN}${1}${NC}"
 }
 
-signature="Developer ID Application: Ian Leitch (8L8F8HSTR4)"
-password="@keychain:PeripheryNotarize"
-bundle_id="com.github.peripheryapp"
+codesign () {
+  /usr/bin/codesign --force --options=runtime --sign "Developer ID Application: Ian Leitch (8L8F8HSTR4)" "$1"
+}
+
+notarize () {
+  xcrun notarytool submit --keychain-profile "PeripheryNotarize" --wait "$1"
+}
 
 xcodebuild -version
 
@@ -29,12 +33,12 @@ printf "\nVersion: "
 read version
 printf "Got it: $version\n"
 
-confirm "Continue?"
+confirm "\nContinue?"
 
 cat scripts/Version.swift.template | sed s/__VERSION__/${version}/ > Sources/Frontend/Version.swift
 cat scripts/Periphery.podspec.template | sed s/__VERSION__/${version}/ > Periphery.podspec
 
-echo -e "\nUpdate CHANGELOG.md and verify changes."
+echo -e "\nUpdate CHANGELOG.md"
 confirm "Continue?"
 
 bin_path=$(make show_bin_path)
@@ -46,19 +50,39 @@ cp "$bin_path" .release/
 cp LICENSE.md .release/
 cp scripts/release_notes.md.template .release/release_notes.md
 
-# Archive
+# Codesign
 cd .release
-codesign --force --options=runtime --sign "$signature" periphery
-zip_filename="periphery-v${version}.zip"
-zip "${zip_filename}" periphery LICENSE.md
-codesign --force --options=runtime --sign "$signature" "${zip_filename}"
-xcrun altool --notarize-app --primary-bundle-id "${bundle_id}" --password "${password}" --file "${zip_filename}"
+codesign periphery
 
-echo "Checksum:"
+# Archive
+zip_filename="periphery-${version}.zip"
+zip "${zip_filename}" periphery LICENSE.md
+codesign "${zip_filename}"
+
+echo "\n${zip_filename} checksum:"
 sha256=$( shasum -a 256 ${zip_filename} | awk '{print $1}' )
 echo ${sha256}
 
-echo -e "\nWait for notarization approval: xcrun altool --notarization-history 0 -p \"$password\""
+# Artifact bundle
+artifactbundle_zip_filename="periphery-${version}-macos.artifactbundle.zip"
+cat ../scripts/info.json.template | sed s/__VERSION__/${version}/ > info.json
+mkdir -p "periphery-${version}-macos/bin"
+cp periphery "periphery-${version}-macos/bin"
+zip "${artifactbundle_zip_filename}" LICENSE.md info.json "periphery-${version}-macos/bin/periphery"
+codesign "${artifactbundle_zip_filename}"
+
+echo "\n${artifactbundle_zip_filename} checksum:"
+artifactbundle_sha256=$( shasum -a 256 ${artifactbundle_zip_filename} | awk '{print $1}' )
+echo ${artifactbundle_sha256}
+
+echo -e "\nUpdate Package.swift"
+confirm "Continue?"
+
+# Notarize
+notarize "${zip_filename}"
+notarize "${artifactbundle_zip_filename}"
+
+echo -e "\nVerify changes"
 confirm "Continue?"
 
 # GitHub
@@ -75,7 +99,7 @@ cat release_notes.md
 echo
 
 cd ..
-hub release create "${version}" -a .release/periphery-v${version}.zip -F .release/release_notes.md
+gh release create -F .release/release_notes.md "${version}" ".release/${zip_filename}" ".release/${artifactbundle_zip_filename}"
 
 # HomeBrew
 cd ../homebrew-periphery
