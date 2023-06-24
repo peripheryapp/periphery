@@ -98,6 +98,8 @@ echo "Release Notes:"
 cat release_notes.md
 echo
 
+confirm "Continue?"
+
 cd ..
 gh release create -F .release/release_notes.md "${version}" ".release/${zip_filename}" ".release/${artifactbundle_zip_filename}"
 
