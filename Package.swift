@@ -154,7 +154,7 @@ targets.append(contentsOf: [
 
 let package = Package(
     name: "Periphery",
-    platforms: [.macOS(.v12)],
+    platforms: [.macOS(.v13)],
     products: [
         .executable(name: "periphery", targets: ["Frontend"]),
     ],
