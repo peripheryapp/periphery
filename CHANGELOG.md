@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Revert SwiftPM binary command plugin. Sorry folks, but SwiftPM doesn't provide the appropriate permissions for Periphery to build projects in the sandbox.
 
 ## 2.14.0 (2023-06-24)
 

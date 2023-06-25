@@ -63,24 +63,8 @@ echo -e "\n${zip_filename} checksum:"
 sha256=$( shasum -a 256 ${zip_filename} | awk '{print $1}' )
 echo ${sha256}
 
-# Artifact bundle
-artifactbundle_zip_filename="periphery-${version}-macos.artifactbundle.zip"
-cat ../scripts/info.json.template | sed s/__VERSION__/${version}/ > info.json
-mkdir -p "periphery-${version}-macos/bin"
-cp periphery "periphery-${version}-macos/bin"
-zip "${artifactbundle_zip_filename}" LICENSE.md info.json "periphery-${version}-macos/bin/periphery"
-codesign "${artifactbundle_zip_filename}"
-
-echo -e "\n${artifactbundle_zip_filename} checksum:"
-artifactbundle_sha256=$( shasum -a 256 ${artifactbundle_zip_filename} | awk '{print $1}' )
-echo ${artifactbundle_sha256}
-
-echo -e "\nUpdate Package.swift"
-confirm "Continue?"
-
 # Notarize
 notarize "${zip_filename}"
-notarize "${artifactbundle_zip_filename}"
 
 echo -e "\nVerify changes"
 confirm "Continue?"
@@ -101,7 +85,7 @@ echo
 confirm "Continue?"
 
 cd ..
-gh release create -F .release/release_notes.md "${version}" ".release/${zip_filename}" ".release/${artifactbundle_zip_filename}"
+gh release create -F .release/release_notes.md "${version}" ".release/${zip_filename}"
 
 # HomeBrew
 cd ../homebrew-periphery
