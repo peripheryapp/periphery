@@ -12,9 +12,6 @@
   <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?color=008DFF" />
 </a>
 <img src="https://img.shields.io/badge/platform-macOS%20|%20Linux-008DFF">
-<a href="https://github.com/peripheryapp/periphery/actions">
-  <img src="https://img.shields.io/github/actions/workflow/status/peripheryapp/periphery/test.yml?branch=master">
-</a>
 <br>
 <br>
 </p>
@@ -452,7 +449,7 @@ You can then invoke periphery as follows:
 
 ```
 periphery scan --file-targets-path map.json --index-store-path index/store
-``` 
+```
 
 > **Tip**
 >
