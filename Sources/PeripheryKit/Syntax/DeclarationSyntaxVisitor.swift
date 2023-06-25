@@ -17,7 +17,6 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         genericConformanceRequirementLocations: Set<SourceLocation>,
         variableInitFunctionCallLocations: Set<SourceLocation>,
         functionCallMetatypeArgumentLocations: Set<SourceLocation>,
-        letShorthandIdentifiers: Set<String>,
         hasCapitalSelfFunctionCall: Bool,
         hasGenericFunctionReturnedMetatypeParameters: Bool
     )
@@ -296,7 +295,6 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             AttributeSyntax($0)?.attributeName.trimmedDescription ?? AttributeSyntax($0)?.attributeName.firstToken(viewMode: .sourceAccurate)?.text
         } ?? []
         let location = sourceLocationBuilder.location(at: position)
-        var letShorthandIdentifiers = Set<String>()
 
         var didVisitCapitalSelfFunctionCall = false
         if consumeCapitalSelfFunctionCalls {
@@ -334,7 +332,6 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             typeLocations(for: genericWhereClause),
             locations(for: variableInitFunctionCallExpr),
             functionCallMetatypeArgumentLocations(for: variableInitFunctionCallExpr),
-            letShorthandIdentifiers,
             didVisitCapitalSelfFunctionCall,
             hasGenericFunctionReturnedMetatypeParameters
         ))

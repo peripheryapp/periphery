@@ -350,13 +350,7 @@ public final class SwiftIndexer: Indexer {
                 guard let result = declarationsByLocation[decl.location] else { continue }
 
                 applyDeclarationMetadata(to: decl, with: result)
-                markLetShorthandContainerIfNeeded(declaration: decl)
             }
-        }
-
-        private func markLetShorthandContainerIfNeeded(declaration: Declaration) {
-            guard !declaration.letShorthandIdentifiers.isEmpty else { return }
-            graph.markLetShorthandContainer(declaration)
         }
 
         private func applyDeclarationMetadata(to decl: Declaration, with result: DeclarationSyntaxVisitor.Result) {
@@ -369,7 +363,6 @@ public final class SwiftIndexer: Indexer {
                 decl.modifiers = Set(result.modifiers)
                 decl.commentCommands = Set(result.commentCommands)
                 decl.declaredType = result.variableType
-                decl.letShorthandIdentifiers = result.letShorthandIdentifiers
                 decl.hasCapitalSelfFunctionCall = result.hasCapitalSelfFunctionCall
                 decl.hasGenericFunctionReturnedMetatypeParameters = result.hasGenericFunctionReturnedMetatypeParameters
 
