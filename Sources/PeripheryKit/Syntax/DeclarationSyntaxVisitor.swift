@@ -22,14 +22,10 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         hasGenericFunctionReturnedMetatypeParameters: Bool
     )
 
-    var letShorthandWorkaroundEnabled: Bool = false
-
     private let sourceLocationBuilder: SourceLocationBuilder
     private let typeSyntaxInspector: TypeSyntaxInspector
     private(set) var results: [Result] = []
-    private var letShorthandIdentifiers: Set<String> = []
     private var didVisitCapitalSelfFunctionCall: Bool = false
-    private var declarationBodyStackDepth = 0
 
     var resultsByLocation: [SourceLocation: Result] {
         results.reduce(into: [SourceLocation: Result]()) { (dict, result) in
@@ -121,13 +117,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_: FunctionDeclSyntax) {
-        declarationBodyStackDepth += 1
-    }
-
     func visitPost(_ node: FunctionDeclSyntax) {
-        declarationBodyStackDepth -= 1
-
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -140,13 +130,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_: InitializerDeclSyntax) {
-        declarationBodyStackDepth += 1
-    }
-
     func visitPost(_ node: InitializerDeclSyntax) {
-        declarationBodyStackDepth -= 1
-
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -158,13 +142,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_: DeinitializerDeclSyntax) {
-        declarationBodyStackDepth += 1
-    }
-
     func visitPost(_ node: DeinitializerDeclSyntax) {
-        declarationBodyStackDepth -= 1
-
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -173,13 +151,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_: SubscriptDeclSyntax) {
-        declarationBodyStackDepth += 1
-    }
-
     func visitPost(_ node: SubscriptDeclSyntax) {
-        declarationBodyStackDepth -= 1
-
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -192,13 +164,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_: VariableDeclSyntax) {
-        declarationBodyStackDepth += 1
-    }
-
     func visitPost(_ node: VariableDeclSyntax) {
-        declarationBodyStackDepth -= 1
-
         for binding in node.bindings {
             if binding.pattern.is(IdentifierPatternSyntax.self) {
                 let closureSignature = binding.initializer?.value.as(ClosureExprSyntax.self)?.signature
@@ -299,17 +265,6 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: OptionalBindingConditionSyntax) {
-        guard letShorthandWorkaroundEnabled else { return }
-
-        guard node.initializer == nil,
-              let identifier = node.pattern.as(IdentifierPatternSyntax.self)?.identifier,
-              let parentStmt = node.parent?.parent?.parent,
-              (parentStmt.is(IfExprSyntax.self) || parentStmt.is(GuardStmtSyntax.self))
-        else { return }
-        letShorthandIdentifiers.insert(identifier.text)
-    }
-
     func visit(_ node: FunctionCallExprSyntax) {
         if let identifierExpr = node.calledExpression.as(IdentifierExprSyntax.self),
            identifierExpr.identifier.tokenKind == .keyword(.Self) {
@@ -342,13 +297,6 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         } ?? []
         let location = sourceLocationBuilder.location(at: position)
         var letShorthandIdentifiers = Set<String>()
-
-        // Only associate let shorthand identifiers in nested code blocks with the top-most
-        // code block.
-        if declarationBodyStackDepth == 0 {
-            letShorthandIdentifiers = self.letShorthandIdentifiers
-            self.letShorthandIdentifiers.removeAll()
-        }
 
         var didVisitCapitalSelfFunctionCall = false
         if consumeCapitalSelfFunctionCalls {
