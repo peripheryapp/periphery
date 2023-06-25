@@ -41,7 +41,7 @@
 
 ## Installation
 
-### [Homebrew](https://brew.sh/) (macOS only)
+### [Homebrew](https://brew.sh/)
 
 Install Homebrew:
 
@@ -57,23 +57,13 @@ Now install Periphery itself:
 brew install peripheryapp/periphery/periphery
 ```
 
-### [Swift Package Manager](https://swift.org/package-manager/)
-
-Add Periphery to your `Package.swift` dependencies:
-
-```swift
-.package(url: "https://github.com/peripheryapp/periphery", from: "2.0.0")
-```
-
-Now run periphery via Swift:
+### [Mint](https://github.com/yonaskolb/mint)
 
 ```
-swift run periphery scan ...
+mint install peripheryapp/periphery
 ```
 
-> SwiftPM does not yet support prebuilt binaries, therefore be aware that Periphery will be built from source. This also means that Periphery will be built using the same build configuration you specify to build your entire project (the default is 'debug'). Debug builds of Periphery are significantly slower than release builds.
-
-### [CocoaPods](https://cocoapods.org/) (macOS only)
+### [CocoaPods](https://cocoapods.org/)
 
 Add the following to your Podfile:
 
