@@ -308,7 +308,9 @@ This analysis can be disabled with `--disable-redundant-public-analysis`.
 
 Periphery cannot analyze Objective-C code since types may be dynamically typed.
 
-By default Periphery does not assume that declarations accessible by the Objective-C runtime are in use. If your project is a mix of Swift & Objective-C, you can enable this behavior with the `--retain-objc-accessible` option. Swift declarations that are accessible by the Objective-C runtime are those that are explicitly attributed with `@objc` or `@objcMembers`, and classes that inherit `NSObject` either directly or indirectly via another class.
+By default Periphery does not assume that declarations accessible by the Objective-C runtime are in use. If your project is a mix of Swift & Objective-C, you can enable this behavior with the `--retain-objc-accessible` option. Swift declarations that are accessible by the Objective-C runtime are those that are explicitly annotated with `@objc` or `@objcMembers`, and classes that inherit `NSObject` either directly or indirectly via another class.
+
+Alternatively, the `--retain-objc-annotated` can be used to only retain declarations that are explicitly annotated with `@objc` or `@objcMembers`. Types that inherit `NSObject` are not retained unless they have the explicit annotations. This option may uncover more unused code, but with the caveat that some of the results may be incorrect if the declaration is in fact used in Objective-C code. To resolve these incorrect results you must add an `@objc` annotation to the declaration.
 
 ### Encodable
 
