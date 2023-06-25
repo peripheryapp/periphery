@@ -1,97 +1,95 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "AEXML",
-        "repositoryURL": "https://github.com/tadija/AEXML",
-        "state": {
-          "branch": null,
-          "revision": "38f7d00b23ecd891e1ee656fa6aeebd6ba04ecc3",
-          "version": "4.6.1"
-        }
-      },
-      {
-        "package": "PathKit",
-        "repositoryURL": "https://github.com/kylef/PathKit.git",
-        "state": {
-          "branch": null,
-          "revision": "3bfd2737b700b9a36565a8c94f4ad2b050a5e574",
-          "version": "1.0.1"
-        }
-      },
-      {
-        "package": "Spectre",
-        "repositoryURL": "https://github.com/kylef/Spectre.git",
-        "state": {
-          "branch": null,
-          "revision": "26cc5e9ae0947092c7139ef7ba612e34646086c7",
-          "version": "0.10.1"
-        }
-      },
-      {
-        "package": "swift-argument-parser",
-        "repositoryURL": "https://github.com/apple/swift-argument-parser",
-        "state": {
-          "branch": null,
-          "revision": "fee6933f37fde9a5e12a1e4aeaa93fe60116ff2a",
-          "version": "1.2.2"
-        }
-      },
-      {
-        "package": "swift-filename-matcher",
-        "repositoryURL": "https://github.com/ileitch/swift-filename-matcher",
-        "state": {
-          "branch": null,
-          "revision": "17eaeaf60f2703e3ef826de94149c88a78953fd3",
-          "version": "0.1.1"
-        }
-      },
-      {
-        "package": "SwiftIndexStore",
-        "repositoryURL": "https://github.com/ileitch/swift-indexstore",
-        "state": {
-          "branch": null,
-          "revision": "314cc506ab5e782a9fcf75bf9c82c56f581f8fef",
-          "version": "9.0.0"
-        }
-      },
-      {
-        "package": "swift-syntax",
-        "repositoryURL": "https://github.com/peripheryapp/swift-syntax",
-        "state": {
-          "branch": null,
-          "revision": "56ef324e094ad1e655ae7d8c8dabadc7e6bd64e9",
-          "version": "1.0.2"
-        }
-      },
-      {
-        "package": "swift-system",
-        "repositoryURL": "https://github.com/apple/swift-system",
-        "state": {
-          "branch": null,
-          "revision": "025bcb1165deab2e20d4eaba79967ce73013f496",
-          "version": "1.2.1"
-        }
-      },
-      {
-        "package": "XcodeProj",
-        "repositoryURL": "https://github.com/tuist/xcodeproj",
-        "state": {
-          "branch": null,
-          "revision": "5fdac93cb4a7fd4bad5ac2da34e5bc878263043f",
-          "version": "8.10.0"
-        }
-      },
-      {
-        "package": "Yams",
-        "repositoryURL": "https://github.com/jpsim/Yams",
-        "state": {
-          "branch": null,
-          "revision": "f47ba4838c30dbd59998a4e4c87ab620ff959e8a",
-          "version": "5.0.5"
-        }
+  "pins" : [
+    {
+      "identity" : "aexml",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tadija/AEXML",
+      "state" : {
+        "revision" : "38f7d00b23ecd891e1ee656fa6aeebd6ba04ecc3",
+        "version" : "4.6.1"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "pathkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kylef/PathKit.git",
+      "state" : {
+        "revision" : "3bfd2737b700b9a36565a8c94f4ad2b050a5e574",
+        "version" : "1.0.1"
+      }
+    },
+    {
+      "identity" : "spectre",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kylef/Spectre.git",
+      "state" : {
+        "revision" : "26cc5e9ae0947092c7139ef7ba612e34646086c7",
+        "version" : "0.10.1"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "fee6933f37fde9a5e12a1e4aeaa93fe60116ff2a",
+        "version" : "1.2.2"
+      }
+    },
+    {
+      "identity" : "swift-filename-matcher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ileitch/swift-filename-matcher",
+      "state" : {
+        "revision" : "17eaeaf60f2703e3ef826de94149c88a78953fd3",
+        "version" : "0.1.1"
+      }
+    },
+    {
+      "identity" : "swift-indexstore",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ileitch/swift-indexstore",
+      "state" : {
+        "revision" : "314cc506ab5e782a9fcf75bf9c82c56f581f8fef",
+        "version" : "9.0.0"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/peripheryapp/swift-syntax",
+      "state" : {
+        "revision" : "56ef324e094ad1e655ae7d8c8dabadc7e6bd64e9",
+        "version" : "1.0.2"
+      }
+    },
+    {
+      "identity" : "swift-system",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-system",
+      "state" : {
+        "revision" : "025bcb1165deab2e20d4eaba79967ce73013f496",
+        "version" : "1.2.1"
+      }
+    },
+    {
+      "identity" : "xcodeproj",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tuist/xcodeproj",
+      "state" : {
+        "revision" : "5fdac93cb4a7fd4bad5ac2da34e5bc878263043f",
+        "version" : "8.10.0"
+      }
+    },
+    {
+      "identity" : "yams",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/Yams",
+      "state" : {
+        "revision" : "f47ba4838c30dbd59998a4e4c87ab620ff959e8a",
+        "version" : "5.0.5"
+      }
+    }
+  ],
+  "version" : 2
 }
