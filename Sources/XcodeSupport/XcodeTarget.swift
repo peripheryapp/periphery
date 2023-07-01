@@ -6,6 +6,7 @@ import Shared
 
 final class XcodeTarget {
     let project: XcodeProject
+    var triple: String?
 
     private let target: PBXTarget
     private var files: [ProjectFileKind: Set<FilePath>] = [:]

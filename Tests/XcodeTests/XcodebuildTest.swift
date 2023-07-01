@@ -5,20 +5,18 @@ import Shared
 @testable import PeripheryKit
 
 class XcodebuildBuildProjectTest: XCTestCase {
-    var shell: Shell!
     var xcodebuild: Xcodebuild!
     var project: XcodeProject!
 
     override func setUp() {
         super.setUp()
 
-        shell = Shell.shared
-        xcodebuild = Xcodebuild(shell: shell)
+        xcodebuild = Xcodebuild(shell: .shared)
         project = try! XcodeProject(path: UIKitProjectPath)
     }
 
     func testBuildSchemeWithWhitespace() throws {
-        let scheme = try XcodeScheme(project: project, name: "Scheme With Spaces")
+        let scheme = "Scheme With Spaces"
         try xcodebuild.build(project: project, scheme: scheme, allSchemes: [scheme])
     }
 }
@@ -42,6 +40,24 @@ class XcodebuildSchemesTest: XCTestCase {
             let schemes = try! xcodebuild.schemes(project: project)
             XCTAssertEqual(schemes, ["SchemeA", "SchemeB"])
         }
+    }
+}
+
+class XcodebuildSettingsTest: XCTestCase {
+    var xcodebuild: Xcodebuild!
+    var project: XcodeProject!
+
+    override func setUp() {
+        super.setUp()
+
+        xcodebuild = Xcodebuild(shell: .shared)
+        project = try! XcodeProject(path: UIKitProjectPath)
+    }
+
+    func testBuildSettings() {
+        let actions = try! xcodebuild.buildSettings(targets: project.targets)
+        let buildTargets = actions.map(\.target).sorted()
+        XCTAssertEqual(buildTargets, ["NotificationServiceExtension", "Target With Spaces", "UIKitProject", "UIKitProjectTests"])
     }
 }
 

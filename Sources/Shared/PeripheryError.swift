@@ -8,7 +8,6 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case underlyingError(Error)
     case invalidScheme(name: String, project: String)
     case invalidTargets(names: [String], project: String)
-    case testTargetsNotBuildable(names: [String])
     case sourceGraphIntegrityError(message: String)
     case guidedSetupError(message: String)
     case updateCheckError(message: String)
@@ -22,6 +21,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case jsonDeserializationError(error: Error, json: String)
     case indexStoreNotFound(derivedDataPath: String)
     case conflictingIndexUnitsError(file: FilePath, module: String, unitTargets: Set<String>)
+    case invalidTargetTriple(target: String, arch: String, vendor: String, osVersion: String)
 
     public var errorDescription: String? {
         switch self {
@@ -42,9 +42,6 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             let declinedTarget = names.count == 1 ? "Target" : "Targets"
             let conjugatedDo = names.count == 1 ? "does" : "do"
             return "\(declinedTarget) \(formattedNames) \(conjugatedDo) not exist in '\(project)'."
-        case .testTargetsNotBuildable(let names):
-            let joinedNames = names.joined(separator: "', '")
-            return "The following test targets are not built by any of the given schemes: '\(joinedNames)'"
         case .sourceGraphIntegrityError(let message):
             return message
         case .guidedSetupError(let message):
@@ -63,7 +60,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             return "Failed to parse Swift version from: \(fullVersion)"
         case let .unindexedTargetsError(targets, indexStorePath):
             let joinedTargets = targets.sorted().joined(separator: ", ")
-            return "The index store at '\(indexStorePath)' does not contain data for the following targets: \(joinedTargets). Either the index store is outdated, or you have requested to scan targets that have not been built."
+            return "The index store at '\(indexStorePath)' does not contain data for the following targets: \(joinedTargets). Either the index store is outdated, or you have requested to scan targets that have not been built. For Xcode projects, the chosen schemes must build all of the chosen targets."
         case let .swiftVersionUnsupportedError(version, minimumVersion):
             return "This version of Periphery only supports Swift >= \(minimumVersion), you're using \(version)."
         case let .jsonDeserializationError(error, json):
@@ -77,6 +74,8 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             }
             parts.append("If you passed the '--index-store-path' option, ensure that Xcode is not open with a project that may write to this index store while Periphery is running.")
             return parts.joined(separator: " ")
+        case let .invalidTargetTriple(target, arch, vendor, osVersion):
+            return "Failed to construct triple for target '\(target)': \(arch), \(vendor), \(osVersion)"
         }
     }
 

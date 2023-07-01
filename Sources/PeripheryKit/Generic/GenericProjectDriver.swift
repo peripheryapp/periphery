@@ -9,7 +9,7 @@ public final class GenericProjectDriver {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 
         let sourceFiles = try configuration.fileTargetsPath
-            .reduce(into: [FilePath: Set<String>]()) { result, mapPath in
+            .reduce(into: [FilePath: Set<IndexTarget>]()) { result, mapPath in
                 guard mapPath.exists else {
                     throw PeripheryError.pathDoesNotExist(path: mapPath.string)
                 }
@@ -18,7 +18,7 @@ public final class GenericProjectDriver {
                 let map = try decoder
                     .decode(FileTargetMapContainer.self, from: data)
                     .fileTargets
-                    .reduce(into: [FilePath: Set<String>](), { (result, tuple) in
+                    .reduce(into: [FilePath: Set<IndexTarget>](), { (result, tuple) in
                         let (key, value) = tuple
                         let path = FilePath.makeAbsolute(key)
 
@@ -26,7 +26,8 @@ public final class GenericProjectDriver {
                             throw PeripheryError.pathDoesNotExist(path: path.string)
                         }
 
-                        result[path] = value
+                        let indexTargets = value.mapSet { IndexTarget(name: $0) }
+                        result[path] = indexTargets
                     })
                 result.merge(map) { $0.union($1) }
             }
@@ -34,10 +35,10 @@ public final class GenericProjectDriver {
         return self.init(sourceFiles: sourceFiles, configuration: configuration)
     }
 
-    private let sourceFiles: [FilePath: Set<String>]
+    private let sourceFiles: [FilePath: Set<IndexTarget>]
     private let configuration: Configuration
 
-    init(sourceFiles: [FilePath: Set<String>], configuration: Configuration) {
+    init(sourceFiles: [FilePath: Set<IndexTarget>], configuration: Configuration) {
         self.sourceFiles = sourceFiles
         self.configuration = configuration
     }

@@ -58,9 +58,12 @@ extension SPMProjectDriver: ProjectDriver {
     }
 
     public func index(graph: SourceGraph) throws {
-        let sourceFiles = targets.reduce(into: [FilePath: Set<String>]()) { result, target in
+        let sourceFiles = targets.reduce(into: [FilePath: Set<IndexTarget>]()) { result, target in
             let targetPath = absolutePath(for: target)
-            target.sources.forEach { result[targetPath.appending($0), default: []].insert(target.name) }
+            target.sources.forEach {
+                let indexTarget = IndexTarget(name: target.name)
+                result[targetPath.appending($0), default: []].insert(indexTarget)
+            }
         }
 
         let storePaths: [FilePath]
