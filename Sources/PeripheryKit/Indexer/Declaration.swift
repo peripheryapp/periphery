@@ -183,7 +183,7 @@ public final class Declaration {
     var isImplicit: Bool = false
     var isObjcAccessible: Bool = false
 
-    private let identifier: String
+    private let identifier: Int
 
     var ancestralDeclarations: Set<Declaration> {
         var maybeParent = parent
@@ -236,7 +236,7 @@ public final class Declaration {
         self.kind = kind
         self.usrs = usrs
         self.location = location
-        self.identifier = usrs.joined()
+        self.identifier = usrs.hashValue
     }
 
     func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {

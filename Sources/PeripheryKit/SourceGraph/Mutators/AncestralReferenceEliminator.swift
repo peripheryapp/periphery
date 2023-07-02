@@ -10,29 +10,24 @@ final class AncestralReferenceEliminator: SourceGraphMutator {
 
     func mutate() {
         for declaration in graph.rootDeclarations {
-            eliminateAncestralReferences(in: declaration, stack: [declaration])
+            eliminateAncestralReferences(in: declaration, stack: declaration.usrs)
         }
     }
 
-    private func eliminateAncestralReferences(in declaration: Declaration, stack: [Declaration]) {
+    private func eliminateAncestralReferences(in declaration: Declaration, stack: Set<String>) {
         guard !graph.isRetained(declaration) else { return }
 
         eliminateAncestralReferences(in: declaration.references, stack: stack)
 
         for childDeclaration in declaration.declarations {
-            let newStack = stack + [childDeclaration]
+            let newStack = stack.union(childDeclaration.usrs)
             eliminateAncestralReferences(in: childDeclaration, stack: newStack)
         }
     }
 
-    private func anyDeclarations(in declarations: [Declaration], areReferencedBy reference: Reference) -> Bool {
-        let usrs = declarations.flatMap { $0.usrs }
-        return usrs.contains(reference.usr)
-    }
-
-    private func eliminateAncestralReferences(in references: Set<Reference>, stack: [Declaration]) {
+    private func eliminateAncestralReferences(in references: Set<Reference>, stack: Set<String>) {
         for reference in references {
-            if anyDeclarations(in: stack, areReferencedBy: reference) {
+            if stack.contains(reference.usr) {
                 graph.remove(reference)
             }
 

@@ -18,7 +18,7 @@ final class XCTestRetainer: SourceGraphMutator {
             }
         }
 
-        let subclasses = Set(immediateTestCaseClasses.flatMap { graph.subclasses(of: $0) })
+        let subclasses = immediateTestCaseClasses.flatMapSet { graph.subclasses(of: $0) }
         let testCaseClasses = subclasses.union(immediateTestCaseClasses)
 
         for testCaseClass in testCaseClasses {

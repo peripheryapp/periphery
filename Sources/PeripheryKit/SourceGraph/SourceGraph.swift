@@ -47,7 +47,7 @@ public final class SourceGraph {
     }
 
     func declarations(ofKinds kinds: [Declaration.Kind]) -> Set<Declaration> {
-        Set(kinds.compactMap { allDeclarationsByKind[$0] }.joined())
+        kinds.flatMapSet { allDeclarationsByKind[$0, default: []] }
     }
 
     func explicitDeclaration(withUsr usr: String) -> Declaration? {
@@ -55,7 +55,7 @@ public final class SourceGraph {
     }
 
     func references(to decl: Declaration) -> Set<Reference> {
-        Set(decl.usrs.flatMap { allReferencesByUsr[$0, default: []] })
+        decl.usrs.flatMapSet { allReferencesByUsr[$0, default: []] }
     }
 
     func hasReferences(to decl: Declaration) -> Bool {
@@ -114,18 +114,24 @@ public final class SourceGraph {
         }
     }
 
-    func add(_ declaration: Declaration) {
-        withLock {
-            addUnsafe(declaration)
-        }
-    }
-
     func addUnsafe(_ declaration: Declaration) {
         allDeclarations.insert(declaration)
         allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
 
         if !declaration.isImplicit {
             declaration.usrs.forEach { allExplicitDeclarationsByUsr[$0] = declaration }
+        }
+    }
+
+    func addUnsafe(_ declarations: Set<Declaration>) {
+        allDeclarations.formUnion(declarations)
+
+        for declaration in declarations {
+            allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
+
+            if !declaration.isImplicit {
+                declaration.usrs.forEach { allExplicitDeclarationsByUsr[$0] = declaration }
+            }
         }
     }
 
@@ -154,6 +160,11 @@ public final class SourceGraph {
     func addUnsafe(_ reference: Reference) {
         _ = allReferences.insert(reference)
         allReferencesByUsr[reference.usr, default: []].insert(reference)
+    }
+
+    func addUnsafe(_ references: Set<Reference>) {
+        allReferences.formUnion(references)
+        references.forEach { allReferencesByUsr[$0.usr, default: []].insert($0) }
     }
 
     func add(_ reference: Reference, from declaration: Declaration) {

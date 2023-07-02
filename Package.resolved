@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ileitch/swift-indexstore",
       "state" : {
-        "revision" : "314cc506ab5e782a9fcf75bf9c82c56f581f8fef",
-        "version" : "9.0.0"
+        "revision" : "4e20a3b2d8bb9bae8ebffb43515987eb6eb5efd8",
+        "version" : "9.0.2"
       }
     },
     {
@@ -77,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tuist/xcodeproj",
       "state" : {
-        "revision" : "5fdac93cb4a7fd4bad5ac2da34e5bc878263043f",
-        "version" : "8.10.0"
+        "revision" : "59c7f8d4201a7bd37ef509edebd5777811c7de78",
+        "version" : "8.11.0"
       }
     },
     {

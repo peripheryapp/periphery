@@ -13,11 +13,11 @@ public extension FilePath {
     static func glob(_ pattern: String) -> Set<FilePath> {
         let absolutePattern = FilePath(pattern).isRelative ? "\(FilePath.current.string)/\(pattern)" : pattern
 
-        return Set(Glob(
+        return Glob(
             pattern: absolutePattern,
             blacklistedDirectories: [".build", "node_modules", ".gems", "gems", ".swiftpm"],
             logger: Logger()
-        ).paths.map { FilePath($0).lexicallyNormalized() })
+        ).paths.mapSet { FilePath($0).lexicallyNormalized() }
     }
 }
 
