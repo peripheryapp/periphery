@@ -10,7 +10,8 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix indexing multi-platform projects such as those containing watchOS extensions.
+- Subclasses of CLKComplicationPrincipalClass referenced from an Info.plist are now retained.
 
 ## 2.14.1 (2023-06-25)
 

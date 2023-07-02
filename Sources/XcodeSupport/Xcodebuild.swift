@@ -23,11 +23,11 @@ public final class Xcodebuild {
     }
 
     @discardableResult
-    func build(project: XcodeProjectlike, scheme: XcodeScheme, allSchemes: [XcodeScheme], additionalArguments: [String] = [], buildForTesting: Bool = false) throws -> String {
+    func build(project: XcodeProjectlike, scheme: String, allSchemes: [String], additionalArguments: [String] = [], buildForTesting: Bool = false) throws -> String {
         let cmd = buildForTesting ? "build-for-testing" : "build"
         let args = [
             "-\(project.type)", "'\(project.path.lexicallyNormalized().string)'",
-            "-scheme", "'\(scheme.name)'",
+            "-scheme", "'\(scheme)'",
             "-parallelizeTargets",
             "-derivedDataPath", "'\(try derivedDataPath(for: project, schemes: allSchemes).string)'",
             "-quiet"
@@ -43,11 +43,11 @@ public final class Xcodebuild {
         return try shell.exec(["/bin/sh", "-c", xcodebuild])
     }
 
-    func removeDerivedData(for project: XcodeProjectlike, allSchemes: [XcodeScheme]) throws {
+    func removeDerivedData(for project: XcodeProjectlike, allSchemes: [String]) throws {
         try shell.exec(["rm", "-rf", try derivedDataPath(for: project, schemes: allSchemes).string])
     }
 
-    func indexStorePath(project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> FilePath {
+    func indexStorePath(project: XcodeProjectlike, schemes: [String]) throws -> FilePath {
         let derivedDataPath = try derivedDataPath(for: project, schemes: schemes)
         let pathsToTry = ["Index.noindex/DataStore", "Index/DataStore"]
             .map { derivedDataPath.appending($0) }
@@ -57,11 +57,11 @@ public final class Xcodebuild {
         return path
     }
 
-    func schemes(project: XcodeProjectlike) throws -> [String] {
-        return try schemes(type: project.type, path: project.path.lexicallyNormalized().string)
+    func schemes(project: XcodeProjectlike) throws -> Set<String> {
+        try schemes(type: project.type, path: project.path.lexicallyNormalized().string)
     }
 
-    func schemes(type: String, path: String) throws -> [String] {
+    func schemes(type: String, path: String) throws -> Set<String> {
         let args = [
             "-\(type)", path,
             "-list",
@@ -85,24 +85,30 @@ public final class Xcodebuild {
             let details = json[type] as? [String: Any],
             let schemes = details["schemes"] as? [String] else { return [] }
 
-        return schemes
+        return Set(schemes)
     }
 
-    func buildSettings(for project: XcodeProjectlike, scheme: String) throws -> String {
-        let args = [
-            "-\(project.type)", project.path.lexicallyNormalized().string,
-            "-showBuildSettings",
-            "-scheme", scheme
-        ]
+    func buildSettings(targets: Set<XcodeTarget>) throws -> [XcodeBuildAction] {
+        try targets
+            .reduce(into: [XcodeProject: Set<String>]()) { result, target in
+                result[target.project, default: []].insert(target.name)
+            }
+            .reduce(into: [XcodeBuildAction]()) { result, pair in
+                let (project, targets) = pair
+                let args = [
+                    "-project", project.path.lexicallyNormalized().string,
+                    "-showBuildSettings",
+                    "-json"
+                ] + targets.flatMap { ["-target", $0] }
 
-        do {
-            // Schemes that are not configured for testing will result in an error if the 'test'
-            // action is supplied.
-            // Note: we don't use -skipUnavailableActions here as it returns incorrect output.
-            return try shell.exec(["xcodebuild"] + args + ["build", "test"], stderr: false)
-        } catch PeripheryError.shellCommandFailed(_, _, _,  _) {
-            return try shell.exec(["xcodebuild"] + args + ["build"], stderr: false)
-        }
+                let output = try shell.exec(["xcodebuild"] + args, stderr: false)
+
+                guard let data = output.data(using: .utf8) else { return }
+
+                let decoder = JSONDecoder()
+                let actions = try decoder.decode([XcodeBuildAction].self, from: data)
+                result.append(contentsOf: actions)
+            }
     }
 
     // MARK: - Private
@@ -116,7 +122,7 @@ public final class Xcodebuild {
         }
     }
 
-    private func derivedDataPath(for project: XcodeProjectlike, schemes: [XcodeScheme]) throws -> FilePath {
+    private func derivedDataPath(for project: XcodeProjectlike, schemes: [String]) throws -> FilePath {
         // Given a project with two schemes: A and B, a scenario can arise where the index store contains conflicting
         // data. If scheme A is built, then the source file modified and then scheme B built, the index store will
         // contain two records for that source file. One reflects the state of the file when scheme A was built, and the
@@ -124,7 +130,7 @@ public final class Xcodebuild {
 
         let xcodeVersionHash = try version().djb2Hex
         let projectHash = project.name.djb2Hex
-        let schemesHash = schemes.map { $0.name }.joined().djb2Hex
+        let schemesHash = schemes.map { $0 }.joined().djb2Hex
 
         return try Constants.cachePath().appending("DerivedData-\(xcodeVersionHash)-\(projectHash)-\(schemesHash)")
     }

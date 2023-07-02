@@ -105,11 +105,8 @@ final class XcodeProject: XcodeProjectlike {
         }
     }
 
-    func schemes() throws -> Set<XcodeScheme> {
-        let schemes = try xcodebuild.schemes(project: self).map {
-            try XcodeScheme(project: self, name: $0)
-        }
-        return Set(schemes)
+    func schemes() throws -> Set<String> {
+        try xcodebuild.schemes(project: self)
     }
 }
 

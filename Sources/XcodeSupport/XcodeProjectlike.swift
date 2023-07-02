@@ -10,7 +10,7 @@ protocol XcodeProjectlike: AnyObject {
     var name: String { get }
     var sourceRoot: FilePath { get }
 
-    func schemes() throws -> Set<XcodeScheme>
+    func schemes() throws -> Set<String>
 }
 
 extension XcodeProjectlike {

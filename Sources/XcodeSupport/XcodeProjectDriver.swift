@@ -47,8 +47,8 @@ public final class XcodeProjectDriver {
         }
 
         // Ensure schemes exist within the project
-        let schemes = try project.schemes().filter { configuration.schemes.contains($0.name) }
-        let validSchemeNames = Set(schemes.map { $0.name })
+        let schemes = try project.schemes().filter { configuration.schemes.contains($0) }
+        let validSchemeNames = Set(schemes.map { $0 })
 
         if let scheme = Set(configuration.schemes).subtracting(validSchemeNames).first {
             throw PeripheryError.invalidScheme(name: scheme, project: project.path.lastComponent?.string ?? "")
@@ -66,7 +66,7 @@ public final class XcodeProjectDriver {
     private let configuration: Configuration
     private let xcodebuild: Xcodebuild
     private let project: XcodeProjectlike
-    private let schemes: Set<XcodeScheme>
+    private let schemes: Set<String>
     private let targets: Set<XcodeTarget>
     private let packageTargets: [SPM.Package: Set<SPM.Target>]
 
@@ -75,7 +75,7 @@ public final class XcodeProjectDriver {
         configuration: Configuration = .shared,
         xcodebuild: Xcodebuild = .init(),
         project: XcodeProjectlike,
-        schemes: Set<XcodeScheme>,
+        schemes: Set<String>,
         targets: Set<XcodeTarget>,
         packageTargets: [SPM.Package: Set<SPM.Target>]
     ) {
@@ -113,17 +113,16 @@ public final class XcodeProjectDriver {
 
 extension XcodeProjectDriver: ProjectDriver {
     public func build() throws {
-        // Ensure test targets are built by chosen schemes.
-        // SwiftPM test targets are not considered here because xcodebuild does not include them
-        // in the output of -showBuildSettings
-        let testTargetNames = targets.filter { $0.isTestTarget }.map { $0.name }
+        // Copy target triples to the targets. The triple is used by the indexer to ignore index store units built for
+        // other architectures/platforms.
+        let targetTriples = try xcodebuild.buildSettings(targets: targets)
+            .mapDict { action in
+                (action.target, try action.makeTargetTriple())
+            }
 
-        if !testTargetNames.isEmpty {
-            let allTestTargets = try schemes.flatMap { try $0.testTargets() }
-            let missingTestTargets = Set(testTargetNames).subtracting(allTestTargets).sorted()
-
-            if !missingTestTargets.isEmpty {
-                throw PeripheryError.testTargetsNotBuildable(names: missingTestTargets)
+        for target in targets {
+            if let triple = targetTriples[target.name] {
+                target.triple = triple
             }
         }
 
@@ -136,14 +135,10 @@ extension XcodeProjectDriver: ProjectDriver {
         for scheme in schemes {
             if configuration.outputFormat.supportsAuxiliaryOutput {
                 let asterisk = colorize("*", .boldGreen)
-                logger.info("\(asterisk) Building \(scheme.name)...")
+                logger.info("\(asterisk) Building \(scheme)...")
             }
 
-            // Because xcodebuild -showBuildSettings doesn't include package test targets, we can't
-            // validate that the requested package test targets are actually built by the scheme.
-            // We'll just assume they are and attempt a test build. If this assumption was false,
-            // an `unindexedTargetsError` will be thrown.
-            let containsXcodeTestTargets = !Set(try scheme.testTargets()).isDisjoint(with: testTargetNames)
+            let containsXcodeTestTargets = targets.contains(where: \.isTestTarget)
             let containsPackageTestTargets = packageTargets.values.contains { $0.contains(where: \.isTestTarget) }
             let buildForTesting = containsXcodeTestTargets || containsPackageTestTargets
             try xcodebuild.build(project: project,
@@ -165,10 +160,13 @@ extension XcodeProjectDriver: ProjectDriver {
 
         try targets.forEach { try $0.identifyFiles() }
 
-        var sourceFiles: [FilePath: Set<String>] = [:]
+        var sourceFiles: [FilePath: Set<IndexTarget>] = [:]
 
         for target in targets {
-            target.files(kind: .swift).forEach { sourceFiles[$0, default: []].insert(target.name) }
+            target.files(kind: .swift).forEach {
+                let indexTarget = IndexTarget(name: target.name, triple: target.triple)
+                sourceFiles[$0, default: []].insert(indexTarget)
+            }
         }
 
         for (package, targets) in packageTargets {
@@ -177,7 +175,8 @@ extension XcodeProjectDriver: ProjectDriver {
             for target in targets {
                 target.sourcePaths.forEach {
                     let absolutePath = packageRoot.pushing($0)
-                    sourceFiles[absolutePath, default: []].insert(target.name) }
+                    let indexTarget = IndexTarget(name: target.name)
+                    sourceFiles[absolutePath, default: []].insert(indexTarget) }
             }
         }
 

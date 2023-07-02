@@ -5,14 +5,14 @@ import SystemPackage
 import Shared
 
 public final class SwiftIndexer: Indexer {
-    private let sourceFiles: [FilePath: Set<String>]
+    private let sourceFiles: [FilePath: Set<IndexTarget>]
     private let graph: SourceGraph
     private let logger: ContextualLogger
     private let configuration: Configuration
     private let indexStorePaths: [FilePath]
 
     public required init(
-        sourceFiles: [FilePath: Set<String>],
+        sourceFiles: [FilePath: Set<IndexTarget>],
         graph: SourceGraph,
         indexStorePaths: [FilePath],
         logger: Logger = .init(),
@@ -32,7 +32,7 @@ public final class SwiftIndexer: Indexer {
         excludedFiles.forEach { self.logger.debug("Excluding \($0.string)") }
 
         let unitsByFile: [FilePath: [(IndexStore, IndexStoreUnit)]] = try JobPool(jobs: indexStorePaths)
-            .map { [logger] indexStorePath in
+            .map { [logger, sourceFiles] indexStorePath in
                 logger.debug("Reading \(indexStorePath)")
                 var unitsByFile: [FilePath: [(IndexStore, IndexStoreUnit)]] = [:]
                 let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: .open())
@@ -43,7 +43,20 @@ public final class SwiftIndexer: Indexer {
                     let file = FilePath.makeAbsolute(filePath)
 
                     if includedFiles.contains(file) {
-                        unitsByFile[file, default: []].append((indexStore, unit))
+                        // Ignore units built for other architectures/platforms.
+                        let validTargetTriples = sourceFiles[file]?.compactMapSet { $0.triple } ?? []
+
+                        if validTargetTriples.isEmpty {
+                            unitsByFile[file, default: []].append((indexStore, unit))
+                        } else {
+                            if let unitTargetTriple = try indexStore.target(for: unit) {
+                                if validTargetTriples.contains(unitTargetTriple) {
+                                    unitsByFile[file, default: []].append((indexStore, unit))
+                                }
+                            } else {
+                                logger.warn("No unit target triple for: \(file)")
+                            }
+                        }
                     }
 
                     return true
@@ -62,7 +75,7 @@ public final class SwiftIndexer: Indexer {
 
         if !unindexedFiles.isEmpty {
             unindexedFiles.forEach { logger.debug("Source file not indexed: \($0)") }
-            let targets: Set<String> = Set(unindexedFiles.flatMap { sourceFiles[$0] ?? [] })
+            let targets = unindexedFiles.flatMapSet { sourceFiles[$0] ?? [] }.mapSet { $0.name }
             throw PeripheryError.unindexedTargetsError(targets: targets, indexStorePaths: indexStorePaths)
         }
 
