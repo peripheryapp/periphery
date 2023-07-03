@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Reduced indexing and analysis runtime by ~60%.
 
 ##### Bug Fixes
 
