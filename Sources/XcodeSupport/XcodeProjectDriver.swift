@@ -48,7 +48,7 @@ public final class XcodeProjectDriver {
 
         // Ensure schemes exist within the project
         let schemes = try project.schemes().filter { configuration.schemes.contains($0) }
-        let validSchemeNames = Set(schemes.map { $0 })
+        let validSchemeNames = schemes.mapSet { $0 }
 
         if let scheme = Set(configuration.schemes).subtracting(validSchemeNames).first {
             throw PeripheryError.invalidScheme(name: scheme, project: project.path.lastComponent?.string ?? "")
@@ -182,16 +182,16 @@ extension XcodeProjectDriver: ProjectDriver {
 
         try SwiftIndexer(sourceFiles: sourceFiles, graph: graph, indexStorePaths: storePaths).perform()
 
-        let xibFiles = Set(targets.map { $0.files(kind: .interfaceBuilder) }.joined())
+        let xibFiles = targets.flatMapSet { $0.files(kind: .interfaceBuilder) }
         try XibIndexer(xibFiles: xibFiles, graph: graph).perform()
 
-        let xcDataModelFiles = Set(targets.map { $0.files(kind: .xcDataModel) }.joined())
+        let xcDataModelFiles = targets.flatMapSet { $0.files(kind: .xcDataModel) }
         try XCDataModelIndexer(files: xcDataModelFiles, graph: graph).perform()
 
-        let xcMappingModelFiles = Set(targets.map { $0.files(kind: .xcMappingModel) }.joined())
+        let xcMappingModelFiles = targets.flatMapSet { $0.files(kind: .xcMappingModel) }
         try XCMappingModelIndexer(files: xcMappingModelFiles, graph: graph).perform()
 
-        let infoPlistFiles = Set(targets.map { $0.files(kind: .infoPlist) }.joined())
+        let infoPlistFiles = targets.flatMapSet { $0.files(kind: .infoPlist) }
         try InfoPlistIndexer(infoPlistFiles: infoPlistFiles, graph: graph).perform()
 
         graph.indexingComplete()

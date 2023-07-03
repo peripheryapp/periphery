@@ -63,11 +63,11 @@ final class XcodeProject: XcodeProjectlike {
                 .compactMap { try XcodeProject.build(path: FilePath($0), referencedBy: path) }
         }
 
-        targets = Set(xcodeProject.pbxproj.nativeTargets
-            .map { XcodeTarget(project: self, target: $0) }
-            + subProjects.flatMap { $0.targets })
+        targets = xcodeProject.pbxproj.nativeTargets
+            .mapSet { XcodeTarget(project: self, target: $0) }
+            .union(subProjects.flatMapSet { $0.targets })
 
-        let packageTargetNames = Set(targets.flatMap { $0.packageDependencyNames })
+        let packageTargetNames = targets.flatMapSet { $0.packageDependencyNames }
 
         if !packageTargetNames.isEmpty {
             var packages: [SPM.Package] = []

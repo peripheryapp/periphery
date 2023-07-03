@@ -326,7 +326,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             type(for: variableType),
             typeLocations(for: variableType),
             allParameterClauseLocations,
-            Set(returnClauseTypeLocations.map { $0.location }),
+            returnClauseTypeLocations.mapSet { $0.location },
             typeLocations(for: inheritanceClause),
             typeLocations(for: genericParameterClause),
             typeLocations(for: genericWhereClause),

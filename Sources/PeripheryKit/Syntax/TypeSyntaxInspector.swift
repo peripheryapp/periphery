@@ -59,7 +59,7 @@ struct TypeSyntaxInspector {
             return types(for: implicitUnwrappedOptionalType.wrappedType)
         } else if let compositionType = typeSyntax.as(CompositionTypeSyntax.self) {
             // Composition type.
-            return Set(compositionType.elements.flatMap { types(for: $0.type) })
+            return compositionType.elements.flatMapSet { types(for: $0.type) }
         } else if let attributedType = typeSyntax.as(AttributedTypeSyntax.self) {
             // Attributed type.
             return types(for: attributedType.baseType)

@@ -13,9 +13,9 @@ final class UnusedParameterRetainer: SourceGraphMutator {
     func mutate() throws {
         let functionDecls = graph
             .declarations(ofKind: .varParameter) // These are only unused params.
-            .compactMap { $0.parent }
+            .compactMapSet { $0.parent }
 
-        retainParams(inFunctions: Set(functionDecls))
+        retainParams(inFunctions: functionDecls)
 
         for protoDecl in graph.declarations(ofKind: .protocol) {
             let protoFuncDecls = protoDecl.declarations.filter { functionDecls.contains($0) }
@@ -55,7 +55,7 @@ final class UnusedParameterRetainer: SourceGraphMutator {
     private func retainParams(inFunctions functionDecls: Set<Declaration>) {
         var visitedDecls: Set<Declaration> = []
 
-        for functionDecl in Set(functionDecls) {
+        for functionDecl in functionDecls {
             guard !visitedDecls.contains(functionDecl) else { continue }
 
             let (baseFunctionDecl, didResolveBase) = graph.baseDeclaration(fromOverride: functionDecl)

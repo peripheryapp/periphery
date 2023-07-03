@@ -46,12 +46,12 @@ extension SPMProjectDriver: ProjectDriver {
                 try package.clean()
             }
 
-            try targets.forEach {
-                if configuration.outputFormat.supportsAuxiliaryOutput {
-                    let asterisk = colorize("*", .boldGreen)
-                    logger.info("\(asterisk) Building \($0.name)...")
-                }
+            if configuration.outputFormat.supportsAuxiliaryOutput {
+                let asterisk = colorize("*", .boldGreen)
+                logger.info("\(asterisk) Building...")
+            }
 
+            try targets.forEach {
                 try $0.build(additionalArguments: configuration.buildArguments)
             }
         }

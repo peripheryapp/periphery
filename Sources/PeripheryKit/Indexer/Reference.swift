@@ -99,18 +99,18 @@ public final class Reference {
     public let usr: String
     public var role: Role = .unknown
 
-    private let identifier: String
+    private let identifier: Int
 
     init(kind: Kind, usr: String, location: SourceLocation, isRelated: Bool = false) {
         self.kind = kind
         self.usr = usr
         self.isRelated = isRelated
         self.location = location
-        self.identifier = "\(usr.hashValue)-\(location.hashValue)-\(isRelated.hashValue)"
+        self.identifier = [usr.hashValue, location.hashValue, isRelated.hashValue].hashValue
     }
 
     var descendentReferences: Set<Reference> {
-        Set(references.flatMap { $0.descendentReferences }).union(references)
+        references.flatMapSet { $0.descendentReferences }.union(references)
     }
 }
 
