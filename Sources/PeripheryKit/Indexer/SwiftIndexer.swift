@@ -201,9 +201,8 @@ public final class SwiftIndexer: Indexer {
                 try indexStore.forEachRecordDependencies(for: unit) { dependency in
                     guard case let .record(record) = dependency else { return true }
 
-                    try indexStore.forEachOccurrences(for: record) { occurrence in
-                        guard occurrence.symbol.language == .swift,
-                              let usr = occurrence.symbol.usr,
+                    try indexStore.forEachOccurrences(for: record, language: .swift) { occurrence in
+                        guard let usr = occurrence.symbol.usr,
                               let location = transformLocation(occurrence.location)
                               else { return true }
 
@@ -544,7 +543,7 @@ public final class SwiftIndexer: Indexer {
                 if rel.roles.contains(.overrideOf) {
                     let baseFunc = rel.symbol
 
-                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) {
+                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformDeclarationKind(baseFunc.kind, baseFunc.subKind) {
                         let reference = Reference(
                             kind: baseFuncKind,
                             usr: baseFuncUsr,
@@ -561,10 +560,10 @@ public final class SwiftIndexer: Indexer {
                 if !rel.roles.intersection([.baseOf, .calledBy, .extendedBy, .containedBy]).isEmpty {
                     let referencer = rel.symbol
 
-                    if let referencerUsr = referencer.usr, let referencerKind = decl.kind.referenceEquivalent {
+                    if let referencerUsr = referencer.usr {
                         for usr in decl.usrs {
                             let reference = Reference(
-                                kind: referencerKind,
+                                kind: decl.kind,
                                 usr: usr,
                                 location: decl.location,
                                 isRelated: rel.roles.contains(.baseOf)
@@ -592,7 +591,7 @@ public final class SwiftIndexer: Indexer {
                 if rel.roles.contains(.overrideOf) {
                     let baseFunc = rel.symbol
 
-                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) {
+                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformDeclarationKind(baseFunc.kind, baseFunc.subKind) {
                         let reference = Reference(
                             kind: baseFuncKind,
                             usr: baseFuncUsr,
@@ -617,7 +616,7 @@ public final class SwiftIndexer: Indexer {
             _ location: SourceLocation,
             _ indexStore: IndexStore
         ) throws -> [Reference] {
-            guard let kind = transformReferenceKind(occurrence.symbol.kind, occurrence.symbol.subKind)
+            guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
                   else { return [] }
 
             guard kind != .varParameter else {
@@ -667,51 +666,6 @@ public final class SwiftIndexer: Indexer {
         }
 
         private func transformDeclarationKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Declaration.Kind? {
-            switch subKind {
-            case .accessorGetter: return .functionAccessorGetter
-            case .accessorSetter: return .functionAccessorSetter
-            case .swiftAccessorDidSet: return .functionAccessorDidset
-            case .swiftAccessorWillSet: return .functionAccessorWillset
-            case .swiftAccessorMutableAddressor: return .functionAccessorMutableaddress
-            case .swiftAccessorAddressor: return .functionAccessorAddress
-            case .swiftSubscript: return .functionSubscript
-            case .swiftInfixOperator: return .functionOperatorInfix
-            case .swiftPrefixOperator: return .functionOperatorPrefix
-            case .swiftPostfixOperator: return .functionOperatorPostfix
-            case .swiftGenericTypeParam: return .genericTypeParam
-            case .swiftAssociatedtype: return .associatedtype
-            case .swiftExtensionOfClass: return .extensionClass
-            case .swiftExtensionOfStruct: return .extensionStruct
-            case .swiftExtensionOfProtocol: return .extensionProtocol
-            case .swiftExtensionOfEnum: return .extensionEnum
-            default: break
-            }
-
-            switch kind {
-            case .module: return .module
-            case .enum: return .enum
-            case .struct: return .struct
-            case .class: return .class
-            case .protocol: return .protocol
-            case .extension: return .extension
-            case .typealias: return .typealias
-            case .function: return .functionFree
-            case .variable: return .varGlobal
-            case .enumConstant: return .enumelement
-            case .instanceMethod: return .functionMethodInstance
-            case .classMethod: return .functionMethodClass
-            case .staticMethod: return .functionMethodStatic
-            case .instanceProperty: return .varInstance
-            case .classProperty: return .varClass
-            case .staticProperty: return .varStatic
-            case .constructor: return .functionConstructor
-            case .destructor: return .functionDestructor
-            case .parameter: return .varParameter
-            default: return nil
-            }
-        }
-
-        private func transformReferenceKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Reference.Kind? {
             switch subKind {
             case .accessorGetter: return .functionAccessorGetter
             case .accessorSetter: return .functionAccessorSetter

@@ -119,7 +119,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     }
 
     private func nonTestableModulesReferencing(_ decl: Declaration) throws -> Set<String> {
-        let referenceFiles = graph.references(to: decl).mapSet { $0.location.file }
+        let referenceFiles = graph.references(to: decl).map { $0.location.file }
 
         let referenceModules = referenceFiles.flatMapSet { file -> Set<String> in
             let importsDeclModuleTestable = file.importStatements.contains(where: { (parts, isTestable) in
