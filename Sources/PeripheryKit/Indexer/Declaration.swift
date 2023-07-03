@@ -45,6 +45,26 @@ public final class Declaration {
             Set(Kind.allCases.filter { $0.isFunctionKind })
         }
 
+        static var protocolMemberKinds: [Kind] {
+            let functionKinds: [Kind] = [.functionMethodInstance, .functionMethodStatic, .functionSubscript, .functionOperator, .functionOperatorInfix, .functionOperatorPostfix, .functionOperatorPrefix, .functionConstructor]
+            let variableKinds: [Kind] = [.varInstance, .varStatic]
+            return functionKinds + variableKinds
+        }
+
+        static var protocolMemberConformingKinds: [Kind] {
+            // Protocols cannot declare 'class' members, yet classes can fulfill the requirement with either a 'class'
+            // or 'static' member.
+            protocolMemberKinds + [.varClass, .functionMethodClass, .associatedtype]
+        }
+
+        var isProtocolMemberKind: Bool {
+            Self.protocolMemberKinds.contains(self)
+        }
+
+        var isProtocolMemberConformingKind: Bool {
+            Self.protocolMemberConformingKinds.contains(self)
+        }
+
         var isFunctionKind: Bool {
             rawValue.hasPrefix("function")
         }
@@ -157,10 +177,6 @@ public final class Declaration {
                 return nil
             }
         }
-
-        var referenceEquivalent: Reference.Kind? {
-            Reference.Kind(rawValue: rawValue)
-        }
     }
 
     public let location: SourceLocation
@@ -229,7 +245,7 @@ public final class Declaration {
     }
 
     var relatedEquivalentReferences: [Reference] {
-        related.filter { $0.kind == kind.referenceEquivalent && $0.name == name }
+        related.filter { $0.kind == kind && $0.name == name }
     }
 
     init(kind: Kind, usrs: Set<String>, location: SourceLocation) {

@@ -18,8 +18,8 @@ public final class SourceGraph {
     private(set) var ignoredDeclarations: Set<Declaration> = []
     private(set) var assetReferences: Set<AssetReference> = []
     private(set) var mainAttributedDeclarations: Set<Declaration> = []
+    private(set) var allReferencesByUsr: [String: Set<Reference>] = [:]
 
-    private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
 
@@ -257,7 +257,7 @@ public final class SourceGraph {
     }
 
     func extendedDeclarationReference(forExtension extensionDeclaration: Declaration) throws -> Reference? {
-        guard let extendedKind = extensionDeclaration.kind.extendedKind?.referenceEquivalent else {
+        guard let extendedKind = extensionDeclaration.kind.extendedKind else {
             throw PeripheryError.sourceGraphIntegrityError(message: "Unknown extended reference kind for extension '\(extensionDeclaration.kind.rawValue)'")
         }
 
@@ -280,7 +280,7 @@ public final class SourceGraph {
         let baseDecl = references(to: decl)
             .filter {
                 $0.isRelated &&
-                $0.kind == decl.kind.referenceEquivalent &&
+                $0.kind == decl.kind &&
                 $0.name == decl.name
             }
             .compactMap { $0.parent }

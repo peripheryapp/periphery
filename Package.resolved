@@ -50,8 +50,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ileitch/swift-indexstore",
       "state" : {
-        "revision" : "4e20a3b2d8bb9bae8ebffb43515987eb6eb5efd8",
-        "version" : "9.0.2"
+        "revision" : "246d455063ddc8faf3ad791c4488e1f60c59aabd",
+        "version" : "9.0.3"
       }
     },
     {

@@ -51,13 +51,14 @@ final class ExtensionReferenceBuilder: SourceGraphMutator {
     private func referenceExtendedTypeAliases(of extendedTypeReference: Reference, from extensionDeclaration: Declaration) {
         // Extensions on type aliases reference the existing type, not the alias.
         // We need to find the typealias and build a reference to it.
-        for aliasDecl in graph.declarations(ofKind: .typealias) {
-            if aliasDecl.references.contains(where: { $0.usr == extendedTypeReference.usr }) {
-                for usr in aliasDecl.usrs {
-                    let aliasReference = Reference(kind: .typealias, usr: usr, location: extensionDeclaration.location)
-                    aliasReference.name = aliasDecl.name
-                    graph.add(aliasReference, from: extensionDeclaration)
-                }
+        let extendedTypeReferences = graph.allReferencesByUsr[extendedTypeReference.usr, default: []]
+
+        for reference in extendedTypeReferences {
+            guard let aliasDecl = reference.parent, aliasDecl.kind == .typealias else { continue }
+            for usr in aliasDecl.usrs {
+                let aliasReference = Reference(kind: .typealias, usr: usr, location: extensionDeclaration.location)
+                aliasReference.name = aliasDecl.name
+                graph.add(aliasReference, from: extensionDeclaration)
             }
         }
     }

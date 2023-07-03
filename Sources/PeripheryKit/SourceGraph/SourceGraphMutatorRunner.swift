@@ -61,7 +61,9 @@ public final class SourceGraphMutatorRunner {
     func perform() throws {
         for mutator in mutators {
             let elapsed = try Benchmark.measure {
+                let interval = logger.beginInterval("mutator:run")
                 try mutator.init(graph: graph, configuration: configuration).mutate()
+              logger.endInterval(interval)
             }
             logger.debug("\(mutator) (\(elapsed)s)")
         }
