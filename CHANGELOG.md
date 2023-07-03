@@ -2,6 +2,20 @@
 
 ##### Breaking
 
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.15.0 (2023-07-04)
+
+##### Breaking
+
 - Swift 5.7 is no longer supported.
 
 ##### Enhancements
