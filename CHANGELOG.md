@@ -16,7 +16,7 @@
 
 ##### Breaking
 
-- Swift 5.7 is no longer supported.
+- Swift 5.7 and macOS 12 are no longer supported.
 
 ##### Enhancements
 
