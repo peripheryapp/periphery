@@ -12,6 +12,8 @@ final class CapitalSelfFunctionCallRetainer: SourceGraphMutator {
     }
 
     func mutate() {
+        guard SwiftVersion.current.version.isVersion(lessThan: "5.9") else { return }
+
         for decl in graph.declarations(ofKinds: [.struct, .class]) {
             guard decl.hasCapitalSelfFunctionCall else { continue }
             decl.declarations
