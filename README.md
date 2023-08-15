@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?color=008DFF" />
 </a>
 <img src="https://img.shields.io/badge/platform-macOS%20|%20Linux-008DFF">
-<a href="https://github.com/sponsors/peripheryapp">
+<a href="#sponsors-">
 <img src="https://img.shields.io/github/sponsors/peripheryapp?logo=githubsponsors&color=db61a2">
 </a>
 <br>
@@ -41,6 +41,7 @@
 - [Platforms](#platforms)
 - [Troubleshooting](#troubleshooting)
 - [Known Bugs](#known-bugs)
+- [Sponsors](#sponsors-) ![Sponsors](assets/sponsor.svg)
 
 ## Installation
 
@@ -512,3 +513,16 @@ Due to some underlying bugs in Swift, Periphery may in some instances report inc
 | [56189](https://github.com/apple/swift/issues/56189) | Index store should relate appendInterpolation from string literals |
 | [56165](https://github.com/apple/swift/issues/56165) | Index store does not relate constructor via literal notation |
 | [49641](https://github.com/apple/swift/issues/49641) | Index does not include reference to constructor of class/struct with generic types |
+
+## Sponsors ![Sponsors](assets/sponsor-20.svg)
+
+Periphery is passion project that takes a huge amount of effort to maintain and develop. If you find Periphery useful, please consider sponsoring through [GitHub Sponsors](https://github.com/sponsors/peripheryapp).
+
+Special thanks goes to the following generous sponsors:
+
+### Emerge Tools
+
+[Emerge Tools](https://www.emergetools.com) is a suite of revolutionary products designed to supercharge mobile apps and the teams that build them.
+
+![Emerge Tools](assets/sponsors/emerge-tools-vertical-white.svg#gh-dark-mode-only)
+![Emerge Tools](assets/sponsors/emerge-tools-vertical-black.svg#gh-light-mode-only)
