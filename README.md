@@ -12,6 +12,9 @@
   <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?color=008DFF" />
 </a>
 <img src="https://img.shields.io/badge/platform-macOS%20|%20Linux-008DFF">
+<a href="https://github.com/sponsors/peripheryapp">
+<img src="https://img.shields.io/github/sponsors/peripheryapp?logo=githubsponsors&color=db61a2">
+</a>
 <br>
 <br>
 </p>
