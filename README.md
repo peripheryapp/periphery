@@ -524,5 +524,10 @@ Special thanks goes to the following generous sponsors:
 
 [Emerge Tools](https://www.emergetools.com) is a suite of revolutionary products designed to supercharge mobile apps and the teams that build them.
 
-![Emerge Tools](assets/sponsors/emerge-tools-vertical-white.svg#gh-dark-mode-only)
-![Emerge Tools](assets/sponsors/emerge-tools-vertical-black.svg#gh-light-mode-only)
+<a href="https://www.emergetools.com" alt="Emerge Tools">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/emerge-tools-vertical-white.svg">
+        <source media="(prefers-color-scheme: light)" srcset="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/emerge-tools-vertical-black.svg">
+        <img src="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/emerge-tools-vertical-black.svg">
+    </picture>
+</a>
