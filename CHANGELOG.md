@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Path forward slashes in JSON output formats are no longer escaped.
 
 ## 2.15.0 (2023-07-04)
 
