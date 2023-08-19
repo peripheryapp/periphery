@@ -40,7 +40,6 @@ public final class SourceGraphMutatorRunner {
         ResultBuilderRetainer.self,
         CapitalSelfFunctionCallRetainer.self,
 
-        PlainExtensionEliminator.self,
         AncestralReferenceEliminator.self,
         AssignOnlyPropertyReferenceEliminator.self,
 
