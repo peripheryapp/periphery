@@ -20,6 +20,7 @@ public final class SourceGraph {
     private(set) var indexedModules: Set<String> = []
     private(set) var unusedModuleImports: Set<Declaration> = []
     private(set) var assignOnlyProperties: Set<Declaration> = []
+    private(set) var extensions: [Declaration: Set<Declaration>] = [:]
 
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
@@ -259,6 +260,12 @@ public final class SourceGraph {
         }
     }
 
+    func markExtension(_ extensionDecl: Declaration, extending extendedDecl: Declaration) {
+        withLock {
+            _ = extensions[extendedDecl, default: []].insert(extensionDecl)
+        }
+    }
+
     func inheritedTypeReferences(of decl: Declaration, seenDeclarations: Set<Declaration> = []) -> Set<Reference> {
         var references = Set<Reference>()
 
@@ -356,4 +363,3 @@ public final class SourceGraph {
         }
     }
 }
-

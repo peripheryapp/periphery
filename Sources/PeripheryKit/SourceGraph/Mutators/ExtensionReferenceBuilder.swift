@@ -44,6 +44,7 @@ final class ExtensionReferenceBuilder: SourceGraphMutator {
             extensionDeclaration.references.forEach { $0.parent = extendedDeclaration }
             extensionDeclaration.related.forEach { $0.parent = extendedDeclaration }
 
+            graph.markExtension(extensionDeclaration, extending: extendedDeclaration)
             graph.remove(extensionDeclaration)
         }
     }

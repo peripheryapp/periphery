@@ -6,10 +6,10 @@ import Shared
 open class SourceGraphTestCase: XCTestCase {
     static var driver: ProjectDriver!
     static var configuration: Configuration!
+    static var results: [ScanResult] = []
 
     private static var graph = SourceGraph()
     private static var allIndexedDeclarations: Set<Declaration> = []
-    private static var results: [ScanResult] = []
 
     var configuration: Configuration { Self.configuration }
 

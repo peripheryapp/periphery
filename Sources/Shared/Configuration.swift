@@ -83,6 +83,9 @@ public final class Configuration {
     @Setting(key: "retain_codable_properties", defaultValue: false)
     public var retainCodableProperties: Bool
 
+    @Setting(key: "auto_remove", defaultValue: false)
+    public var autoRemove: Bool
+
     @Setting(key: "verbose", defaultValue: false)
     public var verbose: Bool
 
@@ -109,6 +112,7 @@ public final class Configuration {
 
     // Non user facing.
     public var guidedSetup: Bool = false
+    public var removalOutputBasePath: FilePath?
 
     // Dependencies.
     private var logger: BaseLogger // Must use BaseLogger as Logger depends upon Configuration.
@@ -202,6 +206,10 @@ public final class Configuration {
 
         if $enableUnusedImportsAnalysis.hasNonDefaultValue {
             config[$enableUnusedImportsAnalysis.key] = enableUnusedImportsAnalysis
+        }
+
+        if $autoRemove.hasNonDefaultValue {
+            config[$autoRemove.key] = autoRemove
         }
 
         if $verbose.hasNonDefaultValue {
@@ -307,6 +315,8 @@ public final class Configuration {
                 $disableRedundantPublicAnalysis.assign(value)
             case $enableUnusedImportsAnalysis.key:
                 $enableUnusedImportsAnalysis.assign(value)
+            case $autoRemove.key:
+                $autoRemove.assign(value)
             case $verbose.key:
                 $verbose.assign(value)
             case $quiet.key:
@@ -353,6 +363,7 @@ public final class Configuration {
         $retainSwiftUIPreviews.reset()
         $disableRedundantPublicAnalysis.reset()
         $enableUnusedImportsAnalysis.reset()
+        $autoRemove.reset()
         $externalEncodableProtocols.reset()
         $externalCodableProtocols.reset()
         $externalTestCaseClasses.reset()
