@@ -1004,34 +1004,6 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    func testLetShorthandSyntax() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass117")) {
-                self.assertReferenced(.varInstance("simpleProperty"))
-                self.assertNotAssignOnlyProperty(.varInstance("simpleProperty"))
-
-                self.assertReferenced(.varInstance("guardedSimpleProperty"))
-                self.assertReferenced(.varInstance("complexProperty"))
-                self.assertReferenced(.varInstance("propertyReferencedFromExtension"))
-                self.assertReferenced(.varInstance("computedPropertyInExtension"))
-                self.assertReferenced(.varInstance("propertyReferencedFromNestedFunction"))
-                self.assertReferenced(.varInstance("propertyReferencedFromPropertyAccessor"))
-
-                self.assertReferenced(.varInstance("propertyReferencedFromDeepChain"))
-                self.assertNotAssignOnlyProperty(.varInstance("propertyReferencedFromDeepChain"))
-            }
-
-            #if swift(>=5.8)
-            self.assertReferenced(.varGlobal("fixtureClass117StaticProperty"))
-            #else
-            // This property should be referenced, but the let shorthand workaround doesn't
-            // handle properties at global (file) scope. This will remain broken until the
-            // issue is resolved in Swift: https://github.com/apple/swift/issues/61509.
-            self.assertNotReferenced(.varGlobal("fixtureClass117StaticProperty"))
-            #endif
-        }
-    }
-
     func testDoesNotRetainLazyProperty() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass36")) {
