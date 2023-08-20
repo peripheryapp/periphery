@@ -74,10 +74,6 @@ struct DeclarationDescription: CustomStringConvertible {
         self.init(kind: .varStatic, name: name, line: line)
     }
 
-    static func varGlobal(_ name: String, line: Int? = nil) -> Self {
-        self.init(kind: .varGlobal, name: name, line: line)
-    }
-
     static func varClass(_ name: String, line: Int? = nil) -> Self {
         self.init(kind: .varClass, name: name, line: line)
     }
