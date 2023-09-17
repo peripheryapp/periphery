@@ -6,11 +6,12 @@
 
 ##### Enhancements
 
-- None.
+- Swift 5.9 support.
 
 ##### Bug Fixes
 
 - Path forward slashes in JSON output formats are no longer escaped.
+- `INDEX_ENABLE_DATA_STORE` is now forcefully enabled as it's required for indexing in some cases.
 
 ## 2.15.0 (2023-07-04)
 
