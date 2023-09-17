@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.15.1 (2023-09-17)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Swift 5.9 support.
 
 ##### Bug Fixes
