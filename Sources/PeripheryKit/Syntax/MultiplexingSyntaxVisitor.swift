@@ -17,8 +17,8 @@ protocol PeripherySyntaxVisitor {
     func visit(_ node: DeinitializerDeclSyntax)
     func visit(_ node: SubscriptDeclSyntax)
     func visit(_ node: VariableDeclSyntax)
-    func visit(_ node: TypealiasDeclSyntax)
-    func visit(_ node: AssociatedtypeDeclSyntax)
+    func visit(_ node: TypeAliasDeclSyntax)
+    func visit(_ node: AssociatedTypeDeclSyntax)
     func visit(_ node: OperatorDeclSyntax)
     func visit(_ node: PrecedenceGroupDeclSyntax)
     func visit(_ node: ImportDeclSyntax)
@@ -36,8 +36,8 @@ protocol PeripherySyntaxVisitor {
     func visitPost(_ node: DeinitializerDeclSyntax)
     func visitPost(_ node: SubscriptDeclSyntax)
     func visitPost(_ node: VariableDeclSyntax)
-    func visitPost(_ node: TypealiasDeclSyntax)
-    func visitPost(_ node: AssociatedtypeDeclSyntax)
+    func visitPost(_ node: TypeAliasDeclSyntax)
+    func visitPost(_ node: AssociatedTypeDeclSyntax)
     func visitPost(_ node: OperatorDeclSyntax)
     func visitPost(_ node: PrecedenceGroupDeclSyntax)
     func visitPost(_ node: ImportDeclSyntax)
@@ -57,8 +57,8 @@ extension PeripherySyntaxVisitor {
     func visit(_ node: DeinitializerDeclSyntax) { }
     func visit(_ node: SubscriptDeclSyntax) { }
     func visit(_ node: VariableDeclSyntax) { }
-    func visit(_ node: TypealiasDeclSyntax) { }
-    func visit(_ node: AssociatedtypeDeclSyntax) { }
+    func visit(_ node: TypeAliasDeclSyntax) { }
+    func visit(_ node: AssociatedTypeDeclSyntax) { }
     func visit(_ node: OperatorDeclSyntax) { }
     func visit(_ node: PrecedenceGroupDeclSyntax) { }
     func visit(_ node: ImportDeclSyntax) { }
@@ -76,8 +76,8 @@ extension PeripherySyntaxVisitor {
     func visitPost(_ node: DeinitializerDeclSyntax) {}
     func visitPost(_ node: SubscriptDeclSyntax) {}
     func visitPost(_ node: VariableDeclSyntax) {}
-    func visitPost(_ node: TypealiasDeclSyntax) {}
-    func visitPost(_ node: AssociatedtypeDeclSyntax) {}
+    func visitPost(_ node: TypeAliasDeclSyntax) {}
+    func visitPost(_ node: AssociatedTypeDeclSyntax) {}
     func visitPost(_ node: OperatorDeclSyntax) {}
     func visitPost(_ node: PrecedenceGroupDeclSyntax) {}
     func visitPost(_ node: ImportDeclSyntax) {}
@@ -95,7 +95,7 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
     required init(file: SourceFile) throws {
         let source = try String(contentsOf: file.path.url)
         self.syntax = Parser.parse(source: source)
-        self.locationConverter = SourceLocationConverter(file: file.path.string, tree: syntax)
+        self.locationConverter = SourceLocationConverter(fileName: file.path.string, tree: syntax)
         self.sourceLocationBuilder = SourceLocationBuilder(file: file, locationConverter: locationConverter)
         super.init(viewMode: .sourceAccurate)
     }
@@ -165,12 +165,12 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
         return .visitChildren
     }
 
-    override func visit(_ node: TypealiasDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: TypeAliasDeclSyntax) -> SyntaxVisitorContinueKind {
         visitors.forEach { $0.visit(node) }
         return .visitChildren
     }
 
-    override func visit(_ node: AssociatedtypeDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: AssociatedTypeDeclSyntax) -> SyntaxVisitorContinueKind {
         visitors.forEach { $0.visit(node) }
         return .visitChildren
     }
@@ -244,11 +244,11 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
         visitors.forEach { $0.visitPost(node) }
     }
 
-    override func visitPost(_ node: TypealiasDeclSyntax) {
+    override func visitPost(_ node: TypeAliasDeclSyntax) {
         visitors.forEach { $0.visitPost(node) }
     }
 
-    override func visitPost(_ node: AssociatedtypeDeclSyntax) {
+    override func visitPost(_ node: AssociatedTypeDeclSyntax) {
         visitors.forEach { $0.visitPost(node) }
     }
 

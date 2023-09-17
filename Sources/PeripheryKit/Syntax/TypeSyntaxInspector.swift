@@ -28,14 +28,14 @@ struct TypeSyntaxInspector {
     // MARK: - Private
 
     func types(for typeSyntax: TypeSyntax) -> Set<TokenSyntax> {
-        if let simpleType = typeSyntax.as(SimpleTypeIdentifierSyntax.self) {
+        if let identifierType = typeSyntax.as(IdentifierTypeSyntax.self) {
             // Simple type.
-            var result = simpleType.genericArgumentClause?.arguments.flatMapSet { types(for: $0.argumentType) } ?? []
-            return result.inserting(simpleType.name)
+            var result = identifierType.genericArgumentClause?.arguments.flatMapSet { types(for: $0.argument) } ?? []
+            return result.inserting(identifierType.name)
         } else if let optionalType = typeSyntax.as(OptionalTypeSyntax.self) {
             // Optional type.
             return types(for: optionalType.wrappedType)
-        } else if let memberType = typeSyntax.as(MemberTypeIdentifierSyntax.self) {
+        } else if let memberType = typeSyntax.as(MemberTypeSyntax.self) {
             // Member type.
             return types(for: memberType.baseType).union([memberType.name])
         } else if let tuple = typeSyntax.as(TupleTypeSyntax.self) {
@@ -43,17 +43,17 @@ struct TypeSyntaxInspector {
             return tuple.elements.flatMapSet { types(for: $0.type) }
         } else if let funcType = typeSyntax.as(FunctionTypeSyntax.self) {
             // Function type.
-            let argumentTypes = funcType.arguments.flatMapSet { types(for: $0.type) }
-            return types(for: funcType.output.returnType).union(argumentTypes)
+            let argumentTypes = funcType.parameters.flatMapSet { types(for: $0.type) }
+            return types(for: funcType.returnClause.type).union(argumentTypes)
         } else if let arrayType = typeSyntax.as(ArrayTypeSyntax.self) {
             // Array type.
-            return types(for: arrayType.elementType)
+            return types(for: arrayType.element)
         } else if let dictType = typeSyntax.as(DictionaryTypeSyntax.self) {
             // Dictionary type.
-            return types(for: dictType.keyType).union(types(for: dictType.valueType))
-        } else if let someType = typeSyntax.as(ConstrainedSugarTypeSyntax.self) {
+            return types(for: dictType.key).union(types(for: dictType.value))
+        } else if let someType = typeSyntax.as(SomeOrAnyTypeSyntax.self) {
             // Some type.
-            return types(for: someType.baseType)
+            return types(for: someType.constraint)
         } else if let implicitUnwrappedOptionalType = typeSyntax.as(ImplicitlyUnwrappedOptionalTypeSyntax.self) {
             // Implicitly unwrapped optional type.
             return types(for: implicitUnwrappedOptionalType.wrappedType)

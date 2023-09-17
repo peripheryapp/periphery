@@ -142,7 +142,7 @@ struct UnusedParameterParser {
     static func parse(file: SourceFile, parseProtocols: Bool) throws -> [Function] {
         let source = try String(contentsOf: file.path.url)
         let syntax = Parser.parse(source: source)
-        let locationConverter = SourceLocationConverter(file: file.path.string, tree: syntax)
+        let locationConverter = SourceLocationConverter(fileName: file.path.string, tree: syntax)
         return parse(
             file: file,
             syntax: syntax,
@@ -189,14 +189,14 @@ struct UnusedParameterParser {
             parsed = parse(node: node.base, collector)
         } else if let node = node.as(CodeBlockItemSyntax.self) {
             parsed = parse(node: node.item, collector)
-        } else if let node = node.as(ParameterClauseSyntax.self) {
-            parsed = parse(node: node.parameterList, collector)
+        } else if let node = node.as(FunctionParameterClauseSyntax.self) {
+            parsed = parse(node: node.parameters, collector)
         } else if let node = node.as(VariableDeclSyntax.self) {
             parsed = parse(variableDecl: node, collector)
         } else if let node = node.as(ClosureExprSyntax.self) {
             parsed = parse(closureExpr: node, collector)
-        } else if let node = node.as(IdentifierExprSyntax.self) {
-            parsed = parse(identifier: node.identifier)
+        } else if let node = node.as(DeclReferenceExprSyntax.self) {
+            parsed = parse(identifier: node.baseName)
         } else if let node = node.as(FunctionParameterSyntax.self) {
             parsed = parse(functionParameter: node)
         } else if let node = node.as(FunctionDeclSyntax.self) {
@@ -258,7 +258,7 @@ struct UnusedParameterParser {
 
     private func parse<T>(closureExpr syntax: ClosureExprSyntax, _ collector: Collector<T>?) -> Closure? {
         let signature = syntax.children(viewMode: .sourceAccurate).mapFirst { $0.as(ClosureSignatureSyntax.self) }
-        let rawParams = signature?.input?.children(viewMode: .sourceAccurate).compactMap { $0.as(ClosureParamSyntax.self) }
+        let rawParams = signature?.parameterClause?.children(viewMode: .sourceAccurate).compactMap { $0.as(ClosureShorthandParameterSyntax.self) }
         let params = rawParams?.map { $0.name.text } ?? []
         let items = syntax.statements.compactMap { parse(node: $0.item, collector) }
         return Closure(params: params, items: items)
@@ -284,7 +284,7 @@ struct UnusedParameterParser {
 
         let items = bindings.flatMap {
             let initializerItems = $0.initializer?.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) } ?? []
-            let accessorItems = $0.accessor?.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) } ?? []
+            let accessorItems = $0.accessorBlock?.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) } ?? []
             return initializerItems + accessorItems
         }
 
@@ -302,8 +302,8 @@ struct UnusedParameterParser {
                      attributes: syntax.attributes,
                      genericParams: syntax.genericParameterClause,
                      body: syntax.body,
-                     named: syntax.identifier.text,
-                     position: syntax.identifier.positionAfterSkippingLeadingTrivia,
+                     named: syntax.name.text,
+                     position: syntax.name.positionAfterSkippingLeadingTrivia,
                      collector)
     }
 
@@ -335,7 +335,7 @@ struct UnusedParameterParser {
         let params = parse(children: syntax.children(viewMode: .sourceAccurate), collecting: Parameter.self)
         let items = parse(node: body, collector)?.items ?? []
         let fullName = buildFullName(for: name, with: params)
-        let genericParamNames = genericParams?.genericParameterList.compactMap { $0.name.text } ?? []
+        let genericParamNames = genericParams?.parameters.compactMap { $0.name.text } ?? []
         let attributeNames = attributes?.children(viewMode: .sourceAccurate).compactMap { AttributeSyntax($0)?.attributeName.trimmedDescription } ?? []
 
         let function = Function(
