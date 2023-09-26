@@ -87,7 +87,10 @@ var targets: [PackageDescription.Target] = [
     ),
     .target(
         name: "UnusedParameterFixtures",
-        path: "Tests/Fixtures/UnusedParameterFixtures"
+        path: "Tests/Fixtures/UnusedParameterFixtures",
+        swiftSettings: [
+            .unsafeFlags(["-suppress-warnings"]) // Suppress warnings from testLocalVariableAssignment
+        ]
     ),
     .target(
         name: "TypeSyntaxInspectorFixtures",
