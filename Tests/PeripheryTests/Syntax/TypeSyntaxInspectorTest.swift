@@ -134,7 +134,7 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
     init(file: SourceFile) throws {
         let source = try String(contentsOf: file.path.url)
         self.syntax = Parser.parse(source: source)
-        self.locationConverter = .init(file: file.path.string, tree: syntax)
+        self.locationConverter = .init(fileName: file.path.string, tree: syntax)
         self.sourceLocationBuilder = .init(file: file, locationConverter: locationConverter)
         self.typeSyntaxInspector = .init(sourceLocationBuilder: sourceLocationBuilder)
         super.init(viewMode: .sourceAccurate)
@@ -155,19 +155,19 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind {
-        if let returnTypeSyntax = node.signature.output?.returnType {
-            if let someTypeSyntax = returnTypeSyntax.as(ConstrainedSugarTypeSyntax.self) {
-                addResult(for: someTypeSyntax.baseType)
+        if let returnTypeSyntax = node.signature.returnClause?.type {
+            if let someTypeSyntax = returnTypeSyntax.as(SomeOrAnyTypeSyntax.self) {
+                addResult(for: someTypeSyntax.constraint)
             } else {
                 addResult(for: returnTypeSyntax)
             }
         }
 
-        for functionParameterSyntax in node.signature.input.parameterList {
+        for functionParameterSyntax in node.signature.parameterClause.parameters {
             addResult(for: functionParameterSyntax.type)
         }
 
-        if let genericParameterList = node.genericParameterClause?.genericParameterList {
+        if let genericParameterList = node.genericParameterClause?.parameters {
             for param in genericParameterList  {
                 if let inheritedType = param.inheritedType {
                     addResult(for: inheritedType)
@@ -175,10 +175,10 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
             }
         }
 
-        if let requirementList = node.genericWhereClause?.requirementList {
+        if let requirementList = node.genericWhereClause?.requirements {
             for requirement in requirementList {
-                if let conformanceRequirementType = requirement.body.as(ConformanceRequirementSyntax.self) {
-                    addResult(for: conformanceRequirementType.rightTypeIdentifier)
+                if let conformanceRequirementType = requirement.requirement.as(ConformanceRequirementSyntax.self) {
+                    addResult(for: conformanceRequirementType.rightType)
                 }
             }
         }
