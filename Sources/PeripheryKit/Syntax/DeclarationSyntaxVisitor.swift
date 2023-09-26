@@ -103,6 +103,11 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
 
         if let memberType = node.extendedType.as(MemberTypeSyntax.self) {
             position = memberType.name.positionAfterSkippingLeadingTrivia
+        } else if let genericArgumentClause = node.extendedType.as(IdentifierTypeSyntax.self)?.genericArgumentClause {
+            // Generic protocol extensions in the form `extension Foo<Type>` have incorrect locations in the index store.
+            // This results in syntax metadata not being applied to the declaration due to the location mismatch. To
+            // workaround this, parse this node with the incorrect location.
+            position = genericArgumentClause.rightAngle.positionAfterSkippingLeadingTrivia
         }
 
         parse(

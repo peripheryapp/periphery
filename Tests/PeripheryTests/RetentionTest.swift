@@ -476,6 +476,25 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRetainsGenericProtocolExtensionMembers() {
+        analyze(retainPublic: true) {
+            assertReferenced(.protocol("FixtureProtocol38"))
+            assertReferenced(.extensionProtocol("FixtureProtocol38")) {
+                self.assertReferenced(.functionMethodInstance("someFunc()"))
+            }
+
+            assertReferenced(.protocol("FixtureProtocol39"))
+            assertReferenced(.extensionProtocol("FixtureProtocol39")) {
+                self.assertReferenced(.functionMethodInstance("someFunc()"))
+            }
+
+            assertReferenced(.protocol("FixtureProtocol40"))
+            assertReferenced(.extensionProtocol("FixtureProtocol40")) {
+                self.assertReferenced(.functionMethodInstance("someFunc()"))
+            }
+        }
+    }
+
     func testUnusedTypealias() {
         analyze() {
             assertNotReferenced(.typealias("UnusedAlias"))

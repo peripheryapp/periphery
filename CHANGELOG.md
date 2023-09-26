@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix retaining members of public generic protocol extensions with `--retain-public`.
 
 ## 2.15.1 (2023-09-17)
 
