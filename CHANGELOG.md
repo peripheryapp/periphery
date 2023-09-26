@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- SwiftUI previews (`PreviewProvider`) are no longer retained by default. Retain them with `--retain-swift-ui-previews`.
 
 ##### Bug Fixes
 

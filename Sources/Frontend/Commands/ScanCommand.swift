@@ -75,6 +75,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Retain unused protocol function parameters, even if the parameter is unused in all conforming functions")
     var retainUnusedProtocolFuncParams: Bool = defaultConfiguration.$retainUnusedProtocolFuncParams.defaultValue
 
+    @Flag(help: "Retain SwiftUI previews")
+    var retainSwiftUIPreviews: Bool = defaultConfiguration.$retainSwiftUIPreviews.defaultValue
+
     @Flag(help: "Clean existing build artifacts before building")
     var cleanBuild: Bool = defaultConfiguration.$cleanBuild.defaultValue
 
@@ -119,6 +122,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$retainObjcAccessible, retainObjcAccessible)
         configuration.apply(\.$retainObjcAnnotated, retainObjcAnnotated)
         configuration.apply(\.$retainUnusedProtocolFuncParams, retainUnusedProtocolFuncParams)
+        configuration.apply(\.$retainSwiftUIPreviews, retainSwiftUIPreviews)
         configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
         configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
         configuration.apply(\.$externalTestCaseClasses, externalTestCaseClasses)

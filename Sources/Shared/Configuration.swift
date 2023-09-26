@@ -65,6 +65,9 @@ public final class Configuration {
     @Setting(key: "retain_unused_protocol_func_params", defaultValue: false)
     public var retainUnusedProtocolFuncParams: Bool
 
+    @Setting(key: "retain_swift_ui_previews", defaultValue: false)
+    public var retainSwiftUIPreviews: Bool
+
     @Setting(key: "disable_redundant_public_analysis", defaultValue: false)
     public var disableRedundantPublicAnalysis: Bool
 
@@ -166,6 +169,10 @@ public final class Configuration {
             config[$retainUnusedProtocolFuncParams.key] = retainUnusedProtocolFuncParams
         }
 
+        if $retainSwiftUIPreviews.hasNonDefaultValue {
+            config[$retainSwiftUIPreviews.key] = retainSwiftUIPreviews
+        }
+
         if $disableRedundantPublicAnalysis.hasNonDefaultValue {
             config[$disableRedundantPublicAnalysis.key] = disableRedundantPublicAnalysis
         }
@@ -252,6 +259,8 @@ public final class Configuration {
                 $retainObjcAnnotated.assign(value)
             case $retainUnusedProtocolFuncParams.key:
                 $retainUnusedProtocolFuncParams.assign(value)
+            case $retainSwiftUIPreviews.key:
+                $retainSwiftUIPreviews.assign(value)
             case $disableRedundantPublicAnalysis.key:
                 $disableRedundantPublicAnalysis.assign(value)
             case $verbose.key:
@@ -292,6 +301,7 @@ public final class Configuration {
         $retainObjcAccessible.reset()
         $retainObjcAnnotated.reset()
         $retainUnusedProtocolFuncParams.reset()
+        $retainSwiftUIPreviews.reset()
         $disableRedundantPublicAnalysis.reset()
         $externalEncodableProtocols.reset()
         $externalTestCaseClasses.reset()
