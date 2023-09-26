@@ -58,7 +58,7 @@ jobs:
         swift: ["5.9", "5.8"]
         include:
           - swift: "5.9"
-            container: "swiftlang/swift:nightly-5.9-jammy"
+            container: "swift:5.9"
             cache-version: 1
           - swift: "5.8"
             container: "swift:5.8"
