@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.16.0 (2023-09-27)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - SwiftUI previews (`PreviewProvider`) are no longer retained by default. Retain them with `--retain-swift-ui-previews`.
 
 ##### Bug Fixes
