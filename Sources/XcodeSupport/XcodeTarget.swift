@@ -6,6 +6,7 @@ import Shared
 
 final class XcodeTarget {
     let project: XcodeProject
+    var triple: String?
 
     private let target: PBXTarget
     private var files: [ProjectFileKind: Set<FilePath>] = [:]
@@ -39,7 +40,7 @@ final class XcodeTarget {
     }
 
     var packageDependencyNames: Set<String> {
-        Set(target.packageProductDependencies.map { $0.productName })
+        target.packageProductDependencies.mapSet { $0.productName }
     }
 
     // MARK: - Private
@@ -48,8 +49,8 @@ final class XcodeTarget {
         let targetPhases = buildPhases.filter { target.buildPhases.contains($0) }
         let sourceRoot = project.sourceRoot.lexicallyNormalized()
 
-        files[kind] = Set(try targetPhases.flatMap {
-            try ($0.files ?? []).compactMap {
+        files[kind] = try targetPhases.flatMapSet {
+            try ($0.files ?? []).compactMapSet {
                 if let stringPath = try $0.file?.fullPath(sourceRoot: sourceRoot.string) {
                     let path = FilePath(stringPath)
                     if let ext = path.extension, kind.extensions.contains(ext.lowercased()) {
@@ -59,14 +60,14 @@ final class XcodeTarget {
 
                 return nil
             }
-        })
+        }
     }
 
     private func identifyInfoPlistFiles() throws {
         let plistFiles = target.buildConfigurationList?.buildConfigurations.compactMap {
             $0.buildSettings["INFOPLIST_FILE"] as? String
         } ?? []
-        files[.infoPlist] = Set(plistFiles.map { parseInfoPlistSetting($0) })
+        files[.infoPlist] = plistFiles.mapSet { parseInfoPlistSetting($0) }
     }
 
     private func parseInfoPlistSetting(_ setting: String) -> FilePath {

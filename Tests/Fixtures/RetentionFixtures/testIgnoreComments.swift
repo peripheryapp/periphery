@@ -42,6 +42,9 @@ public class FixtureClass116 {
     // periphery:ignore
     var assignOnlyProperty = 0
 
+    // periphery:ignore - some comment describing the need to retain this declaration
+    let commentWithTrailingDescription = 0
+
     public func retain() {
         assignOnlyProperty = 1
     }

@@ -47,8 +47,14 @@ public final class Configuration {
     @Setting(key: "external_encodable_protocols", defaultValue: [])
     public var externalEncodableProtocols: [String]
 
+    @Setting(key: "external_test_case_classes", defaultValue: [])
+    public var externalTestCaseClasses: [String]
+
     @Setting(key: "retain_objc_accessible", defaultValue: false)
     public var retainObjcAccessible: Bool
+
+    @Setting(key: "retain_objc_annotated", defaultValue: false)
+    public var retainObjcAnnotated: Bool
 
     @Setting(key: "retain_public", defaultValue: false)
     public var retainPublic: Bool
@@ -58,6 +64,9 @@ public final class Configuration {
 
     @Setting(key: "retain_unused_protocol_func_params", defaultValue: false)
     public var retainUnusedProtocolFuncParams: Bool
+
+    @Setting(key: "retain_swift_ui_previews", defaultValue: false)
+    public var retainSwiftUIPreviews: Bool
 
     @Setting(key: "disable_redundant_public_analysis", defaultValue: false)
     public var disableRedundantPublicAnalysis: Bool
@@ -138,6 +147,10 @@ public final class Configuration {
             config[$retainObjcAccessible.key] = retainObjcAccessible
         }
 
+        if $retainObjcAnnotated.hasNonDefaultValue {
+            config[$retainObjcAnnotated.key] = retainObjcAnnotated
+        }
+        
         if $retainPublic.hasNonDefaultValue {
             config[$retainPublic.key] = retainPublic
         }
@@ -154,8 +167,16 @@ public final class Configuration {
             config[$externalEncodableProtocols.key] = externalEncodableProtocols
         }
 
+        if $externalTestCaseClasses.hasNonDefaultValue {
+            config[$externalTestCaseClasses.key] = externalTestCaseClasses
+        }
+
         if $retainUnusedProtocolFuncParams.hasNonDefaultValue {
             config[$retainUnusedProtocolFuncParams.key] = retainUnusedProtocolFuncParams
+        }
+
+        if $retainSwiftUIPreviews.hasNonDefaultValue {
+            config[$retainSwiftUIPreviews.key] = retainSwiftUIPreviews
         }
 
         if $disableRedundantPublicAnalysis.hasNonDefaultValue {
@@ -244,10 +265,16 @@ public final class Configuration {
                 $retainAssignOnlyPropertyTypes.assign(value)
             case $externalEncodableProtocols.key:
                 $externalEncodableProtocols.assign(value)
+            case $externalTestCaseClasses.key:
+                $externalTestCaseClasses.assign(value)
             case $retainObjcAccessible.key:
                 $retainObjcAccessible.assign(value)
+            case $retainObjcAnnotated.key:
+                $retainObjcAnnotated.assign(value)
             case $retainUnusedProtocolFuncParams.key:
                 $retainUnusedProtocolFuncParams.assign(value)
+            case $retainSwiftUIPreviews.key:
+                $retainSwiftUIPreviews.assign(value)
             case $disableRedundantPublicAnalysis.key:
                 $disableRedundantPublicAnalysis.assign(value)
             case $disableRedundantInternalAnalysis.key:
@@ -290,11 +317,14 @@ public final class Configuration {
         $retainAssignOnlyProperties.reset()
         $retainAssignOnlyPropertyTypes.reset()
         $retainObjcAccessible.reset()
+        $retainObjcAnnotated.reset()
         $retainUnusedProtocolFuncParams.reset()
+        $retainSwiftUIPreviews.reset()
         $disableRedundantPublicAnalysis.reset()
         $disableRedundantInternalAnalysis.reset()
         $disableRedundantFilePrivateAnalysis.reset()
         $externalEncodableProtocols.reset()
+        $externalTestCaseClasses.reset()
         $verbose.reset()
         $quiet.reset()
         $disableUpdateCheck.reset()

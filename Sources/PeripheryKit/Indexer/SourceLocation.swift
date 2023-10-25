@@ -2,13 +2,16 @@ import Foundation
 
 public class SourceLocation {
     public let file: SourceFile
-    public let line: Int64
-    public let column: Int64
+    public let line: Int
+    public let column: Int
 
-    init(file: SourceFile, line: Int64, column: Int64) {
+    private let identifier: Int
+
+    init(file: SourceFile, line: Int, column: Int) {
         self.file = file
         self.line = line
         self.column = column
+        self.identifier = [file.hashValue, line, column].hashValue
     }
 
     // MARK: - Private
@@ -28,19 +31,13 @@ public class SourceLocation {
 
 extension SourceLocation: Equatable {
     public static func == (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
-        let fileIsEqual = lhs.file == rhs.file
-        let lineIsEqual = lhs.line == rhs.line
-        let columnIsEqual = lhs.column == rhs.column
-
-        return fileIsEqual && lineIsEqual && columnIsEqual
+        lhs.identifier == rhs.identifier
     }
 }
 
 extension SourceLocation: Hashable {
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(file)
-        hasher.combine(line)
-        hasher.combine(column)
+        hasher.combine(identifier)
     }
 }
 

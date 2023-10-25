@@ -12,8 +12,7 @@ final class UsedDeclarationMarker: SourceGraphMutator {
         removeErroneousProtocolReferences()
         markUsed(graph.retainedDeclarations)
 
-        let rootReferencedDeclarations = Set(graph.rootReferences.flatMap { declarationsReferenced(by: $0) })
-        markUsed(rootReferencedDeclarations)
+        graph.rootReferences.forEach { markUsed(declarationsReferenced(by: $0)) }
 
         ignoreUnusedDescendents(in: graph.rootDeclarations,
                                 unusedDeclarations: graph.unusedDeclarations)
@@ -45,13 +44,15 @@ final class UsedDeclarationMarker: SourceGraphMutator {
             guard !graph.isUsed(declaration) else { continue }
 
             graph.markUsed(declaration)
-            markUsed(declarationsReferenced(by: declaration))
-        }
-    }
 
-    private func declarationsReferenced(by declaration: Declaration) -> Set<Declaration> {
-        let allReferences = declaration.references.union(declaration.related)
-        return Set(allReferences.flatMap { declarationsReferenced(by: $0) })
+            for ref in declaration.references {
+                markUsed(declarationsReferenced(by: ref))
+            }
+
+            for ref in declaration.related {
+                markUsed(declarationsReferenced(by: ref))
+            }
+        }
     }
 
     private func declarationsReferenced(by reference: Reference) -> Set<Declaration> {

@@ -20,9 +20,8 @@ public final class SourceGraph {
     private(set) var ignoredDeclarations: Set<Declaration> = []
     private(set) var assetReferences: Set<AssetReference> = []
     private(set) var mainAttributedDeclarations: Set<Declaration> = []
-    private(set) var letShorthandContainerDeclarations: Set<Declaration> = []
+    private(set) var allReferencesByUsr: [String: Set<Reference>] = [:]
 
-    private var allReferencesByUsr: [String: Set<Reference>] = [:]
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
 
@@ -50,7 +49,7 @@ public final class SourceGraph {
     }
 
     func declarations(ofKinds kinds: [Declaration.Kind]) -> Set<Declaration> {
-        Set(kinds.compactMap { allDeclarationsByKind[$0] }.joined())
+        kinds.flatMapSet { allDeclarationsByKind[$0, default: []] }
     }
 
     func explicitDeclaration(withUsr usr: String) -> Declaration? {
@@ -58,7 +57,7 @@ public final class SourceGraph {
     }
 
     func references(to decl: Declaration) -> Set<Reference> {
-        Set(decl.usrs.flatMap { allReferencesByUsr[$0, default: []] })
+        decl.usrs.flatMapSet { allReferencesByUsr[$0, default: []] }
     }
 
     func hasReferences(to decl: Declaration) -> Bool {
@@ -135,21 +134,9 @@ public final class SourceGraph {
         }
     }
 
-    func markLetShorthandContainer(_ declaration: Declaration) {
-        withLock {
-            _ = letShorthandContainerDeclarations.insert(declaration)
-        }
-    }
-
     func isRetained(_ declaration: Declaration) -> Bool {
         withLock {
             retainedDeclarations.contains(declaration)
-        }
-    }
-
-    func add(_ declaration: Declaration) {
-        withLock {
-            addUnsafe(declaration)
         }
     }
 
@@ -159,6 +146,18 @@ public final class SourceGraph {
 
         if !declaration.isImplicit {
             declaration.usrs.forEach { allExplicitDeclarationsByUsr[$0] = declaration }
+        }
+    }
+
+    func addUnsafe(_ declarations: Set<Declaration>) {
+        allDeclarations.formUnion(declarations)
+
+        for declaration in declarations {
+            allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
+
+            if !declaration.isImplicit {
+                declaration.usrs.forEach { allExplicitDeclarationsByUsr[$0] = declaration }
+            }
         }
     }
 
@@ -187,6 +186,11 @@ public final class SourceGraph {
     func addUnsafe(_ reference: Reference) {
         _ = allReferences.insert(reference)
         allReferencesByUsr[reference.usr, default: []].insert(reference)
+    }
+
+    func addUnsafe(_ references: Set<Reference>) {
+        allReferences.formUnion(references)
+        references.forEach { allReferencesByUsr[$0.usr, default: []].insert($0) }
     }
 
     func add(_ reference: Reference, from declaration: Declaration) {
@@ -261,19 +265,17 @@ public final class SourceGraph {
         inheritedTypeReferences(of: decl).compactMap { explicitDeclaration(withUsr: $0.usr) }
     }
 
-    func immediateSubclasses(of decl: Declaration) -> [Declaration] {
-        let allClasses = allDeclarationsByKind[.class] ?? []
-        return allClasses
-            .filter {
-                $0.related.contains(where: { ref in
-                    ref.kind == .class && decl.usrs.contains(ref.usr)
-                })
-            }.filter { $0 != decl }
+    func immediateSubclasses(of decl: Declaration) -> Set<Declaration> {
+        references(to: decl)
+            .filter { $0.isRelated && $0.kind == .class }
+            .flatMap { $0.parent?.usrs ?? [] }
+            .compactMapSet { explicitDeclaration(withUsr: $0) }
     }
 
-    func subclasses(of decl: Declaration) -> [Declaration] {
+    func subclasses(of decl: Declaration) -> Set<Declaration> {
         let immediate = immediateSubclasses(of: decl)
-        return immediate + immediate.flatMap { subclasses(of: $0) }
+        let allSubclasses = immediate.flatMapSet { subclasses(of: $0) }
+        return immediate.union(allSubclasses)
     }
 
     func withLock<T>(_ block: () -> T) -> T {
@@ -281,7 +283,7 @@ public final class SourceGraph {
     }
 
     func extendedDeclarationReference(forExtension extensionDeclaration: Declaration) throws -> Reference? {
-        guard let extendedKind = extensionDeclaration.kind.extendedKind?.referenceEquivalent else {
+        guard let extendedKind = extensionDeclaration.kind.extendedKind else {
             throw PeripheryError.sourceGraphIntegrityError(message: "Unknown extended reference kind for extension '\(extensionDeclaration.kind.rawValue)'")
         }
 
@@ -304,7 +306,7 @@ public final class SourceGraph {
         let baseDecl = references(to: decl)
             .filter {
                 $0.isRelated &&
-                $0.kind == decl.kind.referenceEquivalent &&
+                $0.kind == decl.kind &&
                 $0.name == decl.name
             }
             .compactMap { $0.parent }

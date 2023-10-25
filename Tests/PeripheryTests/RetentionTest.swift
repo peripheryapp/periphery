@@ -438,11 +438,22 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         analyze() {
             assertReferenced(.class("FixtureClass34")) {
                 self.assertReferenced(.functionMethodInstance("testSomething()"))
+                self.assertNotReferenced(.functionMethodInstance("testNotATest(param:)"))
                 self.assertReferenced(.functionMethodInstance("setUp()"))
                 self.assertReferenced(.functionMethodStatic("setUp()"))
             }
             assertReferenced(.class("FixtureClass34Subclass")) {
                 self.assertReferenced(.functionMethodInstance("testSubclass()"))
+            }
+        }
+    }
+
+    func testExternalXCTestCaseClass() {
+        configuration.externalTestCaseClasses = ["ExternalTestCase"]
+
+        analyze {
+            assertReferenced(.class("FixtureClass217")) {
+                self.assertReferenced(.functionMethodInstance("testSomeTestCase()"))
             }
         }
     }
@@ -462,6 +473,25 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass37"))
             assertReferenced(.protocol("FixtureProtocol37"))
+        }
+    }
+
+    func testRetainsGenericProtocolExtensionMembers() {
+        analyze(retainPublic: true) {
+            assertReferenced(.protocol("FixtureProtocol38"))
+            assertReferenced(.extensionProtocol("FixtureProtocol38")) {
+                self.assertReferenced(.functionMethodInstance("someFunc()"))
+            }
+
+            assertReferenced(.protocol("FixtureProtocol39"))
+            assertReferenced(.extensionProtocol("FixtureProtocol39")) {
+                self.assertReferenced(.functionMethodInstance("someFunc()"))
+            }
+
+            assertReferenced(.protocol("FixtureProtocol40"))
+            assertReferenced(.extensionProtocol("FixtureProtocol40")) {
+                self.assertReferenced(.functionMethodInstance("someFunc()"))
+            }
         }
     }
 
@@ -887,6 +917,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 self.assertReferenced(.varInstance("multiBindingPropertyA"))
                 self.assertReferenced(.varInstance("multiBindingPropertyB"))
                 self.assertReferenced(.varInstance("assignOnlyProperty"))
+                self.assertReferenced(.varInstance("commentWithTrailingDescription"))
                 self.assertNotAssignOnlyProperty(.varInstance("assignOnlyProperty"))
             }
             assertReferenced(.class("FixtureClass212")) {
@@ -989,34 +1020,6 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.struct("FixtureStruct1")) {
                 self.assertReferenced(.functionMethodInstance("callAsFunction(_:)"))
             }
-        }
-    }
-
-    func testLetShorthandSyntax() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass117")) {
-                self.assertReferenced(.varInstance("simpleProperty"))
-                self.assertNotAssignOnlyProperty(.varInstance("simpleProperty"))
-
-                self.assertReferenced(.varInstance("guardedSimpleProperty"))
-                self.assertReferenced(.varInstance("complexProperty"))
-                self.assertReferenced(.varInstance("propertyReferencedFromExtension"))
-                self.assertReferenced(.varInstance("computedPropertyInExtension"))
-                self.assertReferenced(.varInstance("propertyReferencedFromNestedFunction"))
-                self.assertReferenced(.varInstance("propertyReferencedFromPropertyAccessor"))
-
-                self.assertReferenced(.varInstance("propertyReferencedFromDeepChain"))
-                self.assertNotAssignOnlyProperty(.varInstance("propertyReferencedFromDeepChain"))
-            }
-
-            #if swift(>=5.8)
-            self.assertReferenced(.varGlobal("fixtureClass117StaticProperty"))
-            #else
-            // This property should be referenced, but the let shorthand workaround doesn't
-            // handle properties at global (file) scope. This will remain broken until the
-            // issue is resolved in Swift: https://github.com/apple/swift/issues/61509.
-            self.assertNotReferenced(.varGlobal("fixtureClass117StaticProperty"))
-            #endif
         }
     }
 
@@ -1505,7 +1508,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    // https://bugs.swift.org/browse/SR-14181
+    // https://github.com/apple/swift/issues/64686
     // https://github.com/peripheryapp/periphery/issues/264
     func testSelfReferencedConstructor() {
         analyze(retainPublic: true) {
@@ -1523,7 +1526,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
     // MARK: - Known Failures
 
-    // https://bugs.swift.org/browse/SR-14162
+    // https://github.com/apple/swift/issues/56541
     func testStaticMemberUsedAsSubscriptKey() {
         guard performKnownFailures else { return }
 
@@ -1534,28 +1537,13 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    // https://bugs.swift.org/browse/SR-13768
+    // https://github.com/apple/swift/issues/56165
     func testCustomConstructorWithLiteral() {
         guard performKnownFailures else { return }
 
         analyze(retainPublic: true) {
             assertReferenced(.extensionStruct("Array")) {
                 self.assertReferenced(.functionConstructor("init(title:)"))
-            }
-        }
-    }
-
-    // Broken as of Xcode 10.
-    // https://bugreport.apple.com/web/?problemID=44703843
-    func testGetSetPropertyWithDefaultImplementation() {
-        guard performKnownFailures else { return }
-
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass100")) {
-                self.assertReferenced(.varInstance("someGetSetVar"))
-            }
-            assertReferenced(.protocol("FixtureProtocol100")) {
-                self.assertReferenced(.varInstance("someGetSetVar"))
             }
         }
     }

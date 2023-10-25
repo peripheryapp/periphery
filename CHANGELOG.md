@@ -12,6 +12,96 @@
 
 - None.
 
+## 2.16.0 (2023-09-27)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- SwiftUI previews (`PreviewProvider`) are no longer retained by default. Retain them with `--retain-swift-ui-previews`.
+
+##### Bug Fixes
+
+- Fix retaining members of public generic protocol extensions with `--retain-public`.
+
+## 2.15.1 (2023-09-17)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- Swift 5.9 support.
+
+##### Bug Fixes
+
+- Path forward slashes in JSON output formats are no longer escaped.
+- `INDEX_ENABLE_DATA_STORE` is now forcefully enabled as it's required for indexing in some cases.
+
+## 2.15.0 (2023-07-04)
+
+##### Breaking
+
+- Swift 5.7 and macOS 12 are no longer supported.
+
+##### Enhancements
+
+- Reduced indexing and analysis runtime by ~60%.
+
+##### Bug Fixes
+
+- Fix indexing multi-platform projects such as those containing watchOS extensions.
+- Subclasses of CLKComplicationPrincipalClass referenced from an Info.plist are now retained.
+
+## 2.14.1 (2023-06-25)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- Revert SwiftPM binary command plugin. Sorry folks, but SwiftPM doesn't provide the appropriate permissions for Periphery to build projects in the sandbox.
+
+## 2.14.0 (2023-06-24)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- Add the `--retain-objc-annotated` option.
+- Added support for SwiftPM binary command plugin.
+
+##### Bug Fixes
+
+- None.
+
+## 2.13.0 (2023-05-14)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- Improve indexing performance when multiple index stores are provided.
+- Added `--external-test-case-classes` option to allow external types to be treated as XCTestCase subclasses.
+- Comment commands now support trailing comments, e.g `// periphery:ignore - explanation of why this is necessary`
+
+##### Bug Fixes
+
+- Fix handling of relative paths in `--file-targets-path`.
+- Fix redundant public accessibility false positives when `--retain-objc-accessible` is enabled.
+
 ## 2.12.3 (2023-03-22)
 
 ##### Breaking
@@ -71,7 +161,7 @@
 
 ##### Enhancements
 
-- Add CodeClimate output formatter available via the `--format codeclimate` option. 
+- Add CodeClimate output formatter available via the `--format codeclimate` option.
 - Add support for third-party build systems, such as Bazel.
 
 ##### Bug Fixes
@@ -617,7 +707,7 @@
 - Properties named in struct implicit constructors are now retained.
 - Implicit declarations such as struct constructors are now retained.
 - A `typealias` that defines an `associatedtype` in an external protocol is now retained.
-- All custom `appendInterpolation` methods are now retained, as they cannot be identified as unused due to https://bugs.swift.org/browse/SR-13792.
+- All custom `appendInterpolation` methods are now retained, as they cannot be identified as unused due to https://github.com/apple/swift/issues/56189
 - Fixed path resolution for nested projects in Xcode workspaces.
 - `wrappedValue` and `projectedValue` properties in property wrappers are now retained.
 - `XCTestManifests.swift` is now treated as an entry point file like `LinuxMain.swift`.

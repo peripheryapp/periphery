@@ -20,8 +20,8 @@ class SwiftUIProjectTest: SourceGraphTestCase {
         assertReferenced(.struct("SwiftUIProjectApp"))
     }
 
-    func testRetainsPreviewProvider() {
-        assertReferenced(.struct("ContentView_Previews"))
+    func testDoesNotRetainPreviewProvider() {
+        assertNotReferenced(.struct("ContentView_Previews"))
     }
 
     func testRetainsLibraryContentProvider() {

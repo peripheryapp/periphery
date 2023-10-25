@@ -10,21 +10,37 @@ final class ObjCAccessibleRetainer: SourceGraphMutator {
         self.configuration = configuration
     }
 
-    func mutate() {
-        guard configuration.retainObjcAccessible else { return }
+    func mutate() throws {
+        guard configuration.retainObjcAccessible || configuration.retainObjcAnnotated else { return }
 
-        Declaration.Kind.accessibleKinds
-            .flatMap {
-                graph.declarations(ofKind: $0)
+        for decl in graph.declarations(ofKinds: Declaration.Kind.accessibleKinds) {
+            guard decl.attributes.contains("objc") ||
+                    decl.attributes.contains("objc.name") ||
+                    decl.attributes.contains("objcMembers") else { continue }
+
+            decl.isObjcAccessible = true
+            graph.markRetained(decl)
+
+            if configuration.retainObjcAnnotated {
+                if decl.attributes.contains("objcMembers") || decl.kind == .protocol || decl.kind == .extensionClass {
+                    decl.declarations.forEach {
+                        $0.isObjcAccessible = true
+                        graph.markRetained($0)
+                    }
+                }
             }
-            .filter {
-                $0.attributes.contains("objc") ||
-                    $0.attributes.contains("objc.name") ||
-                    $0.attributes.contains("objcMembers")
+        }
+
+        if configuration.retainObjcAnnotated {
+            for extDecl in graph.declarations(ofKind: .extensionClass) {
+                if let extendedClass = try graph.extendedDeclaration(forExtension: extDecl),
+                   extendedClass.attributes.contains("objcMembers") {
+                    extDecl.declarations.forEach {
+                        $0.isObjcAccessible = true
+                        graph.markRetained($0)
+                    }
+                }
             }
-            .forEach {
-                $0.isObjcAccessible = true
-                graph.markRetained($0)
-            }
+        }
     }
 }

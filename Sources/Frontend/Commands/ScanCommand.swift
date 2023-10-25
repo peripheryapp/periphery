@@ -69,11 +69,20 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Comma-separated list of external protocols that inherit Encodable. Properties of types conforming to these protocols will be retained", transform: split(by: ","))
     var externalEncodableProtocols: [String] = defaultConfiguration.$externalEncodableProtocols.defaultValue
 
+    @Option(parsing: .upToNextOption, help: "Names of XCTestCase subclasses that reside in external targets")
+    var externalTestCaseClasses: [String] = defaultConfiguration.$externalTestCaseClasses.defaultValue
+
     @Flag(help: "Retain declarations that are exposed to Objective-C implicitly by inheriting NSObject classes, or explicitly with the @objc and @objcMembers attributes")
     var retainObjcAccessible: Bool = defaultConfiguration.$retainObjcAccessible.defaultValue
 
+    @Flag(help: "Retain declarations that are exposed to Objective-C explicitly with the @objc and @objcMembers attributes")
+    var retainObjcAnnotated: Bool = defaultConfiguration.$retainObjcAnnotated.defaultValue
+
     @Flag(help: "Retain unused protocol function parameters, even if the parameter is unused in all conforming functions")
     var retainUnusedProtocolFuncParams: Bool = defaultConfiguration.$retainUnusedProtocolFuncParams.defaultValue
+
+    @Flag(help: "Retain SwiftUI previews")
+    var retainSwiftUIPreviews: Bool = defaultConfiguration.$retainSwiftUIPreviews.defaultValue
 
     @Flag(help: "Clean existing build artifacts before building")
     var cleanBuild: Bool = defaultConfiguration.$cleanBuild.defaultValue
@@ -117,11 +126,14 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$retainAssignOnlyProperties, retainAssignOnlyProperties)
         configuration.apply(\.$retainAssignOnlyPropertyTypes, retainAssignOnlyPropertyTypes)
         configuration.apply(\.$retainObjcAccessible, retainObjcAccessible)
+        configuration.apply(\.$retainObjcAnnotated, retainObjcAnnotated)
         configuration.apply(\.$retainUnusedProtocolFuncParams, retainUnusedProtocolFuncParams)
+        configuration.apply(\.$retainSwiftUIPreviews, retainSwiftUIPreviews)
         configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
         configuration.apply(\.$disableRedundantInternalAnalysis, disableRedundantInternalAnalysis)
         configuration.apply(\.$disableRedundantFilePrivateAnalysis, disableRedundantFilePrivateAnalysis)
         configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
+        configuration.apply(\.$externalTestCaseClasses, externalTestCaseClasses)
         configuration.apply(\.$verbose, verbose)
         configuration.apply(\.$quiet, quiet)
         configuration.apply(\.$disableUpdateCheck, disableUpdateCheck)

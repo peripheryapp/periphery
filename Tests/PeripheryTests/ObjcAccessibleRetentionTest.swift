@@ -5,18 +5,18 @@ import Shared
 @testable import PeripheryKit
 
 #if os(macOS)
-final class ObjcRetentionTest: FixtureSourceGraphTestCase {
+final class ObjcAccessibleRetentionTest: FixtureSourceGraphTestCase {
     let performKnownFailures = false
 
     static override func setUp() {
         super.setUp()
 
-        configuration.targets = ["ObjcRetentionFixtures"]
+        configuration.targets = ["ObjcAccessibleRetentionFixtures"]
 
         build(driver: SPMProjectDriver.self)
     }
 
-    // https://bugs.swift.org/browse/SR-13930
+    // https://github.com/apple/swift/issues/56327
     func testRetainsOptionalProtocolMethodImplementedInSubclass() {
         guard performKnownFailures else { return }
 

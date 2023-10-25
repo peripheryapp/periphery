@@ -5,18 +5,15 @@ import SystemPackage
 import Shared
 
 public final class SwiftIndexer: Indexer {
-    private let sourceFiles: [FilePath: Set<String>]
+    private let sourceFiles: [FilePath: Set<IndexTarget>]
     private let graph: SourceGraph
     private let logger: ContextualLogger
     private let configuration: Configuration
     private let indexStorePaths: [FilePath]
-
-    private lazy var letShorthandWorkaroundEnabled: Bool = {
-        SwiftVersion.current.version.isVersion(lessThan: "5.8")
-    }()
+    private let currentFilePath = FilePath.current
 
     public required init(
-        sourceFiles: [FilePath: Set<String>],
+        sourceFiles: [FilePath: Set<IndexTarget>],
         graph: SourceGraph,
         indexStorePaths: [FilePath],
         logger: Logger = .init(),
@@ -31,34 +28,58 @@ public final class SwiftIndexer: Indexer {
     }
 
     public func perform() throws {
-        var unitsByFile: [FilePath: [(IndexStore, IndexStoreUnit)]] = [:]
         let allSourceFiles = Set(sourceFiles.keys)
         let (includedFiles, excludedFiles) = filterIndexExcluded(from: allSourceFiles)
         excludedFiles.forEach { self.logger.debug("Excluding \($0.string)") }
 
-        for indexStorePath in indexStorePaths {
-            logger.debug("Reading \(indexStorePath)")
-            let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: .open())
+        let stores = try JobPool(jobs: indexStorePaths)
+            .map { [logger] indexStorePath in
+                logger.debug("Reading \(indexStorePath)")
+                let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: .open())
+                return (indexStore, indexStore.units(includeSystem: false))
+            }
 
-            try indexStore.forEachUnits(includeSystem: false) { unit -> Bool in
-                guard let filePath = try indexStore.mainFilePath(for: unit) else { return true }
+        let units = stores.reduce(into: [(IndexStore, IndexStoreUnit)]()) { result, tuple in
+            let (indexStore, units) = tuple
+            units.forEach { result.append((indexStore, $0)) }
+        }
 
-                let file = FilePath(filePath)
+        let unitsByFile = try JobPool(jobs: units)
+            .compactMap { [logger, sourceFiles, currentFilePath] (indexStore, unit) -> (FilePath, IndexStore, IndexStoreUnit)? in
+                guard let filePath = try indexStore.mainFilePath(for: unit) else { return nil }
+
+                let file = FilePath.makeAbsolute(filePath, relativeTo: currentFilePath)
 
                 if includedFiles.contains(file) {
-                    unitsByFile[file, default: []].append((indexStore, unit))
+                    // Ignore units built for other architectures/platforms.
+                    let validTargetTriples = sourceFiles[file]?.compactMapSet { $0.triple } ?? []
+
+                    if validTargetTriples.isEmpty {
+                        return (file, indexStore, unit)
+                    } else {
+                        if let unitTargetTriple = try indexStore.target(for: unit) {
+                            if validTargetTriples.contains(unitTargetTriple) {
+                                return (file, indexStore, unit)
+                            }
+                        } else {
+                            logger.warn("No unit target triple for: \(file)")
+                        }
+                    }
                 }
 
-                return true
+                return nil
             }
-        }
+           .reduce(into: [FilePath: [(IndexStore, IndexStoreUnit)]](), { result, tuple in
+               let (file, indexStore, unit) = tuple
+               result[file, default: []].append((indexStore, unit))
+           })
 
         let indexedFiles = Set(unitsByFile.keys)
         let unindexedFiles = allSourceFiles.subtracting(excludedFiles).subtracting(indexedFiles)
 
         if !unindexedFiles.isEmpty {
             unindexedFiles.forEach { logger.debug("Source file not indexed: \($0)") }
-            let targets: Set<String> = Set(unindexedFiles.flatMap { sourceFiles[$0] ?? [] })
+            let targets = unindexedFiles.flatMapSet { sourceFiles[$0] ?? [] }.mapSet { $0.name }
             throw PeripheryError.unindexedTargetsError(targets: targets, indexStorePaths: indexStorePaths)
         }
 
@@ -68,7 +89,7 @@ public final class SwiftIndexer: Indexer {
                 if let name = try indexStore.moduleName(for: unit) {
                     let (didInsert, _) = set.insert(name)
                     if !didInsert {
-                        let targets = try Set(units.compactMap { try indexStore.target(for: $0.1) })
+                        let targets = try units.compactMapSet { try indexStore.target(for: $0.1) }
                         throw PeripheryError.conflictingIndexUnitsError(file: file, module: name, unitTargets: targets)
                     }
                 }
@@ -80,8 +101,7 @@ public final class SwiftIndexer: Indexer {
                 units: units,
                 graph: graph,
                 logger: logger,
-                configuration: configuration,
-                letShorthandWorkaroundEnabled: letShorthandWorkaroundEnabled
+                configuration: configuration
             )
         }
 
@@ -121,15 +141,13 @@ public final class SwiftIndexer: Indexer {
         private let graph: SourceGraph
         private let logger: ContextualLogger
         private let configuration: Configuration
-        private let letShorthandWorkaroundEnabled: Bool
 
         required init(
             file: SourceFile,
             units: [(IndexStore, IndexStoreUnit)],
             graph: SourceGraph,
             logger: ContextualLogger,
-            configuration: Configuration,
-            letShorthandWorkaroundEnabled: Bool
+            configuration: Configuration
 
         ) {
             self.file = file
@@ -137,7 +155,6 @@ public final class SwiftIndexer: Indexer {
             self.graph = graph
             self.logger = logger
             self.configuration = configuration
-            self.letShorthandWorkaroundEnabled = letShorthandWorkaroundEnabled
         }
 
         struct RawRelation {
@@ -178,14 +195,14 @@ public final class SwiftIndexer: Indexer {
         /// phase two.
         func phaseOne() throws {
             var rawDeclsByKey: [RawDeclaration.Key: [(RawDeclaration, [RawRelation])]] = [:]
+            var references: Set<Reference> = []
 
             for (indexStore, unit) in units {
                 try indexStore.forEachRecordDependencies(for: unit) { dependency in
                     guard case let .record(record) = dependency else { return true }
 
-                    try indexStore.forEachOccurrences(for: record) { occurrence in
-                        guard occurrence.symbol.language == .swift,
-                              let usr = occurrence.symbol.usr,
+                    try indexStore.forEachOccurrences(for: record, language: .swift) { occurrence in
+                        guard let usr = occurrence.symbol.usr,
                               let location = transformLocation(occurrence.location)
                               else { return true }
 
@@ -196,11 +213,11 @@ public final class SwiftIndexer: Indexer {
                         }
 
                         if occurrence.roles.contains(.reference) {
-                            try parseReference(occurrence, usr, location, indexStore)
+                            references.formUnion(try parseReference(occurrence, usr, location, indexStore))
                         }
 
                         if occurrence.roles.contains(.implicit) {
-                            try parseImplicit(occurrence, usr, location, indexStore)
+                            references.formUnion(try parseImplicit(occurrence, usr, location, indexStore))
                         }
 
                         return true
@@ -210,8 +227,10 @@ public final class SwiftIndexer: Indexer {
                 }
             }
 
+            var newDeclarations: Set<Declaration> = []
+
             for (key, values) in rawDeclsByKey {
-                let usrs = Set(values.map { $0.0.usr })
+                let usrs = values.mapSet { $0.0.usr }
                 let decl = Declaration(kind: key.kind, usrs: usrs, location: key.location)
 
                 decl.name = key.name
@@ -227,10 +246,15 @@ public final class SwiftIndexer: Indexer {
                 }
 
                 let relations = values.flatMap { $0.1 }
-                try parseDeclaration(decl, relations)
+                references.formUnion(try parseDeclaration(decl, relations))
 
-                graph.add(decl)
+                newDeclarations.insert(decl)
                 declarations.append(decl)
+            }
+
+            graph.withLock {
+                graph.addUnsafe(references)
+                graph.addUnsafe(newDeclarations)
             }
 
             establishDeclarationHierarchy()
@@ -240,7 +264,6 @@ public final class SwiftIndexer: Indexer {
         func phaseTwo() throws {
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: file)
             let declarationSyntaxVisitor = multiplexingSyntaxVisitor.add(DeclarationSyntaxVisitor.self)
-            declarationSyntaxVisitor.letShorthandWorkaroundEnabled = letShorthandWorkaroundEnabled
             let importSyntaxVisitor = multiplexingSyntaxVisitor.add(ImportSyntaxVisitor.self)
 
             multiplexingSyntaxVisitor.visit()
@@ -296,7 +319,7 @@ public final class SwiftIndexer: Indexer {
         }
 
         // Swift does not associate some type references with the containing declaration, resulting in references
-        // with no clear parent. Property references are one example: https://bugs.swift.org/browse/SR-13766.
+        // with no clear parent. Property references are one example: https://github.com/apple/swift/issues/56163
         private func associateDanglingReferences() {
             guard !danglingReferences.isEmpty else { return }
 
@@ -306,7 +329,7 @@ public final class SwiftIndexer: Indexer {
                     result[decl.location, default: []].append(decl)
                 }
             let declsByLine = explicitDeclarations
-                .reduce(into: [Int64: [Declaration]]()) { (result, decl) in
+                .reduce(into: [Int: [Declaration]]()) { (result, decl) in
                     result[decl.location.line, default: []].append(decl)
                 }
 
@@ -351,13 +374,7 @@ public final class SwiftIndexer: Indexer {
                 guard let result = declarationsByLocation[decl.location] else { continue }
 
                 applyDeclarationMetadata(to: decl, with: result)
-                markLetShorthandContainerIfNeeded(declaration: decl)
             }
-        }
-
-        private func markLetShorthandContainerIfNeeded(declaration: Declaration) {
-            guard !declaration.letShorthandIdentifiers.isEmpty else { return }
-            graph.markLetShorthandContainer(declaration)
         }
 
         private func applyDeclarationMetadata(to decl: Declaration, with result: DeclarationSyntaxVisitor.Result) {
@@ -370,7 +387,6 @@ public final class SwiftIndexer: Indexer {
                 decl.modifiers = Set(result.modifiers)
                 decl.commentCommands = Set(result.commentCommands)
                 decl.declaredType = result.variableType
-                decl.letShorthandIdentifiers = result.letShorthandIdentifiers
                 decl.hasCapitalSelfFunctionCall = result.hasCapitalSelfFunctionCall
                 decl.hasGenericFunctionReturnedMetatypeParameters = result.hasGenericFunctionReturnedMetatypeParameters
 
@@ -514,7 +530,9 @@ public final class SwiftIndexer: Indexer {
         private func parseDeclaration(
             _ decl: Declaration,
             _ relations: [RawRelation]
-        ) throws {
+        ) throws -> Set<Reference> {
+            var references: Set<Reference> = []
+
             for rel in relations {
                 if rel.roles.contains(.childOf) {
                     if let parentUsr = rel.symbol.usr {
@@ -525,7 +543,7 @@ public final class SwiftIndexer: Indexer {
                 if rel.roles.contains(.overrideOf) {
                     let baseFunc = rel.symbol
 
-                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) {
+                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformDeclarationKind(baseFunc.kind, baseFunc.subKind) {
                         let reference = Reference(
                             kind: baseFuncKind,
                             usr: baseFuncUsr,
@@ -533,31 +551,32 @@ public final class SwiftIndexer: Indexer {
                             isRelated: true
                         )
                         reference.name = baseFunc.name
-                        graph.withLock {
-                            graph.addUnsafe(reference)
-                            associateUnsafe(reference, with: decl)
-                        }
+                        reference.parent = decl
+                        decl.related.insert(reference)
+                        references.insert(reference)
                     }
                 }
 
                 if !rel.roles.intersection([.baseOf, .calledBy, .extendedBy, .containedBy]).isEmpty {
                     let referencer = rel.symbol
 
-                    if let referencerUsr = referencer.usr, let referencerKind = decl.kind.referenceEquivalent {
+                    if let referencerUsr = referencer.usr {
                         for usr in decl.usrs {
                             let reference = Reference(
-                                kind: referencerKind,
+                                kind: decl.kind,
                                 usr: usr,
                                 location: decl.location,
                                 isRelated: rel.roles.contains(.baseOf)
                             )
                             reference.name = decl.name
-                            graph.add(reference)
+                            references.insert(reference)
                             self.referencesByUsr[referencerUsr, default: []].insert(reference)
                         }
                     }
                 }
             }
+
+            return references
         }
 
         private func parseImplicit(
@@ -565,14 +584,14 @@ public final class SwiftIndexer: Indexer {
             _ occurrenceUsr: String,
             _ location: SourceLocation,
             _ indexStore: IndexStore
-        ) throws {
+        ) throws -> [Reference] {
             var refs = [Reference]()
 
             indexStore.forEachRelations(for: occurrence) { rel -> Bool in
                 if rel.roles.contains(.overrideOf) {
                     let baseFunc = rel.symbol
 
-                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformReferenceKind(baseFunc.kind, baseFunc.subKind) {
+                    if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformDeclarationKind(baseFunc.kind, baseFunc.subKind) {
                         let reference = Reference(
                             kind: baseFuncKind,
                             usr: baseFuncUsr,
@@ -588,9 +607,7 @@ public final class SwiftIndexer: Indexer {
                 return true
             }
 
-            graph.withLock {
-                refs.forEach { graph.addUnsafe($0) }
-            }
+            return refs
         }
 
         private func parseReference(
@@ -598,13 +615,13 @@ public final class SwiftIndexer: Indexer {
             _ occurrenceUsr: String,
             _ location: SourceLocation,
             _ indexStore: IndexStore
-        ) throws {
-            guard let kind = transformReferenceKind(occurrence.symbol.kind, occurrence.symbol.subKind)
-                  else { return }
+        ) throws -> [Reference] {
+            guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
+                  else { return [] }
 
             guard kind != .varParameter else {
                 // Ignore indexed parameters as unused parameter identification is performed separately using SwiftSyntax.
-                return
+                return []
             }
 
             var refs = [Reference]()
@@ -641,61 +658,14 @@ public final class SwiftIndexer: Indexer {
                 }
             }
 
-            graph.withLock {
-                refs.forEach { graph.addUnsafe($0) }
-            }
+            return refs
         }
 
         private func transformLocation(_ input: IndexStoreOccurrence.Location) -> SourceLocation? {
-            return SourceLocation(file: file, line: input.line, column: input.column)
+            return SourceLocation(file: file, line: Int(input.line), column: Int(input.column))
         }
 
         private func transformDeclarationKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Declaration.Kind? {
-            switch subKind {
-            case .accessorGetter: return .functionAccessorGetter
-            case .accessorSetter: return .functionAccessorSetter
-            case .swiftAccessorDidSet: return .functionAccessorDidset
-            case .swiftAccessorWillSet: return .functionAccessorWillset
-            case .swiftAccessorMutableAddressor: return .functionAccessorMutableaddress
-            case .swiftAccessorAddressor: return .functionAccessorAddress
-            case .swiftSubscript: return .functionSubscript
-            case .swiftInfixOperator: return .functionOperatorInfix
-            case .swiftPrefixOperator: return .functionOperatorPrefix
-            case .swiftPostfixOperator: return .functionOperatorPostfix
-            case .swiftGenericTypeParam: return .genericTypeParam
-            case .swiftAssociatedtype: return .associatedtype
-            case .swiftExtensionOfClass: return .extensionClass
-            case .swiftExtensionOfStruct: return .extensionStruct
-            case .swiftExtensionOfProtocol: return .extensionProtocol
-            case .swiftExtensionOfEnum: return .extensionEnum
-            default: break
-            }
-
-            switch kind {
-            case .module: return .module
-            case .enum: return .enum
-            case .struct: return .struct
-            case .class: return .class
-            case .protocol: return .protocol
-            case .extension: return .extension
-            case .typealias: return .typealias
-            case .function: return .functionFree
-            case .variable: return .varGlobal
-            case .enumConstant: return .enumelement
-            case .instanceMethod: return .functionMethodInstance
-            case .classMethod: return .functionMethodClass
-            case .staticMethod: return .functionMethodStatic
-            case .instanceProperty: return .varInstance
-            case .classProperty: return .varClass
-            case .staticProperty: return .varStatic
-            case .constructor: return .functionConstructor
-            case .destructor: return .functionDestructor
-            case .parameter: return .varParameter
-            default: return nil
-            }
-        }
-
-        private func transformReferenceKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Reference.Kind? {
             switch subKind {
             case .accessorGetter: return .functionAccessorGetter
             case .accessorSetter: return .functionAccessorSetter

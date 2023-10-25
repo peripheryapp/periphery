@@ -3,9 +3,6 @@ import Shared
 
 public struct ScanResultBuilder {
     public static func build(for graph: SourceGraph) -> [ScanResult] {
-        let logger = Logger()
-        let interval = logger.beginInterval("scan:result:build")
-
         let assignOnlyProperties = graph.assignOnlyProperties
         let removableDeclarations = graph.unusedDeclarations.subtracting(assignOnlyProperties)
         let redundantProtocols = graph.redundantProtocols.filter { !removableDeclarations.contains($0.0) }
@@ -44,8 +41,6 @@ public struct ScanResultBuilder {
                 !$0.declaration.kind.isAccessorKind &&
                 !graph.ignoredDeclarations.contains($0.declaration)
             }
-
-        logger.endInterval(interval)
 
         return result
     }

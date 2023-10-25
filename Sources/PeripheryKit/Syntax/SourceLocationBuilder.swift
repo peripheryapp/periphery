@@ -12,7 +12,7 @@ final class SourceLocationBuilder {
     func location(at position: AbsolutePosition) -> SourceLocation {
         let location = locationConverter.location(for: position)
         return SourceLocation(file: file,
-                              line: Int64(location.line ?? 0),
-                              column: Int64(location.column ?? 0))
+                              line: location.line,
+                              column: location.column)
     }
  }

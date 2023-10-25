@@ -21,77 +21,8 @@ public final class Reference {
         }
     }
 
-    public enum Kind: String {
-        case `associatedtype` = "associatedtype"
-        case `class` = "class"
-        case `enum` = "enum"
-        case enumelement = "enumelement"
-        case `extension` = "extension"
-        case extensionClass = "extension.class"
-        case extensionEnum = "extension.enum"
-        case extensionProtocol = "extension.protocol"
-        case extensionStruct = "extension.struct"
-        case functionAccessorAddress = "function.accessor.address"
-        case functionAccessorDidset = "function.accessor.didset"
-        case functionAccessorGetter = "function.accessor.getter"
-        case functionAccessorMutableaddress = "function.accessor.mutableaddress"
-        case functionAccessorSetter = "function.accessor.setter"
-        case functionAccessorWillset = "function.accessor.willset"
-        case functionConstructor = "function.constructor"
-        case functionDestructor = "function.destructor"
-        case functionFree = "function.free"
-        case functionMethodClass = "function.method.class"
-        case functionMethodInstance = "function.method.instance"
-        case functionMethodStatic = "function.method.static"
-        case functionOperator = "function.operator"
-        case functionOperatorInfix = "function.operator.infix"
-        case functionOperatorPostfix = "function.operator.postfix"
-        case functionOperatorPrefix = "function.operator.prefix"
-        case functionSubscript = "function.subscript"
-        case genericTypeParam = "generic_type_param"
-        case module = "module"
-        case precedenceGroup = "precedencegroup"
-        case `protocol` = "protocol"
-        case `struct` = "struct"
-        case `typealias` = "typealias"
-        case varClass = "var.class"
-        case varGlobal = "var.global"
-        case varInstance = "var.instance"
-        case varLocal = "var.local"
-        case varParameter = "var.parameter"
-        case varStatic = "var.static"
-
-        static var protocolMemberKinds: [Kind] {
-            let functionKinds: [Kind] = [.functionMethodInstance, .functionMethodStatic, .functionSubscript, .functionOperator, .functionOperatorInfix, .functionOperatorPostfix, .functionOperatorPrefix, .functionConstructor]
-            let variableKinds: [Kind] = [.varInstance, .varStatic]
-            return functionKinds + variableKinds
-        }
-
-        static var protocolMemberConformingKinds: [Kind] {
-            // Protocols cannot declare 'class' members, yet classes can fulfill the requirement with either a 'class'
-            // or 'static' member.
-            protocolMemberKinds + [.varClass, .functionMethodClass, .associatedtype]
-        }
-
-        var isProtocolMemberKind: Bool {
-            Self.protocolMemberKinds.contains(self)
-        }
-
-        var isProtocolMemberConformingKind: Bool {
-            Self.protocolMemberConformingKinds.contains(self)
-        }
-
-        var isFunctionKind: Bool {
-            rawValue.hasPrefix("function")
-        }
-
-        var declarationEquivalent: Declaration.Kind? {
-            Declaration.Kind(rawValue: rawValue)
-        }
-    }
-
     public let location: SourceLocation
-    public let kind: Kind
+    public let kind: Declaration.Kind
     public let isRelated: Bool
     public var name: String?
     public var parent: Declaration?
@@ -99,18 +30,18 @@ public final class Reference {
     public let usr: String
     public var role: Role = .unknown
 
-    private let identifier: String
+    private let identifier: Int
 
-    init(kind: Kind, usr: String, location: SourceLocation, isRelated: Bool = false) {
+    init(kind: Declaration.Kind, usr: String, location: SourceLocation, isRelated: Bool = false) {
         self.kind = kind
         self.usr = usr
         self.isRelated = isRelated
         self.location = location
-        self.identifier = "\(usr.hashValue)-\(location.hashValue)-\(isRelated.hashValue)"
+        self.identifier = [usr.hashValue, location.hashValue, isRelated.hashValue].hashValue
     }
 
     var descendentReferences: Set<Reference> {
-        Set(references.flatMap { $0.descendentReferences }).union(references)
+        references.flatMapSet { $0.descendentReferences }.union(references)
     }
 }
 

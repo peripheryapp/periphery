@@ -3,19 +3,22 @@ import Shared
 
 final class XCTestRetainer: SourceGraphMutator {
     private let graph: SourceGraph
+    private let testCaseClassNames: Set<String>
 
     required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
+        self.testCaseClassNames = Set(configuration.externalTestCaseClasses + ["XCTestCase"])
     }
 
     func mutate() {
         let immediateTestCaseClasses = graph.declarations(ofKind: .class).filter {
             $0.related.contains {
-                $0.kind == .class && $0.name == "XCTestCase"
+                guard let name = $0.name else { return false }
+                return $0.kind == .class && self.testCaseClassNames.contains(name)
             }
         }
 
-        let subclasses = Set(immediateTestCaseClasses.flatMap { graph.subclasses(of: $0) })
+        let subclasses = immediateTestCaseClasses.flatMapSet { graph.subclasses(of: $0) }
         let testCaseClasses = subclasses.union(immediateTestCaseClasses)
 
         for testCaseClass in testCaseClasses {
@@ -23,7 +26,8 @@ final class XCTestRetainer: SourceGraphMutator {
             let methods = testCaseClass.declarations.filter { $0.kind == .functionMethodInstance }
 
             for method in methods {
-                if method.name?.hasPrefix("test") ?? false {
+                guard let name = method.name else { continue }
+                if name.hasPrefix("test"), name.hasSuffix("()") {
                     graph.markRetained(method)
                 }
             }

@@ -27,9 +27,14 @@ final class Scan {
             logger.info("\(asterisk) Inspecting project...")
         }
 
+        let driverPrepareInterval = logger.beginInterval("driver:prepare")
         let driver = try project.driver()
+        logger.endInterval(driverPrepareInterval)
+        let driverBuildInterval = logger.beginInterval("driver:build")
         try driver.build()
+        logger.endInterval(driverBuildInterval)
 
+        let indexInterval = logger.beginInterval("index")
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)
             logger.info("\(asterisk) Indexing...")
@@ -37,13 +42,21 @@ final class Scan {
 
         let graph = SourceGraph.shared
         try driver.index(graph: graph)
+        logger.endInterval(indexInterval)
 
+        let analyzeInterval = logger.beginInterval("analyze")
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)
             logger.info("\(asterisk) Analyzing...")
         }
 
         try SourceGraphMutatorRunner.perform(graph: graph)
-        return ScanResultBuilder.build(for: graph)
+        logger.endInterval(analyzeInterval)
+
+        let resultInterval = logger.beginInterval("result:build")
+        let result = ScanResultBuilder.build(for: graph)
+        logger.endInterval(resultInterval)
+
+        return result
     }
 }

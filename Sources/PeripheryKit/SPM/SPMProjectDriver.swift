@@ -46,21 +46,24 @@ extension SPMProjectDriver: ProjectDriver {
                 try package.clean()
             }
 
-            try targets.forEach {
-                if configuration.outputFormat.supportsAuxiliaryOutput {
-                    let asterisk = colorize("*", .boldGreen)
-                    logger.info("\(asterisk) Building \($0.name)...")
-                }
+            if configuration.outputFormat.supportsAuxiliaryOutput {
+                let asterisk = colorize("*", .boldGreen)
+                logger.info("\(asterisk) Building...")
+            }
 
+            try targets.forEach {
                 try $0.build(additionalArguments: configuration.buildArguments)
             }
         }
     }
 
     public func index(graph: SourceGraph) throws {
-        let sourceFiles = targets.reduce(into: [FilePath: Set<String>]()) { result, target in
+        let sourceFiles = targets.reduce(into: [FilePath: Set<IndexTarget>]()) { result, target in
             let targetPath = absolutePath(for: target)
-            target.sources.forEach { result[targetPath.appending($0), default: []].insert(target.name) }
+            target.sources.forEach {
+                let indexTarget = IndexTarget(name: target.name)
+                result[targetPath.appending($0), default: []].insert(indexTarget)
+            }
         }
 
         let storePaths: [FilePath]

@@ -43,7 +43,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             print(colorize("Select build targets to analyze:", .bold))
             configuration.targets = select(multiple: targets, allowAll: true).selectedValues
 
-            let schemes = try filter(project.schemes(), project).map { $0.name }.sorted()
+            let schemes = try filter(project.schemes(), project).map { $0 }.sorted()
 
             print(colorize("\nSelect the schemes necessary to build your chosen targets:", .bold))
             configuration.schemes = select(multiple: schemes, allowAll: false).selectedValues
@@ -79,17 +79,17 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
 
     // MARK: - Private
 
-    private func getPodSchemes(in project: XcodeProjectlike) throws -> [String] {
+    private func getPodSchemes(in project: XcodeProjectlike) throws -> Set<String> {
         let path = project.sourceRoot.appending("Pods/Pods.xcodeproj")
         guard path.exists else { return [] }
         return try xcodebuild.schemes(type: "project", path: path.lexicallyNormalized().string)
     }
 
-    private func filter(_ schemes: Set<XcodeScheme>, _ project: XcodeProjectlike) throws -> [XcodeScheme] {
-        let podSchemes = try Set(getPodSchemes(in: project))
+    private func filter(_ schemes: Set<String>, _ project: XcodeProjectlike) throws -> [String] {
+        let podSchemes = try getPodSchemes(in: project)
         return schemes
-            .filter { !$0.name.hasPrefix("Pods-") }
-            .filter { !podSchemes.contains($0.name) }
+            .filter { !$0.hasPrefix("Pods-") }
+            .filter { !podSchemes.contains($0) }
     }
 
     private func identifyWorkspace() -> FilePath? {

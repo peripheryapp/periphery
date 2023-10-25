@@ -15,8 +15,11 @@ let package = Package(
             name: "MainTarget",
             dependencies: ["TargetA"]),
         .target(
-            name: "TargetA",
+            name: "ExternalTarget",
             dependencies: []),
+        .target(
+            name: "TargetA",
+            dependencies: ["ExternalTarget"]),
         .testTarget(
             name: "TestTarget",
             dependencies: ["MainTarget", "TargetA"]),

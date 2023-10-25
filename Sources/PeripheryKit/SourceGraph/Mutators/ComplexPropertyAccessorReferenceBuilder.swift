@@ -16,12 +16,11 @@ final class ComplexPropertyAccessorReferenceBuilder: SourceGraphMutator {
         let declarations = graph.declarations(ofKinds: Array(Declaration.Kind.accessorKinds))
 
         for declaration in declarations {
-            guard let parent = declaration.parent,
-                let kind = declaration.kind.referenceEquivalent else { continue }
+            guard let parent = declaration.parent else { continue }
 
             if parent.isComplexProperty {
                 for usr in declaration.usrs {
-                    let reference = Reference(kind: kind,
+                    let reference = Reference(kind: declaration.kind,
                                               usr: usr,
                                               location: declaration.location)
                     reference.parent = parent

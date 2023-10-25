@@ -56,11 +56,9 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                         if let declInSuperclass = declInSuperclass {
                             // Build a reference from the protocol declarations to the
                             // declaration implemented by the superclass.
-                            guard let referenceKind = declInSuperclass.kind.referenceEquivalent else { continue }
-
                             for usr in declInSuperclass.usrs {
                                 let reference = Reference(
-                                    kind: referenceKind,
+                                    kind: declInSuperclass.kind,
                                     usr: usr,
                                     location: declInSuperclass.location,
                                     isRelated: true
@@ -83,23 +81,22 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
         let relatedReferences = graph.allReferences.filter { $0.isRelated && $0.kind.isProtocolMemberConformingKind }
 
         for relatedReference in relatedReferences.subtracting(nonInvertableReferences) {
-            guard let conformingDeclaration = relatedReference.parent,
-                  let equivalentDeclarationKind = relatedReference.kind.declarationEquivalent
+            guard let conformingDeclaration = relatedReference.parent
             else { continue }
 
-            var equivalentDeclarationKinds = [equivalentDeclarationKind]
+            var equivalentDeclarationKinds = [relatedReference.kind]
 
             // A conforming declaration can be declared either 'class' or 'static', whereas
             // protocol members can only be declared as 'static'.
-            if equivalentDeclarationKind == .functionMethodStatic {
+            if relatedReference.kind == .functionMethodStatic {
                 equivalentDeclarationKinds.append(.functionMethodClass)
-            } else if equivalentDeclarationKind == .functionMethodClass {
+            } else if relatedReference.kind == .functionMethodClass {
                 equivalentDeclarationKinds.append(.functionMethodStatic)
-            } else if equivalentDeclarationKind == .varStatic {
+            } else if relatedReference.kind == .varStatic {
                 equivalentDeclarationKinds.append(.varClass)
-            } else if equivalentDeclarationKind == .varClass {
+            } else if relatedReference.kind == .varClass {
                 equivalentDeclarationKinds.append(.varStatic)
-            } else if equivalentDeclarationKind == .associatedtype {
+            } else if relatedReference.kind == .associatedtype {
                 equivalentDeclarationKinds.append(contentsOf: Declaration.Kind.concreteTypeDeclarableKinds)
             }
 

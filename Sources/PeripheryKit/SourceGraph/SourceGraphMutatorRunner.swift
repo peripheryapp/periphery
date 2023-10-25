@@ -9,6 +9,7 @@ public final class SourceGraphMutatorRunner {
     private let mutators: [SourceGraphMutator.Type] = [
         // Must come before ExtensionReferenceBuilder.
         AccessibilityCascader.self,
+        ObjCAccessibleRetainer.self,
         // Must come before ExtensionReferenceBuilder so that it can detect redundant accessibility on extensions.
 		RedundantExplicitPublicAccessibilityMarker.self,
 		RedundantInternalAccessibilityMarker.self,
@@ -28,23 +29,19 @@ public final class SourceGraphMutatorRunner {
         DefaultConstructorReferenceBuilder.self,
         ComplexPropertyAccessorReferenceBuilder.self,
         EnumCaseReferenceBuilder.self,
-        LetShorthandPropertyReferenceBuilder.self,
 
         UnusedParameterRetainer.self,
         AssetReferenceRetainer.self,
         EntryPointAttributeRetainer.self,
         PubliclyAccessibleRetainer.self,
-        ObjCAccessibleRetainer.self,
         XCTestRetainer.self,
         SwiftUIRetainer.self,
         EncodablePropertyRetainer.self,
         StringInterpolationAppendInterpolationRetainer.self,
         PropertyWrapperRetainer.self,
         ResultBuilderRetainer.self,
-        MainActorRetainer.self,
         CapitalSelfFunctionCallRetainer.self,
 
-        PlainExtensionEliminator.self,
         AncestralReferenceEliminator.self,
         AssignOnlyPropertyReferenceEliminator.self,
 
@@ -63,15 +60,13 @@ public final class SourceGraphMutatorRunner {
     }
 
     func perform() throws {
-        let interval = logger.beginInterval("mutator:run")
-
         for mutator in mutators {
             let elapsed = try Benchmark.measure {
+                let interval = logger.beginInterval("mutator:run")
                 try mutator.init(graph: graph, configuration: configuration).mutate()
+              logger.endInterval(interval)
             }
             logger.debug("\(mutator) (\(elapsed)s)")
         }
-
-        logger.endInterval(interval)
     }
 }

@@ -34,7 +34,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     private func validate(_ decl: Declaration) throws {
         // Check if the declaration is public, and is referenced cross module.
         if decl.accessibility.isExplicitly(.public) {
-            if try !isReferencedCrossModule(decl) && !isExposedPubliclyByAnotherDeclaration(decl) {
+            if try !isReferencedCrossModule(decl) && !isExposedPubliclyByAnotherDeclaration(decl) && !graph.isRetained(decl) {
                 // Public accessibility is redundant.
                 mark(decl)
                 markExplicitPublicDescendentDeclarations(from: decl)
@@ -119,9 +119,9 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     }
 
     private func nonTestableModulesReferencing(_ decl: Declaration) throws -> Set<String> {
-        let referenceFiles = Set(graph.references(to: decl).map { $0.location.file })
+        let referenceFiles = graph.references(to: decl).map { $0.location.file }
 
-        let referenceModules = referenceFiles.flatMap { file -> Set<String> in
+        let referenceModules = referenceFiles.flatMapSet { file -> Set<String> in
             let importsDeclModuleTestable = file.importStatements.contains(where: { (parts, isTestable) in
                 isTestable && !Set(parts).isDisjoint(with: decl.location.file.modules)
             })
@@ -133,11 +133,11 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
             return []
         }
 
-        return Set(referenceModules)
+        return referenceModules
     }
 
     private func descendentPublicDeclarations(from decl: Declaration) -> Set<Declaration> {
         let publicDeclarations = decl.declarations.filter { !$0.isImplicit && $0.accessibility.isExplicitly(.public) }
-        return Set(publicDeclarations.flatMap { descendentPublicDeclarations(from: $0) }).union(publicDeclarations)
+        return publicDeclarations.flatMapSet { descendentPublicDeclarations(from: $0) }.union(publicDeclarations)
     }
 }

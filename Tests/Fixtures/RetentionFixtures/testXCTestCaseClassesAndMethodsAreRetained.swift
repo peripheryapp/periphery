@@ -11,6 +11,7 @@ class FixtureClass34: XCTestCase {
     }
 
     func testSomething() {}
+    func testNotATest(param: Int) {}
 }
 
 class FixtureClass34Subclass: FixtureClass34 {

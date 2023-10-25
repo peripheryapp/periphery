@@ -22,7 +22,9 @@ public enum CommentCommand: CustomStringConvertible, Hashable {
         return comments
             .compactMap { comment in
                 guard let range = comment.range(of: "periphery:") else { return nil }
-                let rawCommand = String(comment[range.upperBound...]).replacingOccurrences(of: "*/", with: "").trimmed
+                var rawCommand = String(comment[range.upperBound...]).replacingOccurrences(of: "*/", with: "").trimmed
+                // Anything after '-' in a comment command is ignored.
+                rawCommand = String(rawCommand.split(separator: "-").first ?? "").trimmed
                 return CommentCommand.parse(rawCommand)
             }
     }

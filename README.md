@@ -12,8 +12,8 @@
   <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?color=008DFF" />
 </a>
 <img src="https://img.shields.io/badge/platform-macOS%20|%20Linux-008DFF">
-<a href="https://github.com/peripheryapp/periphery/actions">
-  <img src="https://img.shields.io/github/actions/workflow/status/peripheryapp/periphery/test.yml?branch=master">
+<a href="#sponsors-">
+<img src="https://img.shields.io/github/sponsors/peripheryapp?logo=githubsponsors&color=db61a2">
 </a>
 <br>
 <br>
@@ -32,6 +32,7 @@
   - [Redundant Public Accessibility](#redundant-public-accessibility)
   - [Objective-C](#objective-c)
   - [Encodable](#encodable)
+  - [XCTestCase](#xctestcase)
 - [Comment Commands](#comment-commands)
 - [Xcode Integration](#xcode-integration)
 - [Excluding Files](#excluding-files)
@@ -40,10 +41,11 @@
 - [Platforms](#platforms)
 - [Troubleshooting](#troubleshooting)
 - [Known Bugs](#known-bugs)
+- [Sponsors](#sponsors-) ![Sponsors](assets/sponsor.svg)
 
 ## Installation
 
-### [Homebrew](https://brew.sh/) (macOS only)
+### [Homebrew](https://brew.sh/)
 
 Install Homebrew:
 
@@ -59,23 +61,13 @@ Now install Periphery itself:
 brew install peripheryapp/periphery/periphery
 ```
 
-### [Swift Package Manager](https://swift.org/package-manager/)
-
-Add Periphery to your `Package.swift` dependencies:
-
-```swift
-.package(url: "https://github.com/peripheryapp/periphery", from: "2.0.0")
-```
-
-Now run periphery via Swift:
+### [Mint](https://github.com/yonaskolb/mint)
 
 ```
-swift run periphery scan ...
+mint install peripheryapp/periphery
 ```
 
-> SwiftPM does not yet support prebuilt binaries, therefore be aware that Periphery will be built from source. This also means that Periphery will be built using the same build configuration you specify to build your entire project (the default is 'debug'). Debug builds of Periphery are significantly slower than release builds.
-
-### [CocoaPods](https://cocoapods.org/) (macOS only)
+### [CocoaPods](https://cocoapods.org/)
 
 Add the following to your Podfile:
 
@@ -320,7 +312,9 @@ This analysis can be disabled with `--disable-redundant-public-analysis`.
 
 Periphery cannot analyze Objective-C code since types may be dynamically typed.
 
-By default Periphery does not assume that declarations accessible by the Objective-C runtime are in use. If your project is a mix of Swift & Objective-C, you can enable this behavior with the `--retain-objc-accessible` option. Swift declarations that are accessible by the Objective-C runtime are those that are explicitly attributed with `@objc` or `@objcMembers`, and classes that inherit `NSObject` either directly or indirectly via another class.
+By default Periphery does not assume that declarations accessible by the Objective-C runtime are in use. If your project is a mix of Swift & Objective-C, you can enable this behavior with the `--retain-objc-accessible` option. Swift declarations that are accessible by the Objective-C runtime are those that are explicitly annotated with `@objc` or `@objcMembers`, and classes that inherit `NSObject` either directly or indirectly via another class.
+
+Alternatively, the `--retain-objc-annotated` can be used to only retain declarations that are explicitly annotated with `@objc` or `@objcMembers`. Types that inherit `NSObject` are not retained unless they have the explicit annotations. This option may uncover more unused code, but with the caveat that some of the results may be incorrect if the declaration is in fact used in Objective-C code. To resolve these incorrect results you must add an `@objc` annotation to the declaration.
 
 ### Encodable
 
@@ -334,6 +328,10 @@ let data = try JSONEncoder().encode(SomeStruct(someProperty: "value"))
 ```
 
 This property retention behavior is automatic, even when `Encodable` conformance is inherited via another protocol. However, if a protocol that inherits `Encodable` is declared in an external module that Periphery has not analyzed, it cannot detect the inheritance of `Encodable`. In this situation you can use the `--external-encodable-protocols` option enable this behavior for the given protocols.
+
+### XCTestCase
+
+Any class that inherits `XCTestCase` is automatically retained along with its test methods. However, when a class inherits `XCTestCase` indirectly via another class, e.g `UnitTestCase`, and that class resides in a target that isn't scanned by Periphery, you need to use the `--external-test-case-classes UnitTestCase` option to instruct Periphery to treat `UnitTestCase` as an `XCTestCase` subclass.
 
 ## Comment Commands
 
@@ -356,6 +354,13 @@ func someFunc(used: String, unusedOne: String, unusedTwo: String) {
 ```
 
 The `// periphery:ignore:all` command can be placed at the top of the source file to ignore the entire contents of the file. Note that the comment must be placed above any code, including import statements.
+
+Comment commands also support trailing comments following a hyphen so that you can include an explanation on the same line:
+
+```swift
+// periphery:ignore - explanation of why this is necessary
+class MyClass {}
+```
 
 ## Xcode Integration
 
@@ -440,7 +445,7 @@ You can then invoke periphery as follows:
 
 ```
 periphery scan --file-targets-path map.json --index-store-path index/store
-``` 
+```
 
 > **Tip**
 >
@@ -502,10 +507,27 @@ Due to some underlying bugs in Swift, Periphery may in some instances report inc
 
 | ID    | Title |
 | :---  | :---  |
-| [61509](https://github.com/apple/swift/issues/61509) | Shorthand optional binding has no reference to original variable |
 | [56559](https://github.com/apple/swift/issues/56559) | Index store does not relate constructor referenced via Self |
 | [56541](https://github.com/apple/swift/issues/56541) | Index store does not relate static property getter used as subscript key |
 | [56327](https://github.com/apple/swift/issues/56327) | Index store does not relate objc optional protocol method implemented in subclass |
 | [56189](https://github.com/apple/swift/issues/56189) | Index store should relate appendInterpolation from string literals |
 | [56165](https://github.com/apple/swift/issues/56165) | Index store does not relate constructor via literal notation |
 | [49641](https://github.com/apple/swift/issues/49641) | Index does not include reference to constructor of class/struct with generic types |
+
+## Sponsors ![Sponsors](assets/sponsor-20.svg)
+
+Periphery is passion project that takes a huge amount of effort to maintain and develop. If you find Periphery useful, please consider sponsoring through [GitHub Sponsors](https://github.com/sponsors/peripheryapp).
+
+Special thanks goes to the following generous sponsors:
+
+### Emerge Tools
+
+[Emerge Tools](https://www.emergetools.com) is a suite of revolutionary products designed to supercharge mobile apps and the teams that build them.
+
+<a href="https://www.emergetools.com" alt="Emerge Tools">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/emerge-tools-vertical-white.svg">
+        <source media="(prefers-color-scheme: light)" srcset="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/emerge-tools-vertical-black.svg">
+        <img src="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/emerge-tools-vertical-black.svg">
+    </picture>
+</a>

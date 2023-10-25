@@ -31,7 +31,7 @@ final class XcodeWorkspace: XcodeProjectlike {
         }
 
         let projectPaths = collectProjectPaths(in: xcworkspace.data.children)
-        let projects = Set(try projectPaths.compactMap { try XcodeProject.build(path: (sourceRoot.pushing($0)), referencedBy: self.path) })
+        let projects = try projectPaths.compactMapSet { try XcodeProject.build(path: (sourceRoot.pushing($0)), referencedBy: self.path) }
 
         targets = projects.reduce(into: .init()) { result, project in
             result.formUnion(project.targets)
@@ -42,11 +42,8 @@ final class XcodeWorkspace: XcodeProjectlike {
         }
     }
 
-    func schemes() throws -> Set<XcodeScheme> {
-        let schemes = try xcodebuild.schemes(project: self).map {
-            try XcodeScheme(project: self, name: $0)
-        }
-        return Set(schemes)
+    func schemes() throws -> Set<String> {
+        try xcodebuild.schemes(project: self)
     }
 
     // MARK: - Private
