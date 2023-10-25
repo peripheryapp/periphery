@@ -71,6 +71,12 @@ public final class Configuration {
     @Setting(key: "disable_redundant_public_analysis", defaultValue: false)
     public var disableRedundantPublicAnalysis: Bool
 
+    @Setting(key: "disable_redundant_static_analysis", defaultValue: false)
+    public var disableRedundantInternalAnalysis: Bool
+
+    @Setting(key: "disable_redundant_fileprivate_analysis", defaultValue: false)
+    public var disableRedundantFilePrivateAnalysis: Bool
+
     @Setting(key: "verbose", defaultValue: false)
     public var verbose: Bool
 
@@ -177,6 +183,14 @@ public final class Configuration {
             config[$disableRedundantPublicAnalysis.key] = disableRedundantPublicAnalysis
         }
 
+        if $disableRedundantInternalAnalysis.hasNonDefaultValue {
+            config[$disableRedundantInternalAnalysis.key] = disableRedundantInternalAnalysis
+        }
+
+        if $disableRedundantFilePrivateAnalysis.hasNonDefaultValue {
+            config[$disableRedundantFilePrivateAnalysis.key] = disableRedundantFilePrivateAnalysis
+        }
+
         if $verbose.hasNonDefaultValue {
             config[$verbose.key] = verbose
         }
@@ -263,6 +277,10 @@ public final class Configuration {
                 $retainSwiftUIPreviews.assign(value)
             case $disableRedundantPublicAnalysis.key:
                 $disableRedundantPublicAnalysis.assign(value)
+            case $disableRedundantInternalAnalysis.key:
+                $disableRedundantInternalAnalysis.assign(value)
+            case $disableRedundantFilePrivateAnalysis.key:
+                $disableRedundantFilePrivateAnalysis.assign(value)
             case $verbose.key:
                 $verbose.assign(value)
             case $quiet.key:
@@ -303,6 +321,8 @@ public final class Configuration {
         $retainUnusedProtocolFuncParams.reset()
         $retainSwiftUIPreviews.reset()
         $disableRedundantPublicAnalysis.reset()
+        $disableRedundantInternalAnalysis.reset()
+        $disableRedundantFilePrivateAnalysis.reset()
         $externalEncodableProtocols.reset()
         $externalTestCaseClasses.reset()
         $verbose.reset()
