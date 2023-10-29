@@ -31,6 +31,8 @@ _ = PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnTypeRetainer
 
 _ = NotRedundantPublicTestableImportClass().testableProperty
 
+ProtocolIndirectlyReferencedCrossModuleByExtensionMemberImpl().somePublicFunc()
+
 // Typealias
 let _: PublicTypealiasWithClosureType? = nil
 
@@ -56,4 +58,3 @@ _ = InternalProtocolRefiningPublicProtocolRetainer()
 
 // Closure
 let _ = PublicTypeUsedInPublicClosureRetainer().closure
-

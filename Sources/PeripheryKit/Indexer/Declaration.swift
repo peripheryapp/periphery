@@ -314,4 +314,8 @@ public struct DeclarationAccessibility {
     public func isExplicitly(_ testValue: Accessibility) -> Bool {
         isExplicit && value == testValue
     }
+
+    var isAccessibleCrossModule: Bool {
+        value == .public || value == .open
+    }
 }

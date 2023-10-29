@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix redundant public accessibility analysis for protocol members declared in extensions that are referenced cross-module where the protocol itself is not.
 
 ## 2.16.0 (2023-09-27)
 
