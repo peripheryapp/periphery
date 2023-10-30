@@ -113,19 +113,6 @@ public final class XcodeProjectDriver {
 
 extension XcodeProjectDriver: ProjectDriver {
     public func build() throws {
-        // Copy target triples to the targets. The triple is used by the indexer to ignore index store units built for
-        // other architectures/platforms.
-        let targetTriples = try xcodebuild.buildSettings(targets: targets)
-            .mapDict { action in
-                (action.target, try action.makeTargetTriple())
-            }
-
-        for target in targets {
-            if let triple = targetTriples[target.name] {
-                target.triple = triple
-            }
-        }
-
         guard  !configuration.skipBuild else { return }
 
         if configuration.cleanBuild {
@@ -164,7 +151,7 @@ extension XcodeProjectDriver: ProjectDriver {
 
         for target in targets {
             target.files(kind: .swift).forEach {
-                let indexTarget = IndexTarget(name: target.name, triple: target.triple)
+                let indexTarget = IndexTarget(name: target.name)
                 sourceFiles[$0, default: []].insert(indexTarget)
             }
         }

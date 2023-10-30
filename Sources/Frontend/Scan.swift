@@ -12,9 +12,13 @@ final class Scan {
     }
 
     func perform(project: Project) throws -> [ScanResult] {
-        if !configuration.indexStorePath.isEmpty, !configuration.skipBuild {
-            logger.warn("The '--index-store-path' option implies '--skip-build', specify it to silence this warning")
-            configuration.skipBuild = true
+        if !configuration.indexStorePath.isEmpty {
+            logger.warn("When using the '--index-store-path' option please ensure that Xcode is not running. False-positives can occur if Xcode writes to the index store while Periphery is running.")
+
+            if !configuration.skipBuild {
+                logger.warn("The '--index-store-path' option implies '--skip-build', specify it to silence this warning.")
+                configuration.skipBuild = true
+            }
         }
 
         if configuration.verbose {

@@ -10,7 +10,9 @@ class UIKitProjectTest: SourceGraphTestCase {
 
         configuration.project = UIKitProjectPath.string
         configuration.schemes = ["UIKitProject"]
-        configuration.targets = ["UIKitProject", "NotificationServiceExtension", "UIKitProjectTests", "LocalPackage.LocalPackageTarget", "LocalPackage.LocalPackageTargetTests"]
+        configuration.targets = ["UIKitProject", "NotificationServiceExtension", "MyWidgetExtension",
+                                 "UIKitProjectTests", "LocalPackage.LocalPackageTarget",
+                                 "LocalPackage.LocalPackageTargetTests"]
 
         build(driver: XcodeProjectDriver.self)
         index()

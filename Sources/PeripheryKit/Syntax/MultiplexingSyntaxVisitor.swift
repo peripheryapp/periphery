@@ -86,6 +86,7 @@ extension PeripherySyntaxVisitor {
 }
 
 final class MultiplexingSyntaxVisitor: SyntaxVisitor {
+    let sourceFile: SourceFile
     let syntax: SourceFileSyntax
     let locationConverter: SourceLocationConverter
     let sourceLocationBuilder: SourceLocationBuilder
@@ -93,6 +94,7 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
     private var visitors: [PeripherySyntaxVisitor] = []
 
     required init(file: SourceFile) throws {
+        self.sourceFile = file
         let source = try String(contentsOf: file.path.url)
         self.syntax = Parser.parse(source: source)
         self.locationConverter = SourceLocationConverter(fileName: file.path.string, tree: syntax)

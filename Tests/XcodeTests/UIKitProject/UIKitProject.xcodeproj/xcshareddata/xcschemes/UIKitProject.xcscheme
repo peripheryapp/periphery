@@ -20,6 +20,20 @@
                ReferencedContainer = "container:UIKitProject.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "3CFFB5A62AEF8FDE002EFB86"
+               BuildableName = "MyWidgetExtension.appex"
+               BlueprintName = "MyWidgetExtension"
+               ReferencedContainer = "container:UIKitProject.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

@@ -89,29 +89,6 @@ public final class Xcodebuild {
         return Set(schemes)
     }
 
-    func buildSettings(targets: Set<XcodeTarget>) throws -> [XcodeBuildAction] {
-        try targets
-            .reduce(into: [XcodeProject: Set<String>]()) { result, target in
-                result[target.project, default: []].insert(target.name)
-            }
-            .reduce(into: [XcodeBuildAction]()) { result, pair in
-                let (project, targets) = pair
-                let args = [
-                    "-project", project.path.lexicallyNormalized().string,
-                    "-showBuildSettings",
-                    "-json"
-                ] + targets.flatMap { ["-target", $0] }
-
-                let output = try shell.exec(["xcodebuild"] + args, stderr: false)
-
-                guard let data = output.data(using: .utf8) else { return }
-
-                let decoder = JSONDecoder()
-                let actions = try decoder.decode([XcodeBuildAction].self, from: data)
-                result.append(contentsOf: actions)
-            }
-    }
-
     // MARK: - Private
 
     private func deserialize(_ jsonString: String) throws -> [String: Any]? {

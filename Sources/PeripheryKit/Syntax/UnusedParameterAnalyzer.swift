@@ -1,5 +1,6 @@
 import Foundation
 import SwiftSyntax
+import SystemPackage
 
 final class UnusedParameterAnalyzer {
     private enum UsageType {

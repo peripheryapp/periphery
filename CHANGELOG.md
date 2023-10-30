@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Fix redundant public accessibility analysis for protocol members declared in extensions that are referenced cross-module where the protocol itself is not.
+- Remove checks causing errors when scanning multi-platform projects.
 
 ## 2.16.0 (2023-09-27)
 

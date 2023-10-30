@@ -30,11 +30,4 @@ public extension Sequence {
             }
         }
     }
-
-    func mapDict<Key, Value>(_ transform: (Element) throws -> (Key, Value)) rethrows -> Dictionary<Key, Value> {
-        try reduce(into: .init()) { result, element in
-            let pair = try transform(element)
-            result[pair.0] = pair.1
-        }
-    }
 }

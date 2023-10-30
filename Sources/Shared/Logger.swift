@@ -146,10 +146,6 @@ public struct ContextualLogger {
         logger.debug("[\(context)] \(text)")
     }
 
-    public func warn(_ text: String) {
-        logger.warn("[\(context)] \(text)")
-    }
-
     public func beginInterval(_ name: StaticString) -> SignpostInterval {
         logger.beginInterval(name)
     }
