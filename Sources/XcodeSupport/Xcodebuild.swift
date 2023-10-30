@@ -40,7 +40,21 @@ public final class Xcodebuild {
             "INDEX_ENABLE_DATA_STORE=\"YES\""
         ]
 
-        let xcodebuild = "xcodebuild \((args + [cmd] + envs + additionalArguments).joined(separator: " "))"
+        // Apply quotes to additional option values is needed.
+        var quotedArguments = additionalArguments
+
+        for (i, arg) in additionalArguments.enumerated() {
+            if arg.hasPrefix("-"),
+               let value = additionalArguments[safe: i + 1],
+               !value.hasPrefix("-"),
+               !value.hasPrefix("\""),
+               !value.hasPrefix("\'")
+            {
+                quotedArguments[i + 1] = "\"\(value)\""
+            }
+        }
+
+        let xcodebuild = "xcodebuild \((args + [cmd] + envs + quotedArguments).joined(separator: " "))"
         return try shell.exec(["/bin/sh", "-c", xcodebuild])
     }
 
