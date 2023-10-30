@@ -55,8 +55,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ["5.9", "5.8"]
+        swift: ["5.10-nightly", "5.9-nightly", "5.9", "5.8"]
         include:
+          - swift: "5.10-nightly"
+            container: "swiftlang/swift:nightly-5.10-jammy"
+            cache-version: 1
+          - swift: "5.9-nightly"
+            container: "swiftlang/swift:nightly-5.9-jammy"
+            cache-version: 1
           - swift: "5.9"
             container: "swift:5.9"
             cache-version: 1
