@@ -10,7 +10,7 @@ class UIKitProjectTest: SourceGraphTestCase {
 
         configuration.project = UIKitProjectPath.string
         configuration.schemes = ["UIKitProject"]
-        configuration.targets = ["UIKitProject", "NotificationServiceExtension", "MyWidgetExtension",
+        configuration.targets = ["UIKitProject", "NotificationServiceExtension", "WatchWidgetExtension",
                                  "UIKitProjectTests", "LocalPackage.LocalPackageTarget",
                                  "LocalPackage.LocalPackageTargetTests"]
 

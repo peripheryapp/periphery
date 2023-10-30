@@ -28,9 +28,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "3CFFB5A62AEF8FDE002EFB86"
-               BuildableName = "MyWidgetExtension.appex"
-               BlueprintName = "MyWidgetExtension"
+               BlueprintIdentifier = "3CBEB9D02AEFC25B00F5947D"
+               BuildableName = "WatchWidgetExtension.appex"
+               BlueprintName = "WatchWidgetExtension"
                ReferencedContainer = "container:UIKitProject.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
