@@ -213,7 +213,10 @@ final class Declaration {
     }
 
     var descendentDeclarations: Set<Declaration> {
-        Set(declarations.flatMap { $0.descendentDeclarations }).union(declarations).union(unusedParameters)
+        declarations
+            .flatMapSet { $0.descendentDeclarations }
+            .union(declarations)
+            .union(unusedParameters)
     }
 
     var immediateInheritedTypeReferences: Set<Reference> {
