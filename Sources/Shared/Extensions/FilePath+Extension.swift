@@ -2,10 +2,12 @@ import Foundation
 import SystemPackage
 
 public extension FilePath {
+    @inlinable
     static var current: FilePath {
         Self(fileManager.currentDirectoryPath)
     }
 
+    @inlinable
     static func makeAbsolute(_ path: String, relativeTo relativePath: FilePath = .current) -> FilePath {
         var filePath = FilePath(path)
 
@@ -20,14 +22,17 @@ public extension FilePath {
         return filePath
     }
 
+    @inlinable
     var exists: Bool {
         fileManager.fileExists(atPath: lexicallyNormalized().string)
     }
 
+    @inlinable
     var url: URL {
         URL(fileURLWithPath: lexicallyNormalized().string)
     }
 
+    @inlinable
     func chdir(closure: () throws -> Void) rethrows {
         let previous = Self.current
         _ = fileManager.changeCurrentDirectoryPath(string)
@@ -35,6 +40,7 @@ public extension FilePath {
         _ = fileManager.changeCurrentDirectoryPath(previous.string)
     }
 
+    @inlinable
     func relativeTo(_ relativePath: FilePath) -> FilePath {
         let components = lexicallyNormalized().components.map { $0.string }
         let relativePathComponents = relativePath.lexicallyNormalized().components.map { $0.string }
@@ -59,11 +65,13 @@ public extension FilePath {
 
     // MARK: - Private
 
-    private static var fileManager: FileManager {
+    @usableFromInline
+    internal static var fileManager: FileManager {
         FileManager.default
     }
 
-    private var fileManager: FileManager {
+    @usableFromInline
+    internal var fileManager: FileManager {
         Self.fileManager
     }
 }

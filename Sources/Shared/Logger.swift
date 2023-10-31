@@ -21,7 +21,8 @@ public enum ANSIColor: String {
     case gray = "\u{001B}[0;1;30m"
 }
 
-private var isColorOutputCapable: Bool = {
+@usableFromInline
+var isColorOutputCapable: Bool = {
     guard let term = ProcessInfo.processInfo.environment["TERM"],
         term.lowercased() != "dumb",
         isatty(fileno(stdout)) != 0 else {
@@ -31,6 +32,7 @@ private var isColorOutputCapable: Bool = {
     return true
 }()
 
+@inlinable
 public func colorize(_ text: String, _ color: ANSIColor) -> String {
     guard isColorOutputCapable else { return text }
     return "\(color.rawValue)\(text)\u{001B}[0;0m"
@@ -39,25 +41,30 @@ public func colorize(_ text: String, _ color: ANSIColor) -> String {
 public final class BaseLogger {
     public static let shared = BaseLogger()
 
-    private let outputQueue: DispatchQueue
+    @usableFromInline
+    let outputQueue: DispatchQueue
 
     private init() {
         self.outputQueue = DispatchQueue(label: "BaseLogger.outputQueue")
     }
 
+    @inlinable
     func info(_ text: String) {
         log(text, output: stdout)
     }
 
+    @inlinable
     func debug(_ text: String) {
         log(text, output: stdout)
     }
 
+    @inlinable
     func warn(_ text: String) {
         let text = colorize("warning: ", .boldYellow) + text
         log(text, output: stderr)
     }
 
+    @inlinable
     func error(_ text: String) {
         let text = colorize("error: ", .boldRed) + text
         log(text, output: stderr)
@@ -65,7 +72,8 @@ public final class BaseLogger {
 
     // MARK: - Private
 
-    private func log(_ line: String, output: UnsafeMutablePointer<FILE>) {
+    @inlinable
+    func log(_ line: String, output: UnsafeMutablePointer<FILE>) {
         _ = outputQueue.sync { fputs(line + "\n", output) }
     }
 }
@@ -81,41 +89,48 @@ public final class Logger {
         }
     }
 
-    private let baseLogger: BaseLogger
-    private let configuration: Configuration
+    @usableFromInline let baseLogger: BaseLogger
+    @usableFromInline let configuration: Configuration
 
     #if canImport(os)
-    private let signposter = OSSignposter()
+    @usableFromInline let signposter = OSSignposter()
     #endif
 
+    @inlinable
     public required init(baseLogger: BaseLogger = .shared, configuration: Configuration = .shared) {
         self.baseLogger = baseLogger
         self.configuration = configuration
     }
 
+    @inlinable
     public func contextualized(with context: String) -> ContextualLogger {
         .init(logger: self, context: context)
     }
 
+    @inlinable
     public func info(_ text: String, canQuiet: Bool = true) {
         guard !(configuration.quiet && canQuiet) else { return }
         baseLogger.info(text)
     }
 
+    @inlinable
     public func debug(_ text: String) {
         if configuration.verbose {
             baseLogger.debug(text)
         }
     }
 
+    @inlinable
     public func warn(_ text: String) {
         baseLogger.warn(text)
     }
 
+    @inlinable
     public func error(_ text: String) {
         baseLogger.error(text)
     }
 
+    @inlinable
     public func beginInterval(_ name: StaticString) -> SignpostInterval {
         #if canImport(os)
         let id = signposter.makeSignpostID()
@@ -126,6 +141,7 @@ public final class Logger {
         #endif
     }
 
+    @inlinable
     public func endInterval(_ interval: SignpostInterval) {
         #if canImport(os)
         signposter.endInterval(interval.name, interval.state)
@@ -135,21 +151,31 @@ public final class Logger {
 }
 
 public struct ContextualLogger {
-    let logger: Logger
-    let context: String
+    @usableFromInline let logger: Logger
+    @usableFromInline let context: String
 
+    @inlinable
+    init(logger: Logger, context: String) {
+        self.logger = logger
+        self.context = context
+    }
+
+    @inlinable
     public func contextualized(with innerContext: String) -> ContextualLogger {
         logger.contextualized(with: "\(context):\(innerContext)")
     }
 
+    @inlinable
     public func debug(_ text: String) {
         logger.debug("[\(context)] \(text)")
     }
 
+    @inlinable
     public func beginInterval(_ name: StaticString) -> SignpostInterval {
         logger.beginInterval(name)
     }
 
+    @inlinable
     public func endInterval(_ interval: SignpostInterval) {
         logger.endInterval(interval)
     }
@@ -157,8 +183,14 @@ public struct ContextualLogger {
 
 #if canImport(os)
 public struct SignpostInterval {
-    let name: StaticString
-    let state: OSSignpostIntervalState
+    @usableFromInline let name: StaticString
+    @usableFromInline let state: OSSignpostIntervalState
+
+    @inlinable
+    init(name: StaticString, state: OSSignpostIntervalState) {
+        self.name = name
+        self.state = state
+    }
 }
 #else
 public struct SignpostInterval {}

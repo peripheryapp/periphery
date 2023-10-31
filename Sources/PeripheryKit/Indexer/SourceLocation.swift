@@ -1,9 +1,9 @@
 import Foundation
 
-public class SourceLocation {
-    public let file: SourceFile
-    public let line: Int
-    public let column: Int
+class SourceLocation {
+    let file: SourceFile
+    let line: Int
+    let column: Int
 
     private let identifier: Int
 
@@ -30,19 +30,19 @@ public class SourceLocation {
 }
 
 extension SourceLocation: Equatable {
-    public static func == (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
+    static func == (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
         lhs.identifier == rhs.identifier
     }
 }
 
 extension SourceLocation: Hashable {
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(identifier)
     }
 }
 
 extension SourceLocation: CustomStringConvertible {
-    public var description: String {
+    var description: String {
         return descriptionInternal
     }
 
@@ -52,7 +52,7 @@ extension SourceLocation: CustomStringConvertible {
 }
 
 extension SourceLocation: Comparable {
-    public static func < (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
+    static func < (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
         if lhs.file == rhs.file {
             if lhs.line == rhs.line {
                 return lhs.column < rhs.column

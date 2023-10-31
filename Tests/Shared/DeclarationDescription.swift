@@ -1,5 +1,5 @@
 import Foundation
-import PeripheryKit
+@testable import PeripheryKit
 
 struct DeclarationDescription: CustomStringConvertible {
     let kind: Declaration.Kind
