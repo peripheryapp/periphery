@@ -193,5 +193,7 @@ public struct SignpostInterval {
     }
 }
 #else
-public struct SignpostInterval {}
+public struct SignpostInterval {
+    @usableFromInline init() {}
+}
 #endif
