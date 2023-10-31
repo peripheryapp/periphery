@@ -30,14 +30,14 @@ final class Reference {
     let usr: String
     var role: Role = .unknown
 
-    private let identifier: Int
+    private let hashValueCache: Int
 
     init(kind: Declaration.Kind, usr: String, location: SourceLocation, isRelated: Bool = false) {
         self.kind = kind
         self.usr = usr
         self.isRelated = isRelated
         self.location = location
-        self.identifier = [usr.hashValue, location.hashValue, isRelated.hashValue].hashValue
+        self.hashValueCache = [usr.hashValue, location.hashValue, isRelated.hashValue].hashValue
     }
 
     var descendentReferences: Set<Reference> {
@@ -47,13 +47,13 @@ final class Reference {
 
 extension Reference: Hashable {
     func hash(into hasher: inout Hasher) {
-        hasher.combine(identifier)
+        hasher.combine(hashValueCache)
     }
 }
 
 extension Reference: Equatable {
     static func == (lhs: Reference, rhs: Reference) -> Bool {
-        lhs.identifier == rhs.identifier
+        lhs.usr == rhs.usr && lhs.location == rhs.location && lhs.isRelated == rhs.isRelated
     }
 }
 

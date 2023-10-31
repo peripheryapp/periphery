@@ -5,13 +5,13 @@ class SourceLocation {
     let line: Int
     let column: Int
 
-    private let identifier: Int
+    private let hashValueCache: Int
 
     init(file: SourceFile, line: Int, column: Int) {
         self.file = file
         self.line = line
         self.column = column
-        self.identifier = [file.hashValue, line, column].hashValue
+        self.hashValueCache = [file.hashValue, line, column].hashValue
     }
 
     // MARK: - Private
@@ -31,13 +31,14 @@ class SourceLocation {
 
 extension SourceLocation: Equatable {
     static func == (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
-        lhs.identifier == rhs.identifier
+        lhs.file == rhs.file && lhs.line == rhs.line && lhs.column == rhs.column
     }
 }
 
 extension SourceLocation: Hashable {
     func hash(into hasher: inout Hasher) {
-        hasher.combine(identifier)
+
+        hasher.combine(hashValueCache)
     }
 }
 

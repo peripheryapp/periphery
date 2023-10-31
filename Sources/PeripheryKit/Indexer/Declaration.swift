@@ -198,7 +198,7 @@ final class Declaration {
     var isImplicit: Bool = false
     var isObjcAccessible: Bool = false
 
-    private let identifier: Int
+    private let hashValueCache: Int
 
     var ancestralDeclarations: Set<Declaration> {
         var maybeParent = parent
@@ -251,7 +251,7 @@ final class Declaration {
         self.kind = kind
         self.usrs = usrs
         self.location = location
-        self.identifier = usrs.hashValue
+        self.hashValueCache = usrs.hashValue
     }
 
     func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {
@@ -262,13 +262,13 @@ final class Declaration {
 
 extension Declaration: Hashable {
     func hash(into hasher: inout Hasher) {
-        hasher.combine(identifier)
+        hasher.combine(hashValueCache)
     }
 }
 
 extension Declaration: Equatable {
     static func == (lhs: Declaration, rhs: Declaration) -> Bool {
-        lhs.identifier == rhs.identifier
+        lhs.usrs == rhs.usrs
     }
 }
 
