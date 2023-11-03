@@ -5,37 +5,36 @@ public final class SourceGraph {
     // Global shared instance to prevent costly deinitialization.
     public static var shared = SourceGraph()
 
-    private(set) public var allDeclarations: Set<Declaration> = []
-    private(set) public var usedDeclarations: Set<Declaration> = []
-    private(set) public var redundantProtocols: [Declaration: Set<Reference>] = [:]
-    private(set) public var rootDeclarations: Set<Declaration> = []
-    private(set) public var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
-
+    private(set) var allDeclarations: Set<Declaration> = []
+    private(set) var usedDeclarations: Set<Declaration> = []
+    private(set) var redundantProtocols: [Declaration: Set<Reference>] = [:]
+    private(set) var rootDeclarations: Set<Declaration> = []
+    private(set) var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
     private(set) var rootReferences: Set<Reference> = []
     private(set) var allReferences: Set<Reference> = []
     private(set) var retainedDeclarations: Set<Declaration> = []
-    private(set) var potentialAssignOnlyProperties: Set<Declaration> = []
     private(set) var ignoredDeclarations: Set<Declaration> = []
     private(set) var assetReferences: Set<AssetReference> = []
     private(set) var mainAttributedDeclarations: Set<Declaration> = []
     private(set) var allReferencesByUsr: [String: Set<Reference>] = [:]
 
+    private var potentialAssignOnlyProperties: Set<Declaration> = []
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
 
     private let lock = UnfairLock()
 
-    public var unusedDeclarations: Set<Declaration> {
-        allDeclarations.subtracting(usedDeclarations)
-    }
-
-    public var assignOnlyProperties: Set<Declaration> {
-        return potentialAssignOnlyProperties.intersection(unusedDeclarations)
-    }
-
     public func indexingComplete() {
         rootDeclarations = allDeclarations.filter { $0.parent == nil }
         rootReferences = allReferences.filter { $0.parent == nil }
+    }
+
+    var unusedDeclarations: Set<Declaration> {
+        allDeclarations.subtracting(usedDeclarations)
+    }
+
+    var assignOnlyProperties: Set<Declaration> {
+        return potentialAssignOnlyProperties.intersection(unusedDeclarations)
     }
 
     func declarations(ofKind kind: Declaration.Kind) -> Set<Declaration> {

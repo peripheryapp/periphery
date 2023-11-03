@@ -1,7 +1,7 @@
 import Foundation
 
-public final class Declaration {
-    public enum Kind: String, RawRepresentable, CaseIterable {
+final class Declaration {
+    enum Kind: String, RawRepresentable, CaseIterable {
         case `associatedtype` = "associatedtype"
         case `class` = "class"
         case `enum` = "enum"
@@ -41,7 +41,7 @@ public final class Declaration {
         case varParameter = "var.parameter"
         case varStatic = "var.static"
 
-        public static var functionKinds: Set<Kind> {
+        static var functionKinds: Set<Kind> {
             Set(Kind.allCases.filter { $0.isFunctionKind })
         }
 
@@ -137,7 +137,7 @@ public final class Declaration {
             functionKinds.union(variableKinds).union(globalKinds)
         }
 
-        public var isAccessorKind: Bool {
+        var isAccessorKind: Bool {
             rawValue.hasPrefix("function.accessor")
         }
 
@@ -145,7 +145,7 @@ public final class Declaration {
             [.class, .struct, .enum]
         }
 
-        public var displayName: String? {
+        var displayName: String? {
             switch self {
             case .class:
                 return "class"
@@ -179,27 +179,26 @@ public final class Declaration {
         }
     }
 
-    public let location: SourceLocation
-    public var attributes: Set<String> = []
-    public var modifiers: Set<String> = []
-    public var accessibility: DeclarationAccessibility = .init(value: .internal, isExplicit: false)
-    public let kind: Kind
-    public var name: String?
-    public let usrs: Set<String>
-    public var unusedParameters: Set<Declaration> = []
-    public var declarations: Set<Declaration> = []
-    public var commentCommands: Set<CommentCommand> = []
-    public var references: Set<Reference> = []
-    public var declaredType: String?
-    public var hasCapitalSelfFunctionCall: Bool = false
-    public var hasGenericFunctionReturnedMetatypeParameters: Bool = false
-    public var parent: Declaration?
-
+    let location: SourceLocation
+    var attributes: Set<String> = []
+    var modifiers: Set<String> = []
+    var accessibility: DeclarationAccessibility = .init(value: .internal, isExplicit: false)
+    let kind: Kind
+    var name: String?
+    let usrs: Set<String>
+    var unusedParameters: Set<Declaration> = []
+    var declarations: Set<Declaration> = []
+    var commentCommands: Set<CommentCommand> = []
+    var references: Set<Reference> = []
+    var declaredType: String?
+    var hasCapitalSelfFunctionCall: Bool = false
+    var hasGenericFunctionReturnedMetatypeParameters: Bool = false
+    var parent: Declaration?
     var related: Set<Reference> = []
     var isImplicit: Bool = false
     var isObjcAccessible: Bool = false
 
-    private let identifier: Int
+    private let hashValueCache: Int
 
     var ancestralDeclarations: Set<Declaration> {
         var maybeParent = parent
@@ -213,8 +212,11 @@ public final class Declaration {
         return declarations
     }
 
-    public var descendentDeclarations: Set<Declaration> {
-        Set(declarations.flatMap { $0.descendentDeclarations }).union(declarations).union(unusedParameters)
+    var descendentDeclarations: Set<Declaration> {
+        declarations
+            .flatMapSet { $0.descendentDeclarations }
+            .union(declarations)
+            .union(unusedParameters)
     }
 
     var immediateInheritedTypeReferences: Set<Reference> {
@@ -252,7 +254,7 @@ public final class Declaration {
         self.kind = kind
         self.usrs = usrs
         self.location = location
-        self.identifier = usrs.hashValue
+        self.hashValueCache = usrs.hashValue
     }
 
     func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {
@@ -262,19 +264,19 @@ public final class Declaration {
 }
 
 extension Declaration: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(identifier)
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(hashValueCache)
     }
 }
 
 extension Declaration: Equatable {
-    public static func == (lhs: Declaration, rhs: Declaration) -> Bool {
-        lhs.identifier == rhs.identifier
+    static func == (lhs: Declaration, rhs: Declaration) -> Bool {
+        lhs.usrs == rhs.usrs
     }
 }
 
 extension Declaration: CustomStringConvertible {
-    public var description: String {
+    var description: String {
         "Declaration(\(descriptionParts.joined(separator: ", ")))"
     }
 
@@ -298,7 +300,7 @@ extension Declaration: CustomStringConvertible {
 }
 
 extension Declaration: Comparable {
-    public static func < (lhs: Declaration, rhs: Declaration) -> Bool {
+    static func < (lhs: Declaration, rhs: Declaration) -> Bool {
         if lhs.location == rhs.location {
             return lhs.usrs.sorted().joined() < rhs.usrs.sorted().joined()
         }
@@ -307,11 +309,15 @@ extension Declaration: Comparable {
     }
 }
 
-public struct DeclarationAccessibility {
-    public let value: Accessibility
-    public let isExplicit: Bool
+struct DeclarationAccessibility {
+    let value: Accessibility
+    let isExplicit: Bool
 
-    public func isExplicitly(_ testValue: Accessibility) -> Bool {
+    func isExplicitly(_ testValue: Accessibility) -> Bool {
         isExplicit && value == testValue
+    }
+
+    var isAccessibleCrossModule: Bool {
+        value == .public || value == .open
     }
 }

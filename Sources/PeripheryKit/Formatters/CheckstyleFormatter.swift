@@ -1,6 +1,5 @@
 import Foundation
 import Shared
-import PeripheryKit
 
 final class CheckstyleFormatter: OutputFormatter {
     func format(_ results: [ScanResult]) -> String {

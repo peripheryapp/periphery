@@ -63,8 +63,7 @@ final class ScanBehavior {
             results = try block(project)
             let interval = logger.beginInterval("result:output")
             let filteredResults = OutputDeclarationFilter().filter(results)
-            let sortedResults = filteredResults.sorted { $0.declaration < $1.declaration }
-            let output = try configuration.outputFormat.formatter.init().format(sortedResults)
+            let output = try configuration.outputFormat.formatter.init().format(filteredResults)
             if isatty(fileno(stdout)) == 1 || configuration.outputFormat != .csv {
                 logger.info("", canQuiet: true)
             }

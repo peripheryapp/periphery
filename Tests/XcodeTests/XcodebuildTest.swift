@@ -43,24 +43,6 @@ class XcodebuildSchemesTest: XCTestCase {
     }
 }
 
-class XcodebuildSettingsTest: XCTestCase {
-    var xcodebuild: Xcodebuild!
-    var project: XcodeProject!
-
-    override func setUp() {
-        super.setUp()
-
-        xcodebuild = Xcodebuild(shell: .shared)
-        project = try! XcodeProject(path: UIKitProjectPath)
-    }
-
-    func testBuildSettings() {
-        let actions = try! xcodebuild.buildSettings(targets: project.targets)
-        let buildTargets = actions.map(\.target).sorted()
-        XCTAssertEqual(buildTargets, ["NotificationServiceExtension", "Target With Spaces", "UIKitProject", "UIKitProjectTests"])
-    }
-}
-
 class ShellMock: Shell {
     var output: String = ""
 

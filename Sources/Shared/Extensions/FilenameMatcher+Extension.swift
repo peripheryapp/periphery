@@ -2,6 +2,7 @@ import Foundation
 import FilenameMatcher
 
 public extension FilenameMatcher {
+    @inlinable
     init(relativePattern: String, to base: String, caseSensitive: Bool) {
         let patternComponents = relativePattern.split(separator: "/", omittingEmptySubsequences: false)
         let parentTraversalCount = patternComponents.firstIndex { $0 != ".." } ?? 0

@@ -13,6 +13,7 @@ public enum OutputFormat: String, CaseIterable {
         self.init(rawValue: anyValue as? String ?? "")
     }
 
+    @inlinable
     public var supportsAuxiliaryOutput: Bool {
         self == .xcode
     }

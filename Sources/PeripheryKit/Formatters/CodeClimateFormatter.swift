@@ -1,5 +1,4 @@
 import Foundation
-import PeripheryKit
 
 final class CodeClimateFormatter: OutputFormatter {
     

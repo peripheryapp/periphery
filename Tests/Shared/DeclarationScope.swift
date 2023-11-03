@@ -1,4 +1,4 @@
-import PeripheryKit
+@testable import PeripheryKit
 
 enum DeclarationScope {
     case declaration(Declaration)

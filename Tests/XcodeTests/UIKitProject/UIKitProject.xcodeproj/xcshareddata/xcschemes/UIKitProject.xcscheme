@@ -20,6 +20,20 @@
                ReferencedContainer = "container:UIKitProject.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "3CBEB9D02AEFC25B00F5947D"
+               BuildableName = "WatchWidgetExtension.appex"
+               BlueprintName = "WatchWidgetExtension"
+               ReferencedContainer = "container:UIKitProject.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

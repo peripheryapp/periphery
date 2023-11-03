@@ -1,5 +1,5 @@
-public final class Reference {
-    public enum Role {
+final class Reference {
+    enum Role {
         case varType
         case returnType
         case parameterType
@@ -21,23 +21,23 @@ public final class Reference {
         }
     }
 
-    public let location: SourceLocation
-    public let kind: Declaration.Kind
-    public let isRelated: Bool
-    public var name: String?
-    public var parent: Declaration?
-    public var references: Set<Reference> = []
-    public let usr: String
-    public var role: Role = .unknown
+    let location: SourceLocation
+    let kind: Declaration.Kind
+    let isRelated: Bool
+    var name: String?
+    var parent: Declaration?
+    var references: Set<Reference> = []
+    let usr: String
+    var role: Role = .unknown
 
-    private let identifier: Int
+    private let hashValueCache: Int
 
     init(kind: Declaration.Kind, usr: String, location: SourceLocation, isRelated: Bool = false) {
         self.kind = kind
         self.usr = usr
         self.isRelated = isRelated
         self.location = location
-        self.identifier = [usr.hashValue, location.hashValue, isRelated.hashValue].hashValue
+        self.hashValueCache = [usr.hashValue, location.hashValue, isRelated.hashValue].hashValue
     }
 
     var descendentReferences: Set<Reference> {
@@ -46,19 +46,19 @@ public final class Reference {
 }
 
 extension Reference: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(identifier)
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(hashValueCache)
     }
 }
 
 extension Reference: Equatable {
-    public static func == (lhs: Reference, rhs: Reference) -> Bool {
-        lhs.identifier == rhs.identifier
+    static func == (lhs: Reference, rhs: Reference) -> Bool {
+        lhs.usr == rhs.usr && lhs.location == rhs.location && lhs.isRelated == rhs.isRelated
     }
 }
 
 extension Reference: CustomStringConvertible {
-    public var description: String {
+    var description: String {
         let referenceType = isRelated ? "Related" : "Reference"
 
         return "\(referenceType)(\(descriptionParts.joined(separator: ", ")))"
@@ -72,7 +72,7 @@ extension Reference: CustomStringConvertible {
 }
 
 extension Reference: Comparable {
-    public static func < (lhs: Reference, rhs: Reference) -> Bool {
+    static func < (lhs: Reference, rhs: Reference) -> Bool {
         lhs.location < rhs.location
     }
 }

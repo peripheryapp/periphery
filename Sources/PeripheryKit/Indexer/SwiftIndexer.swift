@@ -32,47 +32,28 @@ public final class SwiftIndexer: Indexer {
         let (includedFiles, excludedFiles) = filterIndexExcluded(from: allSourceFiles)
         excludedFiles.forEach { self.logger.debug("Excluding \($0.string)") }
 
-        let stores = try JobPool(jobs: indexStorePaths)
-            .map { [logger] indexStorePath in
+        let unitsByFile = try JobPool(jobs: indexStorePaths)
+            .flatMap { [logger, currentFilePath] indexStorePath in
                 logger.debug("Reading \(indexStorePath)")
                 let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: .open())
-                return (indexStore, indexStore.units(includeSystem: false))
-            }
+                let units = indexStore.units(includeSystem: false)
 
-        let units = stores.reduce(into: [(IndexStore, IndexStoreUnit)]()) { result, tuple in
-            let (indexStore, units) = tuple
-            units.forEach { result.append((indexStore, $0)) }
-        }
+                return try units.compactMap { unit  -> (FilePath, IndexStore, IndexStoreUnit)? in
+                    guard let filePath = try indexStore.mainFilePath(for: unit) else { return nil }
 
-        let unitsByFile = try JobPool(jobs: units)
-            .compactMap { [logger, sourceFiles, currentFilePath] (indexStore, unit) -> (FilePath, IndexStore, IndexStoreUnit)? in
-                guard let filePath = try indexStore.mainFilePath(for: unit) else { return nil }
+                    let file = FilePath.makeAbsolute(filePath, relativeTo: currentFilePath)
 
-                let file = FilePath.makeAbsolute(filePath, relativeTo: currentFilePath)
-
-                if includedFiles.contains(file) {
-                    // Ignore units built for other architectures/platforms.
-                    let validTargetTriples = sourceFiles[file]?.compactMapSet { $0.triple } ?? []
-
-                    if validTargetTriples.isEmpty {
+                    if includedFiles.contains(file) {
                         return (file, indexStore, unit)
-                    } else {
-                        if let unitTargetTriple = try indexStore.target(for: unit) {
-                            if validTargetTriples.contains(unitTargetTriple) {
-                                return (file, indexStore, unit)
-                            }
-                        } else {
-                            logger.warn("No unit target triple for: \(file)")
-                        }
                     }
-                }
 
-                return nil
+                    return nil
+                }
             }
-           .reduce(into: [FilePath: [(IndexStore, IndexStoreUnit)]](), { result, tuple in
-               let (file, indexStore, unit) = tuple
-               result[file, default: []].append((indexStore, unit))
-           })
+            .reduce(into: [FilePath: [(IndexStore, IndexStoreUnit)]](), { result, tuple in
+                let (file, indexStore, unit) = tuple
+                result[file, default: []].append((indexStore, unit))
+            })
 
         let indexedFiles = Set(unitsByFile.keys)
         let unindexedFiles = allSourceFiles.subtracting(excludedFiles).subtracting(indexedFiles)
@@ -83,21 +64,9 @@ public final class SwiftIndexer: Indexer {
             throw PeripheryError.unindexedTargetsError(targets: targets, indexStorePaths: indexStorePaths)
         }
 
-        let jobs = try unitsByFile.map { (file, units) -> Job in
-            let modules = try units.reduce(into: Set<String>()) { (set, tuple) in
-                let (indexStore, unit) = tuple
-                if let name = try indexStore.moduleName(for: unit) {
-                    let (didInsert, _) = set.insert(name)
-                    if !didInsert {
-                        let targets = try units.compactMapSet { try indexStore.target(for: $0.1) }
-                        throw PeripheryError.conflictingIndexUnitsError(file: file, module: name, unitTargets: targets)
-                    }
-                }
-            }
-            let sourceFile = SourceFile(path: file, modules: modules)
-
+        let jobs = unitsByFile.map { (file, units) -> Job in
             return Job(
-                file: sourceFile,
+                file: file,
                 units: units,
                 graph: graph,
                 logger: logger,
@@ -113,7 +82,7 @@ public final class SwiftIndexer: Indexer {
                 try job.phaseOne()
             }
 
-            phaseOneLogger.debug("\(job.file.path) (\(elapsed)s)")
+            phaseOneLogger.debug("\(job.file) (\(elapsed)s)")
         }
 
         logger.endInterval(phaseOneInterval)
@@ -126,7 +95,7 @@ public final class SwiftIndexer: Indexer {
                 try job.phaseTwo()
             }
 
-            phaseTwoLogger.debug("\(job.file.path) (\(elapsed)s)")
+            phaseTwoLogger.debug("\(job.file) (\(elapsed)s)")
         }
 
         logger.endInterval(phaseTwoInterval)
@@ -135,15 +104,16 @@ public final class SwiftIndexer: Indexer {
     // MARK: - Private
 
     private class Job {
-        let file: SourceFile
+        let file: FilePath
 
         private let units: [(IndexStore, IndexStoreUnit)]
         private let graph: SourceGraph
         private let logger: ContextualLogger
         private let configuration: Configuration
+        private var sourceFile: SourceFile?
 
         required init(
-            file: SourceFile,
+            file: FilePath,
             units: [(IndexStore, IndexStoreUnit)],
             graph: SourceGraph,
             logger: ContextualLogger,
@@ -203,7 +173,7 @@ public final class SwiftIndexer: Indexer {
 
                     try indexStore.forEachOccurrences(for: record, language: .swift) { occurrence in
                         guard let usr = occurrence.symbol.usr,
-                              let location = transformLocation(occurrence.location)
+                              let location = try transformLocation(occurrence.location)
                               else { return true }
 
                         if !occurrence.roles.intersection([.definition, .declaration]).isEmpty {
@@ -262,13 +232,14 @@ public final class SwiftIndexer: Indexer {
 
         /// Phase two associates latent references, and performs other actions that depend on the completed source graph.
         func phaseTwo() throws {
-            let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: file)
+            let sourceFile = try getSourceFile()
+            let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: sourceFile)
             let declarationSyntaxVisitor = multiplexingSyntaxVisitor.add(DeclarationSyntaxVisitor.self)
             let importSyntaxVisitor = multiplexingSyntaxVisitor.add(ImportSyntaxVisitor.self)
 
             multiplexingSyntaxVisitor.visit()
 
-            file.importStatements = importSyntaxVisitor.importStatements
+            sourceFile.importStatements = importSyntaxVisitor.importStatements
 
             associateLatentReferences()
             associateDanglingReferences()
@@ -277,11 +248,28 @@ public final class SwiftIndexer: Indexer {
             applyCommentCommands(using: multiplexingSyntaxVisitor)
         }
 
+        // MARK: - Private
+
         private var declarations: [Declaration] = []
         private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
         private var referencesByUsr: [String: Set<Reference>] = [:]
         private var danglingReferences: [Reference] = []
         private var varParameterUsrs: Set<String> = []
+
+        private func getSourceFile() throws -> SourceFile {
+            if let sourceFile { return sourceFile }
+
+            let modules = try units.reduce(into: Set<String>()) { (set, tuple) in
+                let (indexStore, unit) = tuple
+                if let name = try indexStore.moduleName(for: unit) {
+                    set.insert(name)
+                }
+            }
+
+            let sourceFile = SourceFile(path: file, modules: modules)
+            self.sourceFile = sourceFile
+            return sourceFile
+        }
 
         private func establishDeclarationHierarchy() {
             graph.withLock {
@@ -446,7 +434,7 @@ public final class SwiftIndexer: Indexer {
 
             let analyzer = UnusedParameterAnalyzer()
             let paramsByFunction = analyzer.analyze(
-                file: file,
+                file: syntaxVisitor.sourceFile,
                 syntax: syntaxVisitor.syntax,
                 locationConverter: syntaxVisitor.locationConverter,
                 parseProtocols: true)
@@ -661,8 +649,8 @@ public final class SwiftIndexer: Indexer {
             return refs
         }
 
-        private func transformLocation(_ input: IndexStoreOccurrence.Location) -> SourceLocation? {
-            return SourceLocation(file: file, line: Int(input.line), column: Int(input.column))
+        private func transformLocation(_ input: IndexStoreOccurrence.Location) throws -> SourceLocation? {
+            return SourceLocation(file: try getSourceFile(), line: Int(input.line), column: Int(input.column))
         }
 
         private func transformDeclarationKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Declaration.Kind? {

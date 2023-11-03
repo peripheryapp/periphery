@@ -1,8 +1,7 @@
 import Foundation
 import Shared
-import PeripheryKit
 
-protocol OutputFormatter: AnyObject {
+public protocol OutputFormatter: AnyObject {
     init()
     func format(_ results: [ScanResult]) throws -> String
 }
@@ -58,7 +57,7 @@ extension OutputFormatter {
     }
 }
 
-extension OutputFormat {
+public extension OutputFormat {
     var formatter: OutputFormatter.Type {
         switch self {
         case .xcode:

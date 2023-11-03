@@ -40,7 +40,21 @@ public final class Xcodebuild {
             "INDEX_ENABLE_DATA_STORE=\"YES\""
         ]
 
-        let xcodebuild = "xcodebuild \((args + [cmd] + envs + additionalArguments).joined(separator: " "))"
+        // Apply quotes to additional option values is needed.
+        var quotedArguments = additionalArguments
+
+        for (i, arg) in additionalArguments.enumerated() {
+            if arg.hasPrefix("-"),
+               let value = additionalArguments[safe: i + 1],
+               !value.hasPrefix("-"),
+               !value.hasPrefix("\""),
+               !value.hasPrefix("\'")
+            {
+                quotedArguments[i + 1] = "\"\(value)\""
+            }
+        }
+
+        let xcodebuild = "xcodebuild \((args + [cmd] + envs + quotedArguments).joined(separator: " "))"
         return try shell.exec(["/bin/sh", "-c", xcodebuild])
     }
 
@@ -87,29 +101,6 @@ public final class Xcodebuild {
             let schemes = details["schemes"] as? [String] else { return [] }
 
         return Set(schemes)
-    }
-
-    func buildSettings(targets: Set<XcodeTarget>) throws -> [XcodeBuildAction] {
-        try targets
-            .reduce(into: [XcodeProject: Set<String>]()) { result, target in
-                result[target.project, default: []].insert(target.name)
-            }
-            .reduce(into: [XcodeBuildAction]()) { result, pair in
-                let (project, targets) = pair
-                let args = [
-                    "-project", project.path.lexicallyNormalized().string,
-                    "-showBuildSettings",
-                    "-json"
-                ] + targets.flatMap { ["-target", $0] }
-
-                let output = try shell.exec(["xcodebuild"] + args, stderr: false)
-
-                guard let data = output.data(using: .utf8) else { return }
-
-                let decoder = JSONDecoder()
-                let actions = try decoder.decode([XcodeBuildAction].self, from: data)
-                result.append(contentsOf: actions)
-            }
     }
 
     // MARK: - Private
