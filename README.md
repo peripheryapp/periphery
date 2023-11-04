@@ -47,16 +47,6 @@
 
 ### [Homebrew](https://brew.sh/)
 
-Install Homebrew:
-
-> You can skip this step if you already have Homebrew installed.
-
-```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-Now install Periphery itself:
-
 ```
 brew install peripheryapp/periphery/periphery
 ```
