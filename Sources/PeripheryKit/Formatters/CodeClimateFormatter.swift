@@ -1,7 +1,15 @@
 import Foundation
+import Shared
+import SystemPackage
 
 final class CodeClimateFormatter: OutputFormatter {
-    
+    let configuration: Configuration
+    lazy var currentFilePath: FilePath = { .current }()
+
+    init(configuration: Configuration) {
+        self.configuration = configuration
+    }
+
     func format(_ results: [PeripheryKit.ScanResult]) throws -> String {
         var jsonObject: [Any] = []
 
@@ -11,7 +19,7 @@ final class CodeClimateFormatter: OutputFormatter {
             ]
             
             let location: [AnyHashable: Any] = [
-                "path": result.declaration.location.file.path.url.relativePath,
+                "path": outputPath(result.declaration.location).url.relativePath,
                 "lines": lines
             ]
             
@@ -44,5 +52,4 @@ final class CodeClimateFormatter: OutputFormatter {
         let json = String(data: data, encoding: .utf8)
         return json ?? ""
     }
-    
 }

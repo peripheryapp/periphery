@@ -1,7 +1,15 @@
 import Foundation
 import Shared
+import SystemPackage
 
 final class JsonFormatter: OutputFormatter {
+    let configuration: Configuration
+    lazy var currentFilePath: FilePath = { .current }()
+
+    init(configuration: Configuration) {
+        self.configuration = configuration
+    }
+
     func format(_ results: [ScanResult]) throws -> String {
         var jsonObject: [Any] = []
 
@@ -15,7 +23,7 @@ final class JsonFormatter: OutputFormatter {
                 "accessibility": result.declaration.accessibility.value.rawValue,
                 "ids": Array(result.declaration.usrs),
                 "hints": [describe(result.annotation)],
-                "location": result.declaration.location.description
+                "location": outputPath(result.declaration.location).string
             ]
             jsonObject.append(object)
 
@@ -30,7 +38,7 @@ final class JsonFormatter: OutputFormatter {
                         "accessibility": "",
                         "ids": [ref.usr],
                         "hints": [redundantConformanceHint],
-                        "location": ref.location.description
+                        "location": outputPath(ref.location).string
                     ]
                     jsonObject.append(object)
                 }

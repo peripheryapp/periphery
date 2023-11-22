@@ -1,8 +1,11 @@
 import Foundation
 import Shared
+import SystemPackage
 
 public protocol OutputFormatter: AnyObject {
-    init()
+    var configuration: Configuration { get }
+    var currentFilePath: FilePath { get }
+    init(configuration: Configuration)
     func format(_ results: [ScanResult]) throws -> String
 }
 
@@ -54,6 +57,16 @@ extension OutputFormatter {
         }
 
         return [(result.declaration.location, description)] + secondaryResults
+    }
+
+    func outputPath(_ location: SourceLocation) -> FilePath {
+        var path = location.file.path.lexicallyNormalized()
+
+        if configuration.relativeResults {
+            path = path.relativeTo(currentFilePath)
+        }
+
+        return path
     }
 }
 

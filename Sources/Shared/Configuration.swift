@@ -92,6 +92,9 @@ public final class Configuration {
     @Setting(key: "clean_build", defaultValue: false)
     public var cleanBuild: Bool
 
+    @Setting(key: "relative_results", defaultValue: false)
+    public var relativeResults: Bool
+
     // Non user facing.
     public var guidedSetup: Bool = false
 
@@ -209,6 +212,10 @@ public final class Configuration {
             config[$buildArguments.key] = buildArguments
         }
 
+        if $relativeResults.hasNonDefaultValue {
+            config[$relativeResults.key] = relativeResults
+        }
+
         return try Yams.dump(object: config)
     }
 
@@ -279,6 +286,8 @@ public final class Configuration {
                 $cleanBuild.assign(value)
             case $buildArguments.key:
                 $buildArguments.assign(value)
+            case $relativeResults.key:
+                $relativeResults.assign(value)
             default:
                 logger.warn("\(path.string): invalid key '\(key)'")
             }
@@ -313,6 +322,7 @@ public final class Configuration {
         $skipBuild.reset()
         $cleanBuild.reset()
         $buildArguments.reset()
+        $relativeResults.reset()
     }
 
     // MARK: - Helpers

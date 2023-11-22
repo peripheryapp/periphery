@@ -84,6 +84,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Skip the project build step")
     var skipBuild: Bool = defaultConfiguration.$skipBuild.defaultValue
 
+    @Flag(help: "Output result paths relative to the current directory")
+    var relativeResults: Bool = defaultConfiguration.$relativeResults.defaultValue
+
     @Flag(help: "Exit with non-zero status if any unused code is found")
     var strict: Bool = defaultConfiguration.$strict.defaultValue
 
@@ -134,6 +137,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$skipBuild, skipBuild)
         configuration.apply(\.$cleanBuild, cleanBuild)
         configuration.apply(\.$buildArguments, buildArguments)
+        configuration.apply(\.$relativeResults, relativeResults)
 
         try scanBehavior.main { project in
             try Scan().perform(project: project)

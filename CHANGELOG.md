@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Added the `--relative-results` option to output result paths relative to the current directory.
 
 ##### Bug Fixes
 

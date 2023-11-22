@@ -1,7 +1,15 @@
 import Foundation
 import Shared
+import SystemPackage
 
 final class CsvFormatter: OutputFormatter {
+    let configuration: Configuration
+    lazy var currentFilePath: FilePath = { .current }()
+
+    init(configuration: Configuration) {
+        self.configuration = configuration
+    }
+
     func format(_ results: [ScanResult]) -> String {
         var lines: [String] = ["Kind,Name,Modifiers,Attributes,Accessibility,IDs,Location,Hints"]
 
@@ -55,6 +63,7 @@ final class CsvFormatter: OutputFormatter {
         let joinedModifiers = attributes.joined(separator: "|")
         let joinedAttributes = modifiers.joined(separator: "|")
         let joinedUsrs = usrs.joined(separator: "|")
-        return "\(kind),\(name ?? ""),\(joinedModifiers),\(joinedAttributes),\(accessibility ?? ""),\(joinedUsrs),\(location),\(hint ?? "")"
+        let path = outputPath(location)
+        return "\(kind),\(name ?? ""),\(joinedModifiers),\(joinedAttributes),\(accessibility ?? ""),\(joinedUsrs),\(path),\(hint ?? "")"
     }
 }
