@@ -115,13 +115,13 @@ public final class Logger {
 
     @inlinable
     public func debug(_ text: String) {
-        if configuration.verbose {
-            baseLogger.debug(text)
-        }
+        guard configuration.verbose else { return }
+        baseLogger.debug(text)
     }
 
     @inlinable
     public func warn(_ text: String) {
+        guard !configuration.quiet else { return }
         baseLogger.warn(text)
     }
 
