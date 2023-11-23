@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.17.0 (2023-11-23)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Added the `--relative-results` option to output result paths relative to the current directory.
 - `--quiet` now silences warnings too.
 
