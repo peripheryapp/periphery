@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Add support for indexing plist files via the generic `--file-targets-path` option.
 
 ##### Bug Fixes
 

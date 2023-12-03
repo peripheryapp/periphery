@@ -20,6 +20,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case unindexedTargetsError(targets: Set<String>, indexStorePaths: [FilePath])
     case jsonDeserializationError(error: Error, json: String)
     case indexStoreNotFound(derivedDataPath: String)
+    case unsupportedFileKind(path: FilePath)
 
     public var errorDescription: String? {
         switch self {
@@ -65,6 +66,8 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             return "JSON deserialization failed: \(describe(error))\nJSON:\n\(json)"
         case let .indexStoreNotFound(derivedDataPath):
             return "Failed to find index datastore at path: \(derivedDataPath)"
+        case let .unsupportedFileKind(path):
+            return "Unsupported file kind '\(path)'."
         }
     }
 
