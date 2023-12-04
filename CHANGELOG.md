@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.17.1 (2023-12-04)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Add support for indexing plist files via the generic `--file-targets-path` option.
 
 ##### Bug Fixes
