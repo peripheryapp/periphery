@@ -23,7 +23,7 @@ final class JsonFormatter: OutputFormatter {
                 "accessibility": result.declaration.accessibility.value.rawValue,
                 "ids": Array(result.declaration.usrs),
                 "hints": [describe(result.annotation)],
-                "location": outputPath(result.declaration.location).string
+                "location": locationOutput(result.declaration.location)
             ]
             jsonObject.append(object)
 
@@ -38,7 +38,7 @@ final class JsonFormatter: OutputFormatter {
                         "accessibility": "",
                         "ids": [ref.usr],
                         "hints": [redundantConformanceHint],
-                        "location": outputPath(ref.location).string
+                        "location": locationOutput(ref.location)
                     ]
                     jsonObject.append(object)
                 }
@@ -50,5 +50,14 @@ final class JsonFormatter: OutputFormatter {
         let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted, .withoutEscapingSlashes])
         let json = String(data: data, encoding: .utf8)
         return json ?? ""
+    }
+    
+    private func locationOutput(_ location: SourceLocation) -> String {
+        [
+            outputPath(location).string,
+            String(location.line),
+            String(location.column)
+        ]
+        .joined(separator: ":")
     }
 }
