@@ -63,7 +63,7 @@ final class CsvFormatter: OutputFormatter {
         let joinedModifiers = attributes.joined(separator: "|")
         let joinedAttributes = modifiers.joined(separator: "|")
         let joinedUsrs = usrs.joined(separator: "|")
-        let path = outputPath(location)
+        let path = locationDescription(location)
         return "\(kind),\(name ?? ""),\(joinedModifiers),\(joinedAttributes),\(accessibility ?? ""),\(joinedUsrs),\(path),\(hint ?? "")"
     }
 }
