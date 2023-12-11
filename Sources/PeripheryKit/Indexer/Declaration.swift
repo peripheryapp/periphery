@@ -109,8 +109,27 @@ final class Declaration {
             }
         }
 
+        var extensionKind: Kind? {
+            switch self {
+            case .class:
+                return .extensionClass
+            case .struct:
+                return .extensionStruct
+            case .enum:
+                return .extensionEnum
+            case .protocol:
+                return .extensionProtocol
+            default:
+                return nil
+            }
+        }
+
         var isExtensionKind: Bool {
             rawValue.hasPrefix("extension")
+        }
+
+        var isExtendableKind: Bool {
+            isConcreteTypeDeclarableKind
         }
 
         var isConformableKind: Bool {
@@ -123,6 +142,10 @@ final class Declaration {
 
         static var discreteConformableKinds: Set<Kind> {
             return [.class, .struct, .enum]
+        }
+
+        var isConcreteTypeDeclarableKind: Bool {
+            Self.concreteTypeDeclarableKinds.contains(self)
         }
 
         static var concreteTypeDeclarableKinds: Set<Kind> {
@@ -147,6 +170,8 @@ final class Declaration {
 
         var displayName: String? {
             switch self {
+            case .module:
+                return "imported module"
             case .class:
                 return "class"
             case .protocol:

@@ -2,7 +2,6 @@ import Foundation
 import XCTest
 import Shared
 @testable import XcodeSupport
-@testable import PeripheryKit
 
 class XcodebuildBuildProjectTest: XCTestCase {
     var xcodebuild: Xcodebuild!

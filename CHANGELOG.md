@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Add experimental unused import analysis.
 
 ##### Bug Fixes
 

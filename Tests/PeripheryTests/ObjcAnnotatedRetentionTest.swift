@@ -1,6 +1,5 @@
 import XCTest
 import SystemPackage
-import Shared
 @testable import TestShared
 @testable import PeripheryKit
 

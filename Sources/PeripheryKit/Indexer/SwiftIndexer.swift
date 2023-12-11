@@ -240,6 +240,14 @@ public final class SwiftIndexer: Indexer {
             multiplexingSyntaxVisitor.visit()
 
             sourceFile.importStatements = importSyntaxVisitor.importStatements
+            
+            if configuration.enableUnusedImportsAnalysis {
+                for stmt in sourceFile.importStatements {
+                    if stmt.isExported {
+                        graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
+                    }
+                }
+            }
 
             associateLatentReferences()
             associateDanglingReferences()
@@ -264,6 +272,10 @@ public final class SwiftIndexer: Indexer {
                 if let name = try indexStore.moduleName(for: unit) {
                     set.insert(name)
                 }
+            }
+
+            if configuration.enableUnusedImportsAnalysis {
+                graph.addIndexedModules(modules)
             }
 
             let sourceFile = SourceFile(path: file, modules: modules)

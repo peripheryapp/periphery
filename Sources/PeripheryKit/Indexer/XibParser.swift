@@ -1,7 +1,6 @@
 import Foundation
 import AEXML
 import SystemPackage
-import Shared
 
 final class XibParser {
     private let path: FilePath
