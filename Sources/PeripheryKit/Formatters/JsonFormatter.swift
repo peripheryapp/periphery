@@ -23,7 +23,7 @@ final class JsonFormatter: OutputFormatter {
                 "accessibility": result.declaration.accessibility.value.rawValue,
                 "ids": Array(result.declaration.usrs),
                 "hints": [describe(result.annotation)],
-                "location": outputPath(result.declaration.location).string
+                "location": locationDescription(result.declaration.location)
             ]
             jsonObject.append(object)
 
@@ -38,7 +38,7 @@ final class JsonFormatter: OutputFormatter {
                         "accessibility": "",
                         "ids": [ref.usr],
                         "hints": [redundantConformanceHint],
-                        "location": outputPath(ref.location).string
+                        "location": locationDescription(ref.location)
                     ]
                     jsonObject.append(object)
                 }

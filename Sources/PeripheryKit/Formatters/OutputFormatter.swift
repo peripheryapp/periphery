@@ -68,6 +68,15 @@ extension OutputFormatter {
 
         return path
     }
+
+    func locationDescription(_ location: SourceLocation) -> String {
+        [
+            outputPath(location).string,
+            String(location.line),
+            String(location.column)
+        ]
+        .joined(separator: ":")
+    }
 }
 
 public extension OutputFormat {
