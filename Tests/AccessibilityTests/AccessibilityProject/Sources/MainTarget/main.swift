@@ -58,3 +58,9 @@ _ = InternalProtocolRefiningPublicProtocolRetainer()
 
 // Closure
 let _ = PublicTypeUsedInPublicClosureRetainer().closure
+
+// Async
+
+Task {
+    await PublicActor().someFunc()
+}

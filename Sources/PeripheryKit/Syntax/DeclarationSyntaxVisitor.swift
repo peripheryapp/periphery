@@ -37,6 +37,19 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         self.typeSyntaxInspector = .init(sourceLocationBuilder: sourceLocationBuilder)
     }
 
+    func visitPost(_ node: ActorDeclSyntax) {
+        parse(
+            modifiers: node.modifiers,
+            attributes: node.attributes,
+            trivia: node.leadingTrivia,
+            inheritanceClause: node.inheritanceClause,
+            genericParameterClause: node.genericParameterClause,
+            genericWhereClause: node.genericWhereClause,
+            consumeCapitalSelfFunctionCalls: true,
+            at: node.name.positionAfterSkippingLeadingTrivia
+        )
+    }
+
     func visitPost(_ node: ClassDeclSyntax) {
         parse(
             modifiers: node.modifiers,

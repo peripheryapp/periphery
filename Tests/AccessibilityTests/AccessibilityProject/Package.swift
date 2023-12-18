@@ -1,9 +1,10 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.9
 
 import PackageDescription
 
 let package = Package(
     name: "AccessibilityProject",
+    platforms: [.macOS(.v14)],
     products: [
         .executable(
             name: "app",

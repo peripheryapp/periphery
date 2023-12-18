@@ -6,6 +6,7 @@ import SwiftParser
 protocol PeripherySyntaxVisitor {
     init(sourceLocationBuilder: SourceLocationBuilder)
 
+    func visit(_ node: ActorDeclSyntax)
     func visit(_ node: ClassDeclSyntax)
     func visit(_ node: ProtocolDeclSyntax)
     func visit(_ node: StructDeclSyntax)
@@ -25,6 +26,7 @@ protocol PeripherySyntaxVisitor {
     func visit(_ node: OptionalBindingConditionSyntax)
     func visit(_ node: FunctionCallExprSyntax)
 
+    func visitPost(_ node: ActorDeclSyntax)
     func visitPost(_ node: ClassDeclSyntax)
     func visitPost(_ node: ProtocolDeclSyntax)
     func visitPost(_ node: StructDeclSyntax)
@@ -46,6 +48,7 @@ protocol PeripherySyntaxVisitor {
 }
 
 extension PeripherySyntaxVisitor {
+    func visit(_ node: ActorDeclSyntax) { }
     func visit(_ node: ClassDeclSyntax) { }
     func visit(_ node: ProtocolDeclSyntax) { }
     func visit(_ node: StructDeclSyntax) { }
@@ -65,6 +68,7 @@ extension PeripherySyntaxVisitor {
     func visit(_ node: OptionalBindingConditionSyntax) {}
     func visit(_ node: FunctionCallExprSyntax) {}
 
+    func visitPost(_ node: ActorDeclSyntax) {}
     func visitPost(_ node: ClassDeclSyntax) {}
     func visitPost(_ node: ProtocolDeclSyntax) {}
     func visitPost(_ node: StructDeclSyntax) {}
@@ -110,6 +114,11 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
 
     func visit() {
         walk(syntax)
+    }
+
+    override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind {
+        visitors.forEach { $0.visit(node) }
+        return .visitChildren
     }
 
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
@@ -200,6 +209,10 @@ final class MultiplexingSyntaxVisitor: SyntaxVisitor {
     override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
         visitors.forEach { $0.visit(node) }
         return .visitChildren
+    }
+
+    override func visitPost(_ node: ActorDeclSyntax) {
+        visitors.forEach { $0.visitPost(node) }
     }
 
     override func visitPost(_ node: ClassDeclSyntax) {

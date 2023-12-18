@@ -14,6 +14,7 @@
 - Subscript functions required by `@dynamicMemberLookup` are now retained.
 - A newline is no longer printed before non-Xcode formatted results.
 - `--external-codable-protocols` now retains enums that conform to `CodingKey`.
+- Fix redundant public accessibility analysis false-positive for actors. 
 
 ## 2.17.1 (2023-12-04)
 

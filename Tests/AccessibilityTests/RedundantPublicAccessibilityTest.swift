@@ -251,4 +251,12 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
             self.assertNotRedundantPublicAccessibility(.functionMethodInstance("somePublicFunc()"))
         }
     }
+
+    func testPublicActor() {
+        Self.index()
+
+        assertNotRedundantPublicAccessibility(.class("PublicActor")) {
+            self.assertNotRedundantPublicAccessibility(.functionMethodInstance("someFunc()"))
+        }
+    }
 }
