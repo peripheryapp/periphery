@@ -7,12 +7,10 @@ import Shared
 /// assume that all properties are in use, as they may be referenced by synthesized code.
 final class EncodablePropertyRetainer: SourceGraphMutator {
     private let graph: SourceGraph
-    private let configuration: Configuration
     private let externalCodableProtocols: [String]
 
     required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
-        self.configuration = configuration
         self.externalCodableProtocols = configuration.externalEncodableProtocols + configuration.externalCodableProtocols
     }
 
