@@ -64,7 +64,11 @@ final class ScanBehavior {
             let interval = logger.beginInterval("result:output")
             let filteredResults = OutputDeclarationFilter().filter(results)
             let output = try configuration.outputFormat.formatter.init(configuration: configuration).format(filteredResults)
-            logger.info("", canQuiet: true)
+
+            if configuration.outputFormat.supportsAuxiliaryOutput {
+                logger.info("", canQuiet: true)
+            }
+
             logger.info(output, canQuiet: false)
             logger.endInterval(interval)
 

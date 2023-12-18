@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Subscript functions required by `@dynamicMemberLookup` are now retained.
+- A newline is no longer printed before non-Xcode formatted results.
 
 ## 2.17.1 (2023-12-04)
 
