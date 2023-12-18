@@ -673,6 +673,9 @@ public final class SwiftIndexer: Indexer {
             case .swiftAccessorWillSet: return .functionAccessorWillset
             case .swiftAccessorMutableAddressor: return .functionAccessorMutableaddress
             case .swiftAccessorAddressor: return .functionAccessorAddress
+            case .swiftAccessorRead: return .functionAccessorRead
+            case .swiftAccessorModify: return .functionAccessorModify
+            case .swiftAccessorInit: return .functionAccessorInit
             case .swiftSubscript: return .functionSubscript
             case .swiftInfixOperator: return .functionOperatorInfix
             case .swiftPrefixOperator: return .functionOperatorPrefix
@@ -706,6 +709,7 @@ public final class SwiftIndexer: Indexer {
             case .constructor: return .functionConstructor
             case .destructor: return .functionDestructor
             case .parameter: return .varParameter
+            case .macro: return .macro
             default: return nil
             }
         }

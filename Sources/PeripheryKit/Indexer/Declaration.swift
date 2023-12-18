@@ -17,6 +17,9 @@ final class Declaration {
         case functionAccessorMutableaddress = "function.accessor.mutableaddress"
         case functionAccessorSetter = "function.accessor.setter"
         case functionAccessorWillset = "function.accessor.willset"
+        case functionAccessorRead = "function.accessor.read"
+        case functionAccessorModify = "function.accessor.modify"
+        case functionAccessorInit = "function.accessor.init"
         case functionConstructor = "function.constructor"
         case functionDestructor = "function.destructor"
         case functionFree = "function.free"
@@ -40,6 +43,7 @@ final class Declaration {
         case varLocal = "var.local"
         case varParameter = "var.parameter"
         case varStatic = "var.static"
+        case macro = "macro"
 
         static var functionKinds: Set<Kind> {
             Set(Kind.allCases.filter { $0.isFunctionKind })
