@@ -1032,6 +1032,15 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRetainsDynamicMemberLookupSubscript() {
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct7")) {
+                self.assertReferenced(.functionSubscript("subscript(dynamicMember:)"))
+                self.assertNotReferenced(.functionSubscript("subscript(_:)"))
+            }
+        }
+    }
+
     // MARK: - Assign-only properties
 
     func testSimplePropertyAssignedButNeverRead() {

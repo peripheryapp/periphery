@@ -70,6 +70,10 @@ struct DeclarationDescription: CustomStringConvertible {
         self.init(kind: .functionDestructor, name: name, line: line)
     }
 
+    static func functionSubscript(_ name: String, line: Int? = nil) -> Self {
+        self.init(kind: .functionSubscript, name: name, line: line)
+    }
+
     static func varStatic(_ name: String, line: Int? = nil) -> Self {
         self.init(kind: .varStatic, name: name, line: line)
     }

@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Subscript functions required by `@dynamicMemberLookup` are now retained.
 
 ## 2.17.1 (2023-12-04)
 
