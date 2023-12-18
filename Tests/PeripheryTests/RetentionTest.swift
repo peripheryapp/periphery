@@ -556,6 +556,11 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testCodingKeyEnum() {
+        let configuration = Configuration.shared
+        // CustomStringConvertible doesn't actually inherit Codable, we're just using it because we don't have an
+        // external module in which to declare our own type.
+        configuration.externalCodableProtocols = ["CustomStringConvertible"]
+
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass74")) {
                 self.assertReferenced(.enum("CodingKeys"))
@@ -573,9 +578,12 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 // Not referenced because the enclosing class does not conform to Codable.
                 self.assertNotReferenced(.enum("CodingKeys"))
             }
-          assertReferenced(.struct("FixtureClass120")) {
-              self.assertReferenced(.enum("CodingKeys"))
-          }
+            assertReferenced(.struct("FixtureClass120")) {
+                self.assertReferenced(.enum("CodingKeys"))
+            }
+            assertReferenced(.struct("FixtureClass218")) {
+                self.assertReferenced(.enum("CodingKeys"))
+            }
         }
     }
 
@@ -960,7 +968,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         let configuration = Configuration.shared
         // CustomStringConvertible doesn't actually inherit Encodable, we're just using it because we don't have an
         // external module in which to declare our own type.
-        configuration.externalEncodableProtocols = ["CustomStringConvertible"]
+        configuration.externalCodableProtocols = ["CustomStringConvertible"]
 
         analyze(retainPublic: true) {
             self.assertReferenced(.class("FixtureClass204")) {

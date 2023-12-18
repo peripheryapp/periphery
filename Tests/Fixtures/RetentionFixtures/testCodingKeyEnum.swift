@@ -50,3 +50,15 @@ public struct FixtureClass120 {
 }
 
 extension FixtureClass120: Decodable {}
+
+// CustomStringConvertible doesn't actually inherit Codable, we're just using it because we don't have an external
+// module in which to declare our own type.
+public struct FixtureClass218: CustomStringConvertible {
+    public var description: String = ""
+
+    let someVar: String
+
+    enum CodingKeys: CodingKey {
+        case someVar
+    }
+}

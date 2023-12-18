@@ -47,6 +47,9 @@ public final class Configuration {
     @Setting(key: "external_encodable_protocols", defaultValue: [])
     public var externalEncodableProtocols: [String]
 
+    @Setting(key: "external_codable_protocols", defaultValue: [])
+    public var externalCodableProtocols: [String]
+
     @Setting(key: "external_test_case_classes", defaultValue: [])
     public var externalTestCaseClasses: [String]
 
@@ -167,6 +170,10 @@ public final class Configuration {
             config[$externalEncodableProtocols.key] = externalEncodableProtocols
         }
 
+        if $externalCodableProtocols.hasNonDefaultValue {
+            config[$externalCodableProtocols.key] = externalCodableProtocols
+        }
+
         if $externalTestCaseClasses.hasNonDefaultValue {
             config[$externalTestCaseClasses.key] = externalTestCaseClasses
         }
@@ -264,7 +271,12 @@ public final class Configuration {
             case $retainAssignOnlyPropertyTypes.key:
                 $retainAssignOnlyPropertyTypes.assign(value)
             case $externalEncodableProtocols.key:
+                if !externalEncodableProtocols.isEmpty {
+                    logger.warn("The option '--external-encodable-protocols' is deprecated, use '--external-codable-protocols' instead.")
+                }
                 $externalEncodableProtocols.assign(value)
+            case $externalCodableProtocols.key:
+                $externalCodableProtocols.assign(value)
             case $externalTestCaseClasses.key:
                 $externalTestCaseClasses.assign(value)
             case $retainObjcAccessible.key:
@@ -323,6 +335,7 @@ public final class Configuration {
         $disableRedundantPublicAnalysis.reset()
         $enableUnusedImportsAnalysis.reset()
         $externalEncodableProtocols.reset()
+        $externalCodableProtocols.reset()
         $externalTestCaseClasses.reset()
         $verbose.reset()
         $quiet.reset()

@@ -8,10 +8,12 @@ import Shared
 final class EncodablePropertyRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
+    private let externalCodableProtocols: [String]
 
     required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
         self.configuration = configuration
+        self.externalCodableProtocols = configuration.externalEncodableProtocols + configuration.externalCodableProtocols
     }
 
     func mutate() {
@@ -41,7 +43,7 @@ final class EncodablePropertyRetainer: SourceGraphMutator {
         }
 
         if let name = ref.name {
-            if graph.isExternal(ref), configuration.externalEncodableProtocols.contains(name) {
+            if graph.isExternal(ref), externalCodableProtocols.contains(name) {
                 return true
             }
         }

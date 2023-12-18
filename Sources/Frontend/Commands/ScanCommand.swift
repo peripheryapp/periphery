@@ -63,8 +63,11 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Comma-separated list of property types to retain if the property is assigned, but never read", transform: split(by: ","))
     var retainAssignOnlyPropertyTypes: [String] = defaultConfiguration.$retainAssignOnlyPropertyTypes.defaultValue
 
-    @Option(help: "Comma-separated list of external protocols that inherit Encodable. Properties of types conforming to these protocols will be retained", transform: split(by: ","))
+    @Option(help: .private, transform: split(by: ","))
     var externalEncodableProtocols: [String] = defaultConfiguration.$externalEncodableProtocols.defaultValue
+
+    @Option(parsing: .upToNextOption, help: "Names of external protocols that inherit Codable. Properties and CodingKey enums of types conforming to these protocols will be retained")
+    var externalCodableProtocols: [String] = defaultConfiguration.$externalCodableProtocols.defaultValue
 
     @Option(parsing: .upToNextOption, help: "Names of XCTestCase subclasses that reside in external targets")
     var externalTestCaseClasses: [String] = defaultConfiguration.$externalTestCaseClasses.defaultValue
@@ -111,6 +114,10 @@ struct ScanCommand: FrontendCommand {
             try scanBehavior.setup(config).get()
         }
 
+        if !externalEncodableProtocols.isEmpty {
+            Logger().warn("The option '--external-encodable-protocols' is deprecated, use '--external-codable-protocols' instead.")
+        }
+
         let configuration = Configuration.shared
         configuration.guidedSetup = setup
         configuration.apply(\.$workspace, workspace)
@@ -132,6 +139,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
         configuration.apply(\.$enableUnusedImportsAnalysis, enableUnusedImportAnalysis)
         configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
+        configuration.apply(\.$externalCodableProtocols, externalCodableProtocols)
         configuration.apply(\.$externalTestCaseClasses, externalTestCaseClasses)
         configuration.apply(\.$verbose, verbose)
         configuration.apply(\.$quiet, quiet)

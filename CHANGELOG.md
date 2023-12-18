@@ -7,11 +7,13 @@
 ##### Enhancements
 
 - Add experimental unused import analysis.
+- The option `--external-encodable-protocols` is deprecated, use `--external-codable-protocols` instead.
 
 ##### Bug Fixes
 
 - Subscript functions required by `@dynamicMemberLookup` are now retained.
 - A newline is no longer printed before non-Xcode formatted results.
+- `--external-codable-protocols` now retains enums that conform to `CodingKey`.
 
 ## 2.17.1 (2023-12-04)
 

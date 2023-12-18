@@ -4,9 +4,11 @@ import Shared
 /// Builds a reference from a `Codable` conforming type to any child enum that conforms to `CodingKey`.
 final class CodingKeyEnumReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
+    private let configuration: Configuration
 
     required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
+        self.configuration = configuration
     }
 
     func mutate() {
@@ -17,8 +19,11 @@ final class CodingKeyEnumReferenceBuilder: SourceGraphMutator {
                 $0.kind == .protocol && $0.name == "CodingKey"
             }
 
+            let codableTypes = ["Codable", "Decodable", "Encodable"] + configuration.externalEncodableProtocols + configuration.externalCodableProtocols
+
             let isParentCodable = graph.inheritedTypeReferences(of: parent).contains {
-                [.protocol, .typealias].contains($0.kind) && ["Codable", "Decodable", "Encodable"].contains($0.name)
+                guard let name = $0.name else { return false }
+                return [.protocol, .typealias].contains($0.kind) && codableTypes.contains(name)
             }
 
             if isCodingKey && isParentCodable {
