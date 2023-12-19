@@ -325,6 +325,10 @@ This property retention behavior is automatic, even when `Encodable` conformance
 
 Any class that inherits `XCTestCase` is automatically retained along with its test methods. However, when a class inherits `XCTestCase` indirectly via another class, e.g `UnitTestCase`, and that class resides in a target that isn't scanned by Periphery, you need to use the `--external-test-case-classes UnitTestCase` option to instruct Periphery to treat `UnitTestCase` as an `XCTestCase` subclass.
 
+### Interface Builder
+
+If your project contains Interface Builder files (such as storyboards and XIBs), Periphery will take these into account when identifying unused declarations. However, Periphery currently only identifies unused classes. This limitation exists because Periphery does not yet parse Interface Builder files (see [Issue #212 on GitHub](https://github.com/peripheryapp/periphery/issues/212)). Due to Periphery's design principle of avoiding false positives, it is assumed that if a class is referenced in an Interface Builder file, all of its `IBOutlets` and `IBActions` are used, even if they might not be in reality. This approach will be revised to accurately identify unused `IBActions` and `IBOutlets` once Periphery gains the capability to parse Interface Builder files.
+
 ## Comment Commands
 
 For whatever reason, you may want to keep some unused code. Source code comment commands can be used to ignore specific declarations, and exclude them from the results.
