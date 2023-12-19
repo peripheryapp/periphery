@@ -107,6 +107,8 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
                     }
 
                     return $0.parent
+                } else if decl.attributes.contains("propertyWrapper") {
+                    return $0.parent
                 }
 
                 return nil

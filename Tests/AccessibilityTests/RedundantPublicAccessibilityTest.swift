@@ -259,4 +259,17 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
             self.assertNotRedundantPublicAccessibility(.functionMethodInstance("someFunc()"))
         }
     }
+
+    func testPublicWrappedProperty() {
+        Self.index()
+
+        assertNotRedundantPublicAccessibility(.struct("PublicWrapper")) {
+            self.assertNotRedundantPublicAccessibility(.varInstance("wrappedValue"))
+            self.assertNotRedundantPublicAccessibility(.functionConstructor("init(wrappedValue:)"))
+        }
+
+        assertNotRedundantPublicAccessibility(.struct("PublicWrappedProperty")) {
+            self.assertNotRedundantPublicAccessibility(.varInstance("wrappedProperty"))
+        }
+    }
 }

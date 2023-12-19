@@ -64,3 +64,7 @@ let _ = PublicTypeUsedInPublicClosureRetainer().closure
 Task {
     await PublicActor().someFunc()
 }
+
+// Property wrappers
+
+_ = PublicWrappedProperty().wrappedProperty
