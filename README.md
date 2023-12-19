@@ -420,7 +420,7 @@ Periphery can analyze projects using third-party build systems such as Bazel, th
 
 A file-target mapping file contains a simple mapping of source files to build targets. You will need to generate this file yourself using the appropriate tooling for your build system. The format is as follows:
 
-```js
+```json
 {
   "file_targets": {
     "path/to/file_a.swift": ["TargetA"],
