@@ -60,6 +60,14 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
         assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicFunctionParameterTypeClosureReturnType"))
     }
 
+    func testPublicTypeUsedAsPublicFunctionParameterDefaultValue() {
+        Self.index()
+
+        assertNotRedundantPublicAccessibility(.struct("PublicTypeUsedAsPublicFunctionParameterDefaultValue")) {
+            self.assertNotRedundantPublicAccessibility(.varStatic("somePublicValue"))
+        }
+    }
+
     func testPublicTypeUsedAsPublicFunctionReturnType() {
         Self.index()
 

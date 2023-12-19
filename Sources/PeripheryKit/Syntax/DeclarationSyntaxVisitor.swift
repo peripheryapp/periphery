@@ -336,22 +336,22 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             .union(closureParameterClauseLocations)
 
         results.append((
-            location,
-            accessibility,
-            modifierNames,
-            attributeNames,
-            CommentCommand.parseCommands(in: trivia),
-            type(for: variableType),
-            typeLocations(for: variableType),
-            allParameterClauseLocations,
-            returnClauseTypeLocations.mapSet { $0.location },
-            typeLocations(for: inheritanceClause),
-            typeLocations(for: genericParameterClause),
-            typeLocations(for: genericWhereClause),
-            locations(for: variableInitFunctionCallExpr),
-            functionCallMetatypeArgumentLocations(for: variableInitFunctionCallExpr),
-            didVisitCapitalSelfFunctionCall,
-            hasGenericFunctionReturnedMetatypeParameters
+            location: location,
+            accessibility: accessibility,
+            modifiers: modifierNames,
+            attributes: attributeNames,
+            commentCommands: CommentCommand.parseCommands(in: trivia),
+            variableType: type(for: variableType),
+            variableTypeLocations: typeLocations(for: variableType),
+            parameterTypeLocations: allParameterClauseLocations,
+            returnTypeLocations: returnClauseTypeLocations.mapSet { $0.location },
+            inheritedTypeLocations: typeLocations(for: inheritanceClause),
+            genericParameterLocations: typeLocations(for: genericParameterClause),
+            genericConformanceRequirementLocations: typeLocations(for: genericWhereClause),
+            variableInitFunctionCallLocations: locations(for: variableInitFunctionCallExpr),
+            functionCallMetatypeArgumentLocations: functionCallMetatypeArgumentLocations(for: variableInitFunctionCallExpr),
+            hasCapitalSelfFunctionCall: didVisitCapitalSelfFunctionCall,
+            hasGenericFunctionReturnedMetatypeParameters: hasGenericFunctionReturnedMetatypeParameters
         ))
     }
 
@@ -396,7 +396,23 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
 
         return clause.parameters.reduce(into: .init(), { result, param in
             result.formUnion(typeSyntaxInspector.typeLocations(for: param.type))
+
+            if let defaultValue = param.defaultValue?.value {
+                result.formUnion(identifierLocations(for: defaultValue))
+            }
         })
+    }
+
+    private func identifierLocations(for expr: ExprSyntax) -> Set<SourceLocation> {
+        expr.children(viewMode: .sourceAccurate).flatMapSet { child in
+            if let token = child.as(TokenSyntax.self), case .identifier = token.tokenKind {
+                return [sourceLocationBuilder.location(at: token.positionAfterSkippingLeadingTrivia)]
+            } else if let childExpr = child.as(ExprSyntax.self) {
+                return identifierLocations(for: childExpr)
+            }
+
+            return []
+        }
     }
 
     private func typeLocations(for clause: ClosureParameterClauseSyntax?) -> Set<SourceLocation> {

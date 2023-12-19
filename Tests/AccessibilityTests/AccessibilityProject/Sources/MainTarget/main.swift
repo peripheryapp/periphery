@@ -17,6 +17,8 @@ PublicTypeUsedAsPublicFunctionParameterTypeRetainer().retain1()
 PublicTypeUsedAsPublicFunctionParameterTypeRetainer().retain2()
 PublicTypeUsedAsPublicFunctionParameterTypeRetainer().retain3()
 
+PublicTypeUsedAsPublicFunctionParameterDefaultValueRetainer().somePublicFunc()
+
 _ = PublicTypeUsedAsPublicFunctionReturnTypeRetainer().retain1()
 _ = PublicTypeUsedAsPublicFunctionReturnTypeRetainer().retain2()
 _ = PublicTypeUsedAsPublicFunctionReturnTypeRetainer().retain3()
