@@ -33,6 +33,7 @@
     - [Objective-C](#objective-c)
     - [Encodable](#encodable)
     - [XCTestCase](#xctestcase)
+    - [Interface Builder](#interface-builder)
 - [Comment Commands](#comment-commands)
 - [Xcode Integration](#xcode-integration)
 - [Excluding Files](#excluding-files)
@@ -319,7 +320,7 @@ struct SomeStruct: Encodable {
 let data = try JSONEncoder().encode(SomeStruct(someProperty: "value"))
 ```
 
-This property retention behavior is automatic, even when `Encodable` conformance is inherited via another protocol. However, if a protocol that inherits `Encodable` is declared in an external module that Periphery has not analyzed, it cannot detect the inheritance of `Encodable`. In this situation you can use the `--external-encodable-protocols` option enable this behavior for the given protocols.
+This property retention behavior is automatic, even when `Encodable` conformance is inherited via another protocol. However, if a protocol that inherits `Encodable` is declared in an external module that Periphery has not analyzed, it cannot detect the inheritance of `Encodable`. In this situation you can use the `--external-encodable-protocols` option to enable this behavior for the given protocols.
 
 ### XCTestCase
 
