@@ -25,14 +25,14 @@
 - [How To Use](#how-to-use)
 - [How It Works](#how-it-works)
 - [Analysis](#analysis)
-  - [Function Parameters](#function-parameters)
-  - [Protocols](#protocols-1)
-  - [Enumerations](#enumerations)
-  - [Assign-only Properties](#assign-only-properties)
-  - [Redundant Public Accessibility](#redundant-public-accessibility)
-  - [Objective-C](#objective-c)
-  - [Encodable](#encodable)
-  - [XCTestCase](#xctestcase)
+    - [Function Parameters](#function-parameters)
+    - [Protocols](#protocols-1)
+    - [Enumerations](#enumerations)
+    - [Assign-only Properties](#assign-only-properties)
+    - [Redundant Public Accessibility](#redundant-public-accessibility)
+    - [Objective-C](#objective-c)
+    - [Encodable](#encodable)
+    - [XCTestCase](#xctestcase)
 - [Comment Commands](#comment-commands)
 - [Xcode Integration](#xcode-integration)
 - [Excluding Files](#excluding-files)
@@ -47,13 +47,13 @@
 
 ### [Homebrew](https://brew.sh/)
 
-```
+```sh
 brew install peripheryapp/periphery/periphery
 ```
 
 ### [Mint](https://github.com/yonaskolb/mint)
 
-```
+```sh
 mint install peripheryapp/periphery
 ```
 
@@ -61,7 +61,7 @@ mint install peripheryapp/periphery
 
 Add the following to your Podfile:
 
-```
+```ruby
 pod 'Periphery'
 ```
 
@@ -73,7 +73,7 @@ Now run `pod install`, the Periphery executable will be downloaded and placed at
 
 The scan command is Periphery's primary function. To begin a guided setup, simply change to your project directory and run:
 
-```
+```sh
 periphery scan --setup
 ```
 
@@ -286,15 +286,17 @@ class MyClass {
 ```
 
 In some cases this may be the intended behavior, therefore you have a few options available to silence such results:
-* Retain individual properties using [Comment Commands](#comment-commands).
-* Retain all assign-only properties by their type with `--retain-assign-only-property-types`. Given types must match their exact usage in the property declaration (sans optional question mark), e.g `String`, `[String]`, `Set<String>`. Periphery is unable to resolve inferred property types, therefore in some instances you may need to add explicit type annotations to your properties.
-* Disable assign-only property analysis entirely with `--retain-assign-only-properties`.
+
+- Retain individual properties using [Comment Commands](#comment-commands).
+- Retain all assign-only properties by their type with `--retain-assign-only-property-types`. Given types must match their exact usage in the property declaration (sans optional question mark), e.g `String`, `[String]`, `Set<String>`. Periphery is unable to resolve inferred property types, therefore in some instances you may need to add explicit type annotations to your properties.
+- Disable assign-only property analysis entirely with `--retain-assign-only-properties`.
 
 ### Redundant Public Accessibility
 
 Declarations that are marked `public` yet are not referenced from outside their home module, are identified as having redundant public accessibility. In this scenario, the `public` annotation can be removed from the declaration. Removing redundant public accessibility has a couple of benefits:
-* It helps reduce the public surface area of your modules.
-* In [Whole Module Compilation](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#whole-module-optimizations-wmo) mode, Swift can infer `final` by [automatically discovering](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-if-wmo-is-enabled-use-internal-when-a-declaration-does-not-need-to-be-accessed-outside-of-module) all potentially overriding declarations. `final` classes are [better optimized](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-use-final-when-you-know-the-declaration-does-not-need-to-be-overridden) by the compiler.
+
+- It helps reduce the public surface area of your modules.
+- In [Whole Module Compilation](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#whole-module-optimizations-wmo) mode, Swift can infer `final` by [automatically discovering](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-if-wmo-is-enabled-use-internal-when-a-declaration-does-not-need-to-be-accessed-outside-of-module) all potentially overriding declarations. `final` classes are [better optimized](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-use-final-when-you-know-the-declaration-does-not-need-to-be-overridden) by the compiler.
 
 This analysis can be disabled with `--disable-redundant-public-analysis`.
 
@@ -418,7 +420,7 @@ Periphery can analyze projects using third-party build systems such as Bazel, th
 
 A file-target mapping file contains a simple mapping of source files to build targets. You will need to generate this file yourself using the appropriate tooling for your build system. The format is as follows:
 
-```
+```json
 {
   "file_targets": {
     "path/to/file_a.swift": ["TargetA"],
@@ -433,7 +435,7 @@ A file-target mapping file contains a simple mapping of source files to build ta
 
 You can then invoke periphery as follows:
 
-```
+```sh
 periphery scan --file-targets-path map.json --index-store-path index/store
 ```
 
@@ -471,9 +473,10 @@ struct BuildInfo {
 ```
 
 You've a few options to workaround this:
- - Use [Comment Commands](#comment-commands) to explicitly ignore `releaseName`.
- - Filter the results to remove known instances.
- - Run Periphery once for each build configuration and merge the results. You can pass arguments to the underlying build by specifying them after `--`, e.g `periphery scan ... -- -configuration release`.
+
+- Use [Comment Commands](#comment-commands) to explicitly ignore `releaseName`.
+- Filter the results to remove known instances.
+- Run Periphery once for each build configuration and merge the results. You can pass arguments to the underlying build by specifying them after `--`, e.g `periphery scan ... -- -configuration release`.
 
 ### Swift package is platform-specific
 
@@ -483,7 +486,7 @@ As a workaround, you can manually build the Swift package with `xcodebuild` and 
 
 Example:
 
-```bash
+```sh
 # 1. use xcodebuild
 xcodebuild -scheme MyScheme -destination 'platform=iOS Simulator,OS=16.2,name=iPhone 14' -derivedDataPath '../dd' clean build
 
