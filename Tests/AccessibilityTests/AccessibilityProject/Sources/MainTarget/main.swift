@@ -62,15 +62,16 @@ _ = InternalProtocolRefiningPublicProtocolRetainer()
 let _ = PublicTypeUsedInPublicClosureRetainer().closure
 
 // Async
-
 Task {
     await PublicActor().someFunc()
 }
 
 // Property wrappers
-
 _ = PublicWrappedProperty().wrappedProperty
 
-// Inline
-
+// Inlining
 inlinableFunction()
+
+// Associated types
+_ = PublicInheritedAssociatedTypeClass().items
+_ = PublicInheritedAssociatedTypeDefaultTypeClass().items

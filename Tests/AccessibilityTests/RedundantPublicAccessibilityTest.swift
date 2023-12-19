@@ -287,4 +287,16 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
         assertNotRedundantPublicAccessibility(.class("ClassReferencedFromPublicInlinableFunction"))
         assertNotRedundantPublicAccessibility(.class("ClassReferencedFromPublicInlinableFunction_UsableFromInline"))
     }
+
+    func testPublicInheritedAssociatedType() {
+        Self.index()
+
+        assertNotRedundantPublicAccessibility(.protocol("PublicInheritedAssociatedType"))
+    }
+
+    func testPublicAssociatedTypeDefaultType() {
+        Self.index()
+
+        assertNotRedundantPublicAccessibility(.protocol("PublicInheritedAssociatedTypeDefaultType"))
+    }
 }

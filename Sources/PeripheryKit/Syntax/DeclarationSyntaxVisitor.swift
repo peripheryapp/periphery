@@ -17,6 +17,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         genericConformanceRequirementLocations: Set<SourceLocation>,
         variableInitFunctionCallLocations: Set<SourceLocation>,
         functionCallMetatypeArgumentLocations: Set<SourceLocation>,
+        typeInitializerLocations: Set<SourceLocation>,
         hasCapitalSelfFunctionCall: Bool,
         hasGenericFunctionReturnedMetatypeParameters: Bool
     )
@@ -246,9 +247,9 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             modifiers: node.modifiers,
             attributes: node.attributes,
             trivia: node.leadingTrivia,
-            variableType: node.initializer.value,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
+            typeInitializerClause: node.initializer,
             at: node.name.positionAfterSkippingLeadingTrivia
         )
     }
@@ -260,6 +261,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             trivia: node.leadingTrivia,
             inheritanceClause: node.inheritanceClause,
             genericWhereClause: node.genericWhereClause,
+            typeInitializerClause: node.initializer,
             at: node.name.positionAfterSkippingLeadingTrivia
         )
     }
@@ -304,6 +306,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         genericParameterClause: GenericParameterClauseSyntax? = nil,
         genericWhereClause: GenericWhereClauseSyntax? = nil,
         variableInitFunctionCallExpr: FunctionCallExprSyntax? = nil,
+        typeInitializerClause: TypeInitializerClauseSyntax? = nil,
         consumeCapitalSelfFunctionCalls: Bool = false,
         at position: AbsolutePosition
     ) {
@@ -350,6 +353,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             genericConformanceRequirementLocations: typeLocations(for: genericWhereClause),
             variableInitFunctionCallLocations: locations(for: variableInitFunctionCallExpr),
             functionCallMetatypeArgumentLocations: functionCallMetatypeArgumentLocations(for: variableInitFunctionCallExpr),
+            typeInitializerLocations: typeLocations(for: typeInitializerClause?.value),
             hasCapitalSelfFunctionCall: didVisitCapitalSelfFunctionCall,
             hasGenericFunctionReturnedMetatypeParameters: hasGenericFunctionReturnedMetatypeParameters
         ))

@@ -5,15 +5,16 @@ final class Reference {
         case parameterType
         case genericParameterType
         case genericRequirementType
-        case inheritedClassType
+        case inheritedType
         case refinedProtocolType
+        case initializerType
         case variableInitFunctionCall
         case functionCallMetatypeArgument
         case unknown
 
         var isPubliclyExposable: Bool {
             switch self {
-            case .varType, .returnType, .parameterType, .genericParameterType, .genericRequirementType, .inheritedClassType, .refinedProtocolType, .variableInitFunctionCall, .functionCallMetatypeArgument:
+            case .varType, .returnType, .parameterType, .genericParameterType, .genericRequirementType, .inheritedType, .refinedProtocolType, .initializerType, .variableInitFunctionCall, .functionCallMetatypeArgument:
                 return true
             default:
                 return false

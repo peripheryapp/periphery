@@ -12,7 +12,7 @@ let package = Package(
         ),
     ],
     targets: [
-        .target(
+        .executableTarget(
             name: "MainTarget",
             dependencies: ["TargetA"]),
         .target(

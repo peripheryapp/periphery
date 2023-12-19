@@ -392,8 +392,9 @@ public final class SwiftIndexer: Indexer {
 
                 for ref in decl.references.union(decl.related) {
                     if result.inheritedTypeLocations.contains(ref.location) {
-                        if decl.kind == .class, ref.kind == .class {
-                            ref.role = .inheritedClassType
+                        if (decl.kind == .class && ref.kind == .class) ||
+                            (decl.kind == .associatedtype && ref.kind == .protocol) {
+                            ref.role = .inheritedType
                         } else if decl.kind == .protocol, ref.kind == .protocol {
                             ref.role = .refinedProtocolType
                         }
@@ -411,6 +412,8 @@ public final class SwiftIndexer: Indexer {
                         ref.role = .variableInitFunctionCall
                     } else if result.functionCallMetatypeArgumentLocations.contains(ref.location) {
                         ref.role = .functionCallMetatypeArgument
+                    } else if result.typeInitializerLocations.contains(ref.location) {
+                        ref.role = .initializerType
                     }
                 }
             }
