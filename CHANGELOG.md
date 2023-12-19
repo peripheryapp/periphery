@@ -16,6 +16,7 @@
 - `--external-codable-protocols` now retains enums that conform to `CodingKey`.
 - Fix redundant public accessibility analysis false-positive for actors. 
 - Fix redundant public accessibility analysis false-positive for property wrappers.
+- Fix redundant public accessibility analysis false-positive for declarations referenced from a public `@inlinable` function.
 
 ## 2.17.1 (2023-12-04)
 

@@ -68,3 +68,7 @@ Task {
 // Property wrappers
 
 _ = PublicWrappedProperty().wrappedProperty
+
+// Inline
+
+inlinableFunction()

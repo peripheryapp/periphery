@@ -272,4 +272,11 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
             self.assertNotRedundantPublicAccessibility(.varInstance("wrappedProperty"))
         }
     }
+
+    func testPublicInlinableFunction() {
+        Self.index()
+
+        assertNotRedundantPublicAccessibility(.class("ClassReferencedFromPublicInlinableFunction"))
+        assertNotRedundantPublicAccessibility(.class("ClassReferencedFromPublicInlinableFunction_UsableFromInline"))
+    }
 }
