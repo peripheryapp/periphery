@@ -10,12 +10,14 @@ public protocol PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturn
 public protocol PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType10_1 {}
 public protocol PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType10_2 {}
 public protocol PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType10_3 {}
+public protocol PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType11 {}
 
 public class PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnTypeRetainer {
     public init() {}
 
     public var retain: [Any] {
-        [retain1, retain2, retain3, retain4, retain5, retain6, retain7, retain8, retain9, retain10]
+        [retain1, retain2, retain3, retain4, retain5, retain6, retain7, retain8, retain9, retain10,
+         retain11]
     }
 
     public let retain1 = simpleReturn(PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType1.self)
@@ -32,6 +34,7 @@ public class PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnTyp
         PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType10_2.self,
         PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType10_3.self
     )
+    public let retain11 = complexReturn(ofType: PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnType11.self)
 
     private static func closureReturn<T>(_ type: T.Type) -> () -> T {
         fatalError()
@@ -42,6 +45,10 @@ public class PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnTyp
     }
 
     private static func simpleReturn<T>(_ type: T.Type) -> T {
+        fatalError()
+    }
+
+    private static func complexReturn<T>(ofType type: T.Type) -> ComplexReturnClassOuter.Inner<T> {
         fatalError()
     }
 
@@ -56,4 +63,8 @@ public class PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnTyp
     private static func nonMetatypeReturn<T>(_ type: T.Type) -> String {
         ""
     }
+}
+
+public class ComplexReturnClassOuter {
+    public class Inner<T> {}
 }

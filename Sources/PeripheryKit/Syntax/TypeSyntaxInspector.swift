@@ -37,7 +37,9 @@ struct TypeSyntaxInspector {
             return types(for: optionalType.wrappedType)
         } else if let memberType = typeSyntax.as(MemberTypeSyntax.self) {
             // Member type.
-            return types(for: memberType.baseType).union([memberType.name])
+            return types(for: memberType.baseType)
+                .union(memberType.genericArgumentClause?.arguments.flatMapSet { types(for: $0.argument) } ?? [])
+                .union([memberType.name])
         } else if let tuple = typeSyntax.as(TupleTypeSyntax.self) {
             // Tuple type.
             return tuple.elements.flatMapSet { types(for: $0.type) }

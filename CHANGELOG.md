@@ -19,6 +19,7 @@
 - Fix redundant public accessibility analysis false-positive for declarations referenced from a public `@inlinable` function.
 - Fix redundant public accessibility analysis false-positive for function parameter default values.
 - Fix redundant public accessibility analysis false-positive for inherited and default associated types.
+- Fix redundant public accessibility analysis false-positive for generic types used in the generic argument clause of a return type.
 
 ## 2.17.1 (2023-12-04)
 
