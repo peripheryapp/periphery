@@ -30,7 +30,8 @@ public struct ScanResultBuilder {
             .filter {
                 !$0.declaration.isImplicit &&
                 !$0.declaration.kind.isAccessorKind &&
-                !graph.ignoredDeclarations.contains($0.declaration)
+                !graph.ignoredDeclarations.contains($0.declaration) &&
+                !graph.retainedDeclarations.contains($0.declaration)
             }
 
         return result

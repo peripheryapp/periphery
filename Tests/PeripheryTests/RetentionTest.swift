@@ -91,9 +91,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
     func testSelfReferencedProperty() {
         analyze() {
-            assertNotReferenced(.class("FixtureClass39")) {
-                self.assertNotReferenced(.varInstance("someVar"))
-            }
+            assertNotReferenced(.class("FixtureClass39"))
         }
     }
 
@@ -118,11 +116,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
     func testDeeplyNestedClassReferences() {
         analyze() {
-            assertNotReferenced(.class("FixtureClass17")) {
-                self.assertNotReferenced(.class("FixtureClass18")) {
-                    self.assertNotReferenced(.class("FixtureClass19"))
-                }
-            }
+            assertNotReferenced(.class("FixtureClass17"))
         }
     }
 
@@ -295,9 +289,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
     func testRetainedProtocolDoesNotRetainUnusedClass() {
         analyze(retainPublic: true) {
-            assertNotReferenced(.class("FixtureClass57")) {
-                self.assertNotReferenced(.functionMethodInstance("protocolMethod()"))
-            }
+            assertNotReferenced(.class("FixtureClass57"))
             assertReferenced(.protocol("FixtureProtocol57"))
         }
     }
@@ -307,9 +299,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.protocol("FixtureProtocol200")) {
                 self.assertReferenced(.functionMethodInstance("protocolFunc()"))
             }
-            assertNotReferenced(.class("FixtureClass200")) {
-                self.assertNotReferenced(.functionMethodInstance("protocolFunc()"))
-            }
+            assertNotReferenced(.class("FixtureClass200"))
             assertNotReferenced(.class("FixtureClass201"))
         }
     }
@@ -794,10 +784,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     func testDoesNotRetainDescendantsOfUnusedDeclaration() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass99Outer")) {
-                self.assertNotReferenced(.class("FixtureClass99")) {
-                    self.assertNotReferenced(.functionMethodInstance("someMethod()"))
-                    self.assertNotReferenced(.varInstance("someVar"))
-                }
+                self.assertNotReferenced(.class("FixtureClass99"))
             }
         }
     }
@@ -1056,16 +1043,9 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass70")) {
-                self.assertNotReferenced(.varInstance("simpleUnreadVar"))
                 self.assertAssignOnlyProperty(.varInstance("simpleUnreadVar"))
-
-                self.assertNotReferenced(.varInstance("simpleUnreadShadowedVar"))
                 self.assertAssignOnlyProperty(.varInstance("simpleUnreadShadowedVar"))
-
-                self.assertNotReferenced(.varInstance("simpleUnreadVarAssignedMultiple"))
                 self.assertAssignOnlyProperty(.varInstance("simpleUnreadVarAssignedMultiple"))
-
-                self.assertNotReferenced(.varStatic("simpleStaticUnreadVar"))
                 self.assertAssignOnlyProperty(.varStatic("simpleStaticUnreadVar"))
 
                 self.assertReferenced(.varInstance("complexUnreadVar1"))
@@ -1116,7 +1096,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     func testSimpleAssignOnlyPropertyNameConflict() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass131")) {
-                self.assertNotReferenced(.varInstance("someProperty"))
+                self.assertAssignOnlyProperty(.varInstance("someProperty"))
                 self.assertReferenced(.varStatic("someProperty"))
             }
         }
@@ -1138,11 +1118,11 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 self.assertReferenced(.varInstance("retainedAnyCancellable"))
                 #endif
 
-                self.assertNotReferenced(.varInstance("notRetainedSimpleProperty"))
-                self.assertNotReferenced(.varInstance("notRetainedModulePrefixedProperty"))
-                self.assertNotReferenced(.varInstance("notRetainedTupleProperty"))
-                self.assertNotReferenced(.varInstance("notRetainedDestructuredPropertyB"))
-                self.assertNotReferenced(.varInstance("notRetainedMultipleBindingPropertyB"))
+                self.assertAssignOnlyProperty(.varInstance("notRetainedSimpleProperty"))
+                self.assertAssignOnlyProperty(.varInstance("notRetainedModulePrefixedProperty"))
+                self.assertAssignOnlyProperty(.varInstance("notRetainedTupleProperty"))
+                self.assertAssignOnlyProperty(.varInstance("notRetainedDestructuredPropertyB"))
+                self.assertAssignOnlyProperty(.varInstance("notRetainedMultipleBindingPropertyB"))
             }
         }
     }
@@ -1483,11 +1463,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
     func testIgnoreUnusedParamInUnusedFunction() {
         analyze() {
-            assertNotReferenced(.class("FixtureClass105")) {
-                self.assertNotReferenced(.functionMethodInstance("unused(param:)")) {
-                    self.assertNotReferenced(.varParameter("param"))
-                }
-            }
+            assertNotReferenced(.class("FixtureClass105"))
         }
     }
 

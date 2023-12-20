@@ -300,4 +300,11 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
 
         assertNotRedundantPublicAccessibility(.protocol("PublicInheritedAssociatedTypeDefaultType"))
     }
+
+    func testPublicComparableOperatorFunction() {
+        Self.index()
+
+        assertNotRedundantPublicAccessibility(.functionOperatorInfix("<(_:_:)"))
+        assertNotRedundantPublicAccessibility(.functionOperatorInfix("==(_:_:)"))
+    }
 }

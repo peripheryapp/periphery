@@ -6,9 +6,10 @@ import Shared
 open class SourceGraphTestCase: XCTestCase {
     static var driver: ProjectDriver!
     static var configuration: Configuration!
-    static var graph = SourceGraph()
 
+    private static var graph = SourceGraph()
     private static var allIndexedDeclarations: Set<Declaration> = []
+    private static var results: [ScanResult] = []
 
     var configuration: Configuration { Self.configuration }
 
@@ -47,6 +48,7 @@ open class SourceGraphTestCase: XCTestCase {
         try! Self.driver.index(graph: graph)
         allIndexedDeclarations = graph.allDeclarations
         try! SourceGraphMutatorRunner.perform(graph: graph)
+        results = ScanResultBuilder.build(for: graph)
     }
 
     func assertReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
@@ -61,22 +63,18 @@ open class SourceGraphTestCase: XCTestCase {
         scopeStack.removeLast()
     }
 
-    func assertNotReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+    func assertNotReferenced(_ description: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, file: file, line: line) else { return }
 
-        if !Self.graph.unusedDeclarations.contains(declaration) {
+        if !Self.results.unusedDeclarations.contains(declaration) {
             XCTFail("Expected declaration to not be referenced: \(declaration)", file: file, line: line)
         }
-
-        scopeStack.append(.declaration(declaration))
-        scopedAssertions?()
-        scopeStack.removeLast()
     }
 
     func assertRedundantProtocol(_ name: String, implementedBy conformances: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(.protocol(name), file: file, line: line) else { return }
 
-        if let references = Self.graph.redundantProtocols[declaration] {
+        if let references = Self.results.redundantProtocolDeclarations[declaration] {
             let decls = references.compactMap { $0.parent }
 
             for conformance in conformances {
@@ -92,7 +90,7 @@ open class SourceGraphTestCase: XCTestCase {
     func assertNotRedundantProtocol(_ name: String, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(.protocol(name), file: file, line: line) else { return }
 
-        if Self.graph.redundantProtocols.keys.contains(declaration) {
+        if Self.results.redundantProtocolDeclarations.keys.contains(declaration) {
             XCTFail("Expected '\(name)' to not be redundant.", file: file, line: line)
         }
     }
@@ -112,7 +110,7 @@ open class SourceGraphTestCase: XCTestCase {
     func assertRedundantPublicAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
 
-        if !Self.graph.redundantPublicAccessibility.keys.contains(declaration) {
+        if !Self.results.redundantPublicAccessibilityDeclarations.contains(declaration) {
             XCTFail("Expected declaration to have redundant public accessibility: \(declaration)", file: file, line: line)
         }
 
@@ -124,7 +122,7 @@ open class SourceGraphTestCase: XCTestCase {
     func assertNotRedundantPublicAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
 
-        if Self.graph.redundantPublicAccessibility.keys.contains(declaration) {
+        if Self.results.redundantPublicAccessibilityDeclarations.contains(declaration) {
             XCTFail("Expected declaration to not have redundant public accessibility: \(declaration)", file: file, line: line)
         }
 
@@ -144,7 +142,7 @@ open class SourceGraphTestCase: XCTestCase {
     func assertAssignOnlyProperty(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, file: file, line: line) else { return }
 
-        if !Self.graph.assignOnlyProperties.contains(declaration) {
+        if !Self.results.assignOnlyPropertyDeclarations.contains(declaration) {
             XCTFail("Expected property to be assign-only: \(declaration)", file: file, line: line)
         }
 
@@ -208,6 +206,46 @@ open class SourceGraphTestCase: XCTestCase {
             case let .module(module):
                 result = result.filter { $0.location.file.modules.contains(module) }
             }
+        }
+    }
+}
+
+private extension Array where Element == ScanResult {
+    var unusedDeclarations: Set<Declaration> {
+        compactMapSet {
+            if case .unused = $0.annotation {
+                return $0.declaration
+            }
+
+            return nil
+        }
+    }
+
+    var assignOnlyPropertyDeclarations: Set<Declaration> {
+        compactMapSet {
+            if case .assignOnlyProperty = $0.annotation {
+                return $0.declaration
+            }
+
+            return nil
+        }
+    }
+
+    var redundantProtocolDeclarations: [Declaration: [Reference]] {
+        reduce(into: [Declaration: [Reference]]()) { result, scanResult in
+            if case let .redundantProtocol(references) = scanResult.annotation {
+                result[scanResult.declaration, default: []].append(contentsOf: references)
+            }
+        }
+    }
+
+    var redundantPublicAccessibilityDeclarations: Set<Declaration> {
+        compactMapSet {
+            if case .redundantPublicAccessibility = $0.annotation {
+                return $0.declaration
+            }
+
+            return nil
         }
     }
 }
