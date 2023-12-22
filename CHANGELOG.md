@@ -14,13 +14,14 @@
 - Subscript functions required by `@dynamicMemberLookup` are now retained.
 - A newline is no longer printed before non-Xcode formatted results.
 - `--external-codable-protocols` now retains enums that conform to `CodingKey`.
-- Fix redundant public accessibility analysis false-positive for actors. 
-- Fix redundant public accessibility analysis false-positive for property wrappers.
-- Fix redundant public accessibility analysis false-positive for declarations referenced from a public `@inlinable` function.
-- Fix redundant public accessibility analysis false-positive for function parameter default values.
-- Fix redundant public accessibility analysis false-positive for inherited and default associated types.
-- Fix redundant public accessibility analysis false-positive for generic types used in the generic argument clause of a return type.
-- Fix redundant public accessibility analysis false-positive for retained/ignored declarations.
+- Fix public accessibility analysis false-positive for actors. 
+- Fix public accessibility analysis false-positive for property wrappers.
+- Fix public accessibility analysis false-positive for declarations referenced from a public `@inlinable` function.
+- Fix public accessibility analysis false-positive for function parameter default values.
+- Fix public accessibility analysis false-positive for inherited and default associated types.
+- Fix public accessibility analysis false-positive for generic types used in the generic argument clause of a return type.
+- Fix public accessibility analysis false-positive for retained/ignored declarations.
+- Fix public accessibility analysis false-positive for enum case parameter types. 
 
 ## 2.17.1 (2023-12-04)
 

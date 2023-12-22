@@ -212,6 +212,16 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
         }
     }
 
+    func testEnumCaseWithParameter() {
+        Self.index()
+
+        assertNotRedundantPublicAccessibility(.class("PublicEnumCaseWithParameter_ParameterType"))
+        assertNotRedundantPublicAccessibility(.class("PublicEnumCaseWithParameter_ParameterType_Outer")) {
+            self.assertNotRedundantPublicAccessibility(.class("Inner"))
+        }
+        assertNotRedundantPublicAccessibility(.enum("PublicEnumCaseWithParameter"))
+    }
+
     func testTypealiasWithClosureType() {
         Self.index()
 

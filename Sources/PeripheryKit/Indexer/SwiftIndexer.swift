@@ -332,11 +332,22 @@ public final class SwiftIndexer: Indexer {
                 .reduce(into: [Int: [Declaration]]()) { (result, decl) in
                     result[decl.location.line, default: []].append(decl)
                 }
+            let sortedDeclLines = declsByLine.keys.sorted().reversed()
 
             for ref in danglingReferences {
-                guard let candidateDecls =
-                        declsByLocation[ref.location] ??
-                        declsByLine[ref.location.line] else { continue }
+                let sameLineCandidateDecls = declsByLocation[ref.location] ??
+                        declsByLine[ref.location.line]
+                var candidateDecls = [Declaration]()
+
+                if let sameLineCandidateDecls {
+                    candidateDecls = sameLineCandidateDecls
+                } else {
+                    // No matching declarations on the same line, default to the nearest preceding
+                    // declaration.
+                    if let line = sortedDeclLines.first(where: { $0 < ref.location.line }) {
+                        candidateDecls = declsByLine[line] ?? []
+                    }
+                }
 
                 // The vast majority of the time there will only be a single declaration for this location,
                 // however it is possible for there to be more than one. In that case, first attempt to associate with

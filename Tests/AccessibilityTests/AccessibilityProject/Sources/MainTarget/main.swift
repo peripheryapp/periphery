@@ -44,6 +44,7 @@ case let .someCase(a, b):
     _ = a.value
     _ = b.value
 }
+_ = PublicEnumCaseWithParameter.someCase(param1: nil, param2: nil)
 
 // Inheritance
 _ = PublicClassInheritingPublicClass()
