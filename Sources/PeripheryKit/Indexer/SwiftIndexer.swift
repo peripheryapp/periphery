@@ -342,10 +342,11 @@ public final class SwiftIndexer: Indexer {
                 if let sameLineCandidateDecls {
                     candidateDecls = sameLineCandidateDecls
                 } else {
-                    // No matching declarations on the same line, default to the nearest preceding
-                    // declaration.
+                    // Enum case parameters are not associated with case elements. For parameters
+                    // that exist on a line below the case statement we need to find the nearest
+                    // preceding case.
                     if let line = sortedDeclLines.first(where: { $0 < ref.location.line }) {
-                        candidateDecls = declsByLine[line] ?? []
+                        candidateDecls = declsByLine[line]?.filter { $0.kind == .enumelement } ?? []
                     }
                 }
 
