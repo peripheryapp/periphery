@@ -457,6 +457,14 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         }
     }
 
+    private func typeLocations(for clause: GenericArgumentClauseSyntax?) -> Set<SourceLocation> {
+        guard let clause = clause else { return [] }
+
+        return clause.arguments.reduce(into: .init()) { result, param in
+            result.formUnion(typeSyntaxInspector.typeLocations(for: param.argument))
+        }
+    }
+
     private func typeLocations(for clause: GenericWhereClauseSyntax?) -> Set<SourceLocation> {
         guard let clause = clause else { return [] }
 
@@ -478,7 +486,13 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     private func locations(for call: FunctionCallExprSyntax?) -> Set<SourceLocation> {
         guard let call = call else { return [] }
 
-        return [sourceLocationBuilder.location(at: call.positionAfterSkippingLeadingTrivia)]
+        var locations = Set([sourceLocationBuilder.location(at: call.positionAfterSkippingLeadingTrivia)])
+
+        if let expr = call.calledExpression.as(GenericSpecializationExprSyntax.self) {
+            locations.formUnion(typeLocations(for: expr.genericArgumentClause))
+        }
+
+        return locations
     }
 
     private func functionCallMetatypeArgumentLocations(for call: FunctionCallExprSyntax?) -> Set<SourceLocation> {

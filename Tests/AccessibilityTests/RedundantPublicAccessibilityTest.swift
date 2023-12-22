@@ -46,6 +46,13 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
         assertNotRedundantPublicAccessibility(.class("PublicTypeUsedAsPublicPropertyArrayType"))
     }
 
+    func testPublicTypeUsedAsPublicPropertyInitializer() {
+        Self.index()
+
+        assertNotRedundantPublicAccessibility(.struct("PublicTypeUsedAsPublicPropertyInitializer_Simple"))
+        assertNotRedundantPublicAccessibility(.struct("PublicTypeUsedAsPublicPropertyInitializer_GenericParameter"))
+    }
+
     func testPublicTypeUsedAsPublicInitializerParameterType() {
         Self.index()
 

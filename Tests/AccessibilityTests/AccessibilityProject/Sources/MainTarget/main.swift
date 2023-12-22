@@ -6,8 +6,6 @@ PublicExtensionOnRedundantPublicKindRetainer().retain()
 IgnoreCommentCommandRetainer().retain()
 IgnoreAllCommentCommandRetainer().retain()
 
-_ = PublicTypeUsedAsPublicPropertyTypeRetainer().retain
-
 _ = PublicTypeUsedAsPublicInitializerParameterTypeRetainer()
 
 _ = PublicTypeUsedAsPublicSubscriptParameterTypeRetainer()[]
@@ -34,6 +32,10 @@ _ = PublicTypeUsedAsPublicFunctionMetatypeParameterWithGenericReturnTypeRetainer
 _ = NotRedundantPublicTestableImportClass().testableProperty
 
 ProtocolIndirectlyReferencedCrossModuleByExtensionMemberImpl().somePublicFunc()
+
+// Properties
+_ = PublicTypeUsedAsPublicPropertyTypeRetainer().retain
+_ = PublicTypeUsedAsPublicPropertyInitializer().retain
 
 // Typealias
 let _: PublicTypealiasWithClosureType? = nil

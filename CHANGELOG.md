@@ -21,7 +21,8 @@
 - Fix public accessibility analysis false-positive for inherited and default associated types.
 - Fix public accessibility analysis false-positive for generic types used in the generic argument clause of a return type.
 - Fix public accessibility analysis false-positive for retained/ignored declarations.
-- Fix public accessibility analysis false-positive for enum case parameter types. 
+- Fix public accessibility analysis false-positive for enum case parameter types.
+- Fix public accessibility analysis false-positive for properties initialized with generic specialized types.
 
 ## 2.17.1 (2023-12-04)
 
