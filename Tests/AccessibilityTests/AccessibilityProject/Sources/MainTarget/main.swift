@@ -48,6 +48,7 @@ case let .someCase(a, b):
 // Inheritance
 _ = PublicClassInheritingPublicClass()
 _ = PublicClassInheritingPublicExternalClassRetainer()
+_ = PublicClassInheritingPublicClassWithGenericParameter()
 
 // Conformance
 _ = PublicClassAdoptingPublicProtocol()

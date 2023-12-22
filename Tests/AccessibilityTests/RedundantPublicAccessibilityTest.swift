@@ -107,6 +107,14 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
         assertRedundantPublicAccessibility(.class("PublicClassInheritingPublicExternalClass"))
     }
 
+    func testPublicClassInheritingPublicClassWithGenericRequirement() {
+        Self.index()
+
+        assertNotRedundantPublicAccessibility(.struct("PublicClassInheritingPublicClassWithGenericParameter_GenericType"))
+        assertNotRedundantPublicAccessibility(.class("PublicClassInheritingPublicClassWithGenericParameter_Superclass"))
+        assertNotRedundantPublicAccessibility(.class("PublicClassInheritingPublicClassWithGenericParameter"))
+    }
+
     func testPublicClassAdoptingPublicProtocol() {
         Self.index()
 

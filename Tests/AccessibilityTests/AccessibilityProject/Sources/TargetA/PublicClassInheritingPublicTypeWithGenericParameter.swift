@@ -1,0 +1,7 @@
+import Foundation
+
+public struct PublicClassInheritingPublicClassWithGenericParameter_GenericType {}
+public class PublicClassInheritingPublicClassWithGenericParameter_Superclass<T> {}
+public class PublicClassInheritingPublicClassWithGenericParameter: PublicClassInheritingPublicClassWithGenericParameter_Superclass<PublicClassInheritingPublicClassWithGenericParameter_GenericType> {
+    public override init() {}
+}

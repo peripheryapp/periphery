@@ -7,6 +7,7 @@ final class Reference {
         case genericRequirementType
         case inheritedType
         case refinedProtocolType
+        case conformedType
         case initializerType
         case variableInitFunctionCall
         case functionCallMetatypeArgument

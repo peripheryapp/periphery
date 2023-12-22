@@ -392,11 +392,12 @@ public final class SwiftIndexer: Indexer {
 
                 for ref in decl.references.union(decl.related) {
                     if result.inheritedTypeLocations.contains(ref.location) {
-                        if (decl.kind == .class && ref.kind == .class) ||
-                            (decl.kind == .associatedtype && ref.kind == .protocol) {
-                            ref.role = .inheritedType
+                        if decl.kind.isConformableKind, ref.kind == .protocol {
+                            ref.role = .conformedType
                         } else if decl.kind == .protocol, ref.kind == .protocol {
                             ref.role = .refinedProtocolType
+                        } else if decl.kind == .class || decl.kind == .associatedtype {
+                            ref.role = .inheritedType
                         }
                     } else if result.variableTypeLocations.contains(ref.location) {
                         ref.role = .varType
