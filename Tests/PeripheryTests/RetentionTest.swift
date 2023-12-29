@@ -574,6 +574,15 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.struct("FixtureClass218")) {
                 self.assertReferenced(.enum("CodingKeys"))
             }
+            assertReferenced(.class("FixtureClass220")) {
+                self.assertReferenced(.varInstance("someUsedVar"))
+                self.assertNotReferenced(.varInstance("someUnusedVar"))
+
+                self.assertReferenced(.enum("CodingKeys")) {
+                    self.assertReferenced(.enumelement("someUsedVar"))
+                    self.assertNotReferenced(.enumelement("someUnusedVar"))
+                }
+            }
         }
     }
 
@@ -948,43 +957,6 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.protocol("Fixture200"))
             assertReferenced(.protocol("Fixture201"))
             assertReferenced(.typealias("Fixture202"))
-        }
-    }
-
-    func testRetainsEncodableProperties() {
-        let configuration = Configuration.shared
-        // CustomStringConvertible doesn't actually inherit Encodable, we're just using it because we don't have an
-        // external module in which to declare our own type.
-        configuration.externalCodableProtocols = ["CustomStringConvertible"]
-
-        analyze(retainPublic: true) {
-            self.assertReferenced(.class("FixtureClass204")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass205")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass206")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass207")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass208")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass209")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
-
-            self.assertReferenced(.class("FixtureClass210")) {
-                self.assertReferenced(.varInstance("someVar"))
-            }
         }
     }
 

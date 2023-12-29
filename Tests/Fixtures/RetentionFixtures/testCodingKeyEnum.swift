@@ -62,3 +62,13 @@ public struct FixtureClass218: CustomStringConvertible {
         case someVar
     }
 }
+
+public class FixtureClass220: Encodable {
+    public var someUsedVar: String?
+    var someUnusedVar: String?
+
+    enum CodingKeys: CodingKey {
+        case someUsedVar
+        case someUnusedVar
+    }
+}
