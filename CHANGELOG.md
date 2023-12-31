@@ -8,7 +8,6 @@
 
 - Add experimental unused import analysis.
 - The option `--external-encodable-protocols` is deprecated, use `--external-codable-protocols` instead.
-- CodingKey enum case are now identified as unused if the corresponding property is also unused in the Codable type.
 
 ##### Bug Fixes
 

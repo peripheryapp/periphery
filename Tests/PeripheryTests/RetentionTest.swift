@@ -580,7 +580,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
                 self.assertReferenced(.enum("CodingKeys")) {
                     self.assertReferenced(.enumelement("someUsedVar"))
-                    self.assertNotReferenced(.enumelement("someUnusedVar"))
+                    self.assertReferenced(.enumelement("someUnusedVar"))
                 }
             }
             assertReferenced(.struct("FixtureStruct220")) {
@@ -589,7 +589,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
                 self.assertReferenced(.enum("CodingKeys")) {
                     self.assertReferenced(.enumelement("someUsedVar"))
-                    self.assertNotReferenced(.enumelement("someUnusedVar"))
+                    self.assertReferenced(.enumelement("someUnusedVar"))
                 }
             }
         }
