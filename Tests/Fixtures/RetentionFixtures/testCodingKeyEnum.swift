@@ -72,3 +72,13 @@ public class FixtureClass220: Encodable {
         case someUnusedVar
     }
 }
+
+public struct FixtureStruct220: Encodable {
+    public var someUsedVar: String?
+    var someUnusedVar: String?
+
+    enum CodingKeys: String, CodingKey {
+        case someUsedVar
+        case someUnusedVar
+    }
+}

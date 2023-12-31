@@ -11,7 +11,11 @@ final class EnumCaseReferenceBuilder: SourceGraphMutator {
 
     func mutate() {
         for enumDeclaration in graph.declarations(ofKind: .enum) {
-            if isRawRepresentable(enumDeclaration) {
+            let isCodingKey = graph.inheritedTypeReferences(of: enumDeclaration).contains {
+                $0.kind == .protocol && $0.name == "CodingKey"
+            }
+
+            if !isCodingKey, isRawRepresentable(enumDeclaration) {
                 let enumCases = enumDeclaration.declarations.filter { $0.kind == .enumelement }
 
                 for enumCase in enumCases {
