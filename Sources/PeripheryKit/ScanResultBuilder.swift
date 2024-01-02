@@ -16,7 +16,8 @@ public struct ScanResultBuilder {
             .init(declaration: $0, annotation: .assignOnlyProperty)
         }
         let annotatedRedundantProtocols: [ScanResult] = redundantProtocols.map {
-            .init(declaration: $0.0, annotation: .redundantProtocol(references: $0.1))
+            let inherited = graph.inheritedTypeReferences(of: $0.0).compactMapSet { $0.name }
+            return .init(declaration: $0.0, annotation: .redundantProtocol(references: $0.1, inherited: inherited))
         }
         let annotatedRedundantPublicAccessibility: [ScanResult] = redundantPublicAccessibility.map {
             .init(declaration: $0.0, annotation: .redundantPublicAccessibility(modules: $0.1))

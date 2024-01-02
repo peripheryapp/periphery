@@ -10,7 +10,14 @@ public protocol OutputFormatter: AnyObject {
 }
 
 extension OutputFormatter {
-    var redundantConformanceHint: String { "redundantConformance" }
+    func redundantConformanceHint(with inherited: Set<String>) -> String {
+        var msg = "redundantConformance"
+        if !inherited.isEmpty {
+            msg += "(replace with: '\(inherited.sorted().joined(separator: ", "))')"
+        }
+
+        return msg
+    }
 
     func describe(_ annotation: ScanResult.Annotation) -> String {
         switch annotation {
@@ -18,7 +25,7 @@ extension OutputFormatter {
             return "unused"
         case .assignOnlyProperty:
             return "assignOnlyProperty"
-        case .redundantProtocol(_):
+        case .redundantProtocol(_, _):
             return "redundantProtocol"
         case .redundantPublicAccessibility:
             return "redundantPublicAccessibility"
@@ -43,10 +50,16 @@ extension OutputFormatter {
                 description += " is unused"
             case .assignOnlyProperty:
                 description += " is assigned, but never used"
-            case let .redundantProtocol(references):
+            case let .redundantProtocol(references, inherited):
                 description += " is redundant as it's never used as an existential type"
                 secondaryResults = references.map {
-                    ($0.location, "Protocol '\(name)' conformance is redundant")
+                    var msg = "Protocol '\(name)' conformance is redundant"
+
+                    if !inherited.isEmpty {
+                        msg += ", replace with '\(inherited.sorted().joined(separator: ", "))'"
+                    }
+
+                    return ($0.location, msg)
                 }
             case let .redundantPublicAccessibility(modules):
                 let modulesJoined = modules.sorted().joined(separator: ", ")

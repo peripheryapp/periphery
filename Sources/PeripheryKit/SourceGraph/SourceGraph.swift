@@ -255,11 +255,11 @@ public final class SourceGraph {
         }
     }
 
-    func inheritedTypeReferences(of decl: Declaration, seenDeclarations: Set<Declaration> = []) -> [Reference] {
-        var references: [Reference] = []
+    func inheritedTypeReferences(of decl: Declaration, seenDeclarations: Set<Declaration> = []) -> Set<Reference> {
+        var references = Set<Reference>()
 
         for reference in decl.immediateInheritedTypeReferences {
-            references.append(reference)
+            references.insert(reference)
 
             if let inheritedDecl = explicitDeclaration(withUsr: reference.usr) {
                 // Detect circular references. The following is valid Swift.
@@ -267,7 +267,7 @@ public final class SourceGraph {
                 // extension SomeClass: SomeProtocol {}
                 // protocol SomeProtocol: SomeClass {}
                 guard !seenDeclarations.contains(inheritedDecl) else { continue }
-                references = inheritedTypeReferences(of: inheritedDecl, seenDeclarations: seenDeclarations.union([decl])) + references
+                references = inheritedTypeReferences(of: inheritedDecl, seenDeclarations: seenDeclarations.union([decl])).union(references)
             }
         }
 

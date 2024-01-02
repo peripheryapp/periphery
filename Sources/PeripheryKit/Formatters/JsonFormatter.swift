@@ -28,7 +28,7 @@ final class JsonFormatter: OutputFormatter {
             jsonObject.append(object)
 
             switch result.annotation {
-            case let .redundantProtocol(references: references):
+            case let .redundantProtocol(references, inherited):
                 for ref in references {
                     let object: [AnyHashable: Any] = [
                         "kind": ref.kind.rawValue,
@@ -37,7 +37,7 @@ final class JsonFormatter: OutputFormatter {
                         "attributes": Array<String>(),
                         "accessibility": "",
                         "ids": [ref.usr],
-                        "hints": [redundantConformanceHint],
+                        "hints": [redundantConformanceHint(with: inherited)],
                         "location": locationDescription(ref.location)
                     ]
                     jsonObject.append(object)

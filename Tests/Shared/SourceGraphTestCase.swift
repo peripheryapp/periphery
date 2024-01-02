@@ -71,15 +71,25 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
-    func assertRedundantProtocol(_ name: String, implementedBy conformances: DeclarationDescription..., file: StaticString = #file, line: UInt = #line) {
+    func assertRedundantProtocol(
+        _ name: String,
+        implementedBy conformances: DeclarationDescription...,
+        inherits inheritedProtocols: DeclarationDescription...,
+        file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(.protocol(name), file: file, line: line) else { return }
 
-        if let references = Self.results.redundantProtocolDeclarations[declaration] {
-            let decls = references.compactMap { $0.parent }
+        if let tuple = Self.results.redundantProtocolDeclarations[declaration] {
+            let decls = tuple.references.compactMap { $0.parent }
 
             for conformance in conformances {
                 if !decls.contains(where: { $0.kind == conformance.kind && $0.name == conformance.name }) {
                     XCTFail("Expected \(conformance) to implement protocol '\(name)'.", file: file, line: line)
+                }
+            }
+
+            for inherited in inheritedProtocols {
+                if !tuple.inherited.contains(inherited.name) {
+                    XCTFail("Expected \(name) to inherit protocol '\(inherited.name)'.", file: file, line: line)
                 }
             }
         } else {
@@ -231,10 +241,10 @@ private extension Array where Element == ScanResult {
         }
     }
 
-    var redundantProtocolDeclarations: [Declaration: [Reference]] {
-        reduce(into: [Declaration: [Reference]]()) { result, scanResult in
-            if case let .redundantProtocol(references) = scanResult.annotation {
-                result[scanResult.declaration, default: []].append(contentsOf: references)
+    var redundantProtocolDeclarations: [Declaration: (references: Set<Reference>, inherited: Set<String>)] {
+        reduce(into: .init()) { result, scanResult in
+            if case let .redundantProtocol(references, inherited) = scanResult.annotation {
+                result[scanResult.declaration] = (references, inherited)
             }
         }
     }

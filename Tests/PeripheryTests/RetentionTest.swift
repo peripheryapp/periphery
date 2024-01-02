@@ -173,6 +173,19 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRedundantProtocolThatInheritsOtherProtocols() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass134"))
+
+            assertReferenced(.protocol("FixtureProtocol128"))
+            assertRedundantProtocol(
+                "FixtureProtocol128",
+                implementedBy: .class("FixtureClass134"),
+                inherits: .protocol("FixtureProtocol128_Inherited")
+            )
+        }
+    }
+
     func testProtocolUsedAsExistentialType() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass119"))
