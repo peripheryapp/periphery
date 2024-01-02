@@ -84,6 +84,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Retain SwiftUI previews")
     var retainSwiftUIPreviews: Bool = defaultConfiguration.$retainSwiftUIPreviews.defaultValue
 
+    @Flag(help: "Retain properties on Codable types")
+    var retainCodableProperties: Bool = defaultConfiguration.$retainCodableProperties.defaultValue
+
     @Flag(help: "Clean existing build artifacts before building")
     var cleanBuild: Bool = defaultConfiguration.$cleanBuild.defaultValue
 
@@ -150,6 +153,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$cleanBuild, cleanBuild)
         configuration.apply(\.$buildArguments, buildArguments)
         configuration.apply(\.$relativeResults, relativeResults)
+        configuration.apply(\.$retainCodableProperties, retainCodableProperties)
 
         try scanBehavior.main { project in
             try Scan().perform(project: project)

@@ -43,6 +43,7 @@ public final class SourceGraphMutatorRunner {
         PropertyWrapperRetainer.self,
         ResultBuilderRetainer.self,
         CapitalSelfFunctionCallRetainer.self,
+        CodablePropertyRetainer.self,
 
         AncestralReferenceEliminator.self,
         AssignOnlyPropertyReferenceEliminator.self,

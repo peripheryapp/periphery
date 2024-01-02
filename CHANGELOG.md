@@ -9,6 +9,7 @@
 - Add experimental unused import analysis.
 - The option `--external-encodable-protocols` is deprecated, use `--external-codable-protocols` instead.
 - Assign-only properties on structs with synthesized initializers are now detected.
+- Added the `--retain-codable-properties` option to retain all properties on Codable types.
 
 ##### Bug Fixes
 

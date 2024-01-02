@@ -77,6 +77,9 @@ public final class Configuration {
     @Setting(key: "enable_unused_import_analysis", defaultValue: false)
     public var enableUnusedImportsAnalysis: Bool
 
+    @Setting(key: "retain_codable_properties", defaultValue: false)
+    public var retainCodableProperties: Bool
+
     @Setting(key: "verbose", defaultValue: false)
     public var verbose: Bool
 
@@ -230,6 +233,10 @@ public final class Configuration {
             config[$relativeResults.key] = relativeResults
         }
 
+        if $retainCodableProperties.hasNonDefaultValue {
+            config[$retainCodableProperties.key] = retainCodableProperties
+        }
+
         return try Yams.dump(object: config)
     }
 
@@ -309,6 +316,8 @@ public final class Configuration {
                 $buildArguments.assign(value)
             case $relativeResults.key:
                 $relativeResults.assign(value)
+            case $retainCodableProperties.key:
+                $retainCodableProperties.assign(value)
             default:
                 logger.warn("\(path.string): invalid key '\(key)'")
             }
@@ -346,6 +355,7 @@ public final class Configuration {
         $cleanBuild.reset()
         $buildArguments.reset()
         $relativeResults.reset()
+        $retainCodableProperties.reset()
     }
 
     // MARK: - Helpers

@@ -999,6 +999,28 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRetainsCodableProperties() {
+        configuration.retainCodableProperties = false
+        configuration.retainAssignOnlyProperties = false
+
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct14")) {
+                self.assertNotReferenced(.functionConstructor("init(unused:)"))
+                self.assertAssignOnlyProperty(.varInstance("unused"))
+            }
+        }
+
+        configuration.retainCodableProperties = true
+
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct14")) {
+                self.assertNotReferenced(.functionConstructor("init(unused:)"))
+                self.assertReferenced(.varInstance("unused"))
+                self.assertNotAssignOnlyProperty(.varInstance("unused"))
+            }
+        }
+    }
+
     // MARK: - Assign-only properties
 
     func testStructImplicitInitializer() {
