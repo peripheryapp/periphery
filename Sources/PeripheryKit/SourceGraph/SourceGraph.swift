@@ -7,7 +7,7 @@ public final class SourceGraph {
 
     private(set) var allDeclarations: Set<Declaration> = []
     private(set) var usedDeclarations: Set<Declaration> = []
-    private(set) var redundantProtocols: [Declaration: Set<Reference>] = [:]
+    private(set) var redundantProtocols: [Declaration: (references: Set<Reference>, inherited: Set<Reference>)] = [:]
     private(set) var rootDeclarations: Set<Declaration> = []
     private(set) var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
     private(set) var rootReferences: Set<Reference> = []
@@ -65,9 +65,9 @@ public final class SourceGraph {
         decl.usrs.contains { !allReferencesByUsr[$0, default: []].isEmpty }
     }
 
-    func markRedundantProtocol(_ declaration: Declaration, references: Set<Reference>) {
+    func markRedundantProtocol(_ declaration: Declaration, references: Set<Reference>, inherited: Set<Reference>) {
         withLock {
-            redundantProtocols[declaration] = references
+            redundantProtocols[declaration] = (references, inherited)
         }
     }
 
