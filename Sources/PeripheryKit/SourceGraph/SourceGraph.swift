@@ -19,13 +19,18 @@ public final class SourceGraph {
     private(set) var allReferencesByUsr: [String: Set<Reference>] = [:]
     private(set) var indexedModules: Set<String> = []
     private(set) var unusedModuleImports: Set<Declaration> = []
+    private(set) var assignOnlyProperties: Set<Declaration> = []
 
-    private var potentialAssignOnlyProperties: Set<Declaration> = []
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
     private var moduleToExportingModules: [String: Set<String>] = [:]
 
     private let lock = UnfairLock()
+    private let configuration: Configuration
+
+    init(configuration: Configuration = .shared) {
+        self.configuration = configuration
+    }
 
     public func indexingComplete() {
         rootDeclarations = allDeclarations.filter { $0.parent == nil }
@@ -34,10 +39,6 @@ public final class SourceGraph {
 
     var unusedDeclarations: Set<Declaration> {
         allDeclarations.subtracting(usedDeclarations)
-    }
-
-    var assignOnlyProperties: Set<Declaration> {
-        return potentialAssignOnlyProperties.intersection(unusedDeclarations)
     }
 
     func declarations(ofKind kind: Declaration.Kind) -> Set<Declaration> {
@@ -98,9 +99,9 @@ public final class SourceGraph {
         _ = retainedDeclarations.insert(declaration)
     }
 
-    func markPotentialAssignOnlyProperty(_ declaration: Declaration) {
+    func markAssignOnlyProperty(_ declaration: Declaration) {
         withLock {
-            _ = potentialAssignOnlyProperties.insert(declaration)
+            _ = assignOnlyProperties.insert(declaration)
         }
     }
 
@@ -149,7 +150,7 @@ public final class SourceGraph {
         allDeclarationsByKind[declaration.kind]?.remove(declaration)
         rootDeclarations.remove(declaration)
         usedDeclarations.remove(declaration)
-        potentialAssignOnlyProperties.remove(declaration)
+        assignOnlyProperties.remove(declaration)
         declaration.usrs.forEach { allExplicitDeclarationsByUsr.removeValue(forKey: $0) }
     }
 
@@ -340,5 +341,14 @@ public final class SourceGraph {
                 result.insert(decl)
                 result.formUnion(allOverrideDeclarations(fromBase: decl))
             }
+    }
+
+    func isCodable(_ decl: Declaration) -> Bool {
+        let codableTypes = ["Codable", "Decodable", "Encodable"] + configuration.externalEncodableProtocols + configuration.externalCodableProtocols
+
+        return inheritedTypeReferences(of: decl).contains {
+            guard let name = $0.name else { return false }
+            return [.protocol, .typealias].contains($0.kind) && codableTypes.contains(name)
+        }
     }
 }

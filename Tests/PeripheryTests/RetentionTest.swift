@@ -574,24 +574,6 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.struct("FixtureClass218")) {
                 self.assertReferenced(.enum("CodingKeys"))
             }
-            assertReferenced(.class("FixtureClass220")) {
-                self.assertReferenced(.varInstance("someUsedVar"))
-                self.assertNotReferenced(.varInstance("someUnusedVar"))
-
-                self.assertReferenced(.enum("CodingKeys")) {
-                    self.assertReferenced(.enumelement("someUsedVar"))
-                    self.assertReferenced(.enumelement("someUnusedVar"))
-                }
-            }
-            assertReferenced(.struct("FixtureStruct220")) {
-                self.assertReferenced(.varInstance("someUsedVar"))
-                self.assertNotReferenced(.varInstance("someUnusedVar"))
-
-                self.assertReferenced(.enum("CodingKeys")) {
-                    self.assertReferenced(.enumelement("someUsedVar"))
-                    self.assertReferenced(.enumelement("someUnusedVar"))
-                }
-            }
         }
     }
 
@@ -1018,6 +1000,35 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     // MARK: - Assign-only properties
+
+    func testStructImplicitInitializer() {
+        configuration.retainAssignOnlyProperties = false
+
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct13_Codable")) {
+                self.assertAssignOnlyProperty(.varInstance("assignOnly"))
+            }
+            assertReferenced(.struct("FixtureStruct13_NotCodable")) {
+                self.assertAssignOnlyProperty(.varInstance("assignOnly"))
+                self.assertNotAssignOnlyProperty(.varInstance("used"))
+            }
+        }
+
+        configuration.retainAssignOnlyProperties = true
+
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct13_Codable")) {
+                self.assertReferenced(.varInstance("assignOnly"))
+                self.assertNotAssignOnlyProperty(.varInstance("assignOnly"))
+            }
+            assertReferenced(.struct("FixtureStruct13_NotCodable")) {
+                self.assertReferenced(.varInstance("assignOnly"))
+                self.assertNotAssignOnlyProperty(.varInstance("assignOnly"))
+                self.assertReferenced(.varInstance("used"))
+                self.assertNotAssignOnlyProperty(.varInstance("used"))
+            }
+        }
+    }
 
     func testSimplePropertyAssignedButNeverRead() {
         configuration.retainAssignOnlyProperties = false

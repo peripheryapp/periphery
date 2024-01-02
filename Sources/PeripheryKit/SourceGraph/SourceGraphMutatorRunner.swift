@@ -27,10 +27,11 @@ public final class SourceGraphMutatorRunner {
         ProtocolExtensionReferenceBuilder.self,
         ProtocolConformanceReferenceBuilder.self,
         ExternalTypeProtocolConformanceReferenceRemover.self,
-        DefaultConstructorReferenceBuilder.self,
         ComplexPropertyAccessorReferenceBuilder.self,
         EnumCaseReferenceBuilder.self,
         DynamicMemberLookupReferenceBuilder.self,
+        DefaultConstructorReferenceBuilder.self,
+        StructImplicitInitializerReferenceBuilder.self,
 
         UnusedParameterRetainer.self,
         AssetReferenceRetainer.self,

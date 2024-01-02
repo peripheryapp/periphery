@@ -14,7 +14,7 @@ public final class OutputDeclarationFilter {
 
     public func filter(_ declarations: [ScanResult]) -> [ScanResult] {
         if configuration.reportInclude.isEmpty && configuration.reportExclude.isEmpty {
-            return declarations
+            return declarations.sorted { $0.declaration < $1.declaration }
         }
 
         return declarations
