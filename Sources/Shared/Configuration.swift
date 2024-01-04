@@ -59,6 +59,9 @@ public final class Configuration {
     @Setting(key: "retain_objc_annotated", defaultValue: false)
     public var retainObjcAnnotated: Bool
 
+    @Setting(key: "retain_files", defaultValue: [])
+    public var retainFiles: [String]
+
     @Setting(key: "retain_public", defaultValue: false)
     public var retainPublic: Bool
 
@@ -159,6 +162,10 @@ public final class Configuration {
         
         if $retainPublic.hasNonDefaultValue {
             config[$retainPublic.key] = retainPublic
+        }
+
+        if $retainFiles.hasNonDefaultValue {
+            config[$retainFiles.key] = retainFiles
         }
 
         if $retainAssignOnlyProperties.hasNonDefaultValue {
@@ -273,6 +280,8 @@ public final class Configuration {
                 $outputFormat.assign(value)
             case $retainPublic.key:
                 $retainPublic.assign(value)
+            case $retainFiles.key:
+                $retainFiles.assign(value)
             case $retainAssignOnlyProperties.key:
                 $retainAssignOnlyProperties.assign(value)
             case $retainAssignOnlyPropertyTypes.key:
@@ -335,6 +344,7 @@ public final class Configuration {
         $reportInclude.reset()
         $outputFormat.reset()
         $retainPublic.reset()
+        $retainFiles.reset()
         $retainAssignOnlyProperties.reset()
         $retainAssignOnlyPropertyTypes.reset()
         $retainObjcAccessible.reset()
@@ -379,8 +389,20 @@ public final class Configuration {
         return matchers
     }
 
-    public func resetIndexExcludeMatchers() {
+    private var _retainFilesMatchers: [FilenameMatcher]?
+    public var retainFilesMatchers: [FilenameMatcher] {
+        if let _retainFilesMatchers {
+            return _retainFilesMatchers
+        }
+
+        let matchers = buildFilenameMatchers(with: retainFiles)
+        _retainFilesMatchers = matchers
+        return matchers
+    }
+
+    public func resetMatchers() {
         _indexExcludeMatchers = nil
+        _retainFilesMatchers = nil
     }
 
     public lazy var reportExcludeMatchers: [FilenameMatcher] = {

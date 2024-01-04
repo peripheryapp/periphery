@@ -1034,6 +1034,20 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRetainsFilesOption() {
+        configuration.retainFiles = [testFixturePath.string]
+
+        analyze {
+            assertReferenced(.class("FixtureClass100"))
+        }
+
+        configuration.retainFiles = []
+
+        analyze {
+            assertNotReferenced(.class("FixtureClass100"))
+        }
+    }
+
     // MARK: - Assign-only properties
 
     func testStructImplicitInitializer() {

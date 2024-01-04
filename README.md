@@ -405,6 +405,10 @@ To exclude the results from certain files, pass the `--report-exclude <globs>` o
 
 To exclude files from being indexed, pass the `--index-exclude <globs>` option to the `scan` command. Excluding files from the index phase means that any declarations and references contained within the files will not be seen by Periphery. Periphery will be behave as if the files do not exist. For example, this option can be used to exclude generated code that holds references to non-generated code, or exclude all `.xib` and `.storyboard` files that hold references to code.
 
+### Retaining File Declarations
+
+To retain all declarations in files, pass the `--retain-files <globs>` option to the `scan` command. This option is equivalent to adding a `// periphery:ignore:all` comment command at the top of each file.
+
 ## Continuous Integration
 
 When integrating Periphery into a CI pipeline, you can potentially skip the build phase if your pipeline has already done so, e.g to run tests. This can be achieved using the `--skip-build` option. However, you also need to tell Periphery the location of the index store using `--index-store-path`. This location is dependent on your project type.

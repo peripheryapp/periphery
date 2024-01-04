@@ -99,6 +99,10 @@ public final class SourceGraph {
         _ = retainedDeclarations.insert(declaration)
     }
 
+    func markRetainedUnsafe(_ declarations: Set<Declaration>) {
+        retainedDeclarations.formUnion(declarations)
+    }
+
     func markAssignOnlyProperty(_ declaration: Declaration) {
         withLock {
             _ = assignOnlyProperties.insert(declaration)
@@ -352,3 +356,4 @@ public final class SourceGraph {
         }
     }
 }
+

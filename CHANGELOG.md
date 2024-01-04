@@ -11,6 +11,7 @@
 - Assign-only properties on structs with synthesized initializers are now detected.
 - Added the `--retain-codable-properties` option to retain all properties on Codable types.
 - Results for redundant protocol conformances will now list the inherited protocols that should replace the redundant conformance.
+- Added the `--retain-files` option to retain all declarations within the given files.
 
 ##### Bug Fixes
 

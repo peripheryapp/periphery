@@ -45,6 +45,9 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Path glob of source files to include in the results. This option supersedes '--report-exclude'. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
     var reportInclude: [String] = defaultConfiguration.$reportInclude.defaultValue
 
+    @Option(parsing: .upToNextOption, help: "Retain all declarations within the given source files. Multiple paths may be specified")
+    var retainFiles: [String] = defaultConfiguration.$retainFiles.defaultValue
+
     @Option(parsing: .upToNextOption, help: "Path to the index store. Multiple paths may be specified. Implies '--skip-build'")
     var indexStorePath: [FilePath] = defaultConfiguration.$indexStorePath.defaultValue
 
@@ -132,6 +135,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$reportExclude, reportExclude)
         configuration.apply(\.$reportInclude, reportInclude)
         configuration.apply(\.$outputFormat, format)
+        configuration.apply(\.$retainFiles, retainFiles)
         configuration.apply(\.$retainPublic, retainPublic)
         configuration.apply(\.$retainAssignOnlyProperties, retainAssignOnlyProperties)
         configuration.apply(\.$retainAssignOnlyPropertyTypes, retainAssignOnlyPropertyTypes)

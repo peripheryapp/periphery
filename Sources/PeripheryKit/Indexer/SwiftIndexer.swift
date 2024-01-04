@@ -64,10 +64,17 @@ public final class SwiftIndexer: Indexer {
             throw PeripheryError.unindexedTargetsError(targets: targets, indexStorePaths: indexStorePaths)
         }
 
+        var retainedFiles: Set<FilePath> = []
+
+        if !configuration.retainFilesMatchers.isEmpty {
+            retainedFiles = allSourceFiles.filter { configuration.retainFilesMatchers.anyMatch(filename: $0.string) }
+        }
+
         let jobs = unitsByFile.map { (file, units) -> Job in
             return Job(
                 file: file,
                 units: units,
+                retainAllDeclarations: retainedFiles.contains(file),
                 graph: graph,
                 logger: logger,
                 configuration: configuration
@@ -111,10 +118,12 @@ public final class SwiftIndexer: Indexer {
         private let logger: ContextualLogger
         private let configuration: Configuration
         private var sourceFile: SourceFile?
+        private var retainAllDeclarations: Bool
 
         required init(
             file: FilePath,
             units: [(IndexStore, IndexStoreUnit)],
+            retainAllDeclarations: Bool,
             graph: SourceGraph,
             logger: ContextualLogger,
             configuration: Configuration
@@ -122,6 +131,7 @@ public final class SwiftIndexer: Indexer {
         ) {
             self.file = file
             self.units = units
+            self.retainAllDeclarations = retainAllDeclarations
             self.graph = graph
             self.logger = logger
             self.configuration = configuration
@@ -225,6 +235,10 @@ public final class SwiftIndexer: Indexer {
             graph.withLock {
                 graph.addUnsafe(references)
                 graph.addUnsafe(newDeclarations)
+
+                if retainAllDeclarations {
+                    graph.markRetainedUnsafe(newDeclarations)
+                }
             }
 
             establishDeclarationHierarchy()
@@ -489,6 +503,10 @@ public final class SwiftIndexer: Indexer {
                         paramDecl.parent = functionDecl
                         functionDecl.unusedParameters.insert(paramDecl)
                         graph.addUnsafe(paramDecl)
+
+                        if retainAllDeclarations {
+                            graph.markRetainedUnsafe(paramDecl)
+                        }
 
                         if (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) || ignoredParamNames.contains(param.name) {
                             graph.markRetainedUnsafe(paramDecl)
