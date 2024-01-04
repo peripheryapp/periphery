@@ -24,31 +24,31 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Path to your project's .xcodeproj - supply this option if your project doesn't have an .xcworkspace. Xcode projects only")
     var project: String?
 
-    @Option(parsing: .upToNextOption, help: "Path to file targets mapping. For use with third-party build systems. Multiple paths may be specified")
+    @Option(parsing: .upToNextOption, help: "File target mapping configuration file paths. For use with third-party build systems")
     var fileTargetsPath: [FilePath] = defaultConfiguration.$fileTargetsPath.defaultValue
 
-    @Option(help: "Comma-separated list of schemes that must be built in order to produce the targets passed to the --targets option. Xcode projects only", transform: split(by: ","))
+    @Option(parsing: .upToNextOption, help: "Schemes that must be built in order to produce the targets passed to the --targets option. Xcode projects only")
     var schemes: [String] = defaultConfiguration.$schemes.defaultValue
 
-    @Option(help: "Comma-separated list of target names to scan. Required for Xcode projects. Optional for Swift Package Manager projects, default behavior is to scan all targets defined in Package.swift", transform: split(by: ","))
+    @Option(parsing: .upToNextOption, help: "Target names to scan. Required for Xcode projects. Optional for Swift Package Manager projects, default behavior is to scan all targets defined in Package.swift")
     var targets: [String] = defaultConfiguration.$targets.defaultValue
 
     @Option(help: "Output format (allowed: \(OutputFormat.allValueStrings.joined(separator: ", ")))")
     var format: OutputFormat = defaultConfiguration.$outputFormat.defaultValue
 
-    @Option(help: "Path glob of source files to exclude from indexing. Declarations and references within these files will not be considered during analysis. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
+    @Option(parsing: .upToNextOption, help: "Source file globs to exclude from indexing. Declarations and references within these files will not be considered during analysis")
     var indexExclude: [String] = defaultConfiguration.$indexExclude.defaultValue
 
-    @Option(help: "Path glob of source files to exclude from the results. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
+    @Option(parsing: .upToNextOption, help: "Source file globs to exclude from the results. Note that this option is purely cosmetic, these files will still be indexed")
     var reportExclude: [String] = defaultConfiguration.$reportExclude.defaultValue
 
-    @Option(help: "Path glob of source files to include in the results. This option supersedes '--report-exclude'. Note that this option is purely cosmetic, these files will still be indexed. Multiple globs may be delimited by a pipe", transform: split(by: "|"))
+    @Option(parsing: .upToNextOption, help: "Source file globs to include in the results. This option supersedes '--report-exclude'. Note that this option is purely cosmetic, these files will still be indexed")
     var reportInclude: [String] = defaultConfiguration.$reportInclude.defaultValue
 
-    @Option(parsing: .upToNextOption, help: "Retain all declarations within the given source files. Multiple paths may be specified")
+    @Option(parsing: .upToNextOption, help: "Source file globs for which all containing declarations will be retained")
     var retainFiles: [String] = defaultConfiguration.$retainFiles.defaultValue
 
-    @Option(parsing: .upToNextOption, help: "Path to the index store. Multiple paths may be specified. Implies '--skip-build'")
+    @Option(parsing: .upToNextOption, help: "Index store paths. Implies '--skip-build'")
     var indexStorePath: [FilePath] = defaultConfiguration.$indexStorePath.defaultValue
 
     @Flag(help: "Retain all public declarations, recommended for framework/library projects")
@@ -63,10 +63,10 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Retain properties that are assigned, but never used")
     var retainAssignOnlyProperties: Bool = defaultConfiguration.$retainAssignOnlyProperties.defaultValue
 
-    @Option(help: "Comma-separated list of property types to retain if the property is assigned, but never read", transform: split(by: ","))
+    @Option(parsing: .upToNextOption, help: "Property types to retain if the property is assigned, but never read")
     var retainAssignOnlyPropertyTypes: [String] = defaultConfiguration.$retainAssignOnlyPropertyTypes.defaultValue
 
-    @Option(help: .private, transform: split(by: ","))
+    @Option(parsing: .upToNextOption, help: .private)
     var externalEncodableProtocols: [String] = defaultConfiguration.$externalEncodableProtocols.defaultValue
 
     @Option(parsing: .upToNextOption, help: "Names of external protocols that inherit Codable. Properties and CodingKey enums of types conforming to these protocols will be retained")
@@ -162,12 +162,6 @@ struct ScanCommand: FrontendCommand {
         try scanBehavior.main { project in
             try Scan().perform(project: project)
         }.get()
-    }
-
-    // MARK: - Private
-
-    private static func split(by delimiter: Character) -> (String?) -> [String] {
-        return { options in options?.split(separator: delimiter).map(String.init) ?? [] }
     }
 }
 

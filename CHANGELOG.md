@@ -2,15 +2,15 @@
 
 ##### Breaking
 
-- None.
+- The command-line parsing strategy for options that were delimited by a pipe or comma has changed. These options are now parsed as a space delimited list, e.g `--option "arg1" "arg2"`. 
+- The option `--external-encodable-protocols` is deprecated, use `--external-codable-protocols` instead.
 
 ##### Enhancements
 
 - Add experimental unused import analysis option `--enable-unused-import-analysis`.
-- The option `--external-encodable-protocols` is deprecated, use `--external-codable-protocols` instead.
 - Assign-only properties on structs with synthesized initializers are now detected.
 - Added the `--retain-codable-properties` option to retain all properties on Codable types.
-- Results for redundant protocol conformances will now list the inherited protocols that should replace the redundant conformance.
+- Results for redundant protocol conformances will now list the inherited protocols that should replace the redundant conformance, if any.
 - Added the `--retain-files` option to retain all declarations within the given files.
 
 ##### Bug Fixes
