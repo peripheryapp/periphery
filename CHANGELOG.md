@@ -28,6 +28,7 @@
 - Fix public accessibility analysis false-positive for enum case parameter types.
 - Fix public accessibility analysis false-positive for properties initialized with generic specialized types.
 - Types associated with assign-only properties are no longer identified as unused until the property is removed.
+- Classes referenced in Info.plist as `NSPrincipalClass` and `WKExtensionDelegateClassName` are now retained.
 
 ## 2.17.1 (2023-12-04)
 
