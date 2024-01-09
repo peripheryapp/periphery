@@ -6,6 +6,7 @@ public class FixtureClass123 {
     struct CustomType {}
 
     var retainedSimpleProperty: CustomType?
+    var retainedSimplePropertyImplicitUnwrap: CustomType!
     var notRetainedSimpleProperty: String?
     var retainedModulePrefixedProperty: Swift.Double?
     var notRetainedModulePrefixedProperty: Swift.Bool?
@@ -20,6 +21,7 @@ public class FixtureClass123 {
 
     public func someFunc() {
         retainedSimpleProperty = CustomType()
+        retainedSimplePropertyImplicitUnwrap = CustomType()
         notRetainedSimpleProperty = ""
 
         retainedModulePrefixedProperty = 1

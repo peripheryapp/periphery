@@ -8,6 +8,6 @@ public struct PropertyTypeSanitizer {
 
     @inlinable
     public static func sanitize(_ type: String) -> String {
-        type.trimmed.trimmingCharacters(in: .init(["?"]))
+        type.trimmed.trimmingCharacters(in: .init(["?", "!"]))
     }
 }

@@ -1150,10 +1150,22 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass123")) {
                 self.assertReferenced(.varInstance("retainedSimpleProperty"))
+                self.assertNotAssignOnlyProperty(.varInstance("retainedSimpleProperty"))
+
+                self.assertReferenced(.varInstance("retainedSimplePropertyImplicitUnwrap"))
+                self.assertNotAssignOnlyProperty(.varInstance("retainedSimplePropertyImplicitUnwrap"))
+
                 self.assertReferenced(.varInstance("retainedModulePrefixedProperty"))
+                self.assertNotAssignOnlyProperty(.varInstance("retainedModulePrefixedProperty"))
+
                 self.assertReferenced(.varInstance("retainedTupleProperty"))
+                self.assertNotAssignOnlyProperty(.varInstance("retainedTupleProperty"))
+
                 self.assertReferenced(.varInstance("retainedDestructuredPropertyA"))
+                self.assertNotAssignOnlyProperty(.varInstance("retainedDestructuredPropertyA"))
+
                 self.assertReferenced(.varInstance("retainedMultipleBindingPropertyA"))
+                self.assertNotAssignOnlyProperty(.varInstance("retainedMultipleBindingPropertyA"))
 
                 #if canImport(Combine)
                 self.assertReferenced(.varInstance("retainedAnyCancellable"))
