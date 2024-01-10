@@ -41,6 +41,9 @@ public final class Configuration {
     @Setting(key: "build_arguments", defaultValue: [])
     public var buildArguments: [String]
 
+    @Setting(key: "schemes_arguments", defaultValue: [])
+    public var schemesArguments: [String]
+
     @Setting(key: "retain_assign_only_property_types", defaultValue: [], valueSanitizer: PropertyTypeSanitizer.sanitize)
     public var retainAssignOnlyPropertyTypes: [String]
 
@@ -323,6 +326,8 @@ public final class Configuration {
                 $cleanBuild.assign(value)
             case $buildArguments.key:
                 $buildArguments.assign(value)
+            case $schemesArguments.key:
+                $schemesArguments.assign(value)
             case $relativeResults.key:
                 $relativeResults.assign(value)
             case $retainCodableProperties.key:
