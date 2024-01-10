@@ -21,6 +21,10 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphMutator {
                   !retainAssignOnlyPropertyTypes.contains(declaredType),
                   !graph.isRetained(property),
                   !property.isComplexProperty,
+                  // A protocol property can technically be assigned and never used when the protocol is used as an existential
+                  // type, however communicating that succinctly would be very tricky, and most likely just lead to confusion.
+                  // Here we filter out protocol properties and thus restrict this analysis only to concrete properties.
+                  property.parent?.kind != .protocol,
                   !graph.references(to: property).contains(where: { $0.parent?.parent?.kind == .protocol }),
                   let setter = property.declarations.first(where: { $0.kind == .functionAccessorSetter }),
                   let getter = property.declarations.first(where: { $0.kind == .functionAccessorGetter }),
