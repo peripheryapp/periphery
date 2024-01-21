@@ -8,6 +8,7 @@
 ##### Enhancements
 
 - Add experimental unused import analysis option `--enable-unused-import-analysis`.
+- Add experimental automatic code removal option `--auto-remove`.
 - Assign-only properties on structs with synthesized initializers are now detected.
 - Added the `--retain-codable-properties` option to retain all properties on Codable types.
 - Results for redundant protocol conformances will now list the inherited protocols that should replace the redundant conformance, if any.
@@ -18,15 +19,15 @@
 - Subscript functions required by `@dynamicMemberLookup` are now retained.
 - A newline is no longer printed before non-Xcode formatted results.
 - `--external-codable-protocols` now retains enums that conform to `CodingKey`.
-- Fix public accessibility analysis false-positive for actors. 
-- Fix public accessibility analysis false-positive for property wrappers.
-- Fix public accessibility analysis false-positive for declarations referenced from a public `@inlinable` function.
-- Fix public accessibility analysis false-positive for function parameter default values.
-- Fix public accessibility analysis false-positive for inherited and default associated types.
-- Fix public accessibility analysis false-positive for generic types used in the generic argument clause of a return type.
-- Fix public accessibility analysis false-positive for retained/ignored declarations.
-- Fix public accessibility analysis false-positive for enum case parameter types.
-- Fix public accessibility analysis false-positive for properties initialized with generic specialized types.
+- Fix public accessibility false-positive for actors.
+- Fix public accessibility false-positive for property wrappers.
+- Fix public accessibility false-positive for declarations referenced from a public `@inlinable` function.
+- Fix public accessibility false-positive for function parameter default values.
+- Fix public accessibility false-positive for inherited and default associated types.
+- Fix public accessibility false-positive for generic types used in the generic argument clause of a return type.
+- Fix public accessibility false-positive for retained/ignored declarations.
+- Fix public accessibility false-positive for enum case parameter types.
+- Fix public accessibility false-positive for properties initialized with generic specialized types.
 - Types associated with assign-only properties are no longer identified as unused until the property is removed.
 - Classes referenced in Info.plist as `NSPrincipalClass` and `WKExtensionDelegateClassName` are now retained.
 
