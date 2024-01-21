@@ -8,14 +8,17 @@ class FixtureSourceGraphTestCase: SourceGraphTestCase {
         _sourceFiles = nil
     }
 
+    @discardableResult
     func analyze(retainPublic: Bool = false,
                  retainObjcAccessible: Bool = false,
                  retainObjcAnnotated: Bool = false,
+                 disableRedundantPublicAnalysis: Bool = false,
                  testBlock: () throws -> Void
-    ) rethrows {
+    ) rethrows -> [ScanResult] {
         configuration.retainPublic = retainPublic
         configuration.retainObjcAccessible = retainObjcAccessible
         configuration.retainObjcAnnotated = retainObjcAnnotated
+        configuration.disableRedundantPublicAnalysis = disableRedundantPublicAnalysis
         configuration.indexExclude = Self.sourceFiles.subtracting([testFixturePath]).map { $0.string }
         configuration.resetMatchers()
 
@@ -25,6 +28,7 @@ class FixtureSourceGraphTestCase: SourceGraphTestCase {
 
         Self.index()
         try testBlock()
+        return Self.results
     }
 
     // MARK: - Private

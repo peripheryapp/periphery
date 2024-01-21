@@ -9,8 +9,23 @@ public struct ScanResultBuilder {
         let redundantProtocols = graph.redundantProtocols.filter { !removableDeclarations.contains($0.0) }
         let redundantPublicAccessibility = graph.redundantPublicAccessibility.filter { !removableDeclarations.contains($0.0) }
 
-        let annotatedRemovableDeclarations: [ScanResult] = removableDeclarations.map {
-            .init(declaration: $0, annotation: .unused)
+        let annotatedRemovableDeclarations: [ScanResult] = removableDeclarations.flatMap {
+            var extensionResults = [ScanResult]()
+
+            if $0.kind.isExtendableKind,
+               !graph.retainedDeclarations.contains($0),
+               !graph.ignoredDeclarations.contains($0) {
+                let decls = $0.descendentDeclarations.union([$0])
+
+                for decl in decls {
+                    let extensions = graph.extensions[decl, default: []]
+                    for ext in extensions {
+                        extensionResults.append(ScanResult(declaration: ext, annotation: .unused))
+                    }
+                }
+            }
+
+            return [ScanResult(declaration: $0, annotation: .unused)] + extensionResults
         }
         let annotatedAssignOnlyProperties: [ScanResult] = assignOnlyProperties.map {
             .init(declaration: $0, annotation: .assignOnlyProperty)

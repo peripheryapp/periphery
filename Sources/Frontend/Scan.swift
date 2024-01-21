@@ -58,9 +58,9 @@ final class Scan {
         logger.endInterval(analyzeInterval)
 
         let resultInterval = logger.beginInterval("result:build")
-        let result = ScanResultBuilder.build(for: graph)
+        let results = ScanResultBuilder.build(for: graph)
         logger.endInterval(resultInterval)
 
-        return result
+        return results
     }
 }

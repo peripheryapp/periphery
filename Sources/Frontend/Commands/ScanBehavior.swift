@@ -63,6 +63,11 @@ final class ScanBehavior {
             results = try block(project)
             let interval = logger.beginInterval("result:output")
             let filteredResults = OutputDeclarationFilter().filter(results)
+
+            if configuration.autoRemove {
+                try ScanResultRemover().remove(results: filteredResults)
+            }
+
             let output = try configuration.outputFormat.formatter.init(configuration: configuration).format(filteredResults)
 
             if configuration.outputFormat.supportsAuxiliaryOutput {
