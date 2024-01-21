@@ -2,7 +2,21 @@
 
 ##### Breaking
 
-- The command-line parsing strategy for options that were delimited by a pipe or comma has changed. These options are now parsed as a space delimited list, e.g `--option "arg1" "arg2"`. 
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.18.0 (2024-01-21)
+
+##### Breaking
+
+- The command-line parsing strategy for options that were delimited by a pipe or comma has changed. These options are now parsed as a space delimited list, e.g `--option "arg1" "arg2"`.
 - The option `--external-encodable-protocols` is deprecated, use `--external-codable-protocols` instead.
 
 ##### Enhancements
