@@ -47,7 +47,9 @@ public final class XcodeProjectDriver {
         }
 
         // Ensure schemes exist within the project
-        let schemes = try project.schemes().filter { configuration.schemes.contains($0) }
+        let schemes = try project.schemes(
+            additionalArguments: configuration.schemesArguments
+        ).filter { configuration.schemes.contains($0) }
         let validSchemeNames = schemes.mapSet { $0 }
 
         if let scheme = Set(configuration.schemes).subtracting(validSchemeNames).first {

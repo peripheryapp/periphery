@@ -36,7 +36,7 @@ class XcodebuildSchemesTest: XCTestCase {
     func testParseSchemes() {
         for output in XcodebuildListOutputs {
             shell.output = output
-            let schemes = try! xcodebuild.schemes(project: project)
+            let schemes = try! xcodebuild.schemes(project: project, additionalArguments: [])
             XCTAssertEqual(schemes, ["SchemeA", "SchemeB"])
         }
     }

@@ -42,8 +42,8 @@ final class XcodeWorkspace: XcodeProjectlike {
         }
     }
 
-    func schemes() throws -> Set<String> {
-        try xcodebuild.schemes(project: self)
+    func schemes(additionalArguments: [String]) throws -> Set<String> {
+        try xcodebuild.schemes(project: self, additionalArguments: additionalArguments)
     }
 
     // MARK: - Private
