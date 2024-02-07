@@ -7,7 +7,9 @@ class SomeClass919: SomeProtocol919 {
 }
 
 public struct DepsHandler {
-    public init() {}
+    public func depsMethod() {
+        let _ = someProtocol
+    }
 }
 
 extension DepsHandler {
