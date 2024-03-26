@@ -1,6 +1,6 @@
 import Foundation
 
-class SourceLocation {
+class SourceLocation: Codable {
     let file: SourceFile
     let line: Int
     let column: Int

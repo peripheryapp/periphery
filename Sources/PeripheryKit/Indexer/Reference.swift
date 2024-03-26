@@ -47,6 +47,16 @@ final class Reference {
     }
 }
 
+extension Reference: Codable {
+    enum CodingKeys: CodingKey {
+        case location
+        case kind
+        case isRelated
+        case usr
+        case hashValueCache
+    }
+}
+
 extension Reference: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(hashValueCache)

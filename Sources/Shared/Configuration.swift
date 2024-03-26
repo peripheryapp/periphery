@@ -122,6 +122,12 @@ public final class Configuration {
     @Setting(key: "json_package_manifest_path", defaultValue: nil)
     public var jsonPackageManifestPath: String?
 
+    @Setting(key: "baseline", defaultValue: nil)
+    public var baseline: String?
+
+    @Setting(key: "writeBaseline", defaultValue: nil)
+    public var writeBaseline: String?
+
     // Non user facing.
     public var guidedSetup: Bool = false
     public var removalOutputBasePath: FilePath?

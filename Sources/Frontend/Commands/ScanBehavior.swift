@@ -62,10 +62,27 @@ final class ScanBehavior {
         do {
             results = try block(project)
             let interval = logger.beginInterval("result:output")
-            let filteredResults = OutputDeclarationFilter().filter(results)
+            var filteredResults = OutputDeclarationFilter().filter(results)
 
             if configuration.autoRemove {
                 try ScanResultRemover().remove(results: filteredResults)
+            }
+
+            if let baselineOutputPath = configuration.writeBaseline {
+                try Baseline.write(filteredResults, toPath: baselineOutputPath)
+            }
+
+            if let baselinePath = configuration.baseline {
+                do {
+                    let baseline = try Baseline(fromPath: baselinePath)
+                    filteredResults = baseline.filter(filteredResults)
+                } catch {
+                    if configuration.baseline == configuration.writeBaseline {
+                       // print a warning
+                    } else {
+                        return .failure(.underlyingError(error))
+                    }
+                }
             }
 
             let output = try configuration.outputFormat.formatter.init(configuration: configuration).format(filteredResults)

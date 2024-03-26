@@ -123,6 +123,12 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "JSON package manifest path (obtained using `swift package describe --type json` or manually)")
     var jsonPackageManifestPath: String?
 
+    @Option(help: "The path to a baseline file, which will be used to filter out detected violations.")
+    var baseline: String?
+
+    @Option(help: "The path to save detected violations to as a new baseline.")
+    var writeBaseline: String?
+
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
@@ -174,6 +180,8 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$retainCodableProperties, retainCodableProperties)
         configuration.apply(\.$retainEncodableProperties, retainEncodableProperties)
         configuration.apply(\.$jsonPackageManifestPath, jsonPackageManifestPath)
+        configuration.apply(\.$baseline, baseline)
+        configuration.apply(\.$writeBaseline, writeBaseline)
 
         try scanBehavior.main { project in
             try Scan().perform(project: project)

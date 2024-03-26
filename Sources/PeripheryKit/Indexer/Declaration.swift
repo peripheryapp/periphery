@@ -1,7 +1,7 @@
 import Foundation
 
 final class Declaration {
-    enum Kind: String, RawRepresentable, CaseIterable {
+    enum Kind: String, RawRepresentable, CaseIterable, Codable {
         case `associatedtype` = "associatedtype"
         case `class` = "class"
         case `enum` = "enum"
@@ -289,6 +289,15 @@ final class Declaration {
     func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {
         guard let parent = parent else { return false }
         return parent.kind == kind
+    }
+}
+
+extension Declaration: Codable {
+    enum CodingKeys: CodingKey {
+        case location
+        case kind
+        case usrs
+        case hashValueCache
     }
 }
 

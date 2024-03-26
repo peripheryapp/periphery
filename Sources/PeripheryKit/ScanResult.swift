@@ -1,7 +1,7 @@
 import Foundation
 
-public struct ScanResult {
-    enum Annotation {
+public struct ScanResult: Codable, Equatable, Hashable {
+    enum Annotation: Codable, Equatable, Hashable {
         case unused
         case assignOnlyProperty
         case redundantProtocol(references: Set<Reference>, inherited: Set<String>)
