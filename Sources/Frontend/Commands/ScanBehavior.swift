@@ -69,7 +69,7 @@ final class ScanBehavior {
             }
 
             if let baselineOutputPath = configuration.writeBaseline {
-                try Baseline.write(filteredResults, toPath: baselineOutputPath)
+                try Baseline(scanResults: filteredResults).write(toPath: baselineOutputPath)
             }
 
             if let baselinePath = configuration.baseline {

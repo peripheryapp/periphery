@@ -31,25 +31,20 @@ public struct Baseline: Equatable {
         baselineResults = try JSONDecoder().decode(GroupedResults.self, from: data)
     }
 
-    init(scanResults: [ScanResult]) {
-        let baselineResults = scanResults.baselineResults
-        self.baselineResults = baselineResults.groupedByFile()
+    /// Creates a `Baseline` from a list of results.
+    ///
+    /// - parameter scanResults: The results for the baseline.
+    public init(scanResults: [ScanResult]) {
+        self.baselineResults = scanResults.baselineResults.groupedByFile()
     }
 
     /// Writes a `Baseline` to disk in JSON format.
     ///
-    /// - parameter scanResults: The scan results to save.
     /// - parameter toPath: The path to write to.
-    public static func write(_ scanResults: [ScanResult], toPath path: String) throws {
-        let baselineResults = scanResults.baselineResults
-        let results = baselineResults.groupedByFile()
-        try write(results, toPath: path)
-    }
-
-    private static func write(_ results: GroupedResults, toPath path: String) throws {
+    public func write(toPath path: String) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted]
-        let data = try encoder.encode(results)
+        let data = try encoder.encode(baselineResults)
         try data.write(to: URL(fileURLWithPath: path))
     }
 
