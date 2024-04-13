@@ -3,7 +3,7 @@ import SystemPackage
 
 private typealias GroupedResults = [String: [BaselineResult]]
 
-private struct BaselineResult: Codable, Equatable, Hashable {
+private struct BaselineResult: Codable, Hashable {
     let scanResult: ScanResult
     let text: String
     var key: String { text + scanResult.declaration.kind.rawValue }
@@ -100,8 +100,8 @@ public struct Baseline: Equatable {
                 continue
             }
 
-            let groupedResults = Dictionary(grouping: results) { $0.key }
-            let groupedBaselineResults = Dictionary(grouping: baselineResults) { $0.key }
+            let groupedResults = Dictionary(grouping: results, by: \.key)
+            let groupedBaselineResults = Dictionary(grouping: baselineResults, by: \.key)
 
             for (key, results) in groupedResults {
                 guard let baselineResults = groupedBaselineResults[key] else {
@@ -173,9 +173,7 @@ private extension Sequence where Element == BaselineResult {
     }
 
     func groupedByKind(filteredBy existingScanResults: [BaselineResult]) -> GroupedResults {
-        let setOfExistingScanResults = Set(existingScanResults)
-        let remainingScanResults = filter { !setOfExistingScanResults.contains($0) }
-        return remainingScanResults.groupedByKind()
+        Set(self).subtracting(existingScanResults).groupedByKind()
     }
 }
 
