@@ -17,10 +17,13 @@ private struct BaselineResult: Codable, Hashable {
 /// A set of scan results that can be used to filter newly detected results.
 public struct Baseline: Equatable {
     private let baselineResults: GroupedResults
+    private var sortedBaselineResults: [BaselineResult] {
+        baselineResults.map { ($0, $1) }.sorted { $0.0 < $1.0 }.flatMap { $0.1 }
+    }
 
     /// The stored scan results.
     public var scanResults: [ScanResult] {
-        baselineResults.keys.sorted().flatMap({ baselineResults[$0]! }).resultsWithAbsolutePaths
+        sortedBaselineResults.resultsWithAbsolutePaths
     }
 
     /// Creates a `Baseline` from a saved file.
@@ -28,7 +31,8 @@ public struct Baseline: Equatable {
     /// - parameter fromPath: The path to read from.
     public init(fromPath path: String) throws {
         let data = try Data(contentsOf: URL(fileURLWithPath: path))
-        baselineResults = try JSONDecoder().decode(GroupedResults.self, from: data)
+        baselineResults = try JSONDecoder().decode([BaselineResult].self, from: data).groupedByFile()
+
     }
 
     /// Creates a `Baseline` from a list of results.
@@ -44,7 +48,7 @@ public struct Baseline: Equatable {
     public func write(toPath path: String) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted]
-        let data = try encoder.encode(baselineResults)
+        let data = try encoder.encode(sortedBaselineResults)
         try data.write(to: URL(fileURLWithPath: path))
     }
 
