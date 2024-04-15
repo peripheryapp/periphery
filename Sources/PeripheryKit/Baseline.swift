@@ -1,7 +1,9 @@
 import Foundation
 import SystemPackage
 
-private typealias GroupedResults = [String: [BaselineResult]]
+private typealias ResultsPerFile = [String: [BaselineResult]]
+private typealias ResultsPerKind = [String: [BaselineResult]]
+
 
 private struct BaselineResult: Codable, Hashable {
     let scanResult: ScanResult
@@ -16,9 +18,9 @@ private struct BaselineResult: Codable, Hashable {
 
 /// A set of scan results that can be used to filter newly detected results.
 public struct Baseline: Equatable {
-    private let baselineResults: GroupedResults
+    private let baselineResults: ResultsPerFile
     private var sortedBaselineResults: [BaselineResult] {
-        baselineResults.map { ($0, $1) }.sorted { $0.0 < $1.0 }.flatMap { $0.1 }
+        baselineResults.sorted(by: { $0.key < $1.key }).flatMap(\.value)
     }
 
     /// The stored scan results.
@@ -122,35 +124,33 @@ public struct Baseline: Equatable {
 
 private extension Sequence where Element == ScanResult {
     var baselineResults: [BaselineResult] {
-        var lines: [String: [String]] = [:]
-        var baselineResults: [BaselineResult] = []
-        for scanResult in self {
-            let absolutePath = scanResult.declaration.location.file.path.string
-            let lineNumber = scanResult.declaration.location.line - 1
-            guard lineNumber > 0 else {
-                baselineResults.append(BaselineResult(scanResult: scanResult, text: ""))
-                continue
-            }
-            if let fileLines = lines[absolutePath] {
-                let text = (!fileLines.isEmpty && lineNumber < fileLines.count ) ? fileLines[lineNumber] : ""
-                baselineResults.append(BaselineResult(scanResult: scanResult, text: text))
-                continue
-            }
-            let text: String
-            if let contents = try? String(contentsOfFile: absolutePath, encoding: .utf8) {
-                let fileLines = contents.components(separatedBy: CharacterSet.newlines)
-                if lineNumber < fileLines.count {
-                    text = fileLines[lineNumber]
-                    lines[absolutePath] = fileLines
-                } else {
-                    text = ""
-                }
-            } else {
-                text = ""
-            }
-            baselineResults.append(BaselineResult(scanResult: scanResult, text: text))
+        var lineCache = LineCache()
+        return map {
+            BaselineResult(scanResult: $0, text: lineCache.text(at: $0.declaration.location))
         }
-        return baselineResults
+    }
+}
+
+private struct LineCache {
+    private var lines: [String: [String]] = [:]
+
+    mutating func text(at location: SourceLocation) -> String {
+        let absolutePath = location.file.path.string
+        let lineNumber = location.line - 1
+        guard lineNumber > 0 else {
+            return ""
+        }
+        if let fileLines = lines[absolutePath] {
+            return (!fileLines.isEmpty && lineNumber < fileLines.count ) ? fileLines[lineNumber] : ""
+        }
+        if let contents = try? String(contentsOfFile: absolutePath, encoding: .utf8) {
+            let fileLines = contents.components(separatedBy: CharacterSet.newlines)
+            lines[absolutePath] = fileLines
+            if lineNumber < fileLines.count {
+                return fileLines[lineNumber]
+            }
+        }
+        return ""
     }
 }
 
@@ -161,17 +161,15 @@ private extension Sequence where Element == BaselineResult {
         }
     }
 
-    func groupedByFile() -> GroupedResults {
-        Dictionary(grouping: self) {
-            $0.scanResult.declaration.location.file.path.string
-        }
+    func groupedByFile() -> ResultsPerFile {
+        Dictionary(grouping: self, by: \.scanResult.declaration.location.file.path.string)
     }
 
-    func groupedByKind() -> GroupedResults {
-        Dictionary(grouping: self) { $0.scanResult.declaration.kind.rawValue }
+    func groupedByKind() -> ResultsPerKind {
+        Dictionary(grouping: self, by: \.scanResult.declaration.kind.rawValue)
     }
 
-    func groupedByKind(filteredBy existingScanResults: [BaselineResult]) -> GroupedResults {
+    func groupedByKind(filteredBy existingScanResults: [BaselineResult]) -> ResultsPerKind {
         Set(self).subtracting(existingScanResults).groupedByKind()
     }
 }
