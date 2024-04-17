@@ -59,16 +59,9 @@ public struct Baseline: Equatable {
     /// - parameter scanResults: The scanResults to filter.
     /// - Returns: The new scanResults.
     public func filter(_ scanResults: [ScanResult]) -> [ScanResult] {
-        let scanResultsGroupedByFile = Dictionary(grouping: scanResults) {
-            $0.declaration.location.file.path.string
+        scanResults.baselineResults.groupedByFile().flatMap {
+            filter($1.resultsWithAbsolutePaths)
         }
-
-        var results: [ScanResult] = []
-        for (_, value) in scanResultsGroupedByFile {
-            let filteredResults = filterFileResults(value)
-            results.append(contentsOf: filteredResults)
-        }
-        return results
     }
 
     private func filterFileResults(_ scanResults: [ScanResult]) -> [ScanResult] {
@@ -135,22 +128,24 @@ private struct LineCache {
     private var lines: [String: [String]] = [:]
 
     mutating func text(at location: SourceLocation) -> String {
-        let absolutePath = location.file.path.string
-        let lineNumber = location.line - 1
-        guard lineNumber > 0 else {
-            return ""
-        }
-        if let fileLines = lines[absolutePath] {
-            return (!fileLines.isEmpty && lineNumber < fileLines.count ) ? fileLines[lineNumber] : ""
-        }
-        if let contents = try? String(contentsOfFile: absolutePath, encoding: .utf8) {
-            let fileLines = contents.components(separatedBy: CharacterSet.newlines)
-            lines[absolutePath] = fileLines
-            if lineNumber < fileLines.count {
-                return fileLines[lineNumber]
-            }
+        let line = location.line - 1
+        let file = location.file.path.string
+        if line > 0, let content = cached(file: file), line < content.count {
+            return content[line]
         }
         return ""
+    }
+
+    private mutating func cached(file: String) -> [String]? {
+        if let fileLines = lines[file] {
+            return fileLines
+        }
+
+        if let contents = try? String(contentsOfFile: file, encoding: .utf8) {
+            let fileLines = contents.components(separatedBy: CharacterSet.newlines)
+            return fileLines
+        }
+        return nil
     }
 }
 

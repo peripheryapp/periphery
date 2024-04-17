@@ -76,12 +76,13 @@ final class ScanBehavior {
                 do {
                     let baseline = try Baseline(fromPath: baselinePath)
                     filteredResults = baseline.filter(filteredResults)
-                } catch {
-                    if configuration.baseline == configuration.writeBaseline {
-                       // print a warning
-                    } else {
-                        return .failure(.underlyingError(error))
+                } catch CocoaError.fileReadNoSuchFile {
+                    // print a warning
+                    if configuration.writeBaseline != configuration.baseline {
+//                        return .failure(.underlyingError(error))
                     }
+                } catch {
+                    return .failure(.underlyingError(error))
                 }
             }
 
