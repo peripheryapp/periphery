@@ -60,7 +60,7 @@ public struct Baseline: Equatable {
     /// - Returns: The new scanResults.
     public func filter(_ scanResults: [ScanResult]) -> [ScanResult] {
         BaselineResults(scanResults).groupedByFile().flatMap {
-            filter($1.resultsWithAbsolutePaths)
+            filterFileResults($1.resultsWithAbsolutePaths) // TODO: should it be absolute paths
         }
     }
 
