@@ -73,7 +73,7 @@ public struct Baseline: Equatable {
         }
 
         let relativePathResults = scanResults.baselineResults
-        guard relativePathResults != baselineResults else {
+        if relativePathResults == baselineResults {
             return []
         }
 
@@ -160,12 +160,8 @@ private extension Sequence where Element == BaselineResult {
         Dictionary(grouping: self, by: \.scanResult.declaration.location.file.path.string)
     }
 
-    func groupedByKind() -> ResultsPerKind {
-        Dictionary(grouping: self, by: \.scanResult.declaration.kind.rawValue)
-    }
-
-    func groupedByKind(filteredBy existingScanResults: [BaselineResult]) -> ResultsPerKind {
-        Set(self).subtracting(existingScanResults).groupedByKind()
+    func groupedByKind(filteredBy existingScanResults: [BaselineResult] = []) -> ResultsPerKind {
+        Dictionary(grouping: Set(self).subtracting(existingScanResults), by: \.scanResult.declaration.kind.rawValue)
     }
 }
 
