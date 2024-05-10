@@ -395,7 +395,7 @@ You're ready to roll. You should now see the new scheme in the dropdown. Select 
 
 ## Excluding Files
 
-Both exclusion options described below accept a Bash v4 style path glob, either absolute or relative to your project directory. You may specify multiple globs by separating them with a pipe character, e.g `"Sources/Single.swift|**/Generated/*.swift|**/*.{xib,storyboard}"`.
+Both exclusion options described below accept a Bash v4 style path glob, either absolute or relative to your project directory. You can delimit multiple globs with a space, e.g `--option  "Sources/Single.swift" "**/Generated/*.swift" "**/*.{xib,storyboard}"`.
 
 ### Excluding Results
 
