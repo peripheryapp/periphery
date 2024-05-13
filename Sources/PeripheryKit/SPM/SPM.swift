@@ -10,13 +10,13 @@ public struct SPM {
     }
 
     public struct Package: Decodable {
-        public static func load(jsonPackageManifestPath: [FilePath] = []) throws -> Self {
+        public static func load(jsonPackageManifestPath: String? = nil) throws -> Self {
             Logger().contextualized(with: "spm:package").debug("Loading \(FilePath.current)")
 
             let jsonData: Data
 
-            if let path = jsonPackageManifestPath.first {
-                jsonData = try Data(contentsOf: path.url)
+            if let jsonPackageManifestPath {
+                jsonData = try Data(contentsOf: URL(fileURLWithPath: jsonPackageManifestPath))
             } else {
                 let jsonString = try Shell.shared.exec(["swift", "package", "describe", "--type", "json"], stderr: false)
 

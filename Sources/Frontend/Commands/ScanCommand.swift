@@ -114,8 +114,8 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Only output results")
     var quiet: Bool = defaultConfiguration.$quiet.defaultValue
 
-    @Option(parsing: .upToNextOption, help: "JSON package manifest path (obtained using `swift package describe --type json` or manually)")
-    var jsonPackageManifestPath: [FilePath] = defaultConfiguration.$jsonPackageManifestPath.defaultValue
+    @Option(help: "JSON package manifest path (obtained using `swift package describe --type json` or manually)")
+    var jsonPackageManifestPath: String?
 
     private static let defaultConfiguration = Configuration()
 

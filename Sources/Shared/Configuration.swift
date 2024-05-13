@@ -110,8 +110,8 @@ public final class Configuration {
     @Setting(key: "relative_results", defaultValue: false)
     public var relativeResults: Bool
 
-    @Setting(key: "json_package_manifest_path", defaultValue: [])
-    public var jsonPackageManifestPath: [FilePath]
+    @Setting(key: "json_package_manifest_path", defaultValue: nil)
+    public var jsonPackageManifestPath: String?
 
     // Non user facing.
     public var guidedSetup: Bool = false
