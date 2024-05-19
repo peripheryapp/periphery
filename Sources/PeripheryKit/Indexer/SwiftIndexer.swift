@@ -254,8 +254,8 @@ public final class SwiftIndexer: Indexer {
             multiplexingSyntaxVisitor.visit()
 
             sourceFile.importStatements = importSyntaxVisitor.importStatements
-            
-            if configuration.enableUnusedImportsAnalysis {
+
+            if !configuration.disableUnusedImportAnalysis {
                 for stmt in sourceFile.importStatements {
                     if stmt.isExported {
                         graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
@@ -288,7 +288,7 @@ public final class SwiftIndexer: Indexer {
                 }
             }
 
-            if configuration.enableUnusedImportsAnalysis {
+            if !configuration.disableUnusedImportAnalysis {
                 graph.addIndexedModules(modules)
             }
 

@@ -19,7 +19,7 @@ final class UnusedImportMarker: SourceGraphMutator {
     }
 
     func mutate() throws {
-        guard configuration.enableUnusedImportsAnalysis else { return }
+        guard !configuration.disableUnusedImportAnalysis else { return }
 
         var referencedModulesByFile = [SourceFile: Set<String>]()
 

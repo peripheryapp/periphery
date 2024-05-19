@@ -77,8 +77,8 @@ public final class Configuration {
     @Setting(key: "disable_redundant_public_analysis", defaultValue: false)
     public var disableRedundantPublicAnalysis: Bool
 
-    @Setting(key: "enable_unused_import_analysis", defaultValue: true)
-    public var enableUnusedImportsAnalysis: Bool
+    @Setting(key: "disable_unused_import_analysis", defaultValue: false)
+    public var disableUnusedImportAnalysis: Bool
 
     @Setting(key: "retain_codable_properties", defaultValue: false)
     public var retainCodableProperties: Bool
@@ -204,8 +204,8 @@ public final class Configuration {
             config[$disableRedundantPublicAnalysis.key] = disableRedundantPublicAnalysis
         }
 
-        if $enableUnusedImportsAnalysis.hasNonDefaultValue {
-            config[$enableUnusedImportsAnalysis.key] = enableUnusedImportsAnalysis
+        if $disableUnusedImportAnalysis.hasNonDefaultValue {
+            config[$disableUnusedImportAnalysis.key] = disableUnusedImportAnalysis
         }
 
         if $autoRemove.hasNonDefaultValue {
@@ -313,8 +313,8 @@ public final class Configuration {
                 $retainSwiftUIPreviews.assign(value)
             case $disableRedundantPublicAnalysis.key:
                 $disableRedundantPublicAnalysis.assign(value)
-            case $enableUnusedImportsAnalysis.key:
-                $enableUnusedImportsAnalysis.assign(value)
+            case $disableUnusedImportAnalysis.key:
+                $disableUnusedImportAnalysis.assign(value)
             case $autoRemove.key:
                 $autoRemove.assign(value)
             case $verbose.key:
@@ -362,7 +362,7 @@ public final class Configuration {
         $retainUnusedProtocolFuncParams.reset()
         $retainSwiftUIPreviews.reset()
         $disableRedundantPublicAnalysis.reset()
-        $enableUnusedImportsAnalysis.reset()
+        $disableUnusedImportAnalysis.reset()
         $autoRemove.reset()
         $externalEncodableProtocols.reset()
         $externalCodableProtocols.reset()
