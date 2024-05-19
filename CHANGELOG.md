@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- `@State` and `@Binding` properties are now excluded from assign-only property analysis.
 
 ## 2.18.0 (2024-01-21)
 
