@@ -99,6 +99,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Skip the project build step")
     var skipBuild: Bool = defaultConfiguration.$skipBuild.defaultValue
 
+    @Flag(help: "Skip schemes validation")
+    var skipSchemesValidation: Bool = defaultConfiguration.$skipSchemesValidation.defaultValue
+
     @Flag(help: "Output result paths relative to the current directory")
     var relativeResults: Bool = defaultConfiguration.$relativeResults.defaultValue
 
@@ -161,6 +164,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$strict, strict)
         configuration.apply(\.$indexStorePath, indexStorePath)
         configuration.apply(\.$skipBuild, skipBuild)
+        configuration.apply(\.$skipSchemesValidation, skipSchemesValidation)
         configuration.apply(\.$cleanBuild, cleanBuild)
         configuration.apply(\.$buildArguments, buildArguments)
         configuration.apply(\.$relativeResults, relativeResults)
