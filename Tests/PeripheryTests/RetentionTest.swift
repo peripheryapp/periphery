@@ -1034,6 +1034,28 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRetainsEncodableProperties() {
+        configuration.retainEncodableProperties = false
+        configuration.retainAssignOnlyProperties = false
+
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct15")) {
+                self.assertNotReferenced(.functionConstructor("init(unused:)"))
+                self.assertAssignOnlyProperty(.varInstance("unused"))
+            }
+        }
+
+        configuration.retainEncodableProperties = true
+
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct15")) {
+                self.assertNotReferenced(.functionConstructor("init(unused:)"))
+                self.assertReferenced(.varInstance("unused"))
+                self.assertNotAssignOnlyProperty(.varInstance("unused"))
+            }
+        }
+    }
+
     func testRetainsFilesOption() {
         configuration.retainFiles = [testFixturePath.string]
 

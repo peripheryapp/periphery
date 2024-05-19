@@ -7,6 +7,7 @@
 ##### Enhancements
 
 - Unused import detection is now enabled by default.
+- Added the `--retain-encodable-properties` option to retain all properties on `Encodable` types only.
 
 ##### Bug Fixes
 

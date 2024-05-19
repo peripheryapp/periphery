@@ -87,8 +87,11 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Retain SwiftUI previews")
     var retainSwiftUIPreviews: Bool = defaultConfiguration.$retainSwiftUIPreviews.defaultValue
 
-    @Flag(help: "Retain properties on Codable types")
+    @Flag(help: "Retain properties on Codable types (including Encodable and Decodable)")
     var retainCodableProperties: Bool = defaultConfiguration.$retainCodableProperties.defaultValue
+
+    @Flag(help: "Retain properties on Encodable types only")
+    var retainEncodableProperties: Bool = defaultConfiguration.$retainEncodableProperties.defaultValue
 
     @Flag(help: "Automatically remove code that can be done so safely without introducing build errors (experimental)")
     var autoRemove: Bool = defaultConfiguration.$autoRemove.defaultValue
@@ -165,6 +168,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$buildArguments, buildArguments)
         configuration.apply(\.$relativeResults, relativeResults)
         configuration.apply(\.$retainCodableProperties, retainCodableProperties)
+        configuration.apply(\.$retainEncodableProperties, retainEncodableProperties)
         configuration.apply(\.$jsonPackageManifestPath, jsonPackageManifestPath)
 
         try scanBehavior.main { project in

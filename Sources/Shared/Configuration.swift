@@ -83,6 +83,9 @@ public final class Configuration {
     @Setting(key: "retain_codable_properties", defaultValue: false)
     public var retainCodableProperties: Bool
 
+    @Setting(key: "retain_encodable_properties", defaultValue: false)
+    public var retainEncodableProperties: Bool
+
     @Setting(key: "auto_remove", defaultValue: false)
     public var autoRemove: Bool
 
@@ -254,6 +257,10 @@ public final class Configuration {
         if $retainCodableProperties.hasNonDefaultValue {
             config[$retainCodableProperties.key] = retainCodableProperties
         }
+        
+        if $retainEncodableProperties.hasNonDefaultValue {
+            config[$retainEncodableProperties.key] = retainEncodableProperties
+        }
 
         if $jsonPackageManifestPath.hasNonDefaultValue {
             config[$jsonPackageManifestPath.key] = jsonPackageManifestPath
@@ -344,6 +351,8 @@ public final class Configuration {
                 $relativeResults.assign(value)
             case $retainCodableProperties.key:
                 $retainCodableProperties.assign(value)
+            case $retainEncodableProperties.key:
+                $retainEncodableProperties.assign(value)
             case $jsonPackageManifestPath.key:
                 $jsonPackageManifestPath.assign(value)
             default:
@@ -386,6 +395,7 @@ public final class Configuration {
         $buildArguments.reset()
         $relativeResults.reset()
         $retainCodableProperties.reset()
+        $retainEncodableProperties.reset()
         $jsonPackageManifestPath.reset()
     }
 

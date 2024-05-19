@@ -362,4 +362,13 @@ public final class SourceGraph {
             return [.protocol, .typealias].contains($0.kind) && codableTypes.contains(name)
         }
     }
+
+    func isEncodable(_ decl: Declaration) -> Bool {
+        let encodableTypes = ["Encodable"] + configuration.externalEncodableProtocols + configuration.externalCodableProtocols
+
+        return inheritedTypeReferences(of: decl).contains {
+            guard let name = $0.name else { return false }
+            return [.protocol, .typealias].contains($0.kind) && encodableTypes.contains(name)
+        }
+    }
 }
