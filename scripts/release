@@ -37,6 +37,7 @@ confirm "\nContinue?"
 
 cat scripts/Version.swift.template | sed s/__VERSION__/${version}/ > Sources/Frontend/Version.swift
 cat scripts/Periphery.podspec.template | sed s/__VERSION__/${version}/ > Periphery.podspec
+cat scripts/artifactbundle_info.json.template | sed s/__VERSION__/${version}/ > info.json
 
 echo -e "\nUpdate CHANGELOG.md"
 confirm "Continue?"
@@ -48,6 +49,7 @@ rm -rf .release
 mkdir .release
 cp "$bin_path" .release/
 cp LICENSE.md .release/
+cp info.json .release/
 cp scripts/release_notes.md.template .release/release_notes.md
 
 # Codesign
@@ -63,8 +65,17 @@ echo -e "\n${zip_filename} checksum:"
 sha256=$( shasum -a 256 ${zip_filename} | awk '{print $1}' )
 echo ${sha256}
 
+zip_artifactbundle="periphery-${version}.artifactbundle.zip"
+zip "${zip_artifactbundle}" periphery LICENSE.md info.json
+codesign "${zip_artifactbundle}"
+
+echo -e "\n${zip_artifactbundle} checksum:"
+sha256=$( shasum -a 256 ${zip_artifactbundle} | awk '{print $1}' )
+echo ${sha256}
+
 # Notarize
 notarize "${zip_filename}"
+notarize "${zip_artifactbundle}"
 
 echo -e "\nVerify changes"
 confirm "Continue?"
@@ -85,7 +96,7 @@ echo
 confirm "Continue?"
 
 cd ..
-gh release create -F .release/release_notes.md "${version}" ".release/${zip_filename}"
+gh release create -F .release/release_notes.md "${version}" ".release/${zip_filename}" ".release/${zip_artifactbundle}"
 
 # HomeBrew
 cd ../homebrew-periphery
