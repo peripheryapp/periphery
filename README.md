@@ -32,7 +32,7 @@
     - [Redundant Public Accessibility](#redundant-public-accessibility)
     - [Unused Imports](#unused-imports)
     - [Objective-C](#objective-c)
-    - [Encodable](#encodable)
+    - [Codable](#codable)
     - [XCTestCase](#xctestcase)
     - [Interface Builder](#interface-builder)
 - [Comment Commands](#comment-commands)
@@ -316,18 +316,9 @@ By default Periphery does not assume that declarations accessible by the Objecti
 
 Alternatively, the `--retain-objc-annotated` can be used to only retain declarations that are explicitly annotated with `@objc` or `@objcMembers`. Types that inherit `NSObject` are not retained unless they have the explicit annotations. This option may uncover more unused code, but with the caveat that some of the results may be incorrect if the declaration is in fact used in Objective-C code. To resolve these incorrect results you must add an `@objc` annotation to the declaration.
 
-### Encodable
+### Codable
 
-Conformance to `Encodable` (inc. implicitly via `Codable`) causes synthesis of additional code not visible to Periphery, and thus Periphery is unable to determine if the properties of conforming types are referenced from synthesized code. Therefore, all such properties must be retained in order to avoid false-positive results in the situation where the properties are only referenced via the initializer. For example:
-
-```swift
-struct SomeStruct: Encodable {
-    let someProperty: String // Not unused, automatically retained.
-}
-let data = try JSONEncoder().encode(SomeStruct(someProperty: "value"))
-```
-
-This property retention behavior is automatic, even when `Encodable` conformance is inherited via another protocol. However, if a protocol that inherits `Encodable` is declared in an external module that Periphery has not analyzed, it cannot detect the inheritance of `Encodable`. In this situation you can use the `--external-encodable-protocols` option to enable this behavior for the given protocols.
+Swift synthesizes additional code for `Codable` types that is not visible to Periphery, and can result in false positives for properties not directly referenced from non-synthesized code. If your project contains many such types, you can retain all properties on `Codable` types with `--retain-codable-properties`. If `Codable` conformance is declared by a protocol in an external module not scanned by Periphery, you can instruct Periphery to identify the protocols as `Codable` with `--external-codable-protocols "ExternalProtocol"`.
 
 ### XCTestCase
 
