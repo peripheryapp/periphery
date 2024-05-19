@@ -57,7 +57,7 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Disable identification of redundant public accessibility")
     var disableRedundantPublicAnalysis: Bool = defaultConfiguration.$disableRedundantPublicAnalysis.defaultValue
 
-    @Flag(help: "Enable identification of unused imports (experimental)")
+    @Flag(help: "Enable identification of unused imports")
     var enableUnusedImportAnalysis: Bool = defaultConfiguration.$enableUnusedImportsAnalysis.defaultValue
 
     @Flag(help: "Retain properties that are assigned, but never used")

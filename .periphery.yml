@@ -8,4 +8,3 @@ targets:
 - XcodeTests
 - SPMTests
 - AccessibilityTests
-enable_unused_import_analysis: true

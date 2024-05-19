@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Unused import detection is now enabled by default.
 
 ##### Bug Fixes
 

@@ -30,6 +30,7 @@
     - [Enumerations](#enumerations)
     - [Assign-only Properties](#assign-only-properties)
     - [Redundant Public Accessibility](#redundant-public-accessibility)
+    - [Unused Imports](#unused-imports)
     - [Objective-C](#objective-c)
     - [Encodable](#encodable)
     - [XCTestCase](#xctestcase)
@@ -300,6 +301,12 @@ Declarations that are marked `public` yet are not referenced from outside their 
 - In [Whole Module Compilation](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#whole-module-optimizations-wmo) mode, Swift can infer `final` by [automatically discovering](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-if-wmo-is-enabled-use-internal-when-a-declaration-does-not-need-to-be-accessed-outside-of-module) all potentially overriding declarations. `final` classes are [better optimized](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-use-final-when-you-know-the-declaration-does-not-need-to-be-overridden) by the compiler.
 
 This analysis can be disabled with `--disable-redundant-public-analysis`.
+
+### Unused Imports
+
+Periphery can detect unused imports of targets it has scanned, i.e. those specified with the `--targets` argument. It cannot detect unused imports of other targets because the Swift source files are unavailable and uses of `@_exported` cannot be observed. `@_exported` is problematic because it changes the public interface of a target such that the declarations exported by the target are no longer necessarily declared by the imported target. For example, the `Foundation` target exports `Dispatch`, among other targets. If any given source file imports `Foundation` and references `DispatchQueue` but no other declarations from `Foundation`, then the `Foundation` import cannot be removed as it would also make the `DispatchQueue` type unavailable. To avoid false positives, therefore, Periphery only detects unused imports of targets it has scanned.
+
+Periphery will likely produce false positives for targets with mixed Swift and Objective-C, as Periphery cannot scan the Objective-C files. It is recommended therefore to disable unused import detection for projects with a significant amount of Objective-C, or manually exclude the mixed language targets from the results.
 
 ### Objective-C
 

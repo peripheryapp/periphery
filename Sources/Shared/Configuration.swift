@@ -77,7 +77,7 @@ public final class Configuration {
     @Setting(key: "disable_redundant_public_analysis", defaultValue: false)
     public var disableRedundantPublicAnalysis: Bool
 
-    @Setting(key: "enable_unused_import_analysis", defaultValue: false)
+    @Setting(key: "enable_unused_import_analysis", defaultValue: true)
     public var enableUnusedImportsAnalysis: Bool
 
     @Setting(key: "retain_codable_properties", defaultValue: false)
@@ -163,7 +163,7 @@ public final class Configuration {
         if $retainObjcAnnotated.hasNonDefaultValue {
             config[$retainObjcAnnotated.key] = retainObjcAnnotated
         }
-        
+
         if $retainPublic.hasNonDefaultValue {
             config[$retainPublic.key] = retainPublic
         }
