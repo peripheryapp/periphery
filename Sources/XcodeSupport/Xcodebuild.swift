@@ -71,18 +71,36 @@ public final class Xcodebuild {
         return path
     }
 
-    func schemes(project: XcodeProjectlike) throws -> Set<String> {
-        try schemes(type: project.type, path: project.path.lexicallyNormalized().string)
+    func schemes(project: XcodeProjectlike, additionalArguments: [String]) throws -> Set<String> {
+        try schemes(
+            type: project.type,
+            path: project.path.lexicallyNormalized().string,
+            additionalArguments: additionalArguments
+        )
     }
 
-    func schemes(type: String, path: String) throws -> Set<String> {
+    func schemes(type: String, path: String, additionalArguments: [String]) throws -> Set<String> {
         let args = [
             "-\(type)", path,
             "-list",
             "-json"
         ]
 
-        let lines = try shell.exec(["xcodebuild"] + args, stderr: false).split(separator: "\n").map { String($0).trimmed }
+        var quotedArguments = additionalArguments
+
+        for (i, arg) in additionalArguments.enumerated() {
+            if arg.hasPrefix("-"),
+               let value = additionalArguments[safe: i + 1],
+               !value.hasPrefix("-"),
+               !value.hasPrefix("\""),
+               !value.hasPrefix("\'")
+            {
+                quotedArguments[i + 1] = "\"\(value)\""
+            }
+        }
+
+        let xcodebuild = "xcodebuild \((args + quotedArguments).joined(separator: " "))"
+        let lines = try shell.exec(["/bin/sh", "-c", xcodebuild], stderr: false).split(separator: "\n").map { String($0).trimmed }
 
         // xcodebuild may output unrelated warnings, we need to strip them out otherwise
         // JSON parsing will fail.
