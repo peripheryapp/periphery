@@ -43,7 +43,10 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             print(colorize("Select build targets to analyze:", .bold))
             configuration.targets = select(multiple: targets, allowAll: true).selectedValues
 
-            let schemes = try filter(project.schemes(), project).map { $0 }.sorted()
+            let schemes = try filter(
+                project.schemes(additionalArguments: configuration.xcodeListArguments),
+                project
+            ).map { $0 }.sorted()
 
             print(colorize("\nSelect the schemes necessary to build your chosen targets:", .bold))
             configuration.schemes = select(multiple: schemes, allowAll: false).selectedValues
@@ -82,7 +85,11 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
     private func getPodSchemes(in project: XcodeProjectlike) throws -> Set<String> {
         let path = project.sourceRoot.appending("Pods/Pods.xcodeproj")
         guard path.exists else { return [] }
-        return try xcodebuild.schemes(type: "project", path: path.lexicallyNormalized().string)
+        return try xcodebuild.schemes(
+            type: "project",
+            path: path.lexicallyNormalized().string,
+            additionalArguments: configuration.xcodeListArguments
+        )
     }
 
     private func filter(_ schemes: Set<String>, _ project: XcodeProjectlike) throws -> [String] {
