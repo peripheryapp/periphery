@@ -39,20 +39,7 @@ public final class Xcodebuild {
             "INDEX_ENABLE_DATA_STORE=\"YES\""
         ]
 
-        // Apply quotes to additional option values is needed.
-        var quotedArguments = additionalArguments
-
-        for (i, arg) in additionalArguments.enumerated() {
-            if arg.hasPrefix("-"),
-               let value = additionalArguments[safe: i + 1],
-               !value.hasPrefix("-"),
-               !value.hasPrefix("\""),
-               !value.hasPrefix("\'")
-            {
-                quotedArguments[i + 1] = "\"\(value)\""
-            }
-        }
-
+        let quotedArguments = quote(arguments: additionalArguments)
         let xcodebuild = "xcodebuild \((args + [cmd] + envs + quotedArguments).joined(separator: " "))"
         return try shell.exec(["/bin/sh", "-c", xcodebuild])
     }
@@ -86,19 +73,7 @@ public final class Xcodebuild {
             "-json"
         ]
 
-        var quotedArguments = additionalArguments
-
-        for (i, arg) in additionalArguments.enumerated() {
-            if arg.hasPrefix("-"),
-               let value = additionalArguments[safe: i + 1],
-               !value.hasPrefix("-"),
-               !value.hasPrefix("\""),
-               !value.hasPrefix("\'")
-            {
-                quotedArguments[i + 1] = "\"\(value)\""
-            }
-        }
-
+        let quotedArguments = quote(arguments: additionalArguments)
         let xcodebuild = "xcodebuild \((args + quotedArguments).joined(separator: " "))"
         let lines = try shell.exec(["/bin/sh", "-c", xcodebuild], stderr: false).split(separator: "\n").map { String($0).trimmed }
 
@@ -142,5 +117,22 @@ public final class Xcodebuild {
         let schemesHash = schemes.map { $0 }.joined().djb2Hex
 
         return try Constants.cachePath().appending("DerivedData-\(xcodeVersionHash)-\(projectHash)-\(schemesHash)")
+    }
+
+    private func quote(arguments: [String]) -> [String] {
+        var quotedArguments = arguments
+
+        for (i, arg) in arguments.enumerated() {
+            if arg.hasPrefix("-"),
+               let value = arguments[safe: i + 1],
+               !value.hasPrefix("-"),
+               !value.hasPrefix("\""),
+               !value.hasPrefix("\'")
+            {
+                quotedArguments[i + 1] = "\"\(value)\""
+            }
+        }
+
+        return quotedArguments
     }
 }

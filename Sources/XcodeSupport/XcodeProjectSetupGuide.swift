@@ -44,7 +44,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             configuration.targets = select(multiple: targets, allowAll: true).selectedValues
 
             let schemes = try filter(
-                project.schemes(additionalArguments: configuration.schemesArguments),
+                project.schemes(additionalArguments: configuration.xcodeListArguments),
                 project
             ).map { $0 }.sorted()
 
@@ -88,7 +88,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
         return try xcodebuild.schemes(
             type: "project",
             path: path.lexicallyNormalized().string,
-            additionalArguments: configuration.schemesArguments
+            additionalArguments: configuration.xcodeListArguments
         )
     }
 
