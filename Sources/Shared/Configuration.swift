@@ -255,6 +255,10 @@ public final class Configuration {
             config[$retainCodableProperties.key] = retainCodableProperties
         }
 
+        if $jsonPackageManifestPath.hasNonDefaultValue {
+            config[$jsonPackageManifestPath.key] = jsonPackageManifestPath
+        }
+
         return try Yams.dump(object: config)
     }
 
@@ -340,6 +344,8 @@ public final class Configuration {
                 $relativeResults.assign(value)
             case $retainCodableProperties.key:
                 $retainCodableProperties.assign(value)
+            case $jsonPackageManifestPath.key:
+                $jsonPackageManifestPath.assign(value)
             default:
                 logger.warn("\(path.string): invalid key '\(key)'")
             }
@@ -380,6 +386,7 @@ public final class Configuration {
         $buildArguments.reset()
         $relativeResults.reset()
         $retainCodableProperties.reset()
+        $jsonPackageManifestPath.reset()
     }
 
     // MARK: - Helpers
