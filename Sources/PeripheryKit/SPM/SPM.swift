@@ -10,12 +10,21 @@ public struct SPM {
     }
 
     public struct Package: Decodable {
-        public static func load() throws -> Self {
+        public static func load(jsonPackageManifestPath: String? = nil) throws -> Self {
             Logger().contextualized(with: "spm:package").debug("Loading \(FilePath.current)")
-            let jsonString = try Shell.shared.exec(["swift", "package", "describe", "--type", "json"], stderr: false)
 
-            guard let jsonData = jsonString.data(using: .utf8) else {
-                throw PeripheryError.packageError(message: "Failed to read swift package description.")
+            let jsonData: Data
+
+            if let jsonPackageManifestPath {
+                jsonData = try Data(contentsOf: URL(fileURLWithPath: jsonPackageManifestPath))
+            } else {
+                let jsonString = try Shell.shared.exec(["swift", "package", "describe", "--type", "json"], stderr: false)
+
+                guard let data = jsonString.data(using: .utf8) else {
+                    throw PeripheryError.packageError(message: "Failed to read swift package description.")
+                }
+
+                jsonData = data
             }
 
             let decoder = JSONDecoder()

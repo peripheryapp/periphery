@@ -110,6 +110,9 @@ public final class Configuration {
     @Setting(key: "relative_results", defaultValue: false)
     public var relativeResults: Bool
 
+    @Setting(key: "json_package_manifest_path", defaultValue: nil)
+    public var jsonPackageManifestPath: String?
+
     // Non user facing.
     public var guidedSetup: Bool = false
     public var removalOutputBasePath: FilePath?
@@ -252,6 +255,10 @@ public final class Configuration {
             config[$retainCodableProperties.key] = retainCodableProperties
         }
 
+        if $jsonPackageManifestPath.hasNonDefaultValue {
+            config[$jsonPackageManifestPath.key] = jsonPackageManifestPath
+        }
+
         return try Yams.dump(object: config)
     }
 
@@ -337,6 +344,8 @@ public final class Configuration {
                 $relativeResults.assign(value)
             case $retainCodableProperties.key:
                 $retainCodableProperties.assign(value)
+            case $jsonPackageManifestPath.key:
+                $jsonPackageManifestPath.assign(value)
             default:
                 logger.warn("\(path.string): invalid key '\(key)'")
             }
@@ -377,6 +386,7 @@ public final class Configuration {
         $buildArguments.reset()
         $relativeResults.reset()
         $retainCodableProperties.reset()
+        $jsonPackageManifestPath.reset()
     }
 
     // MARK: - Helpers

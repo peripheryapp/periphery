@@ -114,6 +114,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Only output results")
     var quiet: Bool = defaultConfiguration.$quiet.defaultValue
 
+    @Option(help: "JSON package manifest path (obtained using `swift package describe --type json` or manually)")
+    var jsonPackageManifestPath: String?
+
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
@@ -162,6 +165,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$buildArguments, buildArguments)
         configuration.apply(\.$relativeResults, relativeResults)
         configuration.apply(\.$retainCodableProperties, retainCodableProperties)
+        configuration.apply(\.$jsonPackageManifestPath, jsonPackageManifestPath)
 
         try scanBehavior.main { project in
             try Scan().perform(project: project)

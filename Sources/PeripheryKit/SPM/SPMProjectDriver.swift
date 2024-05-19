@@ -5,7 +5,7 @@ import Shared
 public final class SPMProjectDriver {
     public static func build() throws -> Self {
         let configuration = Configuration.shared
-        let package = try SPM.Package.load()
+        let package = try SPM.Package.load(jsonPackageManifestPath: configuration.jsonPackageManifestPath)
         let targets: [SPM.Target]
 
         if !configuration.schemes.isEmpty {
