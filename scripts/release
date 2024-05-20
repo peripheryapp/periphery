@@ -69,8 +69,8 @@ zip "${zip_artifactbundle}" periphery LICENSE.md info.json
 codesign "${zip_artifactbundle}"
 
 echo -e "\n${zip_artifactbundle} checksum:"
-sha256=$( shasum -a 256 ${zip_artifactbundle} | awk '{print $1}' )
-echo ${sha256}
+artifactbundle_sha256=$( shasum -a 256 ${zip_artifactbundle} | awk '{print $1}' )
+echo ${artifactbundle_sha256}
 
 # Notarize
 notarize "${zip_filename}"
