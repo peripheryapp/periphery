@@ -21,7 +21,9 @@ final class UnusedImportMarker: SourceGraphMutator {
     func mutate() throws {
         guard !configuration.disableUnusedImportAnalysis else { return }
 
-        var referencedModulesByFile = [SourceFile: Set<String>]()
+        var referencedModulesByFile = graph.indexedSourceFiles.reduce(into: [SourceFile: Set<String>]()) { result, file in
+            result[file] = []
+        }
 
         // Build a mapping of source files and the modules they reference.
         for ref in graph.allReferences {

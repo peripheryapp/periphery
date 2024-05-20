@@ -18,6 +18,7 @@ public final class SourceGraph {
     private(set) var mainAttributedDeclarations: Set<Declaration> = []
     private(set) var allReferencesByUsr: [String: Set<Reference>] = [:]
     private(set) var indexedModules: Set<String> = []
+    private(set) var indexedSourceFiles: [SourceFile] = []
     private(set) var unusedModuleImports: Set<Declaration> = []
     private(set) var assignOnlyProperties: Set<Declaration> = []
     private(set) var extensions: [Declaration: Set<Declaration>] = [:]
@@ -216,6 +217,12 @@ public final class SourceGraph {
 
     func isExternal(_ reference: Reference) -> Bool {
         explicitDeclaration(withUsr: reference.usr) == nil
+    }
+
+    func addIndexedSourceFile(_ file: SourceFile) {
+        withLock {
+            indexedSourceFiles.append(file)
+        }
     }
 
     func addIndexedModules(_ modules: Set<String>) {

@@ -288,12 +288,14 @@ public final class SwiftIndexer: Indexer {
                 }
             }
 
+            let sourceFile = SourceFile(path: file, modules: modules)
+            self.sourceFile = sourceFile
+
             if !configuration.disableUnusedImportAnalysis {
+                graph.addIndexedSourceFile(sourceFile)
                 graph.addIndexedModules(modules)
             }
 
-            let sourceFile = SourceFile(path: file, modules: modules)
-            self.sourceFile = sourceFile
             return sourceFile
         }
 
