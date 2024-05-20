@@ -37,7 +37,7 @@ confirm "\nContinue?"
 
 cat scripts/Version.swift.template | sed s/__VERSION__/${version}/ > Sources/Frontend/Version.swift
 cat scripts/Periphery.podspec.template | sed s/__VERSION__/${version}/ > Periphery.podspec
-cat scripts/artifactbundle_info.json.template | sed s/__VERSION__/${version}/ > info.json
+cat scripts/artifactbundle_info.json.template | sed s/__VERSION__/${version}/ > .release/info.json
 
 echo -e "\nUpdate CHANGELOG.md"
 confirm "Continue?"
@@ -49,7 +49,6 @@ rm -rf .release
 mkdir .release
 cp "$bin_path" .release/
 cp LICENSE.md .release/
-cp info.json .release/
 cp scripts/release_notes.md.template .release/release_notes.md
 
 # Codesign
