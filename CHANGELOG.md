@@ -9,6 +9,7 @@
 - Unused import detection is now enabled by default.
 - Added the `--retain-encodable-properties` option to retain all properties on `Encodable` types only.
 - Added the `--xcode-list-arguments` option to pass additional arguments to `xcodebuild -list`.
+- Added the `--skip-schemes-validation` option to skip validation of Xcode schemes.
 
 ##### Bug Fixes
 
