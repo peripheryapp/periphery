@@ -110,6 +110,9 @@ public final class Configuration {
     @Setting(key: "skip_build", defaultValue: false)
     public var skipBuild: Bool
 
+    @Setting(key: "skip_schemes_validation", defaultValue: false)
+    public var skipSchemesValidation: Bool
+
     @Setting(key: "clean_build", defaultValue: false)
     public var cleanBuild: Bool
 
@@ -245,6 +248,10 @@ public final class Configuration {
             config[$skipBuild.key] = skipBuild
         }
 
+        if $skipSchemesValidation.hasNonDefaultValue {
+            config[$skipSchemesValidation.key] = skipSchemesValidation
+        }
+
         if $cleanBuild.hasNonDefaultValue {
             config[$cleanBuild.key] = cleanBuild
         }
@@ -350,6 +357,8 @@ public final class Configuration {
                 $indexStorePath.assign(value)
             case $skipBuild.key:
                 $skipBuild.assign(value)
+            case $skipSchemesValidation.key:
+                $skipSchemesValidation.assign(value)
             case $cleanBuild.key:
                 $cleanBuild.assign(value)
             case $buildArguments.key:
@@ -400,6 +409,7 @@ public final class Configuration {
         $strict.reset()
         $indexStorePath.reset()
         $skipBuild.reset()
+        $skipSchemesValidation.reset()
         $cleanBuild.reset()
         $buildArguments.reset()
         $xcodeListArguments.reset()

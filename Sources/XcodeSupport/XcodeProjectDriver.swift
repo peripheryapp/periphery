@@ -46,14 +46,20 @@ public final class XcodeProjectDriver {
             throw PeripheryError.invalidTargets(names: invalidTargetNames.sorted(), project: project.path.lastComponent?.string ?? "")
         }
 
-        // Ensure schemes exist within the project
-        let schemes = try project.schemes(
-            additionalArguments: configuration.xcodeListArguments
-        ).filter { configuration.schemes.contains($0) }
-        let validSchemeNames = schemes.mapSet { $0 }
+        let schemes: Set<String>
 
-        if let scheme = Set(configuration.schemes).subtracting(validSchemeNames).first {
-            throw PeripheryError.invalidScheme(name: scheme, project: project.path.lastComponent?.string ?? "")
+        if configuration.skipSchemesValidation {
+            schemes = Set(configuration.schemes)
+        } else {
+            // Ensure schemes exist within the project
+            schemes = try project.schemes(
+                additionalArguments: configuration.xcodeListArguments
+            ).filter { configuration.schemes.contains($0) }
+            let validSchemeNames = schemes.mapSet { $0 }
+
+            if let scheme = Set(configuration.schemes).subtracting(validSchemeNames).first {
+                throw PeripheryError.invalidScheme(name: scheme, project: project.path.lastComponent?.string ?? "")
+            }
         }
 
         return self.init(
