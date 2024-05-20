@@ -1,0 +1,15 @@
+{
+    "schemaVersion": "1.0",
+    "artifacts": {
+        "periphery": {
+            "version": "__VERSION__",
+            "type": "executable",
+            "variants": [
+                {
+                    "path": "periphery",
+                    "supportedTriples": ["x86_64-apple-macosx", "arm64-apple-macosx"]
+                }
+            ]
+        }
+    }
+}
