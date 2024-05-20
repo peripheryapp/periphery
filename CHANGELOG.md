@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.19.0 (2024-05-20)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Unused import detection is now enabled by default.
 - Added the `--retain-encodable-properties` option to retain all properties on `Encodable` types only.
 - Added the `--xcode-list-arguments` option to pass additional arguments to `xcodebuild -list`.
