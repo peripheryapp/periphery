@@ -14,6 +14,7 @@
 ##### Bug Fixes
 
 - `@State` and `@Binding` properties are now excluded from assign-only property analysis.
+- Unused imports are now detected in files containing no references.
 
 ## 2.18.0 (2024-01-21)
 
