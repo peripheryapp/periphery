@@ -317,7 +317,9 @@ Alternatively, the `--retain-objc-annotated` can be used to only retain declarat
 
 ### Codable
 
-Swift synthesizes additional code for `Codable` types that is not visible to Periphery, and can result in false positives for properties not directly referenced from non-synthesized code. If your project contains many such types, you can retain all properties on `Codable` types with `--retain-codable-properties`. If `Codable` conformance is declared by a protocol in an external module not scanned by Periphery, you can instruct Periphery to identify the protocols as `Codable` with `--external-codable-protocols "ExternalProtocol"`.
+Swift synthesizes additional code for `Codable` types that is not visible to Periphery, and can result in false positives for properties not directly referenced from non-synthesized code. If your project contains many such types, you can retain all properties on `Codable` types with `--retain-codable-properties`. Alternatively, you can retain properties only on `Encodable` types with `--retain-encodable-properties`.
+
+If `Codable` conformance is declared by a protocol in an external module not scanned by Periphery, you can instruct Periphery to identify the protocols as `Codable` with `--external-codable-protocols "ExternalProtocol"`.
 
 ### XCTestCase
 
