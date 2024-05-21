@@ -9,8 +9,7 @@
 
 <p align="center">
 <a href="https://github.com/peripheryapp/periphery/releases/latest">
-  <img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?color=008DFF" />
-</a>
+<img src="https://img.shields.io/github/release/peripheryapp/periphery.svg?color=008DFF"/></a>
 <img src="https://img.shields.io/badge/platform-macOS%20|%20Linux-008DFF">
 <a href="#sponsors-">
 <img src="https://img.shields.io/github/sponsors/peripheryapp?logo=githubsponsors&color=db61a2">
