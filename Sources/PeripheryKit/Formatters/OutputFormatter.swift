@@ -105,6 +105,8 @@ public extension OutputFormat {
             return JsonFormatter.self
         case .checkstyle:
             return CheckstyleFormatter.self
+        case .actions:
+            return ActionsFormatter.self
         }
     }
 }
