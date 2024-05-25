@@ -37,6 +37,11 @@ final class UnusedImportMarker: SourceGraphMutator {
 
         // For each source file, determine whether its imports are unused.
         for (file, referencedModules) in referencedModulesByFile {
+            // Ignore retained files.
+            if configuration.retainFilesMatchers.anyMatch(filename: file.path.string) {
+                continue
+            }
+
             let unreferencedImports = file.importStatements
                 .filter {
                     // Only consider modules that have been indexed as we need to see which modules

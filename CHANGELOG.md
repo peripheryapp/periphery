@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Disable unused import analysis for files retained with `--retain-files`.
 
 ## 2.19.0 (2024-05-20)
 
