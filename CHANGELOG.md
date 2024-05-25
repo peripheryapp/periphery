@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Added GitHub Actions output formatter.
 
 ##### Bug Fixes
 

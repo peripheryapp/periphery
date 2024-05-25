@@ -2,7 +2,7 @@ import Foundation
 import Shared
 import SystemPackage
 
-final class ActionsFormatter: OutputFormatter {
+final class GitHubActionsFormatter: OutputFormatter {
     let configuration: Configuration
     lazy var currentFilePath: FilePath = { .current }()
 
@@ -12,7 +12,7 @@ final class ActionsFormatter: OutputFormatter {
 
     func format(_ results: [ScanResult]) throws -> String {
         guard results.count > 0 else { return "" }
-        guard configuration.relativeResults else { throw PeripheryError.usageError("`periphery scan` must be ran with `--relative-results` when using the actions formatter")}
+        guard configuration.relativeResults else { throw PeripheryError.usageError("`periphery scan` must be ran with `--relative-results` when using the GitHub Actions formatter")}
 
         return results.flatMap { result in
             describe(result, colored: false).map { (location, description) in
