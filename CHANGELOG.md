@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Disable unused import analysis for files retained with `--retain-files`.
+- Fix handling of Xcode project paths containing spaces.
 
 ## 2.19.0 (2024-05-20)
 

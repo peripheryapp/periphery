@@ -68,7 +68,7 @@ public final class Xcodebuild {
 
     func schemes(type: String, path: String, additionalArguments: [String]) throws -> Set<String> {
         let args = [
-            "-\(type)", path,
+            "-\(type)", "'\(path)'",
             "-list",
             "-json"
         ]
