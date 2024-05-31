@@ -227,7 +227,9 @@ final class Declaration {
     var isImplicit: Bool = false
     var isObjcAccessible: Bool = false
 
-    private let hashValueCache: Int
+    private lazy var hashValueCache: Int = {
+        usrs.hashValue
+    }()
 
     var ancestralDeclarations: Set<Declaration> {
         var maybeParent = parent
@@ -283,7 +285,6 @@ final class Declaration {
         self.kind = kind
         self.usrs = usrs
         self.location = location
-        self.hashValueCache = usrs.hashValue
     }
 
     func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {
@@ -297,7 +298,6 @@ extension Declaration: Codable {
         case location
         case kind
         case usrs
-        case hashValueCache
     }
 }
 

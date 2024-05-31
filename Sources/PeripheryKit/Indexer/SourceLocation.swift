@@ -5,13 +5,14 @@ class SourceLocation: Codable {
     let line: Int
     let column: Int
 
-    private let hashValueCache: Int
+    private lazy var hashValueCache: Int = {
+        [file.hashValue, line, column].hashValue
+    }()
 
     init(file: SourceFile, line: Int, column: Int) {
         self.file = file
         self.line = line
         self.column = column
-        self.hashValueCache = [file.hashValue, line, column].hashValue
     }
 
     // MARK: - Private
@@ -37,7 +38,6 @@ extension SourceLocation: Equatable {
 
 extension SourceLocation: Hashable {
     func hash(into hasher: inout Hasher) {
-
         hasher.combine(hashValueCache)
     }
 }

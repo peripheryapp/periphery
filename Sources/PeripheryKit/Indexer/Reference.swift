@@ -32,14 +32,15 @@ final class Reference {
     let usr: String
     var role: Role = .unknown
 
-    private let hashValueCache: Int
+    private lazy var hashValueCache: Int = {
+        [usr.hashValue, location.hashValue, isRelated.hashValue].hashValue
+    }()
 
     init(kind: Declaration.Kind, usr: String, location: SourceLocation, isRelated: Bool = false) {
         self.kind = kind
         self.usr = usr
         self.isRelated = isRelated
         self.location = location
-        self.hashValueCache = [usr.hashValue, location.hashValue, isRelated.hashValue].hashValue
     }
 
     var descendentReferences: Set<Reference> {
@@ -53,7 +54,6 @@ extension Reference: Codable {
         case kind
         case isRelated
         case usr
-        case hashValueCache
     }
 }
 
