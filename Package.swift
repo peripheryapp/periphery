@@ -164,6 +164,7 @@ let package = Package(
     platforms: [.macOS(.v13)],
     products: [
         .executable(name: "periphery", targets: ["Frontend"]),
+        .library(name: "PeripheryKit", targets: ["PeripheryKit"])
     ],
     dependencies: dependencies,
     targets: targets,
