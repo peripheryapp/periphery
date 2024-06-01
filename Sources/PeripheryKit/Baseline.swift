@@ -5,7 +5,7 @@ private typealias BaselineResults = [BaselineResult]
 private typealias ResultsPerFile = [String: BaselineResults]
 private typealias ResultsPerKind = [String: BaselineResults]
 
-private struct BaselineResult: Codable, Hashable {
+private struct BaselineResult: Codable, Hashable, Comparable {
     let scanResult: ScanResult
     let text: String
     var key: String { text + scanResult.declaration.kind.rawValue }
@@ -14,13 +14,23 @@ private struct BaselineResult: Codable, Hashable {
         self.scanResult = scanResult.withRelativeLocation()
         self.text = text
     }
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.scanResult == rhs.scanResult && lhs.text == rhs.text
+    }
+
+    static func < (lhs: Self, rhs: Self) -> Bool {
+        lhs.scanResult.declaration.location == rhs.scanResult.declaration.location
+        ? lhs.scanResult.declaration.kind.rawValue < rhs.scanResult.declaration.kind.rawValue
+        : lhs.scanResult.declaration.location < rhs.scanResult.declaration.location
+    }
 }
 
 /// A set of scan results that can be used to filter newly detected results.
 public struct Baseline: Equatable {
     private let baseline: ResultsPerFile
     private var sortedBaselineResults: BaselineResults {
-        baseline.sorted(by: { $0.key < $1.key }).flatMap(\.value)
+        baseline.flatMap(\.value).sorted()
     }
 
     /// The stored scan results.
