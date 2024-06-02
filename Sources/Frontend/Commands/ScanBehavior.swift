@@ -71,7 +71,7 @@ final class ScanBehavior {
 
             if !filteredResults.isEmpty, let baselinePath = configuration.writeBaseline {
                 let usrs = filteredResults.flatMapSet { $0.usrs }
-                let baseline = Baseline.v1(usrs: usrs)
+                let baseline = Baseline.v1(usrs: usrs.sorted())
                 let data = try JSONEncoder().encode(baseline)
                 try data.write(to: baselinePath.url)
             }
