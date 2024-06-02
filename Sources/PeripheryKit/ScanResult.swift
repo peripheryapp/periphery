@@ -6,18 +6,18 @@ public struct ScanResult: Codable, Hashable {
         case assignOnlyProperty
         case redundantProtocol(references: Set<Reference>, inherited: Set<String>)
         case redundantPublicAccessibility(modules: Set<String>)
-        
+
         enum CodingKeys: CodingKey {
             case unused
             case assignOnlyProperty
             case redundantProtocol
             case redundantPublicAccessibility
         }
-        
+
         init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let key = container.allKeys.first
-            
+
             switch key {
             case .unused:
                 self = .unused
@@ -37,10 +37,10 @@ public struct ScanResult: Codable, Hashable {
                 )
             }
         }
-        
+
         func encode(to encoder: Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
-            
+
             switch self {
             case .unused:
                 try container.encode(true, forKey: .unused)
@@ -55,7 +55,7 @@ public struct ScanResult: Codable, Hashable {
             }
         }
     }
-    
+
     let declaration: Declaration
     let annotation: Annotation
 }
