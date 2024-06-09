@@ -14,12 +14,10 @@ public final class OutputDeclarationFilter {
         self.contextualLogger = logger.contextualized(with: "report:filter")
     }
 
-    public func filter(_ declarations: [ScanResult]) throws -> [ScanResult] {
+    public func filter(_ declarations: [ScanResult], with baseline: Baseline?) throws -> [ScanResult] {
         var declarations = declarations
 
-        if let baselinePath = configuration.baseline {
-            let data = try Data(contentsOf: baselinePath.url)
-            let baseline = try JSONDecoder().decode(Baseline.self, from: data)
+        if let baseline {
             var didFilterDeclaration = false
             declarations = declarations.filter {
                 let isDisjoint = $0.usrs.isDisjoint(with: baseline.usrs)

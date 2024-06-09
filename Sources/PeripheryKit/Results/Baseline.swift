@@ -4,7 +4,7 @@ import Foundation
 public enum Baseline: Codable {
     case v1(usrs: [String])
 
-    var usrs: Set<String> {
+    public var usrs: Set<String> {
         switch self {
         case .v1(let usrs):
             return Set(usrs)

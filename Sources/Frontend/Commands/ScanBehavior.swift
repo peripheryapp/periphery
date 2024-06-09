@@ -63,14 +63,23 @@ final class ScanBehavior {
             results = try block(project)
 
             let interval = logger.beginInterval("result:output")
-            let filteredResults = try OutputDeclarationFilter().filter(results)
+            var baseline: Baseline?
+
+            if let baselinePath = configuration.baseline {
+                let data = try Data(contentsOf: baselinePath.url)
+                baseline = try JSONDecoder().decode(Baseline.self, from: data)
+            }
+
+            let filteredResults = try OutputDeclarationFilter().filter(results, with: baseline)
 
             if configuration.autoRemove {
                 try ScanResultRemover().remove(results: filteredResults)
             }
 
-            if !filteredResults.isEmpty, let baselinePath = configuration.writeBaseline {
-                let usrs = filteredResults.flatMapSet { $0.usrs }
+            if let baselinePath = configuration.writeBaseline {
+                let usrs = filteredResults
+                    .flatMapSet { $0.usrs }
+                    .union(baseline?.usrs ?? [])
                 let baseline = Baseline.v1(usrs: usrs.sorted())
                 let data = try JSONEncoder().encode(baseline)
                 try data.write(to: baselinePath.url)
