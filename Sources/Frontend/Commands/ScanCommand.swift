@@ -142,10 +142,6 @@ struct ScanCommand: FrontendCommand {
             Logger().warn("The option '--external-encodable-protocols' is deprecated, use '--external-codable-protocols' instead.")
         }
 
-        if baseline != nil, writeBaseline != nil {
-            throw PeripheryError.usageError("The options '--baseline' and '--write-baseline' cannot be used as the same time. First, save a baseline with '--write-baseline', then use it with '--baseline'.")
-        }
-
         let configuration = Configuration.shared
         configuration.guidedSetup = setup
         configuration.apply(\.$workspace, workspace)
