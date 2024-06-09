@@ -63,11 +63,13 @@ final class Parameter: Item, Hashable {
         return secondName ?? firstName ?? ""
     }
 
-    var declaration: Declaration {
+    func makeDeclaration(withParent parent: Declaration) -> Declaration {
         let functionName = function?.fullName ?? "func()"
-        let usr = "\(functionName)-\(name)-\(location)"
+        let parentUsrs = parent.usrs.joined(separator: "-")
+        let usr = "param-\(name)-\(functionName)-\(parentUsrs)"
         let decl = Declaration(kind: .varParameter, usrs: [usr], location: location)
         decl.name = name
+        decl.parent = parent
         return decl
     }
 

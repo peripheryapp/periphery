@@ -122,6 +122,12 @@ public final class Configuration {
     @Setting(key: "json_package_manifest_path", defaultValue: nil)
     public var jsonPackageManifestPath: String?
 
+    @Setting(key: "baseline", defaultValue: nil)
+    public var baseline: FilePath?
+
+    @Setting(key: "write_baseline", defaultValue: nil)
+    public var writeBaseline: FilePath?
+
     // Non user facing.
     public var guidedSetup: Bool = false
     public var removalOutputBasePath: FilePath?
@@ -280,6 +286,14 @@ public final class Configuration {
             config[$jsonPackageManifestPath.key] = jsonPackageManifestPath
         }
 
+        if $baseline.hasNonDefaultValue {
+            config[$baseline.key] = baseline
+        }
+
+        if $writeBaseline.hasNonDefaultValue {
+            config[$writeBaseline.key] = writeBaseline
+        }
+
         return try Yams.dump(object: config)
     }
 
@@ -373,6 +387,10 @@ public final class Configuration {
                 $retainEncodableProperties.assign(value)
             case $jsonPackageManifestPath.key:
                 $jsonPackageManifestPath.assign(value)
+            case $baseline.key:
+                $baseline.assign(value)
+            case $writeBaseline.key:
+                $writeBaseline.assign(value)
             default:
                 logger.warn("\(path.string): invalid key '\(key)'")
             }
@@ -417,6 +435,8 @@ public final class Configuration {
         $retainCodableProperties.reset()
         $retainEncodableProperties.reset()
         $jsonPackageManifestPath.reset()
+        $baseline.reset()
+        $writeBaseline.reset()
     }
 
     // MARK: - Helpers

@@ -501,8 +501,7 @@ public final class SwiftIndexer: Indexer {
 
                 graph.withLock {
                     for param in params {
-                        let paramDecl = param.declaration
-                        paramDecl.parent = functionDecl
+                        let paramDecl = param.makeDeclaration(withParent: functionDecl)
                         functionDecl.unusedParameters.insert(paramDecl)
                         graph.addUnsafe(paramDecl)
 

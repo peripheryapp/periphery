@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Added baseline support. Write a baseline with `--write-baseline <file>` and use it with `--baseline <file>`.
 
 ##### Bug Fixes
 

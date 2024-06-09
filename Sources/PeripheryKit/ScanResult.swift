@@ -10,4 +10,8 @@ public struct ScanResult {
 
     let declaration: Declaration
     let annotation: Annotation
+
+    public var usrs: Set<String> {
+        declaration.usrs
+    }
 }

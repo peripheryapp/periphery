@@ -1,4 +1,5 @@
 import Foundation
+import SystemPackage
 
 class SourceLocation {
     let file: SourceFile
@@ -12,6 +13,13 @@ class SourceLocation {
         self.line = line
         self.column = column
         self.hashValueCache = [file.hashValue, line, column].hashValue
+    }
+
+    func relativeTo(_ path: FilePath) -> SourceLocation {
+        let newPath = file.path.relativeTo(path)
+        let newFile = SourceFile(path: newPath, modules: file.modules)
+        newFile.importStatements = file.importStatements
+        return SourceLocation(file: newFile, line: line, column: column)
     }
 
     // MARK: - Private
