@@ -5,7 +5,7 @@
 </h1>
 
 <h4 align="center">A tool to identify unused code in Swift projects.</h4>
-<p align="center"><q><i>Now I am become Delete, the destroyer of codes.</i></q></p>
+<p align="center"><q><i>Now I have become Delete, the destroyer of codes.</i></q></p>
 
 <p align="center">
 <a href="https://github.com/peripheryapp/periphery/releases/latest">
