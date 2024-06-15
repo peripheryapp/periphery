@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix local Swift package support.
 
 ## 2.20.0 (2024-05-29)
 

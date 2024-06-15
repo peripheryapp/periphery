@@ -40,10 +40,6 @@ public struct SPM {
             targets.filter(\.isSwiftTarget)
         }
 
-        public var testTargets: [Target] {
-            targets.filter(\.isTestTarget)
-        }
-
         func clean() throws {
             try Shell.shared.exec(["swift", "package", "clean"])
         }
@@ -56,7 +52,6 @@ public struct SPM {
         let path: String
         let moduleType: String
         let type: String
-        let targetDependencies: Set<String>?
 
         public var sourcePaths: [FilePath] {
             let root = FilePath(path)
@@ -74,10 +69,6 @@ public struct SPM {
 
         public var isTestTarget: Bool {
             type == "test"
-        }
-
-        public func depends(on target: Target) -> Bool {
-            (targetDependencies ?? []).contains(target.name)
         }
     }
 }

@@ -72,19 +72,10 @@ final class XcodeProject: XcodeProjectlike {
         if !packageTargetNames.isEmpty {
             var packages: [SPM.Package] = []
 
-            // The project file does not provide a clear way to identify file references for local SPM packages.
-            // We need to iterate over all references and check for folders containing a Package.swift file.
-            for fileRef in xcodeProject.pbxproj.fileReferences {
-                // To avoid checking every single file reference, narrow our search down to the known file types Xcode uses
-                // for package references.
-                guard ["wrapper", "folder", "text"].contains(fileRef.lastKnownFileType),
-                      let fullPath = try fileRef.fullPath(sourceRoot: sourceRoot.string)
-                else { continue }
-
-                let packagePath = FilePath(fullPath)
-
-                if packagePath.appending("Package.swift").exists {
-                    try packagePath.chdir {
+            for localPackage in xcodeProject.pbxproj.rootObject?.localPackages ?? [] {
+                let path = sourceRoot.appending(localPackage.relativePath)
+                if path.appending("Package.swift").exists {
+                    try path.chdir {
                         let package = try SPM.Package.load()
                         packages.append(package)
                     }
@@ -95,10 +86,6 @@ final class XcodeProject: XcodeProjectlike {
                 for package in packages {
                     if let target = package.targets.first(where: { $0.name == targetName }) {
                         result[package, default: []].insert(target)
-
-                        // Also include any test targets that depend upon this target, as they may be built by a scheme.
-                        let testTargets = package.testTargets.filter { $0.depends(on: target) }
-                        result[package, default: []].formUnion(testTargets)
                     }
                 }
             })
