@@ -2,6 +2,20 @@
 
 ##### Breaking
 
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 2.21.0 (2024-06-15)
+
+##### Breaking
+
 - Removed support for Swift 5.8/Xcode 14.3.
 
 ##### Enhancements
