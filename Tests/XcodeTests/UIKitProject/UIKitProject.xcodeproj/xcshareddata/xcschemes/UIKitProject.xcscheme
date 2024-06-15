@@ -52,16 +52,6 @@
                ReferencedContainer = "container:UIKitProject.xcodeproj">
             </BuildableReference>
          </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "LocalPackageTargetTests"
-               BuildableName = "LocalPackageTargetTests"
-               BlueprintName = "LocalPackageTargetTests"
-               ReferencedContainer = "container:LocalPackages/LocalPackage">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

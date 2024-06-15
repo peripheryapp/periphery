@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -34,6 +34,7 @@
 		3CD46111256C034C00856DAC /* MultiTargetStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD46107256C02FE00856DAC /* MultiTargetStruct.swift */; };
 		3CD46115256C034D00856DAC /* MultiTargetStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD46107256C02FE00856DAC /* MultiTargetStruct.swift */; };
 		3CD8FF922683ACBB001951CD /* EntityValueTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD8FF912683ACBB001951CD /* EntityValueTransformer.swift */; };
+		3CE32C3B2C1DD14B00315C32 /* LocalPackageTarget in Frameworks */ = {isa = PBXBuildFile; productRef = 3CE32C3A2C1DD14B00315C32 /* LocalPackageTarget */; };
 		3CE3F7CC2685DEFB0047231C /* OldModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3CE3F7CA2685DEFB0047231C /* OldModel.xcdatamodeld */; };
 		3CE3F7CE2685DF0F0047231C /* ModelMapping.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 3CE3F7CD2685DF0F0047231C /* ModelMapping.xcmappingmodel */; };
 		3CE3F7D02685E07C0047231C /* CustomEntityMigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CE3F7CF2685E07C0047231C /* CustomEntityMigrationPolicy.swift */; };
@@ -126,7 +127,6 @@
 		3CE3F7CF2685E07C0047231C /* CustomEntityMigrationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomEntityMigrationPolicy.swift; sourceTree = "<group>"; };
 		3CFFB5A82AEF8FDE002EFB86 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		3CFFB5AA2AEF8FDE002EFB86 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		73AF86C3296881F900BED352 /* LocalPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = LocalPackage; path = LocalPackages/LocalPackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -155,6 +155,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3CE32C3B2C1DD14B00315C32 /* LocalPackageTarget in Frameworks */,
 				73AF86CD2968A93900BED352 /* LocalPackageTarget in Frameworks */,
 				3C1FED1E2556D91D0001BD58 /* Target_With_Spaces.framework in Frameworks */,
 			);
@@ -210,7 +211,6 @@
 		3C849651255405AD00900DA9 = {
 			isa = PBXGroup;
 			children = (
-				73AF86C2296881F900BED352 /* LocalPackages */,
 				3C84965C255405AD00900DA9 /* UIKitProject */,
 				3C1FECFE2556D5AB0001BD58 /* UIKitProjectTests */,
 				3C1FED182556D91C0001BD58 /* Target With Spaces */,
@@ -284,14 +284,6 @@
 				3CD46107256C02FE00856DAC /* MultiTargetStruct.swift */,
 			);
 			path = MultiTarget;
-			sourceTree = "<group>";
-		};
-		73AF86C2296881F900BED352 /* LocalPackages */ = {
-			isa = PBXGroup;
-			children = (
-				73AF86C3296881F900BED352 /* LocalPackage */,
-			);
-			name = LocalPackages;
 			sourceTree = "<group>";
 		};
 		73F8B878296880AC004B1A5E /* Frameworks */ = {
@@ -389,6 +381,7 @@
 			name = UIKitProject;
 			packageProductDependencies = (
 				73AF86CC2968A93900BED352 /* LocalPackageTarget */,
+				3CE32C3A2C1DD14B00315C32 /* LocalPackageTarget */,
 			);
 			productName = UIKitProject;
 			productReference = 3C84965A255405AD00900DA9 /* UIKitProject.app */;
@@ -448,6 +441,9 @@
 				Base,
 			);
 			mainGroup = 3C849651255405AD00900DA9;
+			packageReferences = (
+				3CE32C392C1DD14B00315C32 /* XCLocalSwiftPackageReference "LocalPackages/LocalPackage" */,
+			);
 			productRefGroup = 3C84965B255405AD00900DA9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1019,7 +1015,18 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		3CE32C392C1DD14B00315C32 /* XCLocalSwiftPackageReference "LocalPackages/LocalPackage" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = LocalPackages/LocalPackage;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		3CE32C3A2C1DD14B00315C32 /* LocalPackageTarget */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LocalPackageTarget;
+		};
 		73AF86CA2968A93100BED352 /* LocalPackageTarget */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LocalPackageTarget;

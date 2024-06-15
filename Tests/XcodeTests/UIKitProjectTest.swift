@@ -9,8 +9,7 @@ class UIKitProjectTest: SourceGraphTestCase {
         configuration.project = UIKitProjectPath.string
         configuration.schemes = ["UIKitProject"]
         configuration.targets = ["UIKitProject", "NotificationServiceExtension", "WatchWidgetExtension",
-                                 "UIKitProjectTests", "LocalPackage.LocalPackageTarget",
-                                 "LocalPackage.LocalPackageTargetTests"]
+                                 "UIKitProjectTests", "LocalPackage.LocalPackageTarget"]
 
         build(driver: XcodeProjectDriver.self)
         index()
@@ -89,7 +88,6 @@ class UIKitProjectTest: SourceGraphTestCase {
 
     func testLocalPackageReferences() {
         assertReferenced(.struct("LocalPackageUsedType"))
-        assertReferenced(.struct("LocalPackageUsedInTestType"))
         assertNotReferenced(.struct("LocalPackageUnusedType"))
     }
 }

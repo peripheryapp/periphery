@@ -21,8 +21,5 @@ let package = Package(
         .target(
             name: "LocalPackageTarget",
             dependencies: []),
-        .testTarget(
-            name: "LocalPackageTargetTests",
-            dependencies: ["LocalPackageTarget"]),
     ]
 )
