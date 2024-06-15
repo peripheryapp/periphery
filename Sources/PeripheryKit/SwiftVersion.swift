@@ -4,7 +4,7 @@ import Shared
 public struct SwiftVersion {
     public static let current = SwiftVersion()
 
-    static let minimumVersion = "5.8"
+    static let minimumVersion = "5.9"
 
     public let version: VersionString
     public let fullVersion: String

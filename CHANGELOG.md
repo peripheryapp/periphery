@@ -2,7 +2,7 @@
 
 ##### Breaking
 
-- None.
+- Removed support for Swift 5.8/Xcode 14.3.
 
 ##### Enhancements
 
