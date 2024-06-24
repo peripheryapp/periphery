@@ -1,12 +1,6 @@
 import Foundation
+import SourceGraph
 import SwiftSyntax
-
-struct ImportStatement {
-    let module: String
-    let isTestable: Bool
-    let isExported: Bool
-    let location: SourceLocation
-}
 
 final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
     var importStatements: [ImportStatement] = []

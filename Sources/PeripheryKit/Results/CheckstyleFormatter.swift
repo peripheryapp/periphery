@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 import SystemPackage
+import SourceGraph
 
 final class CheckstyleFormatter: OutputFormatter {
     let configuration: Configuration
@@ -25,7 +26,7 @@ final class CheckstyleFormatter: OutputFormatter {
 
     // MARK: - Private
 
-    private func generateForFile(_ file: String, results: [(SourceLocation, String)]) -> String {
+    private func generateForFile(_ file: String, results: [(Location, String)]) -> String {
         return [
             "\n\t<file name=\"", file, "\">\n",
             results.map(generateForResult).joined(),
@@ -33,7 +34,7 @@ final class CheckstyleFormatter: OutputFormatter {
         ].joined()
     }
 
-    private func generateForResult(_ result: (SourceLocation, String)) -> String {
+    private func generateForResult(_ result: (Location, String)) -> String {
         let line = result.0.line
         let col = result.0.column
 

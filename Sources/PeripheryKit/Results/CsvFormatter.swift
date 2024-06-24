@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 import SystemPackage
+import SourceGraph
 
 final class CsvFormatter: OutputFormatter {
     let configuration: Configuration
@@ -57,7 +58,7 @@ final class CsvFormatter: OutputFormatter {
         attributes: Set<String>,
         accessibility: String?,
         usrs: Set<String>,
-        location: SourceLocation,
+        location: Location,
         hint: String?
     ) -> String {
         let joinedModifiers = attributes.joined(separator: "|")

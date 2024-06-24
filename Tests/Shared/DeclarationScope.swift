@@ -1,4 +1,4 @@
-@testable import PeripheryKit
+@testable import SourceGraph
 
 enum DeclarationScope {
     case declaration(Declaration)

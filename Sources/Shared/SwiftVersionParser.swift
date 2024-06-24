@@ -1,5 +1,4 @@
 import Foundation
-import Shared
 
 public struct SwiftVersionParser {
     public static func parse(_ fullVersion: String) throws -> VersionString {

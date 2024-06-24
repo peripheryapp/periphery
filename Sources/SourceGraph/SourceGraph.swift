@@ -5,23 +5,23 @@ public final class SourceGraph {
     // Global shared instance to prevent costly deinitialization.
     public static var shared = SourceGraph()
 
-    private(set) var allDeclarations: Set<Declaration> = []
-    private(set) var usedDeclarations: Set<Declaration> = []
-    private(set) var redundantProtocols: [Declaration: (references: Set<Reference>, inherited: Set<Reference>)] = [:]
-    private(set) var rootDeclarations: Set<Declaration> = []
-    private(set) var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
-    private(set) var rootReferences: Set<Reference> = []
-    private(set) var allReferences: Set<Reference> = []
-    private(set) var retainedDeclarations: Set<Declaration> = []
-    private(set) var ignoredDeclarations: Set<Declaration> = []
-    private(set) var assetReferences: Set<AssetReference> = []
-    private(set) var mainAttributedDeclarations: Set<Declaration> = []
-    private(set) var allReferencesByUsr: [String: Set<Reference>] = [:]
-    private(set) var indexedModules: Set<String> = []
-    private(set) var indexedSourceFiles: [SourceFile] = []
-    private(set) var unusedModuleImports: Set<Declaration> = []
-    private(set) var assignOnlyProperties: Set<Declaration> = []
-    private(set) var extensions: [Declaration: Set<Declaration>] = [:]
+    public var allDeclarations: Set<Declaration> = []
+    public var usedDeclarations: Set<Declaration> = []
+    public var redundantProtocols: [Declaration: (references: Set<Reference>, inherited: Set<Reference>)] = [:]
+    public var rootDeclarations: Set<Declaration> = []
+    public var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
+    public var rootReferences: Set<Reference> = []
+    public var allReferences: Set<Reference> = []
+    public var retainedDeclarations: Set<Declaration> = []
+    public var ignoredDeclarations: Set<Declaration> = []
+    public var assetReferences: Set<AssetReference> = []
+    public var mainAttributedDeclarations: Set<Declaration> = []
+    public var allReferencesByUsr: [String: Set<Reference>] = [:]
+    public var indexedModules: Set<String> = []
+    public var indexedSourceFiles: [SourceFile] = []
+    public var unusedModuleImports: Set<Declaration> = []
+    public var assignOnlyProperties: Set<Declaration> = []
+    public var extensions: [Declaration: Set<Declaration>] = [:]
 
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
@@ -39,91 +39,91 @@ public final class SourceGraph {
         rootReferences = allReferences.filter { $0.parent == nil }
     }
 
-    var unusedDeclarations: Set<Declaration> {
+    public var unusedDeclarations: Set<Declaration> {
         allDeclarations.subtracting(usedDeclarations)
     }
 
-    func declarations(ofKind kind: Declaration.Kind) -> Set<Declaration> {
+    public func declarations(ofKind kind: Declaration.Kind) -> Set<Declaration> {
         allDeclarationsByKind[kind] ?? []
     }
 
-    func declarations(ofKinds kinds: Set<Declaration.Kind>) -> Set<Declaration> {
+    public func declarations(ofKinds kinds: Set<Declaration.Kind>) -> Set<Declaration> {
         declarations(ofKinds: Array(kinds))
     }
 
-    func declarations(ofKinds kinds: [Declaration.Kind]) -> Set<Declaration> {
+    public func declarations(ofKinds kinds: [Declaration.Kind]) -> Set<Declaration> {
         kinds.flatMapSet { allDeclarationsByKind[$0, default: []] }
     }
 
-    func explicitDeclaration(withUsr usr: String) -> Declaration? {
+    public func explicitDeclaration(withUsr usr: String) -> Declaration? {
         allExplicitDeclarationsByUsr[usr]
     }
 
-    func references(to decl: Declaration) -> Set<Reference> {
+    public func references(to decl: Declaration) -> Set<Reference> {
         decl.usrs.flatMapSet { allReferencesByUsr[$0, default: []] }
     }
 
-    func hasReferences(to decl: Declaration) -> Bool {
+    public func hasReferences(to decl: Declaration) -> Bool {
         decl.usrs.contains { !allReferencesByUsr[$0, default: []].isEmpty }
     }
 
-    func markRedundantProtocol(_ declaration: Declaration, references: Set<Reference>, inherited: Set<Reference>) {
+    public func markRedundantProtocol(_ declaration: Declaration, references: Set<Reference>, inherited: Set<Reference>) {
         withLock {
             redundantProtocols[declaration] = (references, inherited)
         }
     }
 
-    func markRedundantPublicAccessibility(_ declaration: Declaration, modules: Set<String>) {
+    public func markRedundantPublicAccessibility(_ declaration: Declaration, modules: Set<String>) {
         withLock {
             redundantPublicAccessibility[declaration] = modules
         }
     }
 
-    func unmarkRedundantPublicAccessibility(_ declaration: Declaration) {
+    public func unmarkRedundantPublicAccessibility(_ declaration: Declaration) {
         withLock {
             _ = redundantPublicAccessibility.removeValue(forKey: declaration)
         }
     }
 
-    func markIgnored(_ declaration: Declaration) {
+    public func markIgnored(_ declaration: Declaration) {
         withLock {
             _ = ignoredDeclarations.insert(declaration)
         }
     }
 
-    func markRetained(_ declaration: Declaration) {
+    public func markRetained(_ declaration: Declaration) {
         withLock {
             markRetainedUnsafe(declaration)
         }
     }
 
-    func markRetainedUnsafe(_ declaration: Declaration) {
+    public func markRetainedUnsafe(_ declaration: Declaration) {
         _ = retainedDeclarations.insert(declaration)
     }
 
-    func markRetainedUnsafe(_ declarations: Set<Declaration>) {
+    public func markRetainedUnsafe(_ declarations: Set<Declaration>) {
         retainedDeclarations.formUnion(declarations)
     }
 
-    func markAssignOnlyProperty(_ declaration: Declaration) {
+    public func markAssignOnlyProperty(_ declaration: Declaration) {
         withLock {
             _ = assignOnlyProperties.insert(declaration)
         }
     }
 
-    func markMainAttributed(_ declaration: Declaration) {
+    public func markMainAttributed(_ declaration: Declaration) {
         withLock {
             _ = mainAttributedDeclarations.insert(declaration)
         }
     }
 
-    func isRetained(_ declaration: Declaration) -> Bool {
+    public func isRetained(_ declaration: Declaration) -> Bool {
         withLock {
             retainedDeclarations.contains(declaration)
         }
     }
 
-    func addUnsafe(_ declaration: Declaration) {
+    public func addUnsafe(_ declaration: Declaration) {
         allDeclarations.insert(declaration)
         allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
 
@@ -132,7 +132,7 @@ public final class SourceGraph {
         }
     }
 
-    func addUnsafe(_ declarations: Set<Declaration>) {
+    public func addUnsafe(_ declarations: Set<Declaration>) {
         allDeclarations.formUnion(declarations)
 
         for declaration in declarations {
@@ -144,13 +144,13 @@ public final class SourceGraph {
         }
     }
 
-    func remove(_ declaration: Declaration) {
+    public func remove(_ declaration: Declaration) {
         withLock {
             removeUnsafe(declaration)
         }
     }
 
-    func removeUnsafe(_ declaration: Declaration) {
+    public func removeUnsafe(_ declaration: Declaration) {
         declaration.parent?.declarations.remove(declaration)
         allDeclarations.remove(declaration)
         allDeclarationsByKind[declaration.kind]?.remove(declaration)
@@ -160,17 +160,17 @@ public final class SourceGraph {
         declaration.usrs.forEach { allExplicitDeclarationsByUsr.removeValue(forKey: $0) }
     }
 
-    func addUnsafe(_ reference: Reference) {
+    public func addUnsafe(_ reference: Reference) {
         _ = allReferences.insert(reference)
         allReferencesByUsr[reference.usr, default: []].insert(reference)
     }
 
-    func addUnsafe(_ references: Set<Reference>) {
+    public func addUnsafe(_ references: Set<Reference>) {
         allReferences.formUnion(references)
         references.forEach { allReferencesByUsr[$0.usr, default: []].insert($0) }
     }
 
-    func add(_ reference: Reference, from declaration: Declaration) {
+    public func add(_ reference: Reference, from declaration: Declaration) {
         withLock {
             if reference.isRelated {
                 _ = declaration.related.insert(reference)
@@ -197,7 +197,7 @@ public final class SourceGraph {
         }
     }
 
-    func add(_ assetReference: AssetReference) {
+    public func add(_ assetReference: AssetReference) {
         withLock {
             _ = assetReferences.insert(assetReference)
         }
@@ -219,25 +219,25 @@ public final class SourceGraph {
         explicitDeclaration(withUsr: reference.usr) == nil
     }
 
-    func addIndexedSourceFile(_ file: SourceFile) {
+    public func addIndexedSourceFile(_ file: SourceFile) {
         withLock {
             indexedSourceFiles.append(file)
         }
     }
 
-    func addIndexedModules(_ modules: Set<String>) {
+    public func addIndexedModules(_ modules: Set<String>) {
         withLock {
             indexedModules.formUnion(modules)
         }
     }
 
-    func addExportedModule(_ module: String, exportedBy exportingModules: Set<String>) {
+    public func addExportedModule(_ module: String, exportedBy exportingModules: Set<String>) {
         withLock {
             moduleToExportingModules[module, default: []].formUnion(exportingModules)
         }
     }
 
-    func isModule(_ module: String, exportedBy exportingModule: String) -> Bool {
+    public func isModule(_ module: String, exportedBy exportingModule: String) -> Bool {
         withLock {
             isModuleUnsafe(module, exportedBy: exportingModule)
         }
@@ -258,7 +258,7 @@ public final class SourceGraph {
         }
     }
 
-    func markUnusedModuleImport(_ statement: ImportStatement) {
+    public func markUnusedModuleImport(_ statement: ImportStatement) {
         withLock {
             let location = statement.location.relativeTo(.current)
             let usr = "import-\(statement.module)-\(location)"
@@ -268,13 +268,13 @@ public final class SourceGraph {
         }
     }
 
-    func markExtension(_ extensionDecl: Declaration, extending extendedDecl: Declaration) {
+    public func markExtension(_ extensionDecl: Declaration, extending extendedDecl: Declaration) {
         withLock {
             _ = extensions[extendedDecl, default: []].insert(extensionDecl)
         }
     }
 
-    func inheritedTypeReferences(of decl: Declaration, seenDeclarations: Set<Declaration> = []) -> Set<Reference> {
+    public func inheritedTypeReferences(of decl: Declaration, seenDeclarations: Set<Declaration> = []) -> Set<Reference> {
         var references = Set<Reference>()
 
         for reference in decl.immediateInheritedTypeReferences {
@@ -293,7 +293,7 @@ public final class SourceGraph {
         return references
     }
 
-    func inheritedDeclarations(of decl: Declaration) -> [Declaration] {
+    public func inheritedDeclarations(of decl: Declaration) -> [Declaration] {
         inheritedTypeReferences(of: decl).compactMap { explicitDeclaration(withUsr: $0.usr) }
     }
 
@@ -310,7 +310,7 @@ public final class SourceGraph {
         return immediate.union(allSubclasses)
     }
 
-    func withLock<T>(_ block: () -> T) -> T {
+    public func withLock<T>(_ block: () -> T) -> T {
         lock.perform(block)
     }
 

@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 import SystemPackage
+import SourceGraph
 
 public protocol OutputFormatter: AnyObject {
     var configuration: Configuration { get }
@@ -32,9 +33,9 @@ extension OutputFormatter {
         }
     }
 
-    func describe(_ result: ScanResult, colored: Bool) -> [(SourceLocation, String)] {
+    func describe(_ result: ScanResult, colored: Bool) -> [(Location, String)] {
         var description: String = ""
-        var secondaryResults: [(SourceLocation, String)] = []
+        var secondaryResults: [(Location, String)] = []
 
         if var name = result.declaration.name {
             if let kind = result.declaration.kind.displayName, let first_ = kind.first {
@@ -72,7 +73,7 @@ extension OutputFormatter {
         return [(result.declaration.location, description)] + secondaryResults
     }
 
-    func outputPath(_ location: SourceLocation) -> FilePath {
+    func outputPath(_ location: Location) -> FilePath {
         var path = location.file.path.lexicallyNormalized()
 
         if configuration.relativeResults {
@@ -82,7 +83,7 @@ extension OutputFormatter {
         return path
     }
 
-    func locationDescription(_ location: SourceLocation) -> String {
+    func locationDescription(_ location: Location) -> String {
         [
             outputPath(location).string,
             String(location.line),

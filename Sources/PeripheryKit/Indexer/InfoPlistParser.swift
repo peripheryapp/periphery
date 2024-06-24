@@ -2,6 +2,7 @@ import Foundation
 import SystemPackage
 import AEXML
 import Shared
+import SourceGraph
 
 final class InfoPlistParser {
     private static let elements = [

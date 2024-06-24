@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import PeripheryKit
+import Shared
 
 class SwiftVersionParserTest: XCTestCase {
     func testParse() throws {

@@ -1,6 +1,6 @@
 import Foundation
 
-enum Accessibility: String {
+public enum Accessibility: String {
     case `public` = "public"
     case `internal` = "internal"
     case `private` = "private"
