@@ -15,7 +15,7 @@ var dependencies: [Package.Dependency] = [
 dependencies.append(
     .package(
         url: "https://github.com/tuist/xcodeproj",
-        from: "8.0.0"
+        from: "8.16.0"
     )
 )
 #endif
