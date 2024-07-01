@@ -35,6 +35,9 @@ printf "Got it: $version\n"
 
 confirm "\nContinue?"
 
+rm -rf .release
+mkdir .release
+
 cat scripts/Version.swift.template | sed s/__VERSION__/${version}/ > Sources/Frontend/Version.swift
 cat scripts/Periphery.podspec.template | sed s/__VERSION__/${version}/ > Periphery.podspec
 cat scripts/artifactbundle_info.json.template | sed s/__VERSION__/${version}/ > .release/info.json
@@ -45,8 +48,6 @@ confirm "Continue?"
 bin_path=$(make show_bin_path)
 rm -rf "$bin_path"
 make build_release
-rm -rf .release
-mkdir .release
 cp "$bin_path" .release/
 cp LICENSE.md .release/
 cp scripts/release_notes.md.template .release/release_notes.md
