@@ -1626,4 +1626,14 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             }
         }
     }
+
+    func testRetainsClassUsedAsComputedVariableInExtension() {
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("DepsHandler")) {
+                self.assertReferenced(.varInstance("someProtocol")) {
+                    self.assertReferenced(.class("SomeClass919"))
+                }
+            }
+        }
+    }
 }
