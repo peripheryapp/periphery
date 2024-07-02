@@ -1,5 +1,4 @@
 import Foundation
-import SwiftSyntax
 
 public struct ImportStatement {
     public let module: String
