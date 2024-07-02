@@ -1,7 +1,7 @@
 import Foundation
 import XcodeProj
 import SystemPackage
-import PeripheryKit
+import SourceGraph
 
 final class XcodeTarget {
     let project: XcodeProject

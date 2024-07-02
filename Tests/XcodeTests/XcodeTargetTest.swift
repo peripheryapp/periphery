@@ -2,7 +2,6 @@ import Foundation
 import XCTest
 @testable import TestShared
 @testable import XcodeSupport
-@testable import PeripheryKit
 
 class XcodeTargetTest: XCTestCase {
     func testSourceFileInGroupWithoutFolder() throws {

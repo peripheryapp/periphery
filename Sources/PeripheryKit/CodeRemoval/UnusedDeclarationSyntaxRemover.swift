@@ -2,12 +2,13 @@ import Foundation
 import SwiftParser
 import SwiftSyntax
 import SystemPackage
+import SourceGraph
 
 final class UnusedDeclarationSyntaxRemover: SyntaxRewriter, SyntaxRemover, TriviaSplitting {
-    private let resultLocation: SourceLocation
+    private let resultLocation: Location
     private let locationBuilder: SourceLocationBuilder
 
-    init(resultLocation: SourceLocation, replacements: [String], locationBuilder: SourceLocationBuilder) {
+    init(resultLocation: Location, replacements: [String], locationBuilder: SourceLocationBuilder) {
         self.resultLocation = resultLocation
         self.locationBuilder = locationBuilder
     }

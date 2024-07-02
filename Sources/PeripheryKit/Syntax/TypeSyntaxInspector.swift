@@ -1,10 +1,11 @@
 import Foundation
 import SwiftSyntax
+import SourceGraph
 import Shared
 
 struct TypeNameSourceLocation: Hashable {
     let name: String
-    let location: SourceLocation
+    let location: Location
 }
 
 struct TypeSyntaxInspector {
@@ -21,7 +22,7 @@ struct TypeSyntaxInspector {
         }
     }
 
-    func typeLocations(for typeSyntax: TypeSyntax) -> Set<SourceLocation> {
+    func typeLocations(for typeSyntax: TypeSyntax) -> Set<Location> {
         types(for: typeSyntax).mapSet { sourceLocationBuilder.location(at: $0.positionAfterSkippingLeadingTrivia) }
     }
 

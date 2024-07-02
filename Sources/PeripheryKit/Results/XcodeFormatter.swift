@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 import SystemPackage
+import SourceGraph
 
 final class XcodeFormatter: OutputFormatter {
     let configuration: Configuration
@@ -25,7 +26,7 @@ final class XcodeFormatter: OutputFormatter {
 
     // MARK: - Private
 
-    private func prefix(for location: SourceLocation) -> String {
+    private func prefix(for location: Location) -> String {
         let path = outputPath(location)
         let dir = path.removingLastComponent()
         let file = colorize(path.lastComponent?.stem ?? "", .bold)

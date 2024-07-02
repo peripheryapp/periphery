@@ -1,5 +1,5 @@
 import Foundation
-@testable import PeripheryKit
+@testable import SourceGraph
 
 struct DeclarationDescription: CustomStringConvertible {
     let kind: Declaration.Kind

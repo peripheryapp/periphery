@@ -4,9 +4,10 @@ import SwiftSyntax
 import SwiftParser
 @testable import TestShared
 @testable import PeripheryKit
+@testable import SourceGraph
 
 class TypeSyntaxInspectorTest: XCTestCase {
-    private var results: [PeripheryKit.SourceLocation: TypeSyntaxInspectorTestVisitor.Result]!
+    private var results: [Location: TypeSyntaxInspectorTestVisitor.Result]!
 
     override func setUpWithError() throws {
         super.setUp()
@@ -117,8 +118,8 @@ class TypeSyntaxInspectorTest: XCTestCase {
         return SourceFile(path: path, modules: ["TypeSyntaxInspectorFixtures"])
     }
 
-    private func fixtureLocation(line: Int, column: Int = 1) -> PeripheryKit.SourceLocation {
-        SourceLocation(file: fixturePath, line: line, column: column)
+    private func fixtureLocation(line: Int, column: Int = 1) -> Location {
+        Location(file: fixturePath, line: line, column: column)
     }
 }
 
@@ -128,8 +129,8 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
     private let sourceLocationBuilder: SourceLocationBuilder
     private let typeSyntaxInspector: TypeSyntaxInspector
 
-    typealias Result = (type: String, locations: [PeripheryKit.SourceLocation])
-    var results: [PeripheryKit.SourceLocation: Result] = [:]
+    typealias Result = (type: String, locations: [Location])
+    var results: [Location: Result] = [:]
 
     init(file: SourceFile) throws {
         let source = try String(contentsOf: file.path.url)

@@ -1,5 +1,6 @@
 import Shared
 import SystemPackage
+import SourceGraph
 
 public final class XCMappingModelIndexer: Indexer {
     private let files: Set<FilePath>

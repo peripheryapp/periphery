@@ -1,6 +1,7 @@
 import Foundation
 import SystemPackage
 import Shared
+import SourceGraph
 
 public final class GenericProjectDriver {
     private enum FileKind: String {

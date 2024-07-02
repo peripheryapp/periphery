@@ -1,10 +1,11 @@
 import Foundation
 import XCTest
 @testable import TestShared
+@testable import SourceGraph
 @testable import PeripheryKit
 
 class FunctionVisitTest: XCTestCase {
-    private var results: [PeripheryKit.SourceLocation: DeclarationSyntaxVisitor.Result]!
+    private var results: [Location: DeclarationSyntaxVisitor.Result]!
 
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -154,7 +155,7 @@ class FunctionVisitTest: XCTestCase {
         return SourceFile(path: path, modules: ["DeclarationVisitorFixtures"])
     }
 
-    private func fixtureLocation(line: Int, column: Int = 6) -> SourceLocation {
-        SourceLocation(file: fixturePath, line: line, column: column)
+    private func fixtureLocation(line: Int, column: Int = 6) -> Location {
+        Location(file: fixturePath, line: line, column: column)
     }
 }

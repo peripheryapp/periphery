@@ -2,6 +2,7 @@ import Foundation
 import SystemPackage
 import SwiftSyntax
 import SwiftParser
+import SourceGraph
 
 protocol Item: AnyObject {
     var items: [Item] { get }
@@ -18,7 +19,7 @@ final class Function: Item, Hashable {
 
     let name: String
     let fullName: String
-    let location: SourceLocation
+    let location: Location
     let items: [Item]
     let parameters: [Parameter]
     let genericParameters: [String]
@@ -27,7 +28,7 @@ final class Function: Item, Hashable {
     init(
         name: String,
         fullName: String,
-        location: SourceLocation,
+        location: Location,
         items: [Item],
         parameters: [Parameter],
         genericParameters: [String],
@@ -55,7 +56,7 @@ final class Parameter: Item, Hashable {
     let firstName: String?
     let secondName: String?
     let metatype: String?
-    let location: SourceLocation
+    let location: Location
     let items: [Item] = []
     var function: Function?
 
@@ -73,7 +74,7 @@ final class Parameter: Item, Hashable {
         return decl
     }
 
-    init(firstName: String?, secondName: String?, metatype: String?, location: SourceLocation) {
+    init(firstName: String?, secondName: String?, metatype: String?, location: Location) {
         self.firstName = firstName
         self.secondName = secondName
         self.metatype = metatype
@@ -360,9 +361,9 @@ struct UnusedParameterParser {
         return "\(function)(\(strParams):)"
     }
 
-    private func sourceLocation(of position: AbsolutePosition) -> SourceLocation {
+    private func sourceLocation(of position: AbsolutePosition) -> Location {
         let location = locationConverter.location(for: position)
-        return SourceLocation(file: file,
+        return Location(file: file,
                               line: location.line,
                               column: location.column)
     }

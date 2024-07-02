@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 import SystemPackage
+import SourceGraph
 
 final class GitHubActionsFormatter: OutputFormatter {
     let configuration: Configuration
@@ -24,7 +25,7 @@ final class GitHubActionsFormatter: OutputFormatter {
 
     // MARK: - Private
 
-    private func prefix(for location: SourceLocation, result: ScanResult) -> String {
+    private func prefix(for location: Location, result: ScanResult) -> String {
         let path = outputPath(location)
         let lineNum = String(location.line)
         let column = location.column

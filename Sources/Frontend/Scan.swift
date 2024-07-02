@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 import PeripheryKit
+import SourceGraph
 
 final class Scan {
     private let configuration: Configuration

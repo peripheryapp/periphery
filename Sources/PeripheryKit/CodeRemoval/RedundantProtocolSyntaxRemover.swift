@@ -2,13 +2,14 @@ import Foundation
 import SwiftParser
 import SwiftSyntax
 import SystemPackage
+import SourceGraph
 
 final class RedundantProtocolSyntaxRemover: SyntaxRewriter, SyntaxRemover, TriviaSplitting {
-    private let resultLocation: SourceLocation
+    private let resultLocation: Location
     private let replacements: [String]
     private let locationBuilder: SourceLocationBuilder
 
-    init(resultLocation: SourceLocation, replacements: [String], locationBuilder: SourceLocationBuilder) {
+    init(resultLocation: Location, replacements: [String], locationBuilder: SourceLocationBuilder) {
         self.resultLocation = resultLocation
         self.replacements = replacements
         self.locationBuilder = locationBuilder

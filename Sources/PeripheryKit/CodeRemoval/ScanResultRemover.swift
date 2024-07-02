@@ -3,6 +3,7 @@ import SwiftParser
 import SwiftSyntax
 import Shared
 import SystemPackage
+import SourceGraph
 
 public final class ScanResultRemover {
     private let configuration: Configuration
@@ -12,7 +13,7 @@ public final class ScanResultRemover {
     }
 
     public func remove(results: [ScanResult]) throws {
-        let locationsByFile: [SourceFile: [(SourceLocation, [String], SyntaxRemover.Type)]] = results.reduce(into: .init()) { dict, result in
+        let locationsByFile: [SourceFile: [(Location, [String], SyntaxRemover.Type)]] = results.reduce(into: .init()) { dict, result in
             let location = result.declaration.location
             let file = result.declaration.location.file
 

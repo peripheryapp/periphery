@@ -22,6 +22,7 @@ dependencies.append(
 
 var frontendDependencies: [PackageDescription.Target.Dependency] = [
     .target(name: "Shared"),
+    .target(name: "SourceGraph"),
     .target(name: "PeripheryKit"),
     .product(name: "ArgumentParser", package: "swift-argument-parser"),
     .product(name: "FilenameMatcher", package: "swift-filename-matcher")
@@ -39,6 +40,7 @@ var targets: [PackageDescription.Target] = [
     .target(
         name: "PeripheryKit",
         dependencies: [
+            .target(name: "SourceGraph"),
             .target(name: "Shared"),
             .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "AEXML", package: "AEXML"),
@@ -46,6 +48,13 @@ var targets: [PackageDescription.Target] = [
             .product(name: "SwiftParser", package: "swift-syntax"),
             .product(name: "SwiftIndexStore", package: "swift-indexstore"),
             .product(name: "FilenameMatcher", package: "swift-filename-matcher")
+        ]
+    ),
+    .target(
+        name: "SourceGraph",
+        dependencies: [
+            .product(name: "SwiftSyntax", package: "swift-syntax"),
+            .target(name: "Shared")
         ]
     ),
     .target(
@@ -134,6 +143,7 @@ targets.append(contentsOf: [
     .target(
         name: "XcodeSupport",
         dependencies: [
+            .target(name: "SourceGraph"),
             .target(name: "Shared"),
             .target(name: "PeripheryKit"),
             .product(name: "XcodeProj", package: "XcodeProj"),

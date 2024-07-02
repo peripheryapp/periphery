@@ -1,7 +1,7 @@
 import Foundation
 
-final class Declaration {
-    enum Kind: String, RawRepresentable, CaseIterable {
+public final class Declaration {
+    public enum Kind: String, RawRepresentable, CaseIterable {
         case `associatedtype` = "associatedtype"
         case `class` = "class"
         case `enum` = "enum"
@@ -61,15 +61,15 @@ final class Declaration {
             protocolMemberKinds + [.varClass, .functionMethodClass, .associatedtype]
         }
 
-        var isProtocolMemberKind: Bool {
+        public var isProtocolMemberKind: Bool {
             Self.protocolMemberKinds.contains(self)
         }
 
-        var isProtocolMemberConformingKind: Bool {
+        public var isProtocolMemberConformingKind: Bool {
             Self.protocolMemberConformingKinds.contains(self)
         }
 
-        var isFunctionKind: Bool {
+        public var isFunctionKind: Bool {
             rawValue.hasPrefix("function")
         }
 
@@ -77,7 +77,7 @@ final class Declaration {
             Set(Kind.allCases.filter { $0.isVariableKind })
         }
 
-        var isVariableKind: Bool {
+        public var isVariableKind: Bool {
             rawValue.hasPrefix("var")
         }
 
@@ -98,7 +98,7 @@ final class Declaration {
             Set(Kind.allCases.filter { $0.isExtensionKind })
         }
 
-        var extendedKind: Kind? {
+        public var extendedKind: Kind? {
             switch self {
             case .extensionClass:
                 return .class
@@ -113,7 +113,7 @@ final class Declaration {
             }
         }
 
-        var extensionKind: Kind? {
+        public var extensionKind: Kind? {
             switch self {
             case .class:
                 return .extensionClass
@@ -128,19 +128,19 @@ final class Declaration {
             }
         }
 
-        var isExtensionKind: Bool {
+        public var isExtensionKind: Bool {
             rawValue.hasPrefix("extension")
         }
 
-        var isExtendableKind: Bool {
+        public var isExtendableKind: Bool {
             isConcreteTypeDeclarableKind
         }
 
-        var isConformableKind: Bool {
+        public var isConformableKind: Bool {
             isDiscreteConformableKind || isExtensionKind
         }
 
-        var isDiscreteConformableKind: Bool {
+        public var isDiscreteConformableKind: Bool {
             Self.discreteConformableKinds.contains(self)
         }
 
@@ -148,7 +148,7 @@ final class Declaration {
             return [.class, .struct, .enum]
         }
 
-        var isConcreteTypeDeclarableKind: Bool {
+        public var isConcreteTypeDeclarableKind: Bool {
             Self.concreteTypeDeclarableKinds.contains(self)
         }
 
@@ -164,7 +164,7 @@ final class Declaration {
             functionKinds.union(variableKinds).union(globalKinds)
         }
 
-        var isAccessorKind: Bool {
+        public var isAccessorKind: Bool {
             rawValue.hasPrefix("function.accessor")
         }
 
@@ -172,7 +172,7 @@ final class Declaration {
             [.class, .struct, .enum]
         }
 
-        var displayName: String? {
+        public var displayName: String? {
             switch self {
             case .module:
                 return "imported module"
@@ -208,28 +208,28 @@ final class Declaration {
         }
     }
 
-    let location: SourceLocation
-    var attributes: Set<String> = []
-    var modifiers: Set<String> = []
-    var accessibility: DeclarationAccessibility = .init(value: .internal, isExplicit: false)
-    let kind: Kind
-    var name: String?
-    let usrs: Set<String>
-    var unusedParameters: Set<Declaration> = []
-    var declarations: Set<Declaration> = []
-    var commentCommands: Set<CommentCommand> = []
-    var references: Set<Reference> = []
-    var declaredType: String?
-    var hasCapitalSelfFunctionCall: Bool = false
-    var hasGenericFunctionReturnedMetatypeParameters: Bool = false
-    var parent: Declaration?
-    var related: Set<Reference> = []
-    var isImplicit: Bool = false
-    var isObjcAccessible: Bool = false
+    public let location: Location
+    public var attributes: Set<String> = []
+    public var modifiers: Set<String> = []
+    public var accessibility: DeclarationAccessibility = .init(value: .internal, isExplicit: false)
+    public let kind: Kind
+    public var name: String?
+    public let usrs: Set<String>
+    public var unusedParameters: Set<Declaration> = []
+    public var declarations: Set<Declaration> = []
+    public var commentCommands: Set<CommentCommand> = []
+    public var references: Set<Reference> = []
+    public var declaredType: String?
+    public var hasCapitalSelfFunctionCall: Bool = false
+    public var hasGenericFunctionReturnedMetatypeParameters: Bool = false
+    public var parent: Declaration?
+    public var related: Set<Reference> = []
+    public var isImplicit: Bool = false
+    public var isObjcAccessible: Bool = false
 
     private let hashValueCache: Int
 
-    var ancestralDeclarations: Set<Declaration> {
+    public var ancestralDeclarations: Set<Declaration> {
         var maybeParent = parent
         var declarations: Set<Declaration> = []
 
@@ -241,14 +241,14 @@ final class Declaration {
         return declarations
     }
 
-    var descendentDeclarations: Set<Declaration> {
+    public var descendentDeclarations: Set<Declaration> {
         declarations
             .flatMapSet { $0.descendentDeclarations }
             .union(declarations)
             .union(unusedParameters)
     }
 
-    var immediateInheritedTypeReferences: Set<Reference> {
+    public var immediateInheritedTypeReferences: Set<Reference> {
         let superclassReferences = related.filter { [.class, .struct, .protocol].contains($0.kind) }
 
         // Inherited typealiases are References instead of a Related.
@@ -256,7 +256,7 @@ final class Declaration {
         return superclassReferences.union(typealiasReferences)
     }
 
-    var isComplexProperty: Bool {
+    public var isComplexProperty: Bool {
         return declarations.contains {
             if [.functionAccessorWillset,
                 .functionAccessorDidset].contains($0.kind) {
@@ -271,15 +271,15 @@ final class Declaration {
         }
     }
 
-    var isOverride: Bool {
+    public var isOverride: Bool {
         modifiers.contains("override")
     }
 
-    var relatedEquivalentReferences: [Reference] {
+    public var relatedEquivalentReferences: [Reference] {
         related.filter { $0.kind == kind && $0.name == name }
     }
 
-    init(kind: Kind, usrs: Set<String>, location: SourceLocation) {
+    public init(kind: Kind, usrs: Set<String>, location: Location) {
         self.kind = kind
         self.usrs = usrs
         self.location = location
@@ -293,19 +293,19 @@ final class Declaration {
 }
 
 extension Declaration: Hashable {
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(hashValueCache)
     }
 }
 
 extension Declaration: Equatable {
-    static func == (lhs: Declaration, rhs: Declaration) -> Bool {
+    public static func == (lhs: Declaration, rhs: Declaration) -> Bool {
         lhs.usrs == rhs.usrs
     }
 }
 
 extension Declaration: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         "Declaration(\(descriptionParts.joined(separator: ", ")))"
     }
 
@@ -329,7 +329,7 @@ extension Declaration: CustomStringConvertible {
 }
 
 extension Declaration: Comparable {
-    static func < (lhs: Declaration, rhs: Declaration) -> Bool {
+    public static func < (lhs: Declaration, rhs: Declaration) -> Bool {
         if lhs.location == rhs.location {
             return lhs.usrs.sorted().joined() < rhs.usrs.sorted().joined()
         }
@@ -338,9 +338,14 @@ extension Declaration: Comparable {
     }
 }
 
-struct DeclarationAccessibility {
-    let value: Accessibility
-    let isExplicit: Bool
+public struct DeclarationAccessibility {
+    public let value: Accessibility
+    public let isExplicit: Bool
+    
+    public init(value: Accessibility, isExplicit: Bool) {
+        self.value = value
+        self.isExplicit = isExplicit
+    }
 
     func isExplicitly(_ testValue: Accessibility) -> Bool {
         isExplicit && value == testValue

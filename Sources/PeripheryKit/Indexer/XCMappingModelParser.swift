@@ -1,6 +1,7 @@
 import Foundation
 import AEXML
 import SystemPackage
+import SourceGraph
 
 final class XCMappingModelParser {
     private let path: FilePath

@@ -1,5 +1,6 @@
 import Shared
 import SystemPackage
+import SourceGraph
 
 public final class InfoPlistIndexer: Indexer {
     private let infoPlistFiles: Set<FilePath>

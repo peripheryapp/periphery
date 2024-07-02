@@ -1,6 +1,7 @@
 import XCTest
 import SystemPackage
 @testable import PeripheryKit
+@testable import SourceGraph
 import Shared
 
 open class SourceGraphTestCase: XCTestCase {
