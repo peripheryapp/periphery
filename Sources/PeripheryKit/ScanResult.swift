@@ -1,4 +1,5 @@
 import Foundation
+import SourceGraph
 
 public struct ScanResult {
     enum Annotation {

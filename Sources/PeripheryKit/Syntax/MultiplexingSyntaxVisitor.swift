@@ -2,6 +2,7 @@ import Foundation
 import SystemPackage
 import SwiftSyntax
 import SwiftParser
+import SourceGraph
 
 protocol PeripherySyntaxVisitor {
     init(sourceLocationBuilder: SourceLocationBuilder)

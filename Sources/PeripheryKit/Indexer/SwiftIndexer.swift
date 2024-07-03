@@ -3,6 +3,7 @@ import SwiftSyntax
 import SwiftIndexStore
 import SystemPackage
 import Shared
+import SourceGraph
 
 public final class SwiftIndexer: Indexer {
     private let sourceFiles: [FilePath: Set<IndexTarget>]
@@ -150,12 +151,12 @@ public final class SwiftIndexer: Indexer {
         }
 
         struct RawDeclaration {
-            struct Key: Hashable {
+            public struct Key: Hashable {
                 let kind: Declaration.Kind
                 let name: String?
                 let isImplicit: Bool
                 let isObjcAccessible: Bool
-                let location: SourceLocation
+                let location: Location
             }
 
             let usr: String
@@ -163,7 +164,7 @@ public final class SwiftIndexer: Indexer {
             let name: String?
             let isImplicit: Bool
             let isObjcAccessible: Bool
-            let location: SourceLocation
+            let location: Location
 
             var key: Key {
                 Key(kind: kind, name: name, isImplicit: isImplicit, isObjcAccessible: isObjcAccessible, location: location)
@@ -341,7 +342,7 @@ public final class SwiftIndexer: Indexer {
 
             let explicitDeclarations = declarations.filter { !$0.isImplicit }
             let declsByLocation = explicitDeclarations
-                .reduce(into: [SourceLocation: [Declaration]]()) { (result, decl) in
+                .reduce(into: [Location: [Declaration]]()) { (result, decl) in
                     result[decl.location, default: []].append(decl)
                 }
             let declsByLine = explicitDeclarations
@@ -474,7 +475,7 @@ public final class SwiftIndexer: Indexer {
 
         private func identifyUnusedParameters(using syntaxVisitor: MultiplexingSyntaxVisitor) {
             let functionDecls = declarations.filter { $0.kind.isFunctionKind }
-            let functionDeclsByLocation = functionDecls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [SourceLocation: Declaration]()) { $0[$1.0] = $1.1 }
+            let functionDeclsByLocation = functionDecls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [Location: Declaration]()) { $0[$1.0] = $1.1 }
 
             let analyzer = UnusedParameterAnalyzer()
             let paramsByFunction = analyzer.analyze(
@@ -520,7 +521,7 @@ public final class SwiftIndexer: Indexer {
         private func parseRawDeclaration(
             _ occurrence: IndexStoreOccurrence,
             _ usr: String,
-            _ location: SourceLocation,
+            _ location: Location,
             _ indexStore: IndexStore
         ) throws -> (RawDeclaration, [RawRelation])? {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
@@ -617,7 +618,7 @@ public final class SwiftIndexer: Indexer {
         private func parseImplicit(
             _ occurrence: IndexStoreOccurrence,
             _ occurrenceUsr: String,
-            _ location: SourceLocation,
+            _ location: Location,
             _ indexStore: IndexStore
         ) throws -> [Reference] {
             var refs = [Reference]()
@@ -648,7 +649,7 @@ public final class SwiftIndexer: Indexer {
         private func parseReference(
             _ occurrence: IndexStoreOccurrence,
             _ occurrenceUsr: String,
-            _ location: SourceLocation,
+            _ location: Location,
             _ indexStore: IndexStore
         ) throws -> [Reference] {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
@@ -696,8 +697,8 @@ public final class SwiftIndexer: Indexer {
             return refs
         }
 
-        private func transformLocation(_ input: IndexStoreOccurrence.Location) throws -> SourceLocation? {
-            return SourceLocation(file: try getSourceFile(), line: Int(input.line), column: Int(input.column))
+        private func transformLocation(_ input: IndexStoreOccurrence.Location) throws -> Location? {
+            return Location(file: try getSourceFile(), line: Int(input.line), column: Int(input.column))
         }
 
         private func transformDeclarationKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Declaration.Kind? {

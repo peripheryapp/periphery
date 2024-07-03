@@ -1,5 +1,6 @@
 import Shared
 import SystemPackage
+import SourceGraph
 
 public final class XCDataModelIndexer: Indexer {
     private let files: Set<FilePath>

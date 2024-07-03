@@ -1,25 +1,25 @@
 import Foundation
 import SystemPackage
 
-class SourceLocation {
-    let file: SourceFile
-    let line: Int
-    let column: Int
+public class Location {
+    public let file: SourceFile
+    public let line: Int
+    public let column: Int
 
     private let hashValueCache: Int
 
-    init(file: SourceFile, line: Int, column: Int) {
+    public init(file: SourceFile, line: Int, column: Int) {
         self.file = file
         self.line = line
         self.column = column
         self.hashValueCache = [file.hashValue, line, column].hashValue
     }
 
-    func relativeTo(_ path: FilePath) -> SourceLocation {
+    func relativeTo(_ path: FilePath) -> Location {
         let newPath = file.path.relativeTo(path)
         let newFile = SourceFile(path: newPath, modules: file.modules)
         newFile.importStatements = file.importStatements
-        return SourceLocation(file: newFile, line: line, column: column)
+        return Location(file: newFile, line: line, column: column)
     }
 
     // MARK: - Private
@@ -37,31 +37,30 @@ class SourceLocation {
     }()
 }
 
-extension SourceLocation: Equatable {
-    static func == (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
+extension Location: Equatable {
+    public static func == (lhs: Location, rhs: Location) -> Bool {
         lhs.file == rhs.file && lhs.line == rhs.line && lhs.column == rhs.column
     }
 }
 
-extension SourceLocation: Hashable {
-    func hash(into hasher: inout Hasher) {
-
+extension Location: Hashable {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(hashValueCache)
     }
 }
 
-extension SourceLocation: CustomStringConvertible {
-    var description: String {
+extension Location: CustomStringConvertible {
+    public var description: String {
         return descriptionInternal
     }
 
-    var shortDescription: String {
+    public var shortDescription: String {
         return shortDescriptionInternal
     }
 }
 
-extension SourceLocation: Comparable {
-    static func < (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
+extension Location: Comparable {
+    public static func < (lhs: Location, rhs: Location) -> Bool {
         if lhs.file == rhs.file {
             if lhs.line == rhs.line {
                 return lhs.column < rhs.column

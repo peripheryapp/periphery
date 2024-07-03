@@ -2,6 +2,7 @@ import Foundation
 import SystemPackage
 import PeripheryKit
 import Shared
+import SourceGraph
 
 public final class XcodeProjectDriver {
     public static func build() throws -> Self {

@@ -1,6 +1,7 @@
 import Foundation
 import SystemPackage
 import Shared
+import SourceGraph
 
 public final class SPMProjectDriver {
     public static func build() throws -> Self {

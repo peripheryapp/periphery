@@ -1,4 +1,5 @@
 import Foundation
+import SourceGraph
 
 public struct ScanResultBuilder {
     public static func build(for graph: SourceGraph) -> [ScanResult] {

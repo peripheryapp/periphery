@@ -1,4 +1,5 @@
 import Foundation
+import SourceGraph
 
 public protocol ProjectDriver {
     static func build() throws -> Self
