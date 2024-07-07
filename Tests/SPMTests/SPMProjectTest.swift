@@ -6,8 +6,6 @@ class SPMProjectTest: SourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        configuration.targets = ["SPMProjectKit", "Frontend"]
-
         build(driver: SPMProjectDriver.self, projectPath: SPMProjectPath)
         index()
     }

@@ -7,8 +7,7 @@ final class CrossModuleRetentionTest: SourceGraphTestCase {
     static override func setUp() {
         super.setUp()
 
-        configuration.targets = ["CrossModuleRetentionFixtures", "CrossModuleRetentionSupportFixtures"]
-        build(driver: SPMProjectDriver.self)
+        build(driver: SPMProjectDriver.self, projectPath: FixturesProjectPath)
         index()
     }
 

@@ -29,30 +29,17 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             project = try XcodeProject(path: projectPath)
         }
 
-        if let project = project {
-            guard !project.targets.isEmpty else {
-                throw PeripheryError.guidedSetupError(message: "Failed to identify any targets in \(project.path.lastComponent?.string ?? "")")
-            }
-
-            var targets = project.targets.map { $0.name }
-            targets += project.packageTargets.flatMap { (package, targets) in
-                targets.map { "\(package.name).\($0.name)" }
-            }
-            targets = targets.sorted()
-
-            print(colorize("Select build targets to analyze:", .bold))
-            configuration.targets = select(multiple: targets, allowAll: true).selectedValues
-
-            let schemes = try filter(
-                project.schemes(additionalArguments: configuration.xcodeListArguments),
-                project
-            ).map { $0 }.sorted()
-
-            print(colorize("\nSelect the schemes necessary to build your chosen targets:", .bold))
-            configuration.schemes = select(multiple: schemes, allowAll: false).selectedValues
-        } else {
+        guard let project else {
             throw PeripheryError.guidedSetupError(message: "Failed to find .xcworkspace or .xcodeproj in current directory")
         }
+
+        let schemes = try filter(
+            project.schemes(additionalArguments: configuration.xcodeListArguments),
+            project
+        ).map { $0 }.sorted()
+
+        print(colorize("\nSelect the schemes necessary to build your chosen targets:", .bold))
+        configuration.schemes = select(multiple: schemes, allowAll: false).selectedValues
 
         print(colorize("\nAssume Objective-C accessible declarations are in use?", .bold))
         print(colorize("?", .boldYellow) + " Declarations exposed to the Objective-C runtime explicitly with @objc, or implicitly by inheriting NSObject will be assumed to be in use. Choose 'No' if your project is pure Swift.")
@@ -62,16 +49,11 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
     public var commandLineOptions: [String] {
         var options: [String] = []
 
-        if let workspace = configuration.workspace {
-            options.append("--workspace \"\(workspace)\"")
-        }
-
         if let project = configuration.project {
             options.append("--project \"\(project)\"")
         }
 
         options.append("--schemes " + configuration.schemes.map { "\"\($0)\"" }.joined(separator: ","))
-        options.append("--targets " + configuration.targets.map { "\"\($0)\"" }.joined(separator: ","))
 
         if configuration.retainObjcAccessible {
             options.append("--retain-objc-accessible")
@@ -114,7 +96,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
         }
 
         if let workspacePath = workspacePath {
-            configuration.workspace = workspacePath.relativeTo(.current).string
+            configuration.project = workspacePath.relativeTo(.current).string
             return workspacePath
         }
 

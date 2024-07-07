@@ -11,7 +11,7 @@ final class Project {
     static func identify() -> Self {
         let configuration = Configuration.shared
 
-        if configuration.workspace != nil || configuration.project != nil {
+        if configuration.project != nil {
             return self.init(kind: .xcode)
         } else if !configuration.fileTargetsPath.isEmpty {
             return self.init(kind: .generic)

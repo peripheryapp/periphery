@@ -1,5 +1,4 @@
-// swift-tools-version:5.2
-
+// swift-tools-version:5.9
 import PackageDescription
 
 let package = Package(
@@ -7,15 +6,15 @@ let package = Package(
     products: [
         .executable(
             name: "frontend",
-            targets: ["Frontend", "SPMProjectKit"]
+            targets: ["Frontend"]
         ),
     ],
     targets: [
+        .executableTarget(
+            name: "Frontend",
+            dependencies: ["SPMProjectKit"]),
         .target(
             name: "SPMProjectKit",
-            dependencies: []),
-        .target(
-            name: "Frontend",
             dependencies: []),
     ]
 )

@@ -10,7 +10,6 @@
 		3C1A70B4256BBAB300E07E4A /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1A70B3256BBAB300E07E4A /* NotificationService.swift */; };
 		3C1A70B8256BBAB300E07E4A /* NotificationServiceExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3C1A70B1256BBAB300E07E4A /* NotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3C1FED002556D5AB0001BD58 /* UIKitProjectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FECFF2556D5AB0001BD58 /* UIKitProjectTests.swift */; };
-		3C1FED0D2556D7C60001BD58 /* FileInGroupWithoutFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FED0C2556D7C60001BD58 /* FileInGroupWithoutFolder.swift */; };
 		3C1FED1E2556D91D0001BD58 /* Target_With_Spaces.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C1FED172556D91C0001BD58 /* Target_With_Spaces.framework */; };
 		3C1FED1F2556D91D0001BD58 /* Target_With_Spaces.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3C1FED172556D91C0001BD58 /* Target_With_Spaces.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3C1FED2B2556D9360001BD58 /* File With Spaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FED2A2556D9360001BD58 /* File With Spaces.swift */; };
@@ -31,6 +30,7 @@
 		3CBEB9D62AEFC25B00F5947D /* WatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CBEB9D52AEFC25B00F5947D /* WatchWidget.swift */; };
 		3CBEB9D92AEFC25C00F5947D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CBEB9D82AEFC25C00F5947D /* Assets.xcassets */; };
 		3CBEB9DB2AEFC25C00F5947D /* WatchWidget.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 3CBEB9D72AEFC25B00F5947D /* WatchWidget.intentdefinition */; };
+		3CC94B432C3AE1FD000826B7 /* FileInGroupWithoutFolder.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3CC94B422C3AE1FD000826B7 /* FileInGroupWithoutFolder.xib */; };
 		3CD46111256C034C00856DAC /* MultiTargetStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD46107256C02FE00856DAC /* MultiTargetStruct.swift */; };
 		3CD46115256C034D00856DAC /* MultiTargetStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD46107256C02FE00856DAC /* MultiTargetStruct.swift */; };
 		3CD8FF922683ACBB001951CD /* EntityValueTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CD8FF912683ACBB001951CD /* EntityValueTransformer.swift */; };
@@ -97,7 +97,6 @@
 		3C1FECFD2556D5AB0001BD58 /* UIKitProjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UIKitProjectTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C1FECFF2556D5AB0001BD58 /* UIKitProjectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitProjectTests.swift; sourceTree = "<group>"; };
 		3C1FED012556D5AB0001BD58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3C1FED0C2556D7C60001BD58 /* FileInGroupWithoutFolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileInGroupWithoutFolder.swift; sourceTree = "<group>"; };
 		3C1FED172556D91C0001BD58 /* Target_With_Spaces.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Target_With_Spaces.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C1FED1A2556D91D0001BD58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C1FED2A2556D9360001BD58 /* File With Spaces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "File With Spaces.swift"; sourceTree = "<group>"; };
@@ -120,6 +119,7 @@
 		3CBEB9D72AEFC25B00F5947D /* WatchWidget.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = WatchWidget.intentdefinition; sourceTree = "<group>"; };
 		3CBEB9D82AEFC25C00F5947D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3CBEB9DA2AEFC25C00F5947D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3CC94B422C3AE1FD000826B7 /* FileInGroupWithoutFolder.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FileInGroupWithoutFolder.xib; sourceTree = "<group>"; };
 		3CD46107256C02FE00856DAC /* MultiTargetStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiTargetStruct.swift; sourceTree = "<group>"; };
 		3CD8FF912683ACBB001951CD /* EntityValueTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityValueTransformer.swift; sourceTree = "<group>"; };
 		3CE3F7CB2685DEFB0047231C /* OldModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = OldModel.xcdatamodel; sourceTree = "<group>"; };
@@ -194,7 +194,7 @@
 		3C1FED0B2556D7B30001BD58 /* GroupWithoutFolder */ = {
 			isa = PBXGroup;
 			children = (
-				3C1FED0C2556D7C60001BD58 /* FileInGroupWithoutFolder.swift */,
+				3CC94B422C3AE1FD000826B7 /* FileInGroupWithoutFolder.xib */,
 			);
 			name = GroupWithoutFolder;
 			sourceTree = "<group>";
@@ -486,6 +486,7 @@
 				3C3ABC05256522AB00EAB309 /* XibViewController2Subclass.xib in Resources */,
 				3C849665255405B000900DA9 /* Preview Assets.xcassets in Resources */,
 				3C9B06C125542DD700E45614 /* XibViewController.xib in Resources */,
+				3CC94B432C3AE1FD000826B7 /* FileInGroupWithoutFolder.xib in Resources */,
 				3C9B06C425542F2500E45614 /* Launch Screen.storyboard in Resources */,
 				3C849662255405B000900DA9 /* Assets.xcassets in Resources */,
 				3C9B06E725547C3800E45614 /* StoryboardViewController.storyboard in Resources */,
@@ -533,7 +534,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3C5E4E58255C25D200BF728D /* AppDelegate.swift in Sources */,
-				3C1FED0D2556D7C60001BD58 /* FileInGroupWithoutFolder.swift in Sources */,
 				3CD46111256C034C00856DAC /* MultiTargetStruct.swift in Sources */,
 				3CE3F7CC2685DEFB0047231C /* OldModel.xcdatamodeld in Sources */,
 				3C3ABC09256526F900EAB309 /* XibViewController2.swift in Sources */,

@@ -8,8 +8,6 @@ class UIKitProjectTest: SourceGraphTestCase {
 
         configuration.project = UIKitProjectPath.string
         configuration.schemes = ["UIKitProject"]
-        configuration.targets = ["UIKitProject", "NotificationServiceExtension", "WatchWidgetExtension",
-                                 "UIKitProjectTests", "LocalPackage.LocalPackageTarget"]
 
         build(driver: XcodeProjectDriver.self)
         index()

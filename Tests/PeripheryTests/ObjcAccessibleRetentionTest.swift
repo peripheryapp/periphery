@@ -1,19 +1,10 @@
 import XCTest
 import SystemPackage
 @testable import TestShared
-@testable import PeripheryKit
 
 #if os(macOS)
 final class ObjcAccessibleRetentionTest: FixtureSourceGraphTestCase {
     let performKnownFailures = false
-
-    static override func setUp() {
-        super.setUp()
-
-        configuration.targets = ["ObjcAccessibleRetentionFixtures"]
-
-        build(driver: SPMProjectDriver.self)
-    }
 
     // https://github.com/apple/swift/issues/56327
     func testRetainsOptionalProtocolMethodImplementedInSubclass() {

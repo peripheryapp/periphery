@@ -9,8 +9,8 @@ class XcodeTargetTest: XCTestCase {
         let target = project.targets.first { $0.name == "UIKitProject" }!
         try target.identifyFiles()
 
-        XCTAssertTrue(target.files(kind: .swift).contains {
-            $0.relativeTo(ProjectRootPath).string == "Tests/XcodeTests/UIKitProject/UIKitProject/FileInGroupWithoutFolder.swift"
+        XCTAssertTrue(target.files(kind: .interfaceBuilder).contains {
+            $0.relativeTo(ProjectRootPath).string == "Tests/XcodeTests/UIKitProject/UIKitProject/FileInGroupWithoutFolder.xib"
         })
     }
 

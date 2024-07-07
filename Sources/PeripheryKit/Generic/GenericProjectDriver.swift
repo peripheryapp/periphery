@@ -2,10 +2,10 @@ import Foundation
 import SystemPackage
 import Shared
 import SourceGraph
+import SwiftIndexStore
 
 public final class GenericProjectDriver {
     private enum FileKind: String {
-        case swift
         case plist
     }
 
@@ -14,8 +14,8 @@ public final class GenericProjectDriver {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 
-        let sourceFiles = try configuration.fileTargetsPath
-            .reduce(into: [FileKind: [FilePath: Set<IndexTarget>]]()) { result, mapPath in
+        let projectFiles = try configuration.fileTargetsPath
+            .reduce(into: [FileKind: Set<FilePath>]()) { result, mapPath in
                 guard mapPath.exists else {
                     throw PeripheryError.pathDoesNotExist(path: mapPath.string)
                 }
@@ -35,19 +35,18 @@ public final class GenericProjectDriver {
                             throw PeripheryError.unsupportedFileKind(path: path)
                         }
 
-                        let indexTargets = value.mapSet { IndexTarget(name: $0) }
-                        result[fileKind, default: [:]][path, default: []].formUnion(indexTargets)
+                        result[fileKind, default: []].insert(path)
                     }
             }
 
-        return self.init(sourceFiles: sourceFiles, configuration: configuration)
+        return self.init(projectFiles: projectFiles, configuration: configuration)
     }
 
-    private let sourceFiles: [FileKind: [FilePath: Set<IndexTarget>]]
+    private let projectFiles: [FileKind: Set<FilePath>]
     private let configuration: Configuration
 
-    private init(sourceFiles: [FileKind: [FilePath: Set<IndexTarget>]], configuration: Configuration) {
-        self.sourceFiles = sourceFiles
+    private init(projectFiles: [FileKind: Set<FilePath>], configuration: Configuration) {
+        self.projectFiles = projectFiles
         self.configuration = configuration
     }
 }
@@ -55,13 +54,26 @@ public final class GenericProjectDriver {
 extension GenericProjectDriver: ProjectDriver {
     public func build() throws {}
 
-    public func index(graph: SourceGraph) throws {
-        if let swiftFiles = sourceFiles[.swift] {
-            try SwiftIndexer(sourceFiles: swiftFiles, graph: graph, indexStorePaths: configuration.indexStorePath).perform()
-        }
+    public func collect(logger: ContextualLogger) throws -> [SourceFile : [IndexUnit]] {
+        try SourceFileCollector(
+            indexStorePaths: configuration.indexStorePath,
+            logger: logger
+        ).collect()
+    }
 
-        if let plistFiles = sourceFiles[.plist] {
-            try InfoPlistIndexer(infoPlistFiles: Set(plistFiles.keys), graph: graph).perform()
+    public func index(
+        sourceFiles: [SourceFile: [IndexUnit]],
+        graph: SourceGraph,
+        logger: ContextualLogger
+    ) throws {
+        try SwiftIndexer(
+            sourceFiles: sourceFiles,
+            graph: graph,
+            logger: logger
+        ).perform()
+
+        if let plistFiles = projectFiles[.plist] {
+            try InfoPlistIndexer(infoPlistFiles: plistFiles, graph: graph).perform()
         }
 
         graph.indexingComplete()

@@ -10,6 +10,6 @@ public extension XCTestCase {
         #endif
 
         let suiteName = String(describing: Self.self).dropLast(4)
-         return ProjectRootPath.appending("Tests/Fixtures/\(suiteName)Fixtures/\(testName).swift")
+         return FixturesProjectPath.appending("Sources/\(suiteName)Fixtures/\(testName).swift")
     }
 }
