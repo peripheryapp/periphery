@@ -72,10 +72,6 @@ final class ScanBehavior {
 
             let filteredResults = try OutputDeclarationFilter().filter(results, with: baseline)
 
-            if configuration.autoRemove {
-                try ScanResultRemover().remove(results: filteredResults)
-            }
-
             if let baselinePath = configuration.writeBaseline {
                 let usrs = filteredResults
                     .flatMapSet { $0.usrs }

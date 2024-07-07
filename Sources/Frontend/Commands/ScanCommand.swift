@@ -93,9 +93,6 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Retain properties on Encodable types only")
     var retainEncodableProperties: Bool = defaultConfiguration.$retainEncodableProperties.defaultValue
 
-    @Flag(help: "Automatically remove code that can be done so safely without introducing build errors (experimental)")
-    var autoRemove: Bool = defaultConfiguration.$autoRemove.defaultValue
-
     @Flag(help: "Clean existing build artifacts before building")
     var cleanBuild: Bool = defaultConfiguration.$cleanBuild.defaultValue
 
@@ -166,7 +163,6 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
         configuration.apply(\.$externalCodableProtocols, externalCodableProtocols)
         configuration.apply(\.$externalTestCaseClasses, externalTestCaseClasses)
-        configuration.apply(\.$autoRemove, autoRemove)
         configuration.apply(\.$verbose, verbose)
         configuration.apply(\.$quiet, quiet)
         configuration.apply(\.$disableUpdateCheck, disableUpdateCheck)

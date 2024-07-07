@@ -89,9 +89,6 @@ public final class Configuration {
     @Setting(key: "retain_encodable_properties", defaultValue: false)
     public var retainEncodableProperties: Bool
 
-    @Setting(key: "auto_remove", defaultValue: false)
-    public var autoRemove: Bool
-
     @Setting(key: "verbose", defaultValue: false)
     public var verbose: Bool
 
@@ -226,10 +223,6 @@ public final class Configuration {
             config[$disableUnusedImportAnalysis.key] = disableUnusedImportAnalysis
         }
 
-        if $autoRemove.hasNonDefaultValue {
-            config[$autoRemove.key] = autoRemove
-        }
-
         if $verbose.hasNonDefaultValue {
             config[$verbose.key] = verbose
         }
@@ -357,8 +350,6 @@ public final class Configuration {
                 $disableRedundantPublicAnalysis.assign(value)
             case $disableUnusedImportAnalysis.key:
                 $disableUnusedImportAnalysis.assign(value)
-            case $autoRemove.key:
-                $autoRemove.assign(value)
             case $verbose.key:
                 $verbose.assign(value)
             case $quiet.key:
@@ -417,7 +408,6 @@ public final class Configuration {
         $retainSwiftUIPreviews.reset()
         $disableRedundantPublicAnalysis.reset()
         $disableUnusedImportAnalysis.reset()
-        $autoRemove.reset()
         $externalEncodableProtocols.reset()
         $externalCodableProtocols.reset()
         $externalTestCaseClasses.reset()

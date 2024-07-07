@@ -95,10 +95,6 @@ var targets: [PackageDescription.Target] = [
         path: "Tests/Fixtures/RetentionFixtures"
     ),
     .target(
-        name: "RemovalFixtures",
-        path: "Tests/Fixtures/RemovalFixtures"
-    ),
-    .target(
         name: "UnusedParameterFixtures",
         path: "Tests/Fixtures/UnusedParameterFixtures",
         swiftSettings: [
