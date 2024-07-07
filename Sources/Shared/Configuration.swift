@@ -127,7 +127,6 @@ public final class Configuration {
 
     // Non user facing.
     public var guidedSetup: Bool = false
-    public var removalOutputBasePath: FilePath?
 
     // Dependencies.
     private var logger: BaseLogger // Must use BaseLogger as Logger depends upon Configuration.
@@ -330,9 +329,6 @@ public final class Configuration {
             case $retainAssignOnlyPropertyTypes.key:
                 $retainAssignOnlyPropertyTypes.assign(value)
             case $externalEncodableProtocols.key:
-                if !externalEncodableProtocols.isEmpty {
-                    logger.warn("The option '--external-encodable-protocols' is deprecated, use '--external-codable-protocols' instead.")
-                }
                 $externalEncodableProtocols.assign(value)
             case $externalCodableProtocols.key:
                 $externalCodableProtocols.assign(value)

@@ -66,7 +66,7 @@ struct ScanCommand: FrontendCommand {
     @Option(parsing: .upToNextOption, help: "Property types to retain if the property is assigned, but never read")
     var retainAssignOnlyPropertyTypes: [String] = defaultConfiguration.$retainAssignOnlyPropertyTypes.defaultValue
 
-    @Option(parsing: .upToNextOption, help: .private)
+    @Option(parsing: .upToNextOption, help: "Names of external protocols that inherit Encodable. Properties and CodingKey enums of types conforming to these protocols will be retained")
     var externalEncodableProtocols: [String] = defaultConfiguration.$externalEncodableProtocols.defaultValue
 
     @Option(parsing: .upToNextOption, help: "Names of external protocols that inherit Codable. Properties and CodingKey enums of types conforming to these protocols will be retained")
@@ -133,10 +133,6 @@ struct ScanCommand: FrontendCommand {
 
         if !setup {
             try scanBehavior.setup(config).get()
-        }
-
-        if !externalEncodableProtocols.isEmpty {
-            Logger().warn("The option '--external-encodable-protocols' is deprecated, use '--external-codable-protocols' instead.")
         }
 
         let configuration = Configuration.shared
