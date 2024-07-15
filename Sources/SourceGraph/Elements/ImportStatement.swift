@@ -5,7 +5,7 @@ public struct ImportStatement {
     public let isTestable: Bool
     public let isExported: Bool
     public let location: Location
-    
+
     public init(
         module: String,
         isTestable: Bool,

@@ -14,7 +14,7 @@ final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
     func visit(_ node: ImportDeclSyntax) {
         let parts = node.path.map { $0.name.text }
         let module = parts.first ?? ""
-        let attributes = node.attributes.compactMap { $0.as(AttributeSyntax.self)?.attributeName.trimmedDescription } 
+        let attributes = node.attributes.compactMap { $0.as(AttributeSyntax.self)?.attributeName.trimmedDescription }
         let location = sourceLocationBuilder.location(at: node.positionAfterSkippingLeadingTrivia)
         let statement = ImportStatement(
             module: module,

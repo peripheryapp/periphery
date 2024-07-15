@@ -8,7 +8,7 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(url: "https://github.com/ileitch/swift-indexstore", from: "9.0.4"),
     .package(url: "https://github.com/apple/swift-syntax", from: "510.0.2"),
-    .package(url: "https://github.com/ileitch/swift-filename-matcher", from: "0.0.0"),
+    .package(url: "https://github.com/ileitch/swift-filename-matcher", from: "0.0.0")
 ]
 
 #if os(macOS)
@@ -131,7 +131,7 @@ var targets: [PackageDescription.Target] = [
             .target(name: "PeripheryKit")
         ],
         exclude: ["AccessibilityProject"]
-    ),
+    )
 ]
 
 #if os(macOS)
@@ -142,7 +142,7 @@ targets.append(contentsOf: [
             .target(name: "SourceGraph"),
             .target(name: "Shared"),
             .target(name: "PeripheryKit"),
-            .product(name: "XcodeProj", package: "XcodeProj"),
+            .product(name: "XcodeProj", package: "XcodeProj")
         ]
     ),
     .target(

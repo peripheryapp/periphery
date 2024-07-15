@@ -17,16 +17,16 @@ final class CodeClimateFormatter: OutputFormatter {
             let lines: [AnyHashable: Any] = [
                 "begin": result.declaration.location.line
             ]
-            
+
             let location: [AnyHashable: Any] = [
                 "path": outputPath(result.declaration.location).url.relativePath,
                 "lines": lines
             ]
-            
+
             let description = describe(result, colored: false)
                 .map { $0.1 }
                 .joined(separator: ", ")
-            
+
             let fingerprint: String
             if result.declaration.kind == .varParameter,
                 let parentFingerprint = result.declaration.parent?.usrs.joined(separator: "."),
@@ -37,14 +37,14 @@ final class CodeClimateFormatter: OutputFormatter {
             } else {
                 fingerprint = result.declaration.usrs.joined(separator: ".")
             }
-            
+
             let object: [AnyHashable: Any] = [
                 "description": description,
                 "fingerprint": fingerprint,
                 "severity": "major",
                 "location": location
             ]
-            
+
             jsonObject.append(object)
         }
 
