@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 @testable import TestShared
-@testable import PeripheryKit
+@testable import StaticAnalyse
 @testable import SourceGraph
 
 class UnusedParameterTest: XCTestCase {

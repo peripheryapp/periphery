@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 @testable import TestShared
 @testable import SourceGraph
-@testable import PeripheryKit
+@testable import StaticAnalyse
 
 class FunctionVisitTest: XCTestCase {
     private var results: [Location: DeclarationSyntaxVisitor.Result]!
