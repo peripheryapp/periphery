@@ -4,26 +4,26 @@ import SwiftSyntax
 import SwiftParser
 import SourceGraph
 
-protocol Item: AnyObject {
+public protocol Item: AnyObject {
     var items: [Item] { get }
 }
 
-final class Function: Item, Hashable {
-    static func == (lhs: Function, rhs: Function) -> Bool {
+public final class Function: Item, Hashable {
+    public static func == (lhs: Function, rhs: Function) -> Bool {
         lhs.location == rhs.location
     }
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(location)
     }
 
-    let name: String
-    let fullName: String
-    let location: Location
-    let items: [Item]
-    let parameters: [Parameter]
-    let genericParameters: [String]
-    let attributes: [String]
+    public let name: String
+    public let fullName: String
+    public let location: Location
+    public let items: [Item]
+    public let parameters: [Parameter]
+    public let genericParameters: [String]
+    public let attributes: [String]
 
     init(
         name: String,
@@ -44,12 +44,12 @@ final class Function: Item, Hashable {
     }
 }
 
-final class Parameter: Item, Hashable {
-    static func == (lhs: Parameter, rhs: Parameter) -> Bool {
+public final class Parameter: Item, Hashable {
+    public static func == (lhs: Parameter, rhs: Parameter) -> Bool {
         return lhs.location == rhs.location
     }
 
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(location)
     }
 
@@ -57,14 +57,14 @@ final class Parameter: Item, Hashable {
     let secondName: String?
     let metatype: String?
     let location: Location
-    let items: [Item] = []
+    public let items: [Item] = []
     var function: Function?
 
-    var name: String {
+    public var name: String {
         return secondName ?? firstName ?? ""
     }
 
-    func makeDeclaration(withParent parent: Declaration) -> Declaration {
+    public func makeDeclaration(withParent parent: Declaration) -> Declaration {
         let functionName = function?.fullName ?? "func()"
         let parentUsrs = parent.usrs.joined(separator: "-")
         let usr = "param-\(name)-\(functionName)-\(parentUsrs)"

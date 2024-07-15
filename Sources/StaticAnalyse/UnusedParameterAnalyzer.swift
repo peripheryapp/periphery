@@ -3,14 +3,16 @@ import SwiftSyntax
 import SystemPackage
 import SourceGraph
 
-final class UnusedParameterAnalyzer {
+public final class UnusedParameterAnalyzer {
     private enum UsageType {
         case used
         case unused
         case shadowed
     }
+    
+    public init() { }
 
-    func analyze(file: SourceFile, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) -> [Function: Set<Parameter>] {
+    public func analyze(file: SourceFile, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) -> [Function: Set<Parameter>] {
         let functions = UnusedParameterParser.parse(
             file: file,
             syntax: syntax,

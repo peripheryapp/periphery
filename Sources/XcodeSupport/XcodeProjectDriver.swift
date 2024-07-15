@@ -3,6 +3,7 @@ import SystemPackage
 import PeripheryKit
 import Shared
 import SourceGraph
+import Indexer
 
 public final class XcodeProjectDriver {
     public static func build() throws -> Self {
@@ -122,7 +123,7 @@ public final class XcodeProjectDriver {
 
 extension XcodeProjectDriver: ProjectDriver {
     public func build() throws {
-        guard  !configuration.skipBuild else { return }
+        guard !configuration.skipBuild else { return }
 
         if configuration.cleanBuild {
             try xcodebuild.removeDerivedData(for: project, allSchemes: Array(schemes))

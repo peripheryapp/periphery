@@ -2,16 +2,16 @@ import Foundation
 import SourceGraph
 import SwiftSyntax
 
-final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
-    var importStatements: [ImportStatement] = []
+public final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
+    public var importStatements: [ImportStatement] = []
 
     private let sourceLocationBuilder: SourceLocationBuilder
 
-    init(sourceLocationBuilder: SourceLocationBuilder) {
+    public init(sourceLocationBuilder: SourceLocationBuilder) {
         self.sourceLocationBuilder = sourceLocationBuilder
     }
 
-    func visit(_ node: ImportDeclSyntax) {
+    public func visit(_ node: ImportDeclSyntax) {
         let parts = node.path.map { $0.name.text }
         let module = parts.first ?? ""
         let attributes = node.attributes.compactMap { $0.as(AttributeSyntax.self)?.attributeName.trimmedDescription } 

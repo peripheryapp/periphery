@@ -1,9 +1,9 @@
 import Foundation
-import SwiftSyntax
 import SwiftIndexStore
 import SystemPackage
 import Shared
 import SourceGraph
+import SyntaxAnalyse
 
 public final class SwiftIndexer: Indexer {
     private let sourceFiles: [FilePath: Set<IndexTarget>]
@@ -383,7 +383,7 @@ public final class SwiftIndexer: Indexer {
         }
 
         private func applyCommentCommands(using syntaxVisitor: MultiplexingSyntaxVisitor) {
-            let fileCommands = CommentCommand.parseCommands(in: syntaxVisitor.syntax.leadingTrivia)
+            let fileCommands = syntaxVisitor.parseComments()
 
             if fileCommands.contains(.ignoreAll) {
                 retainHierarchy(declarations)
