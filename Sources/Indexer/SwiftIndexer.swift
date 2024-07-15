@@ -3,7 +3,7 @@ import SwiftIndexStore
 import SystemPackage
 import Shared
 import SourceGraph
-import SyntaxAnalyse
+import StaticAnalyse
 
 public final class SwiftIndexer: Indexer {
     private let sourceFiles: [FilePath: Set<IndexTarget>]
