@@ -1,5 +1,6 @@
 import XCTest
 import SystemPackage
+@testable import Indexer
 @testable import PeripheryKit
 @testable import SourceGraph
 import Shared

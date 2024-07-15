@@ -5,6 +5,7 @@ import SwiftParser
 @testable import TestShared
 @testable import PeripheryKit
 @testable import SourceGraph
+@testable import StaticAnalyse
 
 class TypeSyntaxInspectorTest: XCTestCase {
     private var results: [Location: TypeSyntaxInspectorTestVisitor.Result]!
