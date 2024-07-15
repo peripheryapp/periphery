@@ -2,6 +2,7 @@ import Foundation
 import SystemPackage
 import Shared
 import SourceGraph
+import Indexer
 
 public final class SPMProjectDriver {
     public static func build() throws -> Self {

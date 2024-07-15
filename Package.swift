@@ -42,12 +42,29 @@ var targets: [PackageDescription.Target] = [
         dependencies: [
             .target(name: "SourceGraph"),
             .target(name: "Shared"),
+            .target(name: "Indexer"),
             .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "AEXML", package: "AEXML"),
             .product(name: "SwiftSyntax", package: "swift-syntax"),
             .product(name: "SwiftParser", package: "swift-syntax"),
             .product(name: "SwiftIndexStore", package: "swift-indexstore"),
             .product(name: "FilenameMatcher", package: "swift-filename-matcher")
+        ]
+    ),
+    .target(
+        name: "Indexer",
+        dependencies: [
+            .target(name: "StaticAnalyse"),
+            .target(name: "Shared"),
+            .product(name: "SwiftIndexStore", package: "swift-indexstore")
+        ]
+    ),
+    .target(
+        name: "StaticAnalyse",
+        dependencies: [
+            .target(name: "SourceGraph"),
+            .target(name: "Shared"),
+            .product(name: "SwiftSyntax", package: "swift-syntax"),
         ]
     ),
     .target(
