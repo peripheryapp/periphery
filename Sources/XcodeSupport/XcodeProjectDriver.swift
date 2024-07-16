@@ -31,12 +31,18 @@ public final class XcodeProjectDriver {
             } else {
                 let parts = targetName.split(separator: ".", maxSplits: 1)
 
-                if let packageName = parts.first,
-                   let targetName = parts.last,
-                   let package = project.packageTargets.keys.first(where: { $0.name == packageName }),
-                   let target = project.packageTargets[package]?.first(where: { $0.name == targetName })
-                {
+                guard let packageName = parts.first,
+                      let packageTargetName = parts.last,
+                      let package = project.packageTargets.keys.first(where: { $0.name == packageName })
+                else {
+                    invalidTargetNames.append(targetName)
+                    continue
+                }
+                
+                if let target = project.packageTargets[package]?.first(where: { $0.name == packageTargetName }) {
                     packageTargets[package, default: []].insert(target)
+                } else if let subTarget = package.targets.first(where: { $0.name == packageTargetName }) {
+                    packageTargets[package, default: []].insert(subTarget)
                 } else {
                     invalidTargetNames.append(targetName)
                 }
