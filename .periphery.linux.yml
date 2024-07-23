@@ -6,3 +6,6 @@ targets:
 - PeripheryTests
 - SPMTests
 - AccessibilityTests
+- SourceGraph
+- StaticAnalyse
+- Indexer

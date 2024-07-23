@@ -8,3 +8,6 @@ targets:
 - XcodeTests
 - SPMTests
 - AccessibilityTests
+- SourceGraph
+- StaticAnalyse
+- Indexer
