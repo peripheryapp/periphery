@@ -21,7 +21,6 @@ public struct SPM {
         }
 
         func build(additionalArguments: [String]) throws {
-            // TODO: Configure test building?
             try Shell.shared.exec(["swift", "build", "--build-tests"] + additionalArguments)
         }
     }

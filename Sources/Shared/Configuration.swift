@@ -23,7 +23,7 @@ public final class Configuration {
     @Setting(key: "schemes", defaultValue: [])
     public var schemes: [String]
 
-    @Setting(key: "index_exclude", defaultValue: ["**/.build/**/*"], requireDefaultValues: true)
+    @Setting(key: "index_exclude", defaultValue: ["**/*?.build/**/*"], requireDefaultValues: true)
     public var indexExclude: [String]
 
     @Setting(key: "report_exclude", defaultValue: [])
