@@ -7,7 +7,6 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case usageError(String)
     case underlyingError(Error)
     case invalidScheme(name: String, project: String)
-    case invalidTargets(names: [String], project: String)
     case sourceGraphIntegrityError(message: String)
     case guidedSetupError(message: String)
     case updateCheckError(message: String)
@@ -17,7 +16,6 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case packageError(message: String)
     case swiftVersionParseError(fullVersion: String)
     case swiftVersionUnsupportedError(version: String, minimumVersion: String)
-    case unindexedTargetsError(targets: Set<String>, indexStorePaths: [FilePath])
     case jsonDeserializationError(error: Error, json: String)
     case indexStoreNotFound(derivedDataPath: String)
     case unsupportedFileKind(path: FilePath)
@@ -36,11 +34,6 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             return describe(error)
         case let .invalidScheme(name, project):
             return "Scheme '\(name)' does not exist in '\(project)'."
-        case let .invalidTargets(names, project):
-            let formattedNames = names.map { "'\($0)'" }.joined(separator: ", ")
-            let declinedTarget = names.count == 1 ? "Target" : "Targets"
-            let conjugatedDo = names.count == 1 ? "does" : "do"
-            return "\(declinedTarget) \(formattedNames) \(conjugatedDo) not exist in '\(project)'."
         case .sourceGraphIntegrityError(let message):
             return message
         case .guidedSetupError(let message):
@@ -57,9 +50,6 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             return message
         case .swiftVersionParseError(let fullVersion):
             return "Failed to parse Swift version from: \(fullVersion)"
-        case let .unindexedTargetsError(targets, indexStorePath):
-            let joinedTargets = targets.sorted().joined(separator: ", ")
-            return "The index store at '\(indexStorePath)' does not contain data for the following targets: \(joinedTargets). Either the index store is outdated, or you have requested to scan targets that have not been built. For Xcode projects, the chosen schemes must build all of the chosen targets."
         case let .swiftVersionUnsupportedError(version, minimumVersion):
             return "This version of Periphery only supports Swift >= \(minimumVersion), you're using \(version)."
         case let .jsonDeserializationError(error, json):

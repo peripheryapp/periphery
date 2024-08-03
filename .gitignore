@@ -22,6 +22,7 @@ DerivedData
 *.gcda
 *.gcno
 .swiftpm
+Tests/Fixtures/.build/
 
 # VSCode
 .vscode/*

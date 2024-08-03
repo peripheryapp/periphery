@@ -2,8 +2,9 @@ import Foundation
 
 public struct PropertyTypeSanitizer {
     @inlinable
-    public static func sanitize(_ types: [String]) -> [String] {
-        types.map { sanitize($0) }
+    public static func sanitize(_ value: Any) -> [String]? {
+        guard let typedValue = value as? [String] else { return nil }
+        return typedValue.map { sanitize($0) }
     }
 
     @inlinable

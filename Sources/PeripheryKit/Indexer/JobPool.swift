@@ -1,10 +1,10 @@
 import Foundation
 import Shared
 
-struct JobPool<T> {
-    let jobs: [T]
+struct JobPool<Job> {
+    let jobs: [Job]
 
-    func forEach(_ block: @escaping (T) throws -> Void) throws {
+    func forEach(_ block: @escaping (Job) throws -> Void) throws {
         var error: Error?
 
         DispatchQueue.concurrentPerform(iterations: jobs.count) { idx in
@@ -23,9 +23,9 @@ struct JobPool<T> {
         }
     }
 
-    func flatMap<R>(_ block: @escaping (T) throws -> [R]) throws -> [R] {
+    func flatMap<Result>(_ block: @escaping (Job) throws -> [Result]) throws -> [Result] {
         var error: Error?
-        var results: [R] = []
+        var results: [Result] = []
         let lock = UnfairLock()
 
         DispatchQueue.concurrentPerform(iterations: jobs.count) { idx in
