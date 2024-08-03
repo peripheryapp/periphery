@@ -95,7 +95,7 @@ extension XcodeProjectDriver: ProjectDriver {
                                  scheme: scheme,
                                  allSchemes: Array(schemes),
                                  additionalArguments: configuration.buildArguments,
-                                 buildForTesting: true) // TODO: auto detect? configurable?
+                                 buildForTesting: true)
         }
     }
 

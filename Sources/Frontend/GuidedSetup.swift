@@ -40,7 +40,7 @@ final class GuidedSetup: SetupGuideHelpers {
         let project = Project(kind: projectGuide.projectKind)
         try project.validateEnvironment()
 
-        print(colorize("*", .boldGreen) + " Inspecting project...\n")
+        print(colorize("*", .boldGreen) + " Inspecting project...")
 
         let commonGuide = CommonSetupGuide()
         let guides: [SetupGuide] = [projectGuide, commonGuide]
