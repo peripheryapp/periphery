@@ -12,7 +12,7 @@ final class ResultBuilderRetainer: SourceGraphMutator {
         "buildArray(_:)",
         "buildBlock(_:)",
         "buildFinalResult(_:)",
-        "buildLimitedAvailability(_:)",
+        "buildLimitedAvailability(_:)"
     ])
 
     required init(graph: SourceGraph, configuration: Configuration) {
@@ -20,12 +20,10 @@ final class ResultBuilderRetainer: SourceGraphMutator {
     }
 
     func mutate() {
-        for decl in graph.declarations(ofKinds: Declaration.Kind.toplevelAttributableKind) {
-            if decl.attributes.contains("resultBuilder") {
-                for childDecl in decl.declarations {
-                    if let name = childDecl.name, resultBuilderMethods.contains(name) {
-                        graph.markRetained(childDecl)
-                    }
+        for decl in graph.declarations(ofKinds: Declaration.Kind.toplevelAttributableKind) where decl.attributes.contains("resultBuilder") {
+            for childDecl in decl.declarations {
+                if let name = childDecl.name, resultBuilderMethods.contains(name) {
+                    graph.markRetained(childDecl)
                 }
             }
         }

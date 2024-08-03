@@ -8,4 +8,3 @@ public class FixtureClass215Retainer {
         _ = 0.someExtensionProperty
     }
 }
-

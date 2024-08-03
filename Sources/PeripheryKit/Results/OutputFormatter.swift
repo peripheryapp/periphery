@@ -26,7 +26,7 @@ extension OutputFormatter {
             return "unused"
         case .assignOnlyProperty:
             return "assignOnlyProperty"
-        case .redundantProtocol(_, _):
+        case .redundantProtocol:
             return "redundantProtocol"
         case .redundantPublicAccessibility:
             return "redundantPublicAccessibility"

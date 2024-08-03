@@ -8,4 +8,3 @@ public class IgnoreCommentCommandRetainer {
         _ = IgnoreCommentCommand()
     }
 }
-

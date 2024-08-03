@@ -20,16 +20,14 @@ final class AccessibilityCascader: SourceGraphMutator {
     // MARK: - Private
 
     private func cascadeAccessibility(for decls: [Declaration], only kinds: Set<Declaration.Kind> = []) throws {
-        for decl in decls {
-            if decl.accessibility.isExplicit {
-                for childDecl in decl.declarations {
-                    if !kinds.isEmpty && !kinds.contains(childDecl.kind) {
-                        continue
-                    }
+        for decl in decls where decl.accessibility.isExplicit {
+            for childDecl in decl.declarations {
+                if !kinds.isEmpty && !kinds.contains(childDecl.kind) {
+                    continue
+                }
 
-                    if !childDecl.accessibility.isExplicit {
-                        childDecl.accessibility = .init(value: decl.accessibility.value, isExplicit: false)
-                    }
+                if !childDecl.accessibility.isExplicit {
+                    childDecl.accessibility = .init(value: decl.accessibility.value, isExplicit: false)
                 }
             }
         }

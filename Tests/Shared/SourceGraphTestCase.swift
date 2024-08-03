@@ -82,16 +82,12 @@ open class SourceGraphTestCase: XCTestCase {
         if let tuple = Self.results.redundantProtocolDeclarations[declaration] {
             let decls = tuple.references.compactMap { $0.parent }
 
-            for conformance in conformances {
-                if !decls.contains(where: { $0.kind == conformance.kind && $0.name == conformance.name }) {
-                    XCTFail("Expected \(conformance) to implement protocol '\(name)'.", file: file, line: line)
-                }
+            for conformance in conformances where !decls.contains(where: { $0.kind == conformance.kind && $0.name == conformance.name }) {
+                XCTFail("Expected \(conformance) to implement protocol '\(name)'.", file: file, line: line)
             }
 
-            for inherited in inheritedProtocols {
-                if !tuple.inherited.contains(inherited.name) {
-                    XCTFail("Expected \(name) to inherit protocol '\(inherited.name)'.", file: file, line: line)
-                }
+            for inherited in inheritedProtocols where !tuple.inherited.contains(inherited.name) {
+                XCTFail("Expected \(name) to inherit protocol '\(inherited.name)'.", file: file, line: line)
             }
         } else {
             XCTFail("Expected '\(name)' to be redundant.", file: file, line: line)

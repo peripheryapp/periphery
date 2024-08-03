@@ -15,7 +15,7 @@ public extension FilePath {
 
         return Glob(
             pattern: absolutePattern,
-            blacklistedDirectories: [".build", "node_modules", ".gems", "gems", ".swiftpm"],
+            excludedDirectories: [".build", "node_modules", ".gems", "gems", ".swiftpm"],
             logger: Logger()
         ).paths.mapSet { FilePath($0).lexicallyNormalized() }
     }
@@ -27,7 +27,7 @@ public extension FilePath {
  ///      For example, with the pattern "dir/**/*.ext" the file "dir/file.ext" is also included.
  ///    - When the pattern ends with a trailing slash, only directories are matched.
 private class Glob {
-    private let blacklistedDirectories: [String]
+    private let excludedDirectories: [String]
     private let logger: Logger
     private var isDirectoryCache: [String: Bool] = [:]
 
@@ -35,10 +35,10 @@ private class Glob {
 
     init(
         pattern: String,
-        blacklistedDirectories: [String],
+        excludedDirectories: [String],
         logger: Logger
     ) {
-        self.blacklistedDirectories = blacklistedDirectories
+        self.excludedDirectories = excludedDirectories
         self.logger = logger
 
         let hasTrailingGlobstarSlash = pattern.hasSuffix("**/")
@@ -107,7 +107,7 @@ private class Glob {
 
     private func exploreDirectories(url: URL) throws -> [URL] {
         let subURLs = try FileManager.default.contentsOfDirectory(atPath: url.path).flatMap { subPath -> [URL] in
-            if blacklistedDirectories.contains(subPath) {
+            if excludedDirectories.contains(subPath) {
                 return []
             }
 

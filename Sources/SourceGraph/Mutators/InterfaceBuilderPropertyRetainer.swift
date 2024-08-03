@@ -13,10 +13,8 @@ class InterfaceBuilderPropertyRetainer {
         let extensions = graph.declarations(ofKind: .extensionClass)
 
         for extDecl in extensions {
-            for decl in extDecl.declarations {
-                if decl.attributes.contains(where: { ibAttributes.contains($0) }) {
-                    graph.markRetained(decl)
-                }
+            for decl in extDecl.declarations where decl.attributes.contains(where: { ibAttributes.contains($0) }) {
+                graph.markRetained(decl)
             }
         }
     }
@@ -26,10 +24,8 @@ class InterfaceBuilderPropertyRetainer {
         let descendentInheritedDeclarations = inheritedDeclarations.map { $0.declarations }.joined()
         let allDeclarations = declaration.declarations.union(descendentInheritedDeclarations)
 
-        for declaration in allDeclarations {
-            if declaration.attributes.contains(where: { ibAttributes.contains($0) }) {
-                graph.markRetained(declaration)
-            }
+        for declaration in allDeclarations where declaration.attributes.contains(where: { ibAttributes.contains($0) }) {
+            graph.markRetained(declaration)
         }
     }
 }

@@ -18,7 +18,7 @@ final class PubliclyAccessibleRetainer: SourceGraphMutator {
         }
 
         let publicDeclarations = declarations.filter { $0.accessibility.value == .public || $0.accessibility.value == .open }
-        
+
         publicDeclarations.forEach { graph.markRetained($0) }
 
         // Enum cases inherit the accessibility of the enum.
