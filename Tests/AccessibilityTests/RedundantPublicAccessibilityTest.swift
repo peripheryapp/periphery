@@ -6,8 +6,6 @@ class RedundantPublicAccessibilityTest: SourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        configuration.targets = ["MainTarget", "TargetA", "TestTarget"]
-
         build(driver: SPMProjectDriver.self, projectPath: AccessibilityProjectPath)
     }
 

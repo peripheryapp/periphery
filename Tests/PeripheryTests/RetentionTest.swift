@@ -2,18 +2,9 @@ import XCTest
 import SystemPackage
 import Shared
 @testable import TestShared
-@testable import PeripheryKit
 
 final class RetentionTest: FixtureSourceGraphTestCase {
     let performKnownFailures = false
-
-    static override func setUp() {
-        super.setUp()
-
-        configuration.targets = ["RetentionFixtures"]
-
-        build(driver: SPMProjectDriver.self)
-    }
 
     func testNonReferencedClass() {
         analyze() {

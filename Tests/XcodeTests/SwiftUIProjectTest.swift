@@ -8,7 +8,6 @@ class SwiftUIProjectTest: SourceGraphTestCase {
 
         configuration.project = SwiftUIProjectPath.string
         configuration.schemes = ["SwiftUIProject"]
-        configuration.targets = ["SwiftUIProject"]
 
         build(driver: XcodeProjectDriver.self)
         index()

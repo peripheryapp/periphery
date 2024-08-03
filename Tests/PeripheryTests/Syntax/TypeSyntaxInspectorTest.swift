@@ -114,7 +114,7 @@ class TypeSyntaxInspectorTest: XCTestCase {
     // MARK: - Private
 
     private var fixturePath: SourceFile {
-        let path = ProjectRootPath.appending( "Tests/Fixtures/TypeSyntaxInspectorFixtures/TypeSyntaxInspectorFixture.swift")
+        let path = FixturesProjectPath.appending( "Sources/TypeSyntaxInspectorFixtures/TypeSyntaxInspectorFixture.swift")
         return SourceFile(path: path, modules: ["TypeSyntaxInspectorFixtures"])
     }
 

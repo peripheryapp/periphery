@@ -46,12 +46,15 @@ final class GuidedSetup: SetupGuideHelpers {
         let guides: [SetupGuide] = [projectGuide, commonGuide]
         try guides.forEach { try $0.perform() }
         let options = Array(guides.map { $0.commandLineOptions }.joined())
+        var shouldSave = false
 
-        print(colorize("\nSave configuration to \(Configuration.defaultConfigurationFile)?", .bold))
-        let shouldSave = selectBoolean()
+        if configuration.hasNonDefaultValues {
+            print(colorize("\nSave configuration to \(Configuration.defaultConfigurationFile)?", .bold))
+            shouldSave = selectBoolean()
 
-        if shouldSave {
-            try configuration.save()
+            if shouldSave {
+                try configuration.save()
+            }
         }
 
         print(colorize("\n*", .boldGreen) + " Executing command:")

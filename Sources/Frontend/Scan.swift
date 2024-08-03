@@ -45,8 +45,11 @@ final class Scan {
             logger.info("\(asterisk) Indexing...")
         }
 
+        let indexLogger = logger.contextualized(with: "index")
+        let sourceFiles = try driver.collect(logger: indexLogger)
+
         let graph = SourceGraph.shared
-        try driver.index(graph: graph)
+        try driver.index(sourceFiles: sourceFiles, graph: graph, logger: indexLogger)
         logger.endInterval(indexInterval)
 
         let analyzeInterval = logger.beginInterval("analyze")

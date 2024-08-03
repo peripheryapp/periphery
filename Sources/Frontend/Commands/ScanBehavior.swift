@@ -90,24 +90,6 @@ final class ScanBehavior {
             logger.info(output, canQuiet: false)
             logger.endInterval(interval)
 
-            if filteredResults.count > 0,
-                configuration.outputFormat.supportsAuxiliaryOutput {
-                logger.info(
-                    colorize("\n* ", .boldGreen) +
-                        colorize("Seeing false positives?", .bold) +
-
-                        colorize("\n - ", .boldGreen) +
-                        "Periphery only analyzes files that are members of the targets you specify." +
-                        "\n   References to declarations identified as unused may reside in files that are members of other targets, e.g test targets." +
-
-                        colorize("\n - ", .boldGreen) +
-                        "Periphery is a very precise tool, false positives often turn out to be correct after further investigation." +
-
-                        colorize("\n - ", .boldGreen) +
-                        "If it really is a false positive, please report it - https://github.com/peripheryapp/periphery/issues."
-                )
-            }
-
             updateChecker.notifyIfAvailable()
 
             if !filteredResults.isEmpty && configuration.strict {
