@@ -1,20 +1,9 @@
-@testable import PeripheryKit
 import Shared
 import SystemPackage
 @testable import TestShared
 import XCTest
-
-// swiftlint:disable:next balanced_xctest_lifecycle
 final class RetentionTest: FixtureSourceGraphTestCase {
     let performKnownFailures = false
-
-    override static func setUp() {
-        super.setUp()
-
-        configuration.targets = ["RetentionFixtures"]
-
-        build(driver: SPMProjectDriver.self)
-    }
 
     func testNonReferencedClass() {
         analyze {

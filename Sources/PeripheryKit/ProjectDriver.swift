@@ -1,9 +1,9 @@
 import Foundation
-import SourceGraph
+import Indexer
+import Shared
+import SwiftIndexStore
 
 public protocol ProjectDriver {
-    static func build() throws -> Self
-
     func build() throws
-    func index(graph: SourceGraph) throws
+    func plan(logger: ContextualLogger) throws -> IndexPlan
 }

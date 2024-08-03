@@ -8,18 +8,18 @@ import XcodeSupport
 #endif
 
 final class Project {
-    static func identify() -> Self {
+    static func identify() throws -> Self {
         let configuration = Configuration.shared
 
-        if configuration.workspace != nil || configuration.project != nil {
-            return self.init(kind: .xcode)
-        } else if !configuration.fileTargetsPath.isEmpty {
-            return self.init(kind: .generic)
+        if let path = configuration.project {
+            return self.init(kind: .xcode(projectPath: path))
+        } else if let path = configuration.genericProjectConfig {
+            return self.init(kind: .generic(genericProjectConfig: path))
         } else if SPM.isSupported {
             return self.init(kind: .spm)
         }
 
-        return self.init(kind: .xcode)
+        throw PeripheryError.usageError("Failed to identify project kind.")
     }
 
     let kind: ProjectKind
@@ -28,41 +28,18 @@ final class Project {
         self.kind = kind
     }
 
-    func validateEnvironment() throws {
-        let logger = Logger()
-
-        logger.debug(SwiftVersion.current.fullVersion)
-        try SwiftVersion.current.validateVersion()
-
-        switch kind {
-        case .xcode:
-            #if canImport(XcodeSupport)
-            do {
-                let xcodebuild = Xcodebuild()
-                logger.debug(try xcodebuild.version())
-            } catch {
-                throw PeripheryError.xcodebuildNotConfigured
-            }
-            #else
-            fatalError("Xcode projects are not supported on this platform.")
-            #endif
-        default:
-            break
-        }
-    }
-
     func driver() throws -> ProjectDriver {
         switch kind {
-        case .xcode:
+        case .xcode(let projectPath):
             #if canImport(XcodeSupport)
-            return try XcodeProjectDriver.build()
+            return try XcodeProjectDriver.build(projectPath: projectPath)
             #else
             fatalError("Xcode projects are not supported on this platform.")
             #endif
         case .spm:
             return try SPMProjectDriver.build()
-        case .generic:
-            return try GenericProjectDriver.build()
+        case .generic(let genericProjectConfig):
+            return try GenericProjectDriver.build(genericProjectConfig: genericProjectConfig)
         }
     }
 }

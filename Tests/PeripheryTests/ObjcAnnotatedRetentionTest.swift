@@ -1,18 +1,9 @@
-@testable import PeripheryKit
 import SystemPackage
 @testable import TestShared
 import XCTest
 
 #if os(macOS) // swiftlint:disable:next balanced_xctest_lifecycle
 final class ObjcAnnotatedRetentionTest: FixtureSourceGraphTestCase {
-    override static func setUp() {
-        super.setUp()
-
-        configuration.targets = ["ObjcAnnotatedRetentionFixtures"]
-
-        build(driver: SPMProjectDriver.self)
-    }
-
     func testRetainsAnnotatedExtensionDeclarations() {
         analyze(retainObjcAnnotated: true) {
             assertReferenced(.class("FixtureClass214")) {

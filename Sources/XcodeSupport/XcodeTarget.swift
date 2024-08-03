@@ -26,7 +26,6 @@ final class XcodeTarget {
         let sourcesBuildPhases = project.xcodeProject.pbxproj.sourcesBuildPhases
         let resourcesBuildPhases = project.xcodeProject.pbxproj.resourcesBuildPhases
 
-        try identifyFiles(kind: .swift, in: sourcesBuildPhases)
         try identifyFiles(kind: .xcDataModel, in: sourcesBuildPhases)
         try identifyFiles(kind: .xcMappingModel, in: sourcesBuildPhases)
         try identifyFiles(kind: .interfaceBuilder, in: resourcesBuildPhases)
@@ -35,10 +34,6 @@ final class XcodeTarget {
 
     func files(kind: ProjectFileKind) -> Set<FilePath> {
         files[kind, default: []]
-    }
-
-    var packageDependencyNames: Set<String> {
-        target.packageProductDependencies.mapSet { $0.productName }
     }
 
     // MARK: - Private

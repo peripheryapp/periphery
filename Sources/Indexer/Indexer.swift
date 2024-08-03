@@ -1,9 +1,9 @@
 import FilenameMatcher
 import Foundation
 import Shared
+import SourceGraph
 import SystemPackage
-
-public class Indexer {
+class Indexer {
     private let configuration: Configuration
 
     init(configuration: Configuration) {
@@ -15,5 +15,9 @@ public class Indexer {
 
         let included = files.filter { !configuration.indexExcludeMatchers.anyMatch(filename: $0.string) }
         return (included, files.subtracting(included))
+    }
+
+    func isRetained(_ file: SourceFile) -> Bool {
+        configuration.retainFilesMatchers.anyMatch(filename: file.path.string)
     }
 }

@@ -1,9 +1,7 @@
 import Foundation
-import PeripheryKit
 import Shared
 import SystemPackage
 import XcodeProj
-
 final class XcodeWorkspace: XcodeProjectlike {
     let type: String = "workspace"
     let path: FilePath
@@ -14,7 +12,6 @@ final class XcodeWorkspace: XcodeProjectlike {
     private let xcworkspace: XCWorkspace
 
     private(set) var targets: Set<XcodeTarget> = []
-    private(set) var packageTargets: [SPM.Package: Set<SPM.Target>] = [:]
 
     required init(path: FilePath, xcodebuild: Xcodebuild = .init(), configuration: Configuration = .shared, logger: Logger = .init()) throws {
         logger.contextualized(with: "xcode:workspace").debug("Loading \(path)")
@@ -35,10 +32,6 @@ final class XcodeWorkspace: XcodeProjectlike {
 
         targets = projects.reduce(into: .init()) { result, project in
             result.formUnion(project.targets)
-        }
-
-        packageTargets = projects.reduce(into: .init()) { result, project in
-            result.merge(project.packageTargets) { $0.union($1) }
         }
     }
 

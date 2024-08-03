@@ -2,25 +2,51 @@ import Foundation
 import Shared
 import SystemPackage
 
-public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide {
+public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
+    public static func detect() -> Self? {
+        let workspacePaths = FilePath
+            .glob("**/*.xcworkspace")
+            .filter {
+                // Swift Package Manager generates a xcworkspace inside the xcodeproj that isn't useful.
+                !$0.string.contains(".xcodeproj/")
+            }
+        let projectPaths = FilePath.glob("**/*.xcodeproj")
+
+        if workspacePaths.isEmpty && projectPaths.isEmpty {
+            return nil
+        }
+
+        return Self(
+            workspacePaths: workspacePaths,
+            projectPaths: projectPaths
+        )
+    }
+
+    private let workspacePaths: Set<FilePath>
+    private let projectPaths: Set<FilePath>
     private let configuration: Configuration
     private let xcodebuild: Xcodebuild
 
-    public required init(configuration: Configuration = .shared, xcodebuild: Xcodebuild = .init()) {
+    public required init(
+        workspacePaths: Set<FilePath>,
+        projectPaths: Set<FilePath>,
+        configuration: Configuration = .shared,
+        xcodebuild: Xcodebuild = .init()
+    ) {
+        self.workspacePaths = workspacePaths
+        self.projectPaths = projectPaths
         self.configuration = configuration
         self.xcodebuild = xcodebuild
         super.init()
     }
 
-    public var projectKind: ProjectKind {
-        .xcode
+    public var projectKindName: String {
+        "Xcode"
     }
 
-    public var isSupported: Bool {
-        !projectPaths().isEmpty || !workspacePaths().isEmpty
-    }
+    public func perform() throws -> ProjectKind {
+        try xcodebuild.ensureConfigured()
 
-    public func perform() throws {
         var project: XcodeProjectlike?
 
         if let workspacePath = identifyWorkspace() {
@@ -29,49 +55,33 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             project = try XcodeProject(path: projectPath)
         }
 
-        if let project {
-            guard !project.targets.isEmpty else {
-                throw PeripheryError.guidedSetupError(message: "Failed to identify any targets in \(project.path.lastComponent?.string ?? "")")
-            }
-
-            var targets = project.targets.map { $0.name }
-            targets += project.packageTargets.flatMap { package, _ in
-                package.targets.map { "\(package.name).\($0.name)" }
-            }
-            targets = targets.sorted()
-
-            print(colorize("Select build targets to analyze:", .bold))
-            configuration.targets = select(multiple: targets, allowAll: true).selectedValues
-
-            let schemes = Array(try filter(
-                project.schemes(additionalArguments: configuration.xcodeListArguments),
-                project
-            )).sorted()
-
-            print(colorize("\nSelect the schemes necessary to build your chosen targets:", .bold))
-            configuration.schemes = select(multiple: schemes, allowAll: false).selectedValues
-        } else {
+        guard let project else {
             throw PeripheryError.guidedSetupError(message: "Failed to find .xcworkspace or .xcodeproj in current directory")
         }
+
+        let schemes = try filter(
+            project.schemes(additionalArguments: configuration.xcodeListArguments),
+            project
+        ).map { $0 }.sorted()
+
+        print(colorize("\nSelect the schemes necessary to build your chosen targets:", .bold))
+        configuration.schemes = select(multiple: schemes, allowAll: false).selectedValues
 
         print(colorize("\nAssume Objective-C accessible declarations are in use?", .bold))
         print(colorize("?", .boldYellow) + " Declarations exposed to the Objective-C runtime explicitly with @objc, or implicitly by inheriting NSObject will be assumed to be in use. Choose 'No' if your project is pure Swift.")
         configuration.retainObjcAccessible = selectBoolean()
+
+        return .xcode(projectPath: project.path)
     }
 
     public var commandLineOptions: [String] {
         var options: [String] = []
-
-        if let workspace = configuration.workspace {
-            options.append("--workspace \"\(workspace)\"")
-        }
 
         if let project = configuration.project {
             options.append("--project \"\(project)\"")
         }
 
         options.append("--schemes " + configuration.schemes.map { "\"\($0)\"" }.joined(separator: ","))
-        options.append("--targets " + configuration.targets.map { "\"\($0)\"" }.joined(separator: ","))
 
         if configuration.retainObjcAccessible {
             options.append("--retain-objc-accessible")
@@ -101,56 +111,43 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
 
     private func identifyWorkspace() -> FilePath? {
         var workspacePath: FilePath?
-        let paths = workspacePaths()
 
-        if paths.count > 1 {
+        if workspacePaths.count > 1 {
             print(colorize("Found multiple workspaces, please select the one that defines the schemes for building your project:", .bold))
-            let workspaces = paths.map { $0.relativeTo(.current).string }
+            let workspaces = workspacePaths.map { $0.relativeTo(.current).string }
             let workspace = select(single: workspaces)
             workspacePath = FilePath.makeAbsolute(workspace)
             print("")
         } else {
-            workspacePath = paths.first
+            workspacePath = workspacePaths.first
         }
 
         if let workspacePath {
-            configuration.workspace = workspacePath.relativeTo(.current).string
+            configuration.project = workspacePath.relativeTo(.current)
             return workspacePath
         }
 
         return nil
     }
 
-    private func workspacePaths() -> Set<FilePath> {
-        FilePath.glob("**/*.xcworkspace").filter {
-            // Swift Package Manager generates a xcworkspace inside the xcodeproj that isn't useful.
-            !$0.string.contains(".xcodeproj/")
-        }
-    }
-
     private func identifyProject() -> FilePath? {
         var projectPath: FilePath?
-        let paths = projectPaths()
 
-        if paths.count > 1 {
+        if projectPaths.count > 1 {
             print(colorize("Found multiple projects, please select the one that defines the schemes for building your project:", .bold))
-            let projects = paths.map { $0.relativeTo(.current).string }.sorted()
+            let projects = projectPaths.map { $0.relativeTo(.current).string }.sorted()
             let project = select(single: projects)
             projectPath = FilePath.makeAbsolute(project)
             print("")
         } else {
-            projectPath = paths.first
+            projectPath = projectPaths.first
         }
 
         if let projectPath {
-            configuration.project = projectPath.relativeTo(.current).string
+            configuration.project = projectPath.relativeTo(.current)
             return projectPath
         }
 
         return nil
-    }
-
-    private func projectPaths() -> Set<FilePath> {
-        FilePath.glob("**/*.xcodeproj")
     }
 }

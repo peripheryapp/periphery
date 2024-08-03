@@ -1,5 +1,4 @@
 public enum ProjectFileKind {
-    case swift
     case interfaceBuilder
     case infoPlist
     case xcDataModel
@@ -7,8 +6,6 @@ public enum ProjectFileKind {
 
     public var extensions: [String] {
         switch self {
-        case .swift:
-            return ["swift"]
         case .interfaceBuilder:
             return ["xib", "storyboard"]
         case .infoPlist:

@@ -16,27 +16,24 @@ struct ScanCommand: FrontendCommand {
     var setup: Bool = defaultConfiguration.guidedSetup
 
     @Option(help: "Path to configuration file. By default Periphery will look for .periphery.yml in the current directory")
-    var config: String?
+    var config: FilePath?
 
-    @Option(help: "Path to your project's .xcworkspace. Xcode projects only")
-    var workspace: String?
+    @Option(help: "Path to your project's .xcodeproj or .xcworkspace")
+    var project: FilePath?
 
-    @Option(help: "Path to your project's .xcodeproj - supply this option if your project doesn't have an .xcworkspace. Xcode projects only")
-    var project: String?
-
-    @Option(parsing: .upToNextOption, help: "File target mapping configuration file paths. For use with third-party build systems")
-    var fileTargetsPath: [FilePath] = defaultConfiguration.$fileTargetsPath.defaultValue
-
-    @Option(parsing: .upToNextOption, help: "Schemes that must be built in order to produce the targets passed to the --targets option. Xcode projects only")
+    @Option(parsing: .upToNextOption, help: "Schemes to build. All targets built by these schemes will be scanned")
     var schemes: [String] = defaultConfiguration.$schemes.defaultValue
-
-    @Option(parsing: .upToNextOption, help: "Target names to scan. Required for Xcode projects. Optional for Swift Package Manager projects, default behavior is to scan all targets defined in Package.swift")
-    var targets: [String] = defaultConfiguration.$targets.defaultValue
 
     @Option(help: "Output format (allowed: \(OutputFormat.allValueStrings.joined(separator: ", ")))")
     var format: OutputFormat = defaultConfiguration.$outputFormat.defaultValue
 
-    @Option(parsing: .upToNextOption, help: "Source file globs to exclude from indexing. Declarations and references within these files will not be considered during analysis")
+    @Flag(help: "Exclude test targets from indexing")
+    var excludeTests: Bool = defaultConfiguration.$excludeTests.defaultValue
+
+    @Option(parsing: .upToNextOption, help: "Targets to exclude from indexing")
+    var excludeTargets: [String] = defaultConfiguration.$excludeTargets.defaultValue
+
+    @Option(parsing: .upToNextOption, help: "Source file globs to exclude from indexing")
     var indexExclude: [String] = defaultConfiguration.$indexExclude.defaultValue
 
     @Option(parsing: .upToNextOption, help: "Source file globs to exclude from the results. Note that this option is purely cosmetic, these files will still be indexed")
@@ -118,13 +115,16 @@ struct ScanCommand: FrontendCommand {
     var quiet: Bool = defaultConfiguration.$quiet.defaultValue
 
     @Option(help: "JSON package manifest path (obtained using `swift package describe --type json` or manually)")
-    var jsonPackageManifestPath: String?
+    var jsonPackageManifestPath: FilePath?
 
     @Option(help: "Baseline file path used to filter results")
     var baseline: FilePath?
 
     @Option(help: "Baseline file path where results are written. Pass the same path to '--baseline' in subsequent scans to exclude the results recorded in the baseline.")
     var writeBaseline: FilePath?
+
+    @Option(help: "Project configuration for non-Apple build systems")
+    var genericProjectConfig: FilePath?
 
     private static let defaultConfiguration = Configuration()
 
@@ -137,11 +137,8 @@ struct ScanCommand: FrontendCommand {
 
         let configuration = Configuration.shared
         configuration.guidedSetup = setup
-        configuration.apply(\.$workspace, workspace)
         configuration.apply(\.$project, project)
-        configuration.apply(\.$fileTargetsPath, fileTargetsPath)
         configuration.apply(\.$schemes, schemes)
-        configuration.apply(\.$targets, targets)
         configuration.apply(\.$indexExclude, indexExclude)
         configuration.apply(\.$reportExclude, reportExclude)
         configuration.apply(\.$reportInclude, reportInclude)
@@ -165,6 +162,8 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$strict, strict)
         configuration.apply(\.$indexStorePath, indexStorePath)
         configuration.apply(\.$skipBuild, skipBuild)
+        configuration.apply(\.$excludeTests, excludeTests)
+        configuration.apply(\.$excludeTargets, excludeTargets)
         configuration.apply(\.$skipSchemesValidation, skipSchemesValidation)
         configuration.apply(\.$cleanBuild, cleanBuild)
         configuration.apply(\.$buildArguments, buildArguments)
@@ -174,6 +173,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$jsonPackageManifestPath, jsonPackageManifestPath)
         configuration.apply(\.$baseline, baseline)
         configuration.apply(\.$writeBaseline, writeBaseline)
+        configuration.apply(\.$genericProjectConfig, genericProjectConfig)
 
         try scanBehavior.main { project in
             try Scan().perform(project: project)

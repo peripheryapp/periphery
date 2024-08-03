@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+@testable import Shared
 import XCTest
 
 final class SwiftVersionParserTest: XCTestCase {

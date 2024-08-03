@@ -5,10 +5,8 @@ import XCTest
 
 // swiftlint:disable single_test_class
 final class XcodebuildBuildProjectTest: XCTestCase {
-    // swiftlint:disable implicitly_unwrapped_optional
     private var xcodebuild: Xcodebuild!
     private var project: XcodeProject!
-    // swiftlint:enable implicitly_unwrapped_optional
 
     override func setUp() {
         super.setUp()
@@ -30,11 +28,9 @@ final class XcodebuildBuildProjectTest: XCTestCase {
 }
 
 final class XcodebuildSchemesTest: XCTestCase {
-    // swiftlint:disable implicitly_unwrapped_optional
     private var shell: ShellMock!
     private var xcodebuild: Xcodebuild!
     private var project: XcodeProject!
-    // swiftlint:enable implicitly_unwrapped_optional
 
     override func setUp() {
         super.setUp()
