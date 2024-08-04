@@ -57,6 +57,7 @@ extension GenericProjectDriver: ProjectDriver {
     public func collect(logger: ContextualLogger) throws -> [SourceFile : [IndexUnit]] {
         try SourceFileCollector(
             indexStorePaths: configuration.indexStorePath,
+            excludedTestTargets: [], // TODO
             logger: logger
         ).collect()
     }

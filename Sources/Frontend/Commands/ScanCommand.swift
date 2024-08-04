@@ -30,7 +30,13 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Output format (allowed: \(OutputFormat.allValueStrings.joined(separator: ", ")))")
     var format: OutputFormat = defaultConfiguration.$outputFormat.defaultValue
 
-    @Option(parsing: .upToNextOption, help: "Source file globs to exclude from indexing. Declarations and references within these files will not be considered during analysis")
+    @Flag(help: "Exclude test targets from indexing")
+    var excludeTests: Bool = defaultConfiguration.$excludeTests.defaultValue
+
+    @Option(parsing: .upToNextOption, help: "Targets to exclude from indexing")
+    var excludeTargets: [String] = defaultConfiguration.$excludeTargets.defaultValue
+
+    @Option(parsing: .upToNextOption, help: "Source file globs to exclude from indexing")
     var indexExclude: [String] = defaultConfiguration.$indexExclude.defaultValue
 
     @Option(parsing: .upToNextOption, help: "Source file globs to exclude from the results. Note that this option is purely cosmetic, these files will still be indexed")
@@ -111,6 +117,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Only output results")
     var quiet: Bool = defaultConfiguration.$quiet.defaultValue
 
+    @Option(help: "JSON package manifest path (obtained using `swift package describe --type json` or manually)")
+    var jsonPackageManifestPath: String?
+
     @Option(help: "Baseline file path used to filter results")
     var baseline: FilePath?
 
@@ -154,14 +163,18 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$strict, strict)
         configuration.apply(\.$indexStorePath, indexStorePath)
         configuration.apply(\.$skipBuild, skipBuild)
+        configuration.apply(\.$excludeTests, excludeTests)
+        configuration.apply(\.$excludeTargets, excludeTargets)
         configuration.apply(\.$skipSchemesValidation, skipSchemesValidation)
         configuration.apply(\.$cleanBuild, cleanBuild)
         configuration.apply(\.$buildArguments, buildArguments)
         configuration.apply(\.$relativeResults, relativeResults)
         configuration.apply(\.$retainCodableProperties, retainCodableProperties)
         configuration.apply(\.$retainEncodableProperties, retainEncodableProperties)
+        configuration.apply(\.$jsonPackageManifestPath, jsonPackageManifestPath)
         configuration.apply(\.$baseline, baseline)
         configuration.apply(\.$writeBaseline, writeBaseline)
+
         try scanBehavior.main { project in
             try Scan().perform(project: project)
         }.get()

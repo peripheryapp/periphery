@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import Shared
+@testable import Shared
 
 class SwiftVersionParserTest: XCTestCase {
     func testParse() throws {

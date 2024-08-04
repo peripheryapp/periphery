@@ -52,8 +52,11 @@ extension SPMProjectDriver: ProjectDriver {
             storePaths = [pkg.path.appending(".build/debug/index/store")]
         }
 
+        let excludedTestTargets = configuration.excludeTests ? try pkg.testTargetNames() : []
+
         return try SourceFileCollector(
             indexStorePaths: storePaths,
+            excludedTestTargets: excludedTestTargets,
             logger: logger
         ).collect()
     }
