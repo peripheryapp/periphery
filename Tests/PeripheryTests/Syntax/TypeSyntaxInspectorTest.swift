@@ -4,7 +4,7 @@ import SwiftSyntax
 import SwiftParser
 @testable import TestShared
 @testable import SourceGraph
-@testable import StaticAnalyse
+@testable import SyntaxAnalysis
 
 class TypeSyntaxInspectorTest: XCTestCase {
     private var results: [Location: TypeSyntaxInspectorTestVisitor.Result]!

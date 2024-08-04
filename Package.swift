@@ -54,13 +54,13 @@ var targets: [PackageDescription.Target] = [
     .target(
         name: "Indexer",
         dependencies: [
-            .target(name: "StaticAnalyse"),
+            .target(name: "SyntaxAnalysis"),
             .target(name: "Shared"),
             .product(name: "SwiftIndexStore", package: "swift-indexstore")
         ]
     ),
     .target(
-        name: "StaticAnalyse",
+        name: "SyntaxAnalysis",
         dependencies: [
             .target(name: "SourceGraph"),
             .target(name: "Shared"),
