@@ -2,6 +2,7 @@ import Foundation
 import SourceGraph
 import SwiftIndexStore
 import Shared
+import Indexer
 
 public protocol ProjectDriver {
     static func build() throws -> Self

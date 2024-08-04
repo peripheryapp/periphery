@@ -12,7 +12,7 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "Frontend",
-            dependencies: ["SPMProjectKit"])
+            dependencies: ["SPMProjectKit"]),
         .target(
             name: "SPMProjectKit",
             dependencies: [])
