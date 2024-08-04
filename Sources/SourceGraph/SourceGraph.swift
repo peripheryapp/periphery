@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 
+// swiftlint:disable:next type_body_length
 public final class SourceGraph {
     // Global shared instance to prevent costly deinitialization.
     public static var shared = SourceGraph()
@@ -253,7 +254,7 @@ public final class SourceGraph {
 
         // Recursively check if the module is exported transitively.
         return exportingModules.contains { nestedExportingModule in
-            return isModuleUnsafe(nestedExportingModule, exportedBy: exportingModule) &&
+            isModuleUnsafe(nestedExportingModule, exportedBy: exportingModule) &&
             isModuleUnsafe(module, exportedBy: nestedExportingModule)
         }
     }
@@ -344,7 +345,7 @@ public final class SourceGraph {
             .compactMap { $0.parent }
             .first
 
-        guard let baseDecl = baseDecl else {
+        guard let baseDecl else {
             // Base reference is external, return the current function as it's the closest.
             return (decl, false)
         }

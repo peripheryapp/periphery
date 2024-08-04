@@ -7,7 +7,6 @@ public typealias VersionString = String
 public extension VersionString {
     /// Inner comparison utility to handle same versions with different length. (Ex: "1.0.0" & "1.0")
     private func compare(toVersion targetVersion: String) -> ComparisonResult {
-
         let versionDelimiter = "."
         var result: ComparisonResult = .orderedSame
         var versionComponents = components(separatedBy: versionDelimiter)
@@ -29,9 +28,9 @@ public extension VersionString {
         return result
     }
 
-    func isVersion(equalTo targetVersion: String) -> Bool { return compare(toVersion: targetVersion) == .orderedSame }
-    func isVersion(greaterThan targetVersion: String) -> Bool { return compare(toVersion: targetVersion) == .orderedDescending }
-    func isVersion(greaterThanOrEqualTo targetVersion: String) -> Bool { return compare(toVersion: targetVersion) != .orderedAscending }
-    func isVersion(lessThan targetVersion: String) -> Bool { return compare(toVersion: targetVersion) == .orderedAscending }
-    func isVersion(lessThanOrEqualTo targetVersion: String) -> Bool { return compare(toVersion: targetVersion) != .orderedDescending }
+    func isVersion(equalTo targetVersion: String) -> Bool { compare(toVersion: targetVersion) == .orderedSame }
+    func isVersion(greaterThan targetVersion: String) -> Bool { compare(toVersion: targetVersion) == .orderedDescending }
+    func isVersion(greaterThanOrEqualTo targetVersion: String) -> Bool { compare(toVersion: targetVersion) != .orderedAscending }
+    func isVersion(lessThan targetVersion: String) -> Bool { compare(toVersion: targetVersion) == .orderedAscending }
+    func isVersion(lessThanOrEqualTo targetVersion: String) -> Bool { compare(toVersion: targetVersion) != .orderedDescending }
 }

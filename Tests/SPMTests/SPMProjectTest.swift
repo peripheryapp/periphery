@@ -1,8 +1,9 @@
-import XCTest
-@testable import TestShared
 @testable import PeripheryKit
+@testable import TestShared
+import XCTest
 
-class SPMProjectTest: SourceGraphTestCase {
+// swiftlint:disable:next balanced_xctest_lifecycle
+final class SPMProjectTest: SourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 

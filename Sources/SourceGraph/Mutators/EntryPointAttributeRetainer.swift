@@ -28,7 +28,7 @@ final class EntryPointAttributeRetainer: SourceGraphMutator {
                 if $0.attributes.contains("main") {
                     // @main requires a static main() function.
                     $0.declarations
-                        .filter { $0.kind == .functionMethodStatic && $0.name == "main()"}
+                        .filter { $0.kind == .functionMethodStatic && $0.name == "main()" }
                         .forEach { graph.markRetained($0) }
                 }
             }

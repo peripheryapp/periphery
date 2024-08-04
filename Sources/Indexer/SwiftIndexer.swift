@@ -1,10 +1,12 @@
 import Foundation
-import SwiftIndexStore
-import SystemPackage
 import Shared
 import SourceGraph
+import SwiftIndexStore
 import SyntaxAnalysis
+import SystemPackage
 
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 public final class SwiftIndexer: Indexer {
     private let sourceFiles: [FilePath: Set<IndexTarget>]
     private let graph: SourceGraph
@@ -39,6 +41,7 @@ public final class SwiftIndexer: Indexer {
                 let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: .open())
                 let units = indexStore.units(includeSystem: false)
 
+                // swiftlint:disable:next large_tuple
                 return try units.compactMap { unit -> (FilePath, IndexStore, IndexStoreUnit)? in
                     guard let filePath = try indexStore.mainFilePath(for: unit) else { return nil }
 
@@ -71,8 +74,8 @@ public final class SwiftIndexer: Indexer {
             retainedFiles = allSourceFiles.filter { configuration.retainFilesMatchers.anyMatch(filename: $0.string) }
         }
 
-        let jobs = unitsByFile.map { (file, units) -> Job in
-            return Job(
+        let jobs = unitsByFile.map { file, units -> Job in
+            Job(
                 file: file,
                 units: units,
                 retainAllDeclarations: retainedFiles.contains(file),
@@ -111,7 +114,7 @@ public final class SwiftIndexer: Indexer {
 
     // MARK: - Private
 
-    private class Job {
+    private class Job { // swiftlint:disable:this type_body_length
         let file: FilePath
 
         private let units: [(IndexStore, IndexStoreUnit)]
@@ -128,7 +131,6 @@ public final class SwiftIndexer: Indexer {
             graph: SourceGraph,
             logger: ContextualLogger,
             configuration: Configuration
-
         ) {
             self.file = file
             self.units = units
@@ -138,6 +140,7 @@ public final class SwiftIndexer: Indexer {
             self.configuration = configuration
         }
 
+        // swiftlint:disable nesting
         struct RawRelation {
             struct Symbol {
                 let name: String?
@@ -170,11 +173,13 @@ public final class SwiftIndexer: Indexer {
                 Key(kind: kind, name: name, isImplicit: isImplicit, isObjcAccessible: isObjcAccessible, location: location)
             }
         }
+        // swiftlint:enable nesting
 
         /// Phase one reads the index store and establishes the declaration hierarchy and the majority of references.
         /// Some references may depend upon declarations in other files, and thus their association is deferred until
         /// phase two.
-        func phaseOne() throws {
+        func phaseOne() throws { // swiftlint:disable:this cyclomatic_complexity
+
             var rawDeclsByKey: [RawDeclaration.Key: [(RawDeclaration, [RawRelation])]] = [:]
             var references: Set<Reference> = []
 
@@ -280,7 +285,7 @@ public final class SwiftIndexer: Indexer {
         private func getSourceFile() throws -> SourceFile {
             if let sourceFile { return sourceFile }
 
-            let modules = try units.reduce(into: Set<String>()) { (set, tuple) in
+            let modules = try units.reduce(into: Set<String>()) { set, tuple in
                 let (indexStore, unit) = tuple
                 if let name = try indexStore.moduleName(for: unit) {
                     set.insert(name)
@@ -340,11 +345,11 @@ public final class SwiftIndexer: Indexer {
 
             let explicitDeclarations = declarations.filter { !$0.isImplicit }
             let declsByLocation = explicitDeclarations
-                .reduce(into: [Location: [Declaration]]()) { (result, decl) in
+                .reduce(into: [Location: [Declaration]]()) { result, decl in
                     result[decl.location, default: []].append(decl)
                 }
             let declsByLine = explicitDeclarations
-                .reduce(into: [Int: [Declaration]]()) { (result, decl) in
+                .reduce(into: [Int: [Declaration]]()) { result, decl in
                     result[decl.location.line, default: []].append(decl)
                 }
             let sortedDeclLines = declsByLine.keys.sorted().reversed()
@@ -370,7 +375,7 @@ public final class SwiftIndexer: Indexer {
                 // a decl without a parent, as the reference may be a related type of a class/struct/etc.
                 if let decl = candidateDecls.first(where: { $0.parent == nil }) {
                     associate(ref, with: decl)
-                } else if let decl = candidateDecls.sorted().first {
+                } else if let decl = candidateDecls.min() {
                     // Fallback to using the first declaration.
                     // Sorting the declarations helps in the situation where the candidate declarations includes a
                     // property/subscript, and a getter on the same line. The property/subscript is more likely to be
@@ -402,6 +407,7 @@ public final class SwiftIndexer: Indexer {
             }
         }
 
+        // swiftlint:disable:next cyclomatic_complexity
         private func applyDeclarationMetadata(to decl: Declaration, with result: DeclarationSyntaxVisitor.Result) {
             graph.withLock {
                 if let accessibility = result.accessibility {
@@ -694,7 +700,7 @@ public final class SwiftIndexer: Indexer {
         }
 
         private func transformLocation(_ input: IndexStoreOccurrence.Location) throws -> Location? {
-            return Location(file: try getSourceFile(), line: Int(input.line), column: Int(input.column))
+            Location(file: try getSourceFile(), line: Int(input.line), column: Int(input.column))
         }
 
         private func transformDeclarationKind(_ kind: IndexStoreSymbol.Kind, _ subKind: IndexStoreSymbol.SubKind) -> Declaration.Kind? {

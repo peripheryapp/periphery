@@ -1,0 +1,65 @@
+included:
+  - Sources
+  - Tests
+  - Package.swift
+excluded:
+  - Tests/Fixtures
+  - Tests/AccessibilityTests/AccessibilityProject
+  - Tests/XcodeTests/UIKitProject
+
+# Enabled/disabled rules
+analyzer_rules:
+  - all
+opt_in_rules:
+  - all
+disabled_rules:
+  - anyobject_protocol
+  - inert_defer
+  - unused_capture_list  
+  - explicit_acl
+  - explicit_type_interface
+  - missing_docs
+  - required_deinit
+  - line_length
+  - type_contents_order
+  - prefer_nimble
+  - explicit_top_level_acl
+  - anonymous_argument_in_multiline_closure
+  - one_declaration_per_file
+  - conditional_returns_on_newline
+  - vertical_whitespace_between_cases
+  - no_grouping_extension
+  - explicit_enum_raw_value
+  - file_types_order
+  - indentation_width
+  - identifier_name
+  - trailing_closure
+  - multiline_arguments_brackets  
+  - multiline_function_chains
+  - no_extension_access_modifier
+  - force_try
+  - switch_case_on_newline
+  - sorted_enum_cases
+  - prefer_self_in_static_references
+  - superfluous_else
+  - force_unwrapping
+  - file_name
+  - todo
+  - no_magic_numbers
+  - prefixed_toplevel_constant
+  - untyped_error_in_catch
+  
+closure_body_length:
+    warning: 50
+    error: 100
+function_body_length: 60
+balanced_xctest_lifecycle: &unit_test_configuration
+  test_parent_classes:
+    - SourceGraphTestCase
+    - FixtureSourceGraphTestCase    
+    - XCTestCase
+empty_xctest_method: *unit_test_configuration
+final_test_case: *unit_test_configuration
+single_test_class: *unit_test_configuration
+cyclomatic_complexity:
+  ignores_case_statements: true

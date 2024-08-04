@@ -1,11 +1,12 @@
 import Foundation
 import Shared
-import SystemPackage
 import SourceGraph
+import SystemPackage
 
 public protocol OutputFormatter: AnyObject {
     var configuration: Configuration { get }
     var currentFilePath: FilePath { get }
+
     init(configuration: Configuration)
     func format(_ results: [ScanResult]) throws -> String
 }
@@ -38,6 +39,7 @@ extension OutputFormatter {
         var secondaryResults: [(Location, String)] = []
 
         if var name = result.declaration.name {
+            // swiftlint:disable:next identifier_name
             if let kind = result.declaration.kind.displayName, let first_ = kind.first {
                 let first = String(first_)
                 description += "\(first.uppercased())\(kind.dropFirst()) "
@@ -93,6 +95,7 @@ extension OutputFormatter {
     }
 }
 
+// swiftlint:disable:next no_extension_access_modifier
 public extension OutputFormat {
     var formatter: OutputFormatter.Type {
         switch self {

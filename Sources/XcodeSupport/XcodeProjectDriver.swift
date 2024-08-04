@@ -1,9 +1,9 @@
 import Foundation
-import SystemPackage
+import Indexer
 import PeripheryKit
 import Shared
 import SourceGraph
-import Indexer
+import SystemPackage
 
 public final class XcodeProjectDriver {
     public static func build() throws -> Self {
@@ -39,7 +39,7 @@ public final class XcodeProjectDriver {
                     invalidTargetNames.append(targetName)
                     continue
                 }
-                
+
                 if let target = project.packageTargets[package]?.first(where: { $0.name == packageTargetName }) {
                     packageTargets[package, default: []].insert(target)
                 } else if let subTarget = package.targets.first(where: { $0.name == packageTargetName }) {
@@ -86,6 +86,7 @@ public final class XcodeProjectDriver {
     private let targets: Set<XcodeTarget>
     private let packageTargets: [SPM.Package: Set<SPM.Target>]
 
+    // swiftlint:disable:next function_default_parameter_at_end
     init(
         logger: Logger = .init(),
         configuration: Configuration = .shared,
@@ -179,7 +180,8 @@ extension XcodeProjectDriver: ProjectDriver {
                 target.sourcePaths.forEach {
                     let absolutePath = packageRoot.pushing($0)
                     let indexTarget = IndexTarget(name: target.name)
-                    sourceFiles[absolutePath, default: []].insert(indexTarget) }
+                    sourceFiles[absolutePath, default: []].insert(indexTarget)
+                }
             }
         }
 

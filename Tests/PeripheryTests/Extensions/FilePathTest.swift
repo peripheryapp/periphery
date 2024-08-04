@@ -1,8 +1,8 @@
 import Foundation
-import XCTest
 import SystemPackage
+import XCTest
 
-class FilePathTest: XCTestCase {
+final class FilePathTest: XCTestCase {
     func testMakeAbsolute() {
         let current = FilePath("/current")
         XCTAssertEqual(FilePath.makeAbsolute("/a", relativeTo: current).string, "/a")

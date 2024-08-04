@@ -1,8 +1,8 @@
-import XCTest
-import SystemPackage
 import Shared
+import SystemPackage
+import XCTest
 
-class FilePathGlobTest: XCTestCase {
+final class FilePathGlobTest: XCTestCase {
     private let files = ["foo", "bar", "baz", "dir1/file1.ext", "dir1/dir2/dir3/file2.ext"]
     private let baseDir = FilePath.current.appending("tmp/FilePathGlobTest").string
     private let fileManager = FileManager.default
@@ -91,7 +91,7 @@ class FilePathGlobTest: XCTestCase {
     }
 
     func testRelative() {
-        FilePath(baseDir).chdir() {
+        FilePath(baseDir).chdir {
             let pattern = "**/*.ext"
             let paths = FilePath.glob(pattern).sorted()
             XCTAssertPathsEqual(paths, [
@@ -102,7 +102,7 @@ class FilePathGlobTest: XCTestCase {
     }
 
     func testRelativeParent() {
-        FilePath("\(baseDir)/dir1").chdir() {
+        FilePath("\(baseDir)/dir1").chdir {
             let pattern = "../bar"
             let paths = FilePath.glob(pattern).sorted()
             XCTAssertPathsEqual(paths, [
@@ -110,7 +110,7 @@ class FilePathGlobTest: XCTestCase {
             ])
         }
 
-        FilePath("\(baseDir)/dir1/dir2").chdir() {
+        FilePath("\(baseDir)/dir1/dir2").chdir {
             let pattern = "../../**/*.ext"
             let paths = FilePath.glob(pattern).sorted()
             XCTAssertPathsEqual(paths, [

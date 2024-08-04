@@ -53,7 +53,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                             $0.name == unimplementedProtoDecl.name
                         }
 
-                        if let declInSuperclass = declInSuperclass {
+                        if let declInSuperclass {
                             // Build a reference from the protocol declarations to the
                             // declaration implemented by the superclass.
                             for usr in declInSuperclass.usrs {
@@ -77,6 +77,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
         return newReferences
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func invertReferencesFromProtocolToDeclaration(_ nonInvertableReferences: Set<Reference>) {
         let relatedReferences = graph.allReferences.filter { $0.isRelated && $0.kind.isProtocolMemberConformingKind }
 

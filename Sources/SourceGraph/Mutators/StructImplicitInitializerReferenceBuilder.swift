@@ -3,12 +3,14 @@ import Shared
 
 /// Builds references from struct implicit initializers to the properties it assigns.
 final class StructImplicitInitializerReferenceBuilder: SourceGraphMutator {
+    // swiftlint:disable:previous type_name
     private let graph: SourceGraph
 
     init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     func mutate() throws {
         for structDecl in graph.declarations(ofKind: .struct) {
             let implicitInitDecls = structDecl.declarations.filter { $0.kind == .functionConstructor && $0.isImplicit }

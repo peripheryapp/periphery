@@ -1,11 +1,14 @@
 import Foundation
-import XCTest
 import Shared
 @testable import XcodeSupport
+import XCTest
 
-class XcodebuildBuildProjectTest: XCTestCase {
-    var xcodebuild: Xcodebuild!
-    var project: XcodeProject!
+// swiftlint:disable single_test_class
+final class XcodebuildBuildProjectTest: XCTestCase {
+    // swiftlint:disable implicitly_unwrapped_optional
+    private var xcodebuild: Xcodebuild!
+    private var project: XcodeProject!
+    // swiftlint:enable implicitly_unwrapped_optional
 
     override func setUp() {
         super.setUp()
@@ -14,16 +17,24 @@ class XcodebuildBuildProjectTest: XCTestCase {
         project = try! XcodeProject(path: UIKitProjectPath)
     }
 
+    override func tearDown() {
+        xcodebuild = nil
+        project = nil
+        super.tearDown()
+    }
+
     func testBuildSchemeWithWhitespace() throws {
         let scheme = "Scheme With Spaces"
         try xcodebuild.build(project: project, scheme: scheme, allSchemes: [scheme])
     }
 }
 
-class XcodebuildSchemesTest: XCTestCase {
-    var shell: ShellMock!
-    var xcodebuild: Xcodebuild!
-    var project: XcodeProject!
+final class XcodebuildSchemesTest: XCTestCase {
+    // swiftlint:disable implicitly_unwrapped_optional
+    private var shell: ShellMock!
+    private var xcodebuild: Xcodebuild!
+    private var project: XcodeProject!
+    // swiftlint:enable implicitly_unwrapped_optional
 
     override func setUp() {
         super.setUp()
@@ -31,6 +42,13 @@ class XcodebuildSchemesTest: XCTestCase {
         shell = ShellMock()
         xcodebuild = Xcodebuild(shell: shell)
         project = try! XcodeProject(path: UIKitProjectPath)
+    }
+
+    override func tearDown() {
+        shell = nil
+        xcodebuild = nil
+        project = nil
+        super.tearDown()
     }
 
     func testParseSchemes() {
@@ -50,7 +68,7 @@ class ShellMock: Shell {
     }
 
     override func exec(_ args: [String], stderr: Bool = true) throws -> String {
-        return output
+        output
     }
 }
 

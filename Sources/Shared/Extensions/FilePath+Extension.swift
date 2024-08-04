@@ -2,8 +2,7 @@ import Foundation
 import SystemPackage
 
 public extension FilePath {
-    @inlinable
-    static var current: FilePath {
+    @inlinable static var current: FilePath {
         Self(fileManager.currentDirectoryPath)
     }
 
@@ -22,13 +21,11 @@ public extension FilePath {
         return filePath
     }
 
-    @inlinable
-    var exists: Bool {
+    @inlinable var exists: Bool {
         fileManager.fileExists(atPath: lexicallyNormalized().string)
     }
 
-    @inlinable
-    var url: URL {
+    @inlinable var url: URL {
         URL(fileURLWithPath: lexicallyNormalized().string)
     }
 
@@ -65,19 +62,17 @@ public extension FilePath {
 
     // MARK: - Private
 
-    @usableFromInline
-    internal static var fileManager: FileManager {
+    @usableFromInline internal static var fileManager: FileManager {
         FileManager.default
     }
 
-    @usableFromInline
-    internal var fileManager: FileManager {
+    @usableFromInline internal var fileManager: FileManager {
         Self.fileManager
     }
 }
 
 extension FilePath: Comparable {
     public static func < (lhs: FilePath, rhs: FilePath) -> Bool {
-        return lhs.lexicallyNormalized().string < rhs.lexicallyNormalized().string
+        lhs.lexicallyNormalized().string < rhs.lexicallyNormalized().string
     }
 }
