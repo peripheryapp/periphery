@@ -9,5 +9,5 @@ targets:
 - SPMTests
 - AccessibilityTests
 - SourceGraph
-- StaticAnalyse
+- SyntaxAnalysis
 - Indexer
