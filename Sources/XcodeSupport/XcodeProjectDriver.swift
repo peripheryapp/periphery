@@ -94,8 +94,7 @@ extension XcodeProjectDriver: ProjectDriver {
             try xcodebuild.build(project: project,
                                  scheme: scheme,
                                  allSchemes: Array(schemes),
-                                 additionalArguments: configuration.buildArguments,
-                                 buildForTesting: true)
+                                 additionalArguments: configuration.buildArguments)
         }
     }
 
@@ -108,8 +107,15 @@ extension XcodeProjectDriver: ProjectDriver {
             storePaths = [try xcodebuild.indexStorePath(project: project, schemes: Array(schemes))]
         }
 
+        var excludedTestTargets = Set<String>()
+
+        if configuration.excludeTests {
+            excludedTestTargets = project.targets.filter(\.isTestTarget).mapSet(\.name)
+        }
+
         return try SourceFileCollector(
             indexStorePaths: storePaths,
+            excludedTestTargets: excludedTestTargets,
             logger: logger
         ).collect()
     }

@@ -6,11 +6,18 @@ import SourceGraph
 
 public struct SourceFileCollector {
     let indexStorePaths: [FilePath]
+    let excludedTargets: Set<String>
     let logger: ContextualLogger
     let configuration: Configuration
 
-    public init(indexStorePaths: [FilePath], logger: ContextualLogger, configuration: Configuration = .shared) {
+    public init(
+        indexStorePaths: [FilePath],
+        excludedTestTargets: Set<String>,
+        logger: ContextualLogger,
+        configuration: Configuration = .shared
+    ) {
         self.indexStorePaths = indexStorePaths
+        self.excludedTargets = excludedTestTargets.union(configuration.excludeTargets)
         self.logger = logger
         self.configuration = configuration
     }
@@ -32,6 +39,10 @@ public struct SourceFileCollector {
                     if file.exists {
                         if !self.isExcluded(file) {
                             let module = try indexStore.moduleName(for: unit)
+                            if let module, excludedTargets.contains(module) {
+                                return nil
+                            }
+
                             return (file, indexStore, unit, module)
                         }
                     }

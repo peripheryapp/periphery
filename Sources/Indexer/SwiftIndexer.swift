@@ -49,7 +49,7 @@ public final class SwiftIndexer: Indexer {
                 try job.phaseOne()
             }
 
-            phaseOneLogger.debug("\(job.sourceFile.path.string) (\(elapsed)s)")
+            self.debug(logger: phaseOneLogger, sourceFile: job.sourceFile, elapsed: elapsed)
         }
 
         logger.endInterval(phaseOneInterval)
@@ -62,13 +62,19 @@ public final class SwiftIndexer: Indexer {
                 try job.phaseTwo()
             }
 
-            phaseTwoLogger.debug("\(job.sourceFile.path.string) (\(elapsed)s)")
+            self.debug(logger: phaseTwoLogger, sourceFile: job.sourceFile, elapsed: elapsed)
         }
 
         logger.endInterval(phaseTwoInterval)
     }
 
     // MARK: - Private
+
+    private func debug(logger: ContextualLogger, sourceFile: SourceFile, elapsed: String) {
+        guard configuration.verbose else { return }
+        let modules = sourceFile.modules.joined(separator: ", ")
+        logger.debug("\(sourceFile.path.string) (\(modules)) (\(elapsed)s)")
+    }
 
     private class Job {
         let sourceFile: SourceFile

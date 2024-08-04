@@ -22,14 +22,14 @@ public final class Xcodebuild {
     }
 
     @discardableResult
-    func build(project: XcodeProjectlike, scheme: String, allSchemes: [String], additionalArguments: [String] = [], buildForTesting: Bool = false) throws -> String {
-        let cmd = buildForTesting ? "build-for-testing" : "build"
+    func build(project: XcodeProjectlike, scheme: String, allSchemes: [String], additionalArguments: [String] = []) throws -> String {
         let args = [
             "-\(project.type)", "'\(project.path.lexicallyNormalized().string)'",
             "-scheme", "'\(scheme)'",
             "-parallelizeTargets",
             "-derivedDataPath", "'\(try derivedDataPath(for: project, schemes: allSchemes).string)'",
-            "-quiet"
+            "-quiet",
+            "build-for-testing"
         ]
         let envs = [
             "CODE_SIGNING_ALLOWED=\"NO\"",
@@ -40,7 +40,7 @@ public final class Xcodebuild {
         ]
 
         let quotedArguments = quote(arguments: additionalArguments)
-        let xcodebuild = "xcodebuild \((args + [cmd] + envs + quotedArguments).joined(separator: " "))"
+        let xcodebuild = "xcodebuild \((args + envs + quotedArguments).joined(separator: " "))"
         return try shell.exec(["/bin/sh", "-c", xcodebuild])
     }
 

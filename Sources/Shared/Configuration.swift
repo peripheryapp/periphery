@@ -23,6 +23,12 @@ public final class Configuration {
     @Setting(key: "schemes", defaultValue: [])
     public var schemes: [String]
 
+    @Setting(key: "exclude_tests", defaultValue: false)
+    public var excludeTests: Bool
+
+    @Setting(key: "exclude_targets", defaultValue: [])
+    public var excludeTargets: [String]
+
     @Setting(key: "index_exclude", defaultValue: ["**/*?.build/**/*"], requireDefaultValues: true)
     public var indexExclude: [String]
 
@@ -109,6 +115,9 @@ public final class Configuration {
 
     @Setting(key: "relative_results", defaultValue: false)
     public var relativeResults: Bool
+
+    @Setting(key: "json_package_manifest_path", defaultValue: nil)
+    public var jsonPackageManifestPath: String?
 
     @Setting(key: "baseline", defaultValue: nil)
     public var baseline: FilePath?
@@ -209,7 +218,7 @@ public final class Configuration {
 
     // MARK: - Private
 
-    lazy var settings: [any AbstractSetting] = [$project, $fileTargetsPath, $schemes, $indexExclude, $reportExclude, $reportInclude, $outputFormat, $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible, $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis, $disableUnusedImportAnalysis, $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline]
+    lazy var settings: [any AbstractSetting] = [$project, $fileTargetsPath, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat, $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible, $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis, $disableUnusedImportAnalysis, $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline]
 
     private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {
         // TODO: respect filesystem case sensitivity.

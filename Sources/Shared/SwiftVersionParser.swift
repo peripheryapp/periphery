@@ -1,7 +1,7 @@
 import Foundation
 
-public struct SwiftVersionParser {
-    public static func parse(_ fullVersion: String) throws -> VersionString {
+struct SwiftVersionParser {
+    static func parse(_ fullVersion: String) throws -> VersionString {
         guard let rawVersion = fullVersion.components(separatedBy: "Swift version").last?.split(separator: " ").first else {
             throw PeripheryError.swiftVersionParseError(fullVersion: fullVersion)
         }
