@@ -38,7 +38,7 @@ public struct SPM {
             let jsonData: Data
 
             if let path = configuration.jsonPackageManifestPath {
-                jsonData = try Data(contentsOf: URL(fileURLWithPath: path))
+                jsonData = try Data(contentsOf: path.url)
             } else {
                 let jsonString = try Shell.shared.exec(["swift", "package", "describe", "--type", "json"], stderr: false)
 

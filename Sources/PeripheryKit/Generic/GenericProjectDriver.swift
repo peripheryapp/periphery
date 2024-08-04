@@ -2,52 +2,43 @@ import Foundation
 import SystemPackage
 import Indexer
 import Shared
-import SourceGraph
 import SwiftIndexStore
 
 public final class GenericProjectDriver {
-    private enum FileKind: String {
-        case plist
+    struct GenericConfig: Decodable {
+        let plistPaths: Set<String>
+        let testTargets: Set<String>
     }
 
-    public static func build() throws -> Self {
-        let configuration = Configuration.shared
+    public static func build(genericProjectConfig: FilePath) throws -> Self {
+        guard genericProjectConfig.exists else {
+            throw PeripheryError.pathDoesNotExist(path: genericProjectConfig.string)
+        }
+
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let data = try Data(contentsOf: genericProjectConfig.url)
+        let config = try decoder.decode(GenericConfig.self, from: data)
+        let plistPaths = config.plistPaths.mapSet { FilePath.makeAbsolute($0) }
 
-        let projectFiles = try configuration.fileTargetsPath
-            .reduce(into: [FileKind: Set<FilePath>]()) { result, mapPath in
-                guard mapPath.exists else {
-                    throw PeripheryError.pathDoesNotExist(path: mapPath.string)
-                }
-
-                let data = try Data(contentsOf: mapPath.url)
-                try decoder
-                    .decode(FileTargetMapContainer.self, from: data)
-                    .fileTargets
-                    .forEach { key, value in
-                        let path = FilePath.makeAbsolute(key)
-
-                        if !path.exists {
-                            throw PeripheryError.pathDoesNotExist(path: path.string)
-                        }
-
-                        guard let ext = path.extension, let fileKind = FileKind(rawValue: ext) else {
-                            throw PeripheryError.unsupportedFileKind(path: path)
-                        }
-
-                        result[fileKind, default: []].insert(path)
-                    }
-            }
-
-        return self.init(projectFiles: projectFiles, configuration: configuration)
+        return self.init(
+            plistPaths: plistPaths,
+            testTargets: config.testTargets,
+            configuration: .shared
+        )
     }
 
-    private let projectFiles: [FileKind: Set<FilePath>]
+    private let plistPaths: Set<FilePath>
+    private let testTargets: Set<String>
     private let configuration: Configuration
 
-    private init(projectFiles: [FileKind: Set<FilePath>], configuration: Configuration) {
-        self.projectFiles = projectFiles
+    private init(
+        plistPaths: Set<FilePath>,
+        testTargets: Set<String>,
+        configuration: Configuration
+    ) {
+        self.plistPaths = plistPaths
+        self.testTargets = testTargets
         self.configuration = configuration
     }
 }
@@ -55,33 +46,18 @@ public final class GenericProjectDriver {
 extension GenericProjectDriver: ProjectDriver {
     public func build() throws {}
 
-    public func collect(logger: ContextualLogger) throws -> [SourceFile : [IndexUnit]] {
-        try SourceFileCollector(
-            indexStorePaths: configuration.indexStorePath,
-            excludedTestTargets: [], // TODO
+    public func plan(logger: ContextualLogger) throws -> IndexPlan {
+        let excludedTestTargets = configuration.excludeTests ? testTargets : []
+        let collector = SourceFileCollector(
+            indexStorePaths: Set(configuration.indexStorePath),
+            excludedTestTargets: excludedTestTargets,
             logger: logger
-        ).collect()
-    }
+        )
+        let sourceFiles = try collector.collect()
 
-    public func index(
-        sourceFiles: [SourceFile: [IndexUnit]],
-        graph: SourceGraph,
-        logger: ContextualLogger
-    ) throws {
-        try SwiftIndexer(
+        return IndexPlan(
             sourceFiles: sourceFiles,
-            graph: graph,
-            logger: logger
-        ).perform()
-
-        if let plistFiles = projectFiles[.plist] {
-            try InfoPlistIndexer(infoPlistFiles: plistFiles, graph: graph).perform()
-        }
-
-        graph.indexingComplete()
+            plistPaths: plistPaths
+        )
     }
-}
-
-struct FileTargetMapContainer: Decodable {
-    let fileTargets: [String: Set<String>]
 }

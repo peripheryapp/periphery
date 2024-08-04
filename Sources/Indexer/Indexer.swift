@@ -4,7 +4,7 @@ import Shared
 import SourceGraph
 import FilenameMatcher
 
-public class Indexer {
+class Indexer {
     private let configuration: Configuration
 
     init(configuration: Configuration) {

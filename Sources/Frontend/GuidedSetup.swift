@@ -15,37 +15,43 @@ final class GuidedSetup: SetupGuideHelpers {
     func perform() throws -> Project {
         print(colorize("Welcome to Periphery!", .boldGreen))
         print("This guided setup will help you select the appropriate configuration for your project.\n")
-        var projectGuides: [ProjectSetupGuide] = [SPMProjectSetupGuide()]
+
+        var projectGuides: [SetupGuide] = []
+
+        if let guide = SPMProjectSetupGuide.detect() {
+            projectGuides.append(guide)
+        }
 
         #if canImport(XcodeSupport)
-        projectGuides.append(XcodeProjectSetupGuide())
+        if let guide = XcodeProjectSetupGuide.detect() {
+            projectGuides.append(guide)
+        }
         #endif
 
-        let supportedProjectGuides = projectGuides.filter { $0.isSupported }
-        var projectGuide_: ProjectSetupGuide?
+        var projectGuide_: SetupGuide?
 
-        if supportedProjectGuides.count > 1 {
+        if projectGuides.count > 1 {
             print(colorize("Please select which project to use:", .bold))
-            let kindName = select(single: supportedProjectGuides.map { $0.projectKind.rawValue })
-            projectGuide_ = supportedProjectGuides.first { $0.projectKind.rawValue == kindName }
+            let kindName = select(single: projectGuides.map { $0.projectKindName })
+            projectGuide_ = projectGuides.first { $0.projectKindName == kindName }
             print("")
         } else {
-            projectGuide_ = supportedProjectGuides.first
+            projectGuide_ = projectGuides.first
         }
 
         guard let projectGuide = projectGuide_ else {
             fatalError("Failed to identify project type.")
         }
 
-        let project = Project(kind: projectGuide.projectKind)
-        try project.validateEnvironment()
-
         print(colorize("*", .boldGreen) + " Inspecting project...")
 
+        let kind = try projectGuide.perform()
+        let project = Project(kind: kind)
+
         let commonGuide = CommonSetupGuide()
-        let guides: [SetupGuide] = [projectGuide, commonGuide]
-        try guides.forEach { try $0.perform() }
-        let options = Array(guides.map { $0.commandLineOptions }.joined())
+        try commonGuide.perform()
+
+        let options = projectGuide.commandLineOptions + commonGuide.commandLineOptions
         var shouldSave = false
 
         if configuration.hasNonDefaultValues {

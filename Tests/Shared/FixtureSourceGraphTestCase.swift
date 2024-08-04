@@ -2,11 +2,11 @@ import SystemPackage
 @testable import PeripheryKit
 import XCTest
 
-class FixtureSourceGraphTestCase: SourceGraphTestCase {
+class FixtureSourceGraphTestCase: SPMSourceGraphTestCase {
     static override func setUp() {
         super.setUp()
 
-        build(driver: SPMProjectDriver.self, projectPath: FixturesProjectPath)
+        build(projectPath: FixturesProjectPath)
     }
 
     @discardableResult

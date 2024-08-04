@@ -11,11 +11,8 @@ public final class Configuration {
         self.logger = logger
     }
 
-    @Setting(key: "project", defaultValue: nil)
-    public var project: String?
-
-    @Setting(key: "file_targets_path", defaultValue: [], setter: filePathSetter)
-    public var fileTargetsPath: [FilePath]
+    @Setting(key: "project", defaultValue: nil, setter: filePathSetter)
+    public var project: FilePath?
 
     @Setting(key: "format", defaultValue: .default, setter: { OutputFormat(anyValue: $0) })
     public var outputFormat: OutputFormat
@@ -101,7 +98,7 @@ public final class Configuration {
     @Setting(key: "strict", defaultValue: false)
     public var strict: Bool
 
-    @Setting(key: "index_store_path", defaultValue: [], setter: filePathSetter)
+    @Setting(key: "index_store_path", defaultValue: [], setter: filePathArraySetter)
     public var indexStorePath: [FilePath]
 
     @Setting(key: "skip_build", defaultValue: false)
@@ -116,14 +113,17 @@ public final class Configuration {
     @Setting(key: "relative_results", defaultValue: false)
     public var relativeResults: Bool
 
-    @Setting(key: "json_package_manifest_path", defaultValue: nil)
-    public var jsonPackageManifestPath: String?
+    @Setting(key: "json_package_manifest_path", defaultValue: nil, setter: filePathSetter)
+    public var jsonPackageManifestPath: FilePath?
 
-    @Setting(key: "baseline", defaultValue: nil)
+    @Setting(key: "baseline", defaultValue: nil, setter: filePathSetter)
     public var baseline: FilePath?
 
-    @Setting(key: "write_baseline", defaultValue: nil)
+    @Setting(key: "write_baseline", defaultValue: nil, setter: filePathSetter)
     public var writeBaseline: FilePath?
+
+    @Setting(key: "generic_project_config", defaultValue: nil, setter: filePathSetter)
+    public var genericProjectConfig: FilePath?
 
     // Non user facing.
     public var guidedSetup: Bool = false
@@ -218,7 +218,7 @@ public final class Configuration {
 
     // MARK: - Private
 
-    lazy var settings: [any AbstractSetting] = [$project, $fileTargetsPath, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat, $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible, $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis, $disableUnusedImportAnalysis, $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline]
+    lazy var settings: [any AbstractSetting] = [$project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat, $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible, $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis, $disableUnusedImportAnalysis, $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline, $genericProjectConfig]
 
     private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {
         // TODO: respect filesystem case sensitivity.
@@ -290,7 +290,15 @@ protocol AbstractSetting {
     }
 }
 
-private let filePathSetter: (Any) -> [FilePath]? = { value in
+private let filePathSetter: (Any) -> FilePath? = { value in
+    if let value = value as? String {
+        return FilePath(value)
+    }
+
+    return nil
+}
+
+private let filePathArraySetter: (Any) -> [FilePath]? = { value in
     if let value = value as? [FilePath] {
         return value
     } else if let path = value as? String {

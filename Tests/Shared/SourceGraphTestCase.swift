@@ -6,13 +6,12 @@ import SystemPackage
 import Shared
 
 open class SourceGraphTestCase: XCTestCase {
-    static var driver: ProjectDriver!
+    static var plan: IndexPlan!
     static var configuration: Configuration!
     static var results: [ScanResult] = []
 
     private static var graph = SourceGraph()
     private static var allIndexedDeclarations: Set<Declaration> = []
-    private static var sourceFiles: [SourceFile: [IndexUnit]] = [:]
 
     var configuration: Configuration { Self.configuration }
 
@@ -39,23 +38,27 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
-    static func build(driver driverType: ProjectDriver.Type, projectPath: FilePath = ProjectRootPath) {
-        projectPath.chdir {
-            driver = try! driverType.build()
-            try! driver.build()
-            sourceFiles = try! driver.collect(logger: Logger().contextualized(with: "index"))
-        }
-    }
-
     static func index(sourceFile: FilePath? = nil) {
-        var indexSourceFiles = sourceFiles
+        var newPlan = plan!
 
         if let sourceFile {
-            indexSourceFiles = sourceFiles.filter { $0.key.path == sourceFile }
+            newPlan = IndexPlan(
+                sourceFiles: plan.sourceFiles.filter { $0.key.path == sourceFile },
+                plistPaths: plan.plistPaths,
+                xibPaths: plan.xibPaths,
+                xcDataModelPaths: plan.xcDataModelPaths,
+                xcMappingModelPaths: plan.xcMappingModelPaths
+            )
         }
 
         graph = SourceGraph()
-        try! Self.driver.index(sourceFiles: indexSourceFiles, graph: graph, logger: Logger().contextualized(with: "index"))
+        let pipeline = IndexPipeline(
+            plan: newPlan,
+            graph: graph,
+            logger: Logger().contextualized(with: "index")
+        )
+        try! pipeline.perform()
+
         allIndexedDeclarations = graph.allDeclarations
         try! SourceGraphMutatorRunner.perform(graph: graph)
         results = ScanResultBuilder.build(for: graph)

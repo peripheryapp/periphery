@@ -1,13 +1,12 @@
 import XCTest
 import SystemPackage
 @testable import TestShared
-@testable import PeripheryKit
 
-final class CrossModuleRetentionTest: SourceGraphTestCase {
+final class CrossModuleRetentionTest: SPMSourceGraphTestCase {
     static override func setUp() {
         super.setUp()
 
-        build(driver: SPMProjectDriver.self, projectPath: FixturesProjectPath)
+        build(projectPath: FixturesProjectPath)
         index()
     }
 

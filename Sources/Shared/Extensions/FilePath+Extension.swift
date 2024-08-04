@@ -8,18 +8,15 @@ public extension FilePath {
     }
 
     @inlinable
-    static func makeAbsolute(_ path: String, relativeTo relativePath: FilePath = .current) -> FilePath {
-        var filePath = FilePath(path)
+    static func makeAbsolute(_ filePath: String, relativeTo relativePath: FilePath = .current) -> FilePath {
+        makeAbsolute(FilePath(filePath), relativeTo: relativePath)
+    }
 
-        if filePath.isRelative {
-            if path.hasPrefix("./") {
-                filePath = relativePath.appending(String(path.dropFirst(2)))
-            } else {
-                filePath = relativePath.appending(path)
-            }
-        }
-
-        return filePath
+    @inlinable
+    static func makeAbsolute(_ filePath: FilePath, relativeTo relativePath: FilePath = .current) -> FilePath {
+        var filePath = filePath
+        _ = filePath.removePrefix("./")
+        return relativePath.pushing(filePath)
     }
 
     @inlinable

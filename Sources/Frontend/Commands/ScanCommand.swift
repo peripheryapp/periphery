@@ -16,13 +16,10 @@ struct ScanCommand: FrontendCommand {
     var setup: Bool = defaultConfiguration.guidedSetup
 
     @Option(help: "Path to configuration file. By default Periphery will look for .periphery.yml in the current directory")
-    var config: String?
+    var config: FilePath?
 
     @Option(help: "Path to your project's .xcodeproj or .xcworkspace")
-    var project: String?
-
-    @Option(parsing: .upToNextOption, help: "File target mapping configuration file paths. For use with third-party build systems")
-    var fileTargetsPath: [FilePath] = defaultConfiguration.$fileTargetsPath.defaultValue
+    var project: FilePath?
 
     @Option(parsing: .upToNextOption, help: "Schemes to build. All targets built by these schemes will be scanned")
     var schemes: [String] = defaultConfiguration.$schemes.defaultValue
@@ -118,13 +115,16 @@ struct ScanCommand: FrontendCommand {
     var quiet: Bool = defaultConfiguration.$quiet.defaultValue
 
     @Option(help: "JSON package manifest path (obtained using `swift package describe --type json` or manually)")
-    var jsonPackageManifestPath: String?
+    var jsonPackageManifestPath: FilePath?
 
     @Option(help: "Baseline file path used to filter results")
     var baseline: FilePath?
 
     @Option(help: "Baseline file path where results are written. Pass the same path to '--baseline' in subsequent scans to exclude the results recorded in the baseline.")
     var writeBaseline: FilePath?
+
+    @Option(help: "Project configuration for non-Apple build systems")
+    var genericProjectConfig: FilePath?
 
     private static let defaultConfiguration = Configuration()
 
@@ -138,7 +138,6 @@ struct ScanCommand: FrontendCommand {
         let configuration = Configuration.shared
         configuration.guidedSetup = setup
         configuration.apply(\.$project, project)
-        configuration.apply(\.$fileTargetsPath, fileTargetsPath)
         configuration.apply(\.$schemes, schemes)
         configuration.apply(\.$indexExclude, indexExclude)
         configuration.apply(\.$reportExclude, reportExclude)
@@ -174,6 +173,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$jsonPackageManifestPath, jsonPackageManifestPath)
         configuration.apply(\.$baseline, baseline)
         configuration.apply(\.$writeBaseline, writeBaseline)
+        configuration.apply(\.$genericProjectConfig, genericProjectConfig)
 
         try scanBehavior.main { project in
             try Scan().perform(project: project)

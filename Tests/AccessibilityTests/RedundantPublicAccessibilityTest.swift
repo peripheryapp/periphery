@@ -1,12 +1,11 @@
 import XCTest
 @testable import TestShared
-@testable import PeripheryKit
 
-class RedundantPublicAccessibilityTest: SourceGraphTestCase {
+class RedundantPublicAccessibilityTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        build(driver: SPMProjectDriver.self, projectPath: AccessibilityProjectPath)
+        build(projectPath: AccessibilityProjectPath)
     }
 
     func testRedundantPublicType() {

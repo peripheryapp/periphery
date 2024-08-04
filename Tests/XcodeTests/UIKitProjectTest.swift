@@ -1,15 +1,13 @@
 import XCTest
 @testable import TestShared
-@testable import XcodeSupport
 
-class UIKitProjectTest: SourceGraphTestCase {
+class UIKitProjectTest: XcodeSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        configuration.project = UIKitProjectPath.string
         configuration.schemes = ["UIKitProject"]
 
-        build(driver: XcodeProjectDriver.self)
+        build(projectPath: UIKitProjectPath)
         index()
     }
 

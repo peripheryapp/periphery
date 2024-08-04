@@ -1,12 +1,11 @@
 import XCTest
 @testable import TestShared
-@testable import PeripheryKit
 
-class SPMProjectTest: SourceGraphTestCase {
+class SPMProjectTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        build(driver: SPMProjectDriver.self, projectPath: SPMProjectPath)
+        build(projectPath: SPMProjectPath)
         index()
     }
 

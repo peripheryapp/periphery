@@ -10,13 +10,13 @@ public struct IndexUnit {
     let unit: IndexStoreUnit
 }
 
-public final class SwiftIndexer: Indexer {
+final class SwiftIndexer: Indexer {
     private let sourceFiles: [SourceFile: [IndexUnit]]
     private let graph: SourceGraph
     private let logger: ContextualLogger
     private let configuration: Configuration
 
-    public required init(
+    required init(
         sourceFiles: [SourceFile: [IndexUnit]],
         graph: SourceGraph,
         logger: ContextualLogger,
@@ -29,7 +29,7 @@ public final class SwiftIndexer: Indexer {
         super.init(configuration: configuration)
     }
 
-    public func perform() throws {
+    func perform() throws {
         let jobs = sourceFiles.map { (file, units) -> Job in
             return Job(
                 sourceFile: file,

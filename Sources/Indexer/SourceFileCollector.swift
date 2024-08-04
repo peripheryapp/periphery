@@ -5,27 +5,28 @@ import Shared
 import SourceGraph
 
 public struct SourceFileCollector {
-    let indexStorePaths: [FilePath]
-    let excludedTargets: Set<String>
-    let logger: ContextualLogger
-    let configuration: Configuration
+    private let indexStorePaths: Set<FilePath>
+    private let excludedTestTargets: Set<String>
+    private let logger: ContextualLogger
+    private let configuration: Configuration
 
     public init(
-        indexStorePaths: [FilePath],
+        indexStorePaths: Set<FilePath>,
         excludedTestTargets: Set<String>,
         logger: ContextualLogger,
         configuration: Configuration = .shared
     ) {
         self.indexStorePaths = indexStorePaths
-        self.excludedTargets = excludedTestTargets.union(configuration.excludeTargets)
+        self.excludedTestTargets = excludedTestTargets
         self.logger = logger
         self.configuration = configuration
     }
 
     public func collect() throws -> [SourceFile: [IndexUnit]] {
+        let excludedTargets = excludedTestTargets.union(configuration.excludeTargets)
         let currentFilePath = FilePath.current
 
-        return try JobPool(jobs: indexStorePaths)
+        return try JobPool(jobs: Array(indexStorePaths))
             .flatMap { indexStorePath in
                 logger.debug("Reading \(indexStorePath)")
                 let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: .open())

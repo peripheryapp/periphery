@@ -2,7 +2,6 @@ import Foundation
 import SwiftIndexStore
 import SystemPackage
 import Shared
-import SourceGraph
 import Indexer
 
 public final class SPMProjectDriver {
@@ -44,35 +43,23 @@ extension SPMProjectDriver: ProjectDriver {
         }
     }
 
-    public func collect(logger: ContextualLogger) throws -> [SourceFile : [IndexUnit]] {
-        let storePaths: [FilePath]
+    public func plan(logger: ContextualLogger) throws -> IndexPlan {
+        let indexStorePaths: Set<FilePath>
 
         if !configuration.indexStorePath.isEmpty {
-            storePaths = configuration.indexStorePath
+            indexStorePaths = Set(configuration.indexStorePath)
         } else {
-            storePaths = [pkg.path.appending(".build/debug/index/store")]
+            indexStorePaths = [pkg.path.appending(".build/debug/index/store")]
         }
 
         let excludedTestTargets = configuration.excludeTests ? try pkg.testTargetNames() : []
-
-        return try SourceFileCollector(
-            indexStorePaths: storePaths,
+        let collector = SourceFileCollector(
+            indexStorePaths: indexStorePaths,
             excludedTestTargets: excludedTestTargets,
             logger: logger
-        ).collect()
-    }
+        )
+        let sourceFiles = try collector.collect()
 
-    public func index(
-        sourceFiles: [SourceFile: [IndexUnit]],
-        graph: SourceGraph,
-        logger: ContextualLogger
-    ) throws {
-        try SwiftIndexer(
-            sourceFiles: sourceFiles,
-            graph: graph,
-            logger: logger
-        ).perform()
-
-        graph.indexingComplete()
+        return IndexPlan(sourceFiles: sourceFiles)
     }
 }
