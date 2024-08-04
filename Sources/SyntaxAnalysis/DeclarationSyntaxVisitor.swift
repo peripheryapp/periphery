@@ -2,8 +2,8 @@ import Foundation
 import SwiftSyntax
 import SourceGraph
 
-final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
-    typealias Result = (
+public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
+    public typealias Result = (
         location: Location,
         accessibility: Accessibility?,
         modifiers: [String],
@@ -28,18 +28,18 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     private(set) var results: [Result] = []
     private var didVisitCapitalSelfFunctionCall: Bool = false
 
-    var resultsByLocation: [Location: Result] {
+    public var resultsByLocation: [Location: Result] {
         results.reduce(into: [Location: Result]()) { (dict, result) in
             dict[result.location] = result
         }
     }
 
-    init(sourceLocationBuilder: SourceLocationBuilder) {
+    public init(sourceLocationBuilder: SourceLocationBuilder) {
         self.sourceLocationBuilder = sourceLocationBuilder
         self.typeSyntaxInspector = .init(sourceLocationBuilder: sourceLocationBuilder)
     }
 
-    func visitPost(_ node: ActorDeclSyntax) {
+    public func visitPost(_ node: ActorDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -52,7 +52,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: ClassDeclSyntax) {
+    public func visitPost(_ node: ClassDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -65,7 +65,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: ProtocolDeclSyntax) {
+    public func visitPost(_ node: ProtocolDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -76,7 +76,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: StructDeclSyntax) {
+    public func visitPost(_ node: StructDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -89,7 +89,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: EnumDeclSyntax) {
+    public func visitPost(_ node: EnumDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -101,7 +101,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: EnumCaseDeclSyntax) {
+    public func visitPost(_ node: EnumCaseDeclSyntax) {
         for element in node.elements {
             parse(
                 modifiers: node.modifiers,
@@ -113,7 +113,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         }
     }
 
-    func visitPost(_ node: ExtensionDeclSyntax) {
+    public func visitPost(_ node: ExtensionDeclSyntax) {
         var position = node.extendedType.positionAfterSkippingLeadingTrivia
 
         if let memberType = node.extendedType.as(MemberTypeSyntax.self) {
@@ -136,7 +136,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: FunctionDeclSyntax) {
+    public func visitPost(_ node: FunctionDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -149,7 +149,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: InitializerDeclSyntax) {
+    public func visitPost(_ node: InitializerDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -161,7 +161,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: DeinitializerDeclSyntax) {
+    public func visitPost(_ node: DeinitializerDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -170,7 +170,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: SubscriptDeclSyntax) {
+    public func visitPost(_ node: SubscriptDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -183,7 +183,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: VariableDeclSyntax) {
+    public func visitPost(_ node: VariableDeclSyntax) {
         for binding in node.bindings {
             if binding.pattern.is(IdentifierPatternSyntax.self) {
                 let closureSignature = binding.initializer?.value.as(ClosureExprSyntax.self)?.signature
@@ -243,7 +243,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         }
     }
 
-    func visitPost(_ node: TypeAliasDeclSyntax) {
+    public func visitPost(_ node: TypeAliasDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -255,7 +255,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: AssociatedTypeDeclSyntax) {
+    public func visitPost(_ node: AssociatedTypeDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -267,7 +267,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: OperatorDeclSyntax) {
+    public func visitPost(_ node: OperatorDeclSyntax) {
         parse(
             modifiers: nil,
             attributes: nil,
@@ -276,7 +276,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visitPost(_ node: PrecedenceGroupDeclSyntax) {
+    public func visitPost(_ node: PrecedenceGroupDeclSyntax) {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
@@ -285,7 +285,7 @@ final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    func visit(_ node: FunctionCallExprSyntax) {
+    public func visit(_ node: FunctionCallExprSyntax) {
         if let identifierExpr = node.calledExpression.as(DeclReferenceExprSyntax.self),
            identifierExpr.baseName.tokenKind == .keyword(.Self) {
             didVisitCapitalSelfFunctionCall = true

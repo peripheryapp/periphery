@@ -1,5 +1,6 @@
 import Foundation
 import SystemPackage
+import Indexer
 import Shared
 import SourceGraph
 

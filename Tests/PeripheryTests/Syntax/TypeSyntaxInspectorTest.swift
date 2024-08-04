@@ -3,8 +3,8 @@ import XCTest
 import SwiftSyntax
 import SwiftParser
 @testable import TestShared
-@testable import PeripheryKit
 @testable import SourceGraph
+@testable import SyntaxAnalysis
 
 class TypeSyntaxInspectorTest: XCTestCase {
     private var results: [Location: TypeSyntaxInspectorTestVisitor.Result]!
