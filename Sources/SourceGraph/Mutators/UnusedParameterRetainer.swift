@@ -35,7 +35,7 @@ final class UnusedParameterRetainer: SourceGraphMutator {
                         functionDecl.unusedParameters.forEach { graph.markRetained($0) }
                     }
                 } else {
-                    let overrideDecls = conformingDecls.flatMap { graph.allOverrideDeclarations(fromBase:$0) }
+                    let overrideDecls = conformingDecls.flatMap { graph.allOverrideDeclarations(fromBase: $0) }
                     let allFunctionDecls = conformingDecls + overrideDecls + extFuncDecls + [protoFuncDecl]
 
                     for functionDecl in allFunctionDecls {
@@ -90,10 +90,8 @@ final class UnusedParameterRetainer: SourceGraphMutator {
     }
 
     private func retain(params: [Declaration], usedIn functionDecls: [Declaration]) {
-        for param in params {
-            if isParam(param, usedInAnyOf: functionDecls) {
-                graph.markRetained(param)
-            }
+        for param in params where isParam(param, usedInAnyOf: functionDecls) {
+            graph.markRetained(param)
         }
     }
 

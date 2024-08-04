@@ -6,13 +6,13 @@ import os
 
 public final class UnfairLock {
     #if canImport(os)
-    private var _osAllocatedUnfairLock: Any? = nil
+    private var _osAllocatedUnfairLock: Any?
 
     private var osAllocatedUnfairLock: OSAllocatedUnfairLock<Void> {
         _osAllocatedUnfairLock as! OSAllocatedUnfairLock
     }
     #else
-    private var _nsLock: Any? = nil
+    private var _nsLock: Any?
 
     private var nsLock: NSLock {
         _nsLock as! NSLock

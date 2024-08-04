@@ -8,7 +8,7 @@ let package = Package(
         .executable(
             name: "frontend",
             targets: ["Frontend", "SPMProjectKit"]
-        ),
+        )
     ],
     targets: [
         .target(
@@ -16,6 +16,6 @@ let package = Package(
             dependencies: []),
         .target(
             name: "Frontend",
-            dependencies: []),
+            dependencies: [])
     ]
 )

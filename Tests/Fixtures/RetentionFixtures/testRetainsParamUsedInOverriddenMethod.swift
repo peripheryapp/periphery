@@ -48,7 +48,7 @@ public class FixtureClass101Subclass2: FixtureClass101Subclass1 {
     public override func func4(param: Int) {}
 
     public override func func5(param: String) {}
-    
+
     public override func func7(param1: String, param2: String) {}
 }
 

@@ -2,7 +2,7 @@ import XCTest
 import SystemPackage
 import Shared
 
-class FilePathGlobTest : XCTestCase {
+class FilePathGlobTest: XCTestCase {
     private let files = ["foo", "bar", "baz", "dir1/file1.ext", "dir1/dir2/dir3/file2.ext"]
     private let baseDir = FilePath.current.appending("tmp/FilePathGlobTest").string
     private let fileManager = FileManager.default
@@ -61,7 +61,7 @@ class FilePathGlobTest : XCTestCase {
             baseDir,
             "\(baseDir)/dir1",
             "\(baseDir)/dir1/dir2",
-            "\(baseDir)/dir1/dir2/dir3",
+            "\(baseDir)/dir1/dir2/dir3"
         ])
     }
 
@@ -77,7 +77,7 @@ class FilePathGlobTest : XCTestCase {
             "\(baseDir)/dir1/dir2/dir3",
             "\(baseDir)/dir1/dir2/dir3/file2.ext",
             "\(baseDir)/dir1/file1.ext",
-            "\(baseDir)/foo",
+            "\(baseDir)/foo"
         ])
     }
 
@@ -86,7 +86,7 @@ class FilePathGlobTest : XCTestCase {
         let paths = FilePath.glob(pattern).sorted()
         XCTAssertPathsEqual(paths, [
             "\(baseDir)/dir1/dir2/dir3",
-            "\(baseDir)/dir1/dir2/dir3/file2.ext",
+            "\(baseDir)/dir1/dir2/dir3/file2.ext"
         ])
     }
 

@@ -36,7 +36,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
 
             var targets = project.targets.map { $0.name }
             targets += project.packageTargets.flatMap { (package, targets) in
-                targets.map { "\(package.name).\($0.name)" }
+                package.targets.map { "\(package.name).\($0.name)" }
             }
             targets = targets.sorted()
 

@@ -39,7 +39,7 @@ public final class SwiftIndexer: Indexer {
                 let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: .open())
                 let units = indexStore.units(includeSystem: false)
 
-                return try units.compactMap { unit  -> (FilePath, IndexStore, IndexStoreUnit)? in
+                return try units.compactMap { unit -> (FilePath, IndexStore, IndexStoreUnit)? in
                     guard let filePath = try indexStore.mainFilePath(for: unit) else { return nil }
 
                     let file = FilePath.makeAbsolute(filePath, relativeTo: currentFilePath)
@@ -187,7 +187,7 @@ public final class SwiftIndexer: Indexer {
                               let location = try transformLocation(occurrence.location)
                               else { return true }
 
-                        if !occurrence.roles.intersection([.definition, .declaration]).isEmpty {
+                        if !occurrence.roles.isDisjoint(with: [.definition, .declaration]) {
                             if let (decl, relations) = try parseRawDeclaration(occurrence, usr, location, indexStore) {
                                 rawDeclsByKey[decl.key, default: []].append((decl, relations))
                             }
@@ -257,10 +257,8 @@ public final class SwiftIndexer: Indexer {
             sourceFile.importStatements = importSyntaxVisitor.importStatements
 
             if !configuration.disableUnusedImportAnalysis {
-                for stmt in sourceFile.importStatements {
-                    if stmt.isExported {
-                        graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
-                    }
+                for stmt in sourceFile.importStatements where stmt.isExported {
+                    graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
                 }
             }
 
@@ -388,10 +386,8 @@ public final class SwiftIndexer: Indexer {
             if fileCommands.contains(.ignoreAll) {
                 retainHierarchy(declarations)
             } else {
-                for decl in declarations {
-                    if decl.commentCommands.contains(.ignore) {
-                        retainHierarchy([decl])
-                    }
+                for decl in declarations where decl.commentCommands.contains(.ignore) {
+                    retainHierarchy([decl])
                 }
             }
         }
@@ -593,7 +589,7 @@ public final class SwiftIndexer: Indexer {
                     }
                 }
 
-                if !rel.roles.intersection([.baseOf, .calledBy, .extendedBy, .containedBy]).isEmpty {
+                if !rel.roles.isDisjoint(with: [.baseOf, .calledBy, .extendedBy, .containedBy]) {
                     let referencer = rel.symbol
 
                     if let referencerUsr = referencer.usr {
@@ -663,7 +659,7 @@ public final class SwiftIndexer: Indexer {
             var refs = [Reference]()
 
             indexStore.forEachRelations(for: occurrence) { rel -> Bool in
-                if !rel.roles.intersection([.baseOf, .calledBy, .containedBy, .extendedBy]).isEmpty {
+                if !rel.roles.isDisjoint(with: [.baseOf, .calledBy, .containedBy, .extendedBy]) {
                     let referencer = rel.symbol
 
                     if let referencerUsr = referencer.usr {

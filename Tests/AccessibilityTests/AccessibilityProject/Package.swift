@@ -9,7 +9,7 @@ let package = Package(
         .executable(
             name: "app",
             targets: ["MainTarget"]
-        ),
+        )
     ],
     targets: [
         .executableTarget(
@@ -23,6 +23,6 @@ let package = Package(
             dependencies: ["ExternalTarget"]),
         .testTarget(
             name: "TestTarget",
-            dependencies: ["MainTarget", "TargetA"]),
+            dependencies: ["MainTarget", "TargetA"])
     ]
 )

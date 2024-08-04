@@ -269,7 +269,7 @@ public final class Configuration {
         if $retainCodableProperties.hasNonDefaultValue {
             config[$retainCodableProperties.key] = retainCodableProperties
         }
-        
+
         if $retainEncodableProperties.hasNonDefaultValue {
             config[$retainEncodableProperties.key] = retainEncodableProperties
         }

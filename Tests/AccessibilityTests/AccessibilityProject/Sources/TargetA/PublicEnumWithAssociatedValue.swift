@@ -15,4 +15,3 @@ public enum PublicEnumWithAssociatedValue {
         return .someCase(.init(value: ""), named: .init(value: ""))
     }
 }
-

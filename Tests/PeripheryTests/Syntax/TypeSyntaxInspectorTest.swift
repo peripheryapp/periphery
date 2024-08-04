@@ -169,7 +169,7 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
         }
 
         if let genericParameterList = node.genericParameterClause?.parameters {
-            for param in genericParameterList  {
+            for param in genericParameterList {
                 if let inheritedType = param.inheritedType {
                     addResult(for: inheritedType)
                 }

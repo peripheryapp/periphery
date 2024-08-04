@@ -341,7 +341,7 @@ extension Declaration: Comparable {
 public struct DeclarationAccessibility {
     public let value: Accessibility
     public let isExplicit: Bool
-    
+
     public init(value: Accessibility, isExplicit: Bool) {
         self.value = value
         self.isExplicit = isExplicit
