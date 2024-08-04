@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 @testable import TestShared
 @testable import SourceGraph
-@testable import StaticAnalyse
+@testable import SyntaxAnalysis
 
 class PropertyVisitTest: XCTestCase {
     private var results: [Location: DeclarationSyntaxVisitor.Result]!
