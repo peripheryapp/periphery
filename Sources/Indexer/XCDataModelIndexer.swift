@@ -2,19 +2,19 @@ import Shared
 import SystemPackage
 import SourceGraph
 
-public final class XCDataModelIndexer: Indexer {
+final class XCDataModelIndexer: Indexer {
     private let files: Set<FilePath>
     private let graph: SourceGraph
     private let logger: ContextualLogger
 
-    public required init(files: Set<FilePath>, graph: SourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
+    required init(files: Set<FilePath>, graph: SourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
         self.files = files
         self.graph = graph
         self.logger = logger.contextualized(with: "index:xcdatamodel")
         super.init(configuration: configuration)
     }
 
-    public func perform() throws {
+    func perform() throws {
         let (includedFiles, excludedFiles) = filterIndexExcluded(from: files)
         excludedFiles.forEach { self.logger.debug("Excluding \($0.string)") }
 

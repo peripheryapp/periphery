@@ -1,8 +1,9 @@
 import Foundation
 
 public protocol SetupGuide {
-    func perform() throws
+    func perform() throws -> ProjectKind
     var commandLineOptions: [String] { get }
+    var projectKindName: String { get }
 }
 
 public enum SetupSelection {

@@ -6,17 +6,19 @@ import SourceGraph
 import Indexer
 
 public final class XcodeProjectDriver {
-    public static func build() throws -> Self {
+    public static func build(projectPath: FilePath) throws -> Self {
         let configuration = Configuration.shared
-        try validateConfiguration(configuration: configuration)
+        let xcodebuild = Xcodebuild()
 
-        guard let projectPath = configuration.project else {
-            throw PeripheryError.usageError("Expected --project option.")
+        guard !configuration.schemes.isEmpty else {
+            throw PeripheryError.usageError("The '--schemes' option is required.")
         }
+
+        try xcodebuild.ensureConfigured()
 
         let project: XcodeProjectlike
 
-        if projectPath.hasSuffix("xcworkspace") {
+        if projectPath.extension == "xcworkspace" {
             project = try XcodeWorkspace(path: .makeAbsolute(projectPath))
         } else {
             project = try XcodeProject(path: .makeAbsolute(projectPath))
@@ -39,6 +41,8 @@ public final class XcodeProjectDriver {
         }
 
         return self.init(
+            configuration: configuration,
+            xcodebuild: xcodebuild,
             project: project,
             schemes: schemes
         )
@@ -52,8 +56,8 @@ public final class XcodeProjectDriver {
 
     init(
         logger: Logger = .init(),
-        configuration: Configuration = .shared,
-        xcodebuild: Xcodebuild = .init(),
+        configuration: Configuration,
+        xcodebuild: Xcodebuild,
         project: XcodeProjectlike,
         schemes: Set<String>
     ) {
@@ -62,19 +66,6 @@ public final class XcodeProjectDriver {
         self.xcodebuild = xcodebuild
         self.project = project
         self.schemes = schemes
-    }
-
-    // MARK: - Private
-
-    private static func validateConfiguration(configuration: Configuration) throws {
-        guard configuration.project != nil else {
-            let message = "You must supply the --project option."
-            throw PeripheryError.usageError(message)
-        }
-
-        guard !configuration.schemes.isEmpty else {
-            throw PeripheryError.usageError("The '--schemes' option is required.")
-        }
     }
 }
 
@@ -99,55 +90,35 @@ extension XcodeProjectDriver: ProjectDriver {
         }
     }
 
-    public func collect(logger: ContextualLogger) throws -> [SourceFile : [IndexUnit]] {
-        let storePaths: [FilePath]
+    public func plan(logger: ContextualLogger) throws -> IndexPlan {
+        let indexStorePaths: Set<FilePath>
 
         if !configuration.indexStorePath.isEmpty {
-            storePaths = configuration.indexStorePath
+            indexStorePaths = Set(configuration.indexStorePath)
         } else {
-            storePaths = [try xcodebuild.indexStorePath(project: project, schemes: Array(schemes))]
+            indexStorePaths = [try xcodebuild.indexStorePath(project: project, schemes: Array(schemes))]
         }
 
-        var excludedTestTargets = Set<String>()
-
-        if configuration.excludeTests {
-            excludedTestTargets = project.targets.filter(\.isTestTarget).mapSet(\.name)
-        }
-
-        return try SourceFileCollector(
-            indexStorePaths: storePaths,
+        let targets = project.targets
+        try targets.forEach { try $0.identifyFiles() }
+        let excludedTestTargets = configuration.excludeTests ? project.targets.filter(\.isTestTarget).mapSet(\.name) : []
+        let collector = SourceFileCollector(
+            indexStorePaths: indexStorePaths,
             excludedTestTargets: excludedTestTargets,
             logger: logger
-        ).collect()
-    }
+        )
+        let sourceFiles = try collector.collect()
+        let infoPlistPaths = targets.flatMapSet { $0.files(kind: .infoPlist) }
+        let xibPaths = targets.flatMapSet { $0.files(kind: .interfaceBuilder) }
+        let xcDataModelPaths = targets.flatMapSet { $0.files(kind: .xcDataModel) }
+        let xcMappingModelPaths = targets.flatMapSet { $0.files(kind: .xcMappingModel) }
 
-    public func index(
-        sourceFiles: [SourceFile: [IndexUnit]],
-        graph: SourceGraph,
-        logger: ContextualLogger
-    ) throws {
-        try SwiftIndexer(
+        return IndexPlan(
             sourceFiles: sourceFiles,
-            graph: graph,
-            logger: logger
-        ).perform()
-
-        let modules = sourceFiles.keys.flatMapSet { $0.modules }
-        let targets = project.targets.filter { modules.contains($0.name) }
-        try targets.forEach { try $0.identifyFiles() }
-
-        let xibFiles = targets.flatMapSet { $0.files(kind: .interfaceBuilder) }
-        try XibIndexer(xibFiles: xibFiles, graph: graph).perform()
-
-        let xcDataModelFiles = targets.flatMapSet { $0.files(kind: .xcDataModel) }
-        try XCDataModelIndexer(files: xcDataModelFiles, graph: graph).perform()
-
-        let xcMappingModelFiles = targets.flatMapSet { $0.files(kind: .xcMappingModel) }
-        try XCMappingModelIndexer(files: xcMappingModelFiles, graph: graph).perform()
-
-        let infoPlistFiles = targets.flatMapSet { $0.files(kind: .infoPlist) }
-        try InfoPlistIndexer(infoPlistFiles: infoPlistFiles, graph: graph).perform()
-
-        graph.indexingComplete()
+            plistPaths: infoPlistPaths,
+            xibPaths: xibPaths,
+            xcDataModelPaths: xcDataModelPaths,
+            xcMappingModelPaths: xcMappingModelPaths
+        )
     }
 }

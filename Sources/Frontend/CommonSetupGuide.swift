@@ -1,7 +1,7 @@
 import Foundation
 import Shared
 
-final class CommonSetupGuide: SetupGuideHelpers, SetupGuide {
+final class CommonSetupGuide: SetupGuideHelpers {
     private let configuration: Configuration
 
     required init(configuration: Configuration = .shared) {

@@ -4,9 +4,11 @@ import Shared
 
 public final class Xcodebuild {
     private let shell: Shell
+    private let logger: Logger
 
-    public required init(shell: Shell = .shared) {
+    public required init(shell: Shell = .shared, logger: Logger = .init()) {
         self.shell = shell
+        self.logger = logger
     }
 
     private static var version: String?
@@ -19,6 +21,14 @@ public final class Xcodebuild {
         let version = try shell.exec(["xcodebuild", "-version"]).trimmed
         Xcodebuild.version = version
         return version
+    }
+
+    public func ensureConfigured() throws {
+        do {
+            logger.debug(try version())
+        } catch {
+            throw PeripheryError.xcodebuildNotConfigured
+        }
     }
 
     @discardableResult
