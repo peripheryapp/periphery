@@ -48,7 +48,11 @@ disabled_rules:
   - no_magic_numbers
   - prefixed_toplevel_constant
   - untyped_error_in_catch
-  
+  - contrasted_opening_brace
+  - unused_parameter
+  - no_empty_block
+  - prefer_key_path
+
 closure_body_length:
     warning: 50
     error: 100
