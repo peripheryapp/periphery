@@ -25,3 +25,5 @@ DerivedData
 
 # VSCode
 .vscode/*
+
+bazel-*
