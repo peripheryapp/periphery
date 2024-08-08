@@ -208,11 +208,10 @@ struct UnusedParameterParser {
         } else if let node = node.as(InitializerDeclSyntax.self) {
             parsed = parse(initializerDecl: node, collector)
         } else if let optBindingCondition = node.as(OptionalBindingConditionSyntax.self) {
-            // swiftlint:disable:next control_statement
             if optBindingCondition.initializer == nil,
                let pattern = optBindingCondition.pattern.as(IdentifierPatternSyntax.self),
                let parentStmt = optBindingCondition.parent?.parent?.parent,
-               (parentStmt.is(IfExprSyntax.self) || parentStmt.is(GuardStmtSyntax.self)) {
+               parentStmt.is(IfExprSyntax.self) || parentStmt.is(GuardStmtSyntax.self) {
                 // Handle `let x {}` syntax.
                 parsed = parse(identifier: pattern.identifier)
             } else {
