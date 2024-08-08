@@ -1,5 +1,5 @@
-import SwiftSyntax
 import SourceGraph
+import SwiftSyntax
 
 public final class SourceLocationBuilder {
     private let file: SourceFile
@@ -13,7 +13,7 @@ public final class SourceLocationBuilder {
     public func location(at position: AbsolutePosition) -> Location {
         let location = locationConverter.location(for: position)
         return Location(file: file,
-                              line: location.line,
-                              column: location.column)
+                        line: location.line,
+                        column: location.column)
     }
  }

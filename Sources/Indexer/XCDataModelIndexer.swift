@@ -1,6 +1,6 @@
 import Shared
-import SystemPackage
 import SourceGraph
+import SystemPackage
 
 public final class XCDataModelIndexer: Indexer {
     private let files: Set<FilePath>
@@ -19,7 +19,7 @@ public final class XCDataModelIndexer: Indexer {
         excludedFiles.forEach { self.logger.debug("Excluding \($0.string)") }
 
         try JobPool(jobs: Array(includedFiles)).forEach { [weak self] path in
-            guard let self = self else { return }
+            guard let self else { return }
 
             let elapsed = try Benchmark.measure {
                 try XCDataModelParser(path: path)
@@ -27,7 +27,7 @@ public final class XCDataModelIndexer: Indexer {
                     .forEach { self.graph.add($0) }
             }
 
-            self.logger.debug("\(path.string) (\(elapsed)s)")
+            logger.debug("\(path.string) (\(elapsed)s)")
         }
     }
 }

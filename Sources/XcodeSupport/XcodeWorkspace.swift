@@ -1,8 +1,8 @@
 import Foundation
-import XcodeProj
-import SystemPackage
 import PeripheryKit
 import Shared
+import SystemPackage
+import XcodeProj
 
 final class XcodeWorkspace: XcodeProjectlike {
     let type: String = "workspace"

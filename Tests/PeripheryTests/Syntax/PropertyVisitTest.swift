@@ -1,10 +1,11 @@
 import Foundation
-import XCTest
-@testable import TestShared
 @testable import SourceGraph
 @testable import SyntaxAnalysis
+@testable import TestShared
+import XCTest
 
-class PropertyVisitTest: XCTestCase {
+final class PropertyVisitTest: XCTestCase {
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var results: [Location: DeclarationSyntaxVisitor.Result]!
 
     override func setUpWithError() throws {
@@ -13,6 +14,11 @@ class PropertyVisitTest: XCTestCase {
         let visitor = multiplexingVisitor.add(DeclarationSyntaxVisitor.self)
         multiplexingVisitor.visit()
         results = visitor.resultsByLocation
+    }
+
+    override func tearDown() {
+        results = nil
+        super.tearDown()
     }
 
     func testImplicitType() {

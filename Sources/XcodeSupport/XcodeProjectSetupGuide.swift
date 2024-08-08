@@ -1,6 +1,6 @@
 import Foundation
-import SystemPackage
 import Shared
+import SystemPackage
 
 public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide {
     private let configuration: Configuration
@@ -13,7 +13,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
     }
 
     public var projectKind: ProjectKind {
-        return .xcode
+        .xcode
     }
 
     public var isSupported: Bool {
@@ -29,13 +29,13 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             project = try XcodeProject(path: projectPath)
         }
 
-        if let project = project {
+        if let project {
             guard !project.targets.isEmpty else {
                 throw PeripheryError.guidedSetupError(message: "Failed to identify any targets in \(project.path.lastComponent?.string ?? "")")
             }
 
             var targets = project.targets.map { $0.name }
-            targets += project.packageTargets.flatMap { (package, targets) in
+            targets += project.packageTargets.flatMap { package, _ in
                 package.targets.map { "\(package.name).\($0.name)" }
             }
             targets = targets.sorted()
@@ -43,10 +43,10 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             print(colorize("Select build targets to analyze:", .bold))
             configuration.targets = select(multiple: targets, allowAll: true).selectedValues
 
-            let schemes = try filter(
+            let schemes = Array(try filter(
                 project.schemes(additionalArguments: configuration.xcodeListArguments),
                 project
-            ).map { $0 }.sorted()
+            )).sorted()
 
             print(colorize("\nSelect the schemes necessary to build your chosen targets:", .bold))
             configuration.schemes = select(multiple: schemes, allowAll: false).selectedValues
@@ -113,7 +113,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             workspacePath = paths.first
         }
 
-        if let workspacePath = workspacePath {
+        if let workspacePath {
             configuration.workspace = workspacePath.relativeTo(.current).string
             return workspacePath
         }
@@ -142,7 +142,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide 
             projectPath = paths.first
         }
 
-        if let projectPath = projectPath {
+        if let projectPath {
             configuration.project = projectPath.relativeTo(.current).string
             return projectPath
         }

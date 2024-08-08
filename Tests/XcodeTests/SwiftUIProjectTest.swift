@@ -1,8 +1,9 @@
-import XCTest
 @testable import TestShared
 @testable import XcodeSupport
+import XCTest
 
-class SwiftUIProjectTest: SourceGraphTestCase {
+// swiftlint:disable:next balanced_xctest_lifecycle
+final class SwiftUIProjectTest: SourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 

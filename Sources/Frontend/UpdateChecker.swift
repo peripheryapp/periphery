@@ -39,9 +39,10 @@ final class UpdateChecker {
         urlRequest.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
 
         let task = urlSession.dataTask(with: urlRequest) { [weak self] data, _, error in
+            // swiftlint:disable:next self_binding
             guard let strongSelf = self else { return }
 
-            if let error = error {
+            if let error {
                 strongSelf.debugLogger.debug("error: \(error.localizedDescription)")
                 strongSelf.error = error
                 strongSelf.semaphore.signal()
@@ -53,8 +54,11 @@ final class UpdateChecker {
                 let tagName = jsonObject["tag_name"] as? String else {
                     var json = "N/A"
 
-                    if let data = data {
-                        json = String(data: data, encoding: .utf8) ?? "N/A"
+                    if let data {
+                        let decoded = String(decoding: data, as: UTF8.self)
+                        if !decoded.isEmpty {
+                            json = decoded
+                        }
                     }
 
                     let message = "Failed to identify latest release tag in: \(json)"
@@ -72,7 +76,7 @@ final class UpdateChecker {
     }
 
     func notifyIfAvailable() {
-        guard let latestVersion = latestVersion else { return }
+        guard let latestVersion else { return }
 
         debugLogger.debug("latest: \(latestVersion)")
 
@@ -91,7 +95,7 @@ final class UpdateChecker {
     func wait() -> Result<String, PeripheryError> {
         let waitResult = semaphore.wait(timeout: .now() + 60)
 
-        if let error = error {
+        if let error {
             return .failure(.underlyingError(error))
         }
 
@@ -99,7 +103,7 @@ final class UpdateChecker {
             return .failure(PeripheryError.updateCheckError(message: "Timed out while checking for update."))
         }
 
-        if let latestVersion = latestVersion {
+        if let latestVersion {
             return .success(latestVersion)
         }
 

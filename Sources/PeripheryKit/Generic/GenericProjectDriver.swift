@@ -1,8 +1,8 @@
 import Foundation
-import SystemPackage
 import Indexer
 import Shared
 import SourceGraph
+import SystemPackage
 
 public final class GenericProjectDriver {
     private enum FileKind: String {

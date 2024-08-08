@@ -1,12 +1,13 @@
 import Foundation
-import XCTest
-import SwiftSyntax
-import SwiftParser
-@testable import TestShared
 @testable import SourceGraph
+import SwiftParser
+import SwiftSyntax
 @testable import SyntaxAnalysis
+@testable import TestShared
+import XCTest
 
-class TypeSyntaxInspectorTest: XCTestCase {
+final class TypeSyntaxInspectorTest: XCTestCase {
+    // swiftlint:disable:next implicitly_unwrapped_optional
     private var results: [Location: TypeSyntaxInspectorTestVisitor.Result]!
 
     override func setUpWithError() throws {
@@ -14,6 +15,11 @@ class TypeSyntaxInspectorTest: XCTestCase {
         let visitor = try TypeSyntaxInspectorTestVisitor(file: fixturePath)
         visitor.visit()
         results = visitor.results
+    }
+
+    override func tearDown() {
+        results = nil
+        super.tearDown()
     }
 
     func testSimpleType() {
@@ -130,6 +136,7 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
     private let typeSyntaxInspector: TypeSyntaxInspector
 
     typealias Result = (type: String, locations: [Location])
+
     var results: [Location: Result] = [:]
 
     init(file: SourceFile) throws {

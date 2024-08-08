@@ -9,12 +9,14 @@ public final class UnfairLock {
     private var _osAllocatedUnfairLock: Any?
 
     private var osAllocatedUnfairLock: OSAllocatedUnfairLock<Void> {
+        // swiftlint:disable:next force_cast
         _osAllocatedUnfairLock as! OSAllocatedUnfairLock
     }
     #else
     private var _nsLock: Any?
 
     private var nsLock: NSLock {
+        // swiftlint:disable:next force_cast
         _nsLock as! NSLock
     }
     #endif

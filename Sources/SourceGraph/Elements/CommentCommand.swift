@@ -4,7 +4,7 @@ public enum CommentCommand: CustomStringConvertible, Hashable {
     case ignore
     case ignoreAll
     case ignoreParameters([String])
-    
+
     public var description: String {
         switch self {
         case .ignore:

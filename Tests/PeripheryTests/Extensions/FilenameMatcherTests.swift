@@ -1,7 +1,7 @@
+import FilenameMatcher
 import Foundation
 import Shared
 import XCTest
-import FilenameMatcher
 
 final class FilenameMatcherTests: XCTestCase {
     func testRelativePatterns() {

@@ -1,9 +1,9 @@
 import Foundation
-import XCTest
 @testable import TestShared
 @testable import XcodeSupport
+import XCTest
 
-class XcodeTargetTest: XCTestCase {
+final class XcodeTargetTest: XCTestCase {
     func testSourceFileInGroupWithoutFolder() throws {
         let project = try! XcodeProject(path: UIKitProjectPath)
         let target = project.targets.first { $0.name == "UIKitProject" }!

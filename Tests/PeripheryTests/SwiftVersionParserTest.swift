@@ -1,8 +1,8 @@
 import Foundation
-import XCTest
 import Shared
+import XCTest
 
-class SwiftVersionParserTest: XCTestCase {
+final class SwiftVersionParserTest: XCTestCase {
     func testParse() throws {
         let v1 = try SwiftVersionParser.parse("Apple Swift version 5.4 (swiftlang-1205.0.16.12 clang-1205.0.19.6)\nTarget: x86_64-apple-darwin20.2.0")
         XCTAssertEqual(v1, "5.4")

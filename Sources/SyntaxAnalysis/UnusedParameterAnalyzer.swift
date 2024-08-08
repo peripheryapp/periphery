@@ -1,7 +1,7 @@
 import Foundation
+import SourceGraph
 import SwiftSyntax
 import SystemPackage
-import SourceGraph
 
 public final class UnusedParameterAnalyzer {
     private enum UsageType {
@@ -9,7 +9,7 @@ public final class UnusedParameterAnalyzer {
         case unused
         case shadowed
     }
-    
+
     public init() { }
 
     public func analyze(file: SourceFile, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) -> [Function: Set<Parameter>] {
@@ -19,7 +19,7 @@ public final class UnusedParameterAnalyzer {
             locationConverter: locationConverter,
             parseProtocols: parseProtocols)
 
-        return functions.reduce(into: [Function: Set<Parameter>]()) { (result, function) in
+        return functions.reduce(into: [Function: Set<Parameter>]()) { result, function in
             let params = analyze(function: function)
 
             if !params.isEmpty {
@@ -29,7 +29,7 @@ public final class UnusedParameterAnalyzer {
     }
 
     func analyze(function: Function) -> Set<Parameter> {
-        return Set(unusedParams(in: function))
+        Set(unusedParams(in: function))
     }
 
     // MARK: - Private

@@ -1,5 +1,6 @@
 import Shared
 
+// swiftlint:disable:next type_name
 final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
@@ -37,8 +38,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
             if !graph.isRetained(decl) &&
                 !isReferencedCrossModule(decl) &&
                 !isExposedPubliclyByAnotherDeclaration(decl) &&
-                !isProtocolIndirectlyReferencedCrossModuleByExtensionMember(decl)
-            {
+                !isProtocolIndirectlyReferencedCrossModuleByExtensionMember(decl) {
                 // Public accessibility is redundant.
                 mark(decl)
                 markExplicitPublicDescendentDeclarations(from: decl)
@@ -164,7 +164,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     private func nonTestableModulesReferencing(_ decl: Declaration) -> Set<String> {
         let referenceFiles = graph.references(to: decl).map { $0.location.file }
 
-        let referenceModules = referenceFiles.flatMapSet { file -> Set<String> in
+        return referenceFiles.flatMapSet { file -> Set<String> in
             let importsDeclModuleTestable = file.importStatements.contains(where: {
                 $0.isTestable && decl.location.file.modules.contains($0.module)
             })
@@ -175,8 +175,6 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
 
             return []
         }
-
-        return referenceModules
     }
 
     private func descendentPublicDeclarations(from decl: Declaration) -> Set<Declaration> {

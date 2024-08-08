@@ -145,7 +145,7 @@ public final class Declaration {
         }
 
         static var discreteConformableKinds: Set<Kind> {
-            return [.class, .struct, .enum]
+            [.class, .struct, .enum]
         }
 
         public var isConcreteTypeDeclarableKind: Bool {
@@ -153,7 +153,7 @@ public final class Declaration {
         }
 
         static var concreteTypeDeclarableKinds: Set<Kind> {
-            return [.class, .struct, .enum, .typealias]
+            [.class, .struct, .enum, .typealias]
         }
 
         static var accessorKinds: Set<Kind> {
@@ -257,9 +257,11 @@ public final class Declaration {
     }
 
     public var isComplexProperty: Bool {
-        return declarations.contains {
-            if [.functionAccessorWillset,
-                .functionAccessorDidset].contains($0.kind) {
+        declarations.contains {
+            if [
+                .functionAccessorWillset,
+                .functionAccessorDidset
+            ].contains($0.kind) {
                 return true
             }
 
@@ -287,7 +289,7 @@ public final class Declaration {
     }
 
     func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {
-        guard let parent = parent else { return false }
+        guard let parent else { return false }
         return parent.kind == kind
     }
 }
@@ -316,15 +318,17 @@ extension Declaration: CustomStringConvertible {
         let formattedCommentCommands = "[" + commentCommands.map { $0.description }.sorted().joined(separator: ", ") + "]"
         let formattedUsrs = "[" + usrs.sorted().joined(separator: ", ") + "]"
         let implicitOrExplicit = isImplicit ? "implicit" : "explicit"
-        return [kind.rawValue,
-                formattedName,
-                implicitOrExplicit,
-                accessibility.value.rawValue,
-                formattedModifiers,
-                formattedAttributes,
-                formattedCommentCommands,
-                formattedUsrs,
-                location.shortDescription]
+        return [
+            kind.rawValue,
+            formattedName,
+            implicitOrExplicit,
+            accessibility.value.rawValue,
+            formattedModifiers,
+            formattedAttributes,
+            formattedCommentCommands,
+            formattedUsrs,
+            location.shortDescription
+        ]
     }
 }
 

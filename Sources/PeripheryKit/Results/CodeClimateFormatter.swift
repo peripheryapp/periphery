@@ -49,7 +49,6 @@ final class CodeClimateFormatter: OutputFormatter {
         }
 
         let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted, .withoutEscapingSlashes])
-        let json = String(data: data, encoding: .utf8)
-        return json ?? ""
+        return String(decoding: data, as: UTF8.self)
     }
 }

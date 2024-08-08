@@ -1,8 +1,8 @@
 import Foundation
-import XcodeProj
-import SystemPackage
 import PeripheryKit
 import Shared
+import SystemPackage
+import XcodeProj
 
 final class XcodeProject: XcodeProjectlike {
     private static var cache: [FilePath: XcodeProject] = [:]
@@ -105,6 +105,6 @@ extension XcodeProject: Hashable {
 
 extension XcodeProject: Equatable {
     static func == (lhs: XcodeProject, rhs: XcodeProject) -> Bool {
-        return lhs.path == rhs.path
+        lhs.path == rhs.path
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
-import Shared
 import PeripheryKit
+import Shared
 import SourceGraph
 
 final class Scan {

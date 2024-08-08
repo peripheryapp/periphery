@@ -1,13 +1,14 @@
-import Foundation
-import SystemPackage
 import AEXML
+import Foundation
 import Shared
 import SourceGraph
+import SystemPackage
 
 final class InfoPlistParser {
     private static let elements = [
         "UISceneClassName", "UISceneDelegateClassName", "NSPrincipalClass",
-        "NSExtensionPrincipalClass", "CLKComplicationPrincipalClass", "WKExtensionDelegateClassName"]
+        "NSExtensionPrincipalClass", "CLKComplicationPrincipalClass", "WKExtensionDelegateClassName"
+    ]
     private let path: FilePath
 
     required init(path: FilePath) {

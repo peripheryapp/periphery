@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-class StringVersionTest: XCTestCase {
+final class StringVersionTest: XCTestCase {
     func testVersion() {
         XCTAssertTrue("9.3".isVersion(lessThan: "10.0"))
         XCTAssertTrue("9.3.1".isVersion(lessThan: "10.0"))

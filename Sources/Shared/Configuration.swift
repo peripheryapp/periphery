@@ -1,8 +1,10 @@
+import FilenameMatcher
 import Foundation
 import SystemPackage
 import Yams
-import FilenameMatcher
 
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 public final class Configuration {
     public static var defaultConfigurationFile = ".periphery.yml"
     public static let shared = Configuration()
@@ -131,6 +133,7 @@ public final class Configuration {
     // Dependencies.
     private var logger: BaseLogger // Must use BaseLogger as Logger depends upon Configuration.
 
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     public func asYaml() throws -> String {
         var config: [String: Any?] = [:]
 
@@ -294,6 +297,7 @@ public final class Configuration {
         FileManager.default.createFile(atPath: Self.defaultConfigurationFile, contents: data)
     }
 
+    // swiftlint:disable:next function_body_length
     public func load(from path: FilePath?) throws {
         guard let path = try configurationPath(withUserProvided: path) else { return }
 
@@ -435,6 +439,7 @@ public final class Configuration {
         }
     }
 
+    // swiftlint:disable:next discouraged_optional_collection
     private var _indexExcludeMatchers: [FilenameMatcher]?
     public var indexExcludeMatchers: [FilenameMatcher] {
         if let _indexExcludeMatchers {
@@ -446,6 +451,7 @@ public final class Configuration {
         return matchers
     }
 
+    // swiftlint:disable:next discouraged_optional_collection
     private var _retainFilesMatchers: [FilenameMatcher]?
     public var retainFilesMatchers: [FilenameMatcher] {
         if let _retainFilesMatchers {
@@ -479,7 +485,7 @@ public final class Configuration {
     }
 
     private func configurationPath(withUserProvided path: FilePath?) throws -> FilePath? {
-        if let path = path {
+        if let path {
             if !path.exists {
                 throw PeripheryError.pathDoesNotExist(path: path.lexicallyNormalized().string)
             }
@@ -491,21 +497,26 @@ public final class Configuration {
     }
 }
 
-@propertyWrapper public final class Setting<Value: Equatable> {
+@propertyWrapper
+public final class Setting<Value: Equatable> {
     typealias ValueConverter = (Any) -> Value?
     typealias ValueSanitizer = (Value) -> Value
 
     public let defaultValue: Value
+    // swiftlint:disable:next strict_fileprivate
     fileprivate let key: String
 
     private let valueConverter: ValueConverter
     private let valueSanitizer: ValueSanitizer
     private var value: Value
 
-    fileprivate init(key: String,
-                     defaultValue: Value,
-                     valueConverter: @escaping ValueConverter = { $0 as? Value },
-                     valueSanitizer: @escaping ValueSanitizer = { $0 }) {
+    // swiftlint:disable:next strict_fileprivate
+    fileprivate init(
+        key: String,
+        defaultValue: Value,
+        valueConverter: @escaping ValueConverter = { $0 as? Value },
+        valueSanitizer: @escaping ValueSanitizer = { $0 }
+    ) {
         self.key = key
         self.value = defaultValue
         self.defaultValue = defaultValue
@@ -520,6 +531,7 @@ public final class Configuration {
 
     public var projectedValue: Setting { self }
 
+    // swiftlint:disable strict_fileprivate
     fileprivate var hasNonDefaultValue: Bool {
         value != defaultValue
     }
@@ -531,8 +543,10 @@ public final class Configuration {
     fileprivate func reset() {
         wrappedValue = defaultValue
     }
+    // swiftlint:enable strict_fileprivate
 }
 
+// swiftlint:disable:next discouraged_optional_collection
 private let filePathConverter: (Any) -> [FilePath]? = { value in
     if let path = value as? String {
         return [FilePath(path)]

@@ -1,7 +1,7 @@
 import Foundation
 import Shared
-import SystemPackage
 import SourceGraph
+import SystemPackage
 
 final class XcodeFormatter: OutputFormatter {
     let configuration: Configuration
@@ -12,12 +12,12 @@ final class XcodeFormatter: OutputFormatter {
     }
 
     func format(_ results: [ScanResult]) throws -> String {
-        guard results.count > 0 else {
+        guard !results.isEmpty else {
             return colorize("* ", .boldGreen) + colorize("No unused code detected.", .bold)
         }
 
         return results.flatMap { result in
-            describe(result, colored: true).map { (location, description) in
+            describe(result, colored: true).map { location, description in
                 prefix(for: location) + description
             }
         }

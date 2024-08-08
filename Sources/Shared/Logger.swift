@@ -21,8 +21,7 @@ public enum ANSIColor: String {
     case gray = "\u{001B}[0;1;30m"
 }
 
-@usableFromInline
-var isColorOutputCapable: Bool = {
+@usableFromInline var isColorOutputCapable: Bool = {
     guard let term = ProcessInfo.processInfo.environment["TERM"],
         term.lowercased() != "dumb",
         isatty(fileno(stdout)) != 0 else {
@@ -41,8 +40,7 @@ public func colorize(_ text: String, _ color: ANSIColor) -> String {
 public final class BaseLogger {
     public static let shared = BaseLogger()
 
-    @usableFromInline
-    let outputQueue: DispatchQueue
+    @usableFromInline let outputQueue: DispatchQueue
 
     private init() {
         self.outputQueue = DispatchQueue(label: "BaseLogger.outputQueue")
@@ -146,7 +144,6 @@ public final class Logger {
         #if canImport(os)
         signposter.endInterval(interval.name, interval.state)
         #endif
-
     }
 }
 
@@ -194,6 +191,8 @@ public struct SignpostInterval {
 }
 #else
 public struct SignpostInterval {
-    @usableFromInline init() {}
+    // swiftlint:disable:next unneeded_synthesized_initializer
+    @usableFromInline
+    init() {}
 }
 #endif

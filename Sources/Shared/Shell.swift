@@ -46,7 +46,7 @@ final class ReadableStream {
 
 open class Shell {
     public static let shared: Shell = {
-        return Shell(environment: ProcessInfo.processInfo.environment, logger: Logger())
+        Shell(environment: ProcessInfo.processInfo.environment, logger: Logger())
     }()
 
     private var tasks: Set<Process> = []
@@ -55,7 +55,7 @@ open class Shell {
     private let environment: [String: String]
     private let logger: ContextualLogger
 
-    required public init(environment: [String: String], logger: Logger) {
+    public required init(environment: [String: String], logger: Logger) {
         self.environment = environment
         self.logger = logger.contextualized(with: "shell")
     }
@@ -75,7 +75,7 @@ open class Shell {
                 let pair = line.split(separator: "=", maxSplits: 1)
                 return (String(pair.first ?? ""), String(pair.last ?? ""))
             }
-            .reduce(into: [String: String]()) { (result, pair) in
+            .reduce(into: [String: String]()) { result, pair in
                 result[pair.0] = pair.1
             }
 

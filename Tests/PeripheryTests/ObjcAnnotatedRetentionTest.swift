@@ -1,11 +1,11 @@
-import XCTest
+@testable import PeripheryKit
 import SystemPackage
 @testable import TestShared
-@testable import PeripheryKit
+import XCTest
 
-#if os(macOS)
+#if os(macOS) // swiftlint:disable:next balanced_xctest_lifecycle
 final class ObjcAnnotatedRetentionTest: FixtureSourceGraphTestCase {
-    static override func setUp() {
+    override static func setUp() {
         super.setUp()
 
         configuration.targets = ["ObjcAnnotatedRetentionFixtures"]

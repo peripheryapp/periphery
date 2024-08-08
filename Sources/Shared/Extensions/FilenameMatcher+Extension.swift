@@ -1,5 +1,5 @@
-import Foundation
 import FilenameMatcher
+import Foundation
 
 public extension FilenameMatcher {
     @inlinable

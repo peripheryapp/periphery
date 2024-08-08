@@ -1,7 +1,7 @@
 import Foundation
 import Shared
-import SystemPackage
 import SourceGraph
+import SystemPackage
 
 final class CheckstyleFormatter: OutputFormatter {
     let configuration: Configuration
@@ -13,7 +13,7 @@ final class CheckstyleFormatter: OutputFormatter {
 
     func format(_ results: [ScanResult]) -> String {
         let parts = results.flatMap { describe($0, colored: false) }
-        let xml = [
+        return [
             "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<checkstyle version=\"4.3\">",
             parts
                 .group(by: { outputPath($0.0).string.escapedForXML() })
@@ -21,13 +21,12 @@ final class CheckstyleFormatter: OutputFormatter {
                 .map(generateForFile).joined(),
             "\n</checkstyle>"
         ].joined()
-        return xml
     }
 
     // MARK: - Private
 
     private func generateForFile(_ file: String, results: [(Location, String)]) -> String {
-        return [
+        [
             "\n\t<file name=\"", file, "\">\n",
             results.map(generateForResult).joined(),
             "\t</file>"

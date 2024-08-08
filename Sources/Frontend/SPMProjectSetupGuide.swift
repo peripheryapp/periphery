@@ -1,7 +1,7 @@
 import Foundation
-import SystemPackage
 import PeripheryKit
 import Shared
+import SystemPackage
 
 final class SPMProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide {
     private let configuration: Configuration
@@ -51,5 +51,4 @@ final class SPMProjectSetupGuide: SetupGuideHelpers, ProjectSetupGuide {
         let targetNames = targets.map { $0.name }.sorted()
         return select(multiple: targetNames, allowAll: true)
     }
-
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-public final class Benchmark {
+public enum Benchmark {
     @inlinable
     public static func measure(block: () throws -> Void) rethrows -> String {
         let start = Date()

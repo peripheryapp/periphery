@@ -51,11 +51,11 @@ extension Location: Hashable {
 
 extension Location: CustomStringConvertible {
     public var description: String {
-        return descriptionInternal
+        descriptionInternal
     }
 
     public var shortDescription: String {
-        return shortDescriptionInternal
+        shortDescriptionInternal
     }
 }
 

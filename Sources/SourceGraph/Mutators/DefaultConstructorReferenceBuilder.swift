@@ -19,7 +19,7 @@ final class DefaultConstructorReferenceBuilder: SourceGraphMutator {
         let defaultConstructors = graph.declarations(ofKind: .functionConstructor).filter {
             // Some initializers are referenced internally, e.g by JSONEncoder/Decoder so we need
             // to assume they are referenced.
-            $0.name == "init()" ||  $0.isImplicit
+            $0.name == "init()" || $0.isImplicit
         }
 
         defaultConstructors.forEach { constructor in

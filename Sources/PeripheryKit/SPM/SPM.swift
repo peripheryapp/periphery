@@ -1,8 +1,8 @@
 import Foundation
-import SystemPackage
 import Shared
+import SystemPackage
 
-public struct SPM {
+public enum SPM {
     static let packageFile = "Package.swift"
 
     public static var isSupported: Bool {
@@ -29,7 +29,7 @@ public struct SPM {
 
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
-            return try decoder.decode(Package.self, from: jsonData)
+            return try decoder.decode(Self.self, from: jsonData)
         }
 
         public let name: String

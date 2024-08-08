@@ -1,10 +1,10 @@
 import Foundation
-import XCTest
-@testable import TestShared
-@testable import SyntaxAnalysis
 @testable import SourceGraph
+@testable import SyntaxAnalysis
+@testable import TestShared
+import XCTest
 
-class UnusedParameterTest: XCTestCase {
+final class UnusedParameterTest: XCTestCase {
     func testSimpleUnused() {
         analyze()
         assertUnused("param", in: "myFunc(param:)")
@@ -69,7 +69,7 @@ class UnusedParameterTest: XCTestCase {
 
     func testIgnoreProtocolDeclaration() {
         analyze()
-        XCTAssert(functions.count == 0)
+        XCTAssert(functions.isEmpty)
     }
 
     func testParamForGenericSpecialization() {
@@ -215,7 +215,7 @@ class UnusedParameterTest: XCTestCase {
     private func assertUnused(_ name: String, in functionName: String, file: StaticString = #file, line: UInt = #line) {
         let function = functions.first { $0.fullName == functionName }
 
-        if let function = function {
+        if let function {
             assert(function: function, hasParam: name, file: file, line: line)
             let unused = isUnused(param: name, in: function)
             XCTAssertTrue(unused, "Param '\(name)' is used in '\(functionName)'.", file: file, line: line)
@@ -227,7 +227,7 @@ class UnusedParameterTest: XCTestCase {
     private func assertUsed(_ name: String, in functionName: String, file: StaticString = #file, line: UInt = #line) {
         let function = functions.first { $0.fullName == functionName }
 
-        if let function = function {
+        if let function {
             assert(function: function, hasParam: name, file: file, line: line)
             let unused = isUnused(param: name, in: function)
             XCTAssertFalse(unused, "Param '\(name)' is unused in '\(functionName)'.", file: file, line: line)

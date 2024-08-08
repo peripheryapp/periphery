@@ -1,8 +1,11 @@
 import Foundation
-import SwiftSyntax
 import SourceGraph
+import SwiftSyntax
 
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
+    // swiftlint:disable:next large_tuple
     public typealias Result = (
         location: Location,
         accessibility: Accessibility?,
@@ -29,7 +32,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     private var didVisitCapitalSelfFunctionCall: Bool = false
 
     public var resultsByLocation: [Location: Result] {
-        results.reduce(into: [Location: Result]()) { (dict, result) in
+        results.reduce(into: [Location: Result]()) { dict, result in
             dict[result.location] = result
         }
     }
@@ -217,9 +220,11 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     }
 
     func visitVariableTupleBinding(node: VariableDeclSyntax, pattern: TuplePatternSyntax, typeTuple: TupleTypeElementListSyntax?, initializerTuple: LabeledExprListSyntax?) {
-        let elements = pattern.elements.map { $0 }
+        let elements = Array(pattern.elements)
+        // swiftlint:disable array_init
         let types: [TupleTypeElementSyntax?] = typeTuple?.map { $0 } ?? Array(repeating: nil, count: elements.count)
         let initializers: [LabeledExprSyntax?] = initializerTuple?.map { $0 } ?? Array(repeating: nil, count: elements.count)
+        // swiftlint:enable array_init
 
         for (element, (type, initializer)) in zip(elements, zip(types, initializers)) {
             if let elementTuplePattern = element.pattern.as(TuplePatternSyntax.self) {
@@ -294,6 +299,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
 
     // MARK: - Private
 
+    // swiftlint:disable:next function_default_parameter_at_end
     private func parse(
         modifiers: DeclModifierListSyntax?,
         attributes: AttributeListSyntax?,
@@ -377,8 +383,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             .contains {
                 if let baseTypeName = $0.as(MetatypeTypeSyntax.self)?.baseType.trimmedDescription,
                    genericParameterNames.contains(baseTypeName),
-                   returnClauseTypeLocations.contains(where: { $0.name == baseTypeName })
-                {
+                   returnClauseTypeLocations.contains(where: { $0.name == baseTypeName }) {
                     return true
                 }
 
@@ -387,17 +392,17 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     }
 
     private func type(for typeSyntax: TypeSyntax?) -> String? {
-        guard let typeSyntax = typeSyntax else { return nil }
+        guard let typeSyntax else { return nil }
         return typeSyntaxInspector.type(for: typeSyntax)
     }
 
     private func typeLocations(for typeSyntax: TypeSyntax?) -> Set<Location> {
-        guard let typeSyntax = typeSyntax else { return [] }
+        guard let typeSyntax else { return [] }
         return typeSyntaxInspector.typeLocations(for: typeSyntax)
     }
 
     private func typeLocations(for clause: FunctionParameterClauseSyntax?) -> Set<Location> {
-        guard let clause = clause else { return [] }
+        guard let clause else { return [] }
 
         return clause.parameters.reduce(into: .init(), { result, param in
             result.formUnion(typeSyntaxInspector.typeLocations(for: param.type))
@@ -421,7 +426,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     }
 
     private func typeLocations(for clause: ClosureParameterClauseSyntax?) -> Set<Location> {
-        guard let clause = clause else { return [] }
+        guard let clause else { return [] }
 
         return clause.parameters.reduce(into: .init(), { result, param in
             if let type = param.type {
@@ -431,7 +436,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     }
 
     private func typeLocations(for clause: EnumCaseParameterClauseSyntax?) -> Set<Location> {
-        guard let clause = clause else { return [] }
+        guard let clause else { return [] }
 
         return clause.parameters.reduce(into: .init(), { result, param in
             result.formUnion(typeSyntaxInspector.typeLocations(for: param.type))
@@ -449,7 +454,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     }
 
     private func typeLocations(for clause: GenericParameterClauseSyntax?) -> Set<Location> {
-        guard let clause = clause else { return [] }
+        guard let clause else { return [] }
 
         return clause.parameters.reduce(into: .init()) { result, param in
             if let inheritedType = param.inheritedType {
@@ -459,7 +464,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     }
 
     private func typeLocations(for clause: GenericArgumentClauseSyntax?) -> Set<Location> {
-        guard let clause = clause else { return [] }
+        guard let clause else { return [] }
 
         return clause.arguments.reduce(into: .init()) { result, param in
             result.formUnion(typeSyntaxInspector.typeLocations(for: param.argument))
@@ -467,7 +472,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     }
 
     private func typeLocations(for clause: GenericWhereClauseSyntax?) -> Set<Location> {
-        guard let clause = clause else { return [] }
+        guard let clause else { return [] }
 
         return clause.requirements.reduce(into: .init()) { result, requirement in
             if let conformanceRequirementType = requirement.requirement.as(ConformanceRequirementSyntax.self) {
@@ -477,7 +482,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     }
 
     private func typeLocations(for clause: InheritanceClauseSyntax?) -> Set<Location> {
-        guard let clause = clause else { return [] }
+        guard let clause else { return [] }
 
         return clause.inheritedTypes.reduce(into: .init()) { result, type in
             result.formUnion(typeSyntaxInspector.typeLocations(for: type.type))
@@ -485,7 +490,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     }
 
     private func locations(for call: FunctionCallExprSyntax?) -> Set<Location> {
-        guard let call = call else { return [] }
+        guard let call else { return [] }
 
         var locations = Set([sourceLocationBuilder.location(at: call.positionAfterSkippingLeadingTrivia)])
 
@@ -504,8 +509,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             .reduce(into: .init(), { result, argument in
                 if let memberExpr = argument.expression.as(MemberAccessExprSyntax.self),
                    memberExpr.declName.baseName.tokenKind == .keyword(.`self`),
-                   let baseIdentifier = memberExpr.base?.as(DeclReferenceExprSyntax.self)
-                {
+                   let baseIdentifier = memberExpr.base?.as(DeclReferenceExprSyntax.self) {
                     let location = sourceLocationBuilder.location(at: baseIdentifier.positionAfterSkippingLeadingTrivia)
                     result.insert(location)
                 }

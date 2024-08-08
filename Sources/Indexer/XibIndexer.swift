@@ -1,6 +1,6 @@
 import Shared
-import SystemPackage
 import SourceGraph
+import SystemPackage
 
 public final class XibIndexer: Indexer {
     private let xibFiles: Set<FilePath>
@@ -19,7 +19,7 @@ public final class XibIndexer: Indexer {
         excludedFiles.forEach { self.logger.debug("Excluding \($0.string)") }
 
         try JobPool(jobs: Array(includedFiles)).forEach { [weak self] xibPath in
-            guard let self = self else { return }
+            guard let self else { return }
 
             let elapsed = try Benchmark.measure {
                 try XibParser(path: xibPath)
@@ -27,7 +27,7 @@ public final class XibIndexer: Indexer {
                     .forEach { self.graph.add($0) }
             }
 
-            self.logger.debug("\(xibPath.string) (\(elapsed)s)")
+            logger.debug("\(xibPath.string) (\(elapsed)s)")
         }
     }
 }

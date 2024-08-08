@@ -1,7 +1,7 @@
 import Foundation
-import SwiftSyntax
-import SourceGraph
 import Shared
+import SourceGraph
+import SwiftSyntax
 
 struct TypeNameSourceLocation: Hashable {
     let name: String
@@ -28,6 +28,7 @@ struct TypeSyntaxInspector {
 
     // MARK: - Private
 
+    // swiftlint:disable:next cyclomatic_complexity
     func types(for typeSyntax: TypeSyntax) -> Set<TokenSyntax> {
         if let identifierType = typeSyntax.as(IdentifierTypeSyntax.self) {
             // Simple type.

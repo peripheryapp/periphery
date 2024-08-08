@@ -1,19 +1,21 @@
-import SystemPackage
 @testable import PeripheryKit
+import SystemPackage
 import XCTest
 
+// swiftlint:disable:next final_test_case balanced_xctest_lifecycle
 class FixtureSourceGraphTestCase: SourceGraphTestCase {
-    class override func setUp() {
+    override class func setUp() {
         super.setUp()
         _sourceFiles = nil
     }
 
     @discardableResult
-    func analyze(retainPublic: Bool = false,
-                 retainObjcAccessible: Bool = false,
-                 retainObjcAnnotated: Bool = false,
-                 disableRedundantPublicAnalysis: Bool = false,
-                 testBlock: () throws -> Void
+    func analyze(
+        retainPublic: Bool = false,
+        retainObjcAccessible: Bool = false,
+        retainObjcAnnotated: Bool = false,
+        disableRedundantPublicAnalysis: Bool = false,
+        testBlock: () throws -> Void
     ) rethrows -> [ScanResult] {
         configuration.retainPublic = retainPublic
         configuration.retainObjcAccessible = retainObjcAccessible
@@ -33,6 +35,7 @@ class FixtureSourceGraphTestCase: SourceGraphTestCase {
 
     // MARK: - Private
 
+    // swiftlint:disable:next discouraged_optional_collection
     private static var _sourceFiles: Set<FilePath>?
     private static var sourceFiles: Set<FilePath> {
         if let files = _sourceFiles {

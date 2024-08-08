@@ -72,7 +72,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     }
 
     public var description: String {
-        return errorDescription!
+        errorDescription!
     }
 
     // MARK: - Private
