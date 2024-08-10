@@ -6,17 +6,39 @@ public enum SPM {
     static let packageFile = "Package.swift"
 
     public static var isSupported: Bool {
-        FilePath.current.appending(packageFile).exists
+        Package().exists
     }
 
-    public struct Package: Decodable {
-        public static func load(jsonPackageManifestPath: String? = nil) throws -> Self {
+    public struct Package {
+        let path: FilePath = .current
+        let configuration: Configuration = .shared
+
+        var exists: Bool {
+            path.appending(packageFile).exists
+        }
+
+        func clean() throws {
+            try Shell.shared.exec(["swift", "package", "clean"])
+        }
+
+        func build(additionalArguments: [String]) throws {
+            try Shell.shared.exec(["swift", "build", "--build-tests"] + additionalArguments)
+        }
+
+        func testTargetNames() throws -> Set<String> {
+            let description = try load()
+            return description.targets.filter(\.isTestTarget).mapSet(\.name)
+        }
+
+        // MARK: - Private
+
+        private func load() throws -> PackageDescription {
             Logger().contextualized(with: "spm:package").debug("Loading \(FilePath.current)")
 
             let jsonData: Data
 
-            if let jsonPackageManifestPath {
-                jsonData = try Data(contentsOf: URL(fileURLWithPath: jsonPackageManifestPath))
+            if let path = configuration.jsonPackageManifestPath {
+                jsonData = try Data(contentsOf: path.url)
             } else {
                 let jsonString = try Shell.shared.exec(["swift", "package", "describe", "--type", "json"], stderr: false)
 
@@ -29,70 +51,20 @@ public enum SPM {
 
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
-            return try decoder.decode(Self.self, from: jsonData)
-        }
-
-        public let name: String
-        public let path: String
-        public let targets: [Target]
-
-        public var swiftTargets: [Target] {
-            targets.filter(\.isSwiftTarget)
-        }
-
-        func clean() throws {
-            try Shell.shared.exec(["swift", "package", "clean"])
-        }
-    }
-
-    public struct Target: Decodable {
-        public let name: String
-
-        let sources: [String]
-        let path: String
-        let moduleType: String
-        let type: String
-
-        public var sourcePaths: [FilePath] {
-            let root = FilePath(path)
-            return sources.map { root.appending($0) }
-        }
-
-        func build(additionalArguments: [String]) throws {
-            let args: [String] = ["swift", "build", "--target", name] + additionalArguments
-            try Shell.shared.exec(args)
-        }
-
-        var isSwiftTarget: Bool {
-            moduleType == "SwiftTarget"
-        }
-
-        public var isTestTarget: Bool {
-            type == "test"
+            return try decoder.decode(PackageDescription.self, from: jsonData)
         }
     }
 }
 
-extension SPM.Package: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(path)
-    }
+struct PackageDescription: Decodable {
+    let targets: [Target]
 }
 
-extension SPM.Package: Equatable {
-    public static func == (lhs: SPM.Package, rhs: SPM.Package) -> Bool {
-        lhs.path == rhs.path
-    }
-}
+struct Target: Decodable {
+    let name: String
+    let type: String
 
-extension SPM.Target: Hashable {
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(name)
-    }
-}
-
-extension SPM.Target: Equatable {
-    public static func == (lhs: SPM.Target, rhs: SPM.Target) -> Bool {
-        lhs.name == rhs.name
+    var isTestTarget: Bool {
+        type == "test"
     }
 }

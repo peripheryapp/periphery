@@ -8,8 +8,7 @@ import XCTest
 // swiftlint:disable:next blanket_disable_command
 // swiftlint:disable test_case_accessibility
 open class SourceGraphTestCase: XCTestCase {
-    // swiftlint:disable implicitly_unwrapped_optional
-    static var driver: ProjectDriver!
+    static var plan: IndexPlan!
     static var configuration: Configuration!
     // swiftlint:enable implicitly_unwrapped_optional
     static var results: [ScanResult] = []
@@ -42,16 +41,27 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
-    static func build(driver driverType: ProjectDriver.Type, projectPath: FilePath = ProjectRootPath) {
-        projectPath.chdir {
-            driver = try! driverType.build()
-            try! driver.build()
-        }
-    }
+    static func index(sourceFile: FilePath? = nil) {
+        var newPlan = plan!
 
-    static func index() {
+        if let sourceFile {
+            newPlan = IndexPlan(
+                sourceFiles: plan.sourceFiles.filter { $0.key.path == sourceFile },
+                plistPaths: plan.plistPaths,
+                xibPaths: plan.xibPaths,
+                xcDataModelPaths: plan.xcDataModelPaths,
+                xcMappingModelPaths: plan.xcMappingModelPaths
+            )
+        }
+
         graph = SourceGraph()
-        try! Self.driver.index(graph: graph)
+        let pipeline = IndexPipeline(
+            plan: newPlan,
+            graph: graph,
+            logger: Logger().contextualized(with: "index")
+        )
+        try! pipeline.perform()
+
         allIndexedDeclarations = graph.allDeclarations
         try! SourceGraphMutatorRunner.perform(graph: graph)
         results = ScanResultBuilder.build(for: graph)

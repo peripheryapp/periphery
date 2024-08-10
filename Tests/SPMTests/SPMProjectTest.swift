@@ -1,15 +1,12 @@
-@testable import PeripheryKit
 @testable import TestShared
 import XCTest
 
 // swiftlint:disable:next balanced_xctest_lifecycle
-final class SPMProjectTest: SourceGraphTestCase {
+class SPMProjectTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        configuration.targets = ["SPMProjectKit", "Frontend"]
-
-        build(driver: SPMProjectDriver.self, projectPath: SPMProjectPath)
+        build(projectPath: SPMProjectPath)
         index()
     }
 

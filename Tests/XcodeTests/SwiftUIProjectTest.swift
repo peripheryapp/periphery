@@ -1,17 +1,13 @@
 @testable import TestShared
-@testable import XcodeSupport
-import XCTest
 
 // swiftlint:disable:next balanced_xctest_lifecycle
-final class SwiftUIProjectTest: SourceGraphTestCase {
+class SwiftUIProjectTest: XcodeSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        configuration.project = SwiftUIProjectPath.string
         configuration.schemes = ["SwiftUIProject"]
-        configuration.targets = ["SwiftUIProject"]
 
-        build(driver: XcodeProjectDriver.self)
+        build(projectPath: SwiftUIProjectPath)
         index()
     }
 

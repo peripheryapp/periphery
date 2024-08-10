@@ -1,9 +1,7 @@
 import Foundation
-import PeripheryKit
 import Shared
 import SystemPackage
 import XcodeProj
-
 final class XcodeProject: XcodeProjectlike {
     private static var cache: [FilePath: XcodeProject] = [:]
 
@@ -34,7 +32,6 @@ final class XcodeProject: XcodeProjectlike {
     private let xcodebuild: Xcodebuild
 
     private(set) var targets: Set<XcodeTarget> = []
-    private(set) var packageTargets: [SPM.Package: Set<SPM.Target>] = [:]
 
     required init(path: FilePath, xcodebuild: Xcodebuild = .init(), logger: Logger = .init()) throws {
         logger.contextualized(with: "xcode:project").debug("Loading \(path)")
@@ -66,30 +63,6 @@ final class XcodeProject: XcodeProjectlike {
         targets = xcodeProject.pbxproj.nativeTargets
             .mapSet { XcodeTarget(project: self, target: $0) }
             .union(subProjects.flatMapSet { $0.targets })
-
-        let packageTargetNames = targets.flatMapSet { $0.packageDependencyNames }
-
-        if !packageTargetNames.isEmpty {
-            var packages: [SPM.Package] = []
-
-            for localPackage in xcodeProject.pbxproj.rootObject?.localPackages ?? [] {
-                let path = sourceRoot.appending(localPackage.relativePath)
-                if path.appending("Package.swift").exists {
-                    try path.chdir {
-                        let package = try SPM.Package.load()
-                        packages.append(package)
-                    }
-                }
-            }
-
-            packageTargets = packageTargetNames.reduce(into: .init(), { result, targetName in
-                for package in packages {
-                    if let target = package.targets.first(where: { $0.name == targetName }) {
-                        result[package, default: []].insert(target)
-                    }
-                }
-            })
-        }
     }
 
     func schemes(additionalArguments: [String]) throws -> Set<String> {

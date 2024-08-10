@@ -11,25 +11,22 @@ public final class Configuration {
         self.logger = logger
     }
 
-    @Setting(key: "workspace", defaultValue: nil)
-    public var workspace: String?
+    @Setting(key: "project", defaultValue: nil, setter: filePathSetter)
+    public var project: FilePath?
 
-    @Setting(key: "project", defaultValue: nil)
-    public var project: String?
-
-    @Setting(key: "file_targets_path", defaultValue: [], valueConverter: filePathConverter)
-    public var fileTargetsPath: [FilePath]
-
-    @Setting(key: "format", defaultValue: .default, valueConverter: { OutputFormat(anyValue: $0) })
+    @Setting(key: "format", defaultValue: .default, setter: { OutputFormat(anyValue: $0) })
     public var outputFormat: OutputFormat
 
     @Setting(key: "schemes", defaultValue: [])
     public var schemes: [String]
 
-    @Setting(key: "targets", defaultValue: [])
-    public var targets: [String]
+    @Setting(key: "exclude_tests", defaultValue: false)
+    public var excludeTests: Bool
 
-    @Setting(key: "index_exclude", defaultValue: [])
+    @Setting(key: "exclude_targets", defaultValue: [])
+    public var excludeTargets: [String]
+
+    @Setting(key: "index_exclude", defaultValue: ["**/*?.build/**/*"], requireDefaultValues: true)
     public var indexExclude: [String]
 
     @Setting(key: "report_exclude", defaultValue: [])
@@ -44,7 +41,7 @@ public final class Configuration {
     @Setting(key: "xcode_list_arguments", defaultValue: [])
     public var xcodeListArguments: [String]
 
-    @Setting(key: "retain_assign_only_property_types", defaultValue: [], valueSanitizer: PropertyTypeSanitizer.sanitize)
+    @Setting(key: "retain_assign_only_property_types", defaultValue: [], setter: PropertyTypeSanitizer.sanitize)
     public var retainAssignOnlyPropertyTypes: [String]
 
     @Setting(key: "external_encodable_protocols", defaultValue: [])
@@ -101,7 +98,7 @@ public final class Configuration {
     @Setting(key: "strict", defaultValue: false)
     public var strict: Bool
 
-    @Setting(key: "index_store_path", defaultValue: [], valueConverter: filePathConverter)
+    @Setting(key: "index_store_path", defaultValue: [], setter: filePathArraySetter)
     public var indexStorePath: [FilePath]
 
     @Setting(key: "skip_build", defaultValue: false)
@@ -116,14 +113,17 @@ public final class Configuration {
     @Setting(key: "relative_results", defaultValue: false)
     public var relativeResults: Bool
 
-    @Setting(key: "json_package_manifest_path", defaultValue: nil)
-    public var jsonPackageManifestPath: String?
+    @Setting(key: "json_package_manifest_path", defaultValue: nil, setter: filePathSetter)
+    public var jsonPackageManifestPath: FilePath?
 
-    @Setting(key: "baseline", defaultValue: nil)
+    @Setting(key: "baseline", defaultValue: nil, setter: filePathSetter)
     public var baseline: FilePath?
 
-    @Setting(key: "write_baseline", defaultValue: nil)
+    @Setting(key: "write_baseline", defaultValue: nil, setter: filePathSetter)
     public var writeBaseline: FilePath?
+
+    @Setting(key: "generic_project_config", defaultValue: nil, setter: filePathSetter)
+    public var genericProjectConfig: FilePath?
 
     // Non user facing.
     public var guidedSetup: Bool = false
@@ -131,159 +131,17 @@ public final class Configuration {
     // Dependencies.
     private var logger: BaseLogger // Must use BaseLogger as Logger depends upon Configuration.
 
+    public var hasNonDefaultValues: Bool {
+        settings.contains(where: \.hasNonDefaultValue)
+    }
+
     public func asYaml() throws -> String {
         var config: [String: Any?] = [:]
 
-        if $workspace.hasNonDefaultValue {
-            config[$workspace.key] = workspace
-        }
-
-        if $project.hasNonDefaultValue {
-            config[$project.key] = project
-        }
-
-        if $fileTargetsPath.hasNonDefaultValue {
-            config[$fileTargetsPath.key] = fileTargetsPath.map { $0.string }
-        }
-
-        if $schemes.hasNonDefaultValue {
-            config[$schemes.key] = schemes
-        }
-
-        if $targets.hasNonDefaultValue {
-            config[$targets.key] = targets
-        }
-
-        if $outputFormat.hasNonDefaultValue {
-            config[$outputFormat.key] = outputFormat.rawValue
-        }
-
-        if $indexExclude.hasNonDefaultValue {
-            config[$indexExclude.key] = indexExclude
-        }
-
-        if $reportExclude.hasNonDefaultValue {
-            config[$reportExclude.key] = reportExclude
-        }
-
-        if $reportInclude.hasNonDefaultValue {
-            config[$reportInclude.key] = reportInclude
-        }
-
-        if $retainObjcAccessible.hasNonDefaultValue {
-            config[$retainObjcAccessible.key] = retainObjcAccessible
-        }
-
-        if $retainObjcAnnotated.hasNonDefaultValue {
-            config[$retainObjcAnnotated.key] = retainObjcAnnotated
-        }
-
-        if $retainPublic.hasNonDefaultValue {
-            config[$retainPublic.key] = retainPublic
-        }
-
-        if $retainFiles.hasNonDefaultValue {
-            config[$retainFiles.key] = retainFiles
-        }
-
-        if $retainAssignOnlyProperties.hasNonDefaultValue {
-            config[$retainAssignOnlyProperties.key] = retainAssignOnlyProperties
-        }
-
-        if $retainAssignOnlyPropertyTypes.hasNonDefaultValue {
-            config[$retainAssignOnlyPropertyTypes.key] = retainAssignOnlyPropertyTypes
-        }
-
-        if $externalEncodableProtocols.hasNonDefaultValue {
-            config[$externalEncodableProtocols.key] = externalEncodableProtocols
-        }
-
-        if $externalCodableProtocols.hasNonDefaultValue {
-            config[$externalCodableProtocols.key] = externalCodableProtocols
-        }
-
-        if $externalTestCaseClasses.hasNonDefaultValue {
-            config[$externalTestCaseClasses.key] = externalTestCaseClasses
-        }
-
-        if $retainUnusedProtocolFuncParams.hasNonDefaultValue {
-            config[$retainUnusedProtocolFuncParams.key] = retainUnusedProtocolFuncParams
-        }
-
-        if $retainSwiftUIPreviews.hasNonDefaultValue {
-            config[$retainSwiftUIPreviews.key] = retainSwiftUIPreviews
-        }
-
-        if $disableRedundantPublicAnalysis.hasNonDefaultValue {
-            config[$disableRedundantPublicAnalysis.key] = disableRedundantPublicAnalysis
-        }
-
-        if $disableUnusedImportAnalysis.hasNonDefaultValue {
-            config[$disableUnusedImportAnalysis.key] = disableUnusedImportAnalysis
-        }
-
-        if $verbose.hasNonDefaultValue {
-            config[$verbose.key] = verbose
-        }
-
-        if $quiet.hasNonDefaultValue {
-            config[$quiet.key] = quiet
-        }
-
-        if $disableUpdateCheck.hasNonDefaultValue {
-            config[$disableUpdateCheck.key] = disableUpdateCheck
-        }
-
-        if $strict.hasNonDefaultValue {
-            config[$strict.key] = strict
-        }
-
-        if $indexStorePath.hasNonDefaultValue {
-            config[$indexStorePath.key] = indexStorePath.map { $0.string }
-        }
-
-        if $skipBuild.hasNonDefaultValue {
-            config[$skipBuild.key] = skipBuild
-        }
-
-        if $skipSchemesValidation.hasNonDefaultValue {
-            config[$skipSchemesValidation.key] = skipSchemesValidation
-        }
-
-        if $cleanBuild.hasNonDefaultValue {
-            config[$cleanBuild.key] = cleanBuild
-        }
-
-        if $buildArguments.hasNonDefaultValue {
-            config[$buildArguments.key] = buildArguments
-        }
-
-        if $xcodeListArguments.hasNonDefaultValue {
-            config[$xcodeListArguments.key] = xcodeListArguments
-        }
-
-        if $relativeResults.hasNonDefaultValue {
-            config[$relativeResults.key] = relativeResults
-        }
-
-        if $retainCodableProperties.hasNonDefaultValue {
-            config[$retainCodableProperties.key] = retainCodableProperties
-        }
-
-        if $retainEncodableProperties.hasNonDefaultValue {
-            config[$retainEncodableProperties.key] = retainEncodableProperties
-        }
-
-        if $jsonPackageManifestPath.hasNonDefaultValue {
-            config[$jsonPackageManifestPath.key] = jsonPackageManifestPath
-        }
-
-        if $baseline.hasNonDefaultValue {
-            config[$baseline.key] = baseline
-        }
-
-        if $writeBaseline.hasNonDefaultValue {
-            config[$writeBaseline.key] = writeBaseline
+        for setting in settings {
+            if setting.hasNonDefaultValue {
+                config[setting.key] = setting.wrappedValue
+            }
         }
 
         return try Yams.dump(object: config)
@@ -301,128 +159,16 @@ public final class Configuration {
         let yaml = try Yams.load(yaml: encodedYAML) as? [String: Any] ?? [:]
 
         for (key, value) in yaml {
-            switch key {
-            case $workspace.key:
-                $workspace.assign(value)
-            case $project.key:
-                $project.assign(value)
-            case $fileTargetsPath.key:
-                $fileTargetsPath.assign(value)
-            case $schemes.key:
-                $schemes.assign(value)
-            case $targets.key:
-                $targets.assign(value)
-            case $indexExclude.key:
-                $indexExclude.assign(value)
-            case $reportExclude.key:
-                $reportExclude.assign(value)
-            case $reportInclude.key:
-                $reportInclude.assign(value)
-            case $outputFormat.key:
-                $outputFormat.assign(value)
-            case $retainPublic.key:
-                $retainPublic.assign(value)
-            case $retainFiles.key:
-                $retainFiles.assign(value)
-            case $retainAssignOnlyProperties.key:
-                $retainAssignOnlyProperties.assign(value)
-            case $retainAssignOnlyPropertyTypes.key:
-                $retainAssignOnlyPropertyTypes.assign(value)
-            case $externalEncodableProtocols.key:
-                $externalEncodableProtocols.assign(value)
-            case $externalCodableProtocols.key:
-                $externalCodableProtocols.assign(value)
-            case $externalTestCaseClasses.key:
-                $externalTestCaseClasses.assign(value)
-            case $retainObjcAccessible.key:
-                $retainObjcAccessible.assign(value)
-            case $retainObjcAnnotated.key:
-                $retainObjcAnnotated.assign(value)
-            case $retainUnusedProtocolFuncParams.key:
-                $retainUnusedProtocolFuncParams.assign(value)
-            case $retainSwiftUIPreviews.key:
-                $retainSwiftUIPreviews.assign(value)
-            case $disableRedundantPublicAnalysis.key:
-                $disableRedundantPublicAnalysis.assign(value)
-            case $disableUnusedImportAnalysis.key:
-                $disableUnusedImportAnalysis.assign(value)
-            case $verbose.key:
-                $verbose.assign(value)
-            case $quiet.key:
-                $quiet.assign(value)
-            case $disableUpdateCheck.key:
-                $disableUpdateCheck.assign(value)
-            case $strict.key:
-                $strict.assign(value)
-            case $indexStorePath.key:
-                $indexStorePath.assign(value)
-            case $skipBuild.key:
-                $skipBuild.assign(value)
-            case $skipSchemesValidation.key:
-                $skipSchemesValidation.assign(value)
-            case $cleanBuild.key:
-                $cleanBuild.assign(value)
-            case $buildArguments.key:
-                $buildArguments.assign(value)
-            case $xcodeListArguments.key:
-                $xcodeListArguments.assign(value)
-            case $relativeResults.key:
-                $relativeResults.assign(value)
-            case $retainCodableProperties.key:
-                $retainCodableProperties.assign(value)
-            case $retainEncodableProperties.key:
-                $retainEncodableProperties.assign(value)
-            case $jsonPackageManifestPath.key:
-                $jsonPackageManifestPath.assign(value)
-            case $baseline.key:
-                $baseline.assign(value)
-            case $writeBaseline.key:
-                $writeBaseline.assign(value)
-            default:
+            if let setting = settings.first(where: { key == $0.key }) {
+                setting.assign(value)
+            } else {
                 logger.warn("\(path.string): invalid key '\(key)'")
             }
         }
     }
 
     public func reset() {
-        $workspace.reset()
-        $project.reset()
-        $fileTargetsPath.reset()
-        $schemes.reset()
-        $targets.reset()
-        $indexExclude.reset()
-        $reportExclude.reset()
-        $reportInclude.reset()
-        $outputFormat.reset()
-        $retainPublic.reset()
-        $retainFiles.reset()
-        $retainAssignOnlyProperties.reset()
-        $retainAssignOnlyPropertyTypes.reset()
-        $retainObjcAccessible.reset()
-        $retainObjcAnnotated.reset()
-        $retainUnusedProtocolFuncParams.reset()
-        $retainSwiftUIPreviews.reset()
-        $disableRedundantPublicAnalysis.reset()
-        $disableUnusedImportAnalysis.reset()
-        $externalEncodableProtocols.reset()
-        $externalCodableProtocols.reset()
-        $externalTestCaseClasses.reset()
-        $verbose.reset()
-        $quiet.reset()
-        $disableUpdateCheck.reset()
-        $strict.reset()
-        $indexStorePath.reset()
-        $skipBuild.reset()
-        $skipSchemesValidation.reset()
-        $cleanBuild.reset()
-        $buildArguments.reset()
-        $xcodeListArguments.reset()
-        $relativeResults.reset()
-        $retainCodableProperties.reset()
-        $retainEncodableProperties.reset()
-        $jsonPackageManifestPath.reset()
-        $baseline.reset()
-        $writeBaseline.reset()
+        settings.forEach { $0.reset() }
     }
 
     // MARK: - Helpers
@@ -474,6 +220,8 @@ public final class Configuration {
 
     // MARK: - Private
 
+    lazy var settings: [any AbstractSetting] = [$project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat, $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible, $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis, $disableUnusedImportAnalysis, $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline, $genericProjectConfig]
+
     private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {
         // TODO: respect filesystem case sensitivity.
         let pwd = FilePath.current.string
@@ -493,62 +241,105 @@ public final class Configuration {
     }
 }
 
-@propertyWrapper
-public final class Setting<Value: Equatable> {
-    typealias ValueConverter = (Any) -> Value?
-    typealias ValueSanitizer = (Value) -> Value
+protocol AbstractSetting {
+    associatedtype Value
+
+    var key: String { get }
+    var hasNonDefaultValue: Bool { get }
+    var wrappedValue: Value { get }
+
+    func reset()
+    func assign(_ value: Any)
+}
+
+@propertyWrapper public final class Setting<Value: Equatable>: AbstractSetting {
+    typealias Setter = (Any) -> Value?
 
     public let defaultValue: Value
-    // swiftlint:disable:next strict_fileprivate
-    fileprivate let key: String
+    let key: String
 
-    private let valueConverter: ValueConverter
-    private let valueSanitizer: ValueSanitizer
+    private let setter: Setter
     private var value: Value
 
-    // swiftlint:disable:next strict_fileprivate
     fileprivate init(
         key: String,
         defaultValue: Value,
-        valueConverter: @escaping ValueConverter = { $0 as? Value },
-        valueSanitizer: @escaping ValueSanitizer = { $0 }
+        setter: @escaping Setter = { $0 as? Value }
     ) {
         self.key = key
         self.value = defaultValue
         self.defaultValue = defaultValue
-        self.valueConverter = valueConverter
-        self.valueSanitizer = valueSanitizer
+        self.setter = setter
     }
 
     public var wrappedValue: Value {
         get { value }
-        set { value = valueSanitizer(newValue) }
+        set { value = setter(newValue) ?? defaultValue }
     }
 
     public var projectedValue: Setting { self }
 
-    // swiftlint:disable strict_fileprivate
-    fileprivate var hasNonDefaultValue: Bool {
+    var hasNonDefaultValue: Bool {
         value != defaultValue
     }
 
-    fileprivate func assign(_ value: Any) {
-        wrappedValue = valueConverter(value) ?? defaultValue
+    public func assign(_ newValue: Any) {
+        value = setter(newValue) ?? defaultValue
     }
 
-    fileprivate func reset() {
+    func reset() {
         wrappedValue = defaultValue
     }
     // swiftlint:enable strict_fileprivate
 }
 
-// swiftlint:disable:next discouraged_optional_collection
-private let filePathConverter: (Any) -> [FilePath]? = { value in
-    if let path = value as? String {
+private let filePathSetter: (Any) -> FilePath? = { value in
+    if let value = value as? String {
+        return FilePath(value)
+    }
+
+    return nil
+}
+
+private let filePathArraySetter: (Any) -> [FilePath]? = { value in
+    if let value = value as? [FilePath] {
+        return value
+    } else if let path = value as? String {
         return [FilePath(path)]
     } else if let paths = value as? [String] {
         return paths.map { FilePath($0) }
     }
 
     return nil
+}
+
+extension Setting where Value == [String] {
+    convenience init(
+        key: String,
+        defaultValue: Value,
+        requireDefaultValues: Bool
+    ) {
+        self.init(
+            key: key,
+            defaultValue: defaultValue,
+            setter: { value in
+                guard let typedValue = value as? [String] else { return nil }
+                return requireDefaultValues ? Array(Set(typedValue).union(defaultValue)) : typedValue
+            }
+        )
+    }
+}
+
+// MARK: - Yaml Encoding
+
+extension OutputFormat: ScalarRepresentable {
+    public func represented() -> Node.Scalar {
+        rawValue.represented()
+    }
+}
+
+extension FilePath: ScalarRepresentable {
+    public func represented() -> Node.Scalar {
+        string.represented()
+    }
 }

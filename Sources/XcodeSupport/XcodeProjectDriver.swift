@@ -6,52 +6,22 @@ import SourceGraph
 import SystemPackage
 
 public final class XcodeProjectDriver {
-    public static func build() throws -> Self {
+    public static func build(projectPath: FilePath) throws -> Self {
         let configuration = Configuration.shared
-        try validateConfiguration(configuration: configuration)
+        let xcodebuild = Xcodebuild()
+
+        guard !configuration.schemes.isEmpty else {
+            throw PeripheryError.usageError("The '--schemes' option is required.")
+        }
+
+        try xcodebuild.ensureConfigured()
 
         let project: XcodeProjectlike
 
-        if let workspacePath = configuration.workspace {
-            project = try XcodeWorkspace(path: .makeAbsolute(workspacePath))
-        } else if let projectPath = configuration.project {
-            project = try XcodeProject(path: .makeAbsolute(projectPath))
+        if projectPath.extension == "xcworkspace" {
+            project = try XcodeWorkspace(path: .makeAbsolute(projectPath))
         } else {
-            throw PeripheryError.usageError("Expected --workspace or --project option.")
-        }
-
-        // Ensure targets are part of the project
-        var invalidTargetNames: [String] = []
-
-        var targets: Set<XcodeTarget> = []
-        var packageTargets: [SPM.Package: Set<SPM.Target>] = [:]
-
-        for targetName in configuration.targets {
-            if let target = project.targets.first(where: { $0.name == targetName }) {
-                targets.insert(target)
-            } else {
-                let parts = targetName.split(separator: ".", maxSplits: 1)
-
-                guard let packageName = parts.first,
-                      let packageTargetName = parts.last,
-                      let package = project.packageTargets.keys.first(where: { $0.name == packageName })
-                else {
-                    invalidTargetNames.append(targetName)
-                    continue
-                }
-
-                if let target = project.packageTargets[package]?.first(where: { $0.name == packageTargetName }) {
-                    packageTargets[package, default: []].insert(target)
-                } else if let subTarget = package.targets.first(where: { $0.name == packageTargetName }) {
-                    packageTargets[package, default: []].insert(subTarget)
-                } else {
-                    invalidTargetNames.append(targetName)
-                }
-            }
-        }
-
-        if !invalidTargetNames.isEmpty {
-            throw PeripheryError.invalidTargets(names: invalidTargetNames.sorted(), project: project.path.lastComponent?.string ?? "")
+            project = try XcodeProject(path: .makeAbsolute(projectPath))
         }
 
         let schemes: Set<String>
@@ -71,10 +41,10 @@ public final class XcodeProjectDriver {
         }
 
         return self.init(
+            configuration: configuration,
+            xcodebuild: xcodebuild,
             project: project,
-            schemes: schemes,
-            targets: targets,
-            packageTargets: packageTargets
+            schemes: schemes
         )
     }
 
@@ -83,48 +53,20 @@ public final class XcodeProjectDriver {
     private let xcodebuild: Xcodebuild
     private let project: XcodeProjectlike
     private let schemes: Set<String>
-    private let targets: Set<XcodeTarget>
-    private let packageTargets: [SPM.Package: Set<SPM.Target>]
 
     // swiftlint:disable:next function_default_parameter_at_end
     init(
         logger: Logger = .init(),
-        configuration: Configuration = .shared,
-        xcodebuild: Xcodebuild = .init(),
+        configuration: Configuration,
+        xcodebuild: Xcodebuild,
         project: XcodeProjectlike,
-        schemes: Set<String>,
-        targets: Set<XcodeTarget>,
-        packageTargets: [SPM.Package: Set<SPM.Target>]
+        schemes: Set<String>
     ) {
         self.logger = logger
         self.configuration = configuration
         self.xcodebuild = xcodebuild
         self.project = project
         self.schemes = schemes
-        self.targets = targets
-        self.packageTargets = packageTargets
-    }
-
-    // MARK: - Private
-
-    private static func validateConfiguration(configuration: Configuration) throws {
-        guard configuration.workspace != nil || configuration.project != nil else {
-            let message = "You must supply either the --workspace or --project option. If your project uses an .xcworkspace to integrate multiple projects, then supply the --workspace option. Otherwise, supply the --project option."
-            throw PeripheryError.usageError(message)
-        }
-
-        if configuration.workspace != nil && configuration.project != nil {
-            let message = "You must supply either the --workspace or --project option, not both. If your project uses an .xcworkspace to integrate multiple projects, then supply the --workspace option. Otherwise, supply the --project option."
-            throw PeripheryError.usageError(message)
-        }
-
-        guard !configuration.schemes.isEmpty else {
-            throw PeripheryError.usageError("The '--schemes' option is required.")
-        }
-
-        guard !configuration.targets.isEmpty else {
-            throw PeripheryError.usageError("The '--targets' option is required.")
-        }
     }
 }
 
@@ -142,63 +84,42 @@ extension XcodeProjectDriver: ProjectDriver {
                 logger.info("\(asterisk) Building \(scheme)...")
             }
 
-            let containsXcodeTestTargets = targets.contains(where: \.isTestTarget)
-            let containsPackageTestTargets = packageTargets.values.contains { $0.contains(where: \.isTestTarget) }
-            let buildForTesting = containsXcodeTestTargets || containsPackageTestTargets
             try xcodebuild.build(project: project,
                                  scheme: scheme,
                                  allSchemes: Array(schemes),
-                                 additionalArguments: configuration.buildArguments,
-                                 buildForTesting: buildForTesting)
+                                 additionalArguments: configuration.buildArguments)
         }
     }
 
-    public func index(graph: SourceGraph) throws {
-        let storePaths: [FilePath]
+    public func plan(logger: ContextualLogger) throws -> IndexPlan {
+        let indexStorePaths: Set<FilePath>
 
         if !configuration.indexStorePath.isEmpty {
-            storePaths = configuration.indexStorePath
+            indexStorePaths = Set(configuration.indexStorePath)
         } else {
-            storePaths = [try xcodebuild.indexStorePath(project: project, schemes: Array(schemes))]
+            indexStorePaths = [try xcodebuild.indexStorePath(project: project, schemes: Array(schemes))]
         }
 
+        let targets = project.targets
         try targets.forEach { try $0.identifyFiles() }
+        let excludedTestTargets = configuration.excludeTests ? project.targets.filter(\.isTestTarget).mapSet(\.name) : []
+        let collector = SourceFileCollector(
+            indexStorePaths: indexStorePaths,
+            excludedTestTargets: excludedTestTargets,
+            logger: logger
+        )
+        let sourceFiles = try collector.collect()
+        let infoPlistPaths = targets.flatMapSet { $0.files(kind: .infoPlist) }
+        let xibPaths = targets.flatMapSet { $0.files(kind: .interfaceBuilder) }
+        let xcDataModelPaths = targets.flatMapSet { $0.files(kind: .xcDataModel) }
+        let xcMappingModelPaths = targets.flatMapSet { $0.files(kind: .xcMappingModel) }
 
-        var sourceFiles: [FilePath: Set<IndexTarget>] = [:]
-
-        for target in targets {
-            target.files(kind: .swift).forEach {
-                let indexTarget = IndexTarget(name: target.name)
-                sourceFiles[$0, default: []].insert(indexTarget)
-            }
-        }
-
-        for (package, targets) in packageTargets {
-            let packageRoot = FilePath(package.path)
-
-            for target in targets {
-                target.sourcePaths.forEach {
-                    let absolutePath = packageRoot.pushing($0)
-                    let indexTarget = IndexTarget(name: target.name)
-                    sourceFiles[absolutePath, default: []].insert(indexTarget)
-                }
-            }
-        }
-
-        try SwiftIndexer(sourceFiles: sourceFiles, graph: graph, indexStorePaths: storePaths).perform()
-
-        let xibFiles = targets.flatMapSet { $0.files(kind: .interfaceBuilder) }
-        try XibIndexer(xibFiles: xibFiles, graph: graph).perform()
-
-        let xcDataModelFiles = targets.flatMapSet { $0.files(kind: .xcDataModel) }
-        try XCDataModelIndexer(files: xcDataModelFiles, graph: graph).perform()
-
-        let xcMappingModelFiles = targets.flatMapSet { $0.files(kind: .xcMappingModel) }
-        try XCMappingModelIndexer(files: xcMappingModelFiles, graph: graph).perform()
-
-        let infoPlistFiles = targets.flatMapSet { $0.files(kind: .infoPlist) }
-        try InfoPlistIndexer(infoPlistFiles: infoPlistFiles, graph: graph).perform()
-
-        graph.indexingComplete()
+        return IndexPlan(
+            sourceFiles: sourceFiles,
+            plistPaths: infoPlistPaths,
+            xibPaths: xibPaths,
+            xcDataModelPaths: xcDataModelPaths,
+            xcMappingModelPaths: xcMappingModelPaths
+        )
     }
 }

@@ -1,54 +1,44 @@
 import Foundation
 import Indexer
 import Shared
-import SourceGraph
+import SwiftIndexStore
 import SystemPackage
 
 public final class GenericProjectDriver {
-    private enum FileKind: String {
-        case swift
-        case plist
+    struct GenericConfig: Decodable {
+        let plistPaths: Set<String>
+        let testTargets: Set<String>
     }
 
-    public static func build() throws -> Self {
-        let configuration = Configuration.shared
+    public static func build(genericProjectConfig: FilePath) throws -> Self {
+        guard genericProjectConfig.exists else {
+            throw PeripheryError.pathDoesNotExist(path: genericProjectConfig.string)
+        }
+
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let data = try Data(contentsOf: genericProjectConfig.url)
+        let config = try decoder.decode(GenericConfig.self, from: data)
+        let plistPaths = config.plistPaths.mapSet { FilePath.makeAbsolute($0) }
 
-        let sourceFiles = try configuration.fileTargetsPath
-            .reduce(into: [FileKind: [FilePath: Set<IndexTarget>]]()) { result, mapPath in
-                guard mapPath.exists else {
-                    throw PeripheryError.pathDoesNotExist(path: mapPath.string)
-                }
-
-                let data = try Data(contentsOf: mapPath.url)
-                try decoder
-                    .decode(FileTargetMapContainer.self, from: data)
-                    .fileTargets
-                    .forEach { key, value in
-                        let path = FilePath.makeAbsolute(key)
-
-                        if !path.exists {
-                            throw PeripheryError.pathDoesNotExist(path: path.string)
-                        }
-
-                        guard let ext = path.extension, let fileKind = FileKind(rawValue: ext) else {
-                            throw PeripheryError.unsupportedFileKind(path: path)
-                        }
-
-                        let indexTargets = value.mapSet { IndexTarget(name: $0) }
-                        result[fileKind, default: [:]][path, default: []].formUnion(indexTargets)
-                    }
-            }
-
-        return self.init(sourceFiles: sourceFiles, configuration: configuration)
+        return self.init(
+            plistPaths: plistPaths,
+            testTargets: config.testTargets,
+            configuration: .shared
+        )
     }
 
-    private let sourceFiles: [FileKind: [FilePath: Set<IndexTarget>]]
+    private let plistPaths: Set<FilePath>
+    private let testTargets: Set<String>
     private let configuration: Configuration
 
-    private init(sourceFiles: [FileKind: [FilePath: Set<IndexTarget>]], configuration: Configuration) {
-        self.sourceFiles = sourceFiles
+    private init(
+        plistPaths: Set<FilePath>,
+        testTargets: Set<String>,
+        configuration: Configuration
+    ) {
+        self.plistPaths = plistPaths
+        self.testTargets = testTargets
         self.configuration = configuration
     }
 }
@@ -56,19 +46,18 @@ public final class GenericProjectDriver {
 extension GenericProjectDriver: ProjectDriver {
     public func build() throws {}
 
-    public func index(graph: SourceGraph) throws {
-        if let swiftFiles = sourceFiles[.swift] {
-            try SwiftIndexer(sourceFiles: swiftFiles, graph: graph, indexStorePaths: configuration.indexStorePath).perform()
-        }
+    public func plan(logger: ContextualLogger) throws -> IndexPlan {
+        let excludedTestTargets = configuration.excludeTests ? testTargets : []
+        let collector = SourceFileCollector(
+            indexStorePaths: Set(configuration.indexStorePath),
+            excludedTestTargets: excludedTestTargets,
+            logger: logger
+        )
+        let sourceFiles = try collector.collect()
 
-        if let plistFiles = sourceFiles[.plist] {
-            try InfoPlistIndexer(infoPlistFiles: Set(plistFiles.keys), graph: graph).perform()
-        }
-
-        graph.indexingComplete()
+        return IndexPlan(
+            sourceFiles: sourceFiles,
+            plistPaths: plistPaths
+        )
     }
-}
-
-struct FileTargetMapContainer: Decodable {
-    let fileTargets: [String: Set<String>]
 }

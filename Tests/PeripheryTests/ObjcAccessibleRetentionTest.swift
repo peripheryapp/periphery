@@ -1,4 +1,3 @@
-@testable import PeripheryKit
 import SystemPackage
 @testable import TestShared
 import XCTest
@@ -6,14 +5,6 @@ import XCTest
 #if os(macOS) // swiftlint:disable:next balanced_xctest_lifecycle
 final class ObjcAccessibleRetentionTest: FixtureSourceGraphTestCase {
     let performKnownFailures = false
-
-    override static func setUp() {
-        super.setUp()
-
-        configuration.targets = ["ObjcAccessibleRetentionFixtures"]
-
-        build(driver: SPMProjectDriver.self)
-    }
 
     // https://github.com/apple/swift/issues/56327
     func testRetainsOptionalProtocolMethodImplementedInSubclass() {

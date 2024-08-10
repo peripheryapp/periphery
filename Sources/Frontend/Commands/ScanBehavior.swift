@@ -12,14 +12,9 @@ final class ScanBehavior {
         self.logger = logger
     }
 
-    func setup(_ configPath: String?) -> Result<(), PeripheryError> {
+    func setup(_ configPath: FilePath?) -> Result<(), PeripheryError> {
         do {
-            var path: FilePath?
-
-            if let configPath {
-                path = FilePath(configPath)
-            }
-            try configuration.load(from: path)
+            try configuration.load(from: configPath)
         } catch let error as PeripheryError {
             return .failure(error)
         } catch {
@@ -31,27 +26,22 @@ final class ScanBehavior {
 
     func main(_ block: (Project) throws -> [ScanResult]) -> Result<(), PeripheryError> {
         logger.contextualized(with: "version").debug(PeripheryVersion)
+
         let project: Project
 
-        if configuration.guidedSetup {
-            do {
-                project = try GuidedSetup().perform()
-            } catch let error as PeripheryError {
-                return .failure(error)
-            } catch {
-                return .failure(.underlyingError(error))
-            }
-        } else {
-            project = Project.identify()
+        do {
+            logger.debug(SwiftVersion.current.fullVersion)
+            try SwiftVersion.current.validateVersion()
 
-            do {
-                // Guided setup performs validation itself once the type has been determined.
-                try project.validateEnvironment()
-            } catch let error as PeripheryError {
-                return .failure(error)
-            } catch {
-                return .failure(.underlyingError(error))
+            if configuration.guidedSetup {
+                project = try GuidedSetup().perform()
+            } else {
+                project = try Project.identify()
             }
+        } catch let error as PeripheryError {
+            return .failure(error)
+        } catch {
+            return .failure(.underlyingError(error))
         }
 
         let updateChecker = UpdateChecker()
@@ -89,24 +79,6 @@ final class ScanBehavior {
 
             logger.info(output, canQuiet: false)
             logger.endInterval(interval)
-
-            if !filteredResults.isEmpty,
-                configuration.outputFormat.supportsAuxiliaryOutput {
-                logger.info(
-                    colorize("\n* ", .boldGreen) +
-                        colorize("Seeing false positives?", .bold) +
-
-                        colorize("\n - ", .boldGreen) +
-                        "Periphery only analyzes files that are members of the targets you specify." +
-                        "\n   References to declarations identified as unused may reside in files that are members of other targets, e.g test targets." +
-
-                        colorize("\n - ", .boldGreen) +
-                        "Periphery is a very precise tool, false positives often turn out to be correct after further investigation." +
-
-                        colorize("\n - ", .boldGreen) +
-                        "If it really is a false positive, please report it - https://github.com/peripheryapp/periphery/issues."
-                )
-            }
 
             updateChecker.notifyIfAvailable()
 

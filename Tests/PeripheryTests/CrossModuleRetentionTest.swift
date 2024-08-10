@@ -1,15 +1,12 @@
-@testable import PeripheryKit
 import SystemPackage
 @testable import TestShared
-import XCTest
 
 // swiftlint:disable:next balanced_xctest_lifecycle
-final class CrossModuleRetentionTest: SourceGraphTestCase {
+final class CrossModuleRetentionTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        configuration.targets = ["CrossModuleRetentionFixtures", "CrossModuleRetentionSupportFixtures"]
-        build(driver: SPMProjectDriver.self)
+        build(projectPath: FixturesProjectPath)
         index()
     }
 

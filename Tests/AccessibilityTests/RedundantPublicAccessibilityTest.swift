@@ -1,15 +1,12 @@
-@testable import PeripheryKit
 @testable import TestShared
 import XCTest
 
 // swiftlint:disable:next balanced_xctest_lifecycle
-final class RedundantPublicAccessibilityTest: SourceGraphTestCase {
+class RedundantPublicAccessibilityTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
-        configuration.targets = ["MainTarget", "TargetA", "TestTarget"]
-
-        build(driver: SPMProjectDriver.self, projectPath: AccessibilityProjectPath)
+        build(projectPath: AccessibilityProjectPath)
     }
 
     func testRedundantPublicType() {

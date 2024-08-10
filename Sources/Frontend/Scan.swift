@@ -1,4 +1,5 @@
 import Foundation
+import Indexer
 import PeripheryKit
 import Shared
 import SourceGraph
@@ -6,6 +7,7 @@ import SourceGraph
 final class Scan {
     private let configuration: Configuration
     private let logger: Logger
+    private let graph = SourceGraph.shared
 
     required init(configuration: Configuration = .shared, logger: Logger = .init()) {
         self.configuration = configuration
@@ -27,29 +29,52 @@ final class Scan {
             logger.debug("[configuration:begin]\n\(configYaml.trimmed)\n[configuration:end]")
         }
 
+        let driver = try setup(project)
+        try build(driver)
+        try index(driver)
+        try analyze()
+        return buildResults()
+    }
+
+    // MARK: - Private
+
+    private func setup(_ project: Project) throws -> ProjectDriver {
+        let driverSetupInterval = logger.beginInterval("driver:setup")
+
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)
             logger.info("\(asterisk) Inspecting project...")
         }
 
-        let driverPrepareInterval = logger.beginInterval("driver:prepare")
         let driver = try project.driver()
-        logger.endInterval(driverPrepareInterval)
+        logger.endInterval(driverSetupInterval)
+        return driver
+    }
+
+    private func build(_ driver: ProjectDriver) throws {
         let driverBuildInterval = logger.beginInterval("driver:build")
         try driver.build()
         logger.endInterval(driverBuildInterval)
+    }
 
+    private func index(_ driver: ProjectDriver) throws {
         let indexInterval = logger.beginInterval("index")
+
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)
             logger.info("\(asterisk) Indexing...")
         }
 
-        let graph = SourceGraph.shared
-        try driver.index(graph: graph)
+        let indexLogger = logger.contextualized(with: "index")
+        let plan = try driver.plan(logger: indexLogger)
+        let pipeline = IndexPipeline(plan: plan, graph: graph, logger: indexLogger)
+        try pipeline.perform()
         logger.endInterval(indexInterval)
+    }
 
+    private func analyze() throws {
         let analyzeInterval = logger.beginInterval("analyze")
+
         if configuration.outputFormat.supportsAuxiliaryOutput {
             let asterisk = colorize("*", .boldGreen)
             logger.info("\(asterisk) Analyzing...")
@@ -57,11 +82,12 @@ final class Scan {
 
         try SourceGraphMutatorRunner.perform(graph: graph)
         logger.endInterval(analyzeInterval)
+    }
 
+    private func buildResults() -> [ScanResult] {
         let resultInterval = logger.beginInterval("result:build")
         let results = ScanResultBuilder.build(for: graph)
         logger.endInterval(resultInterval)
-
         return results
     }
 }

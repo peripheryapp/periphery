@@ -157,7 +157,7 @@ final class FunctionVisitTest: XCTestCase {
     // MARK: - Private
 
     private var fixturePath: SourceFile {
-        let path = ProjectRootPath.appending( "Tests/Fixtures/DeclarationVisitorFixtures/FunctionFixture.swift")
+        let path = FixturesProjectPath.appending( "Sources/DeclarationVisitorFixtures/FunctionFixture.swift")
         return SourceFile(path: path, modules: ["DeclarationVisitorFixtures"])
     }
 
