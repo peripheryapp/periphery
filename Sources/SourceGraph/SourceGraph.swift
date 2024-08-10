@@ -1,7 +1,6 @@
 import Foundation
 import Shared
 
-// swiftlint:disable:next type_body_length
 public final class SourceGraph {
     // Global shared instance to prevent costly deinitialization.
     public static var shared = SourceGraph()

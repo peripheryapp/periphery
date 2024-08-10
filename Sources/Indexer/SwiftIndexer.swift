@@ -5,8 +5,6 @@ import SwiftIndexStore
 import SyntaxAnalysis
 import SystemPackage
 
-// swiftlint:disable file_length
-// swiftlint:disable:next type_body_length
 public final class SwiftIndexer: Indexer {
     private let sourceFiles: [FilePath: Set<IndexTarget>]
     private let graph: SourceGraph
@@ -114,7 +112,7 @@ public final class SwiftIndexer: Indexer {
 
     // MARK: - Private
 
-    private class Job { // swiftlint:disable:this type_body_length
+    private class Job {
         let file: FilePath
 
         private let units: [(IndexStore, IndexStoreUnit)]
@@ -178,8 +176,7 @@ public final class SwiftIndexer: Indexer {
         /// Phase one reads the index store and establishes the declaration hierarchy and the majority of references.
         /// Some references may depend upon declarations in other files, and thus their association is deferred until
         /// phase two.
-        func phaseOne() throws { // swiftlint:disable:this cyclomatic_complexity
-
+        func phaseOne() throws {
             var rawDeclsByKey: [RawDeclaration.Key: [(RawDeclaration, [RawRelation])]] = [:]
             var references: Set<Reference> = []
 
@@ -407,7 +404,6 @@ public final class SwiftIndexer: Indexer {
             }
         }
 
-        // swiftlint:disable:next cyclomatic_complexity
         private func applyDeclarationMetadata(to decl: Declaration, with result: DeclarationSyntaxVisitor.Result) {
             graph.withLock {
                 if let accessibility = result.accessibility {

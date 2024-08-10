@@ -4,8 +4,7 @@ import SystemPackage
 @testable import TestShared
 import XCTest
 
-// swiftlint:disable file_length
-// swiftlint:disable:next type_body_length balanced_xctest_lifecycle
+// swiftlint:disable:next balanced_xctest_lifecycle
 final class RetentionTest: FixtureSourceGraphTestCase {
     let performKnownFailures = false
 
@@ -1206,9 +1205,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
     // MARK: - Unused Parameters
 
-    // swiftlint:disable:next function_body_length
     func testRetainsParamUsedInOverriddenMethod() {
-        // swiftlint:disable:next closure_body_length
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass101Base")) {
                 // Not used and not overridden.
@@ -1380,9 +1377,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    // swiftlint:disable:next function_body_length
     func testRetainsProtocolParameters() {
-        // swiftlint:disable:next closure_body_length
         analyze(retainPublic: true) {
             assertReferenced(.protocol("FixtureProtocol104")) {
                 // Used in a conformance.

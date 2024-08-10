@@ -29,7 +29,6 @@ final class ScanBehavior {
         return .success(())
     }
 
-    // swiftlint:disable:next function_body_length cyclomatic_complexity
     func main(_ block: (Project) throws -> [ScanResult]) -> Result<(), PeripheryError> {
         logger.contextualized(with: "version").debug(PeripheryVersion)
         let project: Project

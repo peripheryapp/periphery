@@ -77,7 +77,6 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
         return newReferences
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     private func invertReferencesFromProtocolToDeclaration(_ nonInvertableReferences: Set<Reference>) {
         let relatedReferences = graph.allReferences.filter { $0.isRelated && $0.kind.isProtocolMemberConformingKind }
 

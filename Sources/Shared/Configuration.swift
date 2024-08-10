@@ -3,8 +3,6 @@ import Foundation
 import SystemPackage
 import Yams
 
-// swiftlint:disable file_length
-// swiftlint:disable:next type_body_length
 public final class Configuration {
     public static var defaultConfigurationFile = ".periphery.yml"
     public static let shared = Configuration()
@@ -133,7 +131,6 @@ public final class Configuration {
     // Dependencies.
     private var logger: BaseLogger // Must use BaseLogger as Logger depends upon Configuration.
 
-    // swiftlint:disable:next function_body_length cyclomatic_complexity
     public func asYaml() throws -> String {
         var config: [String: Any?] = [:]
 
@@ -297,7 +294,6 @@ public final class Configuration {
         FileManager.default.createFile(atPath: Self.defaultConfigurationFile, contents: data)
     }
 
-    // swiftlint:disable:next function_body_length
     public func load(from path: FilePath?) throws {
         guard let path = try configurationPath(withUserProvided: path) else { return }
 

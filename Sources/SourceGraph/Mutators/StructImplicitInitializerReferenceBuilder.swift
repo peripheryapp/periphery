@@ -10,7 +10,6 @@ final class StructImplicitInitializerReferenceBuilder: SourceGraphMutator {
         self.graph = graph
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     func mutate() throws {
         for structDecl in graph.declarations(ofKind: .struct) {
             let implicitInitDecls = structDecl.declarations.filter { $0.kind == .functionConstructor && $0.isImplicit }

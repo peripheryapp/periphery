@@ -28,7 +28,6 @@ struct TypeSyntaxInspector {
 
     // MARK: - Private
 
-    // swiftlint:disable:next cyclomatic_complexity
     func types(for typeSyntax: TypeSyntax) -> Set<TokenSyntax> {
         if let identifierType = typeSyntax.as(IdentifierTypeSyntax.self) {
             // Simple type.

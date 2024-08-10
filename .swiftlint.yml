@@ -48,15 +48,16 @@ disabled_rules:
   - no_magic_numbers
   - prefixed_toplevel_constant
   - untyped_error_in_catch
+  - cyclomatic_complexity
+  - closure_body_length
+  - function_body_length
+  - type_body_length
+  - file_length  
   - contrasted_opening_brace
   - unused_parameter
   - no_empty_block
   - prefer_key_path
 
-closure_body_length:
-    warning: 50
-    error: 100
-function_body_length: 60
 balanced_xctest_lifecycle: &unit_test_configuration
   test_parent_classes:
     - SourceGraphTestCase
@@ -65,5 +66,3 @@ balanced_xctest_lifecycle: &unit_test_configuration
 empty_xctest_method: *unit_test_configuration
 final_test_case: *unit_test_configuration
 single_test_class: *unit_test_configuration
-cyclomatic_complexity:
-  ignores_case_statements: true

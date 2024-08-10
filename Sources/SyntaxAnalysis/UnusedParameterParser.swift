@@ -181,7 +181,6 @@ struct UnusedParameterParser {
         return collector.collection
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     private func parse<T>(node anyNode: SyntaxProtocol?, _ collector: Collector<T>? = nil) -> Item? {
         guard let node = anyNode?._syntaxNode else { return nil }
 
