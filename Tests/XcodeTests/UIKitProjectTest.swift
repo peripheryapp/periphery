@@ -1,15 +1,18 @@
-import XCTest
 @testable import TestShared
 @testable import XcodeSupport
+import XCTest
 
-class UIKitProjectTest: SourceGraphTestCase {
+// swiftlint:disable:next balanced_xctest_lifecycle
+final class UIKitProjectTest: SourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
         configuration.project = UIKitProjectPath.string
         configuration.schemes = ["UIKitProject"]
-        configuration.targets = ["UIKitProject", "NotificationServiceExtension", "WatchWidgetExtension",
-                                 "UIKitProjectTests", "LocalPackage.LocalPackageTarget"]
+        configuration.targets = [
+            "UIKitProject", "NotificationServiceExtension", "WatchWidgetExtension",
+            "UIKitProjectTests", "LocalPackage.LocalPackageTarget"
+        ]
 
         build(driver: XcodeProjectDriver.self)
         index()

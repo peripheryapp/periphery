@@ -1,6 +1,6 @@
 import Foundation
-import SystemPackage
 import PeripheryKit
+import SystemPackage
 
 protocol XcodeProjectlike: AnyObject {
     var path: FilePath { get }
@@ -15,6 +15,6 @@ protocol XcodeProjectlike: AnyObject {
 
 extension XcodeProjectlike {
     var name: String {
-        return path.lastComponent?.stem ?? ""
+        path.lastComponent?.stem ?? ""
     }
 }

@@ -1,7 +1,7 @@
 import Foundation
-import XcodeProj
-import SystemPackage
 import SourceGraph
+import SystemPackage
+import XcodeProj
 
 final class XcodeTarget {
     let project: XcodeProject
@@ -87,6 +87,6 @@ extension XcodeTarget: Hashable {
 
 extension XcodeTarget: Equatable {
     static func == (lhs: XcodeTarget, rhs: XcodeTarget) -> Bool {
-        return lhs.name == rhs.name
+        lhs.name == rhs.name
     }
 }

@@ -1,8 +1,8 @@
 import Foundation
-import SystemPackage
+import Indexer
 import Shared
 import SourceGraph
-import Indexer
+import SystemPackage
 
 public final class SPMProjectDriver {
     public static func build() throws -> Self {

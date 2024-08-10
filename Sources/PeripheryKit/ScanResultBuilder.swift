@@ -1,7 +1,7 @@
 import Foundation
 import SourceGraph
 
-public struct ScanResultBuilder {
+public enum ScanResultBuilder {
     public static func build(for graph: SourceGraph) -> [ScanResult] {
         let assignOnlyProperties = graph.assignOnlyProperties
         let removableDeclarations = graph.unusedDeclarations
@@ -10,13 +10,13 @@ public struct ScanResultBuilder {
         let redundantProtocols = graph.redundantProtocols.filter { !removableDeclarations.contains($0.0) }
         let redundantPublicAccessibility = graph.redundantPublicAccessibility.filter { !removableDeclarations.contains($0.0) }
 
-        let annotatedRemovableDeclarations: [ScanResult] = removableDeclarations.flatMap {
+        let annotatedRemovableDeclarations: [ScanResult] = removableDeclarations.flatMap { removableDeclaration in
             var extensionResults = [ScanResult]()
 
-            if $0.kind.isExtendableKind,
-               !graph.retainedDeclarations.contains($0),
-               !graph.ignoredDeclarations.contains($0) {
-                let decls = $0.descendentDeclarations.union([$0])
+            if removableDeclaration.kind.isExtendableKind,
+               !graph.retainedDeclarations.contains(removableDeclaration),
+               !graph.ignoredDeclarations.contains(removableDeclaration) {
+                let decls = removableDeclaration.descendentDeclarations.union([removableDeclaration])
 
                 for decl in decls {
                     let extensions = graph.extensions[decl, default: []]
@@ -26,7 +26,7 @@ public struct ScanResultBuilder {
                 }
             }
 
-            return [ScanResult(declaration: $0, annotation: .unused)] + extensionResults
+            return [ScanResult(declaration: removableDeclaration, annotation: .unused)] + extensionResults
         }
         let annotatedAssignOnlyProperties: [ScanResult] = assignOnlyProperties.map {
             .init(declaration: $0, annotation: .assignOnlyProperty)
@@ -44,14 +44,12 @@ public struct ScanResultBuilder {
             annotatedRedundantProtocols +
             annotatedRedundantPublicAccessibility
 
-        let result = allAnnotatedDeclarations
+        return allAnnotatedDeclarations
             .filter {
                 !$0.declaration.isImplicit &&
                 !$0.declaration.kind.isAccessorKind &&
                 !graph.ignoredDeclarations.contains($0.declaration) &&
                 !graph.retainedDeclarations.contains($0.declaration)
             }
-
-        return result
     }
 }

@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 
+// swiftlint:disable:next type_name
 final class ExternalTypeProtocolConformanceReferenceRemover: SourceGraphMutator {
     private let graph: SourceGraph
 

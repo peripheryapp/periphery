@@ -1,7 +1,7 @@
-import Foundation
-import SystemPackage
-import Shared
 import FilenameMatcher
+import Foundation
+import Shared
+import SystemPackage
 
 public class Indexer {
     private let configuration: Configuration

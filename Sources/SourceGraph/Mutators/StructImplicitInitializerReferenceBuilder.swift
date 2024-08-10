@@ -3,6 +3,7 @@ import Shared
 
 /// Builds references from struct implicit initializers to the properties it assigns.
 final class StructImplicitInitializerReferenceBuilder: SourceGraphMutator {
+    // swiftlint:disable:previous type_name
     private let graph: SourceGraph
 
     init(graph: SourceGraph, configuration: Configuration) {

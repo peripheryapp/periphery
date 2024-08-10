@@ -8,7 +8,7 @@ struct DeclarationDescription: CustomStringConvertible {
 
     var description: String {
         var parts = [kind.rawValue, "\"\(name)\""]
-        if let line = line {
+        if let line {
             parts.append("line: \(line)")
         }
         return "(\(parts.joined(separator: ", ")))"

@@ -1,7 +1,7 @@
 import Foundation
-import SwiftSyntax
-import SourceGraph
 import Shared
+import SourceGraph
+import SwiftSyntax
 
 struct TypeNameSourceLocation: Hashable {
     let name: String

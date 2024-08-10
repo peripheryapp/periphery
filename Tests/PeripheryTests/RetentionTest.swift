@@ -1,13 +1,14 @@
-import XCTest
-import SystemPackage
-import Shared
-@testable import TestShared
 @testable import PeripheryKit
+import Shared
+import SystemPackage
+@testable import TestShared
+import XCTest
 
+// swiftlint:disable:next balanced_xctest_lifecycle
 final class RetentionTest: FixtureSourceGraphTestCase {
     let performKnownFailures = false
 
-    static override func setUp() {
+    override static func setUp() {
         super.setUp()
 
         configuration.targets = ["RetentionFixtures"]
@@ -16,13 +17,13 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testNonReferencedClass() {
-        analyze() {
+        analyze {
             assertNotReferenced(.class("FixtureClass1"))
         }
     }
 
     func testNonReferencedFreeFunction() {
-        analyze() {
+        analyze {
             assertNotReferenced(.functionFree("someFunction()"))
         }
     }
@@ -53,14 +54,14 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testConformingProtocolReferencedByNonReferencedClass() {
-        analyze() {
+        analyze {
             assertNotReferenced(.class("FixtureClass6"))
             assertNotReferenced(.protocol("FixtureProtocol1"))
         }
     }
 
     func testSelfReferencedClass() {
-        analyze() {
+        analyze {
             assertNotReferenced(.class("FixtureClass8"))
         }
     }
@@ -90,7 +91,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testSelfReferencedProperty() {
-        analyze() {
+        analyze {
             assertNotReferenced(.class("FixtureClass39"))
         }
     }
@@ -107,7 +108,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testCrossReferencedClasses() {
-        analyze() {
+        analyze {
             assertNotReferenced(.class("FixtureClass14"))
             assertNotReferenced(.class("FixtureClass15"))
             assertNotReferenced(.class("FixtureClass16"))
@@ -115,7 +116,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testDeeplyNestedClassReferences() {
-        analyze() {
+        analyze {
             assertNotReferenced(.class("FixtureClass17"))
         }
     }
@@ -132,7 +133,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testConformanceToExternalProtocolIsRetained() {
-        analyze() {
+        analyze {
             // Retained because it's a method from an external declaration (in this case, Equatable)
             assertReferenced(.class("FixtureClass55")) {
                 self.assertReferenced(.functionOperatorInfix("==(_:_:)"))
@@ -146,9 +147,9 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.protocol("FixtureProtocol114"))
             assertRedundantProtocol("FixtureProtocol114",
                                     implementedBy:
-                                        .class("FixtureClass114"),
+                                        .class("FixtureClass114"), // swiftlint:disable vertical_parameter_alignment_on_call
                                         .class("FixtureClass115"),
-                                        .struct("FixtureStruct116"))
+                                        .struct("FixtureStruct116")) // swiftlint:enable vertical_parameter_alignment_on_call
         }
     }
 
@@ -394,7 +395,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testAccessibility() {
-        analyze() {
+        analyze {
             assertAccessibility(.class("FixtureClass31"), .public) {
                 self.assertAccessibility(.functionConstructor("init(arg:)"), .public)
                 self.assertAccessibility(.functionMethodInstance("openFunc()"), .open)
@@ -438,7 +439,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testXCTestCaseClassesAndMethodsAreRetained() {
-        analyze() {
+        analyze {
             assertReferenced(.class("FixtureClass34")) {
                 self.assertReferenced(.functionMethodInstance("testSomething()"))
                 self.assertNotReferenced(.functionMethodInstance("testNotATest(param:)"))
@@ -499,7 +500,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testUnusedTypealias() {
-        analyze() {
+        analyze {
             assertNotReferenced(.typealias("UnusedAlias"))
         }
     }
@@ -605,7 +606,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testRetainsExternalTypeExtension() {
-        analyze() {
+        analyze {
             assertReferenced(.extensionProtocol("Sequence"))
             assertReferenced(.extensionStruct("Array"))
             assertReferenced(.extensionClass("NumberFormatter"))
@@ -1537,7 +1538,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testIgnoreUnusedParamInUnusedFunction() {
-        analyze() {
+        analyze {
             assertNotReferenced(.class("FixtureClass105"))
         }
     }

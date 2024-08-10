@@ -1,13 +1,17 @@
-import XCTest
-import SystemPackage
 @testable import Indexer
 @testable import PeripheryKit
-@testable import SourceGraph
 import Shared
+@testable import SourceGraph
+import SystemPackage
+import XCTest
 
+// swiftlint:disable:next blanket_disable_command
+// swiftlint:disable test_case_accessibility
 open class SourceGraphTestCase: XCTestCase {
+    // swiftlint:disable implicitly_unwrapped_optional
     static var driver: ProjectDriver!
     static var configuration: Configuration!
+    // swiftlint:enable implicitly_unwrapped_optional
     static var results: [ScanResult] = []
 
     private static var graph = SourceGraph()
@@ -17,13 +21,13 @@ open class SourceGraphTestCase: XCTestCase {
 
     private var scopeStack: [DeclarationScope] = []
 
-    class open override func setUp() {
+    override open class func setUp() {
         super.setUp()
         configuration = Configuration.shared
         configuration.quiet = true
     }
 
-    open override func setUp() {
+    override open func setUp() {
         super.setUp()
         configuration.reset()
     }
@@ -77,7 +81,9 @@ open class SourceGraphTestCase: XCTestCase {
         _ name: String,
         implementedBy conformances: DeclarationDescription...,
         inherits inheritedProtocols: DeclarationDescription...,
-        file: StaticString = #file, line: UInt = #line) {
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
         guard let declaration = materialize(.protocol(name), file: file, line: line) else { return }
 
         if let tuple = Self.results.redundantProtocolDeclarations[declaration] {
@@ -179,6 +185,7 @@ open class SourceGraphTestCase: XCTestCase {
 
     // MARK: - Private
 
+    // swiftlint:disable:next function_default_parameter_at_end discouraged_optional_collection
     private func materialize(_ description: DeclarationDescription, in defaultDeclarations: Set<Declaration>? = nil, fail: Bool = true, file: StaticString, line: UInt) -> Declaration? {
         let declarations = scopedDeclarations(from: defaultDeclarations)
 
@@ -198,6 +205,7 @@ open class SourceGraphTestCase: XCTestCase {
         return matchedDeclaration
     }
 
+    // swiftlint:disable:next discouraged_optional_collection
     private func scopedDeclarations(from defaultDeclarations: Set<Declaration>? = nil) -> Set<Declaration> {
         let allDeclarations = defaultDeclarations ?? Self.graph.rootDeclarations
 

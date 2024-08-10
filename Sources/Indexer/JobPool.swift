@@ -18,7 +18,7 @@ struct JobPool<T> {
             }
         }
 
-        if let error = error {
+        if let error {
             throw error
         }
     }
@@ -43,7 +43,7 @@ struct JobPool<T> {
             }
         }
 
-        if let error = error {
+        if let error {
             throw error
         }
 

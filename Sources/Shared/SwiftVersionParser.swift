@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SwiftVersionParser {
+public enum SwiftVersionParser {
     public static func parse(_ fullVersion: String) throws -> VersionString {
         guard let rawVersion = fullVersion.components(separatedBy: "Swift version").last?.split(separator: " ").first else {
             throw PeripheryError.swiftVersionParseError(fullVersion: fullVersion)

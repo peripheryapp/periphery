@@ -1,6 +1,6 @@
 import Foundation
-import SystemPackage
 import Shared
+import SystemPackage
 
 public final class Xcodebuild {
     private let shell: Shell
@@ -97,6 +97,7 @@ public final class Xcodebuild {
 
     // MARK: - Private
 
+    // swiftlint:disable:next discouraged_optional_collection
     private func deserialize(_ jsonString: String) throws -> [String: Any]? {
         do {
             guard let jsonData = jsonString.data(using: .utf8) else { return nil }
@@ -114,7 +115,7 @@ public final class Xcodebuild {
 
         let xcodeVersionHash = try version().djb2Hex
         let projectHash = project.name.djb2Hex
-        let schemesHash = schemes.map { $0 }.joined().djb2Hex
+        let schemesHash = Array(schemes).joined().djb2Hex
 
         return try Constants.cachePath().appending("DerivedData-\(xcodeVersionHash)-\(projectHash)-\(schemesHash)")
     }
@@ -127,8 +128,7 @@ public final class Xcodebuild {
                let value = arguments[safe: i + 1],
                !value.hasPrefix("-"),
                !value.hasPrefix("\""),
-               !value.hasPrefix("\'")
-            {
+               !value.hasPrefix("\'") {
                 quotedArguments[i + 1] = "\"\(value)\""
             }
         }

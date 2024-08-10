@@ -1,7 +1,7 @@
 import Foundation
-import SystemPackage
-import Shared
 import PeripheryKit
+import Shared
+import SystemPackage
 
 final class ScanBehavior {
     private let configuration: Configuration
@@ -16,7 +16,7 @@ final class ScanBehavior {
         do {
             var path: FilePath?
 
-            if let configPath = configPath {
+            if let configPath {
                 path = FilePath(configPath)
             }
             try configuration.load(from: path)
@@ -90,7 +90,7 @@ final class ScanBehavior {
             logger.info(output, canQuiet: false)
             logger.endInterval(interval)
 
-            if filteredResults.count > 0,
+            if !filteredResults.isEmpty,
                 configuration.outputFormat.supportsAuxiliaryOutput {
                 logger.info(
                     colorize("\n* ", .boldGreen) +

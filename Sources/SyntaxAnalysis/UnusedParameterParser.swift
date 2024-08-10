@@ -1,8 +1,8 @@
 import Foundation
-import SystemPackage
-import SwiftSyntax
-import SwiftParser
 import SourceGraph
+import SwiftParser
+import SwiftSyntax
+import SystemPackage
 
 public protocol Item: AnyObject {
     var items: [Item] { get }
@@ -46,7 +46,7 @@ public final class Function: Item, Hashable {
 
 public final class Parameter: Item, Hashable {
     public static func == (lhs: Parameter, rhs: Parameter) -> Bool {
-        return lhs.location == rhs.location
+        lhs.location == rhs.location
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -61,7 +61,7 @@ public final class Parameter: Item, Hashable {
     var function: Function?
 
     public var name: String {
-        return secondName ?? firstName ?? ""
+        secondName ?? firstName ?? ""
     }
 
     public func makeDeclaration(withParent parent: Declaration) -> Declaration {
@@ -162,17 +162,17 @@ struct UnusedParameterParser {
     }
 
     func parse() -> [Function] {
-        return parse(node: syntax, collecting: Function.self)
+        parse(node: syntax, collecting: Function.self)
     }
 
     // MARK: - Private
 
     private func parse<T: Item>(node: SyntaxProtocol, collecting: T.Type) -> [T] {
-        return parse(children: node.children(viewMode: .sourceAccurate), collecting: collecting)
+        parse(children: node.children(viewMode: .sourceAccurate), collecting: collecting)
     }
 
     private func parse<T: Item>(children: SyntaxChildren, collecting: T.Type) -> [T] {
-        return parse(nodes: Array(children), collecting: collecting)
+        parse(nodes: Array(children), collecting: collecting)
     }
 
     private func parse<T: Item>(nodes: [Syntax], collecting: T.Type) -> [T] {
@@ -210,7 +210,7 @@ struct UnusedParameterParser {
             if optBindingCondition.initializer == nil,
                let pattern = optBindingCondition.pattern.as(IdentifierPatternSyntax.self),
                let parentStmt = optBindingCondition.parent?.parent?.parent,
-               (parentStmt.is(IfExprSyntax.self) || parentStmt.is(GuardStmtSyntax.self)) {
+               parentStmt.is(IfExprSyntax.self) || parentStmt.is(GuardStmtSyntax.self) {
                 // Handle `let x {}` syntax.
                 parsed = parse(identifier: pattern.identifier)
             } else {
@@ -220,7 +220,7 @@ struct UnusedParameterParser {
             parsed = parse(childrenFrom: node, collector)
         }
 
-        if let collector = collector, let parsed = parsed {
+        if let collector, let parsed {
             collector.add(parsed)
         }
 
@@ -229,7 +229,7 @@ struct UnusedParameterParser {
 
     private func parse<T>(childrenFrom node: Syntax, _ collector: Collector<T>?) -> Item? {
         let items = node.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) }
-        if items.count > 0 {
+        if !items.isEmpty {
             return GenericItem(node: node, items: items)
         }
         return nil
@@ -301,25 +301,26 @@ struct UnusedParameterParser {
     }
 
     private func parse<T>(functionDecl syntax: FunctionDeclSyntax, _ collector: Collector<T>?) -> Item? {
-        return build(function: syntax.signature,
-                     attributes: syntax.attributes,
-                     genericParams: syntax.genericParameterClause,
-                     body: syntax.body,
-                     named: syntax.name.text,
-                     position: syntax.name.positionAfterSkippingLeadingTrivia,
-                     collector)
+        build(function: syntax.signature,
+              attributes: syntax.attributes,
+              genericParams: syntax.genericParameterClause,
+              body: syntax.body,
+              named: syntax.name.text,
+              position: syntax.name.positionAfterSkippingLeadingTrivia,
+              collector)
     }
 
     private func parse<T>(initializerDecl syntax: InitializerDeclSyntax, _ collector: Collector<T>?) -> Item? {
-        return build(function: syntax.signature,
-                     attributes: syntax.attributes,
-                     genericParams: syntax.genericParameterClause,
-                     body: syntax.body,
-                     named: "init",
-                     position: syntax.initKeyword.positionAfterSkippingLeadingTrivia,
-                     collector)
+        build(function: syntax.signature,
+              attributes: syntax.attributes,
+              genericParams: syntax.genericParameterClause,
+              body: syntax.body,
+              named: "init",
+              position: syntax.initKeyword.positionAfterSkippingLeadingTrivia,
+              collector)
     }
 
+    // swiftlint:disable:next function_parameter_count
     private func build<T>(
         function syntax: SyntaxProtocol,
         attributes: AttributeListSyntax?,
@@ -364,8 +365,8 @@ struct UnusedParameterParser {
     private func sourceLocation(of position: AbsolutePosition) -> Location {
         let location = locationConverter.location(for: position)
         return Location(file: file,
-                              line: location.line,
-                              column: location.column)
+                        line: location.line,
+                        column: location.column)
     }
 }
 

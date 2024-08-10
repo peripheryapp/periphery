@@ -1,8 +1,9 @@
 import Foundation
 
 public protocol SetupGuide {
-    func perform() throws
     var commandLineOptions: [String] { get }
+
+    func perform() throws
 }
 
 public enum SetupSelection {

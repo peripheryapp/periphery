@@ -1,6 +1,6 @@
 import Foundation
 
-public struct PropertyTypeSanitizer {
+public enum PropertyTypeSanitizer {
     @inlinable
     public static func sanitize(_ types: [String]) -> [String] {
         types.map { sanitize($0) }

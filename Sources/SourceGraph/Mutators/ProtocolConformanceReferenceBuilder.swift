@@ -53,7 +53,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                             $0.name == unimplementedProtoDecl.name
                         }
 
-                        if let declInSuperclass = declInSuperclass {
+                        if let declInSuperclass {
                             // Build a reference from the protocol declarations to the
                             // declaration implemented by the superclass.
                             for usr in declInSuperclass.usrs {

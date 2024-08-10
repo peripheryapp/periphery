@@ -1,5 +1,5 @@
-import Foundation
 import ArgumentParser
+import Foundation
 
 struct VersionCommand: FrontendCommand {
     static let configuration = CommandConfiguration(
