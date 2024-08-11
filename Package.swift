@@ -95,7 +95,8 @@ var targets: [PackageDescription.Target] = [
     .target(
         name: "TestShared",
         dependencies: [
-            .target(name: "PeripheryKit")
+            .target(name: "PeripheryKit"),
+            .target(name: "ProjetDrivers")
         ],
         path: "Tests/Shared"
     ),
@@ -138,6 +139,7 @@ targets.append(contentsOf: [
     .testTarget(
         name: "XcodeTests",
         dependencies: [
+            .target(name: "ProjetDrivers"),
             .target(name: "TestShared"),
             .target(name: "PeripheryKit"),
             .target(name: "XcodeSupport")
