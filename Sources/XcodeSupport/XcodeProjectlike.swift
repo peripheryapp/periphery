@@ -1,7 +1,7 @@
 import Foundation
 import SystemPackage
 
-protocol XcodeProjectlike: AnyObject {
+public protocol XcodeProjectlike: AnyObject {
     var path: FilePath { get }
     var targets: Set<XcodeTarget> { get }
     var type: String { get }
@@ -11,7 +11,7 @@ protocol XcodeProjectlike: AnyObject {
     func schemes(additionalArguments: [String]) throws -> Set<String>
 }
 
-extension XcodeProjectlike {
+public extension XcodeProjectlike {
     var name: String {
         path.lastComponent?.stem ?? ""
     }

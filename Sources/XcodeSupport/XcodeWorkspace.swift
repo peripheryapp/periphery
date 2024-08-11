@@ -2,18 +2,19 @@ import Foundation
 import Shared
 import SystemPackage
 import XcodeProj
-final class XcodeWorkspace: XcodeProjectlike {
-    let type: String = "workspace"
-    let path: FilePath
-    let sourceRoot: FilePath
+
+public final class XcodeWorkspace: XcodeProjectlike {
+    public let type: String = "workspace"
+    public let path: FilePath
+    public let sourceRoot: FilePath
 
     private let xcodebuild: Xcodebuild
     private let configuration: Configuration
     private let xcworkspace: XCWorkspace
 
-    private(set) var targets: Set<XcodeTarget> = []
+    public private(set) var targets: Set<XcodeTarget> = []
 
-    required init(path: FilePath, xcodebuild: Xcodebuild = .init(), configuration: Configuration = .shared, logger: Logger = .init()) throws {
+    public required init(path: FilePath, xcodebuild: Xcodebuild = .init(), configuration: Configuration = .shared, logger: Logger = .init()) throws {
         logger.contextualized(with: "xcode:workspace").debug("Loading \(path)")
 
         self.path = path
@@ -35,7 +36,7 @@ final class XcodeWorkspace: XcodeProjectlike {
         }
     }
 
-    func schemes(additionalArguments: [String]) throws -> Set<String> {
+    public func schemes(additionalArguments: [String]) throws -> Set<String> {
         try xcodebuild.schemes(project: self, additionalArguments: additionalArguments)
     }
 

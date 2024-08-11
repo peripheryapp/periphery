@@ -3,7 +3,7 @@ import SourceGraph
 import SystemPackage
 import XcodeProj
 
-final class XcodeTarget {
+public final class XcodeTarget {
     let project: XcodeProject
 
     private let target: PBXTarget
@@ -14,15 +14,15 @@ final class XcodeTarget {
         self.target = target
     }
 
-    var isTestTarget: Bool {
+    public var isTestTarget: Bool {
         target.productType?.rawValue.contains("test") ?? false
     }
 
-    var name: String {
+    public var name: String {
         target.name
     }
 
-    func identifyFiles() throws {
+    public func identifyFiles() throws {
         let sourcesBuildPhases = project.xcodeProject.pbxproj.sourcesBuildPhases
         let resourcesBuildPhases = project.xcodeProject.pbxproj.resourcesBuildPhases
 
@@ -32,7 +32,7 @@ final class XcodeTarget {
         try identifyInfoPlistFiles()
     }
 
-    func files(kind: ProjectFileKind) -> Set<FilePath> {
+    public func files(kind: ProjectFileKind) -> Set<FilePath> {
         files[kind, default: []]
     }
 
@@ -75,13 +75,13 @@ final class XcodeTarget {
 }
 
 extension XcodeTarget: Hashable {
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(target.name)
     }
 }
 
 extension XcodeTarget: Equatable {
-    static func == (lhs: XcodeTarget, rhs: XcodeTarget) -> Bool {
+    public static func == (lhs: XcodeTarget, rhs: XcodeTarget) -> Bool {
         lhs.name == rhs.name
     }
 }

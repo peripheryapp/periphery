@@ -1,5 +1,4 @@
 import Foundation
-import Shared
 import SystemPackage
 
 public enum SPM {
@@ -10,22 +9,24 @@ public enum SPM {
     }
 
     public struct Package {
-        let path: FilePath = .current
+        public let path: FilePath = .current
         let configuration: Configuration = .shared
+      
+      public init() { }
 
         var exists: Bool {
             path.appending(packageFile).exists
         }
 
-        func clean() throws {
+        public func clean() throws {
             try Shell.shared.exec(["swift", "package", "clean"])
         }
 
-        func build(additionalArguments: [String]) throws {
+        public func build(additionalArguments: [String]) throws {
             try Shell.shared.exec(["swift", "build", "--build-tests"] + additionalArguments)
         }
 
-        func testTargetNames() throws -> Set<String> {
+        public func testTargetNames() throws -> Set<String> {
             let description = try load()
             return description.targets.filter(\.isTestTarget).mapSet(\.name)
         }
