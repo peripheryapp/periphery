@@ -7,7 +7,12 @@ Logger.configureBuffering()
 struct PeripheryCommand: FrontendCommand {
     static let configuration = CommandConfiguration(
         commandName: "periphery",
-        subcommands: [ScanCommand.self, CheckUpdateCommand.self, ClearCacheCommand.self, VersionCommand.self]
+        subcommands: [
+          ScanCommand.self,
+          CheckUpdateCommand.self,
+          ClearCacheCommand.self,
+          VersionCommand.self
+        ]
     )
 }
 

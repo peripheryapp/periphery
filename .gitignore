@@ -26,3 +26,7 @@ Tests/Fixtures/.build/
 
 # VSCode
 .vscode/*
+
+# Bazel
+bazel-*
+/MODULE.bazel.lock

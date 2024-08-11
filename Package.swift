@@ -56,7 +56,7 @@ var targets: [PackageDescription.Target] = [
         dependencies: [
             .target(name: "SyntaxAnalysis"),
             .target(name: "Shared"),
-            .product(name: "SwiftIndexStore", package: "swift-indexstore")
+            .product(name: "SwiftIndexStore", package: "swift-indexstore"),
         ]
     ),
     .target(
@@ -64,7 +64,8 @@ var targets: [PackageDescription.Target] = [
         dependencies: [
             .target(name: "SourceGraph"),
             .target(name: "Shared"),
-            .product(name: "SwiftSyntax", package: "swift-syntax")
+            .product(name: "SwiftSyntax", package: "swift-syntax"),
+            .product(name: "SwiftParser", package: "swift-syntax"),
         ]
     ),
     .target(

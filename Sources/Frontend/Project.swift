@@ -15,6 +15,8 @@ final class Project {
             return self.init(kind: .xcode(projectPath: path))
         } else if let path = configuration.genericProjectConfig {
             return self.init(kind: .generic(genericProjectConfig: path))
+        } else if Bazel.isSupported && configuration.bazel {
+          return self.init(kind: .bazel)
         } else if SPM.isSupported {
             return self.init(kind: .spm)
         }
@@ -38,6 +40,8 @@ final class Project {
             #endif
         case .spm:
             return try SPMProjectDriver.build()
+        case .bazel:
+          return try BazelProjectDriver.build()
         case .generic(let genericProjectConfig):
             return try GenericProjectDriver.build(genericProjectConfig: genericProjectConfig)
         }

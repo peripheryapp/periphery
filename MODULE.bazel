@@ -1,0 +1,11 @@
+module(
+    name = "periphery",
+    version = "0.0.0",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "rules_swift", version = "2.1.1")
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+
+generated = use_extension("//bazel:extensions.bzl", "generated")
+use_repo(generated, "periphery_generated")
