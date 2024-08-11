@@ -1,3 +1,4 @@
+#if os(macOS)
 import Foundation
 import XcodeSupport
 import Indexer
@@ -123,3 +124,4 @@ extension XcodeProjectDriver: ProjectDriver {
         )
     }
 }
+#endif
