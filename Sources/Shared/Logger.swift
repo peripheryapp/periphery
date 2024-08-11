@@ -57,7 +57,10 @@ public final class BaseLogger {
     }
 
     @inlinable
-    func warn(_ text: String) {
+    func warn(_ text: String, newlinePrefix: Bool = false) {
+        if newlinePrefix {
+          log("", output: stderr)
+        }
         let text = colorize("warning: ", .boldYellow) + text
         log(text, output: stderr)
     }
@@ -118,9 +121,9 @@ public final class Logger {
     }
 
     @inlinable
-    public func warn(_ text: String) {
+    public func warn(_ text: String, newlinePrefix: Bool = false) {
         guard !configuration.quiet else { return }
-        baseLogger.warn(text)
+        baseLogger.warn(text, newlinePrefix: newlinePrefix)
     }
 
     @inlinable

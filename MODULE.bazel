@@ -1,0 +1,34 @@
+module(
+    name = "periphery",
+    version = "0.0.0",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "rules_swift", version = "2.1.1")
+bazel_dep(name = "rules_apple", version = "3.8.0")
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "rules_swift_package_manager", version = "0.36.0")
+bazel_dep(name = "apple_support", version = "1.16.0")
+
+generated = use_extension("//bazel:extensions.bzl", "generated")
+use_repo(generated, "periphery_generated")
+
+swift_deps = use_extension(
+    "@rules_swift_package_manager//:extensions.bzl",
+    "swift_deps",
+)
+swift_deps.from_package(
+    resolved = "//:Package.resolved",
+    swift = "//:Package.swift",
+)
+use_repo(
+    swift_deps,
+    periphery_swiftpkg_aexml = "swiftpkg_aexml",
+    periphery_swiftpkg_swift_argument_parser = "swiftpkg_swift_argument_parser",
+    periphery_swiftpkg_swift_filename_matcher = "swiftpkg_swift_filename_matcher",
+    periphery_swiftpkg_swift_indexstore = "swiftpkg_swift_indexstore",
+    periphery_swiftpkg_swift_syntax = "swiftpkg_swift_syntax",
+    periphery_swiftpkg_swift_system = "swiftpkg_swift_system",
+    periphery_swiftpkg_xcodeproj = "swiftpkg_xcodeproj",
+    periphery_swiftpkg_yams = "swiftpkg_yams",
+)

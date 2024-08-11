@@ -1,0 +1,98 @@
+load("@rules_swift//swift:swift.bzl", "swift_binary", "swift_library")
+
+swift_binary(
+    name = "periphery",
+    srcs = glob(["Sources/Frontend/**/*.swift"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        ":Indexer",
+        ":PeripheryKit",
+        ":Shared",
+        ":SourceGraph",
+        ":XcodeSupport",
+        "@swiftpkg_swift_argument_parser//:ArgumentParser",
+        "@swiftpkg_swift_system//:SystemPackage",
+    ],
+)
+
+swift_library(
+    name = "Indexer",
+    srcs = glob(["Sources/Indexer/**/*.swift"]),
+    module_name = "Indexer",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":Shared",
+        ":SourceGraph",
+        ":SyntaxAnalysis",
+        "@swiftpkg_aexml//:AEXML",
+        "@swiftpkg_swift_filename_matcher//:FilenameMatcher",
+        "@swiftpkg_swift_indexstore//:SwiftIndexStore",
+        "@swiftpkg_swift_system//:SystemPackage",
+    ],
+)
+
+swift_library(
+    name = "PeripheryKit",
+    srcs = glob(["Sources/PeripheryKit/**/*.swift"]),
+    module_name = "PeripheryKit",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":Indexer",
+        ":Shared",
+        ":SourceGraph",
+        "@swiftpkg_swift_filename_matcher//:FilenameMatcher",
+        "@swiftpkg_swift_indexstore//:SwiftIndexStore",
+        "@swiftpkg_swift_system//:SystemPackage",
+    ],
+)
+
+swift_library(
+    name = "Shared",
+    srcs = glob(["Sources/Shared/**/*.swift"]),
+    module_name = "Shared",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@swiftpkg_swift_filename_matcher//:FilenameMatcher",
+        "@swiftpkg_swift_system//:SystemPackage",
+        "@swiftpkg_yams//:Yams",
+    ],
+)
+
+swift_library(
+    name = "SourceGraph",
+    srcs = glob(["Sources/SourceGraph/**/*.swift"]),
+    module_name = "SourceGraph",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":Shared",
+        "@swiftpkg_swift_system//:SystemPackage",
+    ],
+)
+
+swift_library(
+    name = "SyntaxAnalysis",
+    srcs = glob(["Sources/SyntaxAnalysis/**/*.swift"]),
+    module_name = "SyntaxAnalysis",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":Shared",
+        ":SourceGraph",
+        "@swiftpkg_swift_syntax//:SwiftParser",
+        "@swiftpkg_swift_system//:SystemPackage",
+    ],
+)
+
+swift_library(
+    name = "XcodeSupport",
+    srcs = glob(["Sources/XcodeSupport/**/*.swift"]),
+    module_name = "XcodeSupport",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":Indexer",
+        ":PeripheryKit",
+        ":Shared",
+        ":SourceGraph",
+        "@swiftpkg_swift_system//:SystemPackage",
+        "@swiftpkg_xcodeproj//:XcodeProj",
+    ],
+)

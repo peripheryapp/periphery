@@ -24,12 +24,14 @@ final class Scan {
             }
         }
 
+        let driver = try setup(project)
+
+        // Output configuration after project setup as the driver may alter it.
         if configuration.verbose {
             let configYaml = try configuration.asYaml()
             logger.debug("[configuration:begin]\n\(configYaml.trimmed)\n[configuration:end]")
         }
 
-        let driver = try setup(project)
         try build(driver)
         try index(driver)
         try analyze()

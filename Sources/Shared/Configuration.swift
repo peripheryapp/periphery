@@ -4,7 +4,7 @@ import SystemPackage
 import Yams
 
 public final class Configuration {
-    public static var defaultConfigurationFile = ".periphery.yml"
+    public static var defaultConfigurationFile = FilePath(".periphery.yml")
     public static let shared = Configuration()
 
     public init(logger: BaseLogger = .shared) {
@@ -125,6 +125,12 @@ public final class Configuration {
     @Setting(key: "generic_project_config", defaultValue: nil, setter: filePathSetter)
     public var genericProjectConfig: FilePath?
 
+    @Setting(key: "bazel", defaultValue: false)
+    public var bazel: Bool
+
+    @Setting(key: "bazel_filter", defaultValue: nil)
+    public var bazelFilter: String?
+
     // Non user facing.
     public var guidedSetup: Bool = false
 
@@ -147,9 +153,9 @@ public final class Configuration {
         return try Yams.dump(object: config)
     }
 
-    public func save() throws {
+    public func save(to path: FilePath = defaultConfigurationFile) throws {
         let data = try asYaml().data(using: .utf8)
-        FileManager.default.createFile(atPath: Self.defaultConfigurationFile, contents: data)
+        FileManager.default.createFile(atPath: path.string, contents: data)
     }
 
     public func load(from path: FilePath?) throws {
@@ -220,7 +226,7 @@ public final class Configuration {
 
     // MARK: - Private
 
-    lazy var settings: [any AbstractSetting] = [$project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat, $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible, $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis, $disableUnusedImportAnalysis, $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline, $genericProjectConfig]
+    lazy var settings: [any AbstractSetting] = [$project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat, $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible, $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis, $disableUnusedImportAnalysis, $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline, $genericProjectConfig, $bazel, $bazelFilter]
 
     private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {
         // TODO: respect filesystem case sensitivity.
@@ -237,7 +243,7 @@ public final class Configuration {
             return path
         }
 
-        return [FilePath(Self.defaultConfigurationFile), FilePath(".periphery.yaml")].first { $0.exists }
+        return [Self.defaultConfigurationFile, FilePath(".periphery.yaml")].first { $0.exists }
     }
 }
 
