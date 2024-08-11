@@ -1,5 +1,4 @@
 import Foundation
-import PeripheryKit
 import Shared
 import SystemPackage
 
