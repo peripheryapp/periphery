@@ -142,7 +142,6 @@ targets.append(contentsOf: [
             .target(name: "ProjectDrivers"),
             .target(name: "TestShared"),
             .target(name: "PeripheryKit"),
-            .target(name: "XcodeSupport")
         ],
         exclude: ["UIKitProject", "SwiftUIProject"]
     )
