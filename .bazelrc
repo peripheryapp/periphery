@@ -1,3 +1,2 @@
 common --noenable_bzlmod
-build --features=swift.index_while_building
 build --swiftcopt=-whole-module-optimization

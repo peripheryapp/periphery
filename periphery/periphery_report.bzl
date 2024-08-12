@@ -4,6 +4,23 @@ load(
     "collect_periphery_info_aspect",
 )
 
+def _force_indexstore_impl(settings, _attr):
+    return {
+        "//command_line_option:features": settings["//command_line_option:features"] + [
+            "swift.index_while_building",
+        ],
+    }
+
+_force_indexstore = transition(
+    implementation = _force_indexstore_impl,
+    inputs = [
+        "//command_line_option:features",
+    ],
+    outputs = [
+        "//command_line_option:features",
+    ],
+)
+
 PeripheryReportInfo = provider(
     doc = "Provides periphery report information for usage by other targets.",
     fields = {
@@ -24,13 +41,26 @@ def _periphery_report_impl(ctx):
         args.add("--report-exclude")
         for glob in ctx.attr.report_exclude_globs:
             args.add(glob)
-    args.add_all("--file-targets-path", periphery_file_inputs.periphery_file_target_mapping_files)
-    args.add_all("--index-store-path", periphery_file_inputs.periphery_indexstore_files, expand_directories = False)
+    config_file_output = ctx.actions.declare_file("periphery_config.yml")
+    ctx.actions.write(
+        output = config_file_output,
+        content = """
+file_targets_path:
+- {file_targets_paths}
+index_store_path:
+- {index_store_paths}
+""".format(
+            file_targets_paths = "\n- ".join([f.path for f in periphery_file_inputs.periphery_file_target_mapping_files]),
+            index_store_paths = "\n- ".join([f.path for f in periphery_file_inputs.periphery_indexstore_files]),
+        ),
+    )
+    args.add_all(["--config", config_file_output.path])
     extension = ctx.attr.format if ctx.attr.format == "json" else "txt"
     output_file = ctx.actions.declare_file(ctx.label.name + "_periphery_report.%s" % extension)
     ctx.actions.run_shell(
         tools = [
             ctx.executable.periphery_tool,
+            config_file_output,
         ] + periphery_file_inputs.runfiles.files.to_list(),
         arguments = [args],
         outputs = [output_file],
@@ -84,6 +114,7 @@ periphery_report = rule(
     doc = "Creates a periphery report for the given targets.",
     attrs = {
         "deps": attr.label_list(
+            cfg = _force_indexstore,
             aspects = [collect_periphery_info_aspect],
             doc = "The targets to generate a periphery report from.",
         ),
@@ -92,10 +123,6 @@ periphery_report = rule(
             doc = "A list of file globs to exclude from the report.",
         ),
         "periphery_additonal_args": attr.string_list(
-            default = [
-                "--retain-objc-accessible",
-                "--retain-assign-only-properties",
-            ],
             doc = "A list additional arguments to pass to the periperhy invocation.",
         ),
         "format": attr.string(
@@ -103,6 +130,10 @@ periphery_report = rule(
             values = [
                 "xcode",
                 "json",
+                "csv",
+                "checkstyle",
+                "codeclimate",
+                "github-actions",
             ],
             doc = "The output format to use.",
         ),
@@ -110,6 +141,9 @@ periphery_report = rule(
             doc = "The periphery tool to use.",
             executable = True,
             cfg = "exec",
+        ),
+        "_allowlist_function_transition": attr.label(
+            default = "@bazel_tools//tools/allowlists/function_transition_allowlist",
         ),
     },
 )
