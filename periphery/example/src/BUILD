@@ -8,5 +8,8 @@ swift_library(
     srcs = [
         "periphery_test.swift",
     ],
+    data = [
+        "Info.plist",
+    ],
     visibility = ["//periphery/example:__pkg__"],
 )

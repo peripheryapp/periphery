@@ -26,3 +26,5 @@ public class FixtureClass85 {
         delegate?.protocolMethod()
     }
 }
+
+public class FixturePrincipleClass {}
