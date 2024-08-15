@@ -294,8 +294,8 @@ protocol AbstractSetting {
 }
 
 private let filePathSetter: (Any) -> FilePath? = { value in
-    if let value = value as? String {
-        return FilePath(value)
+    if let value = value as? FilePath {
+        return value
     }
 
     return nil
