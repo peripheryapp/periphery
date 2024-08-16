@@ -34,7 +34,7 @@ public final class Project {
             #if canImport(XcodeSupport)
             return try XcodeProjectDriver.build(projectPath: projectPath)
             #else
-            fatalError("Xcode projects are not supported on this platform.")
+            throw PeripheryError.xcodeProjectsAreUnsupported
             #endif
         case .spm:
             return try SPMProjectDriver.build()

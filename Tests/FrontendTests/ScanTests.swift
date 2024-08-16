@@ -21,7 +21,13 @@ final class ScanTests: XCTestCase {
                 "--schemes", "DefaultiOSProject"
             ]
         )
-        try command.run()
+        do {
+            try command.run()
+        } catch PeripheryError.xcodeProjectsAreUnsupported {
+            #if os(Linux) 
+            return
+            #endif
+        }
         
         XCTAssertTrue(LoggerStorage.collectedLogs.contains(
             [
