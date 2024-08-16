@@ -8,7 +8,7 @@ public struct VersionCommand: FrontendCommand {
         abstract: "Display the version of Periphery"
     )
 
-  public init() { }
+    public init() { }
 
     public func run() throws {
         print(PeripheryVersion)
