@@ -14,10 +14,10 @@ final class ScanTests: XCTestCase {
         file.append(FilePath.Component("fixtures"))
         file.append(FilePath.Component("DefaultiOSProject"))
         file.append(FilePath.Component("DefaultiOSProject.xcodeproj"))
-        
+
         let command = try ScanCommand.parse(
             [
-                "--project", "\(file.url.path())",
+                "--project", "\(file.string)",
                 "--schemes", "DefaultiOSProject"
             ]
         )
