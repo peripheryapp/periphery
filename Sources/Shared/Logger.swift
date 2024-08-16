@@ -4,6 +4,11 @@ import Foundation
 import os
 #endif
 
+public class LoggerStorage {
+  public static var collectedLogs: [String] = []
+  
+}
+
 public enum ANSIColor: String {
     case bold = "\u{001B}[0;1m"
     case red = "\u{001B}[0;31m"
@@ -72,7 +77,10 @@ public final class BaseLogger {
 
     @inlinable
     func log(_ line: String, output: UnsafeMutablePointer<FILE>) {
-        _ = outputQueue.sync { fputs(line + "\n", output) }
+      outputQueue.sync {
+          fputs(line + "\n", output)
+          LoggerStorage.collectedLogs.append(line)
+        }
     }
 }
 

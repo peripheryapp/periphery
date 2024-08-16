@@ -1,14 +1,17 @@
 import ArgumentParser
+import Frontend
 import Foundation
 import Shared
 
-struct CheckUpdateCommand: FrontendCommand {
-    static let configuration = CommandConfiguration(
+public struct CheckUpdateCommand: FrontendCommand {
+    public static let configuration = CommandConfiguration(
         commandName: "check-update",
         abstract: "Check for available update"
     )
+  
+  public init() { }
 
-    func run() throws {
+    public func run() throws {
         let logger = Logger()
         let checker = UpdateChecker()
         DispatchQueue.global().async { checker.run() }

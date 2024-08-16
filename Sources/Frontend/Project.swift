@@ -7,7 +7,7 @@ import SystemPackage
 import XcodeSupport
 #endif
 
-final class Project {
+public final class Project {
     static func identify() throws -> Self {
         let configuration = Configuration.shared
 
