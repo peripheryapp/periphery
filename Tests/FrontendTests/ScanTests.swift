@@ -1,5 +1,4 @@
 import XCTest
-import PathKit
 import SystemPackage
 import ArgumentParser
 import Commands
