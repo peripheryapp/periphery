@@ -6,6 +6,7 @@ class SPMProjectTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
+        configuration.reset()
         build(projectPath: SPMProjectPath)
         index()
     }
