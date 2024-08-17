@@ -41,28 +41,30 @@ final class SwiftIndexer: Indexer {
             )
         }
 
-        let phaseOneLogger = logger.contextualized(with: "phase:one")
         let phaseOneInterval = logger.beginInterval("index:swift:phase:one")
 
         try JobPool(jobs: jobs).forEach { job in
-            let elapsed = try Benchmark.measure {
+            if self.configuration.verbose {
+                let phaseOneLogger = self.logger.contextualized(with: "phase:one")
+                let elapsed = try Benchmark.measure { try job.phaseOne() }
+                self.debug(logger: phaseOneLogger, sourceFile: job.sourceFile, elapsed: elapsed)
+            } else {
                 try job.phaseOne()
             }
-
-            self.debug(logger: phaseOneLogger, sourceFile: job.sourceFile, elapsed: elapsed)
         }
 
         logger.endInterval(phaseOneInterval)
 
-        let phaseTwoLogger = logger.contextualized(with: "phase:two")
         let phaseTwoInterval = logger.beginInterval("index:swift:phase:two")
 
         try JobPool(jobs: jobs).forEach { job in
-            let elapsed = try Benchmark.measure {
+            if self.configuration.verbose {
+                let phaseTwoLogger = self.logger.contextualized(with: "phase:two")
+                let elapsed = try Benchmark.measure { try job.phaseTwo() }
+                self.debug(logger: phaseTwoLogger, sourceFile: job.sourceFile, elapsed: elapsed)
+            } else {
                 try job.phaseTwo()
             }
-
-            self.debug(logger: phaseTwoLogger, sourceFile: job.sourceFile, elapsed: elapsed)
         }
 
         logger.endInterval(phaseTwoInterval)
@@ -419,7 +421,9 @@ final class SwiftIndexer: Indexer {
 
         private func identifyUnusedParameters(using syntaxVisitor: MultiplexingSyntaxVisitor) {
             let functionDecls = declarations.filter { $0.kind.isFunctionKind }
-            let functionDeclsByLocation = functionDecls.filter { $0.kind.isFunctionKind }.map { ($0.location, $0) }.reduce(into: [Location: Declaration]()) { $0[$1.0] = $1.1 }
+            let functionDeclsByLocation = functionDecls.reduce(into: [Location: Declaration]()) {
+                $0[$1.location] = $1
+            }
 
             let analyzer = UnusedParameterAnalyzer()
             let paramsByFunction = analyzer.analyze(
