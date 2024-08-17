@@ -1,6 +1,6 @@
 def _generated_repo_impl(repository_ctx):
     repository_ctx.file(
-        "BUILD",
+        "BUILD.bazel",
         content = """
 package_group(
     name = "package_group",
@@ -11,8 +11,8 @@ package_group(
 
     # TODO: Scope by project?
     repository_ctx.symlink(
-        "/var/tmp/periphery_bazel/BUILD",
-        "rule/BUILD",
+        "/var/tmp/periphery_bazel/BUILD.bazel",
+        "rule/BUILD.bazel",
     )
 
 generated_repo = repository_rule(

@@ -6,6 +6,30 @@ module(
 
 bazel_dep(name = "rules_swift", version = "2.1.1")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "rules_swift_package_manager", version = "0.36.0")
+bazel_dep(name = "gazelle", version = "0.38.0", repo_name = "bazel_gazelle")
 
 generated = use_extension("//bazel:extensions.bzl", "generated")
 use_repo(generated, "periphery_generated")
+
+swift_deps = use_extension(
+    "@rules_swift_package_manager//:extensions.bzl",
+    "swift_deps",
+)
+swift_deps.from_package(
+    declare_swift_deps_info = True,
+    resolved = "//:Package.resolved",
+    swift = "//:Package.swift",
+)
+use_repo(
+    swift_deps,
+    "swift_deps_info",
+    "swiftpkg_aexml",
+    "swiftpkg_swift_argument_parser",
+    "swiftpkg_swift_filename_matcher",
+    "swiftpkg_swift_indexstore",
+    "swiftpkg_swift_syntax",
+    "swiftpkg_swift_system",
+    "swiftpkg_xcodeproj",
+    "swiftpkg_yams",
+)

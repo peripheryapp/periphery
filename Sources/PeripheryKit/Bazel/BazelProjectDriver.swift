@@ -54,7 +54,7 @@ public class BazelProjectDriver: ProjectDriver {
         try configuration.save(to: configPath)
         contextLogger.debug("Configuration written to \(configPath)")
 
-        let buildPath = outputPath.appending("BUILD")
+        let buildPath = outputPath.appending("BUILD.bazel")
         let deps = try queryTargets().joined(separator: ",\n")
         let buildFileContents = """
         load("@periphery//bazel/internal:scan.bzl", "scan")

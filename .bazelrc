@@ -1,0 +1,4 @@
+common --enable_bzlmod
+
+build --apple_platform_type=macos
+build --repo_env=CC=clang
