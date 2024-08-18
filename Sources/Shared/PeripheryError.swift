@@ -5,6 +5,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case shellCommandFailed(cmd: String, args: [String], status: Int32, output: String)
     case shellOutputEncodingFailed(cmd: String, args: [String], encoding: String.Encoding)
     case usageError(String)
+    case xcodeProjectsAreUnsupported
     case underlyingError(Error)
     case invalidScheme(name: String, project: String)
     case sourceGraphIntegrityError(message: String)
@@ -55,6 +56,8 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             return "JSON deserialization failed: \(describe(error))\nJSON:\n\(json)"
         case let .indexStoreNotFound(derivedDataPath):
             return "Failed to find index datastore at path: \(derivedDataPath)"
+        case .xcodeProjectsAreUnsupported:
+            return "Xcode projects are not supported on this platform"
         }
     }
 

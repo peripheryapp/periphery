@@ -2,9 +2,10 @@ import ArgumentParser
 import Foundation
 import Shared
 import SystemPackage
+import Frontend
 
-struct ScanCommand: FrontendCommand {
-    static let configuration = CommandConfiguration(
+public struct ScanCommand: FrontendCommand {
+    public static let configuration = CommandConfiguration(
         commandName: "scan",
         abstract: "Scan for unused code"
     )
@@ -127,8 +128,10 @@ struct ScanCommand: FrontendCommand {
     var genericProjectConfig: FilePath?
 
     private static let defaultConfiguration = Configuration()
+  
+  public init() { }
 
-    func run() throws {
+    public func run() throws {
         let scanBehavior = ScanBehavior()
 
         if !setup {

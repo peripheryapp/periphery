@@ -3,16 +3,16 @@ import PeripheryKit
 import Shared
 import SystemPackage
 
-final class ScanBehavior {
+public final class ScanBehavior {
     private let configuration: Configuration
     private let logger: Logger
 
-    required init(configuration: Configuration = .shared, logger: Logger = .init()) {
+    public required init(configuration: Configuration = .shared, logger: Logger = .init()) {
         self.configuration = configuration
         self.logger = logger
     }
 
-    func setup(_ configPath: FilePath?) -> Result<(), PeripheryError> {
+    public func setup(_ configPath: FilePath?) -> Result<(), PeripheryError> {
         do {
             try configuration.load(from: configPath)
         } catch let error as PeripheryError {
@@ -24,7 +24,7 @@ final class ScanBehavior {
         return .success(())
     }
 
-    func main(_ block: (Project) throws -> [ScanResult]) -> Result<(), PeripheryError> {
+    public func main(_ block: (Project) throws -> [ScanResult]) -> Result<(), PeripheryError> {
         logger.contextualized(with: "version").debug(PeripheryVersion)
 
         let project: Project

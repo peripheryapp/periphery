@@ -5,7 +5,8 @@ import SystemPackage
 final class CrossModuleRetentionTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
-
+        
+        configuration.reset()
         build(projectPath: FixturesProjectPath)
         index()
     }

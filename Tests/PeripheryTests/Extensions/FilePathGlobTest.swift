@@ -1,4 +1,3 @@
-import Shared
 import SystemPackage
 import XCTest
 

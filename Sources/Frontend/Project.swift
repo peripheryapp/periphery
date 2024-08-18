@@ -7,7 +7,7 @@ import SystemPackage
 import XcodeSupport
 #endif
 
-final class Project {
+public final class Project {
     static func identify() throws -> Self {
         let configuration = Configuration.shared
 
@@ -34,7 +34,7 @@ final class Project {
             #if canImport(XcodeSupport)
             return try XcodeProjectDriver.build(projectPath: projectPath)
             #else
-            fatalError("Xcode projects are not supported on this platform.")
+            throw PeripheryError.xcodeProjectsAreUnsupported
             #endif
         case .spm:
             return try SPMProjectDriver.build()

@@ -5,7 +5,7 @@ import Shared
 import FoundationNetworking
 #endif
 
-final class UpdateChecker {
+public final class UpdateChecker {
     private let logger: Logger
     private let debugLogger: ContextualLogger
     private let configuration: Configuration
@@ -15,7 +15,7 @@ final class UpdateChecker {
     private let semaphore: DispatchSemaphore
     private var error: Error?
 
-    required init(logger: Logger = .init(), configuration: Configuration = .shared) {
+    public required init(logger: Logger = .init(), configuration: Configuration = .shared) {
         self.logger = logger
         self.debugLogger = logger.contextualized(with: "update-check")
         self.configuration = configuration
@@ -29,7 +29,7 @@ final class UpdateChecker {
         urlSession.invalidateAndCancel()
     }
 
-    func run() {
+    public func run() {
         // We only perform the update check with xcode format because it may interfere with
         // parsing json and csv.
         guard !configuration.disableUpdateCheck,
@@ -92,7 +92,7 @@ final class UpdateChecker {
         logger.info("To disable update checks pass the \(boldOption) option to the \(boldScan) command.")
     }
 
-    func wait() -> Result<String, PeripheryError> {
+    public func wait() -> Result<String, PeripheryError> {
         let waitResult = semaphore.wait(timeout: .now() + 60)
 
         if let error {

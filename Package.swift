@@ -33,10 +33,24 @@ frontendDependencies.append(.target(name: "XcodeSupport"))
 #endif
 
 var targets: [PackageDescription.Target] = [
-    .executableTarget(
+  .executableTarget(
+    name: "PeripheryMain",
+    dependencies: [
+      .target(name: "Commands"),
+      .target(name: "Shared"),
+    ]
+  ),
+    .target(
         name: "Frontend",
         dependencies: frontendDependencies
     ),
+    .target(name: "Commands",
+           dependencies: [
+            .product(name: "SystemPackage", package: "swift-system"),
+            .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            .target(name: "Shared"),
+            .target(name: "Frontend")
+           ]),
     .target(
         name: "PeripheryKit",
         dependencies: [
@@ -97,6 +111,13 @@ var targets: [PackageDescription.Target] = [
         ]
     ),
     .testTarget(
+      name: "FrontendTests",
+      dependencies: [
+        .target(name: "Commands")
+      ],
+      exclude: ["DefaultiOSProject"]
+    ),
+    .testTarget(
         name: "SPMTests",
         dependencies: [
             .target(name: "TestShared"),
@@ -141,7 +162,7 @@ let package = Package(
     name: "Periphery",
     platforms: [.macOS(.v13)],
     products: [
-        .executable(name: "periphery", targets: ["Frontend"]),
+        .executable(name: "periphery", targets: ["PeripheryMain"]),
         .library(name: "PeripheryKit", targets: ["PeripheryKit"])
     ],
     dependencies: dependencies,
