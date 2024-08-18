@@ -4,42 +4,20 @@ import ArgumentParser
 import Commands
 import Shared
 
-final class ScanTests: XCTestCase {
-    fileprivate let packageRootPath = URL(fileURLWithPath: #file).pathComponents
-        .prefix(while: { $0 != "Tests" }).joined(separator: "/").dropFirst()
-    
+final class ScanTests: AcceptanceTestCase {
     func testScanWorkspaceWithPath() async throws {
-        var file = FilePath(String(packageRootPath))
-        
-        file.append(FilePath.Component("fixtures"))
-        file.append(FilePath.Component("DefaultiOSProject"))
-        file.append(FilePath.Component("DefaultiOSProject.xcodeproj"))
+        let project = setupFixture(fixture: .defaultiOSProject)
 
-        let command = try ScanCommand.parse(
-            [
-                "--project", "\(file.string)",
-                "--schemes", "DefaultiOSProject"
-            ]
-        )
         do {
-            try command.run()
+            try run(command: ScanCommand.self, arguments: "--project", "\(project)",
+                "--schemes", "DefaultiOSProject")
         } catch PeripheryError.xcodeProjectsAreUnsupported {
             #if os(Linux) 
             return
             #endif
         }
         
-        XCTAssertTrue(LoggerStorage.collectedLogs.contains(
-            [
-                "* Inspecting project...",
-                "* Building DefaultiOSProject...",
-                "* Indexing...",
-                "* Analyzing...",
-                "",
-                "* No unused code detected."
-            ]
-        )
-        )
+        XCTOutputDefaultOutputWithoutUnusedCode(scheme: "DefaultiOSProject")
     }
 }
 
