@@ -2,7 +2,8 @@ import Foundation
 import Shared
 import SystemPackage
 import XcodeProj
-final class XcodeProject: XcodeProjectlike {
+
+public final class XcodeProject: XcodeProjectlike {
     private static var cache: [FilePath: XcodeProject] = [:]
 
     static func build(path: FilePath, referencedBy refPath: FilePath) throws -> XcodeProject? {
@@ -23,17 +24,18 @@ final class XcodeProject: XcodeProjectlike {
         return try self.init(path: path)
     }
 
-    let type: String = "project"
-    let path: FilePath
-    let sourceRoot: FilePath
-    let xcodeProject: XcodeProj
-    let name: String
+    public let type: String = "project"
+    public let path: FilePath
+    public let sourceRoot: FilePath
+    public let name: String
+    public private(set) var targets: Set<XcodeTarget> = []
 
+    let xcodeProject: XcodeProj
+  
     private let xcodebuild: Xcodebuild
 
-    private(set) var targets: Set<XcodeTarget> = []
 
-    required init(path: FilePath, xcodebuild: Xcodebuild = .init(), logger: Logger = .init()) throws {
+    public required init(path: FilePath, xcodebuild: Xcodebuild = .init(), logger: Logger = .init()) throws {
         logger.contextualized(with: "xcode:project").debug("Loading \(path)")
 
         self.path = path
@@ -65,19 +67,19 @@ final class XcodeProject: XcodeProjectlike {
             .union(subProjects.flatMapSet { $0.targets })
     }
 
-    func schemes(additionalArguments: [String]) throws -> Set<String> {
+    public func schemes(additionalArguments: [String]) throws -> Set<String> {
         try xcodebuild.schemes(project: self, additionalArguments: additionalArguments)
     }
 }
 
 extension XcodeProject: Hashable {
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(path.lexicallyNormalized().string)
     }
 }
 
 extension XcodeProject: Equatable {
-    static func == (lhs: XcodeProject, rhs: XcodeProject) -> Bool {
+    public static func == (lhs: XcodeProject, rhs: XcodeProject) -> Bool {
         lhs.path == rhs.path
     }
 }

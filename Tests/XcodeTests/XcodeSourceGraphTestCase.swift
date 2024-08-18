@@ -1,8 +1,8 @@
 import Foundation
 import Shared
+import ProjectDrivers
 import SystemPackage
 @testable import TestShared
-import XcodeSupport
 
 class XcodeSourceGraphTestCase: SourceGraphTestCase {
     static func build(projectPath: FilePath) {

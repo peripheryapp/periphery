@@ -20,22 +20,28 @@ dependencies.append(
 )
 #endif
 
-var frontendDependencies: [PackageDescription.Target.Dependency] = [
-    .target(name: "Shared"),
-    .target(name: "SourceGraph"),
-    .target(name: "PeripheryKit"),
-    .product(name: "ArgumentParser", package: "swift-argument-parser"),
-    .product(name: "FilenameMatcher", package: "swift-filename-matcher")
+var projectDriverDependencies: [PackageDescription.Target.Dependency] = [
+  .target(name: "SourceGraph"),
+  .target(name: "Shared"),
+  .target(name: "Indexer"),
 ]
 
 #if os(macOS)
-frontendDependencies.append(.target(name: "XcodeSupport"))
+projectDriverDependencies.append(.target(name: "XcodeSupport"))
 #endif
+
 
 var targets: [PackageDescription.Target] = [
     .executableTarget(
         name: "Frontend",
-        dependencies: frontendDependencies
+        dependencies: [
+          .target(name: "Shared"),
+          .target(name: "SourceGraph"),
+          .target(name: "PeripheryKit"),
+          .target(name: "ProjectDrivers"),
+          .product(name: "ArgumentParser", package: "swift-argument-parser"),
+          .product(name: "FilenameMatcher", package: "swift-filename-matcher")
+      ]
     ),
     .target(
         name: "PeripheryKit",
@@ -58,6 +64,10 @@ var targets: [PackageDescription.Target] = [
             .target(name: "Shared"),
             .product(name: "SwiftIndexStore", package: "swift-indexstore")
         ]
+    ),
+    .target(
+      name: "ProjectDrivers",
+      dependencies: projectDriverDependencies
     ),
     .target(
         name: "SyntaxAnalysis",
@@ -85,7 +95,8 @@ var targets: [PackageDescription.Target] = [
     .target(
         name: "TestShared",
         dependencies: [
-            .target(name: "PeripheryKit")
+            .target(name: "PeripheryKit"),
+            .target(name: "ProjectDrivers")
         ],
         path: "Tests/Shared"
     ),
@@ -128,9 +139,9 @@ targets.append(contentsOf: [
     .testTarget(
         name: "XcodeTests",
         dependencies: [
+            .target(name: "ProjectDrivers"),
             .target(name: "TestShared"),
             .target(name: "PeripheryKit"),
-            .target(name: "XcodeSupport")
         ],
         exclude: ["UIKitProject", "SwiftUIProject"]
     )

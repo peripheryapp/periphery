@@ -1,11 +1,7 @@
 import Foundation
-import PeripheryKit
+import ProjectDrivers
 import Shared
 import SystemPackage
-
-#if canImport(XcodeSupport)
-import XcodeSupport
-#endif
 
 final class Project {
     static func identify() throws -> Self {
