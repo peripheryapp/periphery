@@ -114,7 +114,8 @@ var targets: [PackageDescription.Target] = [
       name: "FrontendTests",
       dependencies: [
         .target(name: "Commands")
-      ]
+      ],
+      exclude: ["DefaultiOSProject"]
     ),
     .testTarget(
         name: "SPMTests",
