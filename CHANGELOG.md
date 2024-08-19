@@ -2,7 +2,7 @@
 
 ##### Breaking
 
-- None.
+- Support for installing via CocoaPods has been removed.
 
 ##### Enhancements
 

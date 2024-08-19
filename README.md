@@ -58,16 +58,6 @@ brew install peripheryapp/periphery/periphery
 mint install peripheryapp/periphery
 ```
 
-### [CocoaPods](https://cocoapods.org/)
-
-Add the following to your Podfile:
-
-```ruby
-pod 'Periphery'
-```
-
-Now run `pod install`, the Periphery executable will be downloaded and placed at `Pods/Periphery/periphery`.
-
 ## How To Use
 
 ### The `scan` Command

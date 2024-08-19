@@ -39,7 +39,6 @@ rm -rf .release
 mkdir .release
 
 cat scripts/Version.swift.template | sed s/__VERSION__/${version}/ > Sources/Frontend/Version.swift
-cat scripts/Periphery.podspec.template | sed s/__VERSION__/${version}/ > Periphery.podspec
 cat scripts/artifactbundle_info.json.template | sed s/__VERSION__/${version}/ > .release/info.json
 
 echo -e "\nUpdate CHANGELOG.md"
@@ -105,7 +104,3 @@ git add Casks/periphery.rb
 git commit -m "${version}"
 git push origin master
 cd ../periphery
-
-# CocoaPods
-bundle install --quiet
-bundle exec pod trunk push --skip-tests --skip-import-validation --allow-warnings Periphery.podspec
