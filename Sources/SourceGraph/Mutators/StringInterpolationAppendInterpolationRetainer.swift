@@ -7,19 +7,18 @@ final class StringInterpolationAppendInterpolationRetainer: SourceGraphMutator {
     // swiftlint:disable:previous type_name
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
     }
 
     func mutate() {
-        graph.declarations(ofKind: .extensionStruct)
-            .forEach {
-                $0.declarations.filter {
-                    $0.kind == .functionMethodInstance &&
-                        ($0.name ?? "").hasPrefix("appendInterpolation(")
-                }.forEach {
-                    graph.markRetained($0)
-                }
+        for declaration in graph.declarations(ofKind: .extensionStruct) {
+            declaration.declarations.filter {
+                $0.kind == .functionMethodInstance &&
+                    ($0.name ?? "").hasPrefix("appendInterpolation(")
+            }.forEach {
+                graph.markRetained($0)
             }
+        }
     }
 }

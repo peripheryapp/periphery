@@ -21,11 +21,11 @@ public extension FilePath {
     }
 }
 
- /// Finds files on the file system using Bash v4 style pattern matching.
- ///    - A double globstar (**) causes recursive matching in subdirectories.
- ///    - Files from the root directory of the globstar are also included.
- ///      For example, with the pattern "dir/**/*.ext" the file "dir/file.ext" is also included.
- ///    - When the pattern ends with a trailing slash, only directories are matched.
+/// Finds files on the file system using Bash v4 style pattern matching.
+///    - A double globstar (**) causes recursive matching in subdirectories.
+///    - Files from the root directory of the globstar are also included.
+///      For example, with the pattern "dir/**/*.ext" the file "dir/file.ext" is also included.
+///    - When the pattern ends with a trailing slash, only directories are matched.
 private class Glob {
     private let excludedDirectories: [String]
     private let logger: Logger
@@ -142,16 +142,16 @@ private class Glob {
     }
 
     private func populateFiles(gt: glob_t, includeFiles: Bool) {
-#if os(macOS)
-        let matches = Int(gt.gl_matchc)
-#else
-        let matches = Int(gt.gl_pathc)
-#endif
-        for i in 0..<matches {
+        #if os(macOS)
+            let matches = Int(gt.gl_matchc)
+        #else
+            let matches = Int(gt.gl_pathc)
+        #endif
+        for i in 0 ..< matches {
             if let path = String(validatingUTF8: gt.gl_pathv[i]!) {
                 if !includeFiles {
-                    let isDirectory = self.isDirectory(path: path)
-                    if !includeFiles && !isDirectory {
+                    let isDirectory = isDirectory(path: path)
+                    if !includeFiles, !isDirectory {
                         continue
                     }
                 }

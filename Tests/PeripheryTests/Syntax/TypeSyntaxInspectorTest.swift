@@ -39,7 +39,7 @@ final class TypeSyntaxInspectorTest: XCTestCase {
         XCTAssertEqual(memberType?.type, "Swift.String")
         XCTAssertEqual(memberType?.locations, [
             fixtureLocation(line: 5, column: 17),
-            fixtureLocation(line: 5, column: 23)
+            fixtureLocation(line: 5, column: 23),
         ])
     }
 
@@ -48,7 +48,7 @@ final class TypeSyntaxInspectorTest: XCTestCase {
         XCTAssertEqual(tupleType?.type, "(String, Int)")
         XCTAssertEqual(tupleType?.locations, [
             fixtureLocation(line: 6, column: 17),
-            fixtureLocation(line: 6, column: 25)
+            fixtureLocation(line: 6, column: 25),
         ])
     }
 
@@ -57,7 +57,7 @@ final class TypeSyntaxInspectorTest: XCTestCase {
         XCTAssertEqual(result?.type, "[String: Int]")
         XCTAssertEqual(result?.locations, [
             fixtureLocation(line: 7, column: 22),
-            fixtureLocation(line: 7, column: 30)
+            fixtureLocation(line: 7, column: 30),
         ])
     }
 
@@ -78,7 +78,7 @@ final class TypeSyntaxInspectorTest: XCTestCase {
         XCTAssertEqual(functionClosureReturnType?.type, "(Int) -> String")
         XCTAssertEqual(functionClosureReturnType?.locations, [
             fixtureLocation(line: 10, column: 38),
-            fixtureLocation(line: 10, column: 46)
+            fixtureLocation(line: 10, column: 46),
         ])
     }
 
@@ -96,14 +96,14 @@ final class TypeSyntaxInspectorTest: XCTestCase {
         let genericFunctionArgument = results[fixtureLocation(line: 15, column: 58)]
         XCTAssertEqual(genericFunctionArgument?.type, "T.Type")
         XCTAssertEqual(genericFunctionArgument?.locations, [
-            fixtureLocation(line: 15, column: 58)
+            fixtureLocation(line: 15, column: 58),
         ])
 
         let genericParamClause = results[fixtureLocation(line: 15, column: 25)]
         XCTAssertEqual(genericParamClause?.type, "StringProtocol & AnyObject")
         XCTAssertEqual(genericParamClause?.locations, [
             fixtureLocation(line: 15, column: 25),
-            fixtureLocation(line: 15, column: 42)
+            fixtureLocation(line: 15, column: 42),
         ])
 
         let genericWhereClause = results[fixtureLocation(line: 15, column: 75)]
@@ -120,7 +120,7 @@ final class TypeSyntaxInspectorTest: XCTestCase {
     // MARK: - Private
 
     private var fixturePath: SourceFile {
-        let path = FixturesProjectPath.appending( "Sources/TypeSyntaxInspectorFixtures/TypeSyntaxInspectorFixture.swift")
+        let path = FixturesProjectPath.appending("Sources/TypeSyntaxInspectorFixtures/TypeSyntaxInspectorFixture.swift")
         return SourceFile(path: path, modules: ["TypeSyntaxInspectorFixtures"])
     }
 
@@ -141,10 +141,10 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
 
     init(file: SourceFile) throws {
         let source = try String(contentsOf: file.path.url)
-        self.syntax = Parser.parse(source: source)
-        self.locationConverter = .init(fileName: file.path.string, tree: syntax)
-        self.sourceLocationBuilder = .init(file: file, locationConverter: locationConverter)
-        self.typeSyntaxInspector = .init(sourceLocationBuilder: sourceLocationBuilder)
+        syntax = Parser.parse(source: source)
+        locationConverter = .init(fileName: file.path.string, tree: syntax)
+        sourceLocationBuilder = .init(file: file, locationConverter: locationConverter)
+        typeSyntaxInspector = .init(sourceLocationBuilder: sourceLocationBuilder)
         super.init(viewMode: .sourceAccurate)
     }
 

@@ -7,7 +7,7 @@ final class XCTestRetainer: SourceGraphMutator {
 
     required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
-        self.testCaseClassNames = Set(configuration.externalTestCaseClasses + ["XCTestCase"])
+        testCaseClassNames = Set(configuration.externalTestCaseClasses + ["XCTestCase"])
     }
 
     func mutate() {

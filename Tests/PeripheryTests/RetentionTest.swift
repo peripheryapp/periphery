@@ -2,6 +2,7 @@ import Shared
 import SystemPackage
 @testable import TestShared
 import XCTest
+
 final class RetentionTest: FixtureSourceGraphTestCase {
     let performKnownFailures = false
 
@@ -136,9 +137,9 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.protocol("FixtureProtocol114"))
             assertRedundantProtocol("FixtureProtocol114",
                                     implementedBy:
-                                        .class("FixtureClass114"), // swiftlint:disable vertical_parameter_alignment_on_call
-                                        .class("FixtureClass115"),
-                                        .struct("FixtureStruct116")) // swiftlint:enable vertical_parameter_alignment_on_call
+                                    .class("FixtureClass114"), // swiftlint:disable vertical_parameter_alignment_on_call
+                                    .class("FixtureClass115"),
+                                    .struct("FixtureStruct116")) // swiftlint:enable vertical_parameter_alignment_on_call
         }
     }
 
@@ -1180,7 +1181,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 self.assertNotAssignOnlyProperty(.varInstance("retainedMultipleBindingPropertyA"))
 
                 #if canImport(Combine)
-                self.assertReferenced(.varInstance("retainedAnyCancellable"))
+                    self.assertReferenced(.varInstance("retainedAnyCancellable"))
                 #endif
 
                 self.assertAssignOnlyProperty(.varInstance("notRetainedSimpleProperty"))

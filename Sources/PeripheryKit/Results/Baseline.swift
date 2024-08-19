@@ -6,8 +6,8 @@ public enum Baseline: Codable {
 
     public var usrs: Set<String> {
         switch self {
-        case .v1(let usrs):
-            return Set(usrs)
+        case let .v1(usrs):
+            Set(usrs)
         }
     }
 }

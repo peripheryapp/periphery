@@ -1,7 +1,7 @@
 import Foundation
-import ProjectDrivers
 import Indexer
 import PeripheryKit
+import ProjectDrivers
 import Shared
 import SourceGraph
 

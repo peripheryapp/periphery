@@ -15,14 +15,14 @@ public extension Sequence {
     @inlinable
     func flatMapSet<T>(_ transform: (Element) throws -> Set<T>) rethrows -> Set<T> {
         try reduce(into: .init()) { result, element in
-            result.formUnion(try transform(element))
+            try result.formUnion(transform(element))
         }
     }
 
     @inlinable
     func mapSet<T>(_ transform: (Element) throws -> T) rethrows -> Set<T> {
         try reduce(into: .init()) { result, element in
-            result.insert(try transform(element))
+            try result.insert(transform(element))
         }
     }
 

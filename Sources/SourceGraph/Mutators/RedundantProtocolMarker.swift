@@ -5,7 +5,7 @@ import Shared
 final class RedundantProtocolMarker: SourceGraphMutator {
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
     }
 
@@ -34,7 +34,7 @@ final class RedundantProtocolMarker: SourceGraphMutator {
                 .lazy
                 .filter { $0.kind == .extensionProtocol }
                 .compactMap { self.graph.explicitDeclaration(withUsr: $0.usr) }
-                .flatMap { $0.declarations }
+                .flatMap(\.declarations)
                 .allSatisfy { unusedDeclarations.contains($0) }
 
             guard areAllExtensionsMembersUnused else { continue }

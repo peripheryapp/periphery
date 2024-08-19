@@ -63,7 +63,7 @@ class ShellMock: Shell {
         self.init(environment: ProcessInfo.processInfo.environment, logger: Logger())
     }
 
-    override func exec(_ args: [String], stderr: Bool = true) throws -> String {
+    override func exec(_: [String], stderr _: Bool = true) throws -> String {
         output
     }
 }
@@ -72,7 +72,7 @@ private let XcodebuildListOutputs = [
     XcodebuildListOutputA,
     XcodebuildListOutputB,
     XcodebuildListOutputC,
-    XcodebuildListOutputD
+    XcodebuildListOutputD,
 ]
 
 private let XcodebuildListOutputA = """

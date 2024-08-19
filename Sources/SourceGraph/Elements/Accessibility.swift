@@ -1,9 +1,9 @@
 import Foundation
 
 public enum Accessibility: String {
-    case `public` = "public"
-    case `internal` = "internal"
-    case `private` = "private"
-    case `fileprivate` = "fileprivate"
-    case `open` = "open"
+    case `public`
+    case `internal`
+    case `private`
+    case `fileprivate`
+    case open
 }

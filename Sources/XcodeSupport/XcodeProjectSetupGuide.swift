@@ -12,7 +12,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
             }
         let projectPaths = FilePath.glob("**/*.xcodeproj")
 
-        if workspacePaths.isEmpty && projectPaths.isEmpty {
+        if workspacePaths.isEmpty, projectPaths.isEmpty {
             return nil
         }
 

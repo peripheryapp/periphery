@@ -49,7 +49,7 @@ public final class SourceGraphMutatorRunner {
         AssignOnlyPropertyReferenceEliminator.self,
 
         UsedDeclarationMarker.self,
-        RedundantProtocolMarker.self
+        RedundantProtocolMarker.self,
     ]
 
     private let graph: SourceGraph
@@ -67,7 +67,7 @@ public final class SourceGraphMutatorRunner {
             let elapsed = try Benchmark.measure {
                 let interval = logger.beginInterval("mutator:run")
                 try mutator.init(graph: graph, configuration: configuration).mutate()
-              logger.endInterval(interval)
+                logger.endInterval(interval)
             }
             logger.debug("\(mutator) (\(elapsed)s)")
         }

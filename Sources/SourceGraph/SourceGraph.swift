@@ -254,7 +254,7 @@ public final class SourceGraph {
         // Recursively check if the module is exported transitively.
         return exportingModules.contains { nestedExportingModule in
             isModuleUnsafe(nestedExportingModule, exportedBy: exportingModule) &&
-            isModuleUnsafe(module, exportedBy: nestedExportingModule)
+                isModuleUnsafe(module, exportedBy: nestedExportingModule)
         }
     }
 
@@ -338,10 +338,10 @@ public final class SourceGraph {
         let baseDecl = references(to: decl)
             .filter {
                 $0.isRelated &&
-                $0.kind == decl.kind &&
-                $0.name == decl.name
+                    $0.kind == decl.kind &&
+                    $0.name == decl.name
             }
-            .compactMap { $0.parent }
+            .compactMap(\.parent)
             .first
 
         guard let baseDecl else {

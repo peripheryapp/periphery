@@ -6,7 +6,7 @@ public struct AssetReference: Hashable {
         if let name = absoluteName.split(separator: ".").last {
             self.name = String(name)
         } else {
-            self.name = absoluteName
+            name = absoluteName
         }
         self.source = source
     }

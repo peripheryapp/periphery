@@ -15,17 +15,17 @@ final class ObjCAccessibleRetainer: SourceGraphMutator {
 
         for decl in graph.declarations(ofKinds: Declaration.Kind.accessibleKinds) {
             guard decl.attributes.contains("objc") ||
-                    decl.attributes.contains("objc.name") ||
-                    decl.attributes.contains("objcMembers") else { continue }
+                decl.attributes.contains("objc.name") ||
+                decl.attributes.contains("objcMembers") else { continue }
 
             decl.isObjcAccessible = true
             graph.markRetained(decl)
 
             if configuration.retainObjcAnnotated {
                 if decl.attributes.contains("objcMembers") || decl.kind == .protocol || decl.kind == .extensionClass {
-                    decl.declarations.forEach {
-                        $0.isObjcAccessible = true
-                        graph.markRetained($0)
+                    for declaration in decl.declarations {
+                        declaration.isObjcAccessible = true
+                        graph.markRetained(declaration)
                     }
                 }
             }
@@ -34,10 +34,11 @@ final class ObjCAccessibleRetainer: SourceGraphMutator {
         if configuration.retainObjcAnnotated {
             for extDecl in graph.declarations(ofKind: .extensionClass) {
                 if let extendedClass = try graph.extendedDeclaration(forExtension: extDecl),
-                   extendedClass.attributes.contains("objcMembers") {
-                    extDecl.declarations.forEach {
-                        $0.isObjcAccessible = true
-                        graph.markRetained($0)
+                   extendedClass.attributes.contains("objcMembers")
+                {
+                    for declaration in extDecl.declarations {
+                        declaration.isObjcAccessible = true
+                        graph.markRetained(declaration)
                     }
                 }
             }

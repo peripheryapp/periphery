@@ -47,7 +47,7 @@ final class UnusedImportMarker: SourceGraphMutator {
                     // Only consider modules that have been indexed as we need to see which modules
                     // they export.
                     graph.indexedModules.contains($0.module) &&
-                    !referencedModules.contains($0.module)
+                        !referencedModules.contains($0.module)
                 }
 
             for unreferencedImport in unreferencedImports {

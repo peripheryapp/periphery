@@ -41,7 +41,7 @@ final class SwiftUIRetainer: SourceGraphMutator {
         graph
             .mainAttributedDeclarations
             .lazy
-            .flatMap { $0.declarations }
+            .flatMap(\.declarations)
             .filter { $0.kind == .varInstance }
             .filter {
                 $0.references.contains {

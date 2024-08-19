@@ -20,3 +20,6 @@ build_release: clean build_x86_64 build_arm64
 
 show_bin_path:
 	@echo ${EXECUTABLE}
+
+swiftformat:
+	@./scripts/lint/swiftformat.sh

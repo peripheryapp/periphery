@@ -7,7 +7,7 @@ import SystemPackage
 final class InfoPlistParser {
     private static let elements = [
         "UISceneClassName", "UISceneDelegateClassName", "NSPrincipalClass",
-        "NSExtensionPrincipalClass", "CLKComplicationPrincipalClass", "WKExtensionDelegateClassName"
+        "NSExtensionPrincipalClass", "CLKComplicationPrincipalClass", "WKExtensionDelegateClassName",
     ]
     private let path: FilePath
 

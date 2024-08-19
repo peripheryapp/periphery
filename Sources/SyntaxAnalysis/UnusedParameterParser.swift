@@ -175,49 +175,48 @@ struct UnusedParameterParser {
         parse(nodes: Array(children), collecting: collecting)
     }
 
-    private func parse<T: Item>(nodes: [Syntax], collecting: T.Type) -> [T] {
+    private func parse<T: Item>(nodes: [Syntax], collecting _: T.Type) -> [T] {
         let collector = Collector<T>()
         nodes.forEach { _ = parse(node: $0, collector) }
         return collector.collection
     }
 
-    private func parse<T>(node anyNode: SyntaxProtocol?, _ collector: Collector<T>? = nil) -> Item? {
+    private func parse(node anyNode: SyntaxProtocol?, _ collector: Collector<some Any>? = nil) -> Item? {
         guard let node = anyNode?._syntaxNode else { return nil }
 
-        let parsed: Item?
-
-        if let node = node.as(MemberAccessExprSyntax.self) {
+        let parsed: Item? = if let node = node.as(MemberAccessExprSyntax.self) {
             // It's not possible for the member itself to be a reference to a parameter,
             // however the base expression may be.
-            parsed = parse(node: node.base, collector)
+            parse(node: node.base, collector)
         } else if let node = node.as(CodeBlockItemSyntax.self) {
-            parsed = parse(node: node.item, collector)
+            parse(node: node.item, collector)
         } else if let node = node.as(FunctionParameterClauseSyntax.self) {
-            parsed = parse(node: node.parameters, collector)
+            parse(node: node.parameters, collector)
         } else if let node = node.as(VariableDeclSyntax.self) {
-            parsed = parse(variableDecl: node, collector)
+            parse(variableDecl: node, collector)
         } else if let node = node.as(ClosureExprSyntax.self) {
-            parsed = parse(closureExpr: node, collector)
+            parse(closureExpr: node, collector)
         } else if let node = node.as(DeclReferenceExprSyntax.self) {
-            parsed = parse(identifier: node.baseName)
+            parse(identifier: node.baseName)
         } else if let node = node.as(FunctionParameterSyntax.self) {
-            parsed = parse(functionParameter: node)
+            parse(functionParameter: node)
         } else if let node = node.as(FunctionDeclSyntax.self) {
-            parsed = parse(functionDecl: node, collector)
+            parse(functionDecl: node, collector)
         } else if let node = node.as(InitializerDeclSyntax.self) {
-            parsed = parse(initializerDecl: node, collector)
+            parse(initializerDecl: node, collector)
         } else if let optBindingCondition = node.as(OptionalBindingConditionSyntax.self) {
             if optBindingCondition.initializer == nil,
                let pattern = optBindingCondition.pattern.as(IdentifierPatternSyntax.self),
                let parentStmt = optBindingCondition.parent?.parent?.parent,
-               parentStmt.is(IfExprSyntax.self) || parentStmt.is(GuardStmtSyntax.self) {
+               parentStmt.is(IfExprSyntax.self) || parentStmt.is(GuardStmtSyntax.self)
+            {
                 // Handle `let x {}` syntax.
-                parsed = parse(identifier: pattern.identifier)
+                parse(identifier: pattern.identifier)
             } else {
-                parsed = parse(childrenFrom: node, collector)
+                parse(childrenFrom: node, collector)
             }
         } else {
-            parsed = parse(childrenFrom: node, collector)
+            parse(childrenFrom: node, collector)
         }
 
         if let collector, let parsed {
@@ -227,7 +226,7 @@ struct UnusedParameterParser {
         return parsed
     }
 
-    private func parse<T>(childrenFrom node: Syntax, _ collector: Collector<T>?) -> Item? {
+    private func parse(childrenFrom node: Syntax, _ collector: Collector<some Any>?) -> Item? {
         let items = node.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) }
         if !items.isEmpty {
             return GenericItem(node: node, items: items)
@@ -259,15 +258,15 @@ struct UnusedParameterParser {
                          location: location)
     }
 
-    private func parse<T>(closureExpr syntax: ClosureExprSyntax, _ collector: Collector<T>?) -> Closure? {
+    private func parse(closureExpr syntax: ClosureExprSyntax, _ collector: Collector<some Any>?) -> Closure? {
         let signature = syntax.children(viewMode: .sourceAccurate).mapFirst { $0.as(ClosureSignatureSyntax.self) }
         let rawParams = signature?.parameterClause?.children(viewMode: .sourceAccurate).compactMap { $0.as(ClosureShorthandParameterSyntax.self) }
-        let params = rawParams?.map { $0.name.text } ?? []
+        let params = rawParams?.map(\.name.text) ?? []
         let items = syntax.statements.compactMap { parse(node: $0.item, collector) }
         return Closure(params: params, items: items)
     }
 
-    private func parse<T>(variableDecl syntax: VariableDeclSyntax, _ collector: Collector<T>?) -> Variable {
+    private func parse(variableDecl syntax: VariableDeclSyntax, _ collector: Collector<some Any>?) -> Variable {
         let bindings = syntax.bindings
 
         let names = bindings.flatMap { binding -> [String] in
@@ -300,7 +299,7 @@ struct UnusedParameterParser {
         return Identifier(name: name)
     }
 
-    private func parse<T>(functionDecl syntax: FunctionDeclSyntax, _ collector: Collector<T>?) -> Item? {
+    private func parse(functionDecl syntax: FunctionDeclSyntax, _ collector: Collector<some Any>?) -> Item? {
         build(function: syntax.signature,
               attributes: syntax.attributes,
               genericParams: syntax.genericParameterClause,
@@ -310,7 +309,7 @@ struct UnusedParameterParser {
               collector)
     }
 
-    private func parse<T>(initializerDecl syntax: InitializerDeclSyntax, _ collector: Collector<T>?) -> Item? {
+    private func parse(initializerDecl syntax: InitializerDeclSyntax, _ collector: Collector<some Any>?) -> Item? {
         build(function: syntax.signature,
               attributes: syntax.attributes,
               genericParams: syntax.genericParameterClause,
@@ -321,16 +320,16 @@ struct UnusedParameterParser {
     }
 
     // swiftlint:disable:next function_parameter_count
-    private func build<T>(
+    private func build(
         function syntax: SyntaxProtocol,
         attributes: AttributeListSyntax?,
         genericParams: GenericParameterClauseSyntax?,
         body: CodeBlockSyntax?,
         named name: String,
         position: AbsolutePosition,
-        _ collector: Collector<T>?
+        _ collector: Collector<some Any>?
     ) -> Function? {
-        if body == nil && !parseProtocols {
+        if body == nil, !parseProtocols {
             // Function has no body, must be a protocol declaration.
             return nil
         }
@@ -339,7 +338,7 @@ struct UnusedParameterParser {
         let params = parse(children: syntax.children(viewMode: .sourceAccurate), collecting: Parameter.self)
         let items = parse(node: body, collector)?.items ?? []
         let fullName = buildFullName(for: name, with: params)
-        let genericParamNames = genericParams?.parameters.compactMap { $0.name.text } ?? []
+        let genericParamNames = genericParams?.parameters.map(\.name.text) ?? []
         let attributeNames = attributes?.children(viewMode: .sourceAccurate).compactMap { AttributeSyntax($0)?.attributeName.trimmedDescription } ?? []
 
         let function = Function(
@@ -349,7 +348,8 @@ struct UnusedParameterParser {
             items: items,
             parameters: params,
             genericParameters: genericParamNames,
-            attributes: attributeNames)
+            attributes: attributeNames
+        )
 
         params.forEach { $0.function = function }
         return function

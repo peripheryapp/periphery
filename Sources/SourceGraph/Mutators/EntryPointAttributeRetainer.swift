@@ -4,7 +4,7 @@ import Shared
 final class EntryPointAttributeRetainer: SourceGraphMutator {
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
     }
 
@@ -14,15 +14,15 @@ final class EntryPointAttributeRetainer: SourceGraphMutator {
             .lazy
             .filter {
                 $0.attributes.contains("NSApplicationMain") ||
-                $0.attributes.contains("UIApplicationMain") ||
-                $0.attributes.contains("main")
+                    $0.attributes.contains("UIApplicationMain") ||
+                    $0.attributes.contains("main")
             }
             .forEach {
                 graph.markRetained($0)
                 graph.markMainAttributed($0)
 
-                $0.ancestralDeclarations.forEach {
-                    graph.markRetained($0)
+                for ancestralDeclaration in $0.ancestralDeclarations {
+                    graph.markRetained(ancestralDeclaration)
                 }
 
                 if $0.attributes.contains("main") {

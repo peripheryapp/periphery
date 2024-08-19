@@ -36,8 +36,8 @@ public extension FilePath {
 
     @inlinable
     func relativeTo(_ relativePath: FilePath) -> FilePath {
-        let components = lexicallyNormalized().components.map { $0.string }
-        let relativePathComponents = relativePath.lexicallyNormalized().components.map { $0.string }
+        let components = lexicallyNormalized().components.map(\.string)
+        let relativePathComponents = relativePath.lexicallyNormalized().components.map(\.string)
         var commonPathComponents: [String] = []
 
         for component in components {
@@ -46,7 +46,7 @@ public extension FilePath {
             commonPathComponents.append(component)
         }
 
-        let relative = Array(repeating: "..", count: (relativePathComponents.count - commonPathComponents.count))
+        let relative = Array(repeating: "..", count: relativePathComponents.count - commonPathComponents.count)
         let suffix = components.suffix(components.count - commonPathComponents.count)
         var newComponents = (relative + suffix).compactMap { Component($0) }
 

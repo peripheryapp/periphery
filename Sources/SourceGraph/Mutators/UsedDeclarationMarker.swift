@@ -4,7 +4,7 @@ import Shared
 final class UsedDeclarationMarker: SourceGraphMutator {
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
     }
 
@@ -68,7 +68,7 @@ final class UsedDeclarationMarker: SourceGraphMutator {
     private func ignoreUnusedDescendents(in decls: Set<Declaration>, unusedDeclarations: Set<Declaration>) {
         for decl in decls {
             guard !decl.declarations.isEmpty || !decl.unusedParameters.isEmpty
-                else { continue }
+            else { continue }
 
             if unusedDeclarations.contains(decl) {
                 decl.descendentDeclarations.forEach { graph.markIgnored($0) }

@@ -25,7 +25,7 @@ public final class Xcodebuild {
 
     public func ensureConfigured() throws {
         do {
-            logger.debug(try version())
+            try logger.debug(version())
         } catch {
             throw PeripheryError.xcodebuildNotConfigured
         }
@@ -33,20 +33,20 @@ public final class Xcodebuild {
 
     @discardableResult
     public func build(project: XcodeProjectlike, scheme: String, allSchemes: [String], additionalArguments: [String] = []) throws -> String {
-        let args = [
+        let args = try [
             "-\(project.type)", "'\(project.path.lexicallyNormalized().string)'",
             "-scheme", "'\(scheme)'",
             "-parallelizeTargets",
-            "-derivedDataPath", "'\(try derivedDataPath(for: project, schemes: allSchemes).string)'",
+            "-derivedDataPath", "'\(derivedDataPath(for: project, schemes: allSchemes).string)'",
             "-quiet",
-            "build-for-testing"
+            "build-for-testing",
         ]
         let envs = [
             "CODE_SIGNING_ALLOWED=\"NO\"",
             "ENABLE_BITCODE=\"NO\"",
             "DEBUG_INFORMATION_FORMAT=\"dwarf\"",
             "COMPILER_INDEX_STORE_ENABLE=\"YES\"",
-            "INDEX_ENABLE_DATA_STORE=\"YES\""
+            "INDEX_ENABLE_DATA_STORE=\"YES\"",
         ]
 
         let quotedArguments = quote(arguments: additionalArguments)
@@ -55,7 +55,7 @@ public final class Xcodebuild {
     }
 
     public func removeDerivedData(for project: XcodeProjectlike, allSchemes: [String]) throws {
-        try shell.exec(["rm", "-rf", try derivedDataPath(for: project, schemes: allSchemes).string])
+        try shell.exec(["rm", "-rf", derivedDataPath(for: project, schemes: allSchemes).string])
     }
 
     public func indexStorePath(project: XcodeProjectlike, schemes: [String]) throws -> FilePath {
@@ -80,7 +80,7 @@ public final class Xcodebuild {
         let args = [
             "-\(type)", "'\(path)'",
             "-list",
-            "-json"
+            "-json",
         ]
 
         let quotedArguments = quote(arguments: additionalArguments)
@@ -99,8 +99,8 @@ public final class Xcodebuild {
         let jsonString = jsonLines.joined(separator: "\n")
 
         guard let json = try deserialize(jsonString),
-            let details = json[type] as? [String: Any],
-            let schemes = details["schemes"] as? [String] else { return [] }
+              let details = json[type] as? [String: Any],
+              let schemes = details["schemes"] as? [String] else { return [] }
 
         return Set(schemes)
     }
@@ -138,7 +138,8 @@ public final class Xcodebuild {
                let value = arguments[safe: i + 1],
                !value.hasPrefix("-"),
                !value.hasPrefix("\""),
-               !value.hasPrefix("\'") {
+               !value.hasPrefix("\'")
+            {
                 quotedArguments[i + 1] = "\"\(value)\""
             }
         }

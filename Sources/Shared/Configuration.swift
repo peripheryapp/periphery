@@ -216,13 +216,9 @@ public final class Configuration {
         _retainFilesMatchers = nil
     }
 
-    public lazy var reportExcludeMatchers: [FilenameMatcher] = {
-        buildFilenameMatchers(with: reportExclude)
-    }()
+    public lazy var reportExcludeMatchers: [FilenameMatcher] = buildFilenameMatchers(with: reportExclude)
 
-    public lazy var reportIncludeMatchers: [FilenameMatcher] = {
-        buildFilenameMatchers(with: reportInclude)
-    }()
+    public lazy var reportIncludeMatchers: [FilenameMatcher] = buildFilenameMatchers(with: reportInclude)
 
     // MARK: - Private
 
@@ -273,7 +269,7 @@ protocol AbstractSetting {
         setter: @escaping Setter = { $0 as? Value }
     ) {
         self.key = key
-        self.value = defaultValue
+        value = defaultValue
         self.defaultValue = defaultValue
         self.setter = setter
     }

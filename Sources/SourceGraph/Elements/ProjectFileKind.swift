@@ -7,13 +7,13 @@ public enum ProjectFileKind {
     public var extensions: [String] {
         switch self {
         case .interfaceBuilder:
-            return ["xib", "storyboard"]
+            ["xib", "storyboard"]
         case .infoPlist:
-            return ["plist"]
+            ["plist"]
         case .xcDataModel:
-            return ["xcdatamodeld"]
+            ["xcdatamodeld"]
         case .xcMappingModel:
-            return ["xcmappingmodel"]
+            ["xcmappingmodel"]
         }
     }
 }

@@ -31,21 +31,20 @@ public final class XcodeProject: XcodeProjectlike {
     public private(set) var targets: Set<XcodeTarget> = []
 
     let xcodeProject: XcodeProj
-  
-    private let xcodebuild: Xcodebuild
 
+    private let xcodebuild: Xcodebuild
 
     public required init(path: FilePath, xcodebuild: Xcodebuild = .init(), logger: Logger = .init()) throws {
         logger.contextualized(with: "xcode:project").debug("Loading \(path)")
 
         self.path = path
         self.xcodebuild = xcodebuild
-        self.name = self.path.lastComponent?.stem ?? ""
-        self.sourceRoot = self.path.removingLastComponent()
+        name = self.path.lastComponent?.stem ?? ""
+        sourceRoot = self.path.removingLastComponent()
 
         do {
-            self.xcodeProject = try XcodeProj(pathString: self.path.lexicallyNormalized().string)
-        } catch let error {
+            xcodeProject = try XcodeProj(pathString: self.path.lexicallyNormalized().string)
+        } catch {
             throw PeripheryError.underlyingError(error)
         }
 

@@ -14,7 +14,7 @@ public class BazelProjectDriver: ProjectDriver {
         return self.init(configuration: configuration)
     }
 
-      private static let topLevelKinds = [
+    private static let topLevelKinds = [
         // rules_apple, iOS
         "ios_app_clip",
         "ios_application",
@@ -66,9 +66,7 @@ public class BazelProjectDriver: ProjectDriver {
 
     private let outputPath = FilePath("/var/tmp/periphery_bazel")
 
-    private lazy var contextLogger: ContextualLogger = {
-        logger.contextualized(with: "bazel")
-    }()
+    private lazy var contextLogger: ContextualLogger = logger.contextualized(with: "bazel")
 
     required init(
         configuration: Configuration = .shared,
@@ -84,7 +82,7 @@ public class BazelProjectDriver: ProjectDriver {
 
     public func build() throws {
         guard let executablePath = Bundle.main.executablePath else {
-          fatalError("Expected executable path.")
+            fatalError("Expected executable path.")
         }
 
         try fileManager.createDirectory(at: outputPath.url, withIntermediateDirectories: true)
@@ -124,7 +122,7 @@ public class BazelProjectDriver: ProjectDriver {
             "bazel",
             "run",
             "--ui_event_filters=-info,-debug,-warning",
-            "@periphery//bazel:scan"
+            "@periphery//bazel:scan",
         ])
 
         // The actual scan is performed by Bazel.
@@ -135,9 +133,9 @@ public class BazelProjectDriver: ProjectDriver {
 
     private func queryTargets() throws -> [String] {
         try shell
-          .exec(["bazel", "query", query], stderr: false)
-          .split(separator: "\n")
-          .map { "\"@@\($0)\"" }
+            .exec(["bazel", "query", query], stderr: false)
+            .split(separator: "\n")
+            .map { "\"@@\($0)\"" }
     }
 
     private var query: String {
@@ -152,7 +150,7 @@ public class BazelProjectDriver: ProjectDriver {
         """
 
         if let pattern = configuration.bazelFilter {
-          return "filter('\(pattern)', \(query))"
+            return "filter('\(pattern)', \(query))"
         }
 
         return query

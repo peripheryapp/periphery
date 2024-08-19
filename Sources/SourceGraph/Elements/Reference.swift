@@ -16,9 +16,9 @@ public final class Reference {
         var isPubliclyExposable: Bool {
             switch self {
             case .varType, .returnType, .parameterType, .genericParameterType, .genericRequirementType, .inheritedType, .refinedProtocolType, .initializerType, .variableInitFunctionCall, .functionCallMetatypeArgument:
-                return true
+                true
             default:
-                return false
+                false
             }
         }
     }
@@ -39,7 +39,7 @@ public final class Reference {
         self.usr = usr
         self.isRelated = isRelated
         self.location = location
-        self.hashValueCache = [usr.hashValue, location.hashValue, isRelated.hashValue].hashValue
+        hashValueCache = [usr.hashValue, location.hashValue, isRelated.hashValue].hashValue
     }
 
     var descendentReferences: Set<Reference> {

@@ -2,7 +2,7 @@ import Foundation
 import Shared
 
 #if canImport(FoundationNetworking)
-import FoundationNetworking
+    import FoundationNetworking
 #endif
 
 final class UpdateChecker {
@@ -17,7 +17,7 @@ final class UpdateChecker {
 
     required init(logger: Logger = .init(), configuration: Configuration = .shared) {
         self.logger = logger
-        self.debugLogger = logger.contextualized(with: "update-check")
+        debugLogger = logger.contextualized(with: "update-check")
         self.configuration = configuration
         let config = URLSessionConfiguration.ephemeral
         urlSession = URLSession(configuration: config)
@@ -33,7 +33,7 @@ final class UpdateChecker {
         // We only perform the update check with xcode format because it may interfere with
         // parsing json and csv.
         guard !configuration.disableUpdateCheck,
-            configuration.outputFormat.supportsAuxiliaryOutput else { return }
+              configuration.outputFormat.supportsAuxiliaryOutput else { return }
 
         var urlRequest = URLRequest(url: latestReleaseURL)
         urlRequest.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
@@ -50,22 +50,23 @@ final class UpdateChecker {
             }
 
             guard let jsonData = data,
-                let jsonObject = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [AnyHashable: Any],
-                let tagName = jsonObject["tag_name"] as? String else {
-                    var json = "N/A"
+                  let jsonObject = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [AnyHashable: Any],
+                  let tagName = jsonObject["tag_name"] as? String
+            else {
+                var json = "N/A"
 
-                    if let data {
-                        let decoded = String(decoding: data, as: UTF8.self)
-                        if !decoded.isEmpty {
-                            json = decoded
-                        }
+                if let data {
+                    let decoded = String(decoding: data, as: UTF8.self)
+                    if !decoded.isEmpty {
+                        json = decoded
                     }
+                }
 
-                    let message = "Failed to identify latest release tag in: \(json)"
-                    strongSelf.error = PeripheryError.updateCheckError(message: message)
-                    strongSelf.debugLogger.debug(message)
-                    strongSelf.semaphore.signal()
-                    return
+                let message = "Failed to identify latest release tag in: \(json)"
+                strongSelf.error = PeripheryError.updateCheckError(message: message)
+                strongSelf.debugLogger.debug(message)
+                strongSelf.semaphore.signal()
+                return
             }
 
             strongSelf.latestVersion = tagName

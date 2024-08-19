@@ -5,7 +5,7 @@ import SystemPackage
 
 final class CheckstyleFormatter: OutputFormatter {
     let configuration: Configuration
-    lazy var currentFilePath: FilePath = { .current }()
+    lazy var currentFilePath: FilePath = .current
 
     init(configuration: Configuration) {
         self.configuration = configuration
@@ -19,7 +19,7 @@ final class CheckstyleFormatter: OutputFormatter {
                 .group(by: { outputPath($0.0).string.escapedForXML() })
                 .sorted(by: { $0.key < $1.key })
                 .map(generateForFile).joined(),
-            "\n</checkstyle>"
+            "\n</checkstyle>",
         ].joined()
     }
 
@@ -29,7 +29,7 @@ final class CheckstyleFormatter: OutputFormatter {
         [
             "\n\t<file name=\"", file, "\">\n",
             results.map(generateForResult).joined(),
-            "\t</file>"
+            "\t</file>",
         ].joined()
     }
 
@@ -41,7 +41,7 @@ final class CheckstyleFormatter: OutputFormatter {
             "\t\t<error line=\"\(line)\" ",
             "column=\"\(col)\" ",
             "severity=\"warning\" ",
-            "message=\"", result.1.escapedForXML(), "\"/>\n"
+            "message=\"", result.1.escapedForXML(), "\"/>\n",
         ].joined()
     }
 }

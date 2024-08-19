@@ -11,7 +11,7 @@ public final class OutputDeclarationFilter {
     public required init(configuration: Configuration = .shared, logger: Logger = .init()) {
         self.configuration = configuration
         self.logger = logger
-        self.contextualLogger = logger.contextualized(with: "report:filter")
+        contextualLogger = logger.contextualized(with: "report:filter")
     }
 
     public func filter(_ declarations: [ScanResult], with baseline: Baseline?) throws -> [ScanResult] {
@@ -32,7 +32,7 @@ public final class OutputDeclarationFilter {
             }
         }
 
-        if configuration.reportInclude.isEmpty && configuration.reportExclude.isEmpty {
+        if configuration.reportInclude.isEmpty, configuration.reportExclude.isEmpty {
             return declarations.sorted { $0.declaration < $1.declaration }
         }
 

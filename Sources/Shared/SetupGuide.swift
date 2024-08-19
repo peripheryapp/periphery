@@ -12,8 +12,8 @@ public enum SetupSelection {
 
     public var selectedValues: [String] {
         switch self {
-        case .all(let values), .some(let values):
-            return values
+        case let .all(values), let .some(values):
+            values
         }
     }
 }
@@ -37,7 +37,8 @@ open class SetupGuideHelpers {
         print(colorize("> ", .bold), terminator: "")
 
         if let strChoice = readLine(strippingNewline: true)?.trimmed,
-           let choice = Int(strChoice) {
+           let choice = Int(strChoice)
+        {
             if let option = options[safe: choice - 1] {
                 return option
             } else {
@@ -61,14 +62,15 @@ open class SetupGuideHelpers {
         print(colorize("> ", .bold), terminator: "")
 
         if let strChoices = readLine(strippingNewline: true)?.trimmed.split(separator: " ", omittingEmptySubsequences: true) {
-            if allowAll && strChoices.contains("all") {
+            if allowAll, strChoices.contains("all") {
                 return .all(options)
             } else {
                 var selected: [String] = []
 
                 for strChoice in strChoices {
                     if let choice = Int(strChoice),
-                       let option = options[safe: choice - 1] {
+                       let option = options[safe: choice - 1]
+                    {
                         selected.append(option)
                     } else {
                         print(colorize("\nInvalid option: \(strChoice)\n", .boldYellow))
@@ -94,7 +96,8 @@ open class SetupGuideHelpers {
         )
 
         if let answer = readLine(strippingNewline: true)?.trimmed.lowercased(),
-           !answer.isEmpty {
+           !answer.isEmpty
+        {
             if ["y", "yes"].contains(answer) {
                 return true
             } else if ["n", "no"].contains(answer) {

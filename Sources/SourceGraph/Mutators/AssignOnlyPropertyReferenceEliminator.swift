@@ -11,7 +11,7 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphMutator {
     required init(graph: SourceGraph, configuration: Configuration) {
         self.graph = graph
         self.configuration = configuration
-        self.retainAssignOnlyPropertyTypes = defaultRetainedTypes + configuration.retainAssignOnlyPropertyTypes
+        retainAssignOnlyPropertyTypes = defaultRetainedTypes + configuration.retainAssignOnlyPropertyTypes
     }
 
     func mutate() throws {

@@ -12,10 +12,10 @@ final class ResultBuilderRetainer: SourceGraphMutator {
         "buildArray(_:)",
         "buildBlock(_:)",
         "buildFinalResult(_:)",
-        "buildLimitedAvailability(_:)"
+        "buildLimitedAvailability(_:)",
     ])
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
     }
 

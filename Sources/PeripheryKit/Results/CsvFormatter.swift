@@ -5,14 +5,14 @@ import SystemPackage
 
 final class CsvFormatter: OutputFormatter {
     let configuration: Configuration
-    lazy var currentFilePath: FilePath = { .current }()
+    lazy var currentFilePath: FilePath = .current
 
     init(configuration: Configuration) {
         self.configuration = configuration
     }
 
     func format(_ results: [ScanResult]) -> String {
-        var lines: [String] = ["Kind,Name,Modifiers,Attributes,Accessibility,IDs,Location,Hints"]
+        var lines = ["Kind,Name,Modifiers,Attributes,Accessibility,IDs,Location,Hints"]
 
         for result in results {
             let line = format(
@@ -38,7 +38,8 @@ final class CsvFormatter: OutputFormatter {
                         accessibility: nil,
                         usrs: [ref.usr],
                         location: ref.location,
-                        hint: redundantConformanceHint(with: inherited))
+                        hint: redundantConformanceHint(with: inherited)
+                    )
                     lines.append(line)
                 }
             default:
