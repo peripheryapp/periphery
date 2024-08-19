@@ -3,6 +3,7 @@ import Indexer
 import Shared
 import SwiftIndexStore
 import SystemPackage
+
 public final class SPMProjectDriver {
     public static func build() throws -> Self {
         let configuration = Configuration.shared

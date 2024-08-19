@@ -2,7 +2,7 @@ import Foundation
 import SystemPackage
 
 public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
-    case shellCommandFailed(cmd: String, args: [String], status: Int32, output: String)
+    case shellCommandFailed(cmd: [String], status: Int32, output: String)
     case shellOutputEncodingFailed(cmd: String, args: [String], encoding: String.Encoding)
     case usageError(String)
     case underlyingError(Error)
@@ -21,9 +21,9 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
 
     public var errorDescription: String? {
         switch self {
-        case let .shellCommandFailed(cmd, args, status, output):
-            let joinedArgs = args.joined(separator: " ")
-            return "Shell command '\(cmd) \(joinedArgs)' returned exit status '\(status)':\n\(output)"
+        case let .shellCommandFailed(cmd, status, output):
+            let joinedCmd = cmd.joined(separator: " ")
+            return "Shell command '\(joinedCmd)' returned exit status '\(status)':\n\(output)"
         case let .shellOutputEncodingFailed(cmd, args, encoding):
             let joinedArgs = args.joined(separator: " ")
             return "Shell command '\(cmd) \(joinedArgs)' output encoding to \(encoding) failed."

@@ -126,6 +126,12 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Project configuration for non-Apple build systems")
     var genericProjectConfig: FilePath?
 
+    @Flag(help: "Enable Bazel project mode")
+    var bazel: Bool = defaultConfiguration.$bazel.defaultValue
+
+    @Option(help: "Filter pattern applied to the Bazel top-level targets query")
+    var bazelFilter: String?
+
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
@@ -174,6 +180,8 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$baseline, baseline)
         configuration.apply(\.$writeBaseline, writeBaseline)
         configuration.apply(\.$genericProjectConfig, genericProjectConfig)
+        configuration.apply(\.$bazel, bazel)
+        configuration.apply(\.$bazelFilter, bazelFilter)
 
         try scanBehavior.main { project in
             try Scan().perform(project: project)
