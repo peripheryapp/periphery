@@ -1,9 +1,7 @@
 import Foundation
 
 open class Shell {
-    public static let shared: Shell = {
-        Shell(environment: ProcessInfo.processInfo.environment, logger: Logger())
-    }()
+    public static let shared: Shell = .init(environment: ProcessInfo.processInfo.environment, logger: Logger())
 
     private var tasks: Set<Process> = []
     private var tasksQueue = DispatchQueue(label: "Shell.tasksQueue")
@@ -17,12 +15,12 @@ open class Shell {
     }
 
     public func interruptRunning() {
-      tasksQueue.sync {
-        tasks.forEach {
-          $0.interrupt()
-          $0.waitUntilExit()
+        tasksQueue.sync {
+            for task in tasks {
+                task.interrupt()
+                task.waitUntilExit()
+            }
         }
-      }
     }
 
     lazy var pristineEnvironment: [String: String] = {
@@ -41,7 +39,7 @@ open class Shell {
             }
 
         let preservedKeys = ["TERM", "PATH", "DEVELOPER_DIR", "SSH_AUTH_SOCK"]
-        preservedKeys.forEach { key in
+        for key in preservedKeys {
             if let value = environment[key] {
                 newEnv[key] = value
             }
@@ -69,15 +67,15 @@ open class Shell {
         )
     }
 
-  @discardableResult
-  open func execStatus(
-      _ args: [String],
-      stderr: Bool = true
-  ) throws -> Int32 {
-      let env = environment
-      let (status, _) = try exec(args, stderr: stderr, captureOutput: false, environment: env)
-      return status
-  }
+    @discardableResult
+    open func execStatus(
+        _ args: [String],
+        stderr: Bool = true
+    ) throws -> Int32 {
+        let env = environment
+        let (status, _) = try exec(args, stderr: stderr, captureOutput: false, environment: env)
+        return status
+    }
 
     // MARK: - Private
 
@@ -102,7 +100,7 @@ open class Shell {
         task.launchPath = launchPath
         task.environment = environment
         task.arguments = newArgs
-        
+
         logger.debug("\(launchPath) \(newArgs.joined(separator: " "))")
         tasksQueue.sync { _ = tasks.insert(task) }
 
@@ -116,10 +114,11 @@ open class Shell {
 
         task.launch()
 
-        var output: String = ""
+        var output = ""
 
         if let outputPipe,
-           let outputData = try outputPipe.fileHandleForReading.readToEnd() {
+           let outputData = try outputPipe.fileHandleForReading.readToEnd()
+        {
             guard let str = String(data: outputData, encoding: .utf8) else {
                 tasksQueue.sync { _ = tasks.remove(task) }
                 throw PeripheryError.shellOutputEncodingFailed(

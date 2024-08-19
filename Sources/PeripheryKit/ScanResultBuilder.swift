@@ -15,7 +15,8 @@ public enum ScanResultBuilder {
 
             if removableDeclaration.kind.isExtendableKind,
                !graph.retainedDeclarations.contains(removableDeclaration),
-               !graph.ignoredDeclarations.contains(removableDeclaration) {
+               !graph.ignoredDeclarations.contains(removableDeclaration)
+            {
                 let decls = removableDeclaration.descendentDeclarations.union([removableDeclaration])
 
                 for decl in decls {
@@ -47,9 +48,9 @@ public enum ScanResultBuilder {
         return allAnnotatedDeclarations
             .filter {
                 !$0.declaration.isImplicit &&
-                !$0.declaration.kind.isAccessorKind &&
-                !graph.ignoredDeclarations.contains($0.declaration) &&
-                !graph.retainedDeclarations.contains($0.declaration)
+                    !$0.declaration.kind.isAccessorKind &&
+                    !graph.ignoredDeclarations.contains($0.declaration) &&
+                    !graph.retainedDeclarations.contains($0.declaration)
             }
     }
 }

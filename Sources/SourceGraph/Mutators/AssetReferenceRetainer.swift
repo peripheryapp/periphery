@@ -6,9 +6,9 @@ final class AssetReferenceRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let interfaceBuilderPropertyRetainer: InterfaceBuilderPropertyRetainer
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
-        self.interfaceBuilderPropertyRetainer = .init(graph: graph)
+        interfaceBuilderPropertyRetainer = .init(graph: graph)
     }
 
     func mutate() {

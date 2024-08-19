@@ -11,8 +11,8 @@ public enum SPM {
     public struct Package {
         public let path: FilePath = .current
         let configuration: Configuration = .shared
-      
-      public init() { }
+
+        public init() {}
 
         var exists: Bool {
             path.appending(packageFile).exists

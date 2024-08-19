@@ -12,7 +12,7 @@ public final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
     }
 
     public func visit(_ node: ImportDeclSyntax) {
-        let parts = node.path.map { $0.name.text }
+        let parts = node.path.map(\.name.text)
         let module = parts.first ?? ""
         let attributes = node.attributes.compactMap { $0.as(AttributeSyntax.self)?.attributeName.trimmedDescription }
         let location = sourceLocationBuilder.location(at: node.positionAfterSkippingLeadingTrivia)
@@ -20,7 +20,8 @@ public final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
             module: module,
             isTestable: attributes.contains("testable"),
             isExported: attributes.contains("_exported"),
-            location: location)
+            location: location
+        )
         importStatements.append(statement)
     }
 }

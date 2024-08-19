@@ -8,10 +8,10 @@ public protocol ProjectDriver {
     func plan(logger: ContextualLogger) throws -> IndexPlan
 }
 
-extension ProjectDriver {
-  public func build() throws {}
+public extension ProjectDriver {
+    func build() throws {}
 
-  public func plan(logger: ContextualLogger) throws -> IndexPlan {
-      IndexPlan(sourceFiles: [:])
-  }
+    func plan(logger _: ContextualLogger) throws -> IndexPlan {
+        IndexPlan(sourceFiles: [:])
+    }
 }

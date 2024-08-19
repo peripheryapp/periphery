@@ -4,7 +4,7 @@ import Shared
 final class DefaultConstructorReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
     }
 
@@ -22,7 +22,7 @@ final class DefaultConstructorReferenceBuilder: SourceGraphMutator {
             $0.name == "init()" || $0.isImplicit
         }
 
-        defaultConstructors.forEach { constructor in
+        for constructor in defaultConstructors {
             if let parent = constructor.parent {
                 for usr in constructor.usrs {
                     let reference = Reference(kind: .functionConstructor,
@@ -37,7 +37,7 @@ final class DefaultConstructorReferenceBuilder: SourceGraphMutator {
     }
 
     private func referenceDestructors() {
-        graph.declarations(ofKind: .functionDestructor).forEach { destructor in
+        for destructor in graph.declarations(ofKind: .functionDestructor) {
             if let parent = destructor.parent {
                 for usr in destructor.usrs {
                     let reference = Reference(kind: .functionDestructor,

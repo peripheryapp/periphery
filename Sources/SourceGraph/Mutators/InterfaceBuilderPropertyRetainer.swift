@@ -21,7 +21,7 @@ class InterfaceBuilderPropertyRetainer {
 
     func retainPropertiesDeclared(in declaration: Declaration) {
         let inheritedDeclarations = graph.inheritedDeclarations(of: declaration)
-        let descendentInheritedDeclarations = inheritedDeclarations.map { $0.declarations }.joined()
+        let descendentInheritedDeclarations = inheritedDeclarations.map(\.declarations).joined()
         let allDeclarations = declaration.declarations.union(descendentInheritedDeclarations)
 
         for declaration in allDeclarations where declaration.attributes.contains(where: { ibAttributes.contains($0) }) {

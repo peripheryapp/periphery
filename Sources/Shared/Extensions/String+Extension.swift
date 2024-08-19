@@ -13,7 +13,7 @@ public extension String {
             ("\"", "&quot;"),
             ("'", "&apos;"),
             (">", "&gt;"),
-            ("<", "&lt;")
+            ("<", "&lt;"),
         ]
         var newString = self
         for (key, value) in htmlEscapes {
@@ -25,8 +25,8 @@ public extension String {
     // http://www.cse.yorku.ca/~oz/hash.html
     @inlinable var djb2: Int {
         unicodeScalars
-            .map { $0.value }
-            .reduce(5_381) { ($0 << 5) &+ $0 &+ Int($1) }
+            .map(\.value)
+            .reduce(5381) { ($0 << 5) &+ $0 &+ Int($1) }
     }
 
     @inlinable var djb2Hex: String {

@@ -6,7 +6,7 @@ final class StructImplicitInitializerReferenceBuilder: SourceGraphMutator {
     // swiftlint:disable:previous type_name
     private let graph: SourceGraph
 
-    init(graph: SourceGraph, configuration: Configuration) {
+    init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
     }
 

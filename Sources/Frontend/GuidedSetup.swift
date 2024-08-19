@@ -2,7 +2,7 @@ import Foundation
 import Shared
 
 #if canImport(XcodeSupport)
-import XcodeSupport
+    import XcodeSupport
 #endif
 
 final class GuidedSetup: SetupGuideHelpers {
@@ -23,16 +23,16 @@ final class GuidedSetup: SetupGuideHelpers {
         }
 
         #if canImport(XcodeSupport)
-        if let guide = XcodeProjectSetupGuide.detect() {
-            projectGuides.append(guide)
-        }
+            if let guide = XcodeProjectSetupGuide.detect() {
+                projectGuides.append(guide)
+            }
         #endif
 
         var projectGuide_: SetupGuide?
 
         if projectGuides.count > 1 {
             print(colorize("Please select which project to use:", .bold))
-            let kindName = select(single: projectGuides.map { $0.projectKindName })
+            let kindName = select(single: projectGuides.map(\.projectKindName))
             projectGuide_ = projectGuides.first { $0.projectKindName == kindName }
             print("")
         } else {

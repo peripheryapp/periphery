@@ -5,7 +5,7 @@ import SystemPackage
 
 final class XcodeFormatter: OutputFormatter {
     let configuration: Configuration
-    lazy var currentFilePath: FilePath = { .current }()
+    lazy var currentFilePath: FilePath = .current
 
     init(configuration: Configuration) {
         self.configuration = configuration

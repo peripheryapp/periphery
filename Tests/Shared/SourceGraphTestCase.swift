@@ -97,7 +97,7 @@ open class SourceGraphTestCase: XCTestCase {
         guard let declaration = materialize(.protocol(name), file: file, line: line) else { return }
 
         if let tuple = Self.results.redundantProtocolDeclarations[declaration] {
-            let decls = tuple.references.compactMap { $0.parent }
+            let decls = tuple.references.compactMap(\.parent)
 
             for conformance in conformances where !decls.contains(where: { $0.kind == conformance.kind && $0.name == conformance.name }) {
                 XCTFail("Expected \(conformance) to implement protocol '\(name)'.", file: file, line: line)
@@ -198,14 +198,11 @@ open class SourceGraphTestCase: XCTestCase {
     // swiftlint:disable:next function_default_parameter_at_end discouraged_optional_collection
     private func materialize(_ description: DeclarationDescription, in defaultDeclarations: Set<Declaration>? = nil, fail: Bool = true, file: StaticString, line: UInt) -> Declaration? {
         let declarations = scopedDeclarations(from: defaultDeclarations)
-
         let matchingDeclarations = declarations.filter { $0.kind == description.kind && $0.name == description.name }
-        var matchedDeclaration: Declaration?
-
-        if let line = description.line {
-            matchedDeclaration = matchingDeclarations.first(where: { $0.location.line == line })
+        let matchedDeclaration = if let line = description.line {
+            matchingDeclarations.first(where: { $0.location.line == line })
         } else {
-            matchedDeclaration = matchingDeclarations.first
+            matchingDeclarations.first
         }
 
         if matchedDeclaration == nil, fail {
@@ -236,7 +233,7 @@ open class SourceGraphTestCase: XCTestCase {
     }
 }
 
-private extension Array where Element == ScanResult {
+private extension [ScanResult] {
     var unusedDeclarations: Set<Declaration> {
         compactMapSet {
             if case .unused = $0.annotation {

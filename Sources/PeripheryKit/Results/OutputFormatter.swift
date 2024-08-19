@@ -24,18 +24,18 @@ extension OutputFormatter {
     func describe(_ annotation: ScanResult.Annotation) -> String {
         switch annotation {
         case .unused:
-            return "unused"
+            "unused"
         case .assignOnlyProperty:
-            return "assignOnlyProperty"
+            "assignOnlyProperty"
         case .redundantProtocol:
-            return "redundantProtocol"
+            "redundantProtocol"
         case .redundantPublicAccessibility:
-            return "redundantPublicAccessibility"
+            "redundantPublicAccessibility"
         }
     }
 
     func describe(_ result: ScanResult, colored: Bool) -> [(Location, String)] {
-        var description: String = ""
+        var description = ""
         var secondaryResults: [(Location, String)] = []
 
         if var name = result.declaration.name {
@@ -89,7 +89,7 @@ extension OutputFormatter {
         [
             outputPath(location).string,
             String(location.line),
-            String(location.column)
+            String(location.column),
         ]
         .joined(separator: ":")
     }
@@ -100,17 +100,17 @@ public extension OutputFormat {
     var formatter: OutputFormatter.Type {
         switch self {
         case .xcode:
-            return XcodeFormatter.self
+            XcodeFormatter.self
         case .csv:
-            return CsvFormatter.self
+            CsvFormatter.self
         case .codeclimate:
-            return CodeClimateFormatter.self
+            CodeClimateFormatter.self
         case .json:
-            return JsonFormatter.self
+            JsonFormatter.self
         case .checkstyle:
-            return CheckstyleFormatter.self
+            CheckstyleFormatter.self
         case .githubActions:
-            return GitHubActionsFormatter.self
+            GitHubActionsFormatter.self
         }
     }
 }

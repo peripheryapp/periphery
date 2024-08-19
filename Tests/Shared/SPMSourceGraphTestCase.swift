@@ -1,6 +1,6 @@
 import Foundation
-import Shared
 import ProjectDrivers
+import Shared
 import SystemPackage
 
 class SPMSourceGraphTestCase: SourceGraphTestCase {

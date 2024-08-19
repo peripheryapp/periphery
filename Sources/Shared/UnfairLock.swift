@@ -1,31 +1,31 @@
 import Foundation
 
 #if canImport(os)
-import os
+    import os
 #endif
 
 public final class UnfairLock {
     #if canImport(os)
-    private var _osAllocatedUnfairLock: Any?
+        private var _osAllocatedUnfairLock: Any?
 
-    private var osAllocatedUnfairLock: OSAllocatedUnfairLock<Void> {
-        // swiftlint:disable:next force_cast
-        _osAllocatedUnfairLock as! OSAllocatedUnfairLock
-    }
+        private var osAllocatedUnfairLock: OSAllocatedUnfairLock<Void> {
+            // swiftlint:disable:next force_cast
+            _osAllocatedUnfairLock as! OSAllocatedUnfairLock
+        }
     #else
-    private var _nsLock: Any?
+        private var _nsLock: Any?
 
-    private var nsLock: NSLock {
-        // swiftlint:disable:next force_cast
-        _nsLock as! NSLock
-    }
+        private var nsLock: NSLock {
+            // swiftlint:disable:next force_cast
+            _nsLock as! NSLock
+        }
     #endif
 
     public init() {
         #if canImport(os)
-        _osAllocatedUnfairLock = OSAllocatedUnfairLock()
+            _osAllocatedUnfairLock = OSAllocatedUnfairLock()
         #else
-        _nsLock = NSLock()
+            _nsLock = NSLock()
         #endif
     }
 
@@ -33,15 +33,15 @@ public final class UnfairLock {
     @inline(__always)
     public func perform<T>(_ operation: () throws -> T) rethrows -> T {
         #if canImport(os)
-        osAllocatedUnfairLock.lock()
-        let value = try operation()
-        osAllocatedUnfairLock.unlock()
-        return value
+            osAllocatedUnfairLock.lock()
+            let value = try operation()
+            osAllocatedUnfairLock.unlock()
+            return value
         #else
-        nsLock.lock()
-        let value = try operation()
-        nsLock.unlock()
-        return value
+            nsLock.lock()
+            let value = try operation()
+            nsLock.unlock()
+            return value
         #endif
     }
 }

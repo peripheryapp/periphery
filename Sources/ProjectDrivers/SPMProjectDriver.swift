@@ -44,12 +44,10 @@ extension SPMProjectDriver: ProjectDriver {
     }
 
     public func plan(logger: ContextualLogger) throws -> IndexPlan {
-        let indexStorePaths: Set<FilePath>
-
-        if !configuration.indexStorePath.isEmpty {
-            indexStorePaths = Set(configuration.indexStorePath)
+        let indexStorePaths: Set<FilePath> = if !configuration.indexStorePath.isEmpty {
+            Set(configuration.indexStorePath)
         } else {
-            indexStorePaths = [pkg.path.appending(".build/debug/index/store")]
+            [pkg.path.appending(".build/debug/index/store")]
         }
 
         let excludedTestTargets = configuration.excludeTests ? try pkg.testTargetNames() : []

@@ -1,7 +1,7 @@
 import Foundation
 
 #if canImport(os)
-import os
+    import os
 #endif
 
 public enum ANSIColor: String {
@@ -23,8 +23,9 @@ public enum ANSIColor: String {
 
 @usableFromInline var isColorOutputCapable: Bool = {
     guard let term = ProcessInfo.processInfo.environment["TERM"],
-        term.lowercased() != "dumb",
-        isatty(fileno(stdout)) != 0 else {
+          term.lowercased() != "dumb",
+          isatty(fileno(stdout)) != 0
+    else {
         return false
     }
 
@@ -43,7 +44,7 @@ public final class BaseLogger {
     @usableFromInline let outputQueue: DispatchQueue
 
     private init() {
-        self.outputQueue = DispatchQueue(label: "BaseLogger.outputQueue")
+        outputQueue = DispatchQueue(label: "BaseLogger.outputQueue")
     }
 
     @inlinable
@@ -59,7 +60,7 @@ public final class BaseLogger {
     @inlinable
     func warn(_ text: String, newlinePrefix: Bool = false) {
         if newlinePrefix {
-          log("", output: stderr)
+            log("", output: stderr)
         }
         let text = colorize("warning: ", .boldYellow) + text
         log(text, output: stderr)
@@ -94,7 +95,7 @@ public final class Logger {
     @usableFromInline let configuration: Configuration
 
     #if canImport(os)
-    @usableFromInline let signposter = OSSignposter()
+        @usableFromInline let signposter = OSSignposter()
     #endif
 
     @inlinable
@@ -134,18 +135,18 @@ public final class Logger {
     @inlinable
     public func beginInterval(_ name: StaticString) -> SignpostInterval {
         #if canImport(os)
-        let id = signposter.makeSignpostID()
-        let state = signposter.beginInterval(name, id: id)
-        return .init(name: name, state: state)
+            let id = signposter.makeSignpostID()
+            let state = signposter.beginInterval(name, id: id)
+            return .init(name: name, state: state)
         #else
-        return SignpostInterval()
+            return SignpostInterval()
         #endif
     }
 
     @inlinable
     public func endInterval(_ interval: SignpostInterval) {
         #if canImport(os)
-        signposter.endInterval(interval.name, interval.state)
+            signposter.endInterval(interval.name, interval.state)
         #endif
     }
 }
@@ -182,20 +183,20 @@ public struct ContextualLogger {
 }
 
 #if canImport(os)
-public struct SignpostInterval {
-    @usableFromInline let name: StaticString
-    @usableFromInline let state: OSSignpostIntervalState
+    public struct SignpostInterval {
+        @usableFromInline let name: StaticString
+        @usableFromInline let state: OSSignpostIntervalState
 
-    @inlinable
-    init(name: StaticString, state: OSSignpostIntervalState) {
-        self.name = name
-        self.state = state
+        @inlinable
+        init(name: StaticString, state: OSSignpostIntervalState) {
+            self.name = name
+            self.state = state
+        }
     }
-}
 #else
-public struct SignpostInterval {
-    // swiftlint:disable:next unneeded_synthesized_initializer
-    @usableFromInline
-    init() {}
-}
+    public struct SignpostInterval {
+        // swiftlint:disable:next unneeded_synthesized_initializer
+        @usableFromInline
+        init() {}
+    }
 #endif

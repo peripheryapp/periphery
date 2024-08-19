@@ -10,14 +10,15 @@ public final class UnusedParameterAnalyzer {
         case shadowed
     }
 
-    public init() { }
+    public init() {}
 
     public func analyze(file: SourceFile, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) -> [Function: Set<Parameter>] {
         let functions = UnusedParameterParser.parse(
             file: file,
             syntax: syntax,
             locationConverter: locationConverter,
-            parseProtocols: parseProtocols)
+            parseProtocols: parseProtocols
+        )
 
         return functions.reduce(into: [Function: Set<Parameter>]()) { result, function in
             let params = analyze(function: function)
@@ -58,12 +59,12 @@ public final class UnusedParameterAnalyzer {
 
     private func isFunctionFatalErrorOnly(_ function: Function) -> Bool {
         guard let codeBlockList = function.items.first as? GenericItem,
-            codeBlockList.node.is(CodeBlockItemListSyntax.self),
-            codeBlockList.items.count == 1,
-            let funcCallExpr = codeBlockList.items.first as? GenericItem,
-            funcCallExpr.node.is(FunctionCallExprSyntax.self),
-            let identifier = funcCallExpr.items.first as? Identifier
-            else { return false }
+              codeBlockList.node.is(CodeBlockItemListSyntax.self),
+              codeBlockList.items.count == 1,
+              let funcCallExpr = codeBlockList.items.first as? GenericItem,
+              funcCallExpr.node.is(FunctionCallExprSyntax.self),
+              let identifier = funcCallExpr.items.first as? Identifier
+        else { return false }
 
         return identifier.name == "fatalError"
     }
@@ -86,9 +87,9 @@ public final class UnusedParameterAnalyzer {
     private func isParam(_ param: Parameter, usedIn item: Item) -> Bool {
         switch usage(of: param, in: item) {
         case .used:
-            return true
+            true
         case .shadowed, .unused:
-            return false
+            false
         }
     }
 
@@ -137,8 +138,8 @@ public final class UnusedParameterAnalyzer {
         let parts = metatype.split(separator: ".").map { String($0) }
 
         guard let genericParam = parts.first,
-            let member = parts.last,
-            member == "Type" else { return false }
+              let member = parts.last,
+              member == "Type" else { return false }
 
         return function.genericParameters.contains(genericParam)
     }

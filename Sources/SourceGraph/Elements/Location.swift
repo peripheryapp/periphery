@@ -12,7 +12,7 @@ public class Location {
         self.file = file
         self.line = line
         self.column = column
-        self.hashValueCache = [file.hashValue, line, column].hashValue
+        hashValueCache = [file.hashValue, line, column].hashValue
     }
 
     func relativeTo(_ path: FilePath) -> Location {
@@ -28,13 +28,9 @@ public class Location {
         [path, line.description, column.description].joined(separator: ":")
     }
 
-    private lazy var descriptionInternal: String = {
-        buildDescription(path: file.path.string)
-    }()
+    private lazy var descriptionInternal: String = buildDescription(path: file.path.string)
 
-    private lazy var shortDescriptionInternal: String = {
-        buildDescription(path: file.path.lastComponent?.string ?? "")
-    }()
+    private lazy var shortDescriptionInternal: String = buildDescription(path: file.path.lastComponent?.string ?? "")
 }
 
 extension Location: Equatable {

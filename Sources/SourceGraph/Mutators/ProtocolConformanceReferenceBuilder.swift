@@ -4,7 +4,7 @@ import Shared
 final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
     }
 
@@ -44,13 +44,13 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                     let superclassDecls = graph.inheritedTypeReferences(of: conformingClass)
                         .filter { $0.kind == .class }
                         .compactMap { graph.explicitDeclaration(withUsr: $0.usr) }
-                        .flatMap { $0.declarations }
+                        .flatMap(\.declarations)
 
                     for unimplementedProtoDecl in unimplementedProtoDecls {
                         // Find the implementation declaration in a superclass.
                         let declInSuperclass = superclassDecls.first {
                             $0.kind == unimplementedProtoDecl.kind &&
-                            $0.name == unimplementedProtoDecl.name
+                                $0.name == unimplementedProtoDecl.name
                         }
 
                         if let declInSuperclass {
@@ -101,7 +101,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
             }
 
             guard equivalentDeclarationKinds.contains(conformingDeclaration.kind),
-                conformingDeclaration.name == relatedReference.name else { continue }
+                  conformingDeclaration.name == relatedReference.name else { continue }
 
             if let protocolDeclaration = graph.explicitDeclaration(withUsr: relatedReference.usr) {
                 // Invert the related reference such that instead of the conforming declaration

@@ -22,7 +22,7 @@ final class UnusedParameterRetainer: SourceGraphMutator {
 
             for protoFuncDecl in protoFuncDecls {
                 let relatedFuncDecls = protoFuncDecl.related
-                    .filter { $0.kind.isFunctionKind }
+                    .filter(\.kind.isFunctionKind)
                     .compactMapSet { graph.explicitDeclaration(withUsr: $0.usr) }
                 let extFuncDecls = relatedFuncDecls.filter { $0.parent?.kind.isExtensionKind ?? false }
                 let conformingDecls = relatedFuncDecls.subtracting(extFuncDecls)
@@ -64,12 +64,12 @@ final class UnusedParameterRetainer: SourceGraphMutator {
             visitedDecls.formUnion(allFunctionDecls)
 
             if didResolveBase {
-                if baseFunctionDecl.accessibility.value == .open && configuration.retainPublic {
+                if baseFunctionDecl.accessibility.value == .open, configuration.retainPublic {
                     retainAllUnusedParams(inMethods: allFunctionDecls)
                 } else if hasExternalRelatedReferences(from: baseFunctionDecl) {
                     retainAllUnusedParams(inMethods: allFunctionDecls)
                 } else {
-                    let params = allFunctionDecls.flatMap { $0.unusedParameters }
+                    let params = allFunctionDecls.flatMap(\.unusedParameters)
                     retain(params: params, usedIn: allFunctionDecls)
                 }
             } else {
@@ -85,7 +85,7 @@ final class UnusedParameterRetainer: SourceGraphMutator {
     private func retainAllUnusedParams(inMethods methodDeclarations: [Declaration]) {
         methodDeclarations
             .lazy
-            .flatMap { $0.unusedParameters }
+            .flatMap(\.unusedParameters)
             .forEach { graph.markRetained($0) }
     }
 

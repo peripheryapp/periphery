@@ -51,17 +51,17 @@ public struct SourceFileCollector {
                     return nil
                 }
             }
-            .reduce(into: [FilePath: [(IndexStore, IndexStoreUnit, String?)]](), { result, tuple in
+            .reduce(into: [FilePath: [(IndexStore, IndexStoreUnit, String?)]]()) { result, tuple in
                 let (file, indexStore, unit, module) = tuple
                 result[file, default: []].append((indexStore, unit, module))
-            })
-            .reduce(into: [SourceFile: [IndexUnit]](), { result, pair in
+            }
+            .reduce(into: [SourceFile: [IndexUnit]]()) { result, pair in
                 let (file, tuples) = pair
                 let modules = tuples.compactMapSet { $0.2 }
                 let sourceFile = SourceFile(path: file, modules: modules)
                 let units = tuples.map { IndexUnit(store: $0.0, unit: $0.1) }
                 result[sourceFile] = units
-            })
+            }
     }
 
     // MARK: - Private

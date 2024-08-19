@@ -9,9 +9,9 @@ extension CommentCommand {
                  let .blockComment(comment),
                  let .docLineComment(comment),
                  let .docBlockComment(comment):
-                return comment
+                comment
             default:
-                return nil
+                nil
             }
         } ?? []
 

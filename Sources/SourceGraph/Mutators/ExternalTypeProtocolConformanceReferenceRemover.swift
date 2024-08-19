@@ -5,7 +5,7 @@ import Shared
 final class ExternalTypeProtocolConformanceReferenceRemover: SourceGraphMutator {
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
     }
 
@@ -21,7 +21,7 @@ final class ExternalTypeProtocolConformanceReferenceRemover: SourceGraphMutator 
             guard !protocolDecls.isEmpty else { continue }
 
             // Find all related references that may be protocol members.
-            let relatedRefs = extDecl.related.filter { $0.kind.isProtocolMemberKind }
+            let relatedRefs = extDecl.related.filter(\.kind.isProtocolMemberKind)
 
             for relatedRef in relatedRefs {
                 // Ensure the relatedDecl is a member of a protocol.
@@ -29,7 +29,7 @@ final class ExternalTypeProtocolConformanceReferenceRemover: SourceGraphMutator 
                     let relatedDecl = graph.explicitDeclaration(withUsr: relatedRef.usr),
                     let parentDecl = relatedDecl.parent,
                     protocolDecls.contains(parentDecl)
-                else { continue  }
+                else { continue }
 
                 // Retain all parameters from the protocol declaration as altering the function signature would break
                 // conformance.

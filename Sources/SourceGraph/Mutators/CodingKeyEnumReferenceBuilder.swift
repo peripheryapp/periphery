@@ -5,7 +5,7 @@ import Shared
 final class CodingKeyEnumReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
     }
 

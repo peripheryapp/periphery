@@ -16,4 +16,4 @@ public final class SourceLocationBuilder {
                         line: location.line,
                         column: location.column)
     }
- }
+}

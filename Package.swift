@@ -8,40 +8,39 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(url: "https://github.com/ileitch/swift-indexstore", from: "9.0.4"),
     .package(url: "https://github.com/apple/swift-syntax", from: "510.0.3"),
-    .package(url: "https://github.com/ileitch/swift-filename-matcher", from: "0.0.0")
+    .package(url: "https://github.com/ileitch/swift-filename-matcher", from: "0.0.0"),
 ]
 
 #if os(macOS)
-dependencies.append(
-    .package(
-        url: "https://github.com/tuist/xcodeproj",
-        from: "8.16.0"
+    dependencies.append(
+        .package(
+            url: "https://github.com/tuist/xcodeproj",
+            from: "8.16.0"
+        )
     )
-)
 #endif
 
 var projectDriverDependencies: [PackageDescription.Target.Dependency] = [
-  .target(name: "SourceGraph"),
-  .target(name: "Shared"),
-  .target(name: "Indexer"),
+    .target(name: "SourceGraph"),
+    .target(name: "Shared"),
+    .target(name: "Indexer"),
 ]
 
 #if os(macOS)
-projectDriverDependencies.append(.target(name: "XcodeSupport"))
+    projectDriverDependencies.append(.target(name: "XcodeSupport"))
 #endif
-
 
 var targets: [PackageDescription.Target] = [
     .executableTarget(
         name: "Frontend",
         dependencies: [
-          .target(name: "Shared"),
-          .target(name: "SourceGraph"),
-          .target(name: "PeripheryKit"),
-          .target(name: "ProjectDrivers"),
-          .product(name: "ArgumentParser", package: "swift-argument-parser"),
-          .product(name: "FilenameMatcher", package: "swift-filename-matcher")
-      ]
+            .target(name: "Shared"),
+            .target(name: "SourceGraph"),
+            .target(name: "PeripheryKit"),
+            .target(name: "ProjectDrivers"),
+            .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
+        ]
     ),
     .target(
         name: "PeripheryKit",
@@ -54,7 +53,7 @@ var targets: [PackageDescription.Target] = [
             .product(name: "SwiftSyntax", package: "swift-syntax"),
             .product(name: "SwiftParser", package: "swift-syntax"),
             .product(name: "SwiftIndexStore", package: "swift-indexstore"),
-            .product(name: "FilenameMatcher", package: "swift-filename-matcher")
+            .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
         ]
     ),
     .target(
@@ -66,8 +65,8 @@ var targets: [PackageDescription.Target] = [
         ]
     ),
     .target(
-      name: "ProjectDrivers",
-      dependencies: projectDriverDependencies
+        name: "ProjectDrivers",
+        dependencies: projectDriverDependencies
     ),
     .target(
         name: "SyntaxAnalysis",
@@ -82,7 +81,7 @@ var targets: [PackageDescription.Target] = [
         name: "SourceGraph",
         dependencies: [
             .product(name: "SwiftSyntax", package: "swift-syntax"),
-            .target(name: "Shared")
+            .target(name: "Shared"),
         ]
     ),
     .target(
@@ -90,14 +89,14 @@ var targets: [PackageDescription.Target] = [
         dependencies: [
             .product(name: "Yams", package: "Yams"),
             .product(name: "SystemPackage", package: "swift-system"),
-            .product(name: "FilenameMatcher", package: "swift-filename-matcher")
+            .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
         ]
     ),
     .target(
         name: "TestShared",
         dependencies: [
             .target(name: "PeripheryKit"),
-            .target(name: "ProjectDrivers")
+            .target(name: "ProjectDrivers"),
         ],
         path: "Tests/Shared"
     ),
@@ -105,14 +104,14 @@ var targets: [PackageDescription.Target] = [
         name: "PeripheryTests",
         dependencies: [
             .target(name: "TestShared"),
-            .target(name: "PeripheryKit")
+            .target(name: "PeripheryKit"),
         ]
     ),
     .testTarget(
         name: "SPMTests",
         dependencies: [
             .target(name: "TestShared"),
-            .target(name: "PeripheryKit")
+            .target(name: "PeripheryKit"),
         ],
         exclude: ["SPMProject"]
     ),
@@ -120,33 +119,33 @@ var targets: [PackageDescription.Target] = [
         name: "AccessibilityTests",
         dependencies: [
             .target(name: "TestShared"),
-            .target(name: "PeripheryKit")
+            .target(name: "PeripheryKit"),
         ],
         exclude: ["AccessibilityProject"]
-    )
+    ),
 ]
 
 #if os(macOS)
-targets.append(contentsOf: [
-    .target(
-        name: "XcodeSupport",
-        dependencies: [
-            .target(name: "SourceGraph"),
-            .target(name: "Shared"),
-            .target(name: "PeripheryKit"),
-            .product(name: "XcodeProj", package: "XcodeProj")
-        ]
-    ),
-    .testTarget(
-        name: "XcodeTests",
-        dependencies: [
-            .target(name: "ProjectDrivers"),
-            .target(name: "TestShared"),
-            .target(name: "PeripheryKit"),
-        ],
-        exclude: ["UIKitProject", "SwiftUIProject"]
-    )
-])
+    targets.append(contentsOf: [
+        .target(
+            name: "XcodeSupport",
+            dependencies: [
+                .target(name: "SourceGraph"),
+                .target(name: "Shared"),
+                .target(name: "PeripheryKit"),
+                .product(name: "XcodeProj", package: "XcodeProj"),
+            ]
+        ),
+        .testTarget(
+            name: "XcodeTests",
+            dependencies: [
+                .target(name: "ProjectDrivers"),
+                .target(name: "TestShared"),
+                .target(name: "PeripheryKit"),
+            ],
+            exclude: ["UIKitProject", "SwiftUIProject"]
+        ),
+    ])
 #endif
 
 let package = Package(
@@ -154,7 +153,7 @@ let package = Package(
     platforms: [.macOS(.v13)],
     products: [
         .executable(name: "periphery", targets: ["Frontend"]),
-        .library(name: "PeripheryKit", targets: ["PeripheryKit"])
+        .library(name: "PeripheryKit", targets: ["PeripheryKit"]),
     ],
     dependencies: dependencies,
     targets: targets,

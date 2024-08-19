@@ -12,7 +12,7 @@ final class ScanBehavior {
         self.logger = logger
     }
 
-    func setup(_ configPath: FilePath?) -> Result<(), PeripheryError> {
+    func setup(_ configPath: FilePath?) -> Result<Void, PeripheryError> {
         do {
             try configuration.load(from: configPath)
         } catch let error as PeripheryError {
@@ -24,7 +24,7 @@ final class ScanBehavior {
         return .success(())
     }
 
-    func main(_ block: (Project) throws -> [ScanResult]) -> Result<(), PeripheryError> {
+    func main(_ block: (Project) throws -> [ScanResult]) -> Result<Void, PeripheryError> {
         logger.contextualized(with: "version").debug(PeripheryVersion)
 
         let project: Project
@@ -82,7 +82,7 @@ final class ScanBehavior {
 
             updateChecker.notifyIfAvailable()
 
-            if !filteredResults.isEmpty && configuration.strict {
+            if !filteredResults.isEmpty, configuration.strict {
                 throw PeripheryError.foundIssues(count: filteredResults.count)
             }
         } catch let error as PeripheryError {

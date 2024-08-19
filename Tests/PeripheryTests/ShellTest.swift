@@ -7,7 +7,7 @@ final class ShellTest: XCTestCase {
         let developerDir = "/path/to/Xcode.app/Contents/Developer"
         let environment = [
             "PATH": path,
-            "DEVELOPER_DIR": developerDir
+            "DEVELOPER_DIR": developerDir,
         ]
         let shell = Shell(environment: environment, logger: .init())
         XCTAssertEqual(shell.pristineEnvironment["PATH"], path)

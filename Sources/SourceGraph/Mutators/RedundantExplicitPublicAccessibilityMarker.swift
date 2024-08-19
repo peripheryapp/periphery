@@ -15,7 +15,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
         guard !configuration.disableRedundantPublicAnalysis else { return }
 
         let nonExtensionKinds = graph.rootDeclarations.filter { !$0.kind.isExtensionKind }
-        let extensionKinds = graph.rootDeclarations.filter { $0.kind.isExtensionKind }
+        let extensionKinds = graph.rootDeclarations.filter(\.kind.isExtensionKind)
 
         for decl in nonExtensionKinds {
             // Open declarations are not yet implemented.
@@ -35,10 +35,11 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     private func validate(_ decl: Declaration) throws {
         // Check if the declaration is public, and is referenced cross module.
         if decl.accessibility.isExplicitly(.public) {
-            if !graph.isRetained(decl) &&
-                !isReferencedCrossModule(decl) &&
-                !isExposedPubliclyByAnotherDeclaration(decl) &&
-                !isProtocolIndirectlyReferencedCrossModuleByExtensionMember(decl) {
+            if !graph.isRetained(decl),
+               !isReferencedCrossModule(decl),
+               !isExposedPubliclyByAnotherDeclaration(decl),
+               !isProtocolIndirectlyReferencedCrossModuleByExtensionMember(decl)
+            {
                 // Public accessibility is redundant.
                 mark(decl)
                 markExplicitPublicDescendentDeclarations(from: decl)
@@ -58,7 +59,8 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
             // If the extended kind is already marked as having redundant public accessibility, then this extension
             // must also have redundant accessibility.
             if let extendedDecl = try graph.extendedDeclaration(forExtension: decl),
-               graph.redundantPublicAccessibility.keys.contains(extendedDecl) {
+               graph.redundantPublicAccessibility.keys.contains(extendedDecl)
+            {
                 mark(decl)
             }
         }
@@ -90,7 +92,8 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
                         // default types can cause misalignment between the positions of the two.
                         if let functionRef = $0.parent?.references.first(where: { $0.role == .variableInitFunctionCall }),
                            let functionDecl = graph.explicitDeclaration(withUsr: functionRef.usr),
-                           functionDecl.hasGenericFunctionReturnedMetatypeParameters {
+                           functionDecl.hasGenericFunctionReturnedMetatypeParameters
+                        {
                             return $0.parent
                         }
 
@@ -143,7 +146,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
             .compactMap { ref -> Declaration? in
                 guard let parent = ref.parent else { return nil }
 
-                if parent.kind == .extensionProtocol && parent.name == decl.name {
+                if parent.kind == .extensionProtocol, parent.name == decl.name {
                     return parent
                 }
 
@@ -162,7 +165,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     }
 
     private func nonTestableModulesReferencing(_ decl: Declaration) -> Set<String> {
-        let referenceFiles = graph.references(to: decl).map { $0.location.file }
+        let referenceFiles = graph.references(to: decl).map(\.location.file)
 
         return referenceFiles.flatMapSet { file -> Set<String> in
             let importsDeclModuleTestable = file.importStatements.contains(where: {

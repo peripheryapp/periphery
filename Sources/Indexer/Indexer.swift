@@ -3,6 +3,7 @@ import Foundation
 import Shared
 import SourceGraph
 import SystemPackage
+
 class Indexer {
     private let configuration: Configuration
 

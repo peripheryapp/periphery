@@ -128,14 +128,14 @@ class RedundantPublicAccessibilityTest: SPMSourceGraphTestCase {
     }
 
     #if os(macOS)
-    func testPublicClassAdoptingExternalProtocolObjcAccessible() {
-        configuration.retainObjcAccessible = true
-        Self.index()
+        func testPublicClassAdoptingExternalProtocolObjcAccessible() {
+            configuration.retainObjcAccessible = true
+            Self.index()
 
-        assertNotRedundantPublicAccessibility(.class("PublicClassAdoptingExternalProtocolObjcAccessible")) {
-            self.assertNotRedundantPublicAccessibility(.functionMethodInstance("someExternalProtocolMethod()"))
+            assertNotRedundantPublicAccessibility(.class("PublicClassAdoptingExternalProtocolObjcAccessible")) {
+                self.assertNotRedundantPublicAccessibility(.functionMethodInstance("someExternalProtocolMethod()"))
+            }
         }
-    }
     #endif
 
     func testPublicClassAdoptingInternalProtocol() {

@@ -2,11 +2,11 @@ import Foundation
 
 public final class Declaration {
     public enum Kind: String, RawRepresentable, CaseIterable {
-        case `associatedtype` = "associatedtype"
-        case `class` = "class"
-        case `enum` = "enum"
-        case enumelement = "enumelement"
-        case `extension` = "extension"
+        case `associatedtype`
+        case `class`
+        case `enum`
+        case enumelement
+        case `extension`
         case extensionClass = "extension.class"
         case extensionEnum = "extension.enum"
         case extensionProtocol = "extension.protocol"
@@ -32,21 +32,21 @@ public final class Declaration {
         case functionOperatorPrefix = "function.operator.prefix"
         case functionSubscript = "function.subscript"
         case genericTypeParam = "generic_type_param"
-        case module = "module"
+        case module
         case precedenceGroup = "precedencegroup"
-        case `protocol` = "protocol"
-        case `struct` = "struct"
-        case `typealias` = "typealias"
+        case `protocol`
+        case `struct`
+        case `typealias`
         case varClass = "var.class"
         case varGlobal = "var.global"
         case varInstance = "var.instance"
         case varLocal = "var.local"
         case varParameter = "var.parameter"
         case varStatic = "var.static"
-        case macro = "macro"
+        case macro
 
         static var functionKinds: Set<Kind> {
-            Set(Kind.allCases.filter { $0.isFunctionKind })
+            Set(Kind.allCases.filter(\.isFunctionKind))
         }
 
         static var protocolMemberKinds: [Kind] {
@@ -74,7 +74,7 @@ public final class Declaration {
         }
 
         static var variableKinds: Set<Kind> {
-            Set(Kind.allCases.filter { $0.isVariableKind })
+            Set(Kind.allCases.filter(\.isVariableKind))
         }
 
         public var isVariableKind: Bool {
@@ -91,40 +91,40 @@ public final class Declaration {
             .extensionClass,
             .extensionStruct,
             .extensionProtocol,
-            .varGlobal
+            .varGlobal,
         ]
 
         static var extensionKinds: Set<Kind> {
-            Set(Kind.allCases.filter { $0.isExtensionKind })
+            Set(Kind.allCases.filter(\.isExtensionKind))
         }
 
         public var extendedKind: Kind? {
             switch self {
             case .extensionClass:
-                return .class
+                .class
             case .extensionStruct:
-                return .struct
+                .struct
             case .extensionEnum:
-                return .enum
+                .enum
             case .extensionProtocol:
-                return .protocol
+                .protocol
             default:
-                return nil
+                nil
             }
         }
 
         public var extensionKind: Kind? {
             switch self {
             case .class:
-                return .extensionClass
+                .extensionClass
             case .struct:
-                return .extensionStruct
+                .extensionStruct
             case .enum:
-                return .extensionEnum
+                .extensionEnum
             case .protocol:
-                return .extensionProtocol
+                .extensionProtocol
             default:
-                return nil
+                nil
             }
         }
 
@@ -157,7 +157,7 @@ public final class Declaration {
         }
 
         static var accessorKinds: Set<Kind> {
-            Set(Kind.allCases.filter { $0.isAccessorKind })
+            Set(Kind.allCases.filter(\.isAccessorKind))
         }
 
         static var accessibleKinds: Set<Kind> {
@@ -175,35 +175,35 @@ public final class Declaration {
         public var displayName: String? {
             switch self {
             case .module:
-                return "imported module"
+                "imported module"
             case .class:
-                return "class"
+                "class"
             case .protocol:
-                return "protocol"
+                "protocol"
             case .struct:
-                return "struct"
+                "struct"
             case .enum:
-                return "enum"
+                "enum"
             case .enumelement:
-                return "enum case"
+                "enum case"
             case .typealias:
-                return "typealias"
+                "typealias"
             case .associatedtype:
-                return "associatedtype"
+                "associatedtype"
             case .functionConstructor:
-                return "initializer"
+                "initializer"
             case .extension, .extensionEnum, .extensionClass, .extensionStruct, .extensionProtocol:
-                return "extension"
+                "extension"
             case .functionMethodClass, .functionMethodStatic, .functionMethodInstance, .functionFree, .functionOperator, .functionSubscript:
-                return "function"
+                "function"
             case .varStatic, .varInstance, .varClass, .varGlobal, .varLocal:
-                return "property"
+                "property"
             case .varParameter:
-                return "parameter"
+                "parameter"
             case .genericTypeParam:
-                return "generic type parameter"
+                "generic type parameter"
             default:
-                return nil
+                nil
             }
         }
     }
@@ -260,12 +260,12 @@ public final class Declaration {
         declarations.contains {
             if [
                 .functionAccessorWillset,
-                .functionAccessorDidset
+                .functionAccessorDidset,
             ].contains($0.kind) {
                 return true
             }
 
-            if $0.kind.isAccessorKind && !$0.references.isEmpty {
+            if $0.kind.isAccessorKind, !$0.references.isEmpty {
                 return true
             }
 
@@ -285,7 +285,7 @@ public final class Declaration {
         self.kind = kind
         self.usrs = usrs
         self.location = location
-        self.hashValueCache = usrs.hashValue
+        hashValueCache = usrs.hashValue
     }
 
     func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {
@@ -315,7 +315,7 @@ extension Declaration: CustomStringConvertible {
         let formattedName = name != nil ? "'\(name!)'" : "nil"
         let formattedAttributes = "[" + attributes.sorted().joined(separator: ", ") + "]"
         let formattedModifiers = "[" + modifiers.sorted().joined(separator: ", ") + "]"
-        let formattedCommentCommands = "[" + commentCommands.map { $0.description }.sorted().joined(separator: ", ") + "]"
+        let formattedCommentCommands = "[" + commentCommands.map(\.description).sorted().joined(separator: ", ") + "]"
         let formattedUsrs = "[" + usrs.sorted().joined(separator: ", ") + "]"
         let implicitOrExplicit = isImplicit ? "implicit" : "explicit"
         return [
@@ -327,7 +327,7 @@ extension Declaration: CustomStringConvertible {
             formattedAttributes,
             formattedCommentCommands,
             formattedUsrs,
-            location.shortDescription
+            location.shortDescription,
         ]
     }
 }

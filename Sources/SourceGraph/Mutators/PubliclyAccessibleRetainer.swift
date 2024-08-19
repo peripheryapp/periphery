@@ -25,7 +25,7 @@ final class PubliclyAccessibleRetainer: SourceGraphMutator {
         publicDeclarations
             .lazy
             .filter { $0.kind == .enum }
-            .flatMap { $0.declarations }
+            .flatMap(\.declarations)
             .filter { $0.kind == .enumelement }
             .forEach { graph.markRetained($0) }
     }

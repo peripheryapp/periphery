@@ -49,46 +49,46 @@ public protocol PeripherySyntaxVisitor {
 }
 
 // swiftlint:disable:next extension_access_modifier
-extension PeripherySyntaxVisitor {
-    public func visit(_ node: ActorDeclSyntax) { }
-    public func visit(_ node: ClassDeclSyntax) { }
-    public func visit(_ node: ProtocolDeclSyntax) { }
-    public func visit(_ node: StructDeclSyntax) { }
-    public func visit(_ node: EnumDeclSyntax) { }
-    public func visit(_ node: EnumCaseDeclSyntax) { }
-    public func visit(_ node: ExtensionDeclSyntax) { }
-    public func visit(_: FunctionDeclSyntax) { }
-    public func visit(_ node: InitializerDeclSyntax) { }
-    public func visit(_ node: DeinitializerDeclSyntax) { }
-    public func visit(_ node: SubscriptDeclSyntax) { }
-    public func visit(_ node: VariableDeclSyntax) { }
-    public func visit(_ node: TypeAliasDeclSyntax) { }
-    public func visit(_ node: AssociatedTypeDeclSyntax) { }
-    public func visit(_ node: OperatorDeclSyntax) { }
-    public func visit(_ node: PrecedenceGroupDeclSyntax) { }
-    public func visit(_ node: ImportDeclSyntax) { }
-    public func visit(_ node: OptionalBindingConditionSyntax) {}
-    public func visit(_ node: FunctionCallExprSyntax) {}
+public extension PeripherySyntaxVisitor {
+    func visit(_: ActorDeclSyntax) {}
+    func visit(_: ClassDeclSyntax) {}
+    func visit(_: ProtocolDeclSyntax) {}
+    func visit(_: StructDeclSyntax) {}
+    func visit(_: EnumDeclSyntax) {}
+    func visit(_: EnumCaseDeclSyntax) {}
+    func visit(_: ExtensionDeclSyntax) {}
+    func visit(_: FunctionDeclSyntax) {}
+    func visit(_: InitializerDeclSyntax) {}
+    func visit(_: DeinitializerDeclSyntax) {}
+    func visit(_: SubscriptDeclSyntax) {}
+    func visit(_: VariableDeclSyntax) {}
+    func visit(_: TypeAliasDeclSyntax) {}
+    func visit(_: AssociatedTypeDeclSyntax) {}
+    func visit(_: OperatorDeclSyntax) {}
+    func visit(_: PrecedenceGroupDeclSyntax) {}
+    func visit(_: ImportDeclSyntax) {}
+    func visit(_: OptionalBindingConditionSyntax) {}
+    func visit(_: FunctionCallExprSyntax) {}
 
-    public func visitPost(_ node: ActorDeclSyntax) {}
-    public func visitPost(_ node: ClassDeclSyntax) {}
-    public func visitPost(_ node: ProtocolDeclSyntax) {}
-    public func visitPost(_ node: StructDeclSyntax) {}
-    public func visitPost(_ node: EnumDeclSyntax) {}
-    public func visitPost(_ node: EnumCaseDeclSyntax) {}
-    public func visitPost(_ node: ExtensionDeclSyntax) {}
-    public func visitPost(_ node: FunctionDeclSyntax) {}
-    public func visitPost(_ node: InitializerDeclSyntax) {}
-    public func visitPost(_ node: DeinitializerDeclSyntax) {}
-    public func visitPost(_ node: SubscriptDeclSyntax) {}
-    public func visitPost(_ node: VariableDeclSyntax) {}
-    public func visitPost(_ node: TypeAliasDeclSyntax) {}
-    public func visitPost(_ node: AssociatedTypeDeclSyntax) {}
-    public func visitPost(_ node: OperatorDeclSyntax) {}
-    public func visitPost(_ node: PrecedenceGroupDeclSyntax) {}
-    public func visitPost(_ node: ImportDeclSyntax) {}
-    public func visitPost(_ node: OptionalBindingConditionSyntax) {}
-    public func visitPost(_ node: FunctionCallExprSyntax) {}
+    func visitPost(_: ActorDeclSyntax) {}
+    func visitPost(_: ClassDeclSyntax) {}
+    func visitPost(_: ProtocolDeclSyntax) {}
+    func visitPost(_: StructDeclSyntax) {}
+    func visitPost(_: EnumDeclSyntax) {}
+    func visitPost(_: EnumCaseDeclSyntax) {}
+    func visitPost(_: ExtensionDeclSyntax) {}
+    func visitPost(_: FunctionDeclSyntax) {}
+    func visitPost(_: InitializerDeclSyntax) {}
+    func visitPost(_: DeinitializerDeclSyntax) {}
+    func visitPost(_: SubscriptDeclSyntax) {}
+    func visitPost(_: VariableDeclSyntax) {}
+    func visitPost(_: TypeAliasDeclSyntax) {}
+    func visitPost(_: AssociatedTypeDeclSyntax) {}
+    func visitPost(_: OperatorDeclSyntax) {}
+    func visitPost(_: PrecedenceGroupDeclSyntax) {}
+    func visitPost(_: ImportDeclSyntax) {}
+    func visitPost(_: OptionalBindingConditionSyntax) {}
+    func visitPost(_: FunctionCallExprSyntax) {}
 }
 
 public final class MultiplexingSyntaxVisitor: SyntaxVisitor {
@@ -100,11 +100,11 @@ public final class MultiplexingSyntaxVisitor: SyntaxVisitor {
     private var visitors: [PeripherySyntaxVisitor] = []
 
     public required init(file: SourceFile) throws {
-        self.sourceFile = file
+        sourceFile = file
         let source = try String(contentsOf: file.path.url)
-        self.syntax = Parser.parse(source: source)
-        self.locationConverter = SourceLocationConverter(fileName: file.path.string, tree: syntax)
-        self.sourceLocationBuilder = SourceLocationBuilder(file: file, locationConverter: locationConverter)
+        syntax = Parser.parse(source: source)
+        locationConverter = SourceLocationConverter(fileName: file.path.string, tree: syntax)
+        sourceLocationBuilder = SourceLocationBuilder(file: file, locationConverter: locationConverter)
         super.init(viewMode: .sourceAccurate)
     }
 

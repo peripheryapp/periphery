@@ -49,7 +49,7 @@ final class FilePathGlobTest: XCTestCase {
             "\(baseDir)/dir1/dir2/dir3",
             "\(baseDir)/dir1/dir2/dir3/file2.ext",
             "\(baseDir)/dir1/file1.ext",
-            "\(baseDir)/foo"
+            "\(baseDir)/foo",
         ])
     }
 
@@ -61,7 +61,7 @@ final class FilePathGlobTest: XCTestCase {
             baseDir,
             "\(baseDir)/dir1",
             "\(baseDir)/dir1/dir2",
-            "\(baseDir)/dir1/dir2/dir3"
+            "\(baseDir)/dir1/dir2/dir3",
         ])
     }
 
@@ -77,7 +77,7 @@ final class FilePathGlobTest: XCTestCase {
             "\(baseDir)/dir1/dir2/dir3",
             "\(baseDir)/dir1/dir2/dir3/file2.ext",
             "\(baseDir)/dir1/file1.ext",
-            "\(baseDir)/foo"
+            "\(baseDir)/foo",
         ])
     }
 
@@ -86,7 +86,7 @@ final class FilePathGlobTest: XCTestCase {
         let paths = FilePath.glob(pattern).sorted()
         XCTAssertPathsEqual(paths, [
             "\(baseDir)/dir1/dir2/dir3",
-            "\(baseDir)/dir1/dir2/dir3/file2.ext"
+            "\(baseDir)/dir1/dir2/dir3/file2.ext",
         ])
     }
 
@@ -96,7 +96,7 @@ final class FilePathGlobTest: XCTestCase {
             let paths = FilePath.glob(pattern).sorted()
             XCTAssertPathsEqual(paths, [
                 "\(baseDir)/dir1/dir2/dir3/file2.ext",
-                "\(baseDir)/dir1/file1.ext"
+                "\(baseDir)/dir1/file1.ext",
             ])
         }
     }
@@ -106,7 +106,7 @@ final class FilePathGlobTest: XCTestCase {
             let pattern = "../bar"
             let paths = FilePath.glob(pattern).sorted()
             XCTAssertPathsEqual(paths, [
-                "\(baseDir)/bar"
+                "\(baseDir)/bar",
             ])
         }
 
@@ -115,7 +115,7 @@ final class FilePathGlobTest: XCTestCase {
             let paths = FilePath.glob(pattern).sorted()
             XCTAssertPathsEqual(paths, [
                 "\(baseDir)/dir1/dir2/dir3/file2.ext",
-                "\(baseDir)/dir1/file1.ext"
+                "\(baseDir)/dir1/file1.ext",
             ])
         }
     }
@@ -123,7 +123,7 @@ final class FilePathGlobTest: XCTestCase {
     // MARK: - Private
 
     private func XCTAssertPathsEqual(_ filePaths: [FilePath], _ stringPaths: [String], file: StaticString = #file, line: UInt = #line) {
-        let convertedFilePaths = filePaths.map { $0.string }
+        let convertedFilePaths = filePaths.map(\.string)
         XCTAssertEqual(convertedFilePaths, stringPaths, file: file, line: line)
     }
 }

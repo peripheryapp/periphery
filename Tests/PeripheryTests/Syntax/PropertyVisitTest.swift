@@ -56,7 +56,7 @@ final class PropertyVisitTest: XCTestCase {
         XCTAssertEqual(result.variableType, "Set<CustomType>")
         XCTAssertEqual(result.variableTypeLocations, [
             fixtureLocation(line: 13, column: 26),
-            fixtureLocation(line: 13, column: 30)
+            fixtureLocation(line: 13, column: 30),
         ])
     }
 
@@ -65,7 +65,7 @@ final class PropertyVisitTest: XCTestCase {
         XCTAssertEqual(result.variableType, "(Int, String)")
         XCTAssertEqual(result.variableTypeLocations, [
             fixtureLocation(line: 14, column: 25),
-            fixtureLocation(line: 14, column: 30)
+            fixtureLocation(line: 14, column: 30),
         ])
     }
 
@@ -85,7 +85,7 @@ final class PropertyVisitTest: XCTestCase {
         XCTAssertEqual(propertyC.variableType, "CustomType.NestedType")
         XCTAssertEqual(propertyC.variableTypeLocations, [
             fixtureLocation(line: 19, column: 10),
-            fixtureLocation(line: 19, column: 21)
+            fixtureLocation(line: 19, column: 21),
         ])
 
         XCTAssertEqual(propertyD.variableType, "CustomType.NestedType.NestedScalar")
@@ -120,7 +120,7 @@ final class PropertyVisitTest: XCTestCase {
     // MARK: - Private
 
     private var fixturePath: SourceFile {
-        let path = FixturesProjectPath.appending( "Sources/DeclarationVisitorFixtures/PropertyFixture.swift")
+        let path = FixturesProjectPath.appending("Sources/DeclarationVisitorFixtures/PropertyFixture.swift")
         return SourceFile(path: path, modules: ["DeclarationVisitorFixtures"])
     }
 
