@@ -54,7 +54,7 @@ open class Shell {
         stderr: Bool = true
     ) throws -> String {
         let env = environment
-        let (status, output) = try exec(args, stderr: stderr, environment: env)
+        let (status, output) = try exec(args, environment: env, stderr: stderr)
 
         if status == 0 {
             return output
@@ -73,7 +73,7 @@ open class Shell {
         stderr: Bool = true
     ) throws -> Int32 {
         let env = environment
-        let (status, _) = try exec(args, stderr: stderr, captureOutput: false, environment: env)
+        let (status, _) = try exec(args, environment: env, stderr: stderr, captureOutput: false)
         return status
     }
 
@@ -81,9 +81,9 @@ open class Shell {
 
     private func exec(
         _ args: [String],
+        environment: [String: String],
         stderr: Bool = false,
-        captureOutput: Bool = true,
-        environment: [String: String]
+        captureOutput: Bool = true
     ) throws -> (Int32, String) {
         let launchPath: String
         let newArgs: [String]

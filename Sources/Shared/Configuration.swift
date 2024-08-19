@@ -144,10 +144,8 @@ public final class Configuration {
     public func asYaml() throws -> String {
         var config: [String: Any?] = [:]
 
-        for setting in settings {
-            if setting.hasNonDefaultValue {
-                config[setting.key] = setting.wrappedValue
-            }
+        for setting in settings where setting.hasNonDefaultValue {
+            config[setting.key] = setting.wrappedValue
         }
 
         return try Yams.dump(object: config)
@@ -187,7 +185,6 @@ public final class Configuration {
         }
     }
 
-    // swiftlint:disable:next discouraged_optional_collection
     private var _indexExcludeMatchers: [FilenameMatcher]?
     public var indexExcludeMatchers: [FilenameMatcher] {
         if let _indexExcludeMatchers {
@@ -199,7 +196,6 @@ public final class Configuration {
         return matchers
     }
 
-    // swiftlint:disable:next discouraged_optional_collection
     private var _retainFilesMatchers: [FilenameMatcher]?
     public var retainFilesMatchers: [FilenameMatcher] {
         if let _retainFilesMatchers {
@@ -263,7 +259,7 @@ protocol AbstractSetting {
     private let setter: Setter
     private var value: Value
 
-    fileprivate init(
+    init(
         key: String,
         defaultValue: Value,
         setter: @escaping Setter = { $0 as? Value }
@@ -292,7 +288,6 @@ protocol AbstractSetting {
     func reset() {
         wrappedValue = defaultValue
     }
-    // swiftlint:enable strict_fileprivate
 }
 
 private let filePathSetter: (Any) -> FilePath? = { value in

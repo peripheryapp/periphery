@@ -2,7 +2,6 @@
 import SystemPackage
 import XCTest
 
-// swiftlint:disable:next final_test_case balanced_xctest_lifecycle
 class FixtureSourceGraphTestCase: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()

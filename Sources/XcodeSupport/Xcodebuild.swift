@@ -107,7 +107,6 @@ public final class Xcodebuild {
 
     // MARK: - Private
 
-    // swiftlint:disable:next discouraged_optional_collection
     private func deserialize(_ jsonString: String) throws -> [String: Any]? {
         do {
             guard let jsonData = jsonString.data(using: .utf8) else { return nil }

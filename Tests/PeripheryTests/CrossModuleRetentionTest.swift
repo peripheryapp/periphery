@@ -1,7 +1,6 @@
 import SystemPackage
 @testable import TestShared
 
-// swiftlint:disable:next balanced_xctest_lifecycle
 final class CrossModuleRetentionTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()

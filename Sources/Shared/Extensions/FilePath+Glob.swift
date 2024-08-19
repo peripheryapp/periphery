@@ -1,4 +1,3 @@
-// swiftlint:disable file_header
 //  Created by Eric Firestone on 3/22/16.
 //  Copyright © 2016 Square, Inc. All rights reserved.
 //  Released under the Apache v2 License.
@@ -31,7 +30,6 @@ private class Glob {
     private let logger: Logger
     private var isDirectoryCache: [String: Bool] = [:]
 
-    // swiftlint:disable:next strict_fileprivate
     fileprivate var paths: Set<String> = []
 
     init(
@@ -99,7 +97,6 @@ private class Glob {
 
         for directory in directories {
             let partiallyResolvedPattern = directory.appendingPathComponent(lastPart)
-            // swiftlint:disable:next legacy_objc_type
             let standardizedPattern = (partiallyResolvedPattern.relativePath as NSString).standardizingPath
             results.append(contentsOf: expandGlobstar(pattern: standardizedPattern))
         }

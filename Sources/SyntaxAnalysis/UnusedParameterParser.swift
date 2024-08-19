@@ -319,7 +319,6 @@ struct UnusedParameterParser {
               collector)
     }
 
-    // swiftlint:disable:next function_parameter_count
     private func build(
         function syntax: SyntaxProtocol,
         attributes: AttributeListSyntax?,

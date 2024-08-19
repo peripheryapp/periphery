@@ -52,7 +52,6 @@ final class CsvFormatter: OutputFormatter {
 
     // MARK: - Private
 
-    // swiftlint:disable:next function_parameter_count
     private func format(
         kind: String,
         name: String?,

@@ -1,68 +1,38 @@
-included:
-  - Sources
-  - Tests
-  - Package.swift
 excluded:
+  - .build
   - Tests/Fixtures
   - Tests/AccessibilityTests/AccessibilityProject
   - Tests/XcodeTests/UIKitProject
+  - Tests/XcodeTests/SwiftUIProject
 
-# Enabled/disabled rules
-analyzer_rules:
-  - all
 opt_in_rules:
-  - all
+  - single_test_class
+
 disabled_rules:
-  - anyobject_protocol
-  - inert_defer
-  - unused_capture_list  
-  - explicit_acl
-  - explicit_type_interface
-  - missing_docs
-  - required_deinit
-  - line_length
-  - type_contents_order
-  - prefer_nimble
-  - explicit_top_level_acl
-  - anonymous_argument_in_multiline_closure
-  - one_declaration_per_file
-  - conditional_returns_on_newline
-  - vertical_whitespace_between_cases
-  - no_grouping_extension
-  - explicit_enum_raw_value
-  - file_types_order
+  # Formatting is handled by SwiftFormat
+  - trailing_comma
+  - opening_brace
+  - vertical_parameter_alignment_on_call
+  - let_var_whitespace
   - indentation_width
-  - identifier_name
-  - trailing_closure
-  - multiline_arguments_brackets  
-  - multiline_function_chains
-  - no_extension_access_modifier
-  - force_try
-  - switch_case_on_newline
-  - sorted_enum_cases
-  - prefer_self_in_static_references
-  - superfluous_else
-  - force_unwrapping
-  - file_name
-  - todo
-  - no_magic_numbers
-  - prefixed_toplevel_constant
-  - untyped_error_in_catch
+  - attributes
+  - anonymous_argument_in_multiline_closure
+  - vertical_whitespace_between_cases
+
+  # Length/size rules
   - cyclomatic_complexity
   - closure_body_length
   - function_body_length
   - type_body_length
-  - file_length  
-  - contrasted_opening_brace
-  - unused_parameter
-  - no_empty_block
-  - prefer_key_path
+  - file_length
+  - line_length
+  - identifier_name
+  - type_name
+  - large_tuple
+  - function_parameter_count
 
-balanced_xctest_lifecycle: &unit_test_configuration
-  test_parent_classes:
-    - SourceGraphTestCase
-    - FixtureSourceGraphTestCase    
-    - XCTestCase
-empty_xctest_method: *unit_test_configuration
-final_test_case: *unit_test_configuration
-single_test_class: *unit_test_configuration
+  # Other
+  - discouraged_optional_collection
+  - non_optional_string_data_conversion # https://github.com/realm/SwiftLint/issues/5263#issuecomment-2115182747
+  - balanced_xctest_lifecycle
+  - todo

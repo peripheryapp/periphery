@@ -53,7 +53,6 @@
         private let project: XcodeProjectlike
         private let schemes: Set<String>
 
-        // swiftlint:disable:next function_default_parameter_at_end
         init(
             logger: Logger = .init(),
             configuration: Configuration,

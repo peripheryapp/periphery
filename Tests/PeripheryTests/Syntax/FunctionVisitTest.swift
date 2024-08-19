@@ -5,7 +5,6 @@ import Foundation
 import XCTest
 
 final class FunctionVisitTest: XCTestCase {
-    // swiftlint:disable:next implicitly_unwrapped_optional
     private var results: [Location: DeclarationSyntaxVisitor.Result]!
 
     override func setUpWithError() throws {

@@ -3,7 +3,6 @@ import SourceGraph
 import SwiftSyntax
 
 public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
-    // swiftlint:disable:next large_tuple
     public typealias Result = (
         location: Location,
         accessibility: Accessibility?,
@@ -220,10 +219,8 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
 
     func visitVariableTupleBinding(node: VariableDeclSyntax, pattern: TuplePatternSyntax, typeTuple: TupleTypeElementListSyntax?, initializerTuple: LabeledExprListSyntax?) {
         let elements = Array(pattern.elements)
-        // swiftlint:disable array_init
         let types: [TupleTypeElementSyntax?] = typeTuple?.map { $0 } ?? Array(repeating: nil, count: elements.count)
         let initializers: [LabeledExprSyntax?] = initializerTuple?.map { $0 } ?? Array(repeating: nil, count: elements.count)
-        // swiftlint:enable array_init
 
         for (element, (type, initializer)) in zip(elements, zip(types, initializers)) {
             if let elementTuplePattern = element.pattern.as(TuplePatternSyntax.self) {
@@ -301,7 +298,6 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
 
     // MARK: - Private
 
-    // swiftlint:disable:next function_default_parameter_at_end
     private func parse(
         modifiers: DeclModifierListSyntax?,
         attributes: AttributeListSyntax?,

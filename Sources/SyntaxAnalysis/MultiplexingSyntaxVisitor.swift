@@ -48,7 +48,6 @@ public protocol PeripherySyntaxVisitor {
     func visitPost(_ node: FunctionCallExprSyntax)
 }
 
-// swiftlint:disable:next extension_access_modifier
 public extension PeripherySyntaxVisitor {
     func visit(_: ActorDeclSyntax) {}
     func visit(_: ClassDeclSyntax) {}

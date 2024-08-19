@@ -2,7 +2,7 @@ import SystemPackage
 @testable import TestShared
 import XCTest
 
-#if os(macOS) // swiftlint:disable:next balanced_xctest_lifecycle
+#if os(macOS)
     final class ObjcAnnotatedRetentionTest: FixtureSourceGraphTestCase {
         func testRetainsAnnotatedExtensionDeclarations() {
             analyze(retainObjcAnnotated: true) {
