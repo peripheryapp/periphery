@@ -5,12 +5,9 @@ import Shared
 import SystemPackage
 import XCTest
 
-// swiftlint:disable:next blanket_disable_command
-// swiftlint:disable test_case_accessibility
 open class SourceGraphTestCase: XCTestCase {
     static var plan: IndexPlan!
     static var configuration: Configuration!
-    // swiftlint:enable implicitly_unwrapped_optional
     static var results: [ScanResult] = []
 
     private static var graph = SourceGraph()
@@ -195,7 +192,6 @@ open class SourceGraphTestCase: XCTestCase {
 
     // MARK: - Private
 
-    // swiftlint:disable:next function_default_parameter_at_end discouraged_optional_collection
     private func materialize(_ description: DeclarationDescription, in defaultDeclarations: Set<Declaration>? = nil, fail: Bool = true, file: StaticString, line: UInt) -> Declaration? {
         let declarations = scopedDeclarations(from: defaultDeclarations)
         let matchingDeclarations = declarations.filter { $0.kind == description.kind && $0.name == description.name }
@@ -212,7 +208,6 @@ open class SourceGraphTestCase: XCTestCase {
         return matchedDeclaration
     }
 
-    // swiftlint:disable:next discouraged_optional_collection
     private func scopedDeclarations(from defaultDeclarations: Set<Declaration>? = nil) -> Set<Declaration> {
         let allDeclarations = defaultDeclarations ?? Self.graph.rootDeclarations
 

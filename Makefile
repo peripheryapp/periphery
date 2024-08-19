@@ -23,3 +23,8 @@ show_bin_path:
 
 swiftformat:
 	@./scripts/lint/swiftformat.sh
+
+swiftlint:
+	@./scripts/lint/swiftlint.sh
+
+lint: swiftlint swiftformat

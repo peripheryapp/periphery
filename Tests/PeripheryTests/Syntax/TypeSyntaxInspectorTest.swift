@@ -7,7 +7,6 @@ import SwiftSyntax
 import XCTest
 
 final class TypeSyntaxInspectorTest: XCTestCase {
-    // swiftlint:disable:next implicitly_unwrapped_optional
     private var results: [Location: TypeSyntaxInspectorTestVisitor.Result]!
 
     override func setUpWithError() throws {

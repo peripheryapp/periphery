@@ -8,4 +8,4 @@ if [[ "$INSTALLED_VERSION" != "$VERSION" ]]; then
   exit 1
 fi
 
-swiftformat .
+swiftformat --quiet .

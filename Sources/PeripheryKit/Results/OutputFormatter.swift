@@ -39,7 +39,6 @@ extension OutputFormatter {
         var secondaryResults: [(Location, String)] = []
 
         if var name = result.declaration.name {
-            // swiftlint:disable:next identifier_name
             if let kind = result.declaration.kind.displayName, let first_ = kind.first {
                 let first = String(first_)
                 description += "\(first.uppercased())\(kind.dropFirst()) "
@@ -95,7 +94,6 @@ extension OutputFormatter {
     }
 }
 
-// swiftlint:disable:next no_extension_access_modifier
 public extension OutputFormat {
     var formatter: OutputFormatter.Type {
         switch self {

@@ -1,7 +1,6 @@
 @testable import TestShared
 
-// swiftlint:disable:next final_test_case balanced_xctest_lifecycle
-class UIKitProjectTest: XcodeSourceGraphTestCase {
+final class UIKitProjectTest: XcodeSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 

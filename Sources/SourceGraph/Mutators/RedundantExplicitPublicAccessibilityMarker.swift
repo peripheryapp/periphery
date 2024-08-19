@@ -1,6 +1,5 @@
 import Shared
 
-// swiftlint:disable:next type_name
 final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration

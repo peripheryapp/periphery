@@ -137,9 +137,9 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.protocol("FixtureProtocol114"))
             assertRedundantProtocol("FixtureProtocol114",
                                     implementedBy:
-                                    .class("FixtureClass114"), // swiftlint:disable vertical_parameter_alignment_on_call
+                                    .class("FixtureClass114"),
                                     .class("FixtureClass115"),
-                                    .struct("FixtureStruct116")) // swiftlint:enable vertical_parameter_alignment_on_call
+                                    .struct("FixtureStruct116"))
         }
     }
 

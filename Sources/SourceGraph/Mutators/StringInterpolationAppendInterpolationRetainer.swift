@@ -4,7 +4,6 @@ import Shared
 // https://github.com/apple/swift/issues/56189
 // The index store does not contain references to `appendInterpolation` functions from their use in string literals.
 final class StringInterpolationAppendInterpolationRetainer: SourceGraphMutator {
-    // swiftlint:disable:previous type_name
     private let graph: SourceGraph
 
     required init(graph: SourceGraph, configuration _: Configuration) {

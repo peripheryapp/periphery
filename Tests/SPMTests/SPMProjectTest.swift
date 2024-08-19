@@ -1,8 +1,7 @@
 @testable import TestShared
 import XCTest
 
-// swiftlint:disable:next balanced_xctest_lifecycle
-class SPMProjectTest: SPMSourceGraphTestCase {
+final class SPMProjectTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 

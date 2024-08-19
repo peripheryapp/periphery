@@ -1,0 +1,3 @@
+disabled_rules:
+  - implicitly_unwrapped_optional
+  - force_try

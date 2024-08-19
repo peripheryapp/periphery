@@ -39,13 +39,12 @@ final class UpdateChecker {
         urlRequest.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
 
         let task = urlSession.dataTask(with: urlRequest) { [weak self] data, _, error in
-            // swiftlint:disable:next self_binding
-            guard let strongSelf = self else { return }
+            guard let self else { return }
 
             if let error {
-                strongSelf.debugLogger.debug("error: \(error.localizedDescription)")
-                strongSelf.error = error
-                strongSelf.semaphore.signal()
+                debugLogger.debug("error: \(error.localizedDescription)")
+                self.error = error
+                semaphore.signal()
                 return
             }
 
@@ -63,14 +62,14 @@ final class UpdateChecker {
                 }
 
                 let message = "Failed to identify latest release tag in: \(json)"
-                strongSelf.error = PeripheryError.updateCheckError(message: message)
-                strongSelf.debugLogger.debug(message)
-                strongSelf.semaphore.signal()
+                self.error = PeripheryError.updateCheckError(message: message)
+                debugLogger.debug(message)
+                semaphore.signal()
                 return
             }
 
-            strongSelf.latestVersion = tagName
-            strongSelf.semaphore.signal()
+            latestVersion = tagName
+            semaphore.signal()
         }
 
         task.resume()
