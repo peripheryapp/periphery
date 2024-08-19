@@ -17,7 +17,7 @@ final class Project {
             return self.init(kind: .spm)
         }
 
-        throw PeripheryError.usageError("Failed to identify project kind.")
+        throw PeripheryError.usageError("Failed to identify project in the current directory. For Xcode projects use the '--project' option, and for SPM projects change to the directory containing the Package.swift.")
     }
 
     let kind: ProjectKind
