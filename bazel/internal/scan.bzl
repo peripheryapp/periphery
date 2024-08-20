@@ -5,6 +5,7 @@ load("@rules_apple//apple:providers.bzl", "AppleResourceInfo")
 PeripheryInfo = provider(
     doc = "Provides inputs needed to generate a generic project configuration file.",
     fields = {
+        "swift_srcs": "A depset of Swift source files.",
         "indexstores": "A depset of .indexstore files.",
         "plists": "A depset of .plist files.",
         "xibs": "A depset of .xib and .storyboard files.",
@@ -32,6 +33,7 @@ _force_indexstore = transition(
 )
 
 def _scan_inputs_aspect_impl(target, ctx):
+    swift_srcs = []
     indexstores = []
     test_targets = []
     plists = []
@@ -43,6 +45,9 @@ def _scan_inputs_aspect_impl(target, ctx):
         if SwiftInfo in target and hasattr(target[SwiftInfo], "direct_modules"):
             for module in target[SwiftInfo].direct_modules:
                 if hasattr(module, "swift"):
+                    if hasattr(module.compilation_context, "direct_sources"):
+                        swift_srcs.extend([src for src in module.compilation_context.direct_sources if src.extension == "swift"])
+
                     if ctx.rule.attr.testonly:
                         test_targets.append(module.name)
 
@@ -76,6 +81,10 @@ def _scan_inputs_aspect_impl(target, ctx):
 
     deps = getattr(ctx.rule.attr, "deps", [])
 
+    swift_srcs_depset = depset(
+        swift_srcs,
+        transitive = [dep[PeripheryInfo].swift_srcs for dep in deps],
+    )
     indexstores_depset = depset(
         indexstores,
         transitive = [dep[PeripheryInfo].indexstores for dep in deps],
@@ -103,6 +112,7 @@ def _scan_inputs_aspect_impl(target, ctx):
 
     return [
         PeripheryInfo(
+            swift_srcs = swift_srcs_depset,
             indexstores = indexstores_depset,
             plists = plists_depset,
             xibs = xibs_depset,
@@ -113,6 +123,7 @@ def _scan_inputs_aspect_impl(target, ctx):
     ]
 
 def _scan_impl(ctx):
+    swift_srcs_set = sets.make()
     indexstores_set = sets.make()
     plists_set = sets.make()
     xibs_set = sets.make()
@@ -121,6 +132,7 @@ def _scan_impl(ctx):
     test_targets_set = sets.make()
 
     for dep in ctx.attr.deps:
+        swift_srcs_set = sets.union(swift_srcs_set, sets.make(dep[PeripheryInfo].swift_srcs.to_list()))
         indexstores_set = sets.union(indexstores_set, sets.make(dep[PeripheryInfo].indexstores.to_list()))
         plists_set = sets.union(plists_set, sets.make(dep[PeripheryInfo].plists.to_list()))
         xibs_set = sets.union(xibs_set, sets.make(dep[PeripheryInfo].xibs.to_list()))
@@ -128,6 +140,7 @@ def _scan_impl(ctx):
         xcmappingmodels_set = sets.union(xcmappingmodels_set, sets.make(dep[PeripheryInfo].xcmappingmodels.to_list()))
         test_targets_set = sets.union(test_targets_set, sets.make(dep[PeripheryInfo].test_targets.to_list()))
 
+    swift_srcs = sets.to_list(swift_srcs_set)
     indexstores = sets.to_list(indexstores_set)
     plists = sets.to_list(plists_set)
     xibs = sets.to_list(xibs_set)
@@ -164,13 +177,16 @@ def _scan_impl(ctx):
             [ctx.outputs.scan, project_config_file],
         ),
         runfiles = ctx.runfiles(
-            files = indexstores + plists + xibs + xcdatamodels + xcmappingmodels,
+            # Swift sources are not included in the generate project file, yet they are referenced
+            # in the indexstores and will be read by Periphery, and therefore must be present in
+            # the runfiles.
+            files = swift_srcs + indexstores + plists + xibs + xcdatamodels + xcmappingmodels,
         )
     )
 
 scan_inputs_aspect = aspect(
     _scan_inputs_aspect_impl,
-    attr_aspects = ["deps"],
+    attr_aspects = ["deps", "swift_target"],
 )
 
 scan = rule(
