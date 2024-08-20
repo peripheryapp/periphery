@@ -23,11 +23,8 @@ final class ExtensionReferenceBuilder: SourceGraphMutator {
             guard let extendedDeclaration = graph.explicitDeclaration(withUsr: extendedTypeReference.usr) else {
                 // This is an extension on an external type and cannot be folded.
                 graph.markRetained(extensionDeclaration)
-                referenceExtendedTypeAliases(of: extendedTypeReference, from: extensionDeclaration)
                 continue
             }
-
-            referenceExtendedTypeAliases(of: extendedTypeReference, from: extendedDeclaration)
 
             // Don't fold protocol extensions as they must be treated differently.
             guard kind != .extensionProtocol else { continue }
@@ -46,21 +43,6 @@ final class ExtensionReferenceBuilder: SourceGraphMutator {
 
             graph.markExtension(extensionDeclaration, extending: extendedDeclaration)
             graph.remove(extensionDeclaration)
-        }
-    }
-
-    private func referenceExtendedTypeAliases(of extendedTypeReference: Reference, from extensionDeclaration: Declaration) {
-        // Extensions on type aliases reference the existing type, not the alias.
-        // We need to find the typealias and build a reference to it.
-        let extendedTypeReferences = graph.allReferencesByUsr[extendedTypeReference.usr, default: []]
-
-        for reference in extendedTypeReferences {
-            guard let aliasDecl = reference.parent, aliasDecl.kind == .typealias else { continue }
-            for usr in aliasDecl.usrs {
-                let aliasReference = Reference(kind: .typealias, usr: usr, location: extensionDeclaration.location)
-                aliasReference.name = aliasDecl.name
-                graph.add(aliasReference, from: extensionDeclaration)
-            }
         }
     }
 }
