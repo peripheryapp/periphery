@@ -10,7 +10,7 @@ final class EntryPointAttributeRetainer: SourceGraphMutator {
 
     func mutate() {
         graph
-            .declarations(ofKinds: [.class, .struct])
+            .declarations(ofKinds: [.class, .struct, .enum])
             .lazy
             .filter {
                 $0.attributes.contains("NSApplicationMain") ||

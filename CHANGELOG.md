@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- Enums with the `@main` attribute are now retained.
+- None.
 
 ## 2.21.1 (2024-09-28)
 
@@ -24,6 +24,7 @@
 
 ##### Bug Fixes
 
+- Enums with the `@main` attribute are now retained.
 - Fixed issue in Swift 6 where declarations that override external type members are incorrectly identified as unused.
 - Unused public/exported imports are excluded from the results even if unused in the declaring file as the exported symbols may be referenced in other files, and thus removing the import would result in a build failure.
 
