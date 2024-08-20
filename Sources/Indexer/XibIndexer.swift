@@ -4,10 +4,10 @@ import SystemPackage
 
 final class XibIndexer: Indexer {
     private let xibFiles: Set<FilePath>
-    private let graph: SourceGraph
+    private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger
 
-    required init(xibFiles: Set<FilePath>, graph: SourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
+    required init(xibFiles: Set<FilePath>, graph: SynchronizedSourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
         self.xibFiles = xibFiles
         self.graph = graph
         self.logger = logger.contextualized(with: "index:xib")

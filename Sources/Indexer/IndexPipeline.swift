@@ -4,10 +4,10 @@ import SourceGraph
 
 public struct IndexPipeline {
     private let plan: IndexPlan
-    private let graph: SourceGraph
+    private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger
 
-    public init(plan: IndexPlan, graph: SourceGraph, logger: ContextualLogger) {
+    public init(plan: IndexPlan, graph: SynchronizedSourceGraph, logger: ContextualLogger) {
         self.plan = plan
         self.graph = graph
         self.logger = logger

@@ -54,7 +54,7 @@ open class SourceGraphTestCase: XCTestCase {
         graph = SourceGraph()
         let pipeline = IndexPipeline(
             plan: newPlan,
-            graph: graph,
+            graph: SynchronizedSourceGraph(graph: graph),
             logger: Logger().contextualized(with: "index")
         )
         try! pipeline.perform()

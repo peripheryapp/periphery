@@ -12,13 +12,13 @@ public struct IndexUnit {
 
 final class SwiftIndexer: Indexer {
     private let sourceFiles: [SourceFile: [IndexUnit]]
-    private let graph: SourceGraph
+    private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger
     private let configuration: Configuration
 
     required init(
         sourceFiles: [SourceFile: [IndexUnit]],
-        graph: SourceGraph,
+        graph: SynchronizedSourceGraph,
         logger: ContextualLogger,
         configuration: Configuration = .shared
     ) {
@@ -82,7 +82,7 @@ final class SwiftIndexer: Indexer {
         let sourceFile: SourceFile
 
         private let units: [IndexUnit]
-        private let graph: SourceGraph
+        private let graph: SynchronizedSourceGraph
         private let logger: ContextualLogger
         private let configuration: Configuration
         private var retainAllDeclarations: Bool
@@ -91,7 +91,7 @@ final class SwiftIndexer: Indexer {
             sourceFile: SourceFile,
             units: [IndexUnit],
             retainAllDeclarations: Bool,
-            graph: SourceGraph,
+            graph: SynchronizedSourceGraph,
             logger: ContextualLogger,
             configuration: Configuration
         ) {
@@ -202,11 +202,11 @@ final class SwiftIndexer: Indexer {
             }
 
             graph.withLock {
-                graph.addUnsafe(references)
-                graph.addUnsafe(newDeclarations)
+                graph.addWithoutLock(references)
+                graph.addWithoutLock(newDeclarations)
 
                 if retainAllDeclarations {
-                    graph.markRetainedUnsafe(newDeclarations)
+                    graph.markRetainedWithoutLock(newDeclarations)
                 }
             }
 
@@ -252,10 +252,10 @@ final class SwiftIndexer: Indexer {
         private func establishDeclarationHierarchy() {
             graph.withLock {
                 for (parent, decls) in childDeclsByParentUsr {
-                    guard let parentDecl = graph.explicitDeclaration(withUsr: parent) else {
+                    guard let parentDecl = graph.explicitDeclarationWithoutLock(withUsr: parent) else {
                         if varParameterUsrs.contains(parent) {
                             // These declarations are children of a parameter and are redundant.
-                            decls.forEach { graph.removeUnsafe($0) }
+                            decls.forEach { graph.removeWithoutLock($0) }
                         }
 
                         continue
@@ -273,7 +273,7 @@ final class SwiftIndexer: Indexer {
         private func associateLatentReferences() {
             for (usr, refs) in referencesByUsr {
                 graph.withLock {
-                    if let decl = graph.explicitDeclaration(withUsr: usr) {
+                    if let decl = graph.explicitDeclarationWithoutLock(withUsr: usr) {
                         for ref in refs {
                             associateUnsafe(ref, with: decl)
                         }
@@ -454,14 +454,14 @@ final class SwiftIndexer: Indexer {
                     for param in params {
                         let paramDecl = param.makeDeclaration(withParent: functionDecl)
                         functionDecl.unusedParameters.insert(paramDecl)
-                        graph.addUnsafe(paramDecl)
+                        graph.addWithoutLock(paramDecl)
 
                         if retainAllDeclarations {
-                            graph.markRetainedUnsafe(paramDecl)
+                            graph.markRetainedWithoutLock(paramDecl)
                         }
 
                         if (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) || ignoredParamNames.contains(param.name) {
-                            graph.markRetainedUnsafe(paramDecl)
+                            graph.markRetainedWithoutLock(paramDecl)
                         }
                     }
                 }

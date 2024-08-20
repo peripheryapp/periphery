@@ -70,7 +70,8 @@ final class Scan {
 
         let indexLogger = logger.contextualized(with: "index")
         let plan = try driver.plan(logger: indexLogger)
-        let pipeline = IndexPipeline(plan: plan, graph: graph, logger: indexLogger)
+        let syncSourceGraph = SynchronizedSourceGraph(graph: graph)
+        let pipeline = IndexPipeline(plan: plan, graph: syncSourceGraph, logger: indexLogger)
         try pipeline.perform()
         logger.endInterval(indexInterval)
     }
