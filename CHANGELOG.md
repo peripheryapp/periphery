@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Enums with the `@main` attribute are now retained.
 
 ## 2.21.0 (2024-06-15)
 
