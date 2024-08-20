@@ -33,19 +33,23 @@ public struct SourceFileCollector {
                 let units = indexStore.units(includeSystem: false)
 
                 return try units.compactMap { unit -> (FilePath, IndexStore, IndexStoreUnit, String?)? in
-                    guard let filePath = try indexStore.mainFilePath(for: unit), !filePath.isEmpty else { return nil }
+                    guard let filePath = try indexStore.mainFilePath(for: unit), !filePath.isEmpty else {
+                        return nil
+                    }
 
                     let file = FilePath.makeAbsolute(filePath, relativeTo: currentFilePath)
 
-                    if file.exists {
-                        if !isExcluded(file) {
-                            let module = try indexStore.moduleName(for: unit)
-                            if let module, excludedTargets.contains(module) {
-                                return nil
-                            }
+                    guard file.exists else {
+                        throw PeripheryError.pathDoesNotExist(path: file.string)
+                    }
 
-                            return (file, indexStore, unit, module)
+                    if !isExcluded(file) {
+                        let module = try indexStore.moduleName(for: unit)
+                        if let module, excludedTargets.contains(module) {
+                            return nil
                         }
+
+                        return (file, indexStore, unit, module)
                     }
 
                     return nil

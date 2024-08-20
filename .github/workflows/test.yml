@@ -6,9 +6,8 @@ on:
   pull_request: {}
 env:
   swift_package_resolve: swift package resolve
-  swift_build: swift build --build-tests
   swift_test: swift test
-  periphery_scan: ./.build/debug/periphery scan --quiet --skip-build
+  periphery_scan: ./.build/debug/periphery scan --quiet --clean-build
   cache_version: 1
 jobs:
   macOS:
@@ -45,12 +44,10 @@ jobs:
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}
-    - name: Build
-      run: ${{ env.swift_build }}
-    - name: Test
-      run: ${{ env.swift_test }}
     - name: Scan
       run: ${{ env.periphery_scan }} --strict
+    - name: Test
+      run: ${{ env.swift_test }}
   linux:
     strategy:
       fail-fast: false
@@ -86,9 +83,7 @@ jobs:
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}
-    - name: Build
-      run: ${{ env.swift_build }}
-    - name: Test
-      run: ${{ env.swift_test }}
     - name: Scan
       run: ${{ env.periphery_scan }}
+    - name: Test
+      run: ${{ env.swift_test }}
