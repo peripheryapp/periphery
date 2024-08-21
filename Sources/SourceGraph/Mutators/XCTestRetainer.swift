@@ -1,5 +1,6 @@
 import Foundation
 import Shared
+import Configuration
 
 final class XCTestRetainer: SourceGraphMutator {
     private let graph: SourceGraph

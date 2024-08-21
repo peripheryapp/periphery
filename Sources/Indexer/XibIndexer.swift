@@ -1,6 +1,8 @@
 import Shared
 import SourceGraph
 import SystemPackage
+import Utils
+import Configuration
 
 final class XibIndexer: Indexer {
     private let xibFiles: Set<FilePath>

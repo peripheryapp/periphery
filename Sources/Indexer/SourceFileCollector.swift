@@ -3,6 +3,8 @@ import Shared
 import SourceGraph
 import SwiftIndexStore
 import SystemPackage
+import Utils
+import Configuration
 
 public struct SourceFileCollector {
     private let indexStorePaths: Set<FilePath>

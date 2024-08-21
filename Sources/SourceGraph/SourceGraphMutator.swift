@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Configuration
 
 protocol SourceGraphMutator: AnyObject {
     init(graph: SourceGraph, configuration: Configuration)

@@ -1,5 +1,4 @@
 import Foundation
-import Shared
 @testable import XcodeSupport
 import XCTest
 

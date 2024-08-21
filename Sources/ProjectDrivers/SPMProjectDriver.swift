@@ -3,6 +3,9 @@ import Indexer
 import Shared
 import SwiftIndexStore
 import SystemPackage
+import Configuration
+import Utils
+import BaseLogger
 
 public final class SPMProjectDriver {
     public static func build() throws -> Self {

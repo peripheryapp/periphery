@@ -1,5 +1,6 @@
 import Foundation
 import Shared
+import Configuration
 
 /// Marks unused import statements (experimental).
 ///

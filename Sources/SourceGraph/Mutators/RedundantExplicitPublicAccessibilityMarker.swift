@@ -1,4 +1,5 @@
 import Shared
+import Configuration
 
 final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     private let graph: SourceGraph

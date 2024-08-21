@@ -1,6 +1,8 @@
 import Foundation
 import Shared
 import SystemPackage
+import Configuration
+import BaseLogger
 
 public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
     public static func detect() -> Self? {

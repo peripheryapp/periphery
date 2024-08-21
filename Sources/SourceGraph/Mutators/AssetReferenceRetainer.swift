@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Configuration
 
 /// Retains references from non-Swift assets, such as interface builder, Info.plist and CoreData models.
 final class AssetReferenceRetainer: SourceGraphMutator {

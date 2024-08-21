@@ -2,6 +2,8 @@ import Foundation
 import PeripheryKit
 import Shared
 import SystemPackage
+import Configuration
+import Utils
 
 final class ScanBehavior {
     private let configuration: Configuration

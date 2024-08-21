@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 import SystemPackage
+import ProjectDrivers
 
 final class SPMProjectSetupGuide: SetupGuideHelpers, SetupGuide {
     static func detect() -> Self? {

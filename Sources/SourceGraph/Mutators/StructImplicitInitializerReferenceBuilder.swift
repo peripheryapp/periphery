@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Configuration
 
 /// Builds references from struct implicit initializers to the properties it assigns.
 final class StructImplicitInitializerReferenceBuilder: SourceGraphMutator {

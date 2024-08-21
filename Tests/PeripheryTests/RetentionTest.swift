@@ -1,6 +1,6 @@
-import Shared
 import SystemPackage
 @testable import TestShared
+import Configuration
 import XCTest
 
 final class RetentionTest: FixtureSourceGraphTestCase {

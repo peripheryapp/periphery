@@ -2,6 +2,7 @@ import ArgumentParser
 import Foundation
 import Shared
 import SystemPackage
+import Configuration
 
 struct ScanCommand: FrontendCommand {
     static let configuration = CommandConfiguration(

@@ -1,7 +1,7 @@
 import Foundation
 import Indexer
-import Shared
 import SwiftIndexStore
+import Utils
 
 public protocol ProjectDriver {
     func build() throws

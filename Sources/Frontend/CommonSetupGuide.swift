@@ -1,5 +1,7 @@
 import Foundation
 import Shared
+import Configuration
+import BaseLogger
 
 final class CommonSetupGuide: SetupGuideHelpers {
     private let configuration: Configuration

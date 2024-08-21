@@ -4,6 +4,9 @@ import PeripheryKit
 import ProjectDrivers
 import Shared
 import SourceGraph
+import Configuration
+import Utils
+import BaseLogger
 
 final class Scan {
     private let configuration: Configuration

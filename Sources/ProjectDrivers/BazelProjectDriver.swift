@@ -1,6 +1,9 @@
 import Foundation
 import Shared
 import SystemPackage
+import Configuration
+import Utils
+import BaseLogger
 
 public class BazelProjectDriver: ProjectDriver {
     public static var isSupported: Bool {

@@ -1,6 +1,7 @@
 import ArgumentParser
 import Foundation
 import Shared
+import Utils
 
 struct ClearCacheCommand: FrontendCommand {
     static let configuration = CommandConfiguration(

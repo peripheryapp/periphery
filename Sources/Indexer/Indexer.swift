@@ -1,8 +1,8 @@
 import FilenameMatcher
 import Foundation
-import Shared
 import SourceGraph
 import SystemPackage
+import Configuration
 
 class Indexer {
     private let configuration: Configuration

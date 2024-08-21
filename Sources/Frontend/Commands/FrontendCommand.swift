@@ -1,5 +1,5 @@
 import ArgumentParser
-import Shared
+import BaseLogger
 
 protocol FrontendCommand: ParsableCommand {}
 extension FrontendCommand {

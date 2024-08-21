@@ -2,6 +2,7 @@ import Foundation
 import Shared
 import SourceGraph
 import SystemPackage
+import Configuration
 
 final class CsvFormatter: OutputFormatter {
     let configuration: Configuration

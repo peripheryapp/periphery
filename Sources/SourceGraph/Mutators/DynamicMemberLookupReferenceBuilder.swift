@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Configuration
 
 final class DynamicMemberLookupReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph

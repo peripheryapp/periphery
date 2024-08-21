@@ -1,5 +1,8 @@
 import Foundation
+import Configuration
 import SystemPackage
+import Utils
+import Shared
 
 public enum SPM {
     static let packageFile = "Package.swift"

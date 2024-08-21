@@ -1,6 +1,7 @@
 import ArgumentParser
 import Foundation
-import Shared
+import Utils
+import BaseLogger
 
 struct CheckUpdateCommand: FrontendCommand {
     static let configuration = CommandConfiguration(

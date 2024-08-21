@@ -2,10 +2,12 @@ import FilenameMatcher
 import Foundation
 import SystemPackage
 import Yams
+import Shared
+import BaseLogger
 
 public final class Configuration {
     public static var defaultConfigurationFile = FilePath(".periphery.yml")
-    public static let shared = Configuration()
+    public static let shared = Configuration(logger: BaseLogger.shared)
 
     public init(logger: BaseLogger = .shared) {
         self.logger = logger

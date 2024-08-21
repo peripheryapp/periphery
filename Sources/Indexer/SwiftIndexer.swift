@@ -4,6 +4,8 @@ import SourceGraph
 import SwiftIndexStore
 import SyntaxAnalysis
 import SystemPackage
+import Utils
+import Configuration
 
 public struct IndexUnit {
     let store: IndexStore

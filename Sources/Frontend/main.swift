@@ -1,6 +1,6 @@
 import ArgumentParser
 import Foundation
-import Shared
+import Utils
 
 Logger.configureBuffering()
 

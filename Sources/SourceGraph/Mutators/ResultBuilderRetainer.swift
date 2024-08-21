@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Configuration
 
 /// Retains static methods used by the Result Builder language feature.
 final class ResultBuilderRetainer: SourceGraphMutator {

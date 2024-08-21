@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Configuration
 
 /// https://github.com/apple/swift/issues/54532
 /// Constructors on a class/struct with generic type parameters are not referenced despite being used.

@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Configuration
 
 final class ObjCAccessibleRetainer: SourceGraphMutator {
     private let graph: SourceGraph

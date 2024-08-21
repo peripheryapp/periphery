@@ -1,5 +1,6 @@
 import Foundation
 import Shared
+import Configuration
 
 final class UnusedParameterRetainer: SourceGraphMutator {
     private let graph: SourceGraph

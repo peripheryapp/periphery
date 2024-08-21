@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Configuration
 
 final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph

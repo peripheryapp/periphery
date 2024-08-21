@@ -64,6 +64,17 @@ var targets: [PackageDescription.Target] = [
             .product(name: "SwiftIndexStore", package: "swift-indexstore"),
         ]
     ),
+    .target(name: "BaseLogger"),
+    .target(
+        name: "Configuration",
+        dependencies: [
+            .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
+            .product(name: "Yams", package: "Yams"),
+            .product(name: "SystemPackage", package: "swift-system"),
+            .target(name: "BaseLogger"),
+            .target(name: "Shared"),
+        ]
+    ),
     .target(
         name: "ProjectDrivers",
         dependencies: projectDriverDependencies
@@ -82,6 +93,8 @@ var targets: [PackageDescription.Target] = [
         dependencies: [
             .product(name: "SwiftSyntax", package: "swift-syntax"),
             .target(name: "Shared"),
+            .target(name: "Configuration"),
+            .target(name: "Utils"),
         ]
     ),
     .target(
@@ -90,6 +103,15 @@ var targets: [PackageDescription.Target] = [
             .product(name: "Yams", package: "Yams"),
             .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
+        ]
+    ),
+    .target(
+        name: "Utils",
+        dependencies: [
+            .product(name: "Yams", package: "Yams"),
+            .product(name: "SystemPackage", package: "swift-system"),
+            .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
+            .target(name: "Configuration"),
         ]
     ),
     .target(

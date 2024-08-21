@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Configuration
 
 /// Builds references to enum cases of enums that are raw representable.
 final class EnumCaseReferenceBuilder: SourceGraphMutator {

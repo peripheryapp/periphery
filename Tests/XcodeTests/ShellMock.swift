@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Utils
 
 class ShellMock: Shell {
     var output: String = ""

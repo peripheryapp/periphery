@@ -3,6 +3,8 @@ import Indexer
 import Shared
 import SwiftIndexStore
 import SystemPackage
+import Configuration
+import Utils
 
 public final class GenericProjectDriver {
     struct GenericConfig: Decodable {

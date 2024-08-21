@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Configuration
 
 /// A protocol is considered redundant when it's never used as an existential type, despite being conformed to.
 final class RedundantProtocolMarker: SourceGraphMutator {

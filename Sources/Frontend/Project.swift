@@ -2,6 +2,7 @@ import Foundation
 import ProjectDrivers
 import Shared
 import SystemPackage
+import Configuration
 
 final class Project {
     static func identify() throws -> Self {

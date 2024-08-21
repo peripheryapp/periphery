@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Configuration
 
 // https://github.com/apple/swift/issues/56189
 // The index store does not contain references to `appendInterpolation` functions from their use in string literals.

@@ -1,4 +1,5 @@
 import Foundation
+import Shared
 
 enum SwiftVersionParser {
     static func parse(_ fullVersion: String) throws -> VersionString {

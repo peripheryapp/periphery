@@ -1,5 +1,7 @@
 import Foundation
 import Shared
+import Configuration
+import BaseLogger
 
 #if canImport(XcodeSupport)
     import XcodeSupport

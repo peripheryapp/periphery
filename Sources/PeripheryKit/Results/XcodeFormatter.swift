@@ -2,6 +2,8 @@ import Foundation
 import Shared
 import SourceGraph
 import SystemPackage
+import Configuration
+import BaseLogger
 
 final class XcodeFormatter: OutputFormatter {
     let configuration: Configuration

@@ -2,6 +2,7 @@ import Foundation
 import Shared
 import SystemPackage
 import XcodeProj
+import Utils
 
 public final class XcodeProject: XcodeProjectlike {
     private static var cache: [FilePath: XcodeProject] = [:]

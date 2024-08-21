@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 import SystemPackage
+import Configuration
 
 final class CodeClimateFormatter: OutputFormatter {
     let configuration: Configuration

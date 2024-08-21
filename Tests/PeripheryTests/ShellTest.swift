@@ -1,4 +1,4 @@
-@testable import Shared
+@testable import Utils
 import XCTest
 
 final class ShellTest: XCTestCase {

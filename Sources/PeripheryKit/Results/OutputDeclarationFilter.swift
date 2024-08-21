@@ -1,7 +1,8 @@
 import FilenameMatcher
 import Foundation
-import Shared
 import SystemPackage
+import Configuration
+import Utils
 
 public final class OutputDeclarationFilter {
     private let configuration: Configuration

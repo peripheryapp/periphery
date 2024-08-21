@@ -5,6 +5,9 @@
     import SourceGraph
     import SystemPackage
     import XcodeSupport
+    import Utils
+    import Configuration
+    import BaseLogger
 
     public final class XcodeProjectDriver {
         public static func build(projectPath: FilePath) throws -> Self {

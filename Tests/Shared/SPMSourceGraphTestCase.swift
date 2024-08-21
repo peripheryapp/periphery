@@ -2,6 +2,7 @@ import Foundation
 import ProjectDrivers
 import Shared
 import SystemPackage
+import Utils
 
 class SPMSourceGraphTestCase: SourceGraphTestCase {
     static func build(projectPath: FilePath = ProjectRootPath) {

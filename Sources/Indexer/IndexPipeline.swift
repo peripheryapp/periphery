@@ -1,6 +1,6 @@
 import Foundation
-import Shared
 import SourceGraph
+import Utils
 
 public struct IndexPipeline {
     private let plan: IndexPlan

@@ -10,7 +10,7 @@ public enum OutputFormat: String, CaseIterable {
 
     public static let `default` = OutputFormat.xcode
 
-    init?(anyValue: Any) {
+    public init?(anyValue: Any) {
         if let format = anyValue as? OutputFormat {
             self = format
             return

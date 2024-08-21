@@ -2,6 +2,8 @@
 @testable import PeripheryKit
 import Shared
 @testable import SourceGraph
+import Configuration
+import Utils
 import SystemPackage
 import XCTest
 

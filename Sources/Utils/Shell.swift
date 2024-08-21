@@ -1,4 +1,6 @@
 import Foundation
+import Shared
+import Utils
 
 open class Shell {
     public static let shared: Shell = .init(environment: ProcessInfo.processInfo.environment, logger: Logger())

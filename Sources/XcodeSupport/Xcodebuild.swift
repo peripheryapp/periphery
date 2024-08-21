@@ -1,6 +1,7 @@
 import Foundation
 import Shared
 import SystemPackage
+import Utils
 
 public final class Xcodebuild {
     private let shell: Shell
