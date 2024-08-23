@@ -16,7 +16,7 @@ public final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
         let module = parts.first ?? ""
         let attributes = node.attributes.compactMap {
             if case let .attribute(attr) = $0 {
-              attr.attributeName.trimmedDescription
+                attr.attributeName.trimmedDescription
             } else {
                 nil
             }
