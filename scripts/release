@@ -98,10 +98,10 @@ echo
 
 confirm "Continue?"
 
-is_latest=true
+is_latest="true"
 
-if [[ $version == *"beta"* ]]; then
-  is_latest=false
+if [[ ${version} == *"beta"* ]]; then
+  is_latest="false"
 fi
 
 cd ..
