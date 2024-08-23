@@ -44,9 +44,12 @@ final class UnusedImportMarker: SourceGraphMutator {
 
             let unreferencedImports = file.importStatements
                 .filter {
-                    // Only consider modules that have been indexed as we need to see which modules
-                    // they export.
-                    graph.indexedModules.contains($0.module) &&
+                    // Exclude exported/public imports because even though they may be unreferenced
+                    // in the current file, their exported symbols may be referenced in others.
+                    !$0.isExported &&
+                        // Consider modules that have been indexed as we need to see which modules
+                        // they export.
+                        graph.indexedModules.contains($0.module) &&
                         !referencedModules.contains($0.module)
                 }
 

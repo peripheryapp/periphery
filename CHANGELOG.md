@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Enums with the `@main` attribute are now retained.
+- Unused public/exported imports are excluded from the results even if unused in the declaring file as the exported symbols may be referenced in other files, and thus removing the import would result in a build failure.
 
 ## 2.21.0 (2024-06-15)
 

@@ -39,11 +39,11 @@ public struct SourceFileCollector {
 
                     let file = FilePath.makeAbsolute(filePath, relativeTo: currentFilePath)
 
-                    guard file.exists else {
-                        throw PeripheryError.pathDoesNotExist(path: file.string)
-                    }
-
                     if !isExcluded(file) {
+                        guard file.exists else {
+                            throw PeripheryError.pathDoesNotExist(path: file.string)
+                        }
+
                         let module = try indexStore.moduleName(for: unit)
                         if let module, excludedTargets.contains(module) {
                             return nil
