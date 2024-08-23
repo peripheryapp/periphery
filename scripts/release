@@ -44,10 +44,13 @@ cat scripts/artifactbundle_info.json.template | sed s/__VERSION__/${version}/ > 
 echo -e "\nUpdate CHANGELOG.md"
 confirm "Continue?"
 
-bin_path=$(make show_bin_path)
-rm -rf "$bin_path"
 make build_release
-cp "$bin_path" .release/
+
+if [ ! -f .release/periphery ]; then
+  echo "ERROR: Missing release binary?"
+  exit 1
+fi
+
 cp LICENSE.md .release/
 cp scripts/release_notes.md.template .release/release_notes.md
 
