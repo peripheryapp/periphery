@@ -121,6 +121,7 @@ public class BazelProjectDriver: ProjectDriver {
         let status = try shell.execStatus([
             "bazel",
             "run",
+            "--check_visibility=false",
             "--ui_event_filters=-info,-debug,-warning",
             "@periphery//bazel:scan",
         ])
