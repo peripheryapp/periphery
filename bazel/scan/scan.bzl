@@ -202,7 +202,7 @@ scan = rule(
         "periphery_binary": attr.string(doc = "Path to the periphery binary."),
         "_template": attr.label(
             allow_single_file = True,
-            default = "@periphery//bazel/internal:scan_template.sh",
+            default = "@periphery//bazel/scan:scan_template.sh",
         ),
     },
     outputs = {

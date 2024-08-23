@@ -94,7 +94,7 @@ public class BazelProjectDriver: ProjectDriver {
         let buildPath = outputPath.appending("BUILD.bazel")
         let deps = try queryTargets().joined(separator: ",\n")
         let buildFileContents = """
-        load("@periphery//bazel/internal:scan.bzl", "scan")
+        load("@periphery//bazel/scan:scan.bzl", "scan")
 
         scan(
           name = "scan",
@@ -102,7 +102,7 @@ public class BazelProjectDriver: ProjectDriver {
           config = "\(configPath)",
           periphery_binary = "\(executablePath)",
           visibility = [
-            "@periphery//bazel:package_group"
+            "@periphery//:package_group"
           ],
           deps = [
             \(deps)
@@ -123,7 +123,7 @@ public class BazelProjectDriver: ProjectDriver {
             "run",
             "--check_visibility=false",
             "--ui_event_filters=-info,-debug,-warning",
-            "@periphery//bazel:scan",
+            "@periphery//:scan",
         ])
 
         // The actual scan is performed by Bazel.

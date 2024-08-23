@@ -57,7 +57,7 @@ codesign periphery
 
 # Archive
 zip_filename="periphery-${version}.zip"
-zip "${zip_filename}" periphery LICENSE.md
+zip -r "${zip_filename}" periphery LICENSE.md MODULE.bazel BUILD.bazel bazel
 codesign "${zip_filename}"
 
 echo -e "\n${zip_filename} checksum:"
@@ -101,7 +101,7 @@ if [[ $version == *"beta"* ]]; then
 fi
 
 cd ..
-gh release create "--latest=${is_latest}" -F .release/release_notes.md "${version}" ".release/${zip_filename}" ".release/${zip_artifactbundle}"
+gh release create --latest="${is_latest}" -F .release/release_notes.md "${version}" ".release/${zip_filename}" ".release/${zip_artifactbundle}"
 
 # Homebrew
 if [ $is_latest = false ]; then

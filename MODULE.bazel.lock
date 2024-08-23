@@ -76,7 +76,7 @@
   "moduleExtensions": {
     "//bazel:extensions.bzl%generated": {
       "general": {
-        "bzlTransitiveDigest": "kOEf2G+VuW7R207nDIUewqU0dUnnzU7fIydMwugrwTQ=",
+        "bzlTransitiveDigest": "xZGh+e0CeHqMg70Vh0voNCEZWSMobpYB+Rt98Fb2pdg=",
         "usagesDigest": "+tLn28VxrYHSJkd4sij6ZCqx9LBk8tiEaJEOx9zRbFY=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
