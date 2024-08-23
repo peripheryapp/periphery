@@ -80,34 +80,39 @@ def _scan_inputs_aspect_impl(target, ctx):
                         xcmappingmodels.append(resource)
 
     deps = getattr(ctx.rule.attr, "deps", [])
+    providers = [dep[PeripheryInfo] for dep in deps]
+    swift_target = getattr(ctx.rule.attr, "swift_target", None)
+
+    if swift_target:
+        providers.append(swift_target[PeripheryInfo])
 
     swift_srcs_depset = depset(
         swift_srcs,
-        transitive = [dep[PeripheryInfo].swift_srcs for dep in deps],
+        transitive = [provider.swift_srcs for provider in providers],
     )
     indexstores_depset = depset(
         indexstores,
-        transitive = [dep[PeripheryInfo].indexstores for dep in deps],
+        transitive = [provider.indexstores for provider in providers],
     )
     test_targets_depset = depset(
         direct = test_targets,
-        transitive = [dep[PeripheryInfo].test_targets for dep in deps],
+        transitive = [provider.test_targets for provider in providers],
     )
     plists_depset = depset(
         direct = plists,
-        transitive = [dep[PeripheryInfo].plists for dep in deps],
+        transitive = [provider.plists for provider in providers],
     )
     xibs_depset = depset(
         direct = xibs,
-        transitive = [dep[PeripheryInfo].xibs for dep in deps],
+        transitive = [provider.xibs for provider in providers],
     )
     xcdatamodels_depset = depset(
         direct = xcdatamodels,
-        transitive = [dep[PeripheryInfo].xcdatamodels for dep in deps],
+        transitive = [provider.xcdatamodels for provider in providers],
     )
     xcmappingmodels_depset = depset(
         direct = xcmappingmodels,
-        transitive = [dep[PeripheryInfo].xcmappingmodels for dep in deps],
+        transitive = [provider.xcmappingmodels for provider in providers],
     )
 
     return [
