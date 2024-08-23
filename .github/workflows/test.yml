@@ -6,6 +6,7 @@ on:
   pull_request: {}
 env:
   swift_package_resolve: swift package resolve
+  swift_build: swift build
   swift_test: swift test
   periphery_scan: ./.build/debug/periphery scan --quiet --clean-build
   cache_version: 1
@@ -14,8 +15,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        xcode: ["15.4", "15.2"]
+        xcode: ["16.1", "15.4", "15.2"]
         include:
+          - xcode: "16.1"
+            macos: macOS-14
           - xcode: "15.4"
             macos: macOS-14
           - xcode: "15.2"
@@ -44,6 +47,8 @@ jobs:
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}
+    - name: Build
+      run: ${{ env.swift_build }}
     - name: Scan
       run: ${{ env.periphery_scan }} --strict
     - name: Test
@@ -52,8 +57,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ["5.10", "5.9"]
+        swift: ["6.0-nightly", "5.10", "5.9"]
         include:
+          - swift: "6.0-nightly"
+            container: "swiftlang/swift:nightly-6.0-jammy"
+            cache-version: 1
           - swift: "5.10"
             container: "swift:5.10"
             cache-version: 1
@@ -83,6 +91,8 @@ jobs:
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}
+    - name: Build
+      run: ${{ env.swift_build }}
     - name: Scan
       run: ${{ env.periphery_scan }}
     - name: Test
