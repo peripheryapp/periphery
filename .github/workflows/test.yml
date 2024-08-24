@@ -5,24 +5,32 @@ on:
       - master
   pull_request: {}
 env:
+  MISE_EXPERIMENTAL: 1
   swift_package_resolve: swift package resolve
   swift_build: swift build
   swift_test: swift test
   periphery_scan: ./.build/debug/periphery scan --quiet --clean-build
   cache_version: 1
 jobs:
+  lint:
+    runs-on: macos-14
+    name: Lint
+    steps:
+      - uses: actions/checkout@master
+      - uses: jdx/mise-action@v2
+      - run: mise run lint
   macOS:
     strategy:
       fail-fast: false
       matrix:
-        xcode: ["16.0", "15.4", "15.2"]
+        xcode: ["16.1", "15.4", "15.2"]
         include:
-          - xcode: "16.0"
-            macos: macOS-14
+          - xcode: "16.1"
+            macos: macos-14
           - xcode: "15.4"
-            macos: macOS-14
+            macos: macos-14
           - xcode: "15.2"
-            macos: macOS-14
+            macos: macos-14
     runs-on: ${{ matrix.macos }}
     name: macOS
     steps:

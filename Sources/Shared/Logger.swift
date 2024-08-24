@@ -195,7 +195,6 @@ public struct ContextualLogger {
     }
 #else
     public struct SignpostInterval {
-        // swiftlint:disable:next unneeded_synthesized_initializer
         @usableFromInline
         init() {}
     }

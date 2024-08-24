@@ -15,11 +15,3 @@ build_release: clean build_x86_64 build_arm64
 	@mkdir -p .release
 	@lipo -create -output .release/periphery ${EXECUTABLE_X86_64} ${EXECUTABLE_ARM64}
 	@strip -rSTX .release/periphery
-
-swiftformat:
-	@./scripts/lint/swiftformat.sh
-
-swiftlint:
-	@./scripts/lint/swiftlint.sh
-
-lint: swiftlint swiftformat
