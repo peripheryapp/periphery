@@ -41,17 +41,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ileitch/swift-filename-matcher",
       "state" : {
-        "revision" : "17eaeaf60f2703e3ef826de94149c88a78953fd3",
-        "version" : "0.1.1"
+        "revision" : "8cc02e902f651bb5812860011ee13707b9e037df",
+        "version" : "0.1.2"
       }
     },
     {
       "identity" : "swift-indexstore",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ileitch/swift-indexstore",
+      "location" : "https://github.com/kateinoigakukun/swift-indexstore",
       "state" : {
-        "revision" : "e0046a1704e2e7af88355883247ee1f9d47ed9ee",
-        "version" : "9.0.4"
+        "revision" : "9363af98d32247bf953855fc99d1f1f1ef803e43",
+        "version" : "0.3.0"
       }
     },
     {
@@ -77,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tuist/xcodeproj",
       "state" : {
-        "revision" : "c15e011dc0ea74f7833bf33c2791483beb9c7577",
-        "version" : "8.23.1"
+        "revision" : "a1ff175a2f3bfbec166f33b264263c55f2149720",
+        "version" : "8.23.2"
       }
     },
     {
