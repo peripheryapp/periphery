@@ -3,34 +3,38 @@ import Foundation
 import SourceGraph
 import SystemPackage
 
-final class XibParser {
+final class XibParser: NSObject, XMLParserDelegate {
+    private var customClassNames: [String] = []
+    private var currentElementAttributes: [String: String] = [:]
+
     private let path: FilePath
 
     required init(path: FilePath) {
         self.path = path
     }
 
-    func parse() throws -> [AssetReference] {
+    func parse() -> [AssetReference] {
         guard let data = FileManager.default.contents(atPath: path.string) else { return [] }
-        let structure = try AEXMLDocument(xml: data)
-        return references(from: structure.root).map {
-            AssetReference(absoluteName: $0, source: .interfaceBuilder)
+        let parser = XMLParser(data: data)
+        parser.delegate = self
+        parser.parse()
+        return customClassNames.map { AssetReference(absoluteName: $0, source: .interfaceBuilder) }
+    }
+
+    // MARK: - XMLParserDelegate
+
+    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String: String]) {
+        currentElementAttributes = attributeDict
+        if let customClass = attributeDict["customClass"] {
+            customClassNames.append(customClass)
         }
     }
 
-    // MARK: - Private
+    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+        currentElementAttributes = [:]
+    }
 
-    private func references(from element: AEXMLElement) -> [String] {
-        var names: [String] = []
-
-        for child in element.children {
-            if let name = child.attributes["customClass"] {
-                names.append(name)
-            }
-
-            names += references(from: child)
-        }
-
-        return names
+    func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
+        print("Parse error: \(parseError.localizedDescription)")
     }
 }

@@ -21,6 +21,7 @@ open class SourceGraphTestCase: XCTestCase {
         super.setUp()
         configuration = Configuration.shared
         configuration.quiet = true
+        configuration.cleanBuild = true
     }
 
     override open func setUp() {
