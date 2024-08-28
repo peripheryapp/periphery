@@ -103,6 +103,8 @@ var targets: [PackageDescription.Target] = [
             .product(name: "Yams", package: "Yams"),
             .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
+            .target(name: "BaseLogger"),
+
         ]
     ),
     .target(
