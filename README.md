@@ -519,7 +519,7 @@ Special thanks goes to the following generous sponsors:
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/saga-corp-white.svg">
         <source media="(prefers-color-scheme: light)" srcset="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/saga-corp-black.svg">
-        <img src="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/saga-corp-black.svg">
+        <img src="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/saga-corp-black.svg" width="150">
     </picture>
 </a>
 
