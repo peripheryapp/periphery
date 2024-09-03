@@ -511,6 +511,18 @@ Periphery is passion project that takes a huge amount of effort to maintain and 
 
 Special thanks goes to the following generous sponsors:
 
+### SaGa Corp
+
+[SaGa Corp](https://www.sagacorp.fr) develops unique technology for financial players and their customers.
+
+<a href="https://www.sagacorp.fr" alt="SaGa Corp">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/saga-corp-white.svg">
+        <source media="(prefers-color-scheme: light)" srcset="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/saga-corp-black.svg">
+        <img src="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/saga-corp-black.svg">
+    </picture>
+</a>
+
 ### Emerge Tools
 
 [Emerge Tools](https://www.emergetools.com) is a suite of revolutionary products designed to supercharge mobile apps and the teams that build them.
