@@ -1,3 +1,4 @@
+import Configuration
 import Foundation
 import Shared
 import SourceGraph

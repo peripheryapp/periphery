@@ -1,3 +1,5 @@
+import Configuration
+import Logger
 import Shared
 import SourceGraph
 import SystemPackage

@@ -1,0 +1,8 @@
+#!/bin/bash
+# mise description="Lint the project for CI"
+set -euo pipefail
+
+cd $MISE_PROJECT_ROOT
+
+swiftformat --quiet --strict .
+swiftlint lint --quiet --strict

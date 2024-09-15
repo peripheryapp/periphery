@@ -1,5 +1,7 @@
+import Configuration
 import Foundation
 import Indexer
+import Logger
 import PeripheryKit
 import ProjectDrivers
 import Shared

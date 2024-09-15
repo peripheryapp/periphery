@@ -1,6 +1,6 @@
 import Foundation
 import Indexer
-import Shared
+import Logger
 import SwiftIndexStore
 
 public protocol ProjectDriver {

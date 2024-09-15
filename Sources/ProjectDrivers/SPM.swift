@@ -1,4 +1,8 @@
+import Configuration
+import Extensions
 import Foundation
+import Logger
+import Shared
 import SystemPackage
 
 public enum SPM {

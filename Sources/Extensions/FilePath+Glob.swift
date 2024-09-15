@@ -69,7 +69,7 @@ private class Glob {
         let firstPart = parts.removeFirst()
         var lastPart = parts.joined(separator: "**")
 
-        var directories: [URL] = if FileManager.default.fileExists(atPath: firstPart) {
+        let directories: [URL] = if FileManager.default.fileExists(atPath: firstPart) {
             exploreDirectories(url: URL(fileURLWithPath: firstPart))
         } else {
             []

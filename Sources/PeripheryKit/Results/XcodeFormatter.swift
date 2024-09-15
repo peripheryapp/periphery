@@ -1,5 +1,6 @@
+import Configuration
 import Foundation
-import Shared
+import Logger
 import SourceGraph
 import SystemPackage
 

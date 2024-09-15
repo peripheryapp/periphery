@@ -1,5 +1,8 @@
+import Extensions
 import FilenameMatcher
 import Foundation
+import Logger
+import Shared
 import SystemPackage
 import Yams
 
@@ -38,7 +41,7 @@ public final class Configuration {
     @Setting(key: "xcode_list_arguments", defaultValue: [])
     public var xcodeListArguments: [String]
 
-    @Setting(key: "retain_assign_only_property_types", defaultValue: [], setter: PropertyTypeSanitizer.sanitize)
+    @Setting(key: "retain_assign_only_property_types", defaultValue: [])
     public var retainAssignOnlyPropertyTypes: [String]
 
     @Setting(key: "external_encodable_protocols", defaultValue: [])

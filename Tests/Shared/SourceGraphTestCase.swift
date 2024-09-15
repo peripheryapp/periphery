@@ -1,4 +1,6 @@
+import Configuration
 @testable import Indexer
+import Logger
 @testable import PeripheryKit
 import Shared
 @testable import SourceGraph
@@ -23,7 +25,7 @@ open class SourceGraphTestCase: XCTestCase {
         super.setUp()
         configuration = Configuration()
         configuration.quiet = true
-        logger = Logger(configuration: configuration)
+        logger = Logger(quiet: true)
         shell = Shell(logger: logger)
         graph = SourceGraph(configuration: configuration)
     }

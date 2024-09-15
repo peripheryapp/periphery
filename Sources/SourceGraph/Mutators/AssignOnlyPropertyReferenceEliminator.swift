@@ -1,3 +1,4 @@
+import Configuration
 import Foundation
 import Shared
 
@@ -11,7 +12,9 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphMutator {
     required init(graph: SourceGraph, configuration: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
         self.configuration = configuration
-        retainAssignOnlyPropertyTypes = defaultRetainedTypes + configuration.retainAssignOnlyPropertyTypes
+        retainAssignOnlyPropertyTypes = defaultRetainedTypes + configuration.retainAssignOnlyPropertyTypes.map {
+            PropertyTypeSanitizer.sanitize($0)
+        }
     }
 
     func mutate() throws {

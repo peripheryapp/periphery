@@ -1,9 +1,31 @@
 import Foundation
+import Logger
+
+public class ShellProcessStore {
+    public static let shared = ShellProcessStore()
+
+    private var processes: Set<Process> = []
+    private let lock = UnfairLock()
+
+    public func interruptRunning() {
+        lock.perform {
+            for process in processes {
+                process.interrupt()
+                process.waitUntilExit()
+            }
+        }
+    }
+
+    func add(_ process: Process) {
+        lock.perform { _ = processes.insert(process) }
+    }
+
+    func remove(_ process: Process) {
+        lock.perform { _ = processes.remove(process) }
+    }
+}
 
 open class Shell {
-    private var tasks: Set<Process> = []
-    private var tasksQueue = DispatchQueue(label: "Shell.tasksQueue")
-
     private let environment: [String: String]
     private let logger: ContextualLogger
 
@@ -14,15 +36,6 @@ open class Shell {
     public required init(environment: [String: String], logger: Logger) {
         self.environment = environment
         self.logger = logger.contextualized(with: "shell")
-    }
-
-    public func interruptRunning() {
-        tasksQueue.sync {
-            for task in tasks {
-                task.interrupt()
-                task.waitUntilExit()
-            }
-        }
     }
 
     lazy var pristineEnvironment: [String: String] = {
@@ -98,23 +111,23 @@ open class Shell {
             newArgs = args
         }
 
-        let task = Process()
-        task.launchPath = launchPath
-        task.environment = environment
-        task.arguments = newArgs
+        let process = Process()
+        process.launchPath = launchPath
+        process.environment = environment
+        process.arguments = newArgs
 
         logger.debug("\(launchPath) \(newArgs.joined(separator: " "))")
-        tasksQueue.sync { _ = tasks.insert(task) }
+        ShellProcessStore.shared.add(process)
 
         var outputPipe: Pipe?
 
         if captureOutput {
             outputPipe = Pipe()
-            task.standardOutput = outputPipe
-            task.standardError = stderr ? outputPipe : nil
+            process.standardOutput = outputPipe
+            process.standardError = stderr ? outputPipe : nil
         }
 
-        task.launch()
+        process.launch()
 
         var output = ""
 
@@ -122,7 +135,7 @@ open class Shell {
            let outputData = try outputPipe.fileHandleForReading.readToEnd()
         {
             guard let str = String(data: outputData, encoding: .utf8) else {
-                tasksQueue.sync { _ = tasks.remove(task) }
+                ShellProcessStore.shared.remove(process)
                 throw PeripheryError.shellOutputEncodingFailed(
                     cmd: launchPath,
                     args: newArgs,
@@ -132,8 +145,8 @@ open class Shell {
             output = str
         }
 
-        task.waitUntilExit()
-        tasksQueue.sync { _ = tasks.remove(task) }
-        return (task.terminationStatus, output)
+        process.waitUntilExit()
+        ShellProcessStore.shared.remove(process)
+        return (process.terminationStatus, output)
     }
 }

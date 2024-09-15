@@ -1,6 +1,8 @@
 #if os(macOS)
+    import Configuration
     import Foundation
     import Indexer
+    import Logger
     import Shared
     import SourceGraph
     import SystemPackage
