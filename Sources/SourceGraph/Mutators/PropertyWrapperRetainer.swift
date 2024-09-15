@@ -5,7 +5,7 @@ final class PropertyWrapperRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let specialProperties = ["wrappedValue", "projectedValue"]
 
-    required init(graph: SourceGraph, configuration _: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
     }
 

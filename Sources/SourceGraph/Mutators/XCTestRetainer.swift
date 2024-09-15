@@ -5,7 +5,7 @@ final class XCTestRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let testCaseClassNames: Set<String>
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
         testCaseClassNames = Set(configuration.externalTestCaseClasses + ["XCTestCase"])
     }

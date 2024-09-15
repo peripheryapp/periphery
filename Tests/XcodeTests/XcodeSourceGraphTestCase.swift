@@ -7,9 +7,14 @@ import SystemPackage
 class XcodeSourceGraphTestCase: SourceGraphTestCase {
     static func build(projectPath: FilePath) {
         projectPath.chdir {
-            let driver = try! XcodeProjectDriver.build(projectPath: projectPath)
+            let driver = try! XcodeProjectDriver(
+                projectPath: projectPath,
+                configuration: configuration,
+                shell: shell,
+                logger: logger
+            )
             try! driver.build()
-            plan = try! driver.plan(logger: Logger().contextualized(with: "index"))
+            plan = try! driver.plan(logger: logger.contextualized(with: "index"))
         }
     }
 }

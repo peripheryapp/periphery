@@ -2,9 +2,6 @@ import Foundation
 import Shared
 
 public final class SourceGraph {
-    // Global shared instance to prevent costly deinitialization.
-    public static var shared = SourceGraph()
-
     public private(set) var allDeclarations: Set<Declaration> = []
     public private(set) var usedDeclarations: Set<Declaration> = []
     public private(set) var redundantProtocols: [Declaration: (references: Set<Reference>, inherited: Set<Reference>)] = [:]
@@ -29,7 +26,7 @@ public final class SourceGraph {
 
     private let configuration: Configuration
 
-    init(configuration: Configuration = .shared) {
+    public init(configuration: Configuration) {
         self.configuration = configuration
     }
 

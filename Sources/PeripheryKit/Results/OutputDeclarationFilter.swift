@@ -8,7 +8,7 @@ public final class OutputDeclarationFilter {
     private let logger: Logger
     private let contextualLogger: ContextualLogger
 
-    public required init(configuration: Configuration = .shared, logger: Logger = .init()) {
+    public required init(configuration: Configuration, logger: Logger) {
         self.configuration = configuration
         self.logger = logger
         contextualLogger = logger.contextualized(with: "report:filter")

@@ -5,7 +5,7 @@ import Shared
 final class StructImplicitInitializerReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
 
-    init(graph: SourceGraph, configuration _: Configuration) {
+    init(graph: SourceGraph, configuration _: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
     }
 

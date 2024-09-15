@@ -6,11 +6,15 @@ import Shared
 #endif
 
 final class GuidedSetup: SetupGuideHelpers {
-    required init(configuration: Configuration = .shared) {
-        self.configuration = configuration
-    }
-
     private let configuration: Configuration
+    private let shell: Shell
+    private let logger: Logger
+
+    required init(configuration: Configuration, shell: Shell, logger: Logger) {
+        self.configuration = configuration
+        self.shell = shell
+        self.logger = logger
+    }
 
     func perform() throws -> Project {
         print(colorize("Welcome to Periphery!", .boldGreen))
@@ -23,7 +27,7 @@ final class GuidedSetup: SetupGuideHelpers {
         }
 
         #if canImport(XcodeSupport)
-            if let guide = XcodeProjectSetupGuide.detect() {
+            if let guide = XcodeProjectSetupGuide(configuration: configuration, shell: shell, logger: logger) {
                 projectGuides.append(guide)
             }
         #endif
@@ -46,9 +50,9 @@ final class GuidedSetup: SetupGuideHelpers {
         print(colorize("*", .boldGreen) + " Inspecting project...")
 
         let kind = try projectGuide.perform()
-        let project = Project(kind: kind)
+        let project = Project(kind: kind, configuration: configuration, shell: shell, logger: logger)
 
-        let commonGuide = CommonSetupGuide()
+        let commonGuide = CommonSetupGuide(configuration: configuration)
         try commonGuide.perform()
 
         let options = projectGuide.commandLineOptions + commonGuide.commandLineOptions

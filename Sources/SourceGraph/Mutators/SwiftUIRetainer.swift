@@ -7,7 +7,7 @@ final class SwiftUIRetainer: SourceGraphMutator {
     private static let specialProtocolNames = ["LibraryContentProvider"]
     private static let applicationDelegateAdaptorStructNames = ["UIApplicationDelegateAdaptor", "NSApplicationDelegateAdaptor"]
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
         self.configuration = configuration
     }

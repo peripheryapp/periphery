@@ -5,7 +5,7 @@ final class PubliclyAccessibleRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
 
-    required init(graph: SourceGraph, configuration: Configuration) {
+    required init(graph: SourceGraph, configuration: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
         self.configuration = configuration
     }

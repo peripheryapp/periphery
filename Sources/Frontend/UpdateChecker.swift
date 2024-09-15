@@ -15,7 +15,7 @@ final class UpdateChecker {
     private let semaphore: DispatchSemaphore
     private var error: Error?
 
-    required init(logger: Logger = .init(), configuration: Configuration = .shared) {
+    required init(logger: Logger, configuration: Configuration) {
         self.logger = logger
         debugLogger = logger.contextualized(with: "update-check")
         self.configuration = configuration

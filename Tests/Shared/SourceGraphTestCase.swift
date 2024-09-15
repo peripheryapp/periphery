@@ -8,9 +8,11 @@ import XCTest
 open class SourceGraphTestCase: XCTestCase {
     static var plan: IndexPlan!
     static var configuration: Configuration!
+    static var shell: Shell!
+    static var logger: Logger!
     static var results: [ScanResult] = []
 
-    private static var graph = SourceGraph()
+    private static var graph: SourceGraph!
     private static var allIndexedDeclarations: Set<Declaration> = []
 
     var configuration: Configuration { Self.configuration }
@@ -19,8 +21,11 @@ open class SourceGraphTestCase: XCTestCase {
 
     override open class func setUp() {
         super.setUp()
-        configuration = Configuration.shared
+        configuration = Configuration()
         configuration.quiet = true
+        logger = Logger(configuration: configuration)
+        shell = Shell(logger: logger)
+        graph = SourceGraph(configuration: configuration)
     }
 
     override open func setUp() {
@@ -51,16 +56,22 @@ open class SourceGraphTestCase: XCTestCase {
             )
         }
 
-        graph = SourceGraph()
+        graph = SourceGraph(configuration: configuration)
         let pipeline = IndexPipeline(
             plan: newPlan,
             graph: SynchronizedSourceGraph(graph: graph),
-            logger: Logger().contextualized(with: "index")
+            logger: logger.contextualized(with: "index"),
+            configuration: configuration
         )
         try! pipeline.perform()
 
         allIndexedDeclarations = graph.allDeclarations
-        try! SourceGraphMutatorRunner.perform(graph: graph)
+        try! SourceGraphMutatorRunner(
+            graph: graph,
+            logger: logger,
+            configuration: configuration,
+            swiftVersion: SwiftVersion(shell: shell)
+        ).perform()
         results = ScanResultBuilder.build(for: graph)
     }
 

@@ -14,7 +14,7 @@ public struct SourceFileCollector {
         indexStorePaths: Set<FilePath>,
         excludedTestTargets: Set<String>,
         logger: ContextualLogger,
-        configuration: Configuration = .shared
+        configuration: Configuration
     ) {
         self.indexStorePaths = indexStorePaths
         self.excludedTestTargets = excludedTestTargets

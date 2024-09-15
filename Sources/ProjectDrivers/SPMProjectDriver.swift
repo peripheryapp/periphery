@@ -5,22 +5,20 @@ import SwiftIndexStore
 import SystemPackage
 
 public final class SPMProjectDriver {
-    public static func build() throws -> Self {
-        let configuration = Configuration.shared
-
-        if !configuration.schemes.isEmpty {
-            throw PeripheryError.usageError("The --schemes option has no effect with Swift Package Manager projects.")
-        }
-
-        let pkg = SPM.Package()
-        return self.init(pkg: pkg, configuration: configuration, logger: .init())
-    }
-
     private let pkg: SPM.Package
     private let configuration: Configuration
     private let logger: Logger
 
-    init(pkg: SPM.Package, configuration: Configuration, logger: Logger = .init()) {
+    public convenience init(configuration: Configuration, shell: Shell, logger: Logger) throws {
+        if !configuration.schemes.isEmpty {
+            throw PeripheryError.usageError("The --schemes option has no effect with Swift Package Manager projects.")
+        }
+
+        let pkg = SPM.Package(configuration: configuration, shell: shell, logger: logger)
+        self.init(pkg: pkg, configuration: configuration, logger: logger)
+    }
+
+    init(pkg: SPM.Package, configuration: Configuration, logger: Logger) {
         self.pkg = pkg
         self.configuration = configuration
         self.logger = logger
@@ -54,7 +52,8 @@ extension SPMProjectDriver: ProjectDriver {
         let collector = SourceFileCollector(
             indexStorePaths: indexStorePaths,
             excludedTestTargets: excludedTestTargets,
-            logger: logger
+            logger: logger,
+            configuration: configuration
         )
         let sourceFiles = try collector.collect()
 

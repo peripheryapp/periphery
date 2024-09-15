@@ -6,24 +6,6 @@ import XcodeProj
 public final class XcodeProject: XcodeProjectlike {
     private static var cache: [FilePath: XcodeProject] = [:]
 
-    static func build(path: FilePath, referencedBy refPath: FilePath) throws -> XcodeProject? {
-        if !path.exists {
-            let logger = Logger()
-            logger.warn("No such project exists at '\(path.lexicallyNormalized())', referenced by '\(refPath)'.")
-            return nil
-        }
-
-        return try build(path: path)
-    }
-
-    static func build(path: FilePath) throws -> XcodeProject {
-        if let cached = cache[path] {
-            return cached
-        }
-
-        return try self.init(path: path)
-    }
-
     public let type: String = "project"
     public let path: FilePath
     public let sourceRoot: FilePath
@@ -34,7 +16,17 @@ public final class XcodeProject: XcodeProjectlike {
 
     private let xcodebuild: Xcodebuild
 
-    public required init(path: FilePath, xcodebuild: Xcodebuild = .init(), logger: Logger = .init()) throws {
+    convenience init?(path: FilePath, referencedBy refPath: FilePath, shell: Shell, logger: Logger) throws {
+        if !path.exists {
+            logger.warn("No such project exists at '\(path.lexicallyNormalized())', referenced by '\(refPath)'.")
+            return nil
+        }
+
+        let xcodebuild = Xcodebuild(shell: shell, logger: logger)
+        try self.init(path: path, xcodebuild: xcodebuild, shell: shell, logger: logger)
+    }
+
+    public required init(path: FilePath, xcodebuild: Xcodebuild, shell: Shell, logger: Logger) throws {
         logger.contextualized(with: "xcode:project").debug("Loading \(path)")
 
         self.path = path
@@ -58,7 +50,7 @@ public final class XcodeProject: XcodeProjectlike {
             subProjects = try xcodeProject.pbxproj.fileReferences
                 .filter { $0.path?.hasSuffix(".xcodeproj") ?? false }
                 .compactMap { try $0.fullPath(sourceRoot: sourceRoot.string) }
-                .compactMap { try XcodeProject.build(path: FilePath($0), referencedBy: path) }
+                .compactMap { try XcodeProject(path: FilePath($0), referencedBy: path, shell: shell, logger: logger) }
         }
 
         targets = xcodeProject.pbxproj.nativeTargets

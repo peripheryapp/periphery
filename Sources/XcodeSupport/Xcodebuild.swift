@@ -6,7 +6,7 @@ public final class Xcodebuild {
     private let shell: Shell
     private let logger: Logger
 
-    public required init(shell: Shell = .shared, logger: Logger = .init()) {
+    public required init(shell: Shell, logger: Logger) {
         self.shell = shell
         self.logger = logger
     }

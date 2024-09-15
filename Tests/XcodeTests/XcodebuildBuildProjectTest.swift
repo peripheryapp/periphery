@@ -10,8 +10,11 @@ final class XcodebuildBuildProjectTest: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        xcodebuild = Xcodebuild(shell: .shared)
-        project = try! XcodeProject(path: UIKitProjectPath)
+        let configuration = Configuration()
+        let logger = Logger(configuration: configuration)
+        let shell = Shell(logger: logger)
+        xcodebuild = Xcodebuild(shell: shell, logger: logger)
+        project = try! XcodeProject(path: UIKitProjectPath, xcodebuild: xcodebuild, shell: shell, logger: logger)
     }
 
     override func tearDown() {

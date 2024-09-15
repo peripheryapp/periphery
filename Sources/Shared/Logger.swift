@@ -38,48 +38,6 @@ public func colorize(_ text: String, _ color: ANSIColor) -> String {
     return "\(color.rawValue)\(text)\u{001B}[0;0m"
 }
 
-public final class BaseLogger {
-    public static let shared = BaseLogger()
-
-    @usableFromInline let outputQueue: DispatchQueue
-
-    private init() {
-        outputQueue = DispatchQueue(label: "BaseLogger.outputQueue")
-    }
-
-    @inlinable
-    func info(_ text: String) {
-        log(text, output: stdout)
-    }
-
-    @inlinable
-    func debug(_ text: String) {
-        log(text, output: stdout)
-    }
-
-    @inlinable
-    func warn(_ text: String, newlinePrefix: Bool = false) {
-        if newlinePrefix {
-            log("", output: stderr)
-        }
-        let text = colorize("warning: ", .boldYellow) + text
-        log(text, output: stderr)
-    }
-
-    @inlinable
-    func error(_ text: String) {
-        let text = colorize("error: ", .boldRed) + text
-        log(text, output: stderr)
-    }
-
-    // MARK: - Private
-
-    @inlinable
-    func log(_ line: String, output: UnsafeMutablePointer<FILE>) {
-        _ = outputQueue.sync { fputs(line + "\n", output) }
-    }
-}
-
 public final class Logger {
     public static func configureBuffering() {
         var info = stat()
@@ -91,17 +49,17 @@ public final class Logger {
         }
     }
 
-    @usableFromInline let baseLogger: BaseLogger
     @usableFromInline let configuration: Configuration
+    @usableFromInline let outputQueue: DispatchQueue
 
     #if canImport(os)
         @usableFromInline let signposter = OSSignposter()
     #endif
 
     @inlinable
-    public required init(baseLogger: BaseLogger = .shared, configuration: Configuration = .shared) {
-        self.baseLogger = baseLogger
+    public required init(configuration: Configuration) {
         self.configuration = configuration
+        outputQueue = DispatchQueue(label: "Logger.outputQueue")
     }
 
     @inlinable
@@ -112,24 +70,30 @@ public final class Logger {
     @inlinable
     public func info(_ text: String, canQuiet: Bool = true) {
         guard !(configuration.quiet && canQuiet) else { return }
-        baseLogger.info(text)
+        log(text, output: stdout)
     }
 
     @inlinable
     public func debug(_ text: String) {
         guard configuration.verbose else { return }
-        baseLogger.debug(text)
+        log(text, output: stdout)
     }
 
     @inlinable
     public func warn(_ text: String, newlinePrefix: Bool = false) {
         guard !configuration.quiet else { return }
-        baseLogger.warn(text, newlinePrefix: newlinePrefix)
+        if newlinePrefix {
+            log("", output: stderr)
+        }
+        let text = colorize("warning: ", .boldYellow) + text
+        log(text, output: stderr)
     }
 
+    // periphery:ignore
     @inlinable
     public func error(_ text: String) {
-        baseLogger.error(text)
+        let text = colorize("error: ", .boldRed) + text
+        log(text, output: stderr)
     }
 
     @inlinable
@@ -148,6 +112,13 @@ public final class Logger {
         #if canImport(os)
             signposter.endInterval(interval.name, interval.state)
         #endif
+    }
+
+    // MARK: - Private
+
+    @inlinable
+    func log(_ line: String, output: UnsafeMutablePointer<FILE>) {
+        _ = outputQueue.sync { fputs(line + "\n", output) }
     }
 }
 

@@ -6,13 +6,15 @@ import Shared
 /// https://github.com/peripheryapp/periphery/issues/264
 final class CapitalSelfFunctionCallRetainer: SourceGraphMutator {
     private let graph: SourceGraph
+    private let swiftVersion: SwiftVersion
 
-    required init(graph: SourceGraph, configuration _: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration, swiftVersion: SwiftVersion) {
         self.graph = graph
+        self.swiftVersion = swiftVersion
     }
 
     func mutate() {
-        guard SwiftVersion.current.version.isVersion(lessThan: "5.9") else { return }
+        guard swiftVersion.version.isVersion(lessThan: "5.9") else { return }
 
         for decl in graph.declarations(ofKinds: [.struct, .class]) {
             guard decl.hasCapitalSelfFunctionCall else { continue }

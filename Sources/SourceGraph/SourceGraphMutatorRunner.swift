@@ -2,10 +2,6 @@ import Foundation
 import Shared
 
 public final class SourceGraphMutatorRunner {
-    public static func perform(graph: SourceGraph) throws {
-        try self.init(graph: graph).perform()
-    }
-
     private let mutators: [SourceGraphMutator.Type] = [
         // Must come before all others as we need to observe all references prior to any mutations.
         UnusedImportMarker.self,
@@ -55,18 +51,20 @@ public final class SourceGraphMutatorRunner {
     private let graph: SourceGraph
     private let logger: ContextualLogger
     private let configuration: Configuration
+    private let swiftVersion: SwiftVersion
 
-    required init(graph: SourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
+    public required init(graph: SourceGraph, logger: Logger, configuration: Configuration, swiftVersion: SwiftVersion) {
         self.graph = graph
         self.logger = logger.contextualized(with: "mutator:run")
         self.configuration = configuration
+        self.swiftVersion = swiftVersion
     }
 
-    func perform() throws {
+    public func perform() throws {
         for mutator in mutators {
             let elapsed = try Benchmark.measure {
                 let interval = logger.beginInterval("mutator:run")
-                try mutator.init(graph: graph, configuration: configuration).mutate()
+                try mutator.init(graph: graph, configuration: configuration, swiftVersion: swiftVersion).mutate()
                 logger.endInterval(interval)
             }
             logger.debug("\(mutator) (\(elapsed)s)")
