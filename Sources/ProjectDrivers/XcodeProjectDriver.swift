@@ -7,9 +7,19 @@
     import XcodeSupport
 
     public final class XcodeProjectDriver {
-        public static func build(projectPath: FilePath) throws -> Self {
-            let configuration = Configuration.shared
-            let xcodebuild = Xcodebuild()
+        private let logger: Logger
+        private let configuration: Configuration
+        private let xcodebuild: Xcodebuild
+        private let project: XcodeProjectlike
+        private let schemes: Set<String>
+
+        public convenience init(
+            projectPath: FilePath,
+            configuration: Configuration,
+            shell: Shell,
+            logger: Logger
+        ) throws {
+            let xcodebuild = Xcodebuild(shell: shell, logger: logger)
 
             guard !configuration.schemes.isEmpty else {
                 throw PeripheryError.usageError("The '--schemes' option is required.")
@@ -18,9 +28,20 @@
             try xcodebuild.ensureConfigured()
 
             let project: XcodeProjectlike = if projectPath.extension == "xcworkspace" {
-                try XcodeWorkspace(path: .makeAbsolute(projectPath))
+                try XcodeWorkspace(
+                    path: .makeAbsolute(projectPath),
+                    xcodebuild: xcodebuild,
+                    configuration: configuration,
+                    logger: logger,
+                    shell: shell
+                )
             } else {
-                try XcodeProject(path: .makeAbsolute(projectPath))
+                try XcodeProject(
+                    path: .makeAbsolute(projectPath),
+                    xcodebuild: xcodebuild,
+                    shell: shell,
+                    logger: logger
+                )
             }
 
             let schemes: Set<String>
@@ -39,7 +60,8 @@
                 }
             }
 
-            return self.init(
+            self.init(
+                logger: logger,
                 configuration: configuration,
                 xcodebuild: xcodebuild,
                 project: project,
@@ -47,14 +69,8 @@
             )
         }
 
-        private let logger: Logger
-        private let configuration: Configuration
-        private let xcodebuild: Xcodebuild
-        private let project: XcodeProjectlike
-        private let schemes: Set<String>
-
         init(
-            logger: Logger = .init(),
+            logger: Logger,
             configuration: Configuration,
             xcodebuild: Xcodebuild,
             project: XcodeProjectlike,
@@ -102,7 +118,8 @@
             let collector = SourceFileCollector(
                 indexStorePaths: indexStorePaths,
                 excludedTestTargets: excludedTestTargets,
-                logger: logger
+                logger: logger,
+                configuration: configuration
             )
             let sourceFiles = try collector.collect()
             let infoPlistPaths = targets.flatMapSet { $0.files(kind: .infoPlist) }

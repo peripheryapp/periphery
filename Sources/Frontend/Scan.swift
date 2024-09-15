@@ -8,11 +8,14 @@ import SourceGraph
 final class Scan {
     private let configuration: Configuration
     private let logger: Logger
-    private let graph = SourceGraph.shared
+    private let graph: SourceGraph
+    private let swiftVersion: SwiftVersion
 
-    required init(configuration: Configuration = .shared, logger: Logger = .init()) {
+    required init(configuration: Configuration, logger: Logger, swiftVersion: SwiftVersion) {
         self.configuration = configuration
         self.logger = logger
+        self.swiftVersion = swiftVersion
+        graph = SourceGraph(configuration: configuration)
     }
 
     func perform(project: Project) throws -> [ScanResult] {
@@ -71,7 +74,7 @@ final class Scan {
         let indexLogger = logger.contextualized(with: "index")
         let plan = try driver.plan(logger: indexLogger)
         let syncSourceGraph = SynchronizedSourceGraph(graph: graph)
-        let pipeline = IndexPipeline(plan: plan, graph: syncSourceGraph, logger: indexLogger)
+        let pipeline = IndexPipeline(plan: plan, graph: syncSourceGraph, logger: indexLogger, configuration: configuration)
         try pipeline.perform()
         logger.endInterval(indexInterval)
     }
@@ -84,7 +87,12 @@ final class Scan {
             logger.info("\(asterisk) Analyzing...")
         }
 
-        try SourceGraphMutatorRunner.perform(graph: graph)
+        try SourceGraphMutatorRunner(
+            graph: graph,
+            logger: logger,
+            configuration: configuration,
+            swiftVersion: swiftVersion
+        ).perform()
         logger.endInterval(analyzeInterval)
     }
 

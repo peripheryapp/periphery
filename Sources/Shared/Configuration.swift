@@ -5,11 +5,8 @@ import Yams
 
 public final class Configuration {
     public static var defaultConfigurationFile = FilePath(".periphery.yml")
-    public static let shared = Configuration()
 
-    public init(logger: BaseLogger = .shared) {
-        self.logger = logger
-    }
+    public init() {}
 
     @Setting(key: "project", defaultValue: nil, setter: filePathSetter)
     public var project: FilePath?
@@ -134,9 +131,6 @@ public final class Configuration {
     // Non user facing.
     public var guidedSetup: Bool = false
 
-    // Dependencies.
-    private var logger: BaseLogger // Must use BaseLogger as Logger depends upon Configuration.
-
     public var hasNonDefaultValues: Bool {
         settings.contains(where: \.hasNonDefaultValue)
     }
@@ -156,7 +150,7 @@ public final class Configuration {
         FileManager.default.createFile(atPath: path.string, contents: data)
     }
 
-    public func load(from path: FilePath?) throws {
+    public func load(from path: FilePath?, logger: Logger) throws {
         guard let path = try configurationPath(withUserProvided: path) else { return }
 
         let encodedYAML = try String(contentsOf: path.url)

@@ -6,15 +6,19 @@ import SystemPackage
 final class ScanBehavior {
     private let configuration: Configuration
     private let logger: Logger
+    private let shell: Shell
+    private let swiftVersion: SwiftVersion
 
-    required init(configuration: Configuration = .shared, logger: Logger = .init()) {
+    required init(configuration: Configuration, logger: Logger, shell: Shell, swiftVersion: SwiftVersion) {
         self.configuration = configuration
         self.logger = logger
+        self.shell = shell
+        self.swiftVersion = swiftVersion
     }
 
     func setup(_ configPath: FilePath?) -> Result<Void, PeripheryError> {
         do {
-            try configuration.load(from: configPath)
+            try configuration.load(from: configPath, logger: logger)
         } catch let error as PeripheryError {
             return .failure(error)
         } catch {
@@ -30,13 +34,13 @@ final class ScanBehavior {
         let project: Project
 
         do {
-            logger.debug(SwiftVersion.current.fullVersion)
-            try SwiftVersion.current.validateVersion()
+            logger.debug(swiftVersion.fullVersion)
+            try swiftVersion.validateVersion()
 
             if configuration.guidedSetup {
-                project = try GuidedSetup().perform()
+                project = try GuidedSetup(configuration: configuration, shell: shell, logger: logger).perform()
             } else {
-                project = try Project.identify()
+                project = try Project(configuration: configuration, shell: shell, logger: logger)
             }
         } catch let error as PeripheryError {
             return .failure(error)
@@ -44,7 +48,7 @@ final class ScanBehavior {
             return .failure(.underlyingError(error))
         }
 
-        let updateChecker = UpdateChecker()
+        let updateChecker = UpdateChecker(logger: logger, configuration: configuration)
         updateChecker.run()
 
         let results: [ScanResult]
@@ -60,7 +64,7 @@ final class ScanBehavior {
                 baseline = try JSONDecoder().decode(Baseline.self, from: data)
             }
 
-            let filteredResults = try OutputDeclarationFilter().filter(results, with: baseline)
+            let filteredResults = try OutputDeclarationFilter(configuration: configuration, logger: logger).filter(results, with: baseline)
 
             if let baselinePath = configuration.writeBaseline {
                 let usrs = filteredResults

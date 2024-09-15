@@ -17,12 +17,13 @@ struct PeripheryCommand: FrontendCommand {
 }
 
 signal(SIGINT) { _ in
-    let logger = Logger()
+    let logger = Logger(configuration: Configuration())
     logger.warn(
         "Termination can result in a corrupt index. Try the '--clean-build' flag if you get erroneous results such as false-positives and incorrect source file locations.",
         newlinePrefix: true // Print a newline after ^C
     )
-    Shell.shared.interruptRunning()
+    let shell = Shell(logger: logger)
+    shell.interruptRunning()
     exit(0)
 }
 

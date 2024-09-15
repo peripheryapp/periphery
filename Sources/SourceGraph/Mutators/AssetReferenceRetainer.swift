@@ -6,7 +6,7 @@ final class AssetReferenceRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let interfaceBuilderPropertyRetainer: InterfaceBuilderPropertyRetainer
 
-    required init(graph: SourceGraph, configuration _: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
         interfaceBuilderPropertyRetainer = .init(graph: graph)
     }

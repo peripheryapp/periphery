@@ -20,7 +20,7 @@ final class SwiftIndexer: Indexer {
         sourceFiles: [SourceFile: [IndexUnit]],
         graph: SynchronizedSourceGraph,
         logger: ContextualLogger,
-        configuration: Configuration = .shared
+        configuration: Configuration
     ) {
         self.sourceFiles = sourceFiles
         self.graph = graph

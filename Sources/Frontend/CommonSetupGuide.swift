@@ -4,7 +4,7 @@ import Shared
 final class CommonSetupGuide: SetupGuideHelpers {
     private let configuration: Configuration
 
-    required init(configuration: Configuration = .shared) {
+    required init(configuration: Configuration) {
         self.configuration = configuration
         super.init()
     }

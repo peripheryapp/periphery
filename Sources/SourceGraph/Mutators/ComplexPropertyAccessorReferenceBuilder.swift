@@ -8,7 +8,7 @@ import Shared
 final class ComplexPropertyAccessorReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
 
-    required init(graph: SourceGraph, configuration _: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
     }
 

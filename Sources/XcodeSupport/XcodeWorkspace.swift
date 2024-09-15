@@ -14,7 +14,7 @@ public final class XcodeWorkspace: XcodeProjectlike {
 
     public private(set) var targets: Set<XcodeTarget> = []
 
-    public required init(path: FilePath, xcodebuild: Xcodebuild = .init(), configuration: Configuration = .shared, logger: Logger = .init()) throws {
+    public required init(path: FilePath, xcodebuild: Xcodebuild, configuration: Configuration, logger: Logger, shell: Shell) throws {
         logger.contextualized(with: "xcode:workspace").debug("Loading \(path)")
 
         self.path = path
@@ -29,7 +29,7 @@ public final class XcodeWorkspace: XcodeProjectlike {
         }
 
         let projectPaths = collectProjectPaths(in: xcworkspace.data.children)
-        let projects = try projectPaths.compactMapSet { try XcodeProject.build(path: sourceRoot.pushing($0), referencedBy: self.path) }
+        let projects = try projectPaths.compactMapSet { try XcodeProject(path: sourceRoot.pushing($0), referencedBy: self.path, shell: shell, logger: logger) }
 
         targets = projects.reduce(into: .init()) { result, project in
             result.formUnion(project.targets)

@@ -7,10 +7,10 @@ final class XCDataModelIndexer: Indexer {
     private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger
 
-    required init(files: Set<FilePath>, graph: SynchronizedSourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
+    required init(files: Set<FilePath>, graph: SynchronizedSourceGraph, logger: ContextualLogger, configuration: Configuration) {
         self.files = files
         self.graph = graph
-        self.logger = logger.contextualized(with: "index:xcdatamodel")
+        self.logger = logger.contextualized(with: "xcdatamodel")
         super.init(configuration: configuration)
     }
 

@@ -7,10 +7,10 @@ final class InfoPlistIndexer: Indexer {
     private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger
 
-    required init(infoPlistFiles: Set<FilePath>, graph: SynchronizedSourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
+    required init(infoPlistFiles: Set<FilePath>, graph: SynchronizedSourceGraph, logger: ContextualLogger, configuration: Configuration) {
         self.infoPlistFiles = infoPlistFiles
         self.graph = graph
-        self.logger = logger.contextualized(with: "index:infoplist")
+        self.logger = logger.contextualized(with: "infoplist")
         super.init(configuration: configuration)
     }
 

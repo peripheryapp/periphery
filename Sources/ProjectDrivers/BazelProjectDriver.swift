@@ -7,11 +7,10 @@ public class BazelProjectDriver: ProjectDriver {
         FilePath("MODULE.bazel").exists || FilePath("WORKSPACE").exists
     }
 
-    public static func build() throws -> Self {
-        let configuration = Configuration.shared
+    public static func build(configuration: Configuration, shell: Shell, logger: Logger) throws -> Self {
         configuration.bazel = false // Generic project mode is used for the actual scan.
         configuration.reportExclude.append("**/bazel-out/**/*")
-        return self.init(configuration: configuration)
+        return self.init(configuration: configuration, shell: shell, logger: logger)
     }
 
     private static let topLevelKinds = [
@@ -69,9 +68,9 @@ public class BazelProjectDriver: ProjectDriver {
     private lazy var contextLogger: ContextualLogger = logger.contextualized(with: "bazel")
 
     required init(
-        configuration: Configuration = .shared,
-        shell: Shell = .shared,
-        logger: Logger = .init(),
+        configuration: Configuration,
+        shell: Shell,
+        logger: Logger,
         fileManager: FileManager = .default
     ) {
         self.configuration = configuration

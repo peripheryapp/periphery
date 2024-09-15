@@ -1,13 +1,15 @@
 import Foundation
 
 open class Shell {
-    public static let shared: Shell = .init(environment: ProcessInfo.processInfo.environment, logger: Logger())
-
     private var tasks: Set<Process> = []
     private var tasksQueue = DispatchQueue(label: "Shell.tasksQueue")
 
     private let environment: [String: String]
     private let logger: ContextualLogger
+
+    public convenience init(logger: Logger) {
+        self.init(environment: ProcessInfo.processInfo.environment, logger: logger)
+    }
 
     public required init(environment: [String: String], logger: Logger) {
         self.environment = environment

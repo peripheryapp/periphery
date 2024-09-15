@@ -1,11 +1,32 @@
 import Foundation
+import Shared
 @testable import TestShared
 @testable import XcodeSupport
 import XCTest
 
 final class XcodeTargetTest: XCTestCase {
+    private var project: XcodeProject!
+
+    override func setUp() {
+        super.setUp()
+        let configuration = Configuration()
+        let logger = Logger(configuration: configuration)
+        let shell = Shell(logger: logger)
+        let xcodebuild = Xcodebuild(shell: shell, logger: logger)
+        project = try! XcodeProject(
+            path: UIKitProjectPath,
+            xcodebuild: xcodebuild,
+            shell: shell,
+            logger: logger
+        )
+    }
+
+    override func tearDown() {
+        project = nil
+        super.tearDown()
+    }
+
     func testSourceFileInGroupWithoutFolder() throws {
-        let project = try! XcodeProject(path: UIKitProjectPath)
         let target = project.targets.first { $0.name == "UIKitProject" }!
         try target.identifyFiles()
 
@@ -15,7 +36,6 @@ final class XcodeTargetTest: XCTestCase {
     }
 
     func testIsTestTarget() {
-        let project = try! XcodeProject(path: UIKitProjectPath)
         let projectTarget = project.targets.first { $0.name == "UIKitProject" }!
         let testTarget = project.targets.first { $0.name == "UIKitProjectTests" }!
 

@@ -9,7 +9,9 @@ final class ShellTest: XCTestCase {
             "PATH": path,
             "DEVELOPER_DIR": developerDir,
         ]
-        let shell = Shell(environment: environment, logger: .init())
+        let configuration = Configuration()
+        let logger = Logger(configuration: configuration)
+        let shell = Shell(environment: environment, logger: logger)
         XCTAssertEqual(shell.pristineEnvironment["PATH"], path)
         XCTAssertEqual(shell.pristineEnvironment["DEVELOPER_DIR"], developerDir)
     }

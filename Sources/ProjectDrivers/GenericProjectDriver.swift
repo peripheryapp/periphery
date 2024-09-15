@@ -14,7 +14,15 @@ public final class GenericProjectDriver {
         let testTargets: Set<String>
     }
 
-    public static func build(genericProjectConfig: FilePath) throws -> Self {
+    private let indexstorePaths: Set<FilePath>
+    private let plistPaths: Set<FilePath>
+    private let xibPaths: Set<FilePath>
+    private let xcDataModelsPaths: Set<FilePath>
+    private let xcMappingModelsPaths: Set<FilePath>
+    private let testTargets: Set<String>
+    private let configuration: Configuration
+
+    public convenience init(genericProjectConfig: FilePath, configuration: Configuration) throws {
         guard genericProjectConfig.exists else {
             throw PeripheryError.pathDoesNotExist(path: genericProjectConfig.string)
         }
@@ -29,24 +37,16 @@ public final class GenericProjectDriver {
         let xcMappingModelPaths = config.xcmappingmodels.mapSet { FilePath.makeAbsolute($0) }
         let indexstorePaths = config.indexstores.mapSet { FilePath.makeAbsolute($0) }
 
-        return self.init(
+        self.init(
             indexstorePaths: indexstorePaths,
             plistPaths: plistPaths,
             xibPaths: xibPaths,
             xcDataModelsPaths: xcDataModelPaths,
             xcMappingModelsPaths: xcMappingModelPaths,
             testTargets: config.testTargets,
-            configuration: .shared
+            configuration: configuration
         )
     }
-
-    private let indexstorePaths: Set<FilePath>
-    private let plistPaths: Set<FilePath>
-    private let xibPaths: Set<FilePath>
-    private let xcDataModelsPaths: Set<FilePath>
-    private let xcMappingModelsPaths: Set<FilePath>
-    private let testTargets: Set<String>
-    private let configuration: Configuration
 
     private init(
         indexstorePaths: Set<FilePath>,
@@ -73,7 +73,8 @@ extension GenericProjectDriver: ProjectDriver {
         let collector = SourceFileCollector(
             indexStorePaths: Set(configuration.indexStorePath).union(indexstorePaths),
             excludedTestTargets: excludedTestTargets,
-            logger: logger
+            logger: logger,
+            configuration: configuration
         )
         let sourceFiles = try collector.collect()
 

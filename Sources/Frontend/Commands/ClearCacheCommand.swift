@@ -9,6 +9,9 @@ struct ClearCacheCommand: FrontendCommand {
     )
 
     func run() throws {
-        try Shell.shared.exec(["rm", "-rf", Constants.cachePath().string])
+        let configuration = Configuration()
+        let logger = Logger(configuration: configuration)
+        let shell = Shell(logger: logger)
+        try shell.exec(["rm", "-rf", Constants.cachePath().string])
     }
 }

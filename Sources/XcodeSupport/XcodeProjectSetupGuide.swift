@@ -3,7 +3,14 @@ import Shared
 import SystemPackage
 
 public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
-    public static func detect() -> Self? {
+    private let workspacePaths: Set<FilePath>
+    private let projectPaths: Set<FilePath>
+    private let configuration: Configuration
+    private let logger: Logger
+    private let shell: Shell
+    private let xcodebuild: Xcodebuild
+
+    public convenience init?(configuration: Configuration, shell: Shell, logger: Logger) {
         let workspacePaths = FilePath
             .glob("**/*.xcworkspace")
             .filter {
@@ -16,27 +23,28 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
             return nil
         }
 
-        return Self(
+        self.init(
             workspacePaths: workspacePaths,
-            projectPaths: projectPaths
+            projectPaths: projectPaths,
+            configuration: configuration,
+            shell: shell,
+            logger: logger
         )
     }
-
-    private let workspacePaths: Set<FilePath>
-    private let projectPaths: Set<FilePath>
-    private let configuration: Configuration
-    private let xcodebuild: Xcodebuild
 
     public required init(
         workspacePaths: Set<FilePath>,
         projectPaths: Set<FilePath>,
-        configuration: Configuration = .shared,
-        xcodebuild: Xcodebuild = .init()
+        configuration: Configuration,
+        shell: Shell,
+        logger: Logger
     ) {
         self.workspacePaths = workspacePaths
         self.projectPaths = projectPaths
         self.configuration = configuration
-        self.xcodebuild = xcodebuild
+        self.logger = logger
+        self.shell = shell
+        xcodebuild = Xcodebuild(shell: shell, logger: logger)
         super.init()
     }
 
@@ -50,9 +58,20 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
         var project: XcodeProjectlike?
 
         if let workspacePath = identifyWorkspace() {
-            project = try XcodeWorkspace(path: workspacePath)
+            project = try XcodeWorkspace(
+                path: workspacePath,
+                xcodebuild: xcodebuild,
+                configuration: configuration,
+                logger: logger,
+                shell: shell
+            )
         } else if let projectPath = identifyProject() {
-            project = try XcodeProject(path: projectPath)
+            project = try XcodeProject(
+                path: projectPath,
+                xcodebuild: xcodebuild,
+                shell: shell,
+                logger: logger
+            )
         }
 
         guard let project else {

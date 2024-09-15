@@ -550,7 +550,6 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testCodingKeyEnum() {
-        let configuration = Configuration.shared
         // CustomStringConvertible doesn't actually inherit Codable, we're just using it because we don't have an
         // external module in which to declare our own type.
         configuration.externalCodableProtocols = ["CustomStringConvertible"]

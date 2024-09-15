@@ -15,7 +15,7 @@ final class ResultBuilderRetainer: SourceGraphMutator {
         "buildLimitedAvailability(_:)",
     ])
 
-    required init(graph: SourceGraph, configuration _: Configuration) {
+    required init(graph: SourceGraph, configuration _: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
     }
 

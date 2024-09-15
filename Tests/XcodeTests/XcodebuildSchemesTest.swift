@@ -1,4 +1,5 @@
 import Foundation
+import Shared
 @testable import XcodeSupport
 import XCTest
 
@@ -11,8 +12,10 @@ final class XcodebuildSchemesTest: XCTestCase {
         super.setUp()
 
         shell = ShellMock()
-        xcodebuild = Xcodebuild(shell: shell)
-        project = try! XcodeProject(path: UIKitProjectPath)
+        let configuration = Configuration()
+        let logger = Logger(configuration: configuration)
+        xcodebuild = Xcodebuild(shell: shell, logger: logger)
+        project = try! XcodeProject(path: UIKitProjectPath, xcodebuild: xcodebuild, shell: shell, logger: logger)
     }
 
     override func tearDown() {

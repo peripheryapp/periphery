@@ -14,8 +14,7 @@ public extension FilePath {
 
         return Glob(
             pattern: absolutePattern,
-            excludedDirectories: [".build", "node_modules", ".gems", "gems", ".swiftpm"],
-            logger: Logger()
+            excludedDirectories: [".build", "node_modules", ".gems", "gems", ".swiftpm"]
         ).paths.mapSet { FilePath($0).lexicallyNormalized() }
     }
 }
@@ -27,18 +26,15 @@ public extension FilePath {
 ///    - When the pattern ends with a trailing slash, only directories are matched.
 private class Glob {
     private let excludedDirectories: [String]
-    private let logger: Logger
     private var isDirectoryCache: [String: Bool] = [:]
 
     fileprivate var paths: Set<String> = []
 
     init(
         pattern: String,
-        excludedDirectories: [String],
-        logger: Logger
+        excludedDirectories: [String]
     ) {
         self.excludedDirectories = excludedDirectories
-        self.logger = logger
 
         let hasTrailingGlobstarSlash = pattern.hasSuffix("**/")
         let includeFiles = !hasTrailingGlobstarSlash
@@ -73,17 +69,10 @@ private class Glob {
         let firstPart = parts.removeFirst()
         var lastPart = parts.joined(separator: "**")
 
-        var directories: [URL]
-
-        if FileManager.default.fileExists(atPath: firstPart) {
-            do {
-                directories = try exploreDirectories(url: URL(fileURLWithPath: firstPart))
-            } catch {
-                directories = []
-                logger.error("Error parsing file system item: \(error)")
-            }
+        var directories: [URL] = if FileManager.default.fileExists(atPath: firstPart) {
+            exploreDirectories(url: URL(fileURLWithPath: firstPart))
         } else {
-            directories = []
+            []
         }
 
         // Include the globstar root directory ("dir/") in a pattern like "dir/**" or "dir/**/"
@@ -104,8 +93,8 @@ private class Glob {
         return results
     }
 
-    private func exploreDirectories(url: URL) throws -> [URL] {
-        let subURLs = try FileManager.default.contentsOfDirectory(atPath: url.path).flatMap { subPath -> [URL] in
+    private func exploreDirectories(url: URL) -> [URL] {
+        let subURLs = try? FileManager.default.contentsOfDirectory(atPath: url.path).flatMap { subPath -> [URL] in
             if excludedDirectories.contains(subPath) {
                 return []
             }
@@ -116,10 +105,10 @@ private class Glob {
                 return []
             }
 
-            return try exploreDirectories(url: subPathURL)
+            return exploreDirectories(url: subPathURL)
         }
 
-        return [url] + subURLs
+        return [url] + (subURLs ?? [])
     }
 
     private func isDirectory(path: String) -> Bool {

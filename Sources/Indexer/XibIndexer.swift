@@ -7,10 +7,10 @@ final class XibIndexer: Indexer {
     private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger
 
-    required init(xibFiles: Set<FilePath>, graph: SynchronizedSourceGraph, logger: Logger = .init(), configuration: Configuration = .shared) {
+    required init(xibFiles: Set<FilePath>, graph: SynchronizedSourceGraph, logger: ContextualLogger, configuration: Configuration) {
         self.xibFiles = xibFiles
         self.graph = graph
-        self.logger = logger.contextualized(with: "index:xib")
+        self.logger = logger.contextualized(with: "xib")
         super.init(configuration: configuration)
     }
 

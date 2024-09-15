@@ -135,13 +135,16 @@ struct ScanCommand: FrontendCommand {
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
-        let scanBehavior = ScanBehavior()
+        let configuration = Configuration()
+        let logger = Logger(configuration: configuration)
+        let shell = Shell(logger: logger)
+        let swiftVersion = SwiftVersion(shell: shell)
+        let scanBehavior = ScanBehavior(configuration: configuration, logger: logger, shell: shell, swiftVersion: swiftVersion)
 
         if !setup {
             try scanBehavior.setup(config).get()
         }
 
-        let configuration = Configuration.shared
         configuration.guidedSetup = setup
         configuration.apply(\.$project, project)
         configuration.apply(\.$schemes, schemes)
@@ -184,7 +187,11 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$bazelFilter, bazelFilter)
 
         try scanBehavior.main { project in
-            try Scan().perform(project: project)
+            try Scan(
+                configuration: configuration,
+                logger: logger,
+                swiftVersion: swiftVersion
+            ).perform(project: project)
         }.get()
     }
 }
