@@ -26,7 +26,7 @@ public final class Configuration {
     @Setting(key: "exclude_targets", defaultValue: [])
     public var excludeTargets: [String]
 
-    @Setting(key: "index_exclude", defaultValue: ["**/*?.build/**/*"], requireDefaultValues: true)
+    @Setting(key: "index_exclude", defaultValue: ["**/*?.build/**/*", "**/SourcePackages/checkouts/**"], requireDefaultValues: true)
     public var indexExclude: [String]
 
     @Setting(key: "report_exclude", defaultValue: [])
