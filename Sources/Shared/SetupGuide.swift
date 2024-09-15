@@ -1,4 +1,5 @@
 import Foundation
+import Logger
 
 public protocol SetupGuide {
     func perform() throws -> ProjectKind

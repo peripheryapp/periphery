@@ -1,3 +1,4 @@
+import Configuration
 import Shared
 
 final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {

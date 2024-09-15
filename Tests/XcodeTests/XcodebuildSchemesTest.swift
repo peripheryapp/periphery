@@ -1,5 +1,5 @@
 import Foundation
-import Shared
+import Logger
 @testable import XcodeSupport
 import XCTest
 
@@ -12,8 +12,7 @@ final class XcodebuildSchemesTest: XCTestCase {
         super.setUp()
 
         shell = ShellMock()
-        let configuration = Configuration()
-        let logger = Logger(configuration: configuration)
+        let logger = Logger(quiet: true)
         xcodebuild = Xcodebuild(shell: shell, logger: logger)
         project = try! XcodeProject(path: UIKitProjectPath, xcodebuild: xcodebuild, shell: shell, logger: logger)
     }

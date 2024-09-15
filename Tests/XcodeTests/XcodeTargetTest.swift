@@ -1,4 +1,5 @@
 import Foundation
+import Logger
 import Shared
 @testable import TestShared
 @testable import XcodeSupport
@@ -9,8 +10,7 @@ final class XcodeTargetTest: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        let configuration = Configuration()
-        let logger = Logger(configuration: configuration)
+        let logger = Logger(quiet: true)
         let shell = Shell(logger: logger)
         let xcodebuild = Xcodebuild(shell: shell, logger: logger)
         project = try! XcodeProject(

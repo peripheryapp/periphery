@@ -1,6 +1,5 @@
 import FilenameMatcher
 import Foundation
-import Shared
 import XCTest
 
 final class FilenameMatcherTests: XCTestCase {

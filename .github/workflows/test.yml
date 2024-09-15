@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: jdx/mise-action@v2
-      - run: mise run lint
+      - run: mise run lint-ci
   macOS:
     strategy:
       fail-fast: false

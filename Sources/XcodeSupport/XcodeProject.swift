@@ -1,4 +1,5 @@
 import Foundation
+import Logger
 import Shared
 import SystemPackage
 import XcodeProj

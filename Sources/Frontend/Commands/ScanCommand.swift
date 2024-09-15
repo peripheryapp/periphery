@@ -1,5 +1,8 @@
 import ArgumentParser
+import Configuration
 import Foundation
+import Logger
+import PeripheryKit
 import Shared
 import SystemPackage
 
@@ -135,14 +138,13 @@ struct ScanCommand: FrontendCommand {
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
+        let logger = Logger(quiet: quiet, verbose: verbose)
+        logger.contextualized(with: "version").debug(PeripheryVersion)
+
         let configuration = Configuration()
-        let logger = Logger(configuration: configuration)
-        let shell = Shell(logger: logger)
-        let swiftVersion = SwiftVersion(shell: shell)
-        let scanBehavior = ScanBehavior(configuration: configuration, logger: logger, shell: shell, swiftVersion: swiftVersion)
 
         if !setup {
-            try scanBehavior.setup(config).get()
+            try configuration.load(from: config, logger: logger)
         }
 
         configuration.guidedSetup = setup
@@ -186,13 +188,59 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$bazel, bazel)
         configuration.apply(\.$bazelFilter, bazelFilter)
 
-        try scanBehavior.main { project in
-            try Scan(
-                configuration: configuration,
-                logger: logger,
-                swiftVersion: swiftVersion
-            ).perform(project: project)
-        }.get()
+        let shell = Shell(logger: logger)
+        let swiftVersion = SwiftVersion(shell: shell)
+        logger.debug(swiftVersion.fullVersion)
+        try swiftVersion.validateVersion()
+
+        let project: Project = if configuration.guidedSetup {
+            try GuidedSetup(configuration: configuration, shell: shell, logger: logger).perform()
+        } else {
+            try Project(configuration: configuration, shell: shell, logger: logger)
+        }
+
+        let updateChecker = UpdateChecker(logger: logger, configuration: configuration)
+        updateChecker.run()
+
+        let results = try Scan(
+            configuration: configuration,
+            logger: logger,
+            swiftVersion: swiftVersion
+        ).perform(project: project)
+
+        let interval = logger.beginInterval("result:output")
+        var baseline: Baseline?
+
+        if let baselinePath = configuration.baseline {
+            let data = try Data(contentsOf: baselinePath.url)
+            baseline = try JSONDecoder().decode(Baseline.self, from: data)
+        }
+
+        let filteredResults = try OutputDeclarationFilter(configuration: configuration, logger: logger).filter(results, with: baseline)
+
+        if let baselinePath = configuration.writeBaseline {
+            let usrs = filteredResults
+                .flatMapSet { $0.usrs }
+                .union(baseline?.usrs ?? [])
+            let baseline = Baseline.v1(usrs: usrs.sorted())
+            let data = try JSONEncoder().encode(baseline)
+            try data.write(to: baselinePath.url)
+        }
+
+        let output = try configuration.outputFormat.formatter.init(configuration: configuration).format(filteredResults)
+
+        if configuration.outputFormat.supportsAuxiliaryOutput {
+            logger.info("", canQuiet: true)
+        }
+
+        logger.info(output, canQuiet: false)
+        logger.endInterval(interval)
+
+        updateChecker.notifyIfAvailable()
+
+        if !filteredResults.isEmpty, configuration.strict {
+            throw PeripheryError.foundIssues(count: filteredResults.count)
+        }
     }
 }
 

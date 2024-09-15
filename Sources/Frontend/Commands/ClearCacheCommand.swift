@@ -1,5 +1,7 @@
 import ArgumentParser
+import Configuration
 import Foundation
+import Logger
 import Shared
 
 struct ClearCacheCommand: FrontendCommand {

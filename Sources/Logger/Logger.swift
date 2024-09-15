@@ -49,16 +49,18 @@ public final class Logger {
         }
     }
 
-    @usableFromInline let configuration: Configuration
     @usableFromInline let outputQueue: DispatchQueue
+    @usableFromInline let quiet: Bool
+    @usableFromInline let verbose: Bool
 
     #if canImport(os)
         @usableFromInline let signposter = OSSignposter()
     #endif
 
     @inlinable
-    public required init(configuration: Configuration) {
-        self.configuration = configuration
+    public required init(quiet: Bool = false, verbose: Bool = false) {
+        self.quiet = quiet
+        self.verbose = verbose
         outputQueue = DispatchQueue(label: "Logger.outputQueue")
     }
 
@@ -69,19 +71,19 @@ public final class Logger {
 
     @inlinable
     public func info(_ text: String, canQuiet: Bool = true) {
-        guard !(configuration.quiet && canQuiet) else { return }
+        guard !(quiet && canQuiet) else { return }
         log(text, output: stdout)
     }
 
     @inlinable
     public func debug(_ text: String) {
-        guard configuration.verbose else { return }
+        guard verbose else { return }
         log(text, output: stdout)
     }
 
     @inlinable
     public func warn(_ text: String, newlinePrefix: Bool = false) {
-        guard !configuration.quiet else { return }
+        guard !quiet else { return }
         if newlinePrefix {
             log("", output: stderr)
         }

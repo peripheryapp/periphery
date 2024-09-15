@@ -1,4 +1,6 @@
+import Configuration
 import Foundation
+import Logger
 import Shared
 
 #if canImport(FoundationNetworking)

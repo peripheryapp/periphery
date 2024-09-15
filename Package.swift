@@ -35,6 +35,7 @@ var targets: [PackageDescription.Target] = [
         name: "Frontend",
         dependencies: [
             .target(name: "Shared"),
+            .target(name: "Configuration"),
             .target(name: "SourceGraph"),
             .target(name: "PeripheryKit"),
             .target(name: "ProjectDrivers"),
@@ -42,6 +43,25 @@ var targets: [PackageDescription.Target] = [
             .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
         ]
     ),
+    .target(
+        name: "Configuration",
+        dependencies: [
+            .target(name: "Extensions"),
+            .target(name: "Shared"),
+            .target(name: "Logger"),
+            .product(name: "Yams", package: "Yams"),
+            .product(name: "SystemPackage", package: "swift-system"),
+            .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
+        ]
+    ),
+    .target(
+        name: "Extensions",
+        dependencies: [
+            .product(name: "SystemPackage", package: "swift-system"),
+            .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
+        ]
+    ),
+    .target(name: "Logger"),
     .target(
         name: "PeripheryKit",
         dependencies: [
@@ -80,6 +100,7 @@ var targets: [PackageDescription.Target] = [
     .target(
         name: "SourceGraph",
         dependencies: [
+            .target(name: "Configuration"),
             .product(name: "SwiftSyntax", package: "swift-syntax"),
             .target(name: "Shared"),
         ]
@@ -87,7 +108,8 @@ var targets: [PackageDescription.Target] = [
     .target(
         name: "Shared",
         dependencies: [
-            .product(name: "Yams", package: "Yams"),
+            .target(name: "Extensions"),
+            .target(name: "Logger"),
             .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
         ]
@@ -120,6 +142,7 @@ var targets: [PackageDescription.Target] = [
         dependencies: [
             .target(name: "TestShared"),
             .target(name: "PeripheryKit"),
+            .target(name: "Configuration"),
         ],
         exclude: ["AccessibilityProject"]
     ),

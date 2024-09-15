@@ -1,12 +1,12 @@
 import Foundation
+import Logger
 import Shared
 
 class ShellMock: Shell {
     var output: String = ""
 
     convenience init() {
-        let configuration = Configuration()
-        let logger = Logger(configuration: configuration)
+        let logger = Logger(quiet: true)
         self.init(environment: ProcessInfo.processInfo.environment, logger: logger)
     }
 

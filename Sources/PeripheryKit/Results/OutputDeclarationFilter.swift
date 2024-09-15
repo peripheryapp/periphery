@@ -1,6 +1,7 @@
+import Configuration
 import FilenameMatcher
 import Foundation
-import Shared
+import Logger
 import SystemPackage
 
 public final class OutputDeclarationFilter {

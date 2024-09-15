@@ -1,5 +1,5 @@
+import Configuration
 import Foundation
-import Shared
 import SystemPackage
 
 final class JsonFormatter: OutputFormatter {

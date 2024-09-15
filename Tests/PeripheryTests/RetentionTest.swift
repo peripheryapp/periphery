@@ -1,4 +1,3 @@
-import Shared
 import SystemPackage
 @testable import TestShared
 import XCTest
