@@ -1583,18 +1583,16 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    // MARK: - Known Failures
-
     // https://github.com/apple/swift/issues/56541
     func testStaticMemberUsedAsSubscriptKey() {
-        guard performKnownFailures else { return }
-
         analyze(retainPublic: true) {
             assertReferenced(.enum("FixtureEnum128")) {
                 self.assertReferenced(.varStatic("someVar"))
             }
         }
     }
+
+    // MARK: - Known Failures
 
     // https://github.com/apple/swift/issues/56165
     func testCustomConstructorWithLiteral() {
