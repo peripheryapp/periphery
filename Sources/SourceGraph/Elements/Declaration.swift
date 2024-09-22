@@ -164,6 +164,10 @@ public final class Declaration {
             functionKinds.union(variableKinds).union(globalKinds)
         }
 
+        static var overrideKinds: Set<Kind> {
+            [.functionMethodInstance, .varInstance]
+        }
+
         public var isAccessorKind: Bool {
             rawValue.hasPrefix("function.accessor")
         }
