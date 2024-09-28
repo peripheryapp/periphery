@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-syntax",
       "state" : {
-        "revision" : "cb53fa1bd3219b0b23ded7dfdd3b2baff266fd25",
-        "version" : "600.0.0"
+        "revision" : "0687f71944021d616d34d922343dcef086855920",
+        "version" : "600.0.1"
       }
     },
     {
@@ -77,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tuist/xcodeproj",
       "state" : {
-        "revision" : "aaef02b5d7a78aae5ff6d7b2a1c8349dd596e6ea",
-        "version" : "8.23.6"
+        "revision" : "babd2491ea34777bec9d33381a60cd782559b4b3",
+        "version" : "8.24.1"
       }
     },
     {
