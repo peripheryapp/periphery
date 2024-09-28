@@ -1,4 +1,3 @@
-import Configuration
 import Foundation
 import Shared
 
@@ -10,9 +9,9 @@ final class ExternalOverrideRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let isSwift6FixEnabled: Bool
 
-    required init(graph: SourceGraph, configuration _: Configuration, swiftVersion: SwiftVersion) {
+    required init(graph: SourceGraph, configuration _: Configuration) {
         self.graph = graph
-        isSwift6FixEnabled = swiftVersion.version.isVersion(greaterThanOrEqualTo: "6.0")
+        isSwift6FixEnabled = SwiftVersion.current.version.isVersion(greaterThanOrEqualTo: "6.0")
     }
 
     func mutate() {

@@ -38,7 +38,8 @@ final class XcodeTarget {
     }
 
     var packageDependencyNames: Set<String> {
-        target.packageProductDependencies.mapSet { $0.productName }
+        guard let packageProductDependencies = target.packageProductDependencies else { return [] }
+        return packageProductDependencies.mapSet { $0.productName }
     }
 
     // MARK: - Private
