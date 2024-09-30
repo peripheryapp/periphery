@@ -20,6 +20,7 @@ public final class Scan {
         graph = SourceGraph(configuration: configuration)
     }
 
+    // periphery:ignore
     public init(
         configuration: Configuration,
         sourceGraph: SourceGraph

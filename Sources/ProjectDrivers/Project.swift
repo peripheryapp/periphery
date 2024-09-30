@@ -24,6 +24,7 @@ public final class Project {
         )
     }
 
+    // periphery:ignore
     public init(configuration: Configuration) throws {
         self.configuration = configuration
         logger = Logger()
