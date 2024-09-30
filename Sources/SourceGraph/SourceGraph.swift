@@ -22,7 +22,7 @@ public final class SourceGraph {
     public private(set) var extensions: [Declaration: Set<Declaration>] = [:]
 
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
-    private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
+    public private(set) var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
     private var moduleToExportingModules: [String: Set<String>] = [:]
 
     private let configuration: Configuration

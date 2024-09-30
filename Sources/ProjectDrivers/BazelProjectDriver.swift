@@ -4,18 +4,18 @@ import Logger
 import Shared
 import SystemPackage
 
-public class BazelProjectDriver: ProjectDriver {
-    public static var isSupported: Bool {
+class BazelProjectDriver: ProjectDriver {
+    static var isSupported: Bool {
         FilePath("MODULE.bazel").exists || FilePath("WORKSPACE").exists
     }
 
-    public static func build(configuration: Configuration, shell: Shell, logger: Logger) throws -> Self {
+    static func build(configuration: Configuration, shell: Shell, logger: Logger) throws -> Self {
         configuration.bazel = false // Generic project mode is used for the actual scan.
         configuration.reportExclude.append("**/bazel-out/**/*")
         return self.init(configuration: configuration, shell: shell, logger: logger)
     }
 
-    private static let topLevelKinds = [
+    static let topLevelKinds = [
         // rules_apple, iOS
         "ios_app_clip",
         "ios_application",
@@ -81,7 +81,7 @@ public class BazelProjectDriver: ProjectDriver {
         self.fileManager = fileManager
     }
 
-    public func build() throws {
+    func build() throws {
         guard let executablePath = Bundle.main.executablePath else {
             fatalError("Expected executable path.")
         }

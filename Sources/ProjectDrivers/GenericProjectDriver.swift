@@ -6,7 +6,7 @@ import Shared
 import SwiftIndexStore
 import SystemPackage
 
-public final class GenericProjectDriver {
+final class GenericProjectDriver {
     struct GenericConfig: Decodable {
         let indexstores: Set<String>
         let plists: Set<String>
@@ -24,7 +24,7 @@ public final class GenericProjectDriver {
     private let testTargets: Set<String>
     private let configuration: Configuration
 
-    public convenience init(genericProjectConfig: FilePath, configuration: Configuration) throws {
+    convenience init(genericProjectConfig: FilePath, configuration: Configuration) throws {
         guard genericProjectConfig.exists else {
             throw PeripheryError.pathDoesNotExist(path: genericProjectConfig.string)
         }
