@@ -33,6 +33,16 @@ public extension FilePath {
         try closure()
         _ = fileManager.changeCurrentDirectoryPath(previous.string)
     }
+    
+    @inlinable
+    func chdir<T>(closure: () throws -> T) rethrows -> T {
+        let previous = Self.current
+        _ = fileManager.changeCurrentDirectoryPath(string)
+        defer {
+            _ = fileManager.changeCurrentDirectoryPath(previous.string)
+        }
+        return try closure()
+    }
 
     @inlinable
     func relativeTo(_ relativePath: FilePath) -> FilePath {
