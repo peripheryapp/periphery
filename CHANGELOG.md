@@ -12,6 +12,20 @@
 
 - None.
 
+## 2.21.2 (2024-11-01)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- Fix parsing of Xcode 16 projects.
+
 ## 2.21.1 (2024-09-28)
 
 ##### Breaking
