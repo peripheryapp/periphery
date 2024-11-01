@@ -1,21 +1,26 @@
 import Configuration
-import FilenameMatcher
 import Foundation
 import Logger
-import SystemPackage
 
-public final class OutputDeclarationFilter {
+struct BaselineFilter: OutputFilterable {
     private let configuration: Configuration
+    private let baseline: Baseline?
     private let logger: Logger
     private let contextualLogger: ContextualLogger
-
-    public required init(configuration: Configuration, logger: Logger) {
+    
+    init(
+        configuration: Configuration,
+        baseline: Baseline?,
+        logger: Logger,
+        contextualLogger: ContextualLogger
+    ) {
         self.configuration = configuration
+        self.baseline = baseline
         self.logger = logger
-        contextualLogger = logger.contextualized(with: "report:filter")
+        self.contextualLogger = contextualLogger
     }
-
-    public func filter(_ declarations: [ScanResult], with baseline: Baseline?) throws -> [ScanResult] {
+    
+    func filter(_ declarations: [ScanResult]) -> [ScanResult] {
         var declarations = declarations
 
         if let baseline {
