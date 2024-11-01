@@ -1,0 +1,25 @@
+load("@buildifier_prebuilt//:rules.bzl", "buildifier")
+
+exports_files([
+    "run.sh",
+])
+
+buildifier(
+    name = "buildifier.fix",
+    exclude_patterns = [
+        "./.git/**/*",
+        "**/.build/**/*",
+    ],
+    lint_mode = "fix",
+    mode = "fix",
+)
+
+buildifier(
+    name = "buildifier.check",
+    exclude_patterns = [
+        "./.git/**/*",
+        "**/.build/**/*",
+    ],
+    lint_mode = "warn",
+    mode = "check",
+)

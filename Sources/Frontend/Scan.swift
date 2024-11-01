@@ -48,12 +48,6 @@ final class Scan {
 
     private func setup(_ project: Project) throws -> ProjectDriver {
         let driverSetupInterval = logger.beginInterval("driver:setup")
-
-        if configuration.outputFormat.supportsAuxiliaryOutput {
-            let asterisk = colorize("*", .boldGreen)
-            logger.info("\(asterisk) Inspecting project...")
-        }
-
         let driver = try project.driver()
         logger.endInterval(driverSetupInterval)
         return driver

@@ -153,11 +153,12 @@ public final class Configuration {
         FileManager.default.createFile(atPath: path.string, contents: data)
     }
 
-    public func load(from path: FilePath?, logger: Logger) throws {
+    public func load(from path: FilePath?) throws {
         guard let path = try configurationPath(withUserProvided: path) else { return }
 
         let encodedYAML = try String(contentsOf: path.url)
         let yaml = try Yams.load(yaml: encodedYAML) as? [String: Any] ?? [:]
+        let logger = Logger(quiet: false)
 
         for (key, value) in yaml {
             if let setting = settings.first(where: { key == $0.key }) {

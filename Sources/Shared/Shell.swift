@@ -68,7 +68,7 @@ open class Shell {
         _ args: [String],
         stderr: Bool = true
     ) throws -> String {
-        let env = environment
+        let env = pristineEnvironment
         let (status, output) = try exec(args, environment: env, stderr: stderr)
 
         if status == 0 {
@@ -87,7 +87,7 @@ open class Shell {
         _ args: [String],
         stderr: Bool = true
     ) throws -> Int32 {
-        let env = environment
+        let env = pristineEnvironment
         let (status, _) = try exec(args, environment: env, stderr: stderr, captureOutput: false)
         return status
     }

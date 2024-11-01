@@ -1,0 +1,277 @@
+load("@rules_swift//swift:swift.bzl", "swift_binary", "swift_library")
+load("//bazel/internal:opt.bzl", "optimized_swift_binary")  # buildifier: disable=bzl-visibility
+
+swift_library(
+    name = "XcodeSupport",
+    srcs = [
+        "XcodeSupport/XcodeProject.swift",
+        "XcodeSupport/XcodeProjectSetupGuide.swift",
+        "XcodeSupport/XcodeProjectlike.swift",
+        "XcodeSupport/XcodeTarget.swift",
+        "XcodeSupport/XcodeWorkspace.swift",
+        "XcodeSupport/Xcodebuild.swift",
+    ],
+    module_name = "XcodeSupport",
+    deps = [
+        "//Sources:PeripheryKit",
+        "//Sources:Shared",
+        "//Sources:SourceGraph",
+        "@com_github_tuist_xcodeproj//:XcodeProj",
+    ],
+)
+
+swift_library(
+    name = "SyntaxAnalysis",
+    srcs = [
+        "SyntaxAnalysis/CommentCommand.swift",
+        "SyntaxAnalysis/DeclarationSyntaxVisitor.swift",
+        "SyntaxAnalysis/ImportSyntaxVisitor.swift",
+        "SyntaxAnalysis/MultiplexingSyntaxVisitor.swift",
+        "SyntaxAnalysis/SourceLocationBuilder.swift",
+        "SyntaxAnalysis/TypeSyntaxInspector.swift",
+        "SyntaxAnalysis/UnusedParameterAnalyzer.swift",
+        "SyntaxAnalysis/UnusedParameterParser.swift",
+    ],
+    module_name = "SyntaxAnalysis",
+    deps = [
+        "//Sources:Shared",
+        "//Sources:SourceGraph",
+        "@swift-syntax//:SwiftParser",
+        "@swift-syntax//:SwiftSyntax",
+    ],
+)
+
+swift_library(
+    name = "SourceGraph",
+    srcs = [
+        "SourceGraph/Elements/Accessibility.swift",
+        "SourceGraph/Elements/AssetReference.swift",
+        "SourceGraph/Elements/CommentCommand.swift",
+        "SourceGraph/Elements/Declaration.swift",
+        "SourceGraph/Elements/ImportStatement.swift",
+        "SourceGraph/Elements/Location.swift",
+        "SourceGraph/Elements/ProjectFileKind.swift",
+        "SourceGraph/Elements/Reference.swift",
+        "SourceGraph/Elements/SourceFile.swift",
+        "SourceGraph/Mutators/AccessibilityCascader.swift",
+        "SourceGraph/Mutators/AncestralReferenceEliminator.swift",
+        "SourceGraph/Mutators/AssetReferenceRetainer.swift",
+        "SourceGraph/Mutators/AssignOnlyPropertyReferenceEliminator.swift",
+        "SourceGraph/Mutators/CapitalSelfFunctionCallRetainer.swift",
+        "SourceGraph/Mutators/CodablePropertyRetainer.swift",
+        "SourceGraph/Mutators/CodingKeyEnumReferenceBuilder.swift",
+        "SourceGraph/Mutators/ComplexPropertyAccessorReferenceBuilder.swift",
+        "SourceGraph/Mutators/DefaultConstructorReferenceBuilder.swift",
+        "SourceGraph/Mutators/DynamicMemberLookupReferenceBuilder.swift",
+        "SourceGraph/Mutators/EntryPointAttributeRetainer.swift",
+        "SourceGraph/Mutators/EnumCaseReferenceBuilder.swift",
+        "SourceGraph/Mutators/ExtensionReferenceBuilder.swift",
+        "SourceGraph/Mutators/ExternalOverrideRetainer.swift",
+        "SourceGraph/Mutators/ExternalTypeProtocolConformanceReferenceRemover.swift",
+        "SourceGraph/Mutators/GenericClassAndStructConstructorReferenceBuilder.swift",
+        "SourceGraph/Mutators/InterfaceBuilderPropertyRetainer.swift",
+        "SourceGraph/Mutators/ObjCAccessibleRetainer.swift",
+        "SourceGraph/Mutators/PropertyWrapperRetainer.swift",
+        "SourceGraph/Mutators/ProtocolConformanceReferenceBuilder.swift",
+        "SourceGraph/Mutators/ProtocolExtensionReferenceBuilder.swift",
+        "SourceGraph/Mutators/PubliclyAccessibleRetainer.swift",
+        "SourceGraph/Mutators/RedundantExplicitPublicAccessibilityMarker.swift",
+        "SourceGraph/Mutators/RedundantProtocolMarker.swift",
+        "SourceGraph/Mutators/ResultBuilderRetainer.swift",
+        "SourceGraph/Mutators/StringInterpolationAppendInterpolationRetainer.swift",
+        "SourceGraph/Mutators/StructImplicitInitializerReferenceBuilder.swift",
+        "SourceGraph/Mutators/SwiftUIRetainer.swift",
+        "SourceGraph/Mutators/UnusedImportMarker.swift",
+        "SourceGraph/Mutators/UnusedParameterRetainer.swift",
+        "SourceGraph/Mutators/UsedDeclarationMarker.swift",
+        "SourceGraph/Mutators/XCTestRetainer.swift",
+        "SourceGraph/SourceGraph.swift",
+        "SourceGraph/SourceGraphDebugger.swift",
+        "SourceGraph/SourceGraphMutator.swift",
+        "SourceGraph/SourceGraphMutatorRunner.swift",
+        "SourceGraph/SynchronizedSourceGraph.swift",
+    ],
+    module_name = "SourceGraph",
+    deps = [
+        "//Sources:Configuration",
+        "//Sources:Shared",
+        "@swift-syntax//:SwiftSyntax",
+    ],
+)
+
+swift_library(
+    name = "Shared",
+    srcs = [
+        "Shared/Benchmark.swift",
+        "Shared/Constants.swift",
+        "Shared/PeripheryError.swift",
+        "Shared/ProjectKind.swift",
+        "Shared/PropertyTypeSanitizer.swift",
+        "Shared/SetupGuide.swift",
+        "Shared/Shell.swift",
+        "Shared/SwiftVersion.swift",
+        "Shared/SwiftVersionParser.swift",
+        "Shared/UnfairLock.swift",
+    ],
+    module_name = "Shared",
+    deps = [
+        "//Sources:Extensions",
+        "//Sources:Logger",
+        "@com_github_apple_swift-system//:SystemPackage",
+        "@swift-filename-matcher//:FilenameMatcher",
+    ],
+)
+
+swift_library(
+    name = "ProjectDrivers",
+    srcs = [
+        "ProjectDrivers/BazelProjectDriver.swift",
+        "ProjectDrivers/GenericProjectDriver.swift",
+        "ProjectDrivers/ProjectDriver.swift",
+        "ProjectDrivers/SPM.swift",
+        "ProjectDrivers/SPMProjectDriver.swift",
+        "ProjectDrivers/XcodeProjectDriver.swift",
+    ],
+    module_name = "ProjectDrivers",
+    deps = [
+        "//Sources:Indexer",
+        "//Sources:Shared",
+        "//Sources:SourceGraph",
+        "//Sources:XcodeSupport",
+    ],
+)
+
+swift_library(
+    name = "PeripheryKit",
+    srcs = [
+        "PeripheryKit/Results/Baseline.swift",
+        "PeripheryKit/Results/CheckstyleFormatter.swift",
+        "PeripheryKit/Results/CodeClimateFormatter.swift",
+        "PeripheryKit/Results/CsvFormatter.swift",
+        "PeripheryKit/Results/GitHubActionsFormatter.swift",
+        "PeripheryKit/Results/JsonFormatter.swift",
+        "PeripheryKit/Results/OutputDeclarationFilter.swift",
+        "PeripheryKit/Results/OutputFormatter.swift",
+        "PeripheryKit/Results/XcodeFormatter.swift",
+        "PeripheryKit/ScanResult.swift",
+        "PeripheryKit/ScanResultBuilder.swift",
+    ],
+    module_name = "PeripheryKit",
+    deps = [
+        "//Sources:Indexer",
+        "//Sources:Shared",
+        "//Sources:SourceGraph",
+        "@aexml//:AEXML",
+        "@com_github_apple_swift-system//:SystemPackage",
+        "@swift-filename-matcher//:FilenameMatcher",
+        "@swift-indexstore//:SwiftIndexStore",
+        "@swift-syntax//:SwiftParser",
+        "@swift-syntax//:SwiftSyntax",
+    ],
+)
+
+swift_library(
+    name = "Logger",
+    srcs = ["Logger/Logger.swift"],
+    module_name = "Logger",
+)
+
+swift_library(
+    name = "Indexer",
+    srcs = [
+        "Indexer/IndexPipeline.swift",
+        "Indexer/IndexPlan.swift",
+        "Indexer/Indexer.swift",
+        "Indexer/InfoPlistIndexer.swift",
+        "Indexer/InfoPlistParser.swift",
+        "Indexer/JobPool.swift",
+        "Indexer/SourceFileCollector.swift",
+        "Indexer/SwiftIndexer.swift",
+        "Indexer/XCDataModelIndexer.swift",
+        "Indexer/XCDataModelParser.swift",
+        "Indexer/XCMappingModelIndexer.swift",
+        "Indexer/XCMappingModelParser.swift",
+        "Indexer/XibIndexer.swift",
+        "Indexer/XibParser.swift",
+    ],
+    module_name = "Indexer",
+    deps = [
+        "//Sources:Shared",
+        "//Sources:SyntaxAnalysis",
+        "@aexml//:AEXML",
+        "@swift-indexstore//:SwiftIndexStore",
+    ],
+)
+
+swift_binary(
+    name = "Frontend",
+    srcs = [
+        "Frontend/Commands/CheckUpdateCommand.swift",
+        "Frontend/Commands/ClearCacheCommand.swift",
+        "Frontend/Commands/FrontendCommand.swift",
+        "Frontend/Commands/ScanCommand.swift",
+        "Frontend/Commands/VersionCommand.swift",
+        "Frontend/CommonSetupGuide.swift",
+        "Frontend/GuidedSetup.swift",
+        "Frontend/Logger+Extension.swift",
+        "Frontend/Project.swift",
+        "Frontend/SPMProjectSetupGuide.swift",
+        "Frontend/Scan.swift",
+        "Frontend/UpdateChecker.swift",
+        "Frontend/Version.swift",
+        "Frontend/main.swift",
+    ],
+    module_name = "Frontend",
+    deps = [
+        "//Sources:Configuration",
+        "//Sources:PeripheryKit",
+        "//Sources:ProjectDrivers",
+        "//Sources:Shared",
+        "//Sources:SourceGraph",
+        "@swift-filename-matcher//:FilenameMatcher",
+        "@swift_argument_parser//:ArgumentParser",
+    ],
+)
+
+optimized_swift_binary(
+    name = "Frontend_opt",
+    target = ":Frontend",
+    visibility = ["//visibility:public"],
+)
+
+swift_library(
+    name = "Extensions",
+    srcs = [
+        "Extensions/Array+Extension.swift",
+        "Extensions/Collection+Extension.swift",
+        "Extensions/FilePath+Extension.swift",
+        "Extensions/FilePath+Glob.swift",
+        "Extensions/FilenameMatcher+Extension.swift",
+        "Extensions/Sequence+Extension.swift",
+        "Extensions/Set+Extension.swift",
+        "Extensions/String+Extension.swift",
+        "Extensions/String+Version.swift",
+    ],
+    module_name = "Extensions",
+    deps = [
+        "@com_github_apple_swift-system//:SystemPackage",
+        "@swift-filename-matcher//:FilenameMatcher",
+    ],
+)
+
+swift_library(
+    name = "Configuration",
+    srcs = [
+        "Configuration/Configuration.swift",
+        "Configuration/OutputFormat.swift",
+    ],
+    module_name = "Configuration",
+    deps = [
+        "//Sources:Extensions",
+        "//Sources:Logger",
+        "//Sources:Shared",
+        "@com_github_apple_swift-system//:SystemPackage",
+        "@swift-filename-matcher//:FilenameMatcher",
+        "@yams//:Yams",
+    ],
+)

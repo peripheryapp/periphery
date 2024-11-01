@@ -13,20 +13,29 @@ env:
   cache_version: 1
 jobs:
   lint:
-    runs-on: macos-14
+    runs-on: macos-15
     name: Lint
     steps:
       - uses: actions/checkout@master
       - uses: jdx/mise-action@v2
       - run: mise run lint-ci
+  bazel:
+      runs-on: macos-15
+      name: Bazel
+      steps:
+        - uses: actions/checkout@master
+        - name: Scan
+          run: bazel run //:periphery -- scan --bazel --quiet --strict --baseline bazel/internal/bazel_baseline.json
   macOS:
     strategy:
       fail-fast: false
       matrix:
-        xcode: ["16.0", "15.4", "15.2"]
+        xcode: ["16.1", "16.0", "15.4", "15.2"]
         include:
+          - xcode: "16.1"
+            macos: macos-15
           - xcode: "16.0"
-            macos: macos-14
+            macos: macos-15
           - xcode: "15.4"
             macos: macos-14
           - xcode: "15.2"
@@ -69,23 +78,20 @@ jobs:
         include:
           - swift: "6.0"
             container: "swift:6.0"
-            cache-version: 1
           - swift: "5.10"
             container: "swift:5.10"
-            cache-version: 1
           - swift: "5.9"
             container: "swift:5.9"
-            cache-version: 1
     runs-on: ubuntu-20.04
     container: ${{ matrix.container }}
     name: Linux
     steps:
+    - uses: actions/checkout@master
     - name: Get Swift Version
       id: get-swift-version
       run: |
         echo "::set-output name=version::$(swift -version | head -n 1 | sed s/,// )"
       shell: bash
-    - uses: actions/checkout@master
     - name: Cache resolved dependencies
       id: cache-resolved-dependencies
       uses: actions/cache@v2
@@ -93,9 +99,9 @@ jobs:
         path: |
           .build
           Package.resolved
-        key: ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
+        key: ${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
         restore-keys: |
-          ${{ matrix.cache-version }}-${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-
+          ${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}
