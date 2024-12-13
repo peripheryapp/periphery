@@ -29,13 +29,7 @@ signal(SIGINT) { _ in
 
 do {
     var command = try PeripheryCommand.parseAsRoot()
-    do {
-        try command.run()
-    } catch let error as PeripheryError {
-        throw error
-    } catch {
-        throw PeripheryError.underlyingError(error)
-    }
+    try command.run()
 } catch {
     PeripheryCommand.exit(withError: error)
 }
