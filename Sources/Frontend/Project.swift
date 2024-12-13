@@ -64,7 +64,7 @@ final class Project {
         case .spm:
             return try SPMProjectDriver(configuration: configuration, shell: shell, logger: logger)
         case .bazel:
-            return try BazelProjectDriver.build(
+            return BazelProjectDriver(
                 configuration: configuration,
                 shell: shell,
                 logger: logger

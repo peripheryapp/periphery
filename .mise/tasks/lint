@@ -4,5 +4,6 @@ set -euo pipefail
 
 cd $MISE_PROJECT_ROOT
 
+bazel run //bazel/internal:buildifier.fix
 swiftformat .
 swiftlint lint --quiet

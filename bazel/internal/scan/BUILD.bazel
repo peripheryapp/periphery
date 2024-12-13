@@ -1,0 +1,3 @@
+exports_files([
+    "scan_template.sh",
+])

@@ -138,13 +138,10 @@ struct ScanCommand: FrontendCommand {
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
-        let logger = Logger(quiet: quiet, verbose: verbose)
-        logger.contextualized(with: "version").debug(PeripheryVersion)
-
         let configuration = Configuration()
 
         if !setup {
-            try configuration.load(from: config, logger: logger)
+            try configuration.load(from: config)
         }
 
         configuration.guidedSetup = setup
@@ -188,6 +185,11 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$bazel, bazel)
         configuration.apply(\.$bazelFilter, bazelFilter)
 
+        let logger = Logger(
+            quiet: configuration.quiet,
+            verbose: configuration.verbose
+        )
+        logger.contextualized(with: "version").debug(PeripheryVersion)
         let shell = Shell(logger: logger)
         let swiftVersion = SwiftVersion(shell: shell)
         logger.debug(swiftVersion.fullVersion)
