@@ -9,13 +9,7 @@ class BazelProjectDriver: ProjectDriver {
         FilePath("MODULE.bazel").exists || FilePath("WORKSPACE").exists
     }
 
-    static func build(configuration: Configuration, shell: Shell, logger: Logger) throws -> Self {
-        configuration.bazel = false // Generic project mode is used for the actual scan.
-        configuration.reportExclude.append("**/bazel-out/**/*")
-        return self.init(configuration: configuration, shell: shell, logger: logger)
-    }
-
-    static let topLevelKinds = [
+    private static let topLevelKinds = [
         // rules_apple, iOS
         "ios_app_clip",
         "ios_application",
@@ -69,7 +63,7 @@ class BazelProjectDriver: ProjectDriver {
 
     private lazy var contextLogger: ContextualLogger = logger.contextualized(with: "bazel")
 
-    required init(
+    public required init(
         configuration: Configuration,
         shell: Shell,
         logger: Logger,
@@ -89,13 +83,15 @@ class BazelProjectDriver: ProjectDriver {
         try fileManager.createDirectory(at: outputPath.url, withIntermediateDirectories: true)
 
         let configPath = outputPath.appending("periphery.yml")
+        configuration.bazel = false // Generic project mode is used for the actual scan.
+        configuration.reportExclude.append("**/bazel-out/**/*")
         try configuration.save(to: configPath)
         contextLogger.debug("Configuration written to \(configPath)")
 
         let buildPath = outputPath.appending("BUILD.bazel")
         let deps = try queryTargets().joined(separator: ",\n")
         let buildFileContents = """
-        load("@periphery//bazel/scan:scan.bzl", "scan")
+        load("@periphery//bazel:rules.bzl", "scan")
 
         scan(
           name = "scan",
@@ -124,7 +120,7 @@ class BazelProjectDriver: ProjectDriver {
             "run",
             "--check_visibility=false",
             "--ui_event_filters=-info,-debug,-warning",
-            "@periphery//:scan",
+            "@periphery_generated//rule:scan",
         ])
 
         // The actual scan is performed by Bazel.

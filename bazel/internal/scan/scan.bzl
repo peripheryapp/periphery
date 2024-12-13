@@ -1,6 +1,10 @@
+"""
+    Declares the `scan` rule which acts as the primary entry point for the Periphery Bazel integration.
+"""
+
 load("@bazel_skylib//lib:sets.bzl", "sets")
-load("@rules_swift//swift:providers.bzl", "SwiftInfo")
 load("@rules_apple//apple:providers.bzl", "AppleResourceInfo")
+load("@rules_swift//swift:providers.bzl", "SwiftBinaryInfo", "SwiftInfo")
 
 PeripheryInfo = provider(
     doc = "Provides inputs needed to generate a generic project configuration file.",
@@ -41,18 +45,25 @@ def _scan_inputs_aspect_impl(target, ctx):
     xcdatamodels = []
     xcmappingmodels = []
 
-    if not target.label.workspace_name: # Ignore external deps
-        if SwiftInfo in target and hasattr(target[SwiftInfo], "direct_modules"):
-            for module in target[SwiftInfo].direct_modules:
-                if hasattr(module, "swift"):
-                    if hasattr(module.compilation_context, "direct_sources"):
-                        swift_srcs.extend([src for src in module.compilation_context.direct_sources if src.extension == "swift"])
+    if not target.label.workspace_name:  # Ignore external deps
+        modules = []
 
-                    if ctx.rule.attr.testonly:
-                        test_targets.append(module.name)
+        if SwiftBinaryInfo in target:
+            modules.extend(target[SwiftBinaryInfo].swift_info.direct_modules)
 
-                    if hasattr(module.swift, "indexstore") and module.swift.indexstore:
-                        indexstores.append(module.swift.indexstore)
+        if SwiftInfo in target:
+            modules.extend(target[SwiftInfo].direct_modules)
+
+        for module in modules:
+            if hasattr(module, "swift"):
+                if hasattr(module.compilation_context, "direct_sources"):
+                    swift_srcs.extend([src for src in module.compilation_context.direct_sources if src.extension == "swift"])
+
+                if ctx.rule.attr.testonly:
+                    test_targets.append(module.name)
+
+                if hasattr(module.swift, "indexstore") and module.swift.indexstore:
+                    indexstores.append(module.swift.indexstore)
 
         if AppleResourceInfo in target:
             # Each attribute has the structure '[(parent, resource_swift_module, resource_depset)]'
@@ -172,8 +183,8 @@ def _scan_impl(ctx):
         substitutions = {
             "%periphery_binary%": ctx.attr.periphery_binary,
             "%config_path%": ctx.attr.config,
-            "%project_config_path%": project_config_file.path
-        }
+            "%project_config_path%": project_config_file.path,
+        },
     )
 
     return DefaultInfo(
@@ -186,7 +197,7 @@ def _scan_impl(ctx):
             # in the indexstores and will be read by Periphery, and therefore must be present in
             # the runfiles.
             files = swift_srcs + indexstores + plists + xibs + xcdatamodels + xcmappingmodels,
-        )
+        ),
     )
 
 scan_inputs_aspect = aspect(
@@ -201,13 +212,13 @@ scan = rule(
             cfg = _force_indexstore,
             mandatory = True,
             aspects = [scan_inputs_aspect],
-            doc = "Top-level project targets to scan."
+            doc = "Top-level project targets to scan.",
         ),
         "config": attr.string(doc = "Path to the periphery.yml configuration file."),
         "periphery_binary": attr.string(doc = "Path to the periphery binary."),
         "_template": attr.label(
             allow_single_file = True,
-            default = "@periphery//bazel/scan:scan_template.sh",
+            default = "@periphery//bazel/internal/scan:scan_template.sh",
         ),
     },
     outputs = {

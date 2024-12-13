@@ -21,6 +21,11 @@
             shell: Shell,
             logger: Logger
         ) throws {
+            if configuration.outputFormat.supportsAuxiliaryOutput {
+                let asterisk = colorize("*", .boldGreen)
+                logger.info("\(asterisk) Inspecting project...")
+            }
+
             let xcodebuild = Xcodebuild(shell: shell, logger: logger)
 
             guard !configuration.schemes.isEmpty else {

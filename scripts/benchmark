@@ -1,6 +1,0 @@
-#!/bin/bash
-
-set -e
-make build_arm64
-./.build/release/periphery scan --quiet
-hyperfine --warmup 3 './.build/release/periphery scan --quiet --skip-build'

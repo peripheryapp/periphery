@@ -1,3 +1,7 @@
+"""
+    Public module extensions.
+"""
+
 def _generated_repo_impl(repository_ctx):
     repository_ctx.file(
         "BUILD.bazel",
