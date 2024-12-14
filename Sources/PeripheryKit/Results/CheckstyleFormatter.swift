@@ -11,7 +11,7 @@ final class CheckstyleFormatter: OutputFormatter {
         self.configuration = configuration
     }
 
-    func format(_ results: [ScanResult]) -> String {
+    func format(_ results: [ScanResult]) -> String? {
         let parts = results.flatMap { describe($0, colored: false) }
         return [
             "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<checkstyle version=\"4.3\">",

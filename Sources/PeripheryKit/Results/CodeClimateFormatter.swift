@@ -10,7 +10,7 @@ final class CodeClimateFormatter: OutputFormatter {
         self.configuration = configuration
     }
 
-    func format(_ results: [PeripheryKit.ScanResult]) throws -> String {
+    func format(_ results: [ScanResult]) throws -> String? {
         var jsonObject: [Any] = []
 
         for result in results {
@@ -49,6 +49,6 @@ final class CodeClimateFormatter: OutputFormatter {
         }
 
         let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted, .withoutEscapingSlashes])
-        return String(decoding: data, as: UTF8.self)
+        return String(bytes: data, encoding: .utf8)
     }
 }

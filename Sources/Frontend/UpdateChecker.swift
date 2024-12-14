@@ -56,11 +56,8 @@ final class UpdateChecker {
             else {
                 var json = "N/A"
 
-                if let data {
-                    let decoded = String(decoding: data, as: UTF8.self)
-                    if !decoded.isEmpty {
-                        json = decoded
-                    }
+                if let data, let decoded = String(bytes: data, encoding: .utf8) {
+                    json = decoded
                 }
 
                 let message = "Failed to identify latest release tag in: \(json)"
