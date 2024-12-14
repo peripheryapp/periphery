@@ -12,8 +12,8 @@ final class GitHubActionsFormatter: OutputFormatter {
         self.configuration = configuration
     }
 
-    func format(_ results: [ScanResult]) throws -> String {
-        guard !results.isEmpty else { return "" }
+    func format(_ results: [ScanResult]) throws -> String? {
+        guard !results.isEmpty else { return nil }
         guard configuration.relativeResults else { throw PeripheryError.usageError("`periphery scan` must be ran with `--relative-results` when using the GitHub Actions formatter") }
 
         return results.flatMap { result in

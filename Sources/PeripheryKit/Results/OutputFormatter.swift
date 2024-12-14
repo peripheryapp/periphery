@@ -9,7 +9,7 @@ public protocol OutputFormatter: AnyObject {
     var currentFilePath: FilePath { get }
 
     init(configuration: Configuration)
-    func format(_ results: [ScanResult]) throws -> String
+    func format(_ results: [ScanResult]) throws -> String?
 }
 
 extension OutputFormatter {

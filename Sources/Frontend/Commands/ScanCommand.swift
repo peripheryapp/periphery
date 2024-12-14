@@ -229,13 +229,14 @@ struct ScanCommand: FrontendCommand {
             try data.write(to: baselinePath.url)
         }
 
-        let output = try configuration.outputFormat.formatter.init(configuration: configuration).format(filteredResults)
+        if let output = try configuration.outputFormat.formatter.init(configuration: configuration).format(filteredResults) {
+            if configuration.outputFormat.supportsAuxiliaryOutput {
+                logger.info("", canQuiet: true)
+            }
 
-        if configuration.outputFormat.supportsAuxiliaryOutput {
-            logger.info("", canQuiet: true)
+            logger.info(output, canQuiet: false)
         }
 
-        logger.info(output, canQuiet: false)
         logger.endInterval(interval)
 
         updateChecker.notifyIfAvailable()

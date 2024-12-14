@@ -12,7 +12,7 @@ final class XcodeFormatter: OutputFormatter {
         self.configuration = configuration
     }
 
-    func format(_ results: [ScanResult]) throws -> String {
+    func format(_ results: [ScanResult]) throws -> String? {
         guard !results.isEmpty else {
             return colorize("* ", .boldGreen) + colorize("No unused code detected.", .bold)
         }
