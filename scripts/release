@@ -51,7 +51,8 @@ if [ ! -f .release/periphery ]; then
   exit 1
 fi
 
-cp LICENSE.md MODULE.bazel BUILD.bazel bazel Sources .release/
+cp LICENSE.md MODULE.bazel BUILD.bazel .release/
+cp -R bazel Sources .release/
 cp scripts/release_notes.md.template .release/release_notes.md
 
 # Codesign
