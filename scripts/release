@@ -44,7 +44,7 @@ cat scripts/artifactbundle_info.json.template | sed s/__VERSION__/${version}/ > 
 echo -e "\nUpdate CHANGELOG.md"
 confirm "Continue?"
 
-make build_release
+mise r build --arch release
 
 if [ ! -f .release/periphery ]; then
   echo "ERROR: Missing release binary?"

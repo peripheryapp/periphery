@@ -1,0 +1,37 @@
+#!/bin/bash
+#USAGE flag "--arch <arch>" help="Build architecture (x86_64, arm64, release)"
+
+set -eo pipefail
+
+SWIFT_BUILD_FLAGS="--product periphery --configuration release --disable-sandbox --scratch-path .build"
+EXECUTABLE_X86_64="$(swift build ${SWIFT_BUILD_FLAGS} --arch x86_64 --show-bin-path)/periphery"
+EXECUTABLE_ARM64="$(swift build ${SWIFT_BUILD_FLAGS} --arch arm64 --show-bin-path)/periphery"
+
+build_x86_64() {
+    swift build ${SWIFT_BUILD_FLAGS} --arch x86_64
+}
+
+build_arm64() {
+    swift build ${SWIFT_BUILD_FLAGS} --arch arm64
+}
+
+if [ "$usage_arch" = "x86_64" ]; then
+    echo "Building for x86_64"
+    build_x86_64
+    echo ${EXECUTABLE_X86_64}
+elif [ "$usage_arch" = "arm64" ]; then
+    echo "Building for arm64"
+    build_arm64
+    echo ${EXECUTABLE_ARM64}
+elif [ "$usage_arch" = "release" ]; then
+    echo "Building for release"
+    build_x86_64
+    build_arm64
+    mkdir -p .release
+	lipo -create -output .release/periphery ${EXECUTABLE_X86_64} ${EXECUTABLE_ARM64}
+	strip -rSTX .release/periphery
+    echo "$(realpath .release/periphery)"
+else
+    echo "Invalid architecture. Use --arch <arch> where <arch> is x86_64, arm64 or release"
+    exit 1
+fi
