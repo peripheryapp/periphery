@@ -24,6 +24,9 @@ jobs:
       name: Bazel
       steps:
         - uses: actions/checkout@master
+        - uses: jdx/mise-action@v2
+        - name: Check generated rules
+          run: mise r gen-bazel-rules && git diff --quiet --exit-code
         - name: Scan
           run: bazel run //:periphery -- scan --bazel --quiet --strict --baseline bazel/internal/bazel_baseline.json
   macOS:

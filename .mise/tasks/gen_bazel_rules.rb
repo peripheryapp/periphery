@@ -108,7 +108,7 @@ end
 
 File.write("Sources/BUILD.bazel", <<~EOS)
     load("@rules_swift//swift:swift.bzl", "swift_binary", "swift_library")
-    load("//bazel/internal:opt.bzl", "optimized_swift_binary")
+    load("//bazel/internal:opt.bzl", "optimized_swift_binary")  # buildifier: disable=bzl-visibility
 
     #{rules.join("\n\n")}
 EOS

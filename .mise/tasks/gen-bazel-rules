@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -euo pipefail
+
+ruby .mise/tasks/gen_bazel_rules.rb
