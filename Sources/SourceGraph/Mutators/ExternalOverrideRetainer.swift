@@ -4,15 +4,16 @@ import Shared
 
 /// Retains instance functions/vars that override external declarations.
 ///
-/// It's not possible to determine if a declaration that overrides an external declaration is used, as the
-/// external implementation may call the overridden declaration.
+/// It's not possible to determine if a declaration that overrides an external declaration is used,
+/// as the external implementation may call the overridden declaration.
 final class ExternalOverrideRetainer: SourceGraphMutator {
     private let graph: SourceGraph
-    private let isSwift6FixEnabled: Bool
+    private let isSwift60FixEnabled: Bool
 
     required init(graph: SourceGraph, configuration _: Configuration, swiftVersion: SwiftVersion) {
         self.graph = graph
-        isSwift6FixEnabled = swiftVersion.version.isVersion(greaterThanOrEqualTo: "6.0")
+        isSwift60FixEnabled = swiftVersion.version.isVersion(greaterThanOrEqualTo: "6.0") &&
+            swiftVersion.version.isVersion(lessThan: "6.1")
     }
 
     func mutate() {
@@ -38,7 +39,7 @@ final class ExternalOverrideRetainer: SourceGraphMutator {
             }
 
             // https://github.com/swiftlang/swift/issues/76628
-            if !didIdentifyRelatedRef, isSwift6FixEnabled {
+            if !didIdentifyRelatedRef, isSwift60FixEnabled {
                 graph.markRetained(decl)
             }
         }
