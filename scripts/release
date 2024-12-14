@@ -51,8 +51,7 @@ if [ ! -f .release/periphery ]; then
   exit 1
 fi
 
-cp BUILD.bazel MODULE.bazel LICENSE.md .release/
-cp -R bazel .release/
+cp LICENSE.md MODULE.bazel BUILD.bazel bazel Sources .release/
 cp scripts/release_notes.md.template .release/release_notes.md
 
 # Codesign
@@ -61,7 +60,7 @@ codesign periphery
 
 # Archive
 zip_filename="periphery-${version}.zip"
-zip -r "${zip_filename}" periphery LICENSE.md MODULE.bazel BUILD.bazel bazel
+zip -r "${zip_filename}" periphery LICENSE.md
 codesign "${zip_filename}"
 
 echo -e "\n${zip_filename} checksum:"
@@ -76,9 +75,14 @@ echo -e "\n${zip_artifactbundle} checksum:"
 artifactbundle_sha256=$( shasum -a 256 ${zip_artifactbundle} | awk '{print $1}' )
 echo ${artifactbundle_sha256}
 
+bazel_zip_filename="periphery-bazel-${version}.zip"
+zip -r "${bazel_zip_filename}" LICENSE.md MODULE.bazel BUILD.bazel bazel Sources
+codesign "${bazel_zip_filename}"
+
 # Notarize
 notarize "${zip_filename}"
 notarize "${zip_artifactbundle}"
+notarize "${bazel_zip_filename}"
 
 echo -e "\nVerify changes"
 confirm "Continue?"
@@ -105,7 +109,7 @@ if [[ ${version} == *"beta"* ]]; then
 fi
 
 cd ..
-gh release create --latest="${is_latest}" -F .release/release_notes.md "${version}" ".release/${zip_filename}" ".release/${zip_artifactbundle}"
+gh release create --latest="${is_latest}" -F .release/release_notes.md "${version}" ".release/${zip_filename}" ".release/${zip_artifactbundle}" ".release/${bazel_zip_filename}"
 
 # Homebrew
 if [ $is_latest = false ]; then
