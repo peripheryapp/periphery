@@ -3,6 +3,7 @@
 ##### Breaking
 
 - Support for installing via CocoaPods has been removed.
+- Removed support for Swift 5.9/Xcode 15.2.
 
 ##### Enhancements
 
