@@ -53,7 +53,11 @@ fi
 
 cp LICENSE.md MODULE.bazel BUILD.bazel .release/
 cp -R bazel Sources .release/
+rm -r .release/bazel/dev
 cp scripts/release_notes.md.template .release/release_notes.md
+cat .release/MODULE.bazel | sed s/version = "0.0.0"/version = "${version}"/ > .release/MODULE.bazel
+
+confirm "\nContinue?"
 
 # Codesign
 cd .release

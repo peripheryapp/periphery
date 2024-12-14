@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-ruby .mise/tasks/gen_bazel_rules.rb
+ruby .mise/tasks/scripts/gen_bazel_rules.rb
