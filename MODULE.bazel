@@ -15,21 +15,16 @@ bazel_dep(name = "platforms", version = "0.0.10")
 bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
 
 # Swift dependencies
-bazel_dep(name = "swift-syntax", version = "600.0.1")
-bazel_dep(name = "yams", version = "5.1.3")
 bazel_dep(name = "aexml", version = "4.7.0")
 bazel_dep(name = "swift_argument_parser", version = "1.5.0")
-bazel_dep(name = "swift-indexstore", version = "0.3.0")
 bazel_dep(name = "swift-filename-matcher", version = "0.1.2")
+bazel_dep(name = "swift-indexstore", version = "0.3.0")
+bazel_dep(name = "swift-syntax", version = "600.0.1")
+bazel_dep(name = "swift-system", version = "1.4.0")
+bazel_dep(name = "pathkit", version = "1.0.1")
+bazel_dep(name = "xcodeproj", version = "8.25.0")
+bazel_dep(name = "yams", version = "5.1.3")
 
 # Extensions
 generated = use_extension("//bazel:extensions.bzl", "generated")
 use_repo(generated, "periphery_generated")
-
-non_module_deps = use_extension("//bazel/internal:extensions.bzl", "non_module_deps")
-use_repo(
-    non_module_deps,
-    "com_github_apple_swift-system",
-    "com_github_kylef_pathkit",
-    "com_github_tuist_xcodeproj",
-)

@@ -16,7 +16,7 @@ swift_library(
         "//Sources:PeripheryKit",
         "//Sources:Shared",
         "//Sources:SourceGraph",
-        "@com_github_tuist_xcodeproj//:XcodeProj",
+        "@xcodeproj//:XcodeProj",
     ],
 )
 
@@ -116,8 +116,8 @@ swift_library(
     deps = [
         "//Sources:Extensions",
         "//Sources:Logger",
-        "@com_github_apple_swift-system//:SystemPackage",
         "@swift-filename-matcher//:FilenameMatcher",
+        "@swift-system//:SystemPackage",
     ],
 )
 
@@ -161,11 +161,11 @@ swift_library(
         "//Sources:Shared",
         "//Sources:SourceGraph",
         "@aexml//:AEXML",
-        "@com_github_apple_swift-system//:SystemPackage",
         "@swift-filename-matcher//:FilenameMatcher",
         "@swift-indexstore//:SwiftIndexStore",
         "@swift-syntax//:SwiftParser",
         "@swift-syntax//:SwiftSyntax",
+        "@swift-system//:SystemPackage",
     ],
 )
 
@@ -253,8 +253,8 @@ swift_library(
     ],
     module_name = "Extensions",
     deps = [
-        "@com_github_apple_swift-system//:SystemPackage",
         "@swift-filename-matcher//:FilenameMatcher",
+        "@swift-system//:SystemPackage",
     ],
 )
 
@@ -269,8 +269,8 @@ swift_library(
         "//Sources:Extensions",
         "//Sources:Logger",
         "//Sources:Shared",
-        "@com_github_apple_swift-system//:SystemPackage",
         "@swift-filename-matcher//:FilenameMatcher",
+        "@swift-system//:SystemPackage",
         "@yams//:Yams",
     ],
 )
