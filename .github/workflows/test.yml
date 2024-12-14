@@ -9,7 +9,7 @@ env:
   swift_package_resolve: swift package resolve
   swift_build: swift build
   swift_test: swift test
-  periphery_scan: ./.build/debug/periphery scan --quiet --clean-build
+  periphery_scan: ./.build/debug/periphery scan --quiet --clean-build --strict
   cache_version: 1
 jobs:
   lint:
@@ -28,7 +28,7 @@ jobs:
         - name: Check generated rules
           run: mise r gen-bazel-rules && git diff --quiet --exit-code
         - name: Scan
-          run: bazel run //:periphery -- scan --bazel --quiet --strict --baseline bazel/internal/bazel_baseline.json
+          run: bazel run //:periphery -- scan --bazel --quiet --strict --baseline baselines/bazel.json
   macOS:
     strategy:
       fail-fast: false
@@ -70,7 +70,7 @@ jobs:
     - name: Build
       run: ${{ env.swift_build }}
     - name: Scan
-      run: ${{ env.periphery_scan }} --strict
+      run: ${{ env.periphery_scan }}
     - name: Test
       run: ${{ env.swift_test }}
   linux:
@@ -111,6 +111,6 @@ jobs:
     - name: Build
       run: ${{ env.swift_build }}
     - name: Scan
-      run: ${{ env.periphery_scan }}
+      run: ${{ env.periphery_scan }} --baseline baselines/linux.json
     - name: Test
       run: ${{ env.swift_test }}
