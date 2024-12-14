@@ -1,8 +1,7 @@
 #!/bin/bash
-# mise description="Run scan benchmark"
-set -eo pipefail
-
 #USAGE flag "-b --bazel" help="Use binary built by Bazel"
+
+set -eo pipefail
 
 cmd=""
 
@@ -11,8 +10,7 @@ if [ "$usage_bazel" = "true" ]; then
     bazel build //:periphery
     cmd='bazel-bin/Sources/Frontend scan --config /var/tmp/periphery_bazel/periphery.yml --generic-project-config bazel-bin/external/+generated+periphery_generated/rule/project_config.json'
 else
-    make build_arm64
-    ./.build/release/periphery scan --quiet
+    mise r build --arch arm64
     cmd='./.build/release/periphery scan --quiet --skip-build'
 fi
 

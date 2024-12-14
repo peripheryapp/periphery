@@ -1,3 +1,6 @@
-set -e
+#!/bin/bash
+
+set -euo pipefail
+
 swift build
 time ./.build/debug/periphery scan "$@"
