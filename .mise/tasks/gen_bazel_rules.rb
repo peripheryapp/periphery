@@ -4,13 +4,13 @@ require 'json'
 
 PRODUCTS = {
     "ArgumentParser" => "@swift_argument_parser",
-    "SystemPackage" => "@com_github_apple_swift-system",
+    "SystemPackage" => "@swift-system",
     "SwiftIndexStore" => "@swift-indexstore",
     "FilenameMatcher" => "@swift-filename-matcher",
     "Yams" => "@yams",
     "SwiftParser" => "@swift-syntax",
     "SwiftSyntax" => "@swift-syntax",
-    "XcodeProj" => "@com_github_tuist_xcodeproj",
+    "XcodeProj" => "@xcodeproj",
     "AEXML" => "@aexml",
 }
 
