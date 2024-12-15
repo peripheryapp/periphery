@@ -8,4 +8,4 @@ if test "${BUILD_WORKING_DIRECTORY+x}"; then
   cd $BUILD_WORKING_DIRECTORY
 fi
 
-$LAUNCH_WORKING_DIRECTORY/Sources/Frontend "${@:1}"
+$LAUNCH_WORKING_DIRECTORY/Sources/Frontend_opt "${@:1}"
