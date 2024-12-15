@@ -18,6 +18,7 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case swiftVersionUnsupportedError(version: String, minimumVersion: String)
     case jsonDeserializationError(error: Error, json: String)
     case indexStoreNotFound(derivedDataPath: String)
+    case changeCurrentDirectoryFailed(FilePath)
 
     public var errorDescription: String? {
         switch self {
@@ -55,6 +56,8 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
             return "JSON deserialization failed: \(describe(error))\nJSON:\n\(json)"
         case let .indexStoreNotFound(derivedDataPath):
             return "Failed to find index datastore at path: \(derivedDataPath)"
+        case let .changeCurrentDirectoryFailed(path):
+            return "Failed to change current directory to: \(path)"
         }
     }
 

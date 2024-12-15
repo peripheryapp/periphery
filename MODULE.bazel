@@ -13,7 +13,7 @@ bazel_dep(name = "apple_support", version = "1.17.1")
 # Swift dependencies
 bazel_dep(name = "aexml", version = "4.7.0")
 bazel_dep(name = "swift_argument_parser", version = "1.5.0")
-bazel_dep(name = "swift-filename-matcher", version = "0.1.2")
+bazel_dep(name = "swift-filename-matcher", version = "2.0.0")
 bazel_dep(name = "swift-indexstore", version = "0.3.0")
 bazel_dep(name = "swift-syntax", version = "600.0.1")
 bazel_dep(name = "swift-system", version = "1.4.0")

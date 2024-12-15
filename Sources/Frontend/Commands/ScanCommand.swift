@@ -20,6 +20,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Enable guided setup")
     var setup: Bool = defaultConfiguration.guidedSetup
 
+    @Option(help: "Path to the root directory of your project")
+    var projectRoot: FilePath = projectRootDefault
+
     @Option(help: "Path to configuration file. By default Periphery will look for .periphery.yml in the current directory")
     var config: FilePath?
 
@@ -140,6 +143,10 @@ struct ScanCommand: FrontendCommand {
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
+        if !FileManager.default.changeCurrentDirectoryPath(projectRoot.string) {
+            throw PeripheryError.changeCurrentDirectoryFailed(projectRoot)
+        }
+
         let configuration = Configuration()
 
         if !setup {
@@ -246,6 +253,14 @@ struct ScanCommand: FrontendCommand {
         if !filteredResults.isEmpty, configuration.strict {
             throw PeripheryError.foundIssues(count: filteredResults.count)
         }
+    }
+
+    // MARK: - Private
+
+    private static var projectRootDefault: FilePath {
+        let bazelWorkspace = ProcessInfo.processInfo.environment["BUILD_WORKSPACE_DIRECTORY"]
+        let root = bazelWorkspace ?? FileManager.default.currentDirectoryPath
+        return FilePath(root)
     }
 }
 
