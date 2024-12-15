@@ -10,10 +10,7 @@ package_group(
     packages = ["//..."],
 )
 
-sh_binary(
+alias(
     name = "periphery",
-    srcs = ["//bazel/internal:run.sh"],
-    data = [
-        "//Sources:Frontend_opt",
-    ],
+    actual = "//Sources:Frontend_opt",
 )
