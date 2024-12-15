@@ -40,9 +40,7 @@ mkdir .release
 
 cat scripts/Version.swift.template | sed s/__VERSION__/${version}/ > Sources/Frontend/Version.swift
 cat scripts/artifactbundle_info.json.template | sed s/__VERSION__/${version}/ > .release/info.json
-cat MODULE.bazel | sed s/0.0.0/${version}/ > MODULE.bazel.new
-rm MODULE.bazel
-mv MODULE.bazel.new MODULE.bazel
+ruby -e "file = 'MODULE.bazel'; content = File.read(file); content.sub!(/version = \".+?\"/, 'version = \"${version}\"'); File.write(file, content)"
 
 echo -e "\nUpdate CHANGELOG.md"
 confirm "Continue?"
