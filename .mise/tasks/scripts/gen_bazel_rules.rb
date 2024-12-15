@@ -114,4 +114,4 @@ File.write("Sources/BUILD.bazel", <<~EOS)
 EOS
 
 puts
-exec("bazel", "run", "//bazel/internal:buildifier.fix")
+exec("bazel", "run", "//bazel/dev:buildifier.fix")
