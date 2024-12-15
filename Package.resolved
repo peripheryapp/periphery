@@ -1,5 +1,5 @@
 {
-  "originHash" : "3ea0e89d1f3fe86c12ead60c3760805da8a51683f812784e5d6b4234cbe3a43b",
+  "originHash" : "e9d8baa60dce80cafa8b76899eb69396fc9c18d78f46733d4e15bc12127a6bd0",
   "pins" : [
     {
       "identity" : "aexml",
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ileitch/swift-filename-matcher",
       "state" : {
-        "revision" : "8cc02e902f651bb5812860011ee13707b9e037df",
-        "version" : "0.1.2"
+        "revision" : "516ff95f6a06c7a9eff8e944e989c7af076c5cdb",
+        "version" : "2.0.0"
       }
     },
     {

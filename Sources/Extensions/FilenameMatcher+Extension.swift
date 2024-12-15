@@ -19,6 +19,6 @@ public extension FilenameMatcher {
         let normalizedBase = traversedBase.hasSuffix("/") ? traversedBase : "\(traversedBase)/"
         let shouldPrependPwd = !["/", "*"].contains { relativePattern.hasPrefix($0) }
         let pattern = shouldPrependPwd ? "\(normalizedBase)\(traversedPattern)" : traversedPattern
-        self.init(pattern: pattern, caseSensitive: caseSensitive)
+        self.init(pattern: pattern, options: caseSensitive ? [.caseSensitive] : [])
     }
 }
