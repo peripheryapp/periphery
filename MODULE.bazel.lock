@@ -177,7 +177,7 @@
     "//bazel:extensions.bzl%generated": {
       "general": {
         "bzlTransitiveDigest": "dgFs0JxcnjG85QvYWXzJGeKvxaxpucFtipSkimqsDhI=",
-        "usagesDigest": "Bm7np1xW9Jzr4hIpXIopstLe6EbiwmBbcqeElEkK3XI=",
+        "usagesDigest": "BkQfIUcbH0PIgWJ29JAsW4xDPLmyzRGAzZ3nGRCAsRw=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
