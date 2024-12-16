@@ -120,7 +120,7 @@ public class BazelProjectDriver: ProjectDriver {
             "run",
             "--check_visibility=false",
             "--ui_event_filters=-info,-debug,-warning",
-            "@periphery_generated//rule:scan",
+            "\(generatedRepositoryName)//rule:scan",
         ])
 
         // The actual scan is performed by Bazel.
@@ -128,6 +128,10 @@ public class BazelProjectDriver: ProjectDriver {
     }
 
     // MARK: - Private
+
+    private var generatedRepositoryName: String {
+        fileManager.fileExists(atPath: ".bazel_use_local_generated_repo") ? "@periphery_generated" : "@@periphery++generated+periphery_generated"
+    }
 
     private func queryTargets() throws -> [String] {
         try shell
