@@ -1,6 +1,6 @@
 module(
     name = "periphery",
-    version = "3.0.0.beta7",
+    version = "3.0.0.beta8",
     compatibility_level = 1,
 )
 
