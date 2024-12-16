@@ -38,38 +38,12 @@ open class Shell {
         self.logger = logger.contextualized(with: "shell")
     }
 
-    lazy var pristineEnvironment: [String: String] = {
-        let shell = environment["SHELL"] ?? "/bin/bash"
-        guard let pristineEnv = try? exec([shell, "-lc", "env"], environment: [:]).1 else {
-            return environment
-        }
-
-        var newEnv = pristineEnv.trimmed
-            .split(separator: "\n").map { line -> (String, String) in
-                let pair = line.split(separator: "=", maxSplits: 1)
-                return (String(pair.first ?? ""), String(pair.last ?? ""))
-            }
-            .reduce(into: [String: String]()) { result, pair in
-                result[pair.0] = pair.1
-            }
-
-        let preservedKeys = ["TERM", "PATH", "DEVELOPER_DIR", "SSH_AUTH_SOCK"]
-        for key in preservedKeys {
-            if let value = environment[key] {
-                newEnv[key] = value
-            }
-        }
-
-        return newEnv
-    }()
-
     @discardableResult
     open func exec(
         _ args: [String],
         stderr: Bool = true
     ) throws -> String {
-        let env = pristineEnvironment
-        let (status, output) = try exec(args, environment: env, stderr: stderr)
+        let (status, output) = try exec(args, environment: environment, stderr: stderr)
 
         if status == 0 {
             return output
@@ -87,8 +61,7 @@ open class Shell {
         _ args: [String],
         stderr: Bool = true
     ) throws -> Int32 {
-        let env = pristineEnvironment
-        let (status, _) = try exec(args, environment: env, stderr: stderr, captureOutput: false)
+        let (status, _) = try exec(args, environment: environment, stderr: stderr, captureOutput: false)
         return status
     }
 
