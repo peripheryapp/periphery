@@ -1,20 +1,11 @@
 """
-    Public module extensions.
+    Public generated repo extension.
 """
 
 def _generated_repo_impl(repository_ctx):
-    repository_ctx.file(
-        "BUILD.bazel",
-        content = """
-package_group(
-    name = "package_group",
-    packages = ["//..."],
-)
-""",
-    )
     repository_ctx.symlink(
         "/var/tmp/periphery_bazel/BUILD.bazel",
-        "rule/BUILD.bazel",
+        "BUILD.bazel",
     )
 
 generated_repo = repository_rule(

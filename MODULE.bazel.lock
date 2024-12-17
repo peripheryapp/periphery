@@ -174,16 +174,16 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
-    "//bazel:extensions.bzl%generated": {
+    "//bazel:generated.bzl%generated": {
       "general": {
-        "bzlTransitiveDigest": "dgFs0JxcnjG85QvYWXzJGeKvxaxpucFtipSkimqsDhI=",
-        "usagesDigest": "BkQfIUcbH0PIgWJ29JAsW4xDPLmyzRGAzZ3nGRCAsRw=",
+        "bzlTransitiveDigest": "nMR2FBcoRPImVocN9DNOnm2NQWyTbJPu7SHJgAXsLFw=",
+        "usagesDigest": "wpzfE+FqjMSvrEYHa2419pepTym02qH7AT1nBCOagKY=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
           "periphery_generated": {
-            "repoRuleId": "@@//bazel:extensions.bzl%generated_repo",
+            "repoRuleId": "@@//bazel:generated.bzl%generated_repo",
             "attributes": {}
           }
         },
