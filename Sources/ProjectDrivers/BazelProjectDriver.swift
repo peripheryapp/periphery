@@ -98,9 +98,6 @@ public class BazelProjectDriver: ProjectDriver {
           testonly = True,
           config = "\(configPath)",
           periphery_binary = "\(executablePath)",
-          visibility = [
-            "@periphery//:package_group"
-          ],
           deps = [
             \(deps)
           ],
@@ -120,7 +117,7 @@ public class BazelProjectDriver: ProjectDriver {
             "run",
             "--check_visibility=false",
             "--ui_event_filters=-info,-debug,-warning",
-            "\(generatedRepositoryName)//rule:scan",
+            "@periphery_generated//:scan",
         ])
 
         // The actual scan is performed by Bazel.
@@ -128,10 +125,6 @@ public class BazelProjectDriver: ProjectDriver {
     }
 
     // MARK: - Private
-
-    private var generatedRepositoryName: String {
-        fileManager.fileExists(atPath: ".bazel_use_local_generated_repo") ? "@periphery_generated" : "@@periphery++generated+periphery_generated"
-    }
 
     private func queryTargets() throws -> [String] {
         try shell
