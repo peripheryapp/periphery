@@ -235,7 +235,7 @@ swift_binary(
 optimized_swift_binary(
     name = "Frontend_opt",
     target = ":Frontend",
-    visibility = ["//visibility:public"],
+    visibility = ["//:__pkg__"],
 )
 
 swift_library(

@@ -97,7 +97,6 @@ class BazelProjectDriver: ProjectDriver {
           name = "scan",
           testonly = True,
           config = "\(configPath)",
-          periphery_binary = "\(executablePath)",
           deps = [
             \(deps)
           ],
