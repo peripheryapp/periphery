@@ -173,6 +173,8 @@ def _scan_impl(ctx):
         test_targets = test_targets,
     )
 
+    periphery = ctx.attr.periphery[DefaultInfo].files_to_run.executable
+
     project_config_json = json.encode_indent(project_config)
     project_config_file = ctx.actions.declare_file("project_config.json")
     ctx.actions.write(project_config_file, project_config_json)
@@ -181,7 +183,7 @@ def _scan_impl(ctx):
         template = ctx.file._template,
         output = ctx.outputs.scan,
         substitutions = {
-            "%periphery_binary%": ctx.attr.periphery_binary,
+            "%periphery_path%": periphery.short_path,
             "%config_path%": ctx.attr.config,
             "%project_config_path%": project_config_file.path,
         },
@@ -189,14 +191,11 @@ def _scan_impl(ctx):
 
     return DefaultInfo(
         executable = ctx.outputs.scan,
-        files = depset(
-            [ctx.outputs.scan, project_config_file],
-        ),
         runfiles = ctx.runfiles(
-            # Swift sources are not included in the generate project file, yet they are referenced
+            # Swift sources are not included in the generated project file, yet they are referenced
             # in the indexstores and will be read by Periphery, and therefore must be present in
             # the runfiles.
-            files = swift_srcs + indexstores + plists + xibs + xcdatamodels + xcmappingmodels,
+            files = swift_srcs + indexstores + plists + xibs + xcdatamodels + xcmappingmodels + [periphery],
         ),
     )
 
@@ -215,7 +214,10 @@ scan = rule(
             doc = "Top-level project targets to scan.",
         ),
         "config": attr.string(doc = "Path to the periphery.yml configuration file."),
-        "periphery_binary": attr.string(doc = "Path to the periphery binary."),
+        "periphery": attr.label(
+            doc = "The periphery executable target.",
+            default = "@periphery//:periphery",
+        ),
         "_template": attr.label(
             allow_single_file = True,
             default = "@periphery//bazel/internal/scan:scan_template.sh",

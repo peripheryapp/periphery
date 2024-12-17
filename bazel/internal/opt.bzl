@@ -20,19 +20,9 @@ _enable_optimizations = transition(
 )
 
 def _optimized_swift_binary_impl(ctx):
-    default_info = ctx.attr.target[0][DefaultInfo]
     new_exe = ctx.actions.declare_file(ctx.label.name)
-    ctx.actions.symlink(
-        output = new_exe,
-        target_file = ctx.executable.target,
-    )
-    return [
-        DefaultInfo(
-            executable = new_exe,
-            files = depset([new_exe], transitive = [default_info.files]),
-            runfiles = ctx.runfiles().merge(default_info.default_runfiles),
-        ),
-    ]
+    ctx.actions.symlink(output = new_exe, target_file = ctx.executable.target)
+    return [DefaultInfo(executable = new_exe)]
 
 optimized_swift_binary = rule(
     attrs = {

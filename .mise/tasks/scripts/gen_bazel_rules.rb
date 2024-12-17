@@ -73,7 +73,7 @@ def generate_bazel_rule(path, rule, name, attrs)
         optimized_swift_binary(
             name = "#{name}_opt",
             target = ":#{name}",
-            visibility = ["//visibility:public"],
+            visibility = ["//:__pkg__"],
         )
         EOS
     else

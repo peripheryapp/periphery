@@ -76,10 +76,6 @@ public class BazelProjectDriver: ProjectDriver {
     }
 
     public func build() throws {
-        guard let executablePath = Bundle.main.executablePath else {
-            fatalError("Expected executable path.")
-        }
-
         try fileManager.createDirectory(at: outputPath.url, withIntermediateDirectories: true)
 
         let configPath = outputPath.appending("periphery.yml")
@@ -97,7 +93,6 @@ public class BazelProjectDriver: ProjectDriver {
           name = "scan",
           testonly = True,
           config = "\(configPath)",
-          periphery_binary = "\(executablePath)",
           deps = [
             \(deps)
           ],
