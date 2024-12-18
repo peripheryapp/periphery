@@ -10,7 +10,7 @@ class ShellMock: Shell {
         self.init(environment: ProcessInfo.processInfo.environment, logger: logger)
     }
 
-    override func exec(_: [String], stderr _: Bool = true) throws -> String {
+    override func exec(_: [String]) throws -> String {
         output
     }
 }
