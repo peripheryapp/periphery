@@ -46,7 +46,7 @@ public enum SPM {
             if let path = configuration.jsonPackageManifestPath {
                 jsonData = try Data(contentsOf: path.url)
             } else {
-                let jsonString = try shell.exec(["swift", "package", "describe", "--type", "json"], stderr: false)
+                let jsonString = try shell.exec(["swift", "package", "describe", "--type", "json"])
 
                 guard let data = jsonString.data(using: .utf8) else {
                     throw PeripheryError.packageError(message: "Failed to read swift package description.")
