@@ -5,6 +5,7 @@ public class SourceFile {
     public let path: FilePath
     public let modules: Set<String>
     public var importStatements: [ImportStatement] = []
+    public var importsSwiftTesting = false
 
     public init(path: FilePath, modules: Set<String>) {
         self.path = path
