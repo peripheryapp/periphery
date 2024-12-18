@@ -127,7 +127,7 @@ class BazelProjectDriver: ProjectDriver {
 
     private func queryTargets() throws -> [String] {
         try shell
-            .exec(["bazel", "query", query], stderr: false)
+            .exec(["bazel", "query", query])
             .split(separator: "\n")
             .map { "\"@@\($0)\"" }
     }

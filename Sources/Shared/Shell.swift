@@ -39,29 +39,23 @@ open class Shell {
     }
 
     @discardableResult
-    open func exec(
-        _ args: [String],
-        stderr: Bool = true
-    ) throws -> String {
-        let (status, output) = try exec(args, environment: environment, stderr: stderr)
+    open func exec(_ args: [String]) throws -> String {
+        let (status, stdout, stderr) = try exec(args)
 
         if status == 0 {
-            return output
+            return stdout
         }
 
         throw PeripheryError.shellCommandFailed(
             cmd: args,
             status: status,
-            output: output
+            output: [stdout, stderr].filter { !$0.isEmpty }.joined(separator: "\n").trimmed
         )
     }
 
     @discardableResult
-    open func execStatus(
-        _ args: [String],
-        stderr: Bool = true
-    ) throws -> Int32 {
-        let (status, _) = try exec(args, environment: environment, stderr: stderr, captureOutput: false)
+    open func execStatus(_ args: [String]) throws -> Int32 {
+        let (status, _, _) = try exec(args, captureOutput: false)
         return status
     }
 
@@ -69,10 +63,8 @@ open class Shell {
 
     private func exec(
         _ args: [String],
-        environment: [String: String],
-        stderr: Bool = false,
         captureOutput: Bool = true
-    ) throws -> (Int32, String) {
+    ) throws -> (Int32, String, String) {
         let launchPath: String
         let newArgs: [String]
 
@@ -92,22 +84,24 @@ open class Shell {
         logger.debug("\(launchPath) \(newArgs.joined(separator: " "))")
         ShellProcessStore.shared.add(process)
 
-        var outputPipe: Pipe?
+        var stdoutPipe: Pipe?
+        var stderrPipe: Pipe?
 
         if captureOutput {
-            outputPipe = Pipe()
-            process.standardOutput = outputPipe
-            process.standardError = stderr ? outputPipe : nil
+            stdoutPipe = Pipe()
+            stderrPipe = Pipe()
+            process.standardOutput = stdoutPipe
+            process.standardError = stderrPipe
         }
 
         process.launch()
 
-        var output = ""
+        var stdout = ""
+        var stderr = ""
 
-        if let outputPipe,
-           let outputData = try outputPipe.fileHandleForReading.readToEnd()
-        {
-            guard let str = String(data: outputData, encoding: .utf8) else {
+        if let stdoutData = try stdoutPipe?.fileHandleForReading.readToEnd() {
+            guard let stdoutStr = String(data: stdoutData, encoding: .utf8)
+            else {
                 ShellProcessStore.shared.remove(process)
                 throw PeripheryError.shellOutputEncodingFailed(
                     cmd: launchPath,
@@ -115,11 +109,24 @@ open class Shell {
                     encoding: .utf8
                 )
             }
-            output = str
+            stdout = stdoutStr
+        }
+
+        if let stderrData = try stderrPipe?.fileHandleForReading.readToEnd() {
+            guard let stderrStr = String(data: stderrData, encoding: .utf8)
+            else {
+                ShellProcessStore.shared.remove(process)
+                throw PeripheryError.shellOutputEncodingFailed(
+                    cmd: launchPath,
+                    args: newArgs,
+                    encoding: .utf8
+                )
+            }
+            stderr = stderrStr
         }
 
         process.waitUntilExit()
         ShellProcessStore.shared.remove(process)
-        return (process.terminationStatus, output)
+        return (process.terminationStatus, stdout, stderr)
     }
 }

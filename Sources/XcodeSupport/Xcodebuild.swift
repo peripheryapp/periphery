@@ -86,7 +86,7 @@ public final class Xcodebuild {
 
         let quotedArguments = quote(arguments: additionalArguments)
         let xcodebuild = "xcodebuild \((args + quotedArguments).joined(separator: " "))"
-        let lines = try shell.exec(["/bin/sh", "-c", xcodebuild], stderr: false).split(separator: "\n").map { String($0).trimmed }
+        let lines = try shell.exec(["/bin/sh", "-c", xcodebuild]).split(separator: "\n").map { String($0).trimmed }
 
         // xcodebuild may output unrelated warnings, we need to strip them out otherwise
         // JSON parsing will fail.
