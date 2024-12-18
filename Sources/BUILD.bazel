@@ -79,6 +79,7 @@ swift_library(
         "SourceGraph/Mutators/ResultBuilderRetainer.swift",
         "SourceGraph/Mutators/StringInterpolationAppendInterpolationRetainer.swift",
         "SourceGraph/Mutators/StructImplicitInitializerReferenceBuilder.swift",
+        "SourceGraph/Mutators/SwiftTestingRetainer.swift",
         "SourceGraph/Mutators/SwiftUIRetainer.swift",
         "SourceGraph/Mutators/UnusedImportMarker.swift",
         "SourceGraph/Mutators/UnusedParameterRetainer.swift",
