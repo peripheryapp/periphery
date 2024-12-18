@@ -7,7 +7,7 @@
 
 ##### Enhancements
 
-- None.
+- Added support for Swift Testing.
 
 ##### Bug Fixes
 

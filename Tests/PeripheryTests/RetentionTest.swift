@@ -1059,6 +1059,33 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    // MARK: - Swift Testing
+
+    #if canImport(Testing)
+        func testRetainsSwiftTestingDeclarations() {
+            analyze {
+                assertReferenced(.functionFree("swiftTestingFreeFunction()"))
+
+                assertReferenced(.class("SwiftTestingClass")) {
+                    self.assertReferenced(.functionMethodInstance("instanceMethod()"))
+                    self.assertReferenced(.functionMethodClass("classMethod()"))
+                    self.assertReferenced(.functionMethodStatic("staticMethod()"))
+                }
+
+                assertReferenced(.struct("SwiftTestingStructWithSuite")) {
+                    self.assertReferenced(.functionMethodInstance("instanceMethod()"))
+                    self.assertReferenced(.functionMethodStatic("staticMethod()"))
+                }
+
+                assertReferenced(.class("SwiftTestingClassWithSuite")) {
+                    self.assertReferenced(.functionMethodInstance("instanceMethod()"))
+                    self.assertReferenced(.functionMethodClass("classMethod()"))
+                    self.assertReferenced(.functionMethodStatic("staticMethod()"))
+                }
+            }
+        }
+    #endif
+
     // MARK: - Assign-only properties
 
     func testStructImplicitInitializer() {

@@ -229,6 +229,7 @@ final class SwiftIndexer: Indexer {
             multiplexingSyntaxVisitor.visit()
 
             sourceFile.importStatements = importSyntaxVisitor.importStatements
+            sourceFile.importsSwiftTesting = importSyntaxVisitor.importStatements.contains(where: { $0.module == "Testing" })
 
             if !configuration.disableUnusedImportAnalysis {
                 for stmt in sourceFile.importStatements where stmt.isExported {

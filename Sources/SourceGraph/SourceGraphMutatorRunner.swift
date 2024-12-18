@@ -36,6 +36,7 @@ public final class SourceGraphMutatorRunner {
         EntryPointAttributeRetainer.self,
         PubliclyAccessibleRetainer.self,
         XCTestRetainer.self,
+        SwiftTestingRetainer.self,
         SwiftUIRetainer.self,
         StringInterpolationAppendInterpolationRetainer.self,
         PropertyWrapperRetainer.self,
