@@ -46,8 +46,9 @@ final class GuidedSetup: SetupGuideHelpers {
             let kindName = select(single: projectGuides.map(\.projectKindName))
             projectGuide_ = projectGuides.first { $0.projectKindName == kindName }
             print("")
-        } else {
-            projectGuide_ = projectGuides.first
+        } else if let singleGuide = projectGuides.first {
+            print(colorize("*", .boldGreen) + " Detected \(singleGuide.projectKindName) project")
+            projectGuide_ = singleGuide
         }
 
         guard let projectGuide = projectGuide_ else {
