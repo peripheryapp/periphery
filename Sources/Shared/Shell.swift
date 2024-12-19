@@ -26,15 +26,9 @@ public class ShellProcessStore {
 }
 
 open class Shell {
-    private let environment: [String: String]
     private let logger: ContextualLogger
 
-    public convenience init(logger: Logger) {
-        self.init(environment: ProcessInfo.processInfo.environment, logger: logger)
-    }
-
-    public required init(environment: [String: String], logger: Logger) {
-        self.environment = environment
+    public init(logger: Logger) {
         self.logger = logger.contextualized(with: "shell")
     }
 
@@ -78,7 +72,6 @@ open class Shell {
 
         let process = Process()
         process.launchPath = launchPath
-        process.environment = environment
         process.arguments = newArgs
 
         logger.debug("\(launchPath) \(newArgs.joined(separator: " "))")
@@ -96,8 +89,8 @@ open class Shell {
 
         process.launch()
 
-        var stdout = ""
-        var stderr = ""
+        var standardOutput = ""
+        var standardError = ""
 
         if let stdoutData = try stdoutPipe?.fileHandleForReading.readToEnd() {
             guard let stdoutStr = String(data: stdoutData, encoding: .utf8)
@@ -109,7 +102,7 @@ open class Shell {
                     encoding: .utf8
                 )
             }
-            stdout = stdoutStr
+            standardOutput = stdoutStr
         }
 
         if let stderrData = try stderrPipe?.fileHandleForReading.readToEnd() {
@@ -122,11 +115,19 @@ open class Shell {
                     encoding: .utf8
                 )
             }
-            stderr = stderrStr
+            standardError = stderrStr
         }
 
-        process.waitUntilExit()
+        #if os(Linux)
+            // Workaround for https://github.com/swiftlang/swift-corelibs-foundation/issues/5153
+            let semaphore = DispatchSemaphore(value: 0)
+            process.terminationHandler = { _ in semaphore.signal() }
+            semaphore.wait()
+        #else
+            process.waitUntilExit()
+        #endif
+
         ShellProcessStore.shared.remove(process)
-        return (process.terminationStatus, stdout, stderr)
+        return (process.terminationStatus, standardOutput, standardError)
     }
 }
