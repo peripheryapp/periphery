@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker build -t periphery -f docker/Dockerfile.linux .
+docker run --rm -it periphery scan "$@"
