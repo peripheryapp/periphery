@@ -1,0 +1,6 @@
+.git/
+.build/
+.swiftpm/
+.release/
+bazel-*
+docker/

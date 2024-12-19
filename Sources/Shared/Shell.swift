@@ -78,8 +78,8 @@ open class Shell {
 
         process.launch()
 
-        var stdout = ""
-        var stderr = ""
+        var standardOutput = ""
+        var standardError = ""
 
         if let stdoutData = try stdoutPipe?.fileHandleForReading.readToEnd() {
             guard let stdoutStr = String(data: stdoutData, encoding: .utf8)
@@ -90,7 +90,7 @@ open class Shell {
                     encoding: .utf8
                 )
             }
-            stdout = stdoutStr
+            standardOutput = stdoutStr
         }
 
         if let stderrData = try stderrPipe?.fileHandleForReading.readToEnd() {
@@ -102,11 +102,11 @@ open class Shell {
                     encoding: .utf8
                 )
             }
-            stderr = stderrStr
+            standardError = stderrStr
         }
 
         process.waitUntilExit()
         ShellProcessStore.shared.remove(process)
-        return (process.terminationStatus, stdout, stderr)
+        return (process.terminationStatus, standardOutput, standardError)
     }
 }
