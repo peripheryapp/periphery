@@ -85,12 +85,30 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
             project
         ).map { $0 }.sorted()
 
-        print(colorize("\nSelect the schemes necessary to build your chosen targets:", .bold))
-        configuration.schemes = select(multiple: schemes, allowAll: false).selectedValues
+        print(colorize("\nSelect the schemes to build:", .bold))
+        print("Periphery will scan all files built by your chosen schemes.")
+        configuration.schemes = select(multiple: schemes).selectedValues
 
-        print(colorize("\nAssume Objective-C accessible declarations are in use?", .bold))
-        print(colorize("?", .boldYellow) + " Declarations exposed to the Objective-C runtime explicitly with @objc, or implicitly by inheriting NSObject will be assumed to be in use. Choose 'No' if your project is pure Swift.")
-        configuration.retainObjcAccessible = selectBoolean()
+        print(colorize("\nDoes this project contain Objective-C code?", .bold))
+        let containsObjC = selectBoolean()
+
+        if containsObjC {
+            print(colorize("\nPeriphery cannot scan Objective-C code and, as a result, cannot detect Swift types referenced by Objective-C code.", .bold))
+            print("To avoid false positives, you have a few options:")
+            let retainObjcAccessibleOption = colorize("Assume all types accessible from Objective-C are in use:", .bold) + " This includes public NSObject instances (and their subclasses), as well as any types explicitly annotated with @objc. This approach will eliminate false positives but may also result in a lot of missed unused code."
+            let retainObjcAnnotationOption = colorize("Assume only types annotated with @objc are in use:", .bold) + " This option may lead to false positives, but they can be easily corrected by adding the necessary @objc annotations."
+            let objcChoice = select(single: [
+                retainObjcAccessibleOption,
+                retainObjcAnnotationOption,
+                colorize("Do nothing:", .bold) + " Do not assume any Swift types are used in Objective-C code.",
+            ])
+
+            if objcChoice == retainObjcAccessibleOption {
+                configuration.retainObjcAccessible = true
+            } else if objcChoice == retainObjcAnnotationOption {
+                configuration.retainObjcAnnotated = true
+            }
+        }
 
         return .xcode(projectPath: project.path)
     }
@@ -106,6 +124,10 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
 
         if configuration.retainObjcAccessible {
             options.append("--retain-objc-accessible")
+        }
+
+        if configuration.retainObjcAnnotated {
+            options.append("--retain-objc-annotated")
         }
 
         return options

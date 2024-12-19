@@ -13,7 +13,7 @@ final class CommonSetupGuide: SetupGuideHelpers {
 
     func perform() throws {
         print(colorize("\nAssume all 'public' declarations are in use?", .bold))
-        print(colorize("?", .boldYellow) + " Choose 'Yes' if your project is a framework/library without a main application target.")
+        print("Choose 'Yes' if your project is a framework/library without a main application target.")
         configuration.retainPublic = selectBoolean()
     }
 

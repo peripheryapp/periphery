@@ -10,7 +10,7 @@ final class SPMProjectSetupGuide: SetupGuideHelpers, SetupGuide {
     }
 
     var projectKindName: String {
-        "Swift Project Manager"
+        "Swift Package"
     }
 
     func perform() throws -> ProjectKind {
