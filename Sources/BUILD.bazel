@@ -206,6 +206,7 @@ swift_library(
 swift_binary(
     name = "Frontend",
     srcs = [
+        "Frontend/BazelProjectSetupGuide.swift",
         "Frontend/Commands/CheckUpdateCommand.swift",
         "Frontend/Commands/ClearCacheCommand.swift",
         "Frontend/Commands/FrontendCommand.swift",

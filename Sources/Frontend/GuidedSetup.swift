@@ -35,10 +35,14 @@ final class GuidedSetup: SetupGuideHelpers {
             }
         #endif
 
+        if let guide = BazelProjectSetupGuide.detect() {
+            projectGuides.append(guide)
+        }
+
         var projectGuide_: SetupGuide?
 
         if projectGuides.count > 1 {
-            print(colorize("Please select which project to use:", .bold))
+            print(colorize("Select which project to use:", .bold))
             let kindName = select(single: projectGuides.map(\.projectKindName))
             projectGuide_ = projectGuides.first { $0.projectKindName == kindName }
             print("")
@@ -86,6 +90,11 @@ final class GuidedSetup: SetupGuideHelpers {
         }
 
         let parts = [bareCommand] + options
-        return parts.joined(separator: " \\\n  ")
+
+        if options.count > 1 {
+            return parts.joined(separator: " \\\n  ")
+        }
+
+        return parts.joined(separator: " ")
     }
 }
