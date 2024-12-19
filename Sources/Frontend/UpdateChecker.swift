@@ -81,14 +81,16 @@ final class UpdateChecker {
 
         guard latestVersion.isVersion(greaterThan: PeripheryVersion) else { return }
 
-        logger.info(colorize("\n* Update Available", .boldGreen))
+        logger.info(colorize("\nUpdate Available!", .boldGreen))
         let boldLatestVersion = colorize(latestVersion, .bold)
         let boldLocalVersion = colorize(PeripheryVersion, .bold)
         logger.info("Version \(boldLatestVersion) is now available, you are using version \(boldLocalVersion).")
-        logger.info("Release notes: https://github.com/peripheryapp/periphery/releases/tag/\(latestVersion)")
+        logger.info("Release notes: " + colorize("https://github.com/peripheryapp/periphery/releases/tag/\(latestVersion)", .bold))
         let boldOption = colorize("--disable-update-check", .bold)
         let boldScan = colorize("scan", .bold)
         logger.info("To disable update checks pass the \(boldOption) option to the \(boldScan) command.")
+
+        logger.info(colorize("\nIf you are enjoying Periphery, please consider becoming a sponsor.", .bold) + "\nYour support helps ensure the continued development of new features and updates to support new Swift versions.\n" + colorize("https://github.com/sponsors/peripheryapp", .boldMagenta))
     }
 
     func wait() -> Result<String, PeripheryError> {

@@ -3,4 +3,4 @@
 set -euo pipefail
 
 swift build
-time ./.build/debug/periphery scan "$@"
+./.build/debug/periphery scan "$@"
