@@ -33,8 +33,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        xcode: ["16.1", "16.0", "15.4"]
+        xcode: ["16.2", "16.1", "16.0", "15.4"]
         include:
+          - xcode: "16.2"
+            macos: macos-15
           - xcode: "16.1"
             macos: macos-15
           - xcode: "16.0"
