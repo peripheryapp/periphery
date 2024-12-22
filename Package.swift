@@ -6,7 +6,7 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/jpsim/Yams", from: "5.0.0"),
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
-    .package(url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.3.0"),
+    .package(url: "https://github.com/ileitch/swift-indexstore", revision: "a8a375fa31d7f861a8ee44a4d3acab9ecaf742ea"),
     .package(url: "https://github.com/apple/swift-syntax", from: "600.0.1"),
     .package(url: "https://github.com/ileitch/swift-filename-matcher", from: "2.0.0"),
 ]
