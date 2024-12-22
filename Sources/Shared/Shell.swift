@@ -26,15 +26,9 @@ public class ShellProcessStore {
 }
 
 open class Shell {
-    private let environment: [String: String]
     private let logger: ContextualLogger
 
-    public convenience init(logger: Logger) {
-        self.init(environment: ProcessInfo.processInfo.environment, logger: logger)
-    }
-
-    public required init(environment: [String: String], logger: Logger) {
-        self.environment = environment
+    public required init(logger: Logger) {
         self.logger = logger.contextualized(with: "shell")
     }
 
@@ -62,26 +56,14 @@ open class Shell {
     // MARK: - Private
 
     private func exec(
-        _ args: [String],
+        _ cmd: [String],
         captureOutput: Bool = true
     ) throws -> (Int32, String, String) {
-        let launchPath: String
-        let newArgs: [String]
-
-        if let cmd = args.first, cmd.hasPrefix("/") {
-            launchPath = cmd
-            newArgs = Array(args.dropFirst())
-        } else {
-            launchPath = "/usr/bin/env"
-            newArgs = args
-        }
-
         let process = Process()
-        process.launchPath = launchPath
-        process.environment = environment
-        process.arguments = newArgs
+        process.launchPath = "/bin/bash"
+        process.arguments = ["-c", cmd.joined(separator: " ")]
 
-        logger.debug("\(launchPath) \(newArgs.joined(separator: " "))")
+        logger.debug("\(cmd.joined(separator: " "))")
         ShellProcessStore.shared.add(process)
 
         var stdoutPipe: Pipe?
@@ -104,8 +86,7 @@ open class Shell {
             else {
                 ShellProcessStore.shared.remove(process)
                 throw PeripheryError.shellOutputEncodingFailed(
-                    cmd: launchPath,
-                    args: newArgs,
+                    cmd: cmd,
                     encoding: .utf8
                 )
             }
@@ -117,8 +98,7 @@ open class Shell {
             else {
                 ShellProcessStore.shared.remove(process)
                 throw PeripheryError.shellOutputEncodingFailed(
-                    cmd: launchPath,
-                    args: newArgs,
+                    cmd: cmd,
                     encoding: .utf8
                 )
             }

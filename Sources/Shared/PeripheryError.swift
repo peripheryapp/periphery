@@ -3,7 +3,7 @@ import SystemPackage
 
 public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
     case shellCommandFailed(cmd: [String], status: Int32, output: String)
-    case shellOutputEncodingFailed(cmd: String, args: [String], encoding: String.Encoding)
+    case shellOutputEncodingFailed(cmd: [String], encoding: String.Encoding)
     case usageError(String)
     case underlyingError(Error)
     case invalidScheme(name: String, project: String)
@@ -25,9 +25,9 @@ public enum PeripheryError: Error, LocalizedError, CustomStringConvertible {
         case let .shellCommandFailed(cmd, status, output):
             let joinedCmd = cmd.joined(separator: " ")
             return "Shell command '\(joinedCmd)' returned exit status '\(status)':\n\(output)"
-        case let .shellOutputEncodingFailed(cmd, args, encoding):
-            let joinedArgs = args.joined(separator: " ")
-            return "Shell command '\(cmd) \(joinedArgs)' output encoding to \(encoding) failed."
+        case let .shellOutputEncodingFailed(cmd, encoding):
+            let joinedCmd = cmd.joined(separator: " ")
+            return "Shell command '\(joinedCmd)' output encoding to \(encoding) failed."
         case let .usageError(message):
             return message
         case let .underlyingError(error):
