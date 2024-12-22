@@ -127,21 +127,14 @@ class BazelProjectDriver: ProjectDriver {
 
     private func queryTargets() throws -> [String] {
         try shell
-            .exec(["bazel", "query", query])
+            .exec(["bazel", "query", "\"\(query)\""])
             .split(separator: "\n")
             .map { "\"@@\($0)\"" }
     }
 
     private var query: String {
-        let query = """
-        filter(
-          '^//.*',
-          kind(
-            '(\(Self.topLevelKinds.joined(separator: "|"))) rule',
-            deps(//...)
-          )
-        )
-        """
+        let kinds = Self.topLevelKinds.joined(separator: "|")
+        let query = "filter('^//.*', kind('(\(kinds)) rule', deps(//...)))"
 
         if let pattern = configuration.bazelFilter {
             return "filter('\(pattern)', \(query))"

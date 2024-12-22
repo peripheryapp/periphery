@@ -51,8 +51,8 @@ public final class Xcodebuild {
         ]
 
         let quotedArguments = quote(arguments: additionalArguments)
-        let xcodebuild = "xcodebuild \((args + envs + quotedArguments).joined(separator: " "))"
-        return try shell.exec(["/bin/sh", "-c", xcodebuild])
+        let xcodebuild = ["xcodebuild"] + args + envs + quotedArguments
+        return try shell.exec(xcodebuild)
     }
 
     public func removeDerivedData(for project: XcodeProjectlike, allSchemes: [String]) throws {
@@ -85,8 +85,8 @@ public final class Xcodebuild {
         ]
 
         let quotedArguments = quote(arguments: additionalArguments)
-        let xcodebuild = "xcodebuild \((args + quotedArguments).joined(separator: " "))"
-        let lines = try shell.exec(["/bin/sh", "-c", xcodebuild]).split(separator: "\n").map { String($0).trimmed }
+        let xcodebuild = ["xcodebuild"] + args + quotedArguments
+        let lines = try shell.exec(xcodebuild).split(separator: "\n").map { String($0).trimmed }
 
         // xcodebuild may output unrelated warnings, we need to strip them out otherwise
         // JSON parsing will fail.
