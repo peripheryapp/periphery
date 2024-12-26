@@ -1,0 +1,5 @@
+FROM swift:latest
+WORKDIR /workspace
+COPY . /workspace
+RUN swift build --product periphery
+ENTRYPOINT [".build/debug/periphery"]
