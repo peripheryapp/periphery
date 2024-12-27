@@ -115,14 +115,6 @@ fi
 cd ..
 gh release create --latest="${is_latest}" -F .release/release_notes.md "${version}" ".release/${zip_filename}" ".release/${zip_artifactbundle}" ".release/${bazel_zip_filename}"
 
-# Homebrew
-if [ $is_latest = false ]; then
-  echo "Not releasing beta to Homebrew."
-else
-  cd ../homebrew-periphery
-  cat periphery.rb.template | sed s/__VERSION__/${version}/ | sed s/__SHA256__/${sha256}/ > Casks/periphery.rb
-  git add Casks/periphery.rb
-  git commit -m "${version}"
-  git push origin master
-  cd ../periphery
-fi
+echo "Next steps:"
+echo "* Update Homebrew formula"
+echo "* Update Bazel Central Registry"

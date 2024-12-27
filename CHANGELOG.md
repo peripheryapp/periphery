@@ -2,8 +2,17 @@
 
 ##### Breaking
 
+**3.0 is a major breaking change and requires some manual migration, please see the [3.0 Migration Guide](https://github.com/peripheryapp/periphery/wiki/3.0-Migration-Guide).**
+
 - Support for installing via CocoaPods has been removed.
 - Removed support for Swift 5.9/Xcode 15.2.
+- Periphery is now available directly from Homebrew, and the `peripheryapp/periphery` tap is no longer updated. To migrate run the following:
+```
+brew remove periphery
+brew untap peripheryapp/periphery
+brew update
+brew install periphery
+```
 
 ##### Enhancements
 
@@ -11,7 +20,9 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix numerous issues where generated code could not be scanned.
+- Fix support for Xcode's new folder format.
+- Fix cloning private Swift package repositories.
 
 ## 2.21.2 (2024-11-01)
 
