@@ -2,6 +2,20 @@
 
 ##### Breaking
 
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 3.0.0 (2024-12-27)
+
+##### Breaking
+
 **3.0 is a major breaking change and requires some manual migration, please see the [3.0 Migration Guide](https://github.com/peripheryapp/periphery/wiki/3.0-Migration-Guide).**
 
 - Support for installing via CocoaPods has been removed.
