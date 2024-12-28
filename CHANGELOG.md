@@ -10,6 +10,20 @@
 
 ##### Bug Fixes
 
+- None.
+
+## 3.0.1 (2024-12-28)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
 - A clean build is no longer required when a file is deleted from the scanned project.
 
 ## 3.0.0 (2024-12-27)
