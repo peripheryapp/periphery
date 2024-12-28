@@ -1,7 +1,6 @@
 import Configuration
 import Foundation
 import Logger
-import Shared
 import SourceGraph
 import SwiftIndexStore
 import SystemPackage
@@ -43,7 +42,8 @@ public struct SourceFileCollector {
 
                     if !isExcluded(file) {
                         guard file.exists else {
-                            throw PeripheryError.pathDoesNotExist(path: file.string)
+                            logger.debug("Source file does not exist: \(file.string)")
+                            return nil
                         }
 
                         let module = try indexStore.moduleName(for: unit)
