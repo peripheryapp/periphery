@@ -64,11 +64,7 @@ bazel_dep(name = "periphery", version = "<version>")
 use_repo(use_extension("@periphery//bazel:generated.bzl", "generated"), "periphery_generated")
 ```
 
-```sh
-bazel run @periphery -- scan --bazel
-```
-
-This command queries your project to identify all top-level targets, generates an implementation of the [scan](https://github.com/peripheryapp/periphery/blob/master/bazel/rules.bzl) rule, and then invokes Bazel. You can filter the top-level targets with the `-—bazel-filter <value>` option, where `<value>` will be passed as the first argument to Bazel’s [filter](https://bazel.build/query/language#filter) operator. The generated query can be seen in the console with the `-—verbose` option.
+See [Bazel](#build-systems) below for usage instructions.
 
 ## How To Use
 
@@ -426,7 +422,17 @@ By default, Periphery looks for the index store at `.build/debug/index/store`. T
 
 ## Build Systems
 
-Periphery can analyze projects using other build systems, though it cannot drive them automatically like SPM, Xcode and Bazel. Instead, you need to specify the location of indexstore and other resource files. The format is as follows:
+### Bazel
+
+```sh
+bazel run @periphery -- scan --bazel
+```
+
+The `--bazel` option enables Bazel mode which provides seamless integration with your project. It works by querying your project to identify all top-level targets, generates a hidden implementation of the [scan](https://github.com/peripheryapp/periphery/blob/master/bazel/rules.bzl) rule, and then invokes `bazel run`. You can filter the top-level targets with the `-—bazel-filter <value>` option, where `<value>` will be passed as the first argument to Bazel’s [filter](https://bazel.build/query/language#filter) operator. The generated query can be seen in the console with the `-—verbose` option.
+
+### Other
+
+Periphery can analyze projects using other build systems, though it cannot drive them automatically like SPM, Xcode and Bazel. Instead, you need to create a configuration file that specifies the location of indexstore and other resource files. The format is as follows:
 
 ```json
 {
