@@ -68,6 +68,8 @@ use_repo(use_extension("@periphery//bazel:generated.bzl", "generated"), "periphe
 bazel run @periphery -- scan --bazel
 ```
 
+This command queries your project to identify all top-level targets, generates an implementation of the [scan](https://github.com/peripheryapp/periphery/blob/master/bazel/rules.bzl) rule, and then invokes Bazel. You can filter the top-level targets with the `-—bazel-filter <value>` option, where `<value>` will be passed as the first argument to Bazel’s [filter](https://bazel.build/query/language#filter) operator. The generated query can be seen in the console with the `-—verbose` option.
+
 ## How To Use
 
 ### The `scan` Command

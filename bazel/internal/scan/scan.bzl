@@ -26,7 +26,7 @@ def _force_indexstore_impl(settings, _attr):
         ],
     }
 
-_force_indexstore = transition(
+force_indexstore = transition(
     implementation = _force_indexstore_impl,
     inputs = [
         "//command_line_option:features",
@@ -138,7 +138,8 @@ def _scan_inputs_aspect_impl(target, ctx):
         ),
     ]
 
-def _scan_impl(ctx):
+# buildifier: disable=function-docstring
+def scan_impl(ctx):
     swift_srcs_set = sets.make()
     indexstores_set = sets.make()
     plists_set = sets.make()
@@ -202,31 +203,4 @@ def _scan_impl(ctx):
 scan_inputs_aspect = aspect(
     _scan_inputs_aspect_impl,
     attr_aspects = ["deps", "swift_target"],
-)
-
-scan = rule(
-    doc = "Scans the top-level deps and their transitive deps for unused code.",
-    attrs = {
-        "deps": attr.label_list(
-            cfg = _force_indexstore,
-            mandatory = True,
-            aspects = [scan_inputs_aspect],
-            doc = "Top-level project targets to scan.",
-        ),
-        "config": attr.string(doc = "Path to the periphery.yml configuration file."),
-        "periphery": attr.label(
-            doc = "The periphery executable target.",
-            default = "@periphery//:periphery",
-        ),
-        "_template": attr.label(
-            allow_single_file = True,
-            default = "@periphery//bazel/internal/scan:scan_template.sh",
-        ),
-    },
-    outputs = {
-        "project_config": "project_config.json",
-        "scan": "scan.sh",
-    },
-    implementation = _scan_impl,
-    executable = True,
 )
