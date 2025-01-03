@@ -60,7 +60,7 @@ mint install peripheryapp/periphery
 ### [Bazel](https://bazel.build/)
 
 ```python
-bazel_dep(name = "periphery", version = "<version>")
+bazel_dep(name = "periphery", version = "<version>", dev_dependency = True)
 use_repo(use_extension("@periphery//bazel:generated.bzl", "generated"), "periphery_generated")
 ```
 
