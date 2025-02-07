@@ -52,7 +52,7 @@ open class SetupGuideHelpers {
     }
 
     public func select(multiple options: [String]) -> SetupSelection {
-        var helpMsg = " Delimit choices with a single space, e.g: 1 2 3"
+        let helpMsg = " Delimit choices with a single space, e.g: 1 2 3"
 
         display(options: options)
         print(colorize("?", .boldYellow) + helpMsg)
