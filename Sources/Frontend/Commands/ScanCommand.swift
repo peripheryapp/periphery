@@ -264,7 +264,7 @@ struct ScanCommand: FrontendCommand {
 
 extension OutputFormat: ExpressibleByArgument {}
 
-extension FilePath: ExpressibleByArgument {
+extension FilePath: ArgumentParser.ExpressibleByArgument {
     public init?(argument: String) {
         self.init(argument)
     }
