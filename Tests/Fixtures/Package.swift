@@ -6,6 +6,9 @@ var targets: [PackageDescription.Target] = [
         name: "ExternalModuleFixtures"
     ),
     .target(
+        name: "UnusedModuleFixtures"
+    ),
+    .target(
         name: "CrossModuleRetentionFixtures",
         dependencies: [
             .target(name: "CrossModuleRetentionSupportFixtures")
@@ -17,7 +20,8 @@ var targets: [PackageDescription.Target] = [
     .target(
         name: "RetentionFixtures",
         dependencies: [
-            .target(name: "ExternalModuleFixtures")
+            .target(name: "ExternalModuleFixtures"),
+            .target(name: "UnusedModuleFixtures")
         ]
     ),
     .target(
