@@ -885,7 +885,13 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testIgnoreComments() {
-        analyze(retainPublic: true) {
+        // ensure this external module is explicitly indexed so we can tell if it is unused
+        let additionalFilesToIndex = [
+            FixturesProjectPath.appending("Sources/UnusedModuleFixtures/UnusedModuleDeclaration.swift")
+        ]
+
+        analyze(retainPublic: true, additionalFilesToIndex: additionalFilesToIndex) {
+            assertNotReferenced(.module("UnusedModuleFixtures"))
             assertReferenced(.class("Fixture113")) {
                 self.assertReferenced(.functionMethodInstance("someFunc(param:)")) {
                     self.assertReferenced(.varParameter("param"))

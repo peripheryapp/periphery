@@ -1,4 +1,5 @@
 import Foundation
+import UnusedModuleFixtures
 
 // periphery:ignore
 public class Fixture113 {
