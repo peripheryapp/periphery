@@ -45,12 +45,12 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
-    static func index(sourceFile: FilePath? = nil) {
+    static func index(sourceFiles: [FilePath]? = nil) {
         var newPlan = plan!
 
-        if let sourceFile {
+        if let sourceFiles {
             newPlan = IndexPlan(
-                sourceFiles: plan.sourceFiles.filter { $0.key.path == sourceFile },
+                sourceFiles: plan.sourceFiles.filter { sourceFiles.contains($0.key.path) },
                 plistPaths: plan.plistPaths,
                 xibPaths: plan.xibPaths,
                 xcDataModelPaths: plan.xcDataModelPaths,
