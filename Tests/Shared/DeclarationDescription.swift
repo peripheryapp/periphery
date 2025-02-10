@@ -74,6 +74,10 @@ struct DeclarationDescription: CustomStringConvertible {
         self.init(kind: .functionSubscript, name: name, line: line)
     }
 
+    static func module(_ name: String, line: Int? = nil) -> Self {
+        self.init(kind: .module, name: name, line: line)
+    }
+
     static func varStatic(_ name: String, line: Int? = nil) -> Self {
         self.init(kind: .varStatic, name: name, line: line)
     }
