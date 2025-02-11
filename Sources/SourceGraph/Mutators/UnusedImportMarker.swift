@@ -45,6 +45,8 @@ final class UnusedImportMarker: SourceGraphMutator {
 
             let unreferencedImports = file.importStatements
                 .filter {
+                    // Exclude ignore commented imports
+                    !$0.commentCommands.contains(.ignore) &&
                     // Exclude exported/public imports because even though they may be unreferenced
                     // in the current file, their exported symbols may be referenced in others.
                     !$0.isExported &&
