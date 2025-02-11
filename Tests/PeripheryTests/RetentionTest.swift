@@ -891,7 +891,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         ]
 
         analyze(retainPublic: true, additionalFilesToIndex: additionalFilesToIndex) {
-            assertNotReferenced(.module("UnusedModuleFixtures"))
+            assertReferenced(.module("UnusedModuleFixtures"))
             assertReferenced(.class("Fixture113")) {
                 self.assertReferenced(.functionMethodInstance("someFunc(param:)")) {
                     self.assertReferenced(.varParameter("param"))

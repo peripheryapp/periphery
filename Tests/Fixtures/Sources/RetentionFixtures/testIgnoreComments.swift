@@ -1,4 +1,5 @@
 import Foundation
+// periphery:ignore
 import UnusedModuleFixtures
 
 // periphery:ignore
