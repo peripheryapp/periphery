@@ -26,7 +26,8 @@ public final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
             module: module,
             isTestable: attributes.contains("testable"),
             isExported: attributes.contains("_exported") || node.modifiers.contains { $0.name.text == "public" },
-            location: location
+            location: location,
+            commentCommands: CommentCommand.parseCommands(in: node.leadingTrivia)
         )
         importStatements.append(statement)
     }
