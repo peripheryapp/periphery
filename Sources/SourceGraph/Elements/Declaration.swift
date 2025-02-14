@@ -198,7 +198,7 @@ public final class Declaration {
                 "initializer"
             case .extension, .extensionEnum, .extensionClass, .extensionStruct, .extensionProtocol:
                 "extension"
-            case .functionMethodClass, .functionMethodStatic, .functionMethodInstance, .functionFree, .functionOperator, .functionSubscript:
+            case .functionMethodClass, .functionMethodStatic, .functionMethodInstance, .functionFree, .functionOperator, .functionOperatorInfix, .functionOperatorPostfix, .functionOperatorPrefix, .functionSubscript:
                 "function"
             case .varStatic, .varInstance, .varClass, .varGlobal, .varLocal:
                 "property"
