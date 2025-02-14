@@ -47,9 +47,9 @@ final class UnusedImportMarker: SourceGraphMutator {
                 .filter {
                     // Exclude ignore commented imports
                     !$0.commentCommands.contains(.ignore) &&
-                    // Exclude exported/public imports because even though they may be unreferenced
-                    // in the current file, their exported symbols may be referenced in others.
-                    !$0.isExported &&
+                        // Exclude exported/public imports because even though they may be unreferenced
+                        // in the current file, their exported symbols may be referenced in others.
+                        !$0.isExported &&
                         // Consider modules that have been indexed as we need to see which modules
                         // they export.
                         graph.indexedModules.contains($0.module) &&

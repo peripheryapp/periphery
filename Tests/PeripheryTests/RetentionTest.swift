@@ -887,7 +887,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     func testIgnoreComments() {
         // ensure this external module is explicitly indexed so we can tell if it is unused
         let additionalFilesToIndex = [
-            FixturesProjectPath.appending("Sources/UnusedModuleFixtures/UnusedModuleDeclaration.swift")
+            FixturesProjectPath.appending("Sources/UnusedModuleFixtures/UnusedModuleDeclaration.swift"),
         ]
 
         analyze(retainPublic: true, additionalFilesToIndex: additionalFilesToIndex) {
