@@ -15,6 +15,7 @@ class FixtureSourceGraphTestCase: SPMSourceGraphTestCase {
         retainObjcAccessible: Bool = false,
         retainObjcAnnotated: Bool = false,
         disableRedundantPublicAnalysis: Bool = false,
+        additionalFilesToIndex: [FilePath] = [],
         testBlock: () throws -> Void
     ) rethrows -> [ScanResult] {
         configuration.retainPublic = retainPublic
@@ -27,7 +28,7 @@ class FixtureSourceGraphTestCase: SPMSourceGraphTestCase {
             fatalError("\(testFixturePath.string) does not exist")
         }
 
-        Self.index(sourceFile: testFixturePath)
+        Self.index(sourceFiles: [testFixturePath] + additionalFilesToIndex)
         try testBlock()
         return Self.results
     }

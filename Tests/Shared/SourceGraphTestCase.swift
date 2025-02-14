@@ -45,12 +45,12 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
-    static func index(sourceFile: FilePath? = nil) {
+    static func index(sourceFiles: [FilePath]? = nil) {
         var newPlan = plan!
 
-        if let sourceFile {
+        if let sourceFiles {
             newPlan = IndexPlan(
-                sourceFiles: plan.sourceFiles.filter { $0.key.path == sourceFile },
+                sourceFiles: plan.sourceFiles.filter { sourceFiles.contains($0.key.path) },
                 plistPaths: plan.plistPaths,
                 xibPaths: plan.xibPaths,
                 xcDataModelPaths: plan.xcDataModelPaths,
@@ -78,22 +78,36 @@ open class SourceGraphTestCase: XCTestCase {
     }
 
     func assertReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = materialize(description, file: file, line: line) else { return }
+        if case .module = description.kind {
+            if let declaration = Self.graph.unusedModuleImports.first(where: { $0.name == description.name }) {
+                XCTFail("Expected declaration to be referenced: \(declaration)", file: file, line: line)
+            }
 
-        if !Self.graph.usedDeclarations.contains(declaration) {
-            XCTFail("Expected declaration to be referenced: \(declaration)", file: file, line: line)
+        } else {
+            guard let declaration = materialize(description, file: file, line: line) else { return }
+
+            if !Self.graph.usedDeclarations.contains(declaration) {
+                XCTFail("Expected declaration to be referenced: \(declaration)", file: file, line: line)
+            }
+
+            scopeStack.append(.declaration(declaration))
+            scopedAssertions?()
+            scopeStack.removeLast()
         }
-
-        scopeStack.append(.declaration(declaration))
-        scopedAssertions?()
-        scopeStack.removeLast()
     }
 
     func assertNotReferenced(_ description: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = materialize(description, file: file, line: line) else { return }
+        if case .module = description.kind {
+            if Self.graph.unusedModuleImports.first(where: { $0.name == description.name }) == nil {
+                XCTFail("Expected module to not be referenced: \(description.name)", file: file, line: line)
+            }
 
-        if !Self.results.unusedDeclarations.contains(declaration) {
-            XCTFail("Expected declaration to not be referenced: \(declaration)", file: file, line: line)
+        } else {
+            guard let declaration = materialize(description, file: file, line: line) else { return }
+
+            if !Self.results.unusedDeclarations.contains(declaration) {
+                XCTFail("Expected declaration to not be referenced: \(declaration)", file: file, line: line)
+            }
         }
     }
 
