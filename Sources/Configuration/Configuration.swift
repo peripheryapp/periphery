@@ -329,13 +329,13 @@ extension Setting where Value == [String] {
 
 // MARK: - Yaml Encoding
 
-extension OutputFormat: ScalarRepresentable {
+extension OutputFormat: Yams.ScalarRepresentable {
     public func represented() -> Node.Scalar {
         rawValue.represented()
     }
 }
 
-extension FilePath: ScalarRepresentable {
+extension FilePath: Yams.ScalarRepresentable {
     public func represented() -> Node.Scalar {
         string.represented()
     }
