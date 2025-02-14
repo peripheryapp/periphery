@@ -68,7 +68,7 @@ public extension FilePath {
     }
 }
 
-extension FilePath: Comparable {
+extension FilePath: Swift.Comparable {
     public static func < (lhs: FilePath, rhs: FilePath) -> Bool {
         lhs.lexicallyNormalized().string < rhs.lexicallyNormalized().string
     }
