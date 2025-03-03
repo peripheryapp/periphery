@@ -10,7 +10,8 @@
 
 ##### Bug Fixes
 
-- None.
+- Updated XcodeProj dependency provides support for Xcode 16's new project format.
+- Fix retain comment commands for imports.
 
 ## 3.0.1 (2024-12-28)
 
