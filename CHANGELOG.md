@@ -12,7 +12,21 @@
 
 - None.
 
-## 3.0.2 (2023-03-03)
+## 3.0.3 (2025-03-15)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- Rebuilt defective release binary.
+
+## 3.0.2 (2025-03-03)
 
 ##### Breaking
 
