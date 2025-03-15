@@ -36,14 +36,14 @@ jobs:
         xcode: ["16.2", "16.1", "16.0", "15.4"]
         include:
           - xcode: "16.2"
-            macos: macos-15
+            image: macos-15
           - xcode: "16.1"
-            macos: macos-15
+            image: macos-15
           - xcode: "16.0"
-            macos: macos-15
+            image: macos-15
           - xcode: "15.4"
-            macos: macos-14
-    runs-on: ${{ matrix.macos }}
+            image: macos-14
+    runs-on: ${{ matrix.image }}
     name: macOS
     steps:
     - uses: actions/checkout@master
@@ -77,13 +77,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ["6.0", "5.10"]
+        swift: ["6.1-nightly", "6.0", "5.10"]
         include:
+          - swift: "6.1-nightly"
+            container: "swiftlang/swift:nightly-6.1-jammy"
+            image: ubuntu-latest
           - swift: "6.0"
             container: "swift:6.0"
+            image: ubuntu-latest
           - swift: "5.10"
             container: "swift:5.10"
-    runs-on: ubuntu-20.04
+            image: ubuntu-22.04
+    runs-on: ${{ matrix.image }}
     container: ${{ matrix.container }}
     name: Linux
     steps:
