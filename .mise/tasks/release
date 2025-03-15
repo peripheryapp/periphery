@@ -9,7 +9,7 @@ confirm () {
   green "$1 (y/n): "
   read answer
 
-  if [ $answer != "y" ]
+  if [ "$answer" != "y" ]
   then
     exit 0
   fi
@@ -51,6 +51,11 @@ if [ ! -f .release/periphery ]; then
   echo "ERROR: Missing release binary?"
   exit 1
 fi
+
+echo "Testing release binary..."
+for i in {1..3}; do
+    .release/periphery scan --strict
+done
 
 cp LICENSE.md MODULE.bazel BUILD.bazel .release/
 cp -R bazel Sources .release/
