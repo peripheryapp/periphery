@@ -43,7 +43,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             inheritanceClause: node.inheritanceClause,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
@@ -56,7 +56,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             inheritanceClause: node.inheritanceClause,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
@@ -69,7 +69,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             inheritanceClause: node.inheritanceClause,
             genericWhereClause: node.genericWhereClause,
             at: node.name.positionAfterSkippingLeadingTrivia
@@ -80,7 +80,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             inheritanceClause: node.inheritanceClause,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
@@ -93,7 +93,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             inheritanceClause: node.inheritanceClause,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
@@ -128,7 +128,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             inheritanceClause: node.inheritanceClause,
             genericWhereClause: node.genericWhereClause,
             consumeCapitalSelfFunctionCalls: true,
@@ -140,7 +140,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             parameterClause: node.signature.parameterClause,
             returnClause: node.signature.returnClause,
             genericParameterClause: node.genericParameterClause,
@@ -153,7 +153,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             parameterClause: node.signature.parameterClause,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
@@ -165,7 +165,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             at: node.deinitKeyword.positionAfterSkippingLeadingTrivia
         )
     }
@@ -174,7 +174,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             parameterClause: node.parameterClause,
             returnClause: node.returnClause,
             genericParameterClause: node.genericParameterClause,
@@ -192,7 +192,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
                 parse(
                     modifiers: node.modifiers,
                     attributes: node.attributes,
-                    trivia: node.leadingTrivia,
+                    trivia: node.commentCommandTrivia,
                     variableType: binding.typeAnnotation?.type,
                     closureParameterClause: closureParameters,
                     returnClause: closureSignature?.returnClause,
@@ -210,7 +210,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
                 parse(
                     modifiers: node.modifiers,
                     attributes: node.attributes,
-                    trivia: node.leadingTrivia,
+                    trivia: node.leadingTrivia.merging(node.trailingTrivia),
                     at: binding.positionAfterSkippingLeadingTrivia
                 )
             }
@@ -237,7 +237,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
                 parse(
                     modifiers: node.modifiers,
                     attributes: node.attributes,
-                    trivia: node.leadingTrivia,
+                    trivia: node.commentCommandTrivia,
                     variableType: type?.type,
                     variableInitFunctionCallExpr: initializer?.expression.as(FunctionCallExprSyntax.self),
                     at: element.positionAfterSkippingLeadingTrivia
@@ -250,7 +250,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.leadingTrivia.merging(node.trailingTrivia),
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
             typeInitializerClause: node.initializer,
@@ -262,7 +262,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.leadingTrivia.merging(node.trailingTrivia),
             inheritanceClause: node.inheritanceClause,
             genericWhereClause: node.genericWhereClause,
             typeInitializerClause: node.initializer,
@@ -274,7 +274,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: nil,
             attributes: nil,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             at: node.name.positionAfterSkippingLeadingTrivia
         )
     }
@@ -283,7 +283,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         parse(
             modifiers: node.modifiers,
             attributes: node.attributes,
-            trivia: node.leadingTrivia,
+            trivia: node.commentCommandTrivia,
             at: node.name.positionAfterSkippingLeadingTrivia
         )
     }
@@ -517,3 +517,64 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             }
     }
 }
+
+// MARK: - Inline Comment Commands
+
+private extension SyntaxProtocol {
+    /// All trivia where inline comment commands can be found.
+    ///
+    /// Matches uses like these:
+    ///
+    /// ```
+    /// // periphery:ignore
+    /// Foo {
+    /// }
+    /// ```
+    ///
+    /// ```
+    /// Foo { // periphery:ignore
+    /// }
+    /// ```
+    ///
+    /// ```
+    /// Foo {} // periphery:ignore
+    /// ```
+    var commentCommandTrivia: Trivia {
+        var commandTrivia = leadingTrivia
+
+        if let hasMemberBlock = self as? HasMemberBlock {
+            commandTrivia = commandTrivia
+                .merging(hasMemberBlock.memberBlock.leftBrace.trailingTrivia)
+                .merging(hasMemberBlock.memberBlock.rightBrace.trailingTrivia)
+        }
+
+        if let hasCodeBody = self as? HasCodeBody, let body = hasCodeBody.body {
+            commandTrivia = commandTrivia
+                .merging(body.leftBrace.trailingTrivia)
+                .merging(body.rightBrace.trailingTrivia)
+        }
+
+        return commandTrivia
+    }
+}
+
+/// Identifies types with a MemberBlockSyntax child
+private protocol HasMemberBlock {
+    var memberBlock: MemberBlockSyntax { get }
+}
+
+extension ActorDeclSyntax: HasMemberBlock {}
+extension ClassDeclSyntax: HasMemberBlock {}
+extension ProtocolDeclSyntax: HasMemberBlock {}
+extension ExtensionDeclSyntax: HasMemberBlock {}
+extension StructDeclSyntax: HasMemberBlock {}
+extension EnumDeclSyntax: HasMemberBlock {}
+
+/// Identifies types with a CodeBlockSyntax child
+private protocol HasCodeBody {
+    var body: CodeBlockSyntax? { get }
+}
+
+extension FunctionDeclSyntax: HasCodeBody {}
+extension InitializerDeclSyntax: HasCodeBody {}
+extension DeinitializerDeclSyntax: HasCodeBody {}

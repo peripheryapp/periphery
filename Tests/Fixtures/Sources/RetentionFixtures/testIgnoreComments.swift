@@ -67,3 +67,49 @@ public class FixtureClass213: Fixture114 {
 public protocol Fixture205Protocol {}
 // periphery:ignore
 public class Fixture205: Fixture205Protocol {}
+
+// MARK: - Inline comment commands
+
+public class Fixture300Class { // periphery:ignore
+}
+
+public class Fixture301Class {} // periphery:ignore
+
+public protocol Fixture302Protocol { // periphery:ignore
+}
+
+public protocol Fixture303Protocol {} // periphery:ignore
+
+public struct Fixture304Struct { // periphery:ignore
+}
+
+public struct Fixture305Struct {} // periphery:ignore
+
+public protocol Fixture306Protocol {}
+public extension Fixture306Protocol { // periphery:ignore
+    func foo() {}
+}
+
+public enum Fixture307Enum { // periphery:ignore
+    case foo
+}
+
+public class Fixture308Class {
+    var storage: String
+
+    public init() {
+        storage = "noValue"
+    }
+
+    public init(string: String) { // periphery:ignore
+        storage = string
+    }
+
+    public func someFunc() { // periphery:ignore
+        storage = "someFunc"
+    }
+}
+
+public class Fixture309Class { // periphery:ignore
+    public let reference = Fixture308Class()
+}

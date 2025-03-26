@@ -938,6 +938,30 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.protocol("Fixture205Protocol"))
             assertNotRedundantProtocol("Fixture205Protocol")
         }
+
+        // inline comment command tests
+        analyze(retainPublic: false) {
+            assertReferenced(.class("Fixture300Class"))
+            assertReferenced(.class("Fixture301Class"))
+
+            assertReferenced(.protocol("Fixture302Protocol"))
+            assertNotRedundantProtocol("Fixture302Protocol")
+            assertReferenced(.protocol("Fixture303Protocol"))
+            assertNotRedundantProtocol("Fixture303Protocol")
+
+            assertReferenced(.struct("Fixture304Struct"))
+            assertReferenced(.struct("Fixture305Struct"))
+
+            assertReferenced(.extensionProtocol("Fixture306Protocol"))
+            assertNotRedundantProtocol("Fixture306Protocol")
+
+            assertReferenced(.enum("Fixture307Enum"))
+
+            assertReferenced(.class("Fixture308Class")) {
+                self.assertReferenced(.functionMethodInstance("someFunc()"))
+                self.assertReferenced(.functionConstructor("init(string:)"))
+            }
+        }
     }
 
     func testIgnoreAllComment() {
