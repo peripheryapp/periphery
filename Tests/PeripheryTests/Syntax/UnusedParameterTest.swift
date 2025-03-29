@@ -123,6 +123,11 @@ final class UnusedParameterTest: XCTestCase {
         assertUsed("param", in: "init(param:)")
     }
 
+    func testUnavailableFunction() {
+        analyze()
+        assertUsed("param", in: "myFunc(param:)")
+    }
+
     func testParameterPosition() {
         analyze()
         let function = functions.first!
