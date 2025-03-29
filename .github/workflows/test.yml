@@ -25,6 +25,11 @@ jobs:
       steps:
         - uses: actions/checkout@master
         - uses: jdx/mise-action@v2
+        - uses: bazel-contrib/setup-bazel@0.14.0
+          with:
+            bazelisk-cache: true
+            disk-cache: ${{ github.workflow }}
+            repository-cache: true
         - name: Check generated rules
           run: mise r gen-bazel-rules && git diff --quiet --exit-code
         - name: Scan
