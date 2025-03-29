@@ -467,7 +467,9 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         guard let clause else { return [] }
 
         return clause.arguments.reduce(into: .init()) { result, param in
-            result.formUnion(typeSyntaxInspector.typeLocations(for: param.argument))
+            if case let .type(argumentType) = param.argument {
+                result.formUnion(typeSyntaxInspector.typeLocations(for: argumentType))
+            }
         }
     }
 

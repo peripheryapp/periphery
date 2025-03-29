@@ -57,8 +57,17 @@ public final class XcodeTarget {
     }
 
     private func identifyInfoPlistFiles() throws {
-        let plistFiles = target.buildConfigurationList?.buildConfigurations.compactMap {
-            $0.buildSettings["INFOPLIST_FILE"] as? String
+        let plistFiles = target.buildConfigurationList?.buildConfigurations.flatMap {
+            if let setting = $0.buildSettings["INFOPLIST_FILE"] {
+                switch setting {
+                case let .string(value):
+                    return [value]
+                case let .array(values):
+                    return values
+                }
+            }
+
+            return []
         } ?? []
         files[.infoPlist] = plistFiles.mapSet { parseInfoPlistSetting($0) }
     }
