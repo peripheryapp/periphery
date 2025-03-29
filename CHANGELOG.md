@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Unused parameter warnings are suppressed in `@available(*, unavailable)` functions.
 
 ## 3.0.3 (2025-03-15)
 

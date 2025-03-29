@@ -36,7 +36,7 @@ public final class UnusedParameterAnalyzer {
     // MARK: - Private
 
     private func unusedParams(in function: Function) -> [Parameter] {
-        guard !function.attributes.contains("IBAction") else { return [] }
+        guard !function.attributes.contains(where: { $0.name == "IBAction" }) else { return [] }
         return function.parameters.filter { !isParam($0, usedIn: function) }
     }
 
@@ -54,7 +54,15 @@ public final class UnusedParameterAnalyzer {
             return true
         }
 
+        if isFunctionUnavailable(function) {
+            return true
+        }
+
         return isParam(param, usedIn: function.items)
+    }
+
+    private func isFunctionUnavailable(_ function: Function) -> Bool {
+        function.attributes.contains { $0.name == "available" && $0.arguments == "*, unavailable" }
     }
 
     private func isFunctionFatalErrorOnly(_ function: Function) -> Bool {
