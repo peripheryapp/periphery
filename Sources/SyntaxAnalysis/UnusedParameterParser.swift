@@ -4,11 +4,11 @@ import SwiftParser
 import SwiftSyntax
 import SystemPackage
 
-public protocol Item: AnyObject {
+public protocol Item {
     var items: [Item] { get }
 }
 
-public final class Function: Item, Hashable {
+public struct Function: Item, Hashable {
     public static func == (lhs: Function, rhs: Function) -> Bool {
         lhs.location == rhs.location
     }
@@ -23,28 +23,15 @@ public final class Function: Item, Hashable {
     public let items: [Item]
     public let parameters: [Parameter]
     public let genericParameters: [String]
-    public let attributes: [String]
-
-    init(
-        name: String,
-        fullName: String,
-        location: Location,
-        items: [Item],
-        parameters: [Parameter],
-        genericParameters: [String],
-        attributes: [String]
-    ) {
-        self.name = name
-        self.fullName = fullName
-        self.location = location
-        self.items = items
-        self.parameters = parameters
-        self.genericParameters = genericParameters
-        self.attributes = attributes
-    }
+    public let attributes: [Attribute]
 }
 
-public final class Parameter: Item, Hashable {
+public struct Attribute {
+    let name: String
+    let arguments: String?
+}
+
+public struct Parameter: Item, Hashable {
     public static func == (lhs: Parameter, rhs: Parameter) -> Bool {
         lhs.location == rhs.location
     }
@@ -58,67 +45,39 @@ public final class Parameter: Item, Hashable {
     let metatype: String?
     let location: Location
     public let items: [Item] = []
-    var function: Function?
 
     public var name: String {
         secondName ?? firstName ?? ""
     }
 
     public func makeDeclaration(withParent parent: Declaration) -> Declaration {
-        let functionName = function?.fullName ?? "func()"
         let parentUsrs = parent.usrs.joined(separator: "-")
-        let usr = "param-\(name)-\(functionName)-\(parentUsrs)"
+        let usr = "param-\(name)-\(parent.name ?? "unknown-function")-\(parentUsrs)"
         let decl = Declaration(kind: .varParameter, usrs: [usr], location: location)
         decl.name = name
         decl.parent = parent
         return decl
     }
-
-    init(firstName: String?, secondName: String?, metatype: String?, location: Location) {
-        self.firstName = firstName
-        self.secondName = secondName
-        self.metatype = metatype
-        self.location = location
-    }
 }
 
-final class Variable: Item {
+struct Variable: Item {
     let names: [String]
     let items: [Item]
-
-    init(names: [String], items: [Item]) {
-        self.names = names
-        self.items = items
-    }
 }
 
-final class Closure: Item {
+struct Closure: Item {
     let params: [String]
     let items: [Item]
-
-    init(params: [String], items: [Item]) {
-        self.params = params
-        self.items = items
-    }
 }
 
-final class Identifier: Item {
+struct Identifier: Item {
     let name: String
     let items: [Item] = []
-
-    init(name: String) {
-        self.name = name
-    }
 }
 
-final class GenericItem: Item {
+struct GenericItem: Item {
     let node: Syntax
     let items: [Item]
-
-    init(node: Syntax, items: [Item]) {
-        self.node = node
-        self.items = items
-    }
 }
 
 struct UnusedParameterParser {
@@ -338,20 +297,28 @@ struct UnusedParameterParser {
         let items = parse(node: body, collector)?.items ?? []
         let fullName = buildFullName(for: name, with: params)
         let genericParamNames = genericParams?.parameters.map(\.name.text) ?? []
-        let attributeNames = attributes?.children(viewMode: .sourceAccurate).compactMap { AttributeSyntax($0)?.attributeName.trimmedDescription } ?? []
+        let parsedAttributes: [Attribute] = attributes?
+            .compactMap { $0 }
+            .compactMap {
+                if case let .attribute(attr) = $0 {
+                    return Attribute(
+                        name: attr.attributeName.trimmedDescription,
+                        arguments: attr.arguments?.trimmedDescription
+                    )
+                }
 
-        let function = Function(
+                return nil
+            } ?? []
+
+        return Function(
             name: name,
             fullName: fullName,
             location: sourceLocation(of: position),
             items: items,
             parameters: params,
             genericParameters: genericParamNames,
-            attributes: attributeNames
+            attributes: parsedAttributes
         )
-
-        params.forEach { $0.function = function }
-        return function
     }
 
     private func buildFullName(for function: String, with params: [Parameter]) -> String {
