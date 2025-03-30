@@ -117,10 +117,10 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
         var options: [String] = []
 
         if let project = configuration.project {
-            options.append("--project \"\(project)\"")
+            options.append("--project \"\(project.string.withEscapedQuotes)\"")
         }
 
-        options.append("--schemes " + configuration.schemes.map { "\"\($0)\"" }.joined(separator: ","))
+        options.append("--schemes " + configuration.schemes.map { "\"\($0.withEscapedQuotes)\"" }.joined(separator: ","))
 
         if configuration.retainObjcAccessible {
             options.append("--retain-objc-accessible")
