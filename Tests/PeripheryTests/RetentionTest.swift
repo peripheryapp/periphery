@@ -1089,6 +1089,55 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testMainActorAnnotation() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass132")) {
+                self.assertReferenced(.functionConstructor("init(value:)"))
+            }
+            assertReferenced(.class("FixtureClass133"))
+        }
+    }
+
+    // https://github.com/apple/swift/issues/64686
+    // https://github.com/peripheryapp/periphery/issues/264
+    func testSelfReferencedConstructor() {
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct3")) {
+                self.assertReferenced(.functionConstructor("init(value:)"))
+            }
+            assertReferenced(.struct("FixtureStruct4")) {
+                self.assertReferenced(.functionConstructor("init(value:)"))
+            }
+            assertReferenced(.struct("FixtureStruct5")) {
+                self.assertNotReferenced(.functionConstructor("init(value:)"))
+            }
+        }
+    }
+
+    // https://github.com/apple/swift/issues/56541
+    func testStaticMemberUsedAsSubscriptKey() {
+        analyze(retainPublic: true) {
+            assertReferenced(.enum("FixtureEnum128")) {
+                self.assertReferenced(.varStatic("someVar"))
+            }
+        }
+    }
+
+    func testRetainsDynamicReplacement() {
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureStruct8")) {
+                self.assertReferenced(.functionMethodInstance("originalMethod()"))
+                self.assertReferenced(.functionMethodInstance("replacementMethod()"))
+
+                self.assertReferenced(.varInstance("originalProperty"))
+                self.assertReferenced(.varInstance("replacementProperty"))
+
+                self.assertReferenced(.functionSubscript("subscript(original:)"))
+                self.assertReferenced(.functionSubscript("subscript(replacement:)"))
+            }
+        }
+    }
+
     // MARK: - Swift Testing
 
     #if canImport(Testing)
@@ -1609,40 +1658,6 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 self.assertReferenced(.functionMethodInstance("unimplementedFunc(param:)")) {
                     self.assertReferenced(.varParameter("param"))
                 }
-            }
-        }
-    }
-
-    func testMainActorAnnotation() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass132")) {
-                self.assertReferenced(.functionConstructor("init(value:)"))
-            }
-            assertReferenced(.class("FixtureClass133"))
-        }
-    }
-
-    // https://github.com/apple/swift/issues/64686
-    // https://github.com/peripheryapp/periphery/issues/264
-    func testSelfReferencedConstructor() {
-        analyze(retainPublic: true) {
-            assertReferenced(.struct("FixtureStruct3")) {
-                self.assertReferenced(.functionConstructor("init(value:)"))
-            }
-            assertReferenced(.struct("FixtureStruct4")) {
-                self.assertReferenced(.functionConstructor("init(value:)"))
-            }
-            assertReferenced(.struct("FixtureStruct5")) {
-                self.assertNotReferenced(.functionConstructor("init(value:)"))
-            }
-        }
-    }
-
-    // https://github.com/apple/swift/issues/56541
-    func testStaticMemberUsedAsSubscriptKey() {
-        analyze(retainPublic: true) {
-            assertReferenced(.enum("FixtureEnum128")) {
-                self.assertReferenced(.varStatic("someVar"))
             }
         }
     }
