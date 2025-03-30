@@ -36,3 +36,4 @@ disabled_rules:
   - non_optional_string_data_conversion # https://github.com/realm/SwiftLint/issues/5263#issuecomment-2115182747
   - balanced_xctest_lifecycle
   - todo
+  - for_where

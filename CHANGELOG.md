@@ -12,6 +12,7 @@
 
 - Unused parameter warnings are suppressed in `@available(*, unavailable)` functions.
 - Fix handling of Xcode projects with single and double quotes in their path and scheme names.
+- `@_dynamicReplacement` members are now retained.
 
 ## 3.0.3 (2025-03-15)
 
