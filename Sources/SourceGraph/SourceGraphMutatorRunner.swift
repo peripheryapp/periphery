@@ -61,6 +61,8 @@ public final class SourceGraphMutatorRunner {
         self.logger = logger.contextualized(with: "mutator:run")
         self.configuration = configuration
         self.swiftVersion = swiftVersion
+
+        SourceGraphDebugger(graph: graph).describeGraph()
     }
 
     public func perform() throws {

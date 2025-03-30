@@ -1,5 +1,6 @@
-FROM swift:latest
+FROM swiftlang/swift:nightly-6.1-jammy
 WORKDIR /workspace
 COPY . /workspace
 RUN swift build --product periphery
-ENTRYPOINT [".build/debug/periphery"]
+WORKDIR /workspace/linux-bug
+ENTRYPOINT ["../.build/debug/periphery"]
