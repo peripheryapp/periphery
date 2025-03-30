@@ -32,4 +32,8 @@ public extension String {
     @inlinable var djb2Hex: String {
         String(format: "%02x", djb2)
     }
+
+    @inlinable var withEscapedQuotes: String {
+        replacingOccurrences(of: "\"", with: "\\\"")
+    }
 }

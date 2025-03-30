@@ -35,8 +35,8 @@ public final class Xcodebuild {
     @discardableResult
     public func build(project: XcodeProjectlike, scheme: String, allSchemes: [String], additionalArguments: [String] = []) throws -> String {
         let args = try [
-            "-\(project.type)", "'\(project.path.lexicallyNormalized().string)'",
-            "-scheme", "'\(scheme)'",
+            "-\(project.type)", "\"\(project.path.lexicallyNormalized().string.withEscapedQuotes)\"",
+            "-scheme", "\"\(scheme.withEscapedQuotes)\"",
             "-parallelizeTargets",
             "-derivedDataPath", "'\(derivedDataPath(for: project, schemes: allSchemes).string)'",
             "-quiet",
@@ -79,7 +79,7 @@ public final class Xcodebuild {
 
     func schemes(type: String, path: String, additionalArguments: [String]) throws -> Set<String> {
         let args = [
-            "-\(type)", "'\(path)'",
+            "-\(type)", "\"\(path.withEscapedQuotes)\"",
             "-list",
             "-json",
         ]
