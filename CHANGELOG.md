@@ -6,7 +6,12 @@
 
 ##### Enhancements
 
-- None.
+- Comment commands can now be placed inline with declarations:
+  ```swift
+  class Foo { // periphery:ignore
+    ...
+  }
+  ```
 
 ##### Bug Fixes
 
