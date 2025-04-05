@@ -102,10 +102,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ["nightly", "6.1", "6.0"]
+        swift: ["nightly-main", "6.1", "6.0"]
         include:
-          - swift: "nightly"
-            container: "swiftlang/swift:nightly"
+          - swift: "nightly-main"
+            container: "swiftlang/swift:nightly-main"
             continueOnError: true
           - swift: "6.1"
             container: "swift:6.1"
