@@ -31,7 +31,10 @@ struct TypeSyntaxInspector {
     func types(for typeSyntax: TypeSyntax) -> Set<TokenSyntax> {
         if let identifierType = typeSyntax.as(IdentifierTypeSyntax.self) {
             // Simple type.
-            var result = identifierType.genericArgumentClause?.arguments.flatMapSet { types(for: $0.argument) } ?? []
+            var result: Set<TokenSyntax> = identifierType.genericArgumentClause?.arguments.flatMapSet {
+                guard case let .type(argumentType) = $0.argument else { return [] }
+                return types(for: argumentType)
+            } ?? []
             return result.inserting(identifierType.name)
         } else if let optionalType = typeSyntax.as(OptionalTypeSyntax.self) {
             // Optional type.
@@ -39,7 +42,10 @@ struct TypeSyntaxInspector {
         } else if let memberType = typeSyntax.as(MemberTypeSyntax.self) {
             // Member type.
             return types(for: memberType.baseType)
-                .union(memberType.genericArgumentClause?.arguments.flatMapSet { types(for: $0.argument) } ?? [])
+                .union(memberType.genericArgumentClause?.arguments.flatMapSet {
+                    guard case let .type(argumentType) = $0.argument else { return [] }
+                    return types(for: argumentType)
+                } ?? [])
                 .union([memberType.name])
         } else if let tuple = typeSyntax.as(TupleTypeSyntax.self) {
             // Tuple type.
