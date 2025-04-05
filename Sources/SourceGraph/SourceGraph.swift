@@ -22,7 +22,7 @@ public final class SourceGraph {
     public private(set) var extensions: [Declaration: Set<Declaration>] = [:]
 
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
-    private var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
+    private var allDeclarationsByUsr: [String: Declaration] = [:]
     private var moduleToExportingModules: [String: Set<String>] = [:]
 
     private let configuration: Configuration
@@ -52,8 +52,8 @@ public final class SourceGraph {
         kinds.flatMapSet { allDeclarationsByKind[$0, default: []] }
     }
 
-    public func explicitDeclaration(withUsr usr: String) -> Declaration? {
-        allExplicitDeclarationsByUsr[usr]
+    public func declaration(withUsr usr: String) -> Declaration? {
+        allDeclarationsByUsr[usr]
     }
 
     public func references(to decl: Declaration) -> Set<Reference> {
@@ -103,10 +103,7 @@ public final class SourceGraph {
     public func add(_ declaration: Declaration) {
         allDeclarations.insert(declaration)
         allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
-
-        if !declaration.isImplicit {
-            declaration.usrs.forEach { allExplicitDeclarationsByUsr[$0] = declaration }
-        }
+        declaration.usrs.forEach { allDeclarationsByUsr[$0] = declaration }
     }
 
     public func add(_ declarations: Set<Declaration>) {
@@ -114,10 +111,7 @@ public final class SourceGraph {
 
         for declaration in declarations {
             allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
-
-            if !declaration.isImplicit {
-                declaration.usrs.forEach { allExplicitDeclarationsByUsr[$0] = declaration }
-            }
+            declaration.usrs.forEach { allDeclarationsByUsr[$0] = declaration }
         }
     }
 
@@ -128,7 +122,7 @@ public final class SourceGraph {
         rootDeclarations.remove(declaration)
         usedDeclarations.remove(declaration)
         assignOnlyProperties.remove(declaration)
-        declaration.usrs.forEach { allExplicitDeclarationsByUsr.removeValue(forKey: $0) }
+        declaration.usrs.forEach { allDeclarationsByUsr.removeValue(forKey: $0) }
     }
 
     public func add(_ reference: Reference) {
@@ -175,7 +169,7 @@ public final class SourceGraph {
     }
 
     func isExternal(_ reference: Reference) -> Bool {
-        explicitDeclaration(withUsr: reference.usr) == nil
+        declaration(withUsr: reference.usr) == nil
     }
 
     public func addIndexedSourceFile(_ file: SourceFile) {
@@ -223,7 +217,7 @@ public final class SourceGraph {
         for reference in decl.immediateInheritedTypeReferences {
             references.insert(reference)
 
-            if let inheritedDecl = explicitDeclaration(withUsr: reference.usr) {
+            if let inheritedDecl = declaration(withUsr: reference.usr) {
                 // Detect circular references. The following is valid Swift.
                 // class SomeClass {}
                 // extension SomeClass: SomeProtocol {}
@@ -237,14 +231,14 @@ public final class SourceGraph {
     }
 
     func inheritedDeclarations(of decl: Declaration) -> [Declaration] {
-        inheritedTypeReferences(of: decl).compactMap { explicitDeclaration(withUsr: $0.usr) }
+        inheritedTypeReferences(of: decl).compactMap { declaration(withUsr: $0.usr) }
     }
 
     func immediateSubclasses(of decl: Declaration) -> Set<Declaration> {
         references(to: decl)
             .filter { $0.isRelated && $0.kind == .class }
             .flatMap { $0.parent?.usrs ?? [] }
-            .compactMapSet { explicitDeclaration(withUsr: $0) }
+            .compactMapSet { declaration(withUsr: $0) }
     }
 
     func subclasses(of decl: Declaration) -> Set<Declaration> {
@@ -264,7 +258,7 @@ public final class SourceGraph {
     func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
         guard let extendedReference = try extendedDeclarationReference(forExtension: extensionDeclaration) else { return nil }
 
-        if let extendedDeclaration = allExplicitDeclarationsByUsr[extendedReference.usr] {
+        if let extendedDeclaration = allDeclarationsByUsr[extendedReference.usr] {
             return extendedDeclaration
         }
 
@@ -293,7 +287,7 @@ public final class SourceGraph {
 
     func allOverrideDeclarations(fromBase decl: Declaration) -> Set<Declaration> {
         decl.relatedEquivalentReferences
-            .compactMap { explicitDeclaration(withUsr: $0.usr) }
+            .compactMap { declaration(withUsr: $0.usr) }
             .reduce(into: .init()) { result, decl in
                 guard decl.isOverride else { return }
                 result.insert(decl)

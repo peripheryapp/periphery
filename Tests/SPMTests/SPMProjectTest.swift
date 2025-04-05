@@ -17,4 +17,8 @@ final class SPMProjectTest: SPMSourceGraphTestCase {
         assertReferenced(.class("PublicCrossModuleReferenced"))
         assertNotReferenced(.class("PublicCrossModuleNotReferenced"))
     }
+
+    func testMacroImport() {
+        assertReferenced(.module("SPMProjectKit"))
+    }
 }
