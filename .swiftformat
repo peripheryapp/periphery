@@ -1,4 +1,4 @@
---swiftversion 5.10
+--swiftversion 6.0
 
 --exclude Tests/Fixtures/
 --exclude Tests/AccessibilityTests/AccessibilityProject/
