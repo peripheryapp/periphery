@@ -83,7 +83,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
         let schemes = try filter(
             project.schemes(additionalArguments: configuration.xcodeListArguments),
             project
-        ).map { $0 }.sorted()
+        ).map(\.self).sorted()
 
         print(colorize("\nSelect the schemes to build:", .bold))
         print("Periphery will scan all files built by your chosen schemes.")

@@ -219,8 +219,8 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
 
     func visitVariableTupleBinding(node: VariableDeclSyntax, pattern: TuplePatternSyntax, typeTuple: TupleTypeElementListSyntax?, initializerTuple: LabeledExprListSyntax?) {
         let elements = Array(pattern.elements)
-        let types: [TupleTypeElementSyntax?] = typeTuple?.map { $0 } ?? Array(repeating: nil, count: elements.count)
-        let initializers: [LabeledExprSyntax?] = initializerTuple?.map { $0 } ?? Array(repeating: nil, count: elements.count)
+        let types: [TupleTypeElementSyntax?] = typeTuple?.map(\.self) ?? Array(repeating: nil, count: elements.count)
+        let initializers: [LabeledExprSyntax?] = initializerTuple?.map(\.self) ?? Array(repeating: nil, count: elements.count)
 
         for (element, (type, initializer)) in zip(elements, zip(types, initializers)) {
             if let elementTuplePattern = element.pattern.as(TuplePatternSyntax.self) {

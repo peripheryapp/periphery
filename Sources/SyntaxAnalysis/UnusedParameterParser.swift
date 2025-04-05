@@ -298,7 +298,7 @@ struct UnusedParameterParser {
         let fullName = buildFullName(for: name, with: params)
         let genericParamNames = genericParams?.parameters.map(\.name.text) ?? []
         let parsedAttributes: [Attribute] = attributes?
-            .compactMap { $0 }
+            .compactMap(\.self)
             .compactMap {
                 if case let .attribute(attr) = $0 {
                     return Attribute(
@@ -323,7 +323,7 @@ struct UnusedParameterParser {
 
     private func buildFullName(for function: String, with params: [Parameter]) -> String {
         let strParams = params.map {
-            [$0.firstName, $0.secondName].compactMap { $0 }.joined(separator: " ")
+            [$0.firstName, $0.secondName].compactMap(\.self).joined(separator: " ")
         }.joined(separator: ":")
         return "\(function)(\(strParams):)"
     }
