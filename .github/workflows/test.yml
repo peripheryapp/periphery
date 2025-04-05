@@ -57,7 +57,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app; swift -version
+      run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
     - name: Install Swiftly
       if: ${{ matrix.swiftly }}
       run: |
@@ -75,8 +75,9 @@ jobs:
     - name: Get Swift Version
       id: get-swift-version
       run: |
-        swift -version
-        echo "::set-output name=version::$(swift -version | head -n 1 | sed s/,// )"
+        swift_version=$(swift -version | head -n 1 | sed s/,//)
+        echo "$swift_version"
+        echo "SWIFT_VERSION=${swift_version}" >> "$GITHUB_ENV"
       shell: bash
     - name: Cache resolved dependencies
       id: cache-resolved-dependencies
@@ -85,9 +86,9 @@ jobs:
         path: |
           .build
           Package.resolved
-        key: ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
+        key: ${{ runner.os }}-${{ matrix.xcode }}-${{ env.SWIFT_VERSION }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-
+          ${{ runner.os }}-${{ matrix.xcode }}-${{ env.SWIFT_VERSION }}-${{ env.cache_version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}
@@ -119,8 +120,9 @@ jobs:
     - name: Get Swift Version
       id: get-swift-version
       run: |
-        swift -version
-        echo "::set-output name=version::$(swift -version | head -n 1 | sed s/,// )"
+        swift_version=$(swift -version | head -n 1 | sed s/,//)
+        echo "$swift_version"
+        echo "SWIFT_VERSION=${swift_version}" >> "$GITHUB_ENV"
       shell: bash
     - name: Cache resolved dependencies
       id: cache-resolved-dependencies
@@ -129,9 +131,9 @@ jobs:
         path: |
           .build
           Package.resolved
-        key: ${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
+        key: ${{ runner.os }}-${{ env.SWIFT_VERSION }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-
+          ${{ runner.os }}-${{ env.SWIFT_VERSION }}-${{ env.cache_version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}
