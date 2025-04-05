@@ -2,7 +2,7 @@
 
 ##### Breaking
 
-- None.
+- Assign-only property analysis is disabled with Swift 6.1 due to a Swift bug: https://github.com/swiftlang/swift/issues/80394.
 
 ##### Enhancements
 
