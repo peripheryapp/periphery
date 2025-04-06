@@ -59,7 +59,8 @@
     "https://bcr.bazel.build/modules/pathkit/1.0.1/MODULE.bazel": "fae93989a10f8d90d5ac02453e6632ae7f71111687862c01f468858cef40bb5e",
     "https://bcr.bazel.build/modules/pathkit/1.0.1/source.json": "3215e6b4b08f96f34024eaf186d247744ca255925d7ee3f50cf94f7cf885696b",
     "https://bcr.bazel.build/modules/platforms/0.0.10/MODULE.bazel": "8cb8efaf200bdeb2150d93e162c40f388529a25852b332cec879373771e48ed5",
-    "https://bcr.bazel.build/modules/platforms/0.0.10/source.json": "f22828ff4cf021a6b577f1bf6341cb9dcd7965092a439f64fc1bb3b7a5ae4bd5",
+    "https://bcr.bazel.build/modules/platforms/0.0.11/MODULE.bazel": "0daefc49732e227caa8bfa834d65dc52e8cc18a2faf80df25e8caea151a9413f",
+    "https://bcr.bazel.build/modules/platforms/0.0.11/source.json": "f7e188b79ebedebfe75e9e1d098b8845226c7992b307e28e1496f23112e8fc29",
     "https://bcr.bazel.build/modules/platforms/0.0.4/MODULE.bazel": "9b328e31ee156f53f3c416a64f8491f7eb731742655a47c9eec4703a71644aee",
     "https://bcr.bazel.build/modules/platforms/0.0.5/MODULE.bazel": "5733b54ea419d5eaf7997054bb55f6a1d0b5ff8aedf0176fef9eea44f3acda37",
     "https://bcr.bazel.build/modules/platforms/0.0.6/MODULE.bazel": "ad6eeef431dc52aefd2d77ed20a4b353f8ebf0f4ecdd26a807d2da5aa8cd0615",
@@ -175,6 +176,22 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
+    "//bazel:generated.bzl%generated": {
+      "general": {
+        "bzlTransitiveDigest": "nMR2FBcoRPImVocN9DNOnm2NQWyTbJPu7SHJgAXsLFw=",
+        "usagesDigest": "4V0SQiDEBMW4aAeaNSRW2lPd5NPkALfgBsR7pBFNlPU=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "periphery_generated": {
+            "repoRuleId": "@@//bazel:generated.bzl%generated_repo",
+            "attributes": {}
+          }
+        },
+        "recordedRepoMappingEntries": []
+      }
+    },
     "@@apple_support+//crosstool:setup.bzl%apple_cc_configure_extension": {
       "general": {
         "bzlTransitiveDigest": "Ync9nL0AbHC6ondeEY7fBjBjLxojTsiXcJh65ZDTRlA=",
@@ -343,22 +360,6 @@
             "bazel_tools"
           ]
         ]
-      }
-    },
-    "@@platforms//host:extension.bzl%host_platform": {
-      "general": {
-        "bzlTransitiveDigest": "xelQcPZH8+tmuOHVjL9vDxMnnQNMlwj0SlvgoqBkm4U=",
-        "usagesDigest": "SeQiIN/f8/Qt9vYQk7qcXp4I4wJeEC0RnQDiaaJ4tb8=",
-        "recordedFileInputs": {},
-        "recordedDirentsInputs": {},
-        "envVariables": {},
-        "generatedRepoSpecs": {
-          "host_platform": {
-            "repoRuleId": "@@platforms//host:extension.bzl%host_platform_repo",
-            "attributes": {}
-          }
-        },
-        "recordedRepoMappingEntries": []
       }
     },
     "@@rules_java+//java:rules_java_deps.bzl%compatibility_proxy": {
