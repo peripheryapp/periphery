@@ -19,9 +19,9 @@ jobs:
       - uses: actions/checkout@master
       - uses: jdx/mise-action@v2
       - run: mise run lint-ci
-  bazel:
+  bazel_macos:
       runs-on: macos-15
-      name: Bazel
+      name: Bazel (macOS)
       steps:
         - uses: actions/checkout@master
         - uses: jdx/mise-action@v2
@@ -34,7 +34,20 @@ jobs:
           run: mise r gen-bazel-rules && git diff --quiet --exit-code
         - name: Scan
           run: bazel run //:periphery -- scan --bazel --quiet --strict --baseline baselines/bazel.json
-  macOS:
+  bazel_linux:
+      runs-on: ubuntu-latest
+      container: swift:latest
+      name: Bazel (Linux)
+      steps:
+        - uses: actions/checkout@master
+        - uses: bazel-contrib/setup-bazel@0.14.0
+          with:
+            bazelisk-cache: true
+            disk-cache: ${{ github.workflow }}
+            repository-cache: true
+        - name: Scan
+          run: CC=clang bazel run --spawn_strategy=standalone //:periphery -- scan --bazel --quiet --strict --baseline baselines/bazel.json
+  macos:
     name: macOS
     strategy:
       fail-fast: false
