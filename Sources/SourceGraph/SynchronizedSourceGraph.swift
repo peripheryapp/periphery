@@ -54,8 +54,8 @@ public final class SynchronizedSourceGraph {
         graph.remove(declaration)
     }
 
-    public func explicitDeclarationWithoutLock(withUsr usr: String) -> Declaration? {
-        graph.explicitDeclaration(withUsr: usr)
+    public func declarationWithoutLock(withUsr usr: String) -> Declaration? {
+        graph.declaration(withUsr: usr)
     }
 
     public func markRetainedWithoutLock(_ declaration: Declaration) {

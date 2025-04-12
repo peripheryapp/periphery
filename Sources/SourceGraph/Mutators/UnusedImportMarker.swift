@@ -28,7 +28,8 @@ final class UnusedImportMarker: SourceGraphMutator {
 
         // Build a mapping of source files and the modules they reference.
         for ref in graph.allReferences {
-            guard let decl = graph.explicitDeclaration(withUsr: ref.usr) else { continue }
+            guard let decl = graph.declaration(withUsr: ref.usr) else { continue }
+
             // Record directly referenced modules and also identify any modules that extended
             // the declaration. These extensions may provide members/conformances that aren't
             // referenced directly but which are still required.

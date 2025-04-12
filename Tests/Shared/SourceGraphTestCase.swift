@@ -82,7 +82,6 @@ open class SourceGraphTestCase: XCTestCase {
             if let declaration = Self.graph.unusedModuleImports.first(where: { $0.name == description.name }) {
                 XCTFail("Expected declaration to be referenced: \(declaration)", file: file, line: line)
             }
-
         } else {
             guard let declaration = materialize(description, file: file, line: line) else { return }
 

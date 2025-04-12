@@ -255,7 +255,7 @@ final class SwiftIndexer: Indexer {
         private func establishDeclarationHierarchy() {
             graph.withLock {
                 for (parent, decls) in childDeclsByParentUsr {
-                    guard let parentDecl = graph.explicitDeclarationWithoutLock(withUsr: parent) else {
+                    guard let parentDecl = graph.declarationWithoutLock(withUsr: parent) else {
                         if varParameterUsrs.contains(parent) {
                             // These declarations are children of a parameter and are redundant.
                             decls.forEach { graph.removeWithoutLock($0) }
@@ -276,7 +276,7 @@ final class SwiftIndexer: Indexer {
         private func associateLatentReferences() {
             for (usr, refs) in referencesByUsr {
                 graph.withLock {
-                    if let decl = graph.explicitDeclarationWithoutLock(withUsr: usr) {
+                    if let decl = graph.declarationWithoutLock(withUsr: usr) {
                         for ref in refs {
                             associateUnsafe(ref, with: decl)
                         }
