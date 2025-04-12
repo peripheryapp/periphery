@@ -122,12 +122,6 @@ swift_library(
     ],
 )
 
-_PROJECT_DRIVERS_DEPS = [
-    "//Sources:Indexer",
-    "//Sources:Shared",
-    "//Sources:SourceGraph",
-]
-
 swift_library(
     name = "ProjectDrivers",
     srcs = [
@@ -139,10 +133,20 @@ swift_library(
         "ProjectDrivers/XcodeProjectDriver.swift",
     ],
     module_name = "ProjectDrivers",
-    deps = select({
-        "@platforms//os:macos": _PROJECT_DRIVERS_DEPS + ["//Sources:XcodeSupport"],
-        "//conditions:default": _PROJECT_DRIVERS_DEPS,
-    }),
+    deps =
+        select({
+            "@platforms//os:macos": [
+                "//Sources:Indexer",
+                "//Sources:Shared",
+                "//Sources:SourceGraph",
+                "//Sources:XcodeSupport",
+            ],
+            "//conditions:default": [
+                "//Sources:Indexer",
+                "//Sources:Shared",
+                "//Sources:SourceGraph",
+            ],
+        }),
 )
 
 swift_library(
