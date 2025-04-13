@@ -22,4 +22,8 @@ public enum OutputFormat: String, CaseIterable {
     @inlinable public var supportsAuxiliaryOutput: Bool {
         self == .xcode
     }
+
+    @inlinable public var supportsColoredOutput: Bool {
+        self == .xcode
+    }
 }

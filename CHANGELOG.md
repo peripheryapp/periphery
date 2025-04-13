@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Added `--write-results <file>` option.
 
 ##### Bug Fixes
 

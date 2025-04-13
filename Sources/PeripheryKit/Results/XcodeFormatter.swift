@@ -12,14 +12,14 @@ final class XcodeFormatter: OutputFormatter {
         self.configuration = configuration
     }
 
-    func format(_ results: [ScanResult]) throws -> String? {
+    func format(_ results: [ScanResult], colored: Bool) throws -> String? {
         guard !results.isEmpty else {
-            return colorize("* ", .boldGreen) + colorize("No unused code detected.", .bold)
+            return colorize("* ", .boldGreen, colored: colored) + colorize("No unused code detected.", .bold, colored: colored)
         }
 
         return results.flatMap { result in
-            describe(result, colored: true).map { location, description in
-                prefix(for: location) + description
+            describe(result, colored: colored).map { location, description in
+                prefix(for: location, colored: colored) + description
             }
         }
         .joined(separator: "\n")
@@ -27,15 +27,20 @@ final class XcodeFormatter: OutputFormatter {
 
     // MARK: - Private
 
-    private func prefix(for location: Location) -> String {
+    private func prefix(for location: Location, colored: Bool) -> String {
         let path = outputPath(location)
         let dir = path.removingLastComponent()
-        let file = colorize(path.lastComponent?.stem ?? "", .bold)
+        let file = colorize(path.lastComponent?.stem ?? "", .bold, colored: colored)
         let ext = path.extension ?? "swift"
-        let lineNum = colorize(String(location.line), .bold)
+        let lineNum = colorize(String(location.line), .bold, colored: colored)
         let column = location.column
-        let warning = colorize("warning:", .boldYellow)
+        let warning = colorize("warning:", .boldYellow, colored: colored)
 
         return "\(dir)/\(file).\(ext):\(lineNum):\(column): \(warning) "
+    }
+
+    private func colorize(_ text: String, _ color: ANSIColor, colored: Bool) -> String {
+        guard colored else { return text }
+        return Logger.colorize(text, color)
     }
 }
