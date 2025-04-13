@@ -19,7 +19,7 @@ final class GuidedSetup: SetupGuideHelpers {
     }
 
     func perform() throws -> Project {
-        print(colorize("Welcome to Periphery!", .boldGreen))
+        print(Logger.colorize("Welcome to Periphery!", .boldGreen))
         print("This guided setup will help you select the appropriate configuration for your project.\n")
 
         var projectGuides: [SetupGuide] = []
@@ -41,12 +41,12 @@ final class GuidedSetup: SetupGuideHelpers {
         var projectGuide_: SetupGuide?
 
         if projectGuides.count > 1 {
-            print(colorize("Select which project to use:", .bold))
+            print(Logger.colorize("Select which project to use:", .bold))
             let kindName = select(single: projectGuides.map(\.projectKindName))
             projectGuide_ = projectGuides.first { $0.projectKindName == kindName }
             print("")
         } else if let singleGuide = projectGuides.first {
-            print(colorize("*", .boldGreen) + " Detected \(singleGuide.projectKindName) project")
+            print(Logger.colorize("*", .boldGreen) + " Detected \(singleGuide.projectKindName) project")
             projectGuide_ = singleGuide
         }
 
@@ -54,7 +54,7 @@ final class GuidedSetup: SetupGuideHelpers {
             fatalError("Failed to identify project type.")
         }
 
-        print(colorize("*", .boldGreen) + " Inspecting project...")
+        print(Logger.colorize("*", .boldGreen) + " Inspecting project...")
 
         let kind = try projectGuide.perform()
         let project = Project(kind: kind, configuration: configuration, shell: shell, logger: logger)
@@ -66,7 +66,7 @@ final class GuidedSetup: SetupGuideHelpers {
         var shouldSave = false
 
         if configuration.hasNonDefaultValues {
-            print(colorize("\nSave configuration to \(Configuration.defaultConfigurationFile)?", .bold))
+            print(Logger.colorize("\nSave configuration to \(Configuration.defaultConfigurationFile)?", .bold))
             shouldSave = selectBoolean()
 
             if shouldSave {
@@ -74,8 +74,8 @@ final class GuidedSetup: SetupGuideHelpers {
             }
         }
 
-        print(colorize("\n*", .boldGreen) + " Executing command:")
-        print(colorize(formatScanCommand(options: options, didSave: shouldSave) + "\n", .bold))
+        print(Logger.colorize("\n*", .boldGreen) + " Executing command:")
+        print(Logger.colorize(formatScanCommand(options: options, didSave: shouldSave) + "\n", .bold))
 
         return project
     }

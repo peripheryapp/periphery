@@ -10,7 +10,7 @@ final class JsonFormatter: OutputFormatter {
         self.configuration = configuration
     }
 
-    func format(_ results: [ScanResult]) throws -> String? {
+    func format(_ results: [ScanResult], colored _: Bool) throws -> String? {
         var jsonObject: [Any] = []
 
         for result in results {

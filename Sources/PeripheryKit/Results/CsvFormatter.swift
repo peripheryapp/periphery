@@ -11,7 +11,7 @@ final class CsvFormatter: OutputFormatter {
         self.configuration = configuration
     }
 
-    func format(_ results: [ScanResult]) -> String? {
+    func format(_ results: [ScanResult], colored _: Bool) -> String? {
         var lines = ["Kind,Name,Modifiers,Attributes,Accessibility,IDs,Location,Hints"]
 
         for result in results {

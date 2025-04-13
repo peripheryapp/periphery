@@ -122,6 +122,9 @@ public final class Configuration {
     @Setting(key: "write_baseline", defaultValue: nil, setter: filePathSetter)
     public var writeBaseline: FilePath?
 
+    @Setting(key: "write_results", defaultValue: nil, setter: filePathSetter)
+    public var writeResults: FilePath?
+
     @Setting(key: "generic_project_config", defaultValue: nil, setter: filePathSetter)
     public var genericProjectConfig: FilePath?
 
@@ -216,7 +219,15 @@ public final class Configuration {
 
     // MARK: - Private
 
-    lazy var settings: [any AbstractSetting] = [$project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat, $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible, $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis, $disableUnusedImportAnalysis, $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline, $genericProjectConfig, $bazel, $bazelFilter]
+    lazy var settings: [any AbstractSetting] = [
+        $project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat,
+        $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible,
+        $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis,
+        $disableUnusedImportAnalysis, $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses,
+        $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild, $skipSchemesValidation, $cleanBuild,
+        $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath, $retainCodableProperties,
+        $retainEncodableProperties, $baseline, $writeBaseline, $writeResults, $genericProjectConfig, $bazel, $bazelFilter,
+    ]
 
     private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {
         // TODO: respect filesystem case sensitivity.

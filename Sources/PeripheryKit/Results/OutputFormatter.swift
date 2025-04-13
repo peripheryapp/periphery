@@ -9,7 +9,7 @@ public protocol OutputFormatter: AnyObject {
     var currentFilePath: FilePath { get }
 
     init(configuration: Configuration)
-    func format(_ results: [ScanResult]) throws -> String?
+    func format(_ results: [ScanResult], colored: Bool) throws -> String?
 }
 
 extension OutputFormatter {
@@ -45,7 +45,7 @@ extension OutputFormatter {
                 description += "\(first.uppercased())\(kind.dropFirst()) "
             }
 
-            name = colored ? colorize(name, .lightBlue) : name
+            name = colored ? Logger.colorize(name, .lightBlue) : name
             description += "'\(name)'"
 
             switch result.annotation {

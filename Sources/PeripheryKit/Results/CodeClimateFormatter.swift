@@ -10,7 +10,7 @@ final class CodeClimateFormatter: OutputFormatter {
         self.configuration = configuration
     }
 
-    func format(_ results: [ScanResult]) throws -> String? {
+    func format(_ results: [ScanResult], colored: Bool) throws -> String? {
         var jsonObject: [Any] = []
 
         for result in results {
@@ -23,7 +23,7 @@ final class CodeClimateFormatter: OutputFormatter {
                 "lines": lines,
             ]
 
-            let description = describe(result, colored: false)
+            let description = describe(result, colored: colored)
                 .map(\.1)
                 .joined(separator: ", ")
 

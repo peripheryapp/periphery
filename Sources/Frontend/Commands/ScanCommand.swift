@@ -129,6 +129,9 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Baseline file path where results are written. Pass the same path to '--baseline' in subsequent scans to exclude the results recorded in the baseline.")
     var writeBaseline: FilePath?
 
+    @Option(help: "File path where formatted results are written.")
+    var writeResults: FilePath?
+
     @Option(help: "Project configuration for non-Apple build systems")
     var genericProjectConfig: FilePath?
 
@@ -188,6 +191,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$jsonPackageManifestPath, jsonPackageManifestPath)
         configuration.apply(\.$baseline, baseline)
         configuration.apply(\.$writeBaseline, writeBaseline)
+        configuration.apply(\.$writeResults, writeResults)
         configuration.apply(\.$genericProjectConfig, genericProjectConfig)
         configuration.apply(\.$bazel, bazel)
         configuration.apply(\.$bazelFilter, bazelFilter)
@@ -241,12 +245,27 @@ struct ScanCommand: FrontendCommand {
             try data.write(to: baselinePath.url)
         }
 
-        if let output = try configuration.outputFormat.formatter.init(configuration: configuration).format(filteredResults) {
-            if configuration.outputFormat.supportsAuxiliaryOutput {
+        let outputFormat = configuration.outputFormat
+        let formatter = outputFormat.formatter.init(configuration: configuration)
+
+        if let output = try formatter.format(filteredResults, colored: outputFormat.supportsColoredOutput) {
+            if outputFormat.supportsAuxiliaryOutput {
                 logger.info("", canQuiet: true)
             }
 
             logger.info(output, canQuiet: false)
+
+            if let resultsPath = configuration.writeResults {
+                var output = output
+
+                if outputFormat.supportsColoredOutput {
+                    // The formatted output contains ANSI escape codes, so we need to re-format
+                    // with coloring disabled.
+                    output = try formatter.format(filteredResults, colored: false) ?? ""
+                }
+
+                try output.write(to: resultsPath.url, atomically: true, encoding: .utf8)
+            }
         }
 
         logger.endInterval(interval)
