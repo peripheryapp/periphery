@@ -24,7 +24,9 @@ public final class OutputDeclarationFilter {
                 .flatMapSet(\.usrs)
                 .intersection(baseline.usrs)
 
-            declarations = declarations.filter {
+            declarations = declarations
+                .filter { $0.declaration.kind != .varParameter }
+                .filter {
                 let isIgnored = $0.usrs.contains { ignoredUsrs.contains($0) }
                 if isIgnored {
                     didFilterDeclaration = true
