@@ -20,12 +20,16 @@ public final class OutputDeclarationFilter {
 
         if let baseline {
             var didFilterDeclaration = false
+            let ignoredUsrs = declarations
+                .flatMapSet(\.usrs)
+                .intersection(baseline.usrs)
+
             declarations = declarations.filter {
-                let isDisjoint = $0.usrs.isDisjoint(with: baseline.usrs)
-                if !isDisjoint {
+                let isIgnored = $0.usrs.contains { ignoredUsrs.contains($0) }
+                if isIgnored {
                     didFilterDeclaration = true
                 }
-                return isDisjoint
+                return !isIgnored
             }
 
             if !didFilterDeclaration {
