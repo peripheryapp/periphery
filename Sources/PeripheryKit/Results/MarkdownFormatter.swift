@@ -16,14 +16,15 @@ final class MarkdownFormatter: OutputFormatter {
 
         let formattedResults = results.flatMap { result in
             describe(result, colored: colored).map { location, description in
-                "| \(locationDescription(location)) | \(description) |"
+                "| **\(description)**<br>\(locationDescription(location)) |"
             }
         }
         .joined(separator: "\n")
+        let title = results.count == 1 ?"Result" : "Results"
 
         return """
-        | Location | Result |
-        | :- | :- |
+        | \(results.count) \(title) |
+        | :- |
         \(formattedResults)
         """
     }
