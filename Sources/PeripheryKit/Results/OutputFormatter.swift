@@ -110,6 +110,8 @@ public extension OutputFormat {
             CheckstyleFormatter.self
         case .githubActions:
             GitHubActionsFormatter.self
+        case .markdown:
+            MarkdownFormatter.self
         }
     }
 }

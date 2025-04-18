@@ -7,6 +7,7 @@
 ##### Enhancements
 
 - Added `--write-results <file>` option.
+- Added `markdown` output format.
 
 ##### Bug Fixes
 
