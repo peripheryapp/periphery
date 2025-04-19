@@ -27,7 +27,7 @@ open class SourceGraphTestCase: XCTestCase {
         configuration.quiet = true
         logger = Logger(quiet: true)
         shell = Shell(logger: logger)
-        graph = SourceGraph(configuration: configuration)
+        graph = SourceGraph(configuration: configuration, logger: logger)
     }
 
     override open func setUp() {
@@ -58,7 +58,7 @@ open class SourceGraphTestCase: XCTestCase {
             )
         }
 
-        graph = SourceGraph(configuration: configuration)
+        graph = SourceGraph(configuration: configuration, logger: logger)
         let pipeline = IndexPipeline(
             plan: newPlan,
             graph: SynchronizedSourceGraph(graph: graph),

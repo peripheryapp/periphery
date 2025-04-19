@@ -224,7 +224,6 @@ public final class Declaration {
     public var commentCommands: Set<CommentCommand> = []
     public var references: Set<Reference> = []
     public var declaredType: String?
-    public var hasCapitalSelfFunctionCall: Bool = false
     public var hasGenericFunctionReturnedMetatypeParameters: Bool = false
     public var parent: Declaration?
     public var related: Set<Reference> = []

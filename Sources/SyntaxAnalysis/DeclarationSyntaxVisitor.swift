@@ -19,14 +19,12 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         variableInitFunctionCallLocations: Set<Location>,
         functionCallMetatypeArgumentLocations: Set<Location>,
         typeInitializerLocations: Set<Location>,
-        hasCapitalSelfFunctionCall: Bool,
         hasGenericFunctionReturnedMetatypeParameters: Bool
     )
 
     private let sourceLocationBuilder: SourceLocationBuilder
     private let typeSyntaxInspector: TypeSyntaxInspector
     private(set) var results: [Result] = []
-    private var didVisitCapitalSelfFunctionCall: Bool = false
 
     public var resultsByLocation: [Location: Result] {
         results.reduce(into: [Location: Result]()) { dict, result in
@@ -47,7 +45,6 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             inheritanceClause: node.inheritanceClause,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
-            consumeCapitalSelfFunctionCalls: true,
             at: node.name.positionAfterSkippingLeadingTrivia
         )
     }
@@ -60,7 +57,6 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             inheritanceClause: node.inheritanceClause,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
-            consumeCapitalSelfFunctionCalls: true,
             at: node.name.positionAfterSkippingLeadingTrivia
         )
     }
@@ -84,7 +80,6 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             inheritanceClause: node.inheritanceClause,
             genericParameterClause: node.genericParameterClause,
             genericWhereClause: node.genericWhereClause,
-            consumeCapitalSelfFunctionCalls: true,
             at: node.name.positionAfterSkippingLeadingTrivia
         )
     }
@@ -131,7 +126,6 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             trivia: node.commentCommandTrivia,
             inheritanceClause: node.inheritanceClause,
             genericWhereClause: node.genericWhereClause,
-            consumeCapitalSelfFunctionCalls: true,
             at: position
         )
     }
@@ -288,14 +282,6 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         )
     }
 
-    public func visit(_ node: FunctionCallExprSyntax) {
-        if let identifierExpr = node.calledExpression.as(DeclReferenceExprSyntax.self),
-           identifierExpr.baseName.tokenKind == .keyword(.Self)
-        {
-            didVisitCapitalSelfFunctionCall = true
-        }
-    }
-
     // MARK: - Private
 
     private func parse(
@@ -312,7 +298,6 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         genericWhereClause: GenericWhereClauseSyntax? = nil,
         variableInitFunctionCallExpr: FunctionCallExprSyntax? = nil,
         typeInitializerClause: TypeInitializerClauseSyntax? = nil,
-        consumeCapitalSelfFunctionCalls: Bool = false,
         at position: AbsolutePosition
     ) {
         let modifierNames = modifiers?.map(\.name.text) ?? []
@@ -321,13 +306,6 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             AttributeSyntax($0)?.attributeName.trimmedDescription ?? AttributeSyntax($0)?.attributeName.firstToken(viewMode: .sourceAccurate)?.text
         } ?? []
         let location = sourceLocationBuilder.location(at: position)
-
-        var didVisitCapitalSelfFunctionCall = false
-        if consumeCapitalSelfFunctionCalls {
-            didVisitCapitalSelfFunctionCall = self.didVisitCapitalSelfFunctionCall
-            self.didVisitCapitalSelfFunctionCall = false
-        }
-
         let returnClauseTypeLocations = typeNameLocations(for: returnClause)
         let parameterClauseTypes = parameterClause?.parameters.map(\.type) ?? []
         let closureParameterClauseTypes = closureParameterClause?.parameters.compactMap(\.type) ?? []
@@ -360,7 +338,6 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             variableInitFunctionCallLocations: locations(for: variableInitFunctionCallExpr),
             functionCallMetatypeArgumentLocations: functionCallMetatypeArgumentLocations(for: variableInitFunctionCallExpr),
             typeInitializerLocations: typeLocations(for: typeInitializerClause?.value),
-            hasCapitalSelfFunctionCall: didVisitCapitalSelfFunctionCall,
             hasGenericFunctionReturnedMetatypeParameters: hasGenericFunctionReturnedMetatypeParameters
         ))
     }
