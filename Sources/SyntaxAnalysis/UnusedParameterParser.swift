@@ -51,7 +51,7 @@ public struct Parameter: Item, Hashable {
     }
 
     public func makeDeclaration(withParent parent: Declaration) -> Declaration {
-        let parentUsrs = parent.usrs.joined(separator: "-")
+        let parentUsrs = parent.usrs.sorted().joined(separator: "-")
         let usr = "param-\(name)-\(parent.name ?? "unknown-function")-\(parentUsrs)"
         let decl = Declaration(kind: .varParameter, usrs: [usr], location: location)
         decl.name = name

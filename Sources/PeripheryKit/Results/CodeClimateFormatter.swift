@@ -28,14 +28,14 @@ final class CodeClimateFormatter: OutputFormatter {
                 .joined(separator: ", ")
 
             let fingerprint: String = if result.declaration.kind == .varParameter,
-                                         let parentFingerprint = result.declaration.parent?.usrs.joined(separator: "."),
+                                         let parentFingerprint = result.declaration.parent?.usrs.sorted().joined(separator: "."),
                                          let argumentName = result.declaration.name
             {
                 // As function parameters do not have a mangled name that can be used for the fingerprint
                 // we take the mangled name of the function and append the position
                 "\(parentFingerprint)-\(argumentName)"
             } else {
-                result.declaration.usrs.joined(separator: ".")
+                result.declaration.usrs.sorted().joined(separator: ".")
             }
 
             let object: [AnyHashable: Any] = [
