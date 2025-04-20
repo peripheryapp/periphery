@@ -34,10 +34,6 @@ final class ExtensionReferenceBuilder: SourceGraphMutator {
             extendedDeclaration.references.formUnion(extensionDeclaration.references)
             extendedDeclaration.related.formUnion(extensionDeclaration.related)
 
-            if extensionDeclaration.hasCapitalSelfFunctionCall {
-                extendedDeclaration.hasCapitalSelfFunctionCall = true
-            }
-
             extensionDeclaration.declarations.forEach { $0.parent = extendedDeclaration }
             extensionDeclaration.references.forEach { $0.parent = extendedDeclaration }
             extensionDeclaration.related.forEach { $0.parent = extendedDeclaration }

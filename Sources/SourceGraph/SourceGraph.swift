@@ -1,5 +1,6 @@
 import Configuration
 import Foundation
+import Logger
 import Shared
 
 public final class SourceGraph {
@@ -26,9 +27,11 @@ public final class SourceGraph {
     private var moduleToExportingModules: [String: Set<String>] = [:]
 
     private let configuration: Configuration
+    private let logger: Logger
 
-    public init(configuration: Configuration) {
+    public init(configuration: Configuration, logger: Logger) {
         self.configuration = configuration
+        self.logger = logger
     }
 
     public func indexingComplete() {
@@ -103,16 +106,22 @@ public final class SourceGraph {
     public func add(_ declaration: Declaration) {
         allDeclarations.insert(declaration)
         allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
-        declaration.usrs.forEach { allDeclarationsByUsr[$0] = declaration }
+        for usr in declaration.usrs {
+            if let existingDecl = allDeclarationsByUsr[usr] {
+                logger.warn("""
+                Declaration conflict detected: a declaration with the USR '\(usr)' has already been indexed.
+                This issue can cause inconsistent and incorrect results.
+                Existing declaration: \(existingDecl), declared in modules: \(existingDecl.location.file.modules.sorted())
+                Conflicting declaration: \(declaration), declared in modules: \(declaration.location.file.modules.sorted())
+                To resolve this warning, make sure all build modules are uniquely named.
+                """)
+            }
+            allDeclarationsByUsr[usr] = declaration
+        }
     }
 
     public func add(_ declarations: Set<Declaration>) {
-        allDeclarations.formUnion(declarations)
-
-        for declaration in declarations {
-            allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
-            declaration.usrs.forEach { allDeclarationsByUsr[$0] = declaration }
-        }
+        declarations.forEach { add($0) }
     }
 
     public func remove(_ declaration: Declaration) {
@@ -258,7 +267,7 @@ public final class SourceGraph {
     func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
         guard let extendedReference = try extendedDeclarationReference(forExtension: extensionDeclaration) else { return nil }
 
-        if let extendedDeclaration = allDeclarationsByUsr[extendedReference.usr] {
+        if let extendedDeclaration = declaration(withUsr: extendedReference.usr) {
             return extendedDeclaration
         }
 

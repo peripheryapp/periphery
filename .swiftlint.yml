@@ -1,5 +1,5 @@
 excluded:
-  - .build
+  - "**/.build"
   - Tests/Fixtures
   - Tests/AccessibilityTests/AccessibilityProject
   - Tests/XcodeTests/UIKitProject

@@ -251,6 +251,7 @@ final class SwiftIndexer: Indexer {
         private var referencesByUsr: [String: Set<Reference>] = [:]
         private var danglingReferences: [Reference] = []
         private var varParameterUsrs: Set<String> = []
+        private var extensionUsrMap: [String: String] = [:]
 
         private func establishDeclarationHierarchy() {
             graph.withLock {
@@ -366,7 +367,6 @@ final class SwiftIndexer: Indexer {
                 decl.modifiers = Set(result.modifiers)
                 decl.commentCommands = Set(result.commentCommands)
                 decl.declaredType = result.variableType
-                decl.hasCapitalSelfFunctionCall = result.hasCapitalSelfFunctionCall
                 decl.hasGenericFunctionReturnedMetatypeParameters = result.hasGenericFunctionReturnedMetatypeParameters
 
                 for ref in decl.references.union(decl.related) {
@@ -487,6 +487,17 @@ final class SwiftIndexer: Indexer {
                 return nil
             }
 
+            var usr = usr
+
+            if kind.isExtensionKind {
+                // Identical extensions in different modules have the same USR, which leads to conflicts and incorrect
+                // results. Here we append the module names to form a unique USR. The only references to this
+                // extension will exist in the same file, so we only need a file-local mapping for the USR.
+                let newUsr = "\(usr)-\(location.file.modules.sorted().joined(separator: "-"))"
+                extensionUsrMap[usr] = newUsr
+                usr = newUsr
+            }
+
             let decl = RawDeclaration(
                 usr: usr,
                 kind: kind,
@@ -526,6 +537,10 @@ final class SwiftIndexer: Indexer {
             for rel in relations {
                 if rel.roles.contains(.childOf) {
                     if let parentUsr = rel.symbol.usr {
+                        var parentUsr = parentUsr
+                        if rel.symbol.kind == .extension {
+                            parentUsr = extensionUsrMap[parentUsr] ?? parentUsr
+                        }
                         childDeclsByParentUsr[parentUsr, default: []].insert(decl)
                     }
                 }
