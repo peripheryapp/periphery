@@ -255,7 +255,7 @@ struct ScanCommand: FrontendCommand {
 
             logger.info(output, canQuiet: false)
 
-            if let resultsPath = configuration.writeResults {
+            if !filteredResults.isEmpty, let resultsPath = configuration.writeResults {
                 var output = output
 
                 if outputFormat.supportsColoredOutput {
