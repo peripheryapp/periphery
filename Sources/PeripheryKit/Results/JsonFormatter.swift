@@ -14,16 +14,17 @@ final class JsonFormatter: OutputFormatter {
         var jsonObject: [Any] = []
 
         for result in results {
+            let location = declarationLocation(from: result.declaration)
             let object: [AnyHashable: Any] = [
-                "kind": result.declaration.kind.rawValue,
-                "modules": result.declaration.location.file.modules.sorted(),
+                "kind": declarationKind(from: result.declaration),
+                "modules": location.file.modules.sorted(),
                 "name": result.declaration.name ?? "",
                 "modifiers": result.declaration.modifiers.sorted(),
                 "attributes": result.declaration.attributes.sorted(),
                 "accessibility": result.declaration.accessibility.value.rawValue,
                 "ids": result.declaration.usrs.sorted(),
                 "hints": [describe(result.annotation)],
-                "location": locationDescription(result.declaration.location),
+                "location": locationDescription(location),
             ]
             jsonObject.append(object)
 

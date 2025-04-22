@@ -210,6 +210,27 @@ open class SourceGraphTestCase: XCTestCase {
         scopeStack.removeLast()
     }
 
+    func assertOverrides(_ description: DeclarationDescription, _ overrides: [CommentCommand.Override], file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, file: file, line: line) else {
+            XCTFail("Failed to materialize \(description)", file: file, line: line)
+            return
+        }
+
+        let declOverrides = declaration.commentCommands.flatMap {
+            if case let .override(overrides) = $0 {
+                return overrides
+            }
+
+            return []
+        }
+
+        for override in overrides {
+            if !declOverrides.contains(override) {
+                XCTFail("Expected override: \(override)", file: file, line: line)
+            }
+        }
+    }
+
     func module(_ name: String, scopedAssertions: (() -> Void)? = nil) {
         scopeStack.append(.module(name))
         scopedAssertions?()

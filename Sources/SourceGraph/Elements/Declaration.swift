@@ -176,7 +176,7 @@ public final class Declaration {
             [.class, .struct, .enum]
         }
 
-        public var displayName: String? {
+        public var displayName: String {
             switch self {
             case .module:
                 "imported module"
@@ -198,7 +198,7 @@ public final class Declaration {
                 "initializer"
             case .extension, .extensionEnum, .extensionClass, .extensionStruct, .extensionProtocol:
                 "extension"
-            case .functionMethodClass, .functionMethodStatic, .functionMethodInstance, .functionFree, .functionOperator, .functionOperatorInfix, .functionOperatorPostfix, .functionOperatorPrefix, .functionSubscript:
+            case .functionMethodClass, .functionMethodStatic, .functionMethodInstance, .functionFree, .functionOperator, .functionOperatorInfix, .functionOperatorPostfix, .functionOperatorPrefix, .functionSubscript, .functionAccessorAddress, .functionAccessorMutableaddress, .functionAccessorDidset, .functionAccessorGetter, .functionAccessorSetter, .functionAccessorWillset, .functionAccessorRead, .functionAccessorModify, .functionAccessorInit, .functionDestructor:
                 "function"
             case .varStatic, .varInstance, .varClass, .varGlobal, .varLocal:
                 "property"
@@ -206,8 +206,10 @@ public final class Declaration {
                 "parameter"
             case .genericTypeParam:
                 "generic type parameter"
-            default:
-                nil
+            case .precedenceGroup:
+                "precedence group"
+            case .macro:
+                "macro"
             }
         }
     }
