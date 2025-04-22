@@ -16,13 +16,13 @@ final class CsvFormatter: OutputFormatter {
 
         for result in results {
             let line = format(
-                kind: result.declaration.kind.rawValue,
+                kind: declarationKind(from: result.declaration),
                 name: result.declaration.name,
                 modifiers: result.declaration.modifiers,
                 attributes: result.declaration.attributes,
                 accessibility: result.declaration.accessibility.value.rawValue,
                 usrs: result.declaration.usrs,
-                location: result.declaration.location,
+                location: declarationLocation(from: result.declaration),
                 hint: describe(result.annotation)
             )
             lines.append(line)

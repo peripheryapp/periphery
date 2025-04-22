@@ -29,14 +29,19 @@ final class XcodeFormatter: OutputFormatter {
 
     private func prefix(for location: Location, colored: Bool) -> String {
         let path = outputPath(location)
-        let dir = path.removingLastComponent()
+        var dir = path.removingLastComponent().string
+
+        if !dir.isEmpty {
+            dir += "/"
+        }
+
         let file = colorize(path.lastComponent?.stem ?? "", .bold, colored: colored)
         let ext = path.extension ?? "swift"
         let lineNum = colorize(String(location.line), .bold, colored: colored)
         let column = location.column
         let warning = colorize("warning:", .boldYellow, colored: colored)
 
-        return "\(dir)/\(file).\(ext):\(lineNum):\(column): \(warning) "
+        return "\(dir)\(file).\(ext):\(lineNum):\(column): \(warning) "
     }
 
     private func colorize(_ text: String, _ color: ANSIColor, colored: Bool) -> String {

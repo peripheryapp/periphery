@@ -884,97 +884,6 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    func testIgnoreComments() {
-        // ensure this external module is explicitly indexed so we can tell if it is unused
-        let additionalFilesToIndex = [
-            FixturesProjectPath.appending("Sources/UnusedModuleFixtures/UnusedModuleDeclaration.swift"),
-        ]
-
-        analyze(retainPublic: true, additionalFilesToIndex: additionalFilesToIndex) {
-            assertReferenced(.module("UnusedModuleFixtures"))
-            assertReferenced(.class("Fixture113")) {
-                self.assertReferenced(.functionMethodInstance("someFunc(param:)")) {
-                    self.assertReferenced(.varParameter("param"))
-                }
-            }
-            assertReferenced(.class("Fixture114")) {
-                self.assertReferenced(.functionMethodInstance("referencedFunc()"))
-                self.assertReferenced(.functionMethodInstance("someFunc(a:b:c:)")) {
-                    self.assertReferenced(.varParameter("b"))
-                    self.assertReferenced(.varParameter("c"))
-                }
-                self.assertReferenced(.functionMethodInstance("protocolFunc(param:)")) {
-                    self.assertReferenced(.varParameter("param"))
-                }
-            }
-            assertReferenced(.protocol("Fixture114Protocol")) {
-                self.assertReferenced(.functionMethodInstance("protocolFunc(param:)")) {
-                    self.assertReferenced(.varParameter("param"))
-                }
-            }
-            assertReferenced(.class("FixtureClass116")) {
-                self.assertReferenced(.functionMethodInstance("someFunc()"))
-                self.assertReferenced(.varInstance("simpleProperty"))
-                self.assertReferenced(.varInstance("tuplePropertyA"))
-                self.assertReferenced(.varInstance("tuplePropertyB"))
-                self.assertReferenced(.varInstance("multiBindingPropertyA"))
-                self.assertReferenced(.varInstance("multiBindingPropertyB"))
-                self.assertReferenced(.varInstance("assignOnlyProperty"))
-                self.assertReferenced(.varInstance("commentWithTrailingDescription"))
-                self.assertNotAssignOnlyProperty(.varInstance("assignOnlyProperty"))
-            }
-            assertReferenced(.class("FixtureClass212")) {
-                self.assertReferenced(.functionMethodInstance("protocolFunc(param:)")) {
-                    self.assertReferenced(.varParameter("param"))
-                }
-            }
-            assertReferenced(.class("FixtureClass213")) {
-                self.assertReferenced(.functionMethodInstance("someFunc(a:b:c:)")) {
-                    self.assertReferenced(.varParameter("b"))
-                    self.assertReferenced(.varParameter("c"))
-                }
-            }
-            assertReferenced(.class("Fixture205"))
-            assertReferenced(.protocol("Fixture205Protocol"))
-            assertNotRedundantProtocol("Fixture205Protocol")
-        }
-
-        // inline comment command tests
-        analyze(retainPublic: false) {
-            assertReferenced(.class("Fixture300Class"))
-            assertReferenced(.class("Fixture301Class"))
-
-            assertReferenced(.protocol("Fixture302Protocol"))
-            assertNotRedundantProtocol("Fixture302Protocol")
-            assertReferenced(.protocol("Fixture303Protocol"))
-            assertNotRedundantProtocol("Fixture303Protocol")
-
-            assertReferenced(.struct("Fixture304Struct"))
-            assertReferenced(.struct("Fixture305Struct"))
-
-            assertReferenced(.extensionProtocol("Fixture306Protocol"))
-            assertNotRedundantProtocol("Fixture306Protocol")
-
-            assertReferenced(.enum("Fixture307Enum"))
-
-            assertReferenced(.class("Fixture308Class")) {
-                self.assertReferenced(.functionMethodInstance("someFunc()"))
-                self.assertReferenced(.functionConstructor("init(string:)"))
-            }
-        }
-    }
-
-    func testIgnoreAllComment() {
-        analyze(retainPublic: true) {
-            assertReferenced(.class("Fixture115")) {
-                self.assertReferenced(.functionMethodInstance("someFunc(param:)")) {
-                    self.assertReferenced(.varParameter("param"))
-                }
-            }
-            assertReferenced(.class("Fixture116"))
-        }
-    }
-
     func testRetainsProtocolsViaCompositeTypealias() {
         analyze(retainPublic: true) {
             assertReferenced(.protocol("Fixture200"))
@@ -1135,6 +1044,108 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 self.assertReferenced(.functionSubscript("subscript(original:)"))
                 self.assertReferenced(.functionSubscript("subscript(replacement:)"))
             }
+        }
+    }
+
+    // MARK: - Comment Commands
+
+    func testIgnoreComments() {
+        // ensure this external module is explicitly indexed so we can tell if it is unused
+        let additionalFilesToIndex = [
+            FixturesProjectPath.appending("Sources/UnusedModuleFixtures/UnusedModuleDeclaration.swift"),
+        ]
+
+        analyze(retainPublic: true, additionalFilesToIndex: additionalFilesToIndex) {
+            assertReferenced(.module("UnusedModuleFixtures"))
+            assertReferenced(.class("Fixture113")) {
+                self.assertReferenced(.functionMethodInstance("someFunc(param:)")) {
+                    self.assertReferenced(.varParameter("param"))
+                }
+            }
+            assertReferenced(.class("Fixture114")) {
+                self.assertReferenced(.functionMethodInstance("referencedFunc()"))
+                self.assertReferenced(.functionMethodInstance("someFunc(a:b:c:)")) {
+                    self.assertReferenced(.varParameter("b"))
+                    self.assertReferenced(.varParameter("c"))
+                }
+                self.assertReferenced(.functionMethodInstance("protocolFunc(param:)")) {
+                    self.assertReferenced(.varParameter("param"))
+                }
+            }
+            assertReferenced(.protocol("Fixture114Protocol")) {
+                self.assertReferenced(.functionMethodInstance("protocolFunc(param:)")) {
+                    self.assertReferenced(.varParameter("param"))
+                }
+            }
+            assertReferenced(.class("FixtureClass116")) {
+                self.assertReferenced(.functionMethodInstance("someFunc()"))
+                self.assertReferenced(.varInstance("simpleProperty"))
+                self.assertReferenced(.varInstance("tuplePropertyA"))
+                self.assertReferenced(.varInstance("tuplePropertyB"))
+                self.assertReferenced(.varInstance("multiBindingPropertyA"))
+                self.assertReferenced(.varInstance("multiBindingPropertyB"))
+                self.assertReferenced(.varInstance("assignOnlyProperty"))
+                self.assertReferenced(.varInstance("commentWithTrailingDescription"))
+                self.assertNotAssignOnlyProperty(.varInstance("assignOnlyProperty"))
+            }
+            assertReferenced(.class("FixtureClass212")) {
+                self.assertReferenced(.functionMethodInstance("protocolFunc(param:)")) {
+                    self.assertReferenced(.varParameter("param"))
+                }
+            }
+            assertReferenced(.class("FixtureClass213")) {
+                self.assertReferenced(.functionMethodInstance("someFunc(a:b:c:)")) {
+                    self.assertReferenced(.varParameter("b"))
+                    self.assertReferenced(.varParameter("c"))
+                }
+            }
+            assertReferenced(.class("Fixture205"))
+            assertReferenced(.protocol("Fixture205Protocol"))
+            assertNotRedundantProtocol("Fixture205Protocol")
+        }
+
+        // inline comment command tests
+        analyze(retainPublic: false) {
+            assertReferenced(.class("Fixture300Class"))
+            assertReferenced(.class("Fixture301Class"))
+
+            assertReferenced(.protocol("Fixture302Protocol"))
+            assertNotRedundantProtocol("Fixture302Protocol")
+            assertReferenced(.protocol("Fixture303Protocol"))
+            assertNotRedundantProtocol("Fixture303Protocol")
+
+            assertReferenced(.struct("Fixture304Struct"))
+            assertReferenced(.struct("Fixture305Struct"))
+
+            assertReferenced(.extensionProtocol("Fixture306Protocol"))
+            assertNotRedundantProtocol("Fixture306Protocol")
+
+            assertReferenced(.enum("Fixture307Enum"))
+
+            assertReferenced(.class("Fixture308Class")) {
+                self.assertReferenced(.functionMethodInstance("someFunc()"))
+                self.assertReferenced(.functionConstructor("init(string:)"))
+            }
+        }
+    }
+
+    func testIgnoreAllComment() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("Fixture115")) {
+                self.assertReferenced(.functionMethodInstance("someFunc(param:)")) {
+                    self.assertReferenced(.varParameter("param"))
+                }
+            }
+            assertReferenced(.class("Fixture116"))
+        }
+    }
+
+    func testCommentCommandOverride() {
+        analyze(retainPublic: true) {
+            assertOverrides(.class("FixtureClass136"), [
+                .location("some/other/file.swift", 12, 34),
+                .kind("banana"),
+            ])
         }
     }
 

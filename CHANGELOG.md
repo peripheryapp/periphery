@@ -8,6 +8,14 @@
 
 - Added the `--write-results <file>` option.
 - Added the `github-markdown` output format.
+- Added the ability to override the result location and kind with a comment command. This can be used in cases where the unused code exists in a generated source file, but the code to be removed exists in another file.
+  ```swift
+  // periphery:override location="some/dir/en.lproj/Feature.strings:1:1" kind="localized string"
+  var generatedProperty: String = "abc123"
+  ```
+  ```
+  some/dir/en.lproj/Feature.strings:1:1: warning: Localized string 'generatedProperty' is unused
+  ```
 
 ##### Bug Fixes
 

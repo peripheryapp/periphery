@@ -38,13 +38,11 @@ extension OutputFormatter {
     func describe(_ result: ScanResult, colored: Bool) -> [(Location, String)] {
         var description = ""
         var secondaryResults: [(Location, String)] = []
+        let location = declarationLocation(from: result.declaration)
+        let kindDisplayName = declarationKindDisplayName(from: result.declaration)
 
         if var name = result.declaration.name {
-            if let kind = result.declaration.kind.displayName, let first_ = kind.first {
-                let first = String(first_)
-                description += "\(first.uppercased())\(kind.dropFirst()) "
-            }
-
+            description += "\(kindDisplayName.first?.uppercased() ?? "")\(kindDisplayName.dropFirst()) "
             name = colored ? Logger.colorize(name, .lightBlue) : name
             description += "'\(name)'"
 
@@ -72,14 +70,14 @@ extension OutputFormatter {
             description += "unused"
         }
 
-        return [(result.declaration.location, description)] + secondaryResults
+        return [(location, description)] + secondaryResults
     }
 
     func outputPath(_ location: Location) -> FilePath {
         var path = location.file.path.lexicallyNormalized()
 
-        if configuration.relativeResults {
-            path = path.relativeTo(currentFilePath)
+        if configuration.relativeResults, path.isAbsolute {
+            path = path.relativeTo(currentFilePath).removingRoot()
         }
 
         return path
@@ -92,6 +90,74 @@ extension OutputFormatter {
             String(location.column),
         ]
         .joined(separator: ":")
+    }
+
+    func declarationKind(from declaration: Declaration) -> String {
+        var kind = declaration.kind.rawValue
+
+        for command in declaration.commentCommands {
+            switch command {
+            case let .override(overrides):
+                for override in overrides {
+                    switch override {
+                    case let .kind(overrideKind):
+                        kind = overrideKind
+                    default:
+                        break
+                    }
+                }
+            default:
+                break
+            }
+        }
+
+        return kind
+    }
+
+    func declarationKindDisplayName(from declaration: Declaration) -> String {
+        var kind = declaration.kind.displayName
+
+        for command in declaration.commentCommands {
+            switch command {
+            case let .override(overrides):
+                for override in overrides {
+                    switch override {
+                    case let .kind(overrideKind):
+                        kind = overrideKind
+                    default:
+                        break
+                    }
+                }
+            default:
+                break
+            }
+        }
+
+        return kind
+    }
+
+    func declarationLocation(from declaration: Declaration) -> Location {
+        var location = declaration.location
+
+        for command in declaration.commentCommands {
+            switch command {
+            case let .override(overrides):
+                for override in overrides {
+                    switch override {
+                    case let .location(file, line, column):
+                        let sourceFile = SourceFile(path: FilePath(String(file)), modules: [])
+                        let overrideLocation = Location(file: sourceFile, line: line, column: column)
+                        location = overrideLocation
+                    default:
+                        break
+                    }
+                }
+            default:
+                break
+            }
+        }
+
+        return location
     }
 }
 
