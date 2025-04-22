@@ -2,12 +2,12 @@
 
 ##### Breaking
 
-- None.
+- The `bazel-out` directory is no longer automatically excluded from results to allow for the detection of unused code in generated files. Use `--report-exclude "**/bazel-out/**/*"` to apply the previous behavior.
 
 ##### Enhancements
 
-- Added `--write-results <file>` option.
-- Added `github-markdown` output format.
+- Added the `--write-results <file>` option.
+- Added the `github-markdown` output format.
 
 ##### Bug Fixes
 
