@@ -54,8 +54,9 @@ extension CommentCommand {
 
                     let line = Int(parts[safe: 1] ?? "1") ?? 1
                     let column = Int(parts[safe: 2] ?? "1") ?? 1
+                    let filePath = FilePath(String(file)).makeAbsolute()
 
-                    overrides.append(.location(String(file), line, column))
+                    overrides.append(.location(filePath, line, column))
                 case "kind":
                     overrides.append(.kind(value))
                 default:

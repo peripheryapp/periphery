@@ -339,11 +339,26 @@ extension Declaration: CustomStringConvertible {
 
 extension Declaration: Comparable {
     public static func < (lhs: Declaration, rhs: Declaration) -> Bool {
-        if lhs.location == rhs.location {
+        var lhsLocation = lhs.location
+        var rhsLocation = rhs.location
+
+        if let locationOverride = lhs.commentCommands.locationOverride {
+            let (path, line, column) = locationOverride
+            let sourceFile = SourceFile(path: path, modules: [])
+            lhsLocation = Location(file: sourceFile, line: line, column: column)
+        }
+
+        if let locationOverride = rhs.commentCommands.locationOverride {
+            let (path, line, column) = locationOverride
+            let sourceFile = SourceFile(path: path, modules: [])
+            rhsLocation = Location(file: sourceFile, line: line, column: column)
+        }
+
+        if lhsLocation == rhsLocation {
             return lhs.usrs.sorted().joined() < rhs.usrs.sorted().joined()
         }
 
-        return lhs.location < rhs.location
+        return lhsLocation < rhsLocation
     }
 }
 

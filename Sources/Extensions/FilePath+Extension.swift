@@ -18,6 +18,11 @@ public extension FilePath {
         return relativePath.pushing(filePath)
     }
 
+    @inlinable
+    func makeAbsolute(relativeTo relativePath: FilePath = .current) -> FilePath {
+        Self.makeAbsolute(self, relativeTo: relativePath)
+    }
+
     @inlinable var exists: Bool {
         fileManager.fileExists(atPath: lexicallyNormalized().string)
     }
