@@ -6,6 +6,9 @@ struct FixtureStruct8 {
 }
 
 extension FixtureStruct8 {
+    @_dynamicReplacement(for: originalStaticMethod)
+    static func replacementStaticMethod() {}
+
     @_dynamicReplacement(for: originalMethod)
     func replacementMethod() {}
 
@@ -18,6 +21,7 @@ extension FixtureStruct8 {
 
 public struct FixtureStruct8Retainer {
     public func retain() {
+        _ = FixtureStruct8.originalStaticMethod()
         let strct = FixtureStruct8()
         strct.originalMethod()
         _ = strct.originalProperty
