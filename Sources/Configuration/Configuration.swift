@@ -172,10 +172,6 @@ public final class Configuration {
         }
     }
 
-    public func reset() {
-        settings.forEach { $0.reset() }
-    }
-
     // MARK: - Helpers
 
     public func apply<T: Equatable>(_ path: KeyPath<Configuration, Setting<T>>, _ value: T) {
@@ -186,35 +182,9 @@ public final class Configuration {
         }
     }
 
-    private var _indexExcludeMatchers: [FilenameMatcher]?
-    public var indexExcludeMatchers: [FilenameMatcher] {
-        if let _indexExcludeMatchers {
-            return _indexExcludeMatchers
-        }
-
-        let matchers = buildFilenameMatchers(with: indexExclude)
-        _indexExcludeMatchers = matchers
-        return matchers
-    }
-
-    private var _retainFilesMatchers: [FilenameMatcher]?
-    public var retainFilesMatchers: [FilenameMatcher] {
-        if let _retainFilesMatchers {
-            return _retainFilesMatchers
-        }
-
-        let matchers = buildFilenameMatchers(with: retainFiles)
-        _retainFilesMatchers = matchers
-        return matchers
-    }
-
-    public func resetMatchers() {
-        _indexExcludeMatchers = nil
-        _retainFilesMatchers = nil
-    }
-
+    public lazy var indexExcludeMatchers: [FilenameMatcher] = buildFilenameMatchers(with: indexExclude)
+    public lazy var retainFilesMatchers: [FilenameMatcher] = buildFilenameMatchers(with: retainFiles)
     public lazy var reportExcludeMatchers: [FilenameMatcher] = buildFilenameMatchers(with: reportExclude)
-
     public lazy var reportIncludeMatchers: [FilenameMatcher] = buildFilenameMatchers(with: reportInclude)
 
     // MARK: - Private
@@ -255,7 +225,6 @@ protocol AbstractSetting {
     var hasNonDefaultValue: Bool { get }
     var wrappedValue: Value { get }
 
-    func reset()
     func assign(_ value: Any)
 }
 
@@ -292,10 +261,6 @@ protocol AbstractSetting {
 
     public func assign(_ newValue: Any) {
         value = setter(newValue) ?? defaultValue
-    }
-
-    func reset() {
-        wrappedValue = defaultValue
     }
 }
 

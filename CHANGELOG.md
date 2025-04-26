@@ -25,6 +25,7 @@
 - Fix inconsistent unused parameter results when the function is declared in a file that is a member of multiple targets.
 - Fix inconsistent results caused by identical extensions declared in different modules.
 - Static `@_dynamicReplacement` members are now retained.
+- Fix possible concurrent mutation crash when accessing filename matching configuration options.
 
 ## 3.1.0 (2025-04-05)
 

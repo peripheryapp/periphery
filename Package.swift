@@ -120,6 +120,7 @@ var targets: [PackageDescription.Target] = [
         dependencies: [
             .target(name: "PeripheryKit"),
             .target(name: "ProjectDrivers"),
+            .target(name: "Configuration"),
         ],
         path: "Tests/Shared"
     ),
