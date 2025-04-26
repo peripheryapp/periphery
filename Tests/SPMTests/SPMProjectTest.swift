@@ -1,3 +1,4 @@
+import Configuration
 @testable import TestShared
 import XCTest
 
@@ -6,7 +7,7 @@ final class SPMProjectTest: SPMSourceGraphTestCase {
         super.setUp()
 
         build(projectPath: SPMProjectPath)
-        index()
+        index(configuration: Configuration())
     }
 
     func testMainEntryFile() {

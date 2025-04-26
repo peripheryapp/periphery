@@ -1,13 +1,15 @@
+import Configuration
 @testable import TestShared
 
 final class UIKitProjectTest: XcodeSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
+        let configuration = Configuration()
         configuration.schemes = ["UIKitProject"]
 
-        build(projectPath: UIKitProjectPath)
-        index()
+        build(projectPath: UIKitProjectPath, configuration: configuration)
+        index(configuration: configuration)
     }
 
     func testRetainsMainAppEntryPoint() {

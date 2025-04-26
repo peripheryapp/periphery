@@ -9,7 +9,6 @@ import XCTest
 
 open class SourceGraphTestCase: XCTestCase {
     static var plan: IndexPlan!
-    static var configuration: Configuration!
     static var shell: Shell!
     static var logger: Logger!
     static var results: [ScanResult] = []
@@ -17,22 +16,15 @@ open class SourceGraphTestCase: XCTestCase {
     private static var graph: SourceGraph!
     private static var allIndexedDeclarations: Set<Declaration> = []
 
-    var configuration: Configuration { Self.configuration }
-
     private var scopeStack: [DeclarationScope] = []
 
     override open class func setUp() {
         super.setUp()
-        configuration = Configuration()
-        configuration.quiet = true
         logger = Logger(quiet: true)
         shell = Shell(logger: logger)
+        let configuration = Configuration()
+        configuration.quiet = true
         graph = SourceGraph(configuration: configuration, logger: logger)
-    }
-
-    override open func setUp() {
-        super.setUp()
-        configuration.reset()
     }
 
     override open func tearDown() {
@@ -45,7 +37,11 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
-    static func index(sourceFiles: [FilePath]? = nil) {
+    func index(sourceFiles: [FilePath]? = nil, configuration: Configuration = .init()) {
+        Self.index(sourceFiles: sourceFiles, configuration: configuration)
+    }
+
+    static func index(sourceFiles: [FilePath]? = nil, configuration: Configuration) {
         var newPlan = plan!
 
         if let sourceFiles {
