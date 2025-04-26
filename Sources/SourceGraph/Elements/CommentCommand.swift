@@ -35,3 +35,45 @@ public enum CommentCommand: CustomStringConvertible, Hashable {
         }
     }
 }
+
+public extension Sequence<CommentCommand> {
+    var locationOverride: (String, Int, Int)? {
+        for command in self {
+            switch command {
+            case let .override(overrides):
+                for override in overrides {
+                    switch override {
+                    case let .location(path, line, column):
+                        return (path, line, column)
+                    default:
+                        break
+                    }
+                }
+            default:
+                break
+            }
+        }
+
+        return nil
+    }
+
+    var kindOverride: String? {
+        for command in self {
+            switch command {
+            case let .override(overrides):
+                for override in overrides {
+                    switch override {
+                    case let .kind(kind):
+                        return kind
+                    default:
+                        break
+                    }
+                }
+            default:
+                break
+            }
+        }
+
+        return nil
+    }
+}

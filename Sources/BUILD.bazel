@@ -96,6 +96,7 @@ swift_library(
         "//Sources:Configuration",
         "//Sources:Shared",
         "@swift-syntax//:SwiftSyntax",
+        "@swift-system//:SystemPackage",
     ],
 )
 
