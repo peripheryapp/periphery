@@ -1035,6 +1035,9 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     func testRetainsDynamicReplacement() {
         analyze(retainPublic: true) {
             assertReferenced(.struct("FixtureStruct8")) {
+                self.assertReferenced(.functionMethodStatic("originalStaticMethod()"))
+                self.assertReferenced(.functionMethodStatic("replacementStaticMethod()"))
+
                 self.assertReferenced(.functionMethodInstance("originalMethod()"))
                 self.assertReferenced(.functionMethodInstance("replacementMethod()"))
 

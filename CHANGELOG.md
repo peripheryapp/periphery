@@ -24,6 +24,7 @@
 - Fix slow baseline filtering for large projects with many results.
 - Fix inconsistent unused parameter results when the function is declared in a file that is a member of multiple targets.
 - Fix inconsistent results caused by identical extensions declared in different modules.
+- Static `@_dynamicReplacement` members are now retained.
 
 ## 3.1.0 (2025-04-05)
 

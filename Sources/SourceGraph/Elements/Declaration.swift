@@ -49,6 +49,10 @@ public final class Declaration {
             Set(Kind.allCases.filter(\.isFunctionKind))
         }
 
+        static var variableKinds: Set<Kind> {
+            Set(Kind.allCases.filter(\.isVariableKind))
+        }
+
         static var protocolMemberKinds: [Kind] {
             let functionKinds: [Kind] = [.functionMethodInstance, .functionMethodStatic, .functionSubscript, .functionOperator, .functionOperatorInfix, .functionOperatorPostfix, .functionOperatorPrefix, .functionConstructor]
             let variableKinds: [Kind] = [.varInstance, .varStatic]
@@ -71,10 +75,6 @@ public final class Declaration {
 
         public var isFunctionKind: Bool {
             rawValue.hasPrefix("function")
-        }
-
-        static var variableKinds: Set<Kind> {
-            Set(Kind.allCases.filter(\.isVariableKind))
         }
 
         public var isVariableKind: Bool {
