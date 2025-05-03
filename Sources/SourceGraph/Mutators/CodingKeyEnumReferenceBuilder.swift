@@ -3,6 +3,7 @@ import Foundation
 import Shared
 
 /// Builds a reference from a `Codable` conforming type to any child enum that conforms to `CodingKey`.
+@MainActor
 final class CodingKeyEnumReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
 

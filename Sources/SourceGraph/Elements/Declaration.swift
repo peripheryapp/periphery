@@ -1,6 +1,6 @@
 import Foundation
 
-public final class Declaration {
+public final actor Declaration {
     public enum Kind: String, RawRepresentable, CaseIterable {
         case `associatedtype`
         case `class`
@@ -282,7 +282,7 @@ public final class Declaration {
         modifiers.contains("override")
     }
 
-    public var relatedEquivalentReferences: [Reference] {
+    public var relatedEquivalentReferences: async [Reference] {
         related.filter { $0.kind == kind && $0.name == name }
     }
 

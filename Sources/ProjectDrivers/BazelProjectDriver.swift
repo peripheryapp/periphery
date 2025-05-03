@@ -102,7 +102,7 @@ public class BazelProjectDriver: ProjectDriver {
         contextLogger.debug("Build file written to \(buildPath)")
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
-            let asterisk = Logger.colorize("*", .boldGreen)
+            let asterisk = logger.colorize("*", .boldGreen)
             logger.info("\(asterisk) Building...")
         }
 

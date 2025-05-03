@@ -46,6 +46,6 @@ final class XcodeFormatter: OutputFormatter {
 
     private func colorize(_ text: String, _ color: ANSIColor, colored: Bool) -> String {
         guard colored else { return text }
-        return Logger.colorize(text, color)
+        return logger.colorize(text, color)
     }
 }

@@ -182,5 +182,5 @@ let package = Package(
     ],
     dependencies: dependencies,
     targets: targets,
-    swiftLanguageModes: [.v5]
+    swiftLanguageModes: [.v6]
 )

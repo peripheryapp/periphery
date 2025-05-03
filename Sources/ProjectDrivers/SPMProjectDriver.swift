@@ -35,7 +35,7 @@ extension SPMProjectDriver: ProjectDriver {
             }
 
             if configuration.outputFormat.supportsAuxiliaryOutput {
-                let asterisk = Logger.colorize("*", .boldGreen)
+                let asterisk = logger.colorize("*", .boldGreen)
                 logger.info("\(asterisk) Building...")
             }
 

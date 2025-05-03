@@ -10,6 +10,7 @@ import Shared
 /// Testing TODO:
 /// * Exports, including nested exports
 /// * Public declaration extended by another module
+@MainActor
 final class UnusedImportMarker: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration

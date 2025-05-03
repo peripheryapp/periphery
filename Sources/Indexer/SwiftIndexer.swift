@@ -203,13 +203,11 @@ final class SwiftIndexer: Indexer {
                 declarations.append(decl)
             }
 
-            graph.withLock {
-                graph.addWithoutLock(references)
-                graph.addWithoutLock(newDeclarations)
+            await graph.addWithoutLock(references)
+            await graph.addWithoutLock(newDeclarations)
 
-                if retainAllDeclarations {
-                    graph.markRetainedWithoutLock(newDeclarations)
-                }
+            if retainAllDeclarations {
+                await graph.markRetainedWithoutLock(newDeclarations)
             }
 
             establishDeclarationHierarchy()
@@ -218,8 +216,8 @@ final class SwiftIndexer: Indexer {
         /// Phase two associates latent references, and performs other actions that depend on the completed source graph.
         func phaseTwo() throws {
             if !configuration.disableUnusedImportAnalysis {
-                graph.addIndexedSourceFile(sourceFile)
-                graph.addIndexedModules(sourceFile.modules)
+                await graph.addIndexedSourceFile(sourceFile)
+                await graph.addIndexedModules(sourceFile.modules)
             }
 
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: sourceFile)
@@ -233,7 +231,7 @@ final class SwiftIndexer: Indexer {
 
             if !configuration.disableUnusedImportAnalysis {
                 for stmt in sourceFile.importStatements where stmt.isExported {
-                    graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
+                    await graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
                 }
             }
 
@@ -254,36 +252,32 @@ final class SwiftIndexer: Indexer {
         private var extensionUsrMap: [String: String] = [:]
 
         private func establishDeclarationHierarchy() {
-            graph.withLock {
-                for (parent, decls) in childDeclsByParentUsr {
-                    guard let parentDecl = graph.declarationWithoutLock(withUsr: parent) else {
-                        if varParameterUsrs.contains(parent) {
-                            // These declarations are children of a parameter and are redundant.
-                            decls.forEach { graph.removeWithoutLock($0) }
-                        }
-
-                        continue
+            for (parent, decls) in childDeclsByParentUsr {
+                guard let parentDecl = await graph.declaration(withUsr: parent) else {
+                    if varParameterUsrs.contains(parent) {
+                        // These declarations are children of a parameter and are redundant.
+                        decls.forEach { await graph.remove($0) }
                     }
 
-                    for decl in decls {
-                        decl.parent = parentDecl
-                    }
-
-                    parentDecl.declarations.formUnion(decls)
+                    continue
                 }
+
+                for decl in decls {
+                    decl.parent = parentDecl
+                }
+
+                parentDecl.declarations.formUnion(decls)
             }
         }
 
         private func associateLatentReferences() {
             for (usr, refs) in referencesByUsr {
-                graph.withLock {
-                    if let decl = graph.declarationWithoutLock(withUsr: usr) {
-                        for ref in refs {
-                            associateUnsafe(ref, with: decl)
-                        }
-                    } else {
-                        danglingReferences.append(contentsOf: refs)
+                if let decl = graph.declarationWithoutLock(withUsr: usr) {
+                    for ref in refs {
+                        associateUnsafe(ref, with: decl)
                     }
+                } else {
+                    danglingReferences.append(contentsOf: refs)
                 }
             }
         }
@@ -358,43 +352,41 @@ final class SwiftIndexer: Indexer {
         }
 
         private func applyDeclarationMetadata(to decl: Declaration, with result: DeclarationSyntaxVisitor.Result) {
-            graph.withLock {
-                if let accessibility = result.accessibility {
-                    decl.accessibility = .init(value: accessibility, isExplicit: true)
-                }
+            if let accessibility = result.accessibility {
+                decl.accessibility = .init(value: accessibility, isExplicit: true)
+            }
 
-                decl.attributes = Set(result.attributes)
-                decl.modifiers = Set(result.modifiers)
-                decl.commentCommands = Set(result.commentCommands)
-                decl.declaredType = result.variableType
-                decl.hasGenericFunctionReturnedMetatypeParameters = result.hasGenericFunctionReturnedMetatypeParameters
+            decl.attributes = Set(result.attributes)
+            decl.modifiers = Set(result.modifiers)
+            decl.commentCommands = Set(result.commentCommands)
+            decl.declaredType = result.variableType
+            decl.hasGenericFunctionReturnedMetatypeParameters = result.hasGenericFunctionReturnedMetatypeParameters
 
-                for ref in decl.references.union(decl.related) {
-                    if result.inheritedTypeLocations.contains(ref.location) {
-                        if decl.kind.isConformableKind, ref.kind == .protocol {
-                            ref.role = .conformedType
-                        } else if decl.kind == .protocol, ref.kind == .protocol {
-                            ref.role = .refinedProtocolType
-                        } else if decl.kind == .class || decl.kind == .associatedtype {
-                            ref.role = .inheritedType
-                        }
-                    } else if result.variableTypeLocations.contains(ref.location) {
-                        ref.role = .varType
-                    } else if result.returnTypeLocations.contains(ref.location) {
-                        ref.role = .returnType
-                    } else if result.parameterTypeLocations.contains(ref.location) {
-                        ref.role = .parameterType
-                    } else if result.genericParameterLocations.contains(ref.location) {
-                        ref.role = .genericParameterType
-                    } else if result.genericConformanceRequirementLocations.contains(ref.location) {
-                        ref.role = .genericRequirementType
-                    } else if result.variableInitFunctionCallLocations.contains(ref.location) {
-                        ref.role = .variableInitFunctionCall
-                    } else if result.functionCallMetatypeArgumentLocations.contains(ref.location) {
-                        ref.role = .functionCallMetatypeArgument
-                    } else if result.typeInitializerLocations.contains(ref.location) {
-                        ref.role = .initializerType
+            for ref in decl.references.union(decl.related) {
+                if result.inheritedTypeLocations.contains(ref.location) {
+                    if decl.kind.isConformableKind, ref.kind == .protocol {
+                        ref.role = .conformedType
+                    } else if decl.kind == .protocol, ref.kind == .protocol {
+                        ref.role = .refinedProtocolType
+                    } else if decl.kind == .class || decl.kind == .associatedtype {
+                        ref.role = .inheritedType
                     }
+                } else if result.variableTypeLocations.contains(ref.location) {
+                    ref.role = .varType
+                } else if result.returnTypeLocations.contains(ref.location) {
+                    ref.role = .returnType
+                } else if result.parameterTypeLocations.contains(ref.location) {
+                    ref.role = .parameterType
+                } else if result.genericParameterLocations.contains(ref.location) {
+                    ref.role = .genericParameterType
+                } else if result.genericConformanceRequirementLocations.contains(ref.location) {
+                    ref.role = .genericRequirementType
+                } else if result.variableInitFunctionCallLocations.contains(ref.location) {
+                    ref.role = .variableInitFunctionCall
+                } else if result.functionCallMetatypeArgumentLocations.contains(ref.location) {
+                    ref.role = .functionCallMetatypeArgument
+                } else if result.typeInitializerLocations.contains(ref.location) {
+                    ref.role = .initializerType
                 }
             }
         }
@@ -407,10 +399,8 @@ final class SwiftIndexer: Indexer {
             }
         }
 
-        private func associate(_ ref: Reference, with decl: Declaration) {
-            graph.withLock {
-                associateUnsafe(ref, with: decl)
-            }
+        private func associate(_ ref: Reference, with decl: Declaration) async {
+            await associateUnsafe(ref, with: decl)
         }
 
         private func associateUnsafe(_ ref: Reference, with decl: Declaration) {
@@ -423,7 +413,7 @@ final class SwiftIndexer: Indexer {
             }
         }
 
-        private func identifyUnusedParameters(using syntaxVisitor: MultiplexingSyntaxVisitor) {
+        private func identifyUnusedParameters(using syntaxVisitor: MultiplexingSyntaxVisitor) async {
             let functionDecls = declarations.filter(\.kind.isFunctionKind)
             let functionDeclsByLocation = functionDecls.reduce(into: [Location: Declaration]()) {
                 $0[$1.location] = $1
@@ -453,19 +443,17 @@ final class SwiftIndexer: Indexer {
                     }
                 }
 
-                graph.withLock {
-                    for param in params {
-                        let paramDecl = param.makeDeclaration(withParent: functionDecl)
-                        functionDecl.unusedParameters.insert(paramDecl)
-                        graph.addWithoutLock(paramDecl)
+                for param in params {
+                    let paramDecl = param.makeDeclaration(withParent: functionDecl)
+                    functionDecl.unusedParameters.insert(paramDecl)
+                    await graph.addWithoutLock(paramDecl)
 
-                        if retainAllDeclarations {
-                            graph.markRetainedWithoutLock(paramDecl)
-                        }
+                    if retainAllDeclarations {
+                        await graph.markRetainedWithoutLock(paramDecl)
+                    }
 
-                        if (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) || ignoredParamNames.contains(param.name) {
-                            graph.markRetainedWithoutLock(paramDecl)
-                        }
+                    if (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) || ignoredParamNames.contains(param.name) {
+                        await graph.markRetainedWithoutLock(paramDecl)
                     }
                 }
             }

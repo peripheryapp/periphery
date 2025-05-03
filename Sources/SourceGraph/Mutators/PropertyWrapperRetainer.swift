@@ -2,6 +2,7 @@ import Configuration
 import Foundation
 import Shared
 
+@MainActor
 final class PropertyWrapperRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let specialProperties = ["wrappedValue", "projectedValue"]

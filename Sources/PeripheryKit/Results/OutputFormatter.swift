@@ -43,7 +43,7 @@ extension OutputFormatter {
 
         if var name = result.declaration.name {
             description += "\(kindDisplayName.first?.uppercased() ?? "")\(kindDisplayName.dropFirst()) "
-            name = colored ? Logger.colorize(name, .lightBlue) : name
+            name = colored ? logger.colorize(name, .lightBlue) : name
             description += "'\(name)'"
 
             switch result.annotation {

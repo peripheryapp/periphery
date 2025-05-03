@@ -81,16 +81,16 @@ final class UpdateChecker {
 
         guard latestVersion.isVersion(greaterThan: PeripheryVersion) else { return }
 
-        logger.info(Logger.colorize("\nUpdate Available!", .boldGreen))
-        let boldLatestVersion = Logger.colorize(latestVersion, .bold)
-        let boldLocalVersion = Logger.colorize(PeripheryVersion, .bold)
+        logger.info(logger.colorize("\nUpdate Available!", .boldGreen))
+        let boldLatestVersion = logger.colorize(latestVersion, .bold)
+        let boldLocalVersion = logger.colorize(PeripheryVersion, .bold)
         logger.info("Version \(boldLatestVersion) is now available, you are using version \(boldLocalVersion).")
-        logger.info("Release notes: " + Logger.colorize("https://github.com/peripheryapp/periphery/releases/tag/\(latestVersion)", .bold))
-        let boldOption = Logger.colorize("--disable-update-check", .bold)
-        let boldScan = Logger.colorize("scan", .bold)
+        logger.info("Release notes: " + logger.colorize("https://github.com/peripheryapp/periphery/releases/tag/\(latestVersion)", .bold))
+        let boldOption = logger.colorize("--disable-update-check", .bold)
+        let boldScan = logger.colorize("scan", .bold)
         logger.info("To disable update checks pass the \(boldOption) option to the \(boldScan) command.")
 
-        logger.info(Logger.colorize("\nIf you are enjoying Periphery, please consider becoming a sponsor.", .bold) + "\nYour support helps ensure the continued development of new features and updates to support new Swift versions.\n" + Logger.colorize("https://github.com/sponsors/peripheryapp", .boldMagenta))
+        logger.info(logger.colorize("\nIf you are enjoying Periphery, please consider becoming a sponsor.", .bold) + "\nYour support helps ensure the continued development of new features and updates to support new Swift versions.\n" + logger.colorize("https://github.com/sponsors/peripheryapp", .boldMagenta))
     }
 
     func wait() -> Result<String, PeripheryError> {

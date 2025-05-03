@@ -3,6 +3,7 @@ import Foundation
 import Shared
 
 /// A protocol is considered redundant when it's never used as an existential type, despite being conformed to.
+@MainActor
 final class RedundantProtocolMarker: SourceGraphMutator {
     private let graph: SourceGraph
 

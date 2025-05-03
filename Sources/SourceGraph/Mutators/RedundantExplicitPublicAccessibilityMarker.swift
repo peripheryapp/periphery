@@ -1,6 +1,7 @@
 import Configuration
 import Shared
 
+@MainActor
 final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration

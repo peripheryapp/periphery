@@ -26,7 +26,7 @@ final class XCMappingModelIndexer: Indexer {
             let elapsed = try Benchmark.measure {
                 try XCMappingModelParser(path: path)
                     .parse()
-                    .forEach { self.graph.add($0) }
+                    .forEach { await self.graph.add($0) }
             }
 
             logger.debug("\(path.string) (\(elapsed)s)")

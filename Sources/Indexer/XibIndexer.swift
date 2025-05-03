@@ -26,7 +26,7 @@ final class XibIndexer: Indexer {
             let elapsed = try Benchmark.measure {
                 try XibParser(path: xibPath)
                     .parse()
-                    .forEach { self.graph.add($0) }
+                    .forEach { await self.graph.add($0) }
             }
 
             logger.debug("\(xibPath.string) (\(elapsed)s)")

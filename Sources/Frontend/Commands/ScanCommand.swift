@@ -13,10 +13,10 @@ struct ScanCommand: FrontendCommand {
     )
 
     @Argument(help: "Arguments following '--' will be passed to the underlying build tool, which is either 'swift build' or 'xcodebuild' depending on your project")
-    var buildArguments: [String] = defaultConfiguration.$buildArguments.defaultValue
+    var buildArguments: [String] = Configuration.Default.buildArguments
 
     @Flag(help: "Enable guided setup")
-    var setup: Bool = defaultConfiguration.guidedSetup
+    var setup: Bool = Configuration.Default.guidedSetup
 
     @Option(help: "Path to the root directory of your project")
     var projectRoot: FilePath = projectRootDefault
@@ -28,97 +28,97 @@ struct ScanCommand: FrontendCommand {
     var project: FilePath?
 
     @Option(parsing: .upToNextOption, help: "Schemes to build. All targets built by these schemes will be scanned")
-    var schemes: [String] = defaultConfiguration.$schemes.defaultValue
+    var schemes: [String] = Configuration.Default.schemes
 
     @Option(help: "Output format (allowed: \(OutputFormat.allValueStrings.joined(separator: ", ")))")
-    var format: OutputFormat = defaultConfiguration.$outputFormat.defaultValue
+    var format: OutputFormat = Configuration.Default.outputFormat
 
     @Flag(help: "Exclude test targets from indexing")
-    var excludeTests: Bool = defaultConfiguration.$excludeTests.defaultValue
+    var excludeTests: Bool = Configuration.Default.excludeTests
 
     @Option(parsing: .upToNextOption, help: "Targets to exclude from indexing")
-    var excludeTargets: [String] = defaultConfiguration.$excludeTargets.defaultValue
+    var excludeTargets: [String] = Configuration.Default.excludeTargets
 
     @Option(parsing: .upToNextOption, help: "Source file globs to exclude from indexing")
-    var indexExclude: [String] = defaultConfiguration.$indexExclude.defaultValue
+    var indexExclude: [String] = Configuration.Default.indexExclude
 
     @Option(parsing: .upToNextOption, help: "Source file globs to exclude from the results. Note that this option is purely cosmetic, these files will still be indexed")
-    var reportExclude: [String] = defaultConfiguration.$reportExclude.defaultValue
+    var reportExclude: [String] = Configuration.Default.reportExclude
 
     @Option(parsing: .upToNextOption, help: "Source file globs to include in the results. This option supersedes '--report-exclude'. Note that this option is purely cosmetic, these files will still be indexed")
-    var reportInclude: [String] = defaultConfiguration.$reportInclude.defaultValue
+    var reportInclude: [String] = Configuration.Default.reportInclude
 
     @Option(parsing: .upToNextOption, help: "Source file globs for which all containing declarations will be retained")
-    var retainFiles: [String] = defaultConfiguration.$retainFiles.defaultValue
+    var retainFiles: [String] = Configuration.Default.retainFiles
 
     @Option(parsing: .upToNextOption, help: "Index store paths. Implies '--skip-build'")
-    var indexStorePath: [FilePath] = defaultConfiguration.$indexStorePath.defaultValue
+    var indexStorePath: [FilePath] = Configuration.Default.indexStorePath
 
     @Flag(help: "Retain all public declarations, recommended for framework/library projects")
-    var retainPublic: Bool = defaultConfiguration.$retainPublic.defaultValue
+    var retainPublic: Bool = Configuration.Default.retainPublic
 
     @Flag(help: "Disable identification of redundant public accessibility")
-    var disableRedundantPublicAnalysis: Bool = defaultConfiguration.$disableRedundantPublicAnalysis.defaultValue
+    var disableRedundantPublicAnalysis: Bool = Configuration.Default.disableRedundantPublicAnalysis
 
     @Flag(help: "Disable identification of unused imports")
-    var disableUnusedImportAnalysis: Bool = defaultConfiguration.$disableUnusedImportAnalysis.defaultValue
+    var disableUnusedImportAnalysis: Bool = Configuration.Default.disableUnusedImportAnalysis
 
     @Flag(help: "Retain properties that are assigned, but never used")
-    var retainAssignOnlyProperties: Bool = defaultConfiguration.$retainAssignOnlyProperties.defaultValue
+    var retainAssignOnlyProperties: Bool = Configuration.Default.retainAssignOnlyProperties
 
     @Option(parsing: .upToNextOption, help: "Property types to retain if the property is assigned, but never read")
-    var retainAssignOnlyPropertyTypes: [String] = defaultConfiguration.$retainAssignOnlyPropertyTypes.defaultValue
+    var retainAssignOnlyPropertyTypes: [String] = Configuration.Default.retainAssignOnlyPropertyTypes
 
     @Option(parsing: .upToNextOption, help: "Names of external protocols that inherit Encodable. Properties and CodingKey enums of types conforming to these protocols will be retained")
-    var externalEncodableProtocols: [String] = defaultConfiguration.$externalEncodableProtocols.defaultValue
+    var externalEncodableProtocols: [String] = Configuration.Default.externalEncodableProtocols
 
     @Option(parsing: .upToNextOption, help: "Names of external protocols that inherit Codable. Properties and CodingKey enums of types conforming to these protocols will be retained")
-    var externalCodableProtocols: [String] = defaultConfiguration.$externalCodableProtocols.defaultValue
+    var externalCodableProtocols: [String] = Configuration.Default.externalCodableProtocols
 
     @Option(parsing: .upToNextOption, help: "Names of XCTestCase subclasses that reside in external targets")
-    var externalTestCaseClasses: [String] = defaultConfiguration.$externalTestCaseClasses.defaultValue
+    var externalTestCaseClasses: [String] = Configuration.Default.externalTestCaseClasses
 
     @Flag(help: "Retain declarations that are exposed to Objective-C implicitly by inheriting NSObject classes, or explicitly with the @objc and @objcMembers attributes")
-    var retainObjcAccessible: Bool = defaultConfiguration.$retainObjcAccessible.defaultValue
+    var retainObjcAccessible: Bool = Configuration.Default.retainObjcAccessible
 
     @Flag(help: "Retain declarations that are exposed to Objective-C explicitly with the @objc and @objcMembers attributes")
-    var retainObjcAnnotated: Bool = defaultConfiguration.$retainObjcAnnotated.defaultValue
+    var retainObjcAnnotated: Bool = Configuration.Default.retainObjcAnnotated
 
     @Flag(help: "Retain unused protocol function parameters, even if the parameter is unused in all conforming functions")
-    var retainUnusedProtocolFuncParams: Bool = defaultConfiguration.$retainUnusedProtocolFuncParams.defaultValue
+    var retainUnusedProtocolFuncParams: Bool = Configuration.Default.retainUnusedProtocolFuncParams
 
     @Flag(help: "Retain SwiftUI previews")
-    var retainSwiftUIPreviews: Bool = defaultConfiguration.$retainSwiftUIPreviews.defaultValue
+    var retainSwiftUIPreviews: Bool = Configuration.Default.retainSwiftUIPreviews
 
     @Flag(help: "Retain properties on Codable types (including Encodable and Decodable)")
-    var retainCodableProperties: Bool = defaultConfiguration.$retainCodableProperties.defaultValue
+    var retainCodableProperties: Bool = Configuration.Default.retainCodableProperties
 
     @Flag(help: "Retain properties on Encodable types only")
-    var retainEncodableProperties: Bool = defaultConfiguration.$retainEncodableProperties.defaultValue
+    var retainEncodableProperties: Bool = Configuration.Default.retainEncodableProperties
 
     @Flag(help: "Clean existing build artifacts before building")
-    var cleanBuild: Bool = defaultConfiguration.$cleanBuild.defaultValue
+    var cleanBuild: Bool = Configuration.Default.cleanBuild
 
     @Flag(help: "Skip the project build step")
-    var skipBuild: Bool = defaultConfiguration.$skipBuild.defaultValue
+    var skipBuild: Bool = Configuration.Default.skipBuild
 
     @Flag(help: "Skip schemes validation")
-    var skipSchemesValidation: Bool = defaultConfiguration.$skipSchemesValidation.defaultValue
+    var skipSchemesValidation: Bool = Configuration.Default.skipSchemesValidation
 
     @Flag(help: "Output result paths relative to the current directory")
-    var relativeResults: Bool = defaultConfiguration.$relativeResults.defaultValue
+    var relativeResults: Bool = Configuration.Default.relativeResults
 
     @Flag(help: "Exit with non-zero status if any unused code is found")
-    var strict: Bool = defaultConfiguration.$strict.defaultValue
+    var strict: Bool = Configuration.Default.strict
 
     @Flag(help: "Disable checking for updates")
-    var disableUpdateCheck: Bool = defaultConfiguration.$disableUpdateCheck.defaultValue
+    var disableUpdateCheck: Bool = Configuration.Default.disableUpdateCheck
 
     @Flag(help: "Enable verbose logging")
-    var verbose: Bool = defaultConfiguration.$verbose.defaultValue
+    var verbose: Bool = Configuration.Default.verbose
 
     @Flag(help: "Only output results")
-    var quiet: Bool = defaultConfiguration.$quiet.defaultValue
+    var quiet: Bool = Configuration.Default.quiet
 
     @Option(help: "JSON package manifest path (obtained using `swift package describe --type json` or manually)")
     var jsonPackageManifestPath: FilePath?
@@ -136,7 +136,7 @@ struct ScanCommand: FrontendCommand {
     var genericProjectConfig: FilePath?
 
     @Flag(help: "Enable Bazel project mode")
-    var bazel: Bool = defaultConfiguration.$bazel.defaultValue
+    var bazel: Bool = Configuration.Default.bazel
 
     @Option(help: "Filter pattern applied to the Bazel top-level targets query")
     var bazelFilter: String?
@@ -153,6 +153,7 @@ struct ScanCommand: FrontendCommand {
         if !setup {
             try configuration.load(from: config)
         }
+
 
         configuration.guidedSetup = setup
         configuration.apply(\.$project, project)

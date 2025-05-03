@@ -4,6 +4,7 @@ import Shared
 
 /// Retains Swift Testing declarations.
 /// https://developer.apple.com/xcode/swift-testing/
+@MainActor
 final class SwiftTestingRetainer: SourceGraphMutator {
     private let graph: SourceGraph
 

@@ -3,5 +3,5 @@ import Logger
 
 protocol FrontendCommand: ParsableCommand {}
 extension FrontendCommand {
-    static var _errorLabel: String { Logger.colorize("error", .boldRed) }
+    static var _errorLabel: String { logger.colorize("error", .boldRed) }
 }

@@ -6,6 +6,7 @@ import Shared
 ///
 /// It's not possible to determine if a declaration that overrides an external declaration is used,
 /// as the external implementation may call the overridden declaration.
+@MainActor
 final class ExternalOverrideRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let isSwift60FixEnabled: Bool

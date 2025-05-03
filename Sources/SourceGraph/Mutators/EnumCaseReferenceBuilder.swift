@@ -3,6 +3,7 @@ import Foundation
 import Shared
 
 /// Builds references to enum cases of enums that are raw representable.
+@MainActor
 final class EnumCaseReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
 

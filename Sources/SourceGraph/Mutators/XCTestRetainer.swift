@@ -11,6 +11,7 @@ final class XCTestRetainer: SourceGraphMutator {
         testCaseClassNames = Set(configuration.externalTestCaseClasses + ["XCTestCase"])
     }
 
+    @MainActor
     func mutate() {
         let immediateTestCaseClasses = graph.declarations(ofKind: .class).filter {
             $0.related.contains {

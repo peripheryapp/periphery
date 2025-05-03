@@ -3,6 +3,7 @@ import Foundation
 import Shared
 
 /// Retains static methods used by the Result Builder language feature.
+@MainActor
 final class ResultBuilderRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let resultBuilderMethods = Set<String>([

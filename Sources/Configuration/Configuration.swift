@@ -6,10 +6,197 @@ import Shared
 import SystemPackage
 import Yams
 
-public final class Configuration {
-    public static var defaultConfigurationFile = FilePath(".periphery.yml")
+public struct Configuration: Codable, Sendable {
+    enum CodingKeys: String, CodingKey {
+        case project = "project"
+        case outputFormat = "format"
+        case schemes = "schemes"
+        case excludeTests = "exclude_tests"
+        case excludeTargets = "exclude_targets"
+        case indexExclude = "index_exclude"
+        case reportExclude = "report_exclude"
+        case reportInclude = "report_include"
+        case buildArguments = "build_arguments"
+        case xcodeListArguments = "xcode_list_arguments"
+        case retainAssignOnlyPropertyTypes = "retain_assign_only_property_types"
+        case externalEncodableProtocols = "external_encodable_protocols"
+        case externalCodableProtocols = "external_codable_protocols"
+        case externalTestCaseClasses = "external_test_case_classes"
+        case retainObjcAccessible = "retain_objc_accessible"
+        case retainObjcAnnotated = "retain_objc_annotated"
+        case retainFiles = "retain_files"
+        case retainPublic = "retain_public"
+        case retainAssignOnlyProperties = "retain_assign_only_properties"
+        case retainUnusedProtocolFuncParams = "retain_unused_protocol_func_params"
+        case retainSwiftUIPreviews = "retain_swift_ui_previews"
+        case disableRedundantPublicAnalysis = "disable_redundant_public_analysis"
+        case disableUnusedImportAnalysis = "disable_unused_import_analysis"
+        case retainCodableProperties = "retain_codable_properties"
+        case retainEncodableProperties = "retain_encodable_properties"
+        case verbose = "verbose"
+        case quiet = "quiet"
+        case disableUpdateCheck = "disable_update_check"
+        case strict = "strict"
+        case indexStorePath = "index_store_path"
+        case skipBuild = "skip_build"
+        case skipSchemesValidation = "skip_schemes_validation"
+        case cleanBuild = "clean_build"
+        case relativeResults = "relative_results"
+        case jsonPackageManifestPath = "json_package_manifest_path"
+        case baseline = "baseline"
+        case writeBaseline = "write_baseline"
+        case writeResults = "write_results"
+        case genericProjectConfig = "generic_project_config"
+        case bazel = "bazel"
+        case bazelFilter = "bazel_filter"
+    }
 
+    public struct Default {
+        public static let project: FilePath? = nil
+        public static let outputFormat: OutputFormat = .default
+        public static let schemes: [String] = []
+        public static let excludeTests: Bool = false
+        public static let excludeTargets: [String] = []
+        public static let indexExclude: [String] = ["**/*?.build/**/*", "**/SourcePackages/checkouts/**"]
+        public static let reportExclude: [String] = []
+        public static let reportInclude: [String] = []
+        public static let buildArguments: [String] = []
+        public static let xcodeListArguments: [String] = []
+        public static let retainAssignOnlyPropertyTypes: [String] = []
+        public static let externalEncodableProtocols: [String] = []
+        public static let externalCodableProtocols: [String] = []
+        public static let externalTestCaseClasses: [String] = []
+        public static let retainObjcAccessible: Bool = false
+        public static let retainObjcAnnotated: Bool = false
+        public static let retainFiles: [String] = []
+        public static let retainPublic: Bool = false
+        public static let retainAssignOnlyProperties: Bool = false
+        public static let retainUnusedProtocolFuncParams: Bool = false
+        public static let retainSwiftUIPreviews: Bool = false
+        public static let disableRedundantPublicAnalysis: Bool = false
+        public static let disableUnusedImportAnalysis: Bool = false
+        public static let retainCodableProperties: Bool = false
+        public static let retainEncodableProperties: Bool = false
+        public static let verbose: Bool = false
+        public static let quiet: Bool = false
+        public static let disableUpdateCheck: Bool = false
+        public static let strict: Bool = false
+        public static let indexStorePath: [FilePath] = []
+        public static let skipBuild: Bool = false
+        public static let skipSchemesValidation: Bool = false
+        public static let cleanBuild: Bool = false
+        public static let relativeResults: Bool = false
+        public static let jsonPackageManifestPath: FilePath? = nil
+        public static let baseline: FilePath? = nil
+        public static let writeBaseline: FilePath? = nil
+        public static let writeResults: FilePath? = nil
+        public static let genericProjectConfig: FilePath? = nil
+        public static let bazel: Bool = false
+        public static let bazelFilter: String? = nil
+        public static let guidedSetup = false
+    }
+
+    public let project: FilePath?
+    public let outputFormat: OutputFormat
+    public let schemes: [String]
+    public let excludeTests: Bool
+    public let excludeTargets: [String]
+    public let indexExclude: [String]
+    public let reportExclude: [String]
+    public let reportInclude: [String]
+    public let buildArguments: [String]
+    public let xcodeListArguments: [String]
+    public let retainAssignOnlyPropertyTypes: [String]
+    public let externalEncodableProtocols: [String]
+    public let externalCodableProtocols: [String]
+    public let externalTestCaseClasses: [String]
+    public let retainObjcAccessible: Bool
+    public let retainObjcAnnotated: Bool
+    public let retainFiles: [String]
+    public let retainPublic: Bool
+    public let retainAssignOnlyProperties: Bool
+    public let retainUnusedProtocolFuncParams: Bool
+    public let retainSwiftUIPreviews: Bool
+    public let disableRedundantPublicAnalysis: Bool
+    public let disableUnusedImportAnalysis: Bool
+    public let retainCodableProperties: Bool
+    public let retainEncodableProperties: Bool
+    public let verbose: Bool
+    public let quiet: Bool
+    public let disableUpdateCheck: Bool
+    public let strict: Bool
+    public let indexStorePath: [FilePath]
+    public let skipBuild: Bool
+    public let skipSchemesValidation: Bool
+    public let cleanBuild: Bool
+    public let relativeResults: Bool
+    public let jsonPackageManifestPath: FilePath?
+    public let baseline: FilePath?
+    public let writeBaseline: FilePath?
+    public let writeResults: FilePath?
+    public let genericProjectConfig: FilePath?
+    public let bazel: Bool
+    public let bazelFilter: String?
+
+    // Non user facing.
+    public let guidedSetup: Bool = false
+
+      public init(
+        project: FilePath?,
+        outputFormat: OutputFormat,
+        schemes: [String],
+        excludeTests: Bool,
+        excludeTargets: [String],
+        indexExclude: [String],
+        reportExclude: [String],
+        reportInclude: [String],
+        buildArguments: [String],
+        xcodeListArguments: [String],
+        retainAssignOnlyPropertyTypes: [String],
+        externalEncodableProtocols: [String],
+        externalCodableProtocols: [String],
+        externalTestCaseClasses: [String],
+        retainObjcAccessible: Bool,
+        retainObjcAnnotated: Bool,
+        retainFiles: [String],
+        retainPublic: Bool,
+        retainAssignOnlyProperties: Bool,
+        retainUnusedProtocolFuncParams: Bool,
+        retainSwiftUIPreviews: Bool,
+        disableRedundantPublicAnalysis: Bool,
+        disableUnusedImportAnalysis: Bool,
+        retainCodableProperties: Bool,
+        retainEncodableProperties: Bool,
+        verbose: Bool,
+        quiet: Bool,
+        disableUpdateCheck: Bool,
+        strict: Bool,
+        indexStorePath: [FilePath],
+        skipBuild: Bool,
+        skipSchemesValidation: Bool,
+        cleanBuild: Bool,
+        relativeResults: Bool,
+        jsonPackageManifestPath: FilePath?,
+        baseline: FilePath?,
+        writeBaseline: FilePath?,
+        writeResults: FilePath?,
+        genericProjectConfig: FilePath?,
+        bazel: Bool,
+        bazelFilter: String?
+      ) {
+
+      }
+
+    public func asYaml() throws -> String {
+      let encoder = YAMLEncoder()
+      return try encoder.encode(self)
+    }
+}
+
+public final class ConfigurationOld {
     public init() {}
+
+    public let defaultConfigurationFile = FilePath(".periphery.yml")
 
     @Setting(key: "project", defaultValue: nil, setter: filePathSetter)
     public var project: FilePath?
@@ -141,17 +328,8 @@ public final class Configuration {
         settings.contains(where: \.hasNonDefaultValue)
     }
 
-    public func asYaml() throws -> String {
-        var config: [String: Any?] = [:]
-
-        for setting in settings where setting.hasNonDefaultValue {
-            config[setting.key] = setting.wrappedValue
-        }
-
-        return try Yams.dump(object: config)
-    }
-
-    public func save(to path: FilePath = defaultConfigurationFile) throws {
+    public func save(to path: FilePath? = nil) throws {
+        let path = path ?? defaultConfigurationFile
         let data = try asYaml().data(using: .utf8)
         FileManager.default.createFile(atPath: path.string, contents: data)
     }
@@ -214,7 +392,7 @@ public final class Configuration {
             return path
         }
 
-        return [Self.defaultConfigurationFile, FilePath(".periphery.yaml")].first { $0.exists }
+        return [defaultConfigurationFile, FilePath(".periphery.yaml")].first { $0.exists }
     }
 }
 
@@ -229,38 +407,25 @@ protocol AbstractSetting {
 }
 
 @propertyWrapper public final class Setting<Value: Equatable>: AbstractSetting {
-    typealias Setter = (Any) -> Value?
-
     public let defaultValue: Value
     let key: String
 
-    private let setter: Setter
     private var value: Value
 
     init(
         key: String,
         defaultValue: Value,
-        setter: @escaping Setter = { $0 as? Value }
     ) {
         self.key = key
         value = defaultValue
         self.defaultValue = defaultValue
-        self.setter = setter
     }
 
-    public var wrappedValue: Value {
-        get { value }
-        set { value = setter(newValue) ?? defaultValue }
-    }
-
+    public var wrappedValue: Value { value }
     public var projectedValue: Setting { self }
 
     var hasNonDefaultValue: Bool {
         value != defaultValue
-    }
-
-    public func assign(_ newValue: Any) {
-        value = setter(newValue) ?? defaultValue
     }
 }
 

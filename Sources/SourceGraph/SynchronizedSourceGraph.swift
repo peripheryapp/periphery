@@ -1,8 +1,8 @@
 import Foundation
 import Shared
 
-/// A wrapper around for SourceGraph with synchronization for use during indexing.
-public final class SynchronizedSourceGraph {
+/// A wrapper around SourceGraph with synchronization for use during indexing.
+public final actor SynchronizedSourceGraph {
     private let graph: SourceGraph
     private let lock = UnfairLock()
 
@@ -10,42 +10,28 @@ public final class SynchronizedSourceGraph {
         self.graph = graph
     }
 
-    public func withLock<T>(_ block: () -> T) -> T {
-        lock.perform(block)
-    }
-
     public func indexingComplete() {
         graph.indexingComplete()
     }
 
     public func markRetained(_ declaration: Declaration) {
-        withLock {
-            graph.markRetained(declaration)
-        }
+        graph.markRetained(declaration)
     }
 
     public func addIndexedSourceFile(_ file: SourceFile) {
-        withLock {
-            graph.addIndexedSourceFile(file)
-        }
+        graph.addIndexedSourceFile(file)
     }
 
     public func addIndexedModules(_ modules: Set<String>) {
-        withLock {
-            graph.addIndexedModules(modules)
-        }
+        graph.addIndexedModules(modules)
     }
 
     public func addExportedModule(_ module: String, exportedBy exportingModules: Set<String>) {
-        withLock {
-            graph.addExportedModule(module, exportedBy: exportingModules)
-        }
+        graph.addExportedModule(module, exportedBy: exportingModules)
     }
 
     public func add(_ assetReference: AssetReference) {
-        withLock {
-            graph.add(assetReference)
-        }
+        graph.add(assetReference)
     }
 
     // MARK: - Without Lock

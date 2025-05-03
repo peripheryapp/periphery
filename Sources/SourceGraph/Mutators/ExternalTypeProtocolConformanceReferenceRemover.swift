@@ -2,6 +2,7 @@ import Configuration
 import Foundation
 import Shared
 
+@MainActor
 final class ExternalTypeProtocolConformanceReferenceRemover: SourceGraphMutator {
     private let graph: SourceGraph
 

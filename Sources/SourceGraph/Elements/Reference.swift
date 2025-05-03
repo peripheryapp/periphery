@@ -1,4 +1,4 @@
-public final class Reference {
+public final actor Reference {
     public enum Role {
         case varType
         case returnType

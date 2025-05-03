@@ -2,6 +2,7 @@ import Configuration
 import Foundation
 import Shared
 
+@MainActor
 final class UnusedParameterRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration

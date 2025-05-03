@@ -4,6 +4,7 @@ import Shared
 
 /// Folds all references and declarations that exist within an extension into the
 /// class/struct that is being extended and removes the extension declaration.
+@MainActor
 final class ExtensionReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
 

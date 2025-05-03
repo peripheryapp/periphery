@@ -5,6 +5,7 @@ import Shared
 /// https://github.com/apple/swift/issues/54532
 /// Constructors on a class/struct with generic type parameters are not referenced despite being used.
 /// We therefore must reference the constructor from the class/struct.
+@MainActor
 final class GenericClassAndStructConstructorReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
 

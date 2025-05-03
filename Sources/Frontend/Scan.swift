@@ -63,7 +63,7 @@ final class Scan {
         let indexInterval = logger.beginInterval("index")
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
-            let asterisk = Logger.colorize("*", .boldGreen)
+            let asterisk = logger.colorize("*", .boldGreen)
             logger.info("\(asterisk) Indexing...")
         }
 
@@ -79,7 +79,7 @@ final class Scan {
         let analyzeInterval = logger.beginInterval("analyze")
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
-            let asterisk = Logger.colorize("*", .boldGreen)
+            let asterisk = logger.colorize("*", .boldGreen)
             logger.info("\(asterisk) Analyzing...")
         }
 

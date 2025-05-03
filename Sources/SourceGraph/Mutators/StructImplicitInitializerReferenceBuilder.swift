@@ -3,6 +3,7 @@ import Foundation
 import Shared
 
 /// Builds references from struct implicit initializers to the properties it assigns.
+@MainActor
 final class StructImplicitInitializerReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
 

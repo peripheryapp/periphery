@@ -3,6 +3,7 @@ import Foundation
 import Logger
 import Shared
 
+@MainActor
 public final class SourceGraphMutatorRunner {
     private let mutators: [SourceGraphMutator.Type] = [
         // Must come before all others as we need to observe all references prior to any mutations.
