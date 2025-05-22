@@ -44,51 +44,49 @@ def _scan_inputs_aspect_impl(target, ctx):
     xibs = []
     xcdatamodels = []
     xcmappingmodels = []
+    modules = []
 
-    if not target.label.workspace_name:  # Ignore external deps
-        modules = []
+    if SwiftBinaryInfo in target:
+        modules.extend(target[SwiftBinaryInfo].swift_info.direct_modules)
 
-        if SwiftBinaryInfo in target:
-            modules.extend(target[SwiftBinaryInfo].swift_info.direct_modules)
+    if SwiftInfo in target:
+        modules.extend(target[SwiftInfo].direct_modules)
 
-        if SwiftInfo in target:
-            modules.extend(target[SwiftInfo].direct_modules)
+    for module in modules:
+        if hasattr(module, "swift"):
+            if hasattr(module.compilation_context, "direct_sources"):
+                swift_srcs.extend([src for src in module.compilation_context.direct_sources if src.extension == "swift"])
 
-        for module in modules:
-            if hasattr(module, "swift"):
-                if hasattr(module.compilation_context, "direct_sources"):
-                    swift_srcs.extend([src for src in module.compilation_context.direct_sources if src.extension == "swift"])
+            if ctx.rule.attr.testonly:
+                test_targets.append(module.name)
 
-                if ctx.rule.attr.testonly:
-                    test_targets.append(module.name)
+            if hasattr(module.swift, "indexstore") and module.swift.indexstore:
+                indexstores.append(module.swift.indexstore)
 
-                if hasattr(module.swift, "indexstore") and module.swift.indexstore:
-                    indexstores.append(module.swift.indexstore)
+    if AppleResourceInfo in target:
+        # Each attribute has the structure '[(parent, resource_swift_module, resource_depset)]'
+        info = target[AppleResourceInfo]
 
-        if AppleResourceInfo in target:
-            # Each attribute has the structure '[(parent, resource_swift_module, resource_depset)]'
-            info = target[AppleResourceInfo]
+        if hasattr(info, "infoplists"):
+            plists.extend(info.infoplists[0][2].to_list())
 
-            if hasattr(info, "infoplists"):
-                plists.extend(info.infoplists[0][2].to_list())
+        if hasattr(info, "xibs"):
+            xibs.extend(info.xibs[0][2].to_list())
 
-            if hasattr(info, "xibs"):
-                xibs.extend(info.xibs[0][2].to_list())
+        if hasattr(info, "storyboards"):
+            # Periphery uses the same parser for xibs and storyboards.
+            xibs.extend(info.storyboards[0][2].to_list())
 
-            if hasattr(info, "storyboards"):
-                # Periphery uses the same parser for xibs and storyboards.
-                xibs.extend(info.storyboards[0][2].to_list())
+        if hasattr(info, "datamodels"):
+            # 'datamodels' contains both .xcdatamodel and .xcmappingmodel files.
+            # We separate them because Periphery uses a different parser for each.
+            resources = info.datamodels[0][2].to_list()
 
-            if hasattr(info, "datamodels"):
-                # 'datamodels' contains both .xcdatamodel and .xcmappingmodel files.
-                # We separate them because Periphery uses a different parser for each.
-                resources = info.datamodels[0][2].to_list()
-
-                for resource in resources:
-                    if ".xcdatamodel" in resource.path:
-                        xcdatamodels.append(resource)
-                    elif ".xcmappingmodel" in resource.path:
-                        xcmappingmodels.append(resource)
+            for resource in resources:
+                if ".xcdatamodel" in resource.path:
+                    xcdatamodels.append(resource)
+                elif ".xcmappingmodel" in resource.path:
+                    xcmappingmodels.append(resource)
 
     deps = getattr(ctx.rule.attr, "deps", [])
     providers = [dep[PeripheryInfo] for dep in deps]

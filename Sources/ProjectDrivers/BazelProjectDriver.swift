@@ -52,6 +52,7 @@ public class BazelProjectDriver: ProjectDriver {
         "swift_binary",
         "swift_test",
         "swift_compiler_plugin",
+        "swift_proto_library",
     ]
 
     private let configuration: Configuration

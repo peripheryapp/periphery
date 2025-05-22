@@ -127,8 +127,21 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                     graph.add(newReference, from: protocolDeclaration)
                 }
             } else {
-                // The referenced declaration is external, e.g from stdlib/Foundation.
-                graph.markRetained(conformingDeclaration)
+                if let parent = conformingDeclaration.parent {
+                    for usr in conformingDeclaration.usrs {
+                        let newReference = Reference(
+                            kind: conformingDeclaration.kind,
+                            usr: usr,
+                            location: conformingDeclaration.location,
+                            isRelated: true
+                        )
+                        newReference.name = conformingDeclaration.name
+                        newReference.parent = parent
+                        graph.add(newReference, from: parent)
+                    }
+                } else {
+                    graph.markRetained(conformingDeclaration)    
+                }
             }
         }
     }
