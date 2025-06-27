@@ -2,6 +2,20 @@
 
 ##### Breaking
 
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 3.2.0 (2025-06-27)
+
+##### Breaking
+
 - The `bazel-out` directory is no longer automatically excluded from results to allow for the detection of unused code in generated files. Use `--report-exclude "**/bazel-out/**/*"` to apply the previous behavior.
 
 ##### Enhancements
