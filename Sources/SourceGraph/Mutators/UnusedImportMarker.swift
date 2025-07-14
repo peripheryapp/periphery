@@ -6,10 +6,6 @@ import Shared
 ///
 /// A module import is unused when the source file contains no references to it, and no other
 /// imported modules either export it, or extend declarations declared by it.
-///
-/// Testing TODO:
-/// * Exports, including nested exports
-/// * Public declaration extended by another module
 final class UnusedImportMarker: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
@@ -30,10 +26,9 @@ final class UnusedImportMarker: SourceGraphMutator {
         for ref in graph.allReferences {
             guard let decl = graph.declaration(withUsr: ref.usr) else { continue }
 
-            // Record directly referenced modules and also identify any modules that extended
-            // the declaration. These extensions may provide members/conformances that aren't
-            // referenced directly but which are still required.
-            let referencedModules = decl.location.file.modules.union(modulesExtending(decl))
+            let referencedModules = decl.location.file.modules
+                .union(modulesExtending(decl))
+                .union(modulesDeclaringReferencedTypes(decl))
             referencedModulesByFile[ref.location.file, default: []].formUnion(referencedModules)
         }
 
@@ -73,7 +68,8 @@ final class UnusedImportMarker: SourceGraphMutator {
 
     private var extendedDeclCache: [Declaration: Set<String>] = [:]
 
-    /// Identifies any modules that extend the given declaration.
+    /// Identifies any modules that extend the given declaration, as they may provide members and
+    /// conformances that are required for compilation.
     private func modulesExtending(_ decl: Declaration) -> Set<String> {
         guard decl.kind.isExtendableKind else { return [] }
 
@@ -92,5 +88,32 @@ final class UnusedImportMarker: SourceGraphMutator {
             }
         extendedDeclCache[decl] = modules
         return modules
+    }
+
+    /// Identifies modules that declare types referenced by the given declaration that are not
+    /// referenced directly at the usage site of the declaration, but are required for compilation.
+    ///
+    /// For example, where a property is used, only the property declaration and its accessors are
+    /// referenced. If the module that declares the property _type_ is different from the module
+    /// that declares the property, then the import for the module declaring the type is required
+    /// for compilation.
+    private func modulesDeclaringReferencedTypes(_ decl: Declaration) -> Set<String> {
+        guard decl.kind.isVariableKind ||
+            decl.kind == .enumelement ||
+            decl.kind == .typealias
+        else { return [] }
+
+        return decl.references.flatMapSet { ref in
+            guard let refDecl = graph.declaration(withUsr: ref.usr) else { return [] }
+
+            var modules = refDecl.location.file.modules
+
+            if refDecl.kind == .typealias {
+                // Follow a typealias to also include the module that declares the aliased type.
+                modules.formUnion(modulesDeclaringReferencedTypes(refDecl))
+            }
+
+            return modules
+        }
     }
 }
