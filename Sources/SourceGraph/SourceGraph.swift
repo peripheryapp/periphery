@@ -16,12 +16,13 @@ public final class SourceGraph {
     public private(set) var assetReferences: Set<AssetReference> = []
     public private(set) var mainAttributedDeclarations: Set<Declaration> = []
     public private(set) var allReferencesByUsr: [String: Set<Reference>] = [:]
-    public private(set) var indexedModules: Set<String> = []
     public private(set) var indexedSourceFiles: [SourceFile] = []
     public private(set) var unusedModuleImports: Set<Declaration> = []
     public private(set) var assignOnlyProperties: Set<Declaration> = []
     public private(set) var extensions: [Declaration: Set<Declaration>] = [:]
 
+    private var indexedModules: Set<String> = []
+    private var unindexedExportedModules: Set<String> = []
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var allDeclarationsByUsr: [String: Declaration] = [:]
     private var moduleToExportingModules: [String: Set<String>] = [:]
@@ -37,6 +38,7 @@ public final class SourceGraph {
     public func indexingComplete() {
         rootDeclarations = allDeclarations.filter { $0.parent == nil }
         rootReferences = allReferences.filter { $0.parent == nil }
+        unindexedExportedModules = Set(moduleToExportingModules.keys).subtracting(indexedModules)
     }
 
     public var unusedDeclarations: Set<Declaration> {
@@ -60,7 +62,11 @@ public final class SourceGraph {
     }
 
     public func references(to decl: Declaration) -> Set<Reference> {
-        decl.usrs.flatMapSet { allReferencesByUsr[$0, default: []] }
+        decl.usrs.flatMapSet { references(to: $0) }
+    }
+
+    public func references(to usr: String) -> Set<Reference> {
+        allReferencesByUsr[usr, default: []]
     }
 
     public func hasReferences(to decl: Declaration) -> Bool {
@@ -189,8 +195,18 @@ public final class SourceGraph {
         indexedModules.formUnion(modules)
     }
 
+    public func isModuleIndexed(_ module: String) -> Bool {
+        indexedModules.contains(module)
+    }
+
     public func addExportedModule(_ module: String, exportedBy exportingModules: Set<String>) {
         moduleToExportingModules[module, default: []].formUnion(exportingModules)
+    }
+
+    public func moduleExportsUnindexedModules(_ module: String) -> Bool {
+        unindexedExportedModules.contains { unindexedModule in
+            isModule(unindexedModule, exportedBy: module)
+        }
     }
 
     public func isModule(_ module: String, exportedBy exportingModule: String) -> Bool {
@@ -272,6 +288,21 @@ public final class SourceGraph {
         }
 
         return nil
+    }
+
+    func allSuperDeclarationsInOverrideChain(from decl: Declaration) -> Set<Declaration> {
+        guard decl.isOverride else { return [] }
+
+        let overridenDecl = decl.related
+            .filter { $0.kind == decl.kind && $0.name == decl.name }
+            .compactMap { declaration(withUsr: $0.usr) }
+            .first
+
+        guard let overridenDecl else {
+            return []
+        }
+
+        return Set([overridenDecl]).union(allSuperDeclarationsInOverrideChain(from: overridenDecl))
     }
 
     func baseDeclaration(fromOverride decl: Declaration) -> (Declaration, Bool) {

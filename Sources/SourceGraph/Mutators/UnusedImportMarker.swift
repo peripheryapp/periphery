@@ -24,11 +24,28 @@ final class UnusedImportMarker: SourceGraphMutator {
 
         // Build a mapping of source files and the modules they reference.
         for ref in graph.allReferences {
-            guard let decl = graph.declaration(withUsr: ref.usr) else { continue }
+            var directModules: Set<String> = []
+            var indirectModules: Set<String> = []
 
-            let referencedModules = decl.location.file.modules
-                .union(modulesExtending(decl))
-                .union(modulesDeclaringReferencedTypes(decl))
+            if let decl = graph.declaration(withUsr: ref.usr) {
+                directModules = decl.location.file.modules
+                let indirectRefs = referencedTypes(from: decl)
+
+                indirectModules = indirectRefs
+                    .compactMap { graph.declaration(withUsr: $0.usr) }
+                    .flatMapSet(\.location.file.modules)
+                    .union(indirectRefs.flatMapSet { modulesExtending($0) })
+
+                if decl.isOverride {
+                    let overrideModules = graph.allSuperDeclarationsInOverrideChain(from: decl)
+                        .flatMapSet(\.location.file.modules)
+                    indirectModules.formUnion(overrideModules)
+                }
+            }
+
+            let referencedModules = directModules
+                .union(indirectModules)
+                .union(modulesExtending(ref))
             referencedModulesByFile[ref.location.file, default: []].formUnion(referencedModules)
         }
 
@@ -46,10 +63,11 @@ final class UnusedImportMarker: SourceGraphMutator {
                         // Exclude exported/public imports because even though they may be unreferenced
                         // in the current file, their exported symbols may be referenced in others.
                         !$0.isExported &&
-                        // Consider modules that have been indexed as we need to see which modules
+                        // Only Consider modules that have been indexed as we need to see which modules
                         // they export.
-                        graph.indexedModules.contains($0.module) &&
-                        !referencedModules.contains($0.module)
+                        graph.isModuleIndexed($0.module) &&
+                        !referencedModules.contains($0.module) &&
+                        !graph.moduleExportsUnindexedModules($0.module)
                 }
 
             for unreferencedImport in unreferencedImports {
@@ -66,54 +84,58 @@ final class UnusedImportMarker: SourceGraphMutator {
 
     // MARK: - Private
 
-    private var extendedDeclCache: [Declaration: Set<String>] = [:]
+    private var extendedDeclCache: [String: Set<String>] = [:]
 
-    /// Identifies any modules that extend the given declaration, as they may provide members and
-    /// conformances that are required for compilation.
-    private func modulesExtending(_ decl: Declaration) -> Set<String> {
-        guard decl.kind.isExtendableKind else { return [] }
+    /// Identifies any modules that extend the given declaration reference, as they may provide
+    /// members and conformances that are required for compilation.
+    private func modulesExtending(_ ref: Reference) -> Set<String> {
+        guard ref.kind.isExtendableKind else { return [] }
 
-        if let modules = extendedDeclCache[decl] {
+        if let modules = extendedDeclCache[ref.usr] {
             return modules
         }
 
-        let modules: Set<String> = graph.references(to: decl)
+        let modules: Set<String> = graph.references(to: ref.usr)
             .flatMapSet {
                 guard let parent = $0.parent,
-                      parent.kind == decl.kind.extensionKind,
-                      parent.name == decl.name
+                      parent.kind == ref.kind.extensionKind,
+                      parent.name == ref.name
                 else { return [] }
 
                 return parent.location.file.modules
             }
-        extendedDeclCache[decl] = modules
+        extendedDeclCache[ref.usr] = modules
         return modules
     }
 
-    /// Identifies modules that declare types referenced by the given declaration that are not
-    /// referenced directly at the usage site of the declaration, but are required for compilation.
-    ///
-    /// For example, where a property is used, only the property declaration and its accessors are
-    /// referenced. If the module that declares the property _type_ is different from the module
-    /// that declares the property, then the import for the module declaring the type is required
-    /// for compilation.
-    private func modulesDeclaringReferencedTypes(_ decl: Declaration) -> Set<String> {
-        guard decl.kind.isVariableKind ||
-            decl.kind == .enumelement ||
-            decl.kind == .typealias
-        else { return [] }
+    /// Identifies types referenced by a declaration whose module must be imported for compilation.
+    private func referencedTypes(from decl: Declaration) -> Set<Reference> {
+        let references: Set<Reference>
 
-        return decl.references.flatMapSet { ref in
-            guard let refDecl = graph.declaration(withUsr: ref.usr) else { return [] }
-
-            var modules = refDecl.location.file.modules
-
-            if refDecl.kind == .typealias {
-                // Follow a typealias to also include the module that declares the aliased type.
-                modules.formUnion(modulesDeclaringReferencedTypes(refDecl))
+        if decl.kind.isVariableKind {
+            references = decl.references.filter { $0.role == .varType }
+        } else if decl.kind == .enumelement {
+            references = decl.references
+        } else if decl.kind == .typealias {
+            let transitiveReferences = decl.references.flatMapSet { ref -> Set<Reference> in
+                guard let refDecl = graph.declaration(withUsr: ref.usr) else { return [] }
+                return referencedTypes(from: refDecl)
             }
-
-            return modules
+            references = decl.references.union(transitiveReferences)
+        } else if decl.kind.isFunctionKind {
+            references = decl.references
+                .filter {
+                    [
+                        .returnType,
+                        .parameterType,
+                    ].contains($0.role)
+                }
+        } else if decl.kind == .protocol {
+            references = decl.related.filter { $0.role == .refinedProtocolType }
+        } else {
+            references = []
         }
+
+        return references
     }
 }
