@@ -133,7 +133,7 @@ public final class Declaration {
         }
 
         public var isExtendableKind: Bool {
-            isConcreteTypeDeclarableKind
+            isConcreteTypeDeclarableKind || self == .protocol
         }
 
         public var isConformableKind: Bool {

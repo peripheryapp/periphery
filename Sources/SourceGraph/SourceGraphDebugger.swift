@@ -16,7 +16,7 @@ final class SourceGraphDebugger {
 
     // MARK: - Private
 
-    private func describe(_ declarations: [Declaration]) {
+    func describe(_ declarations: [Declaration]) {
         for (index, declaration) in declarations.enumerated() {
             describe(declaration)
 

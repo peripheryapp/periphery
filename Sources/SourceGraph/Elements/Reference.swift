@@ -1,5 +1,5 @@
 public final class Reference {
-    public enum Role {
+    public enum Role: String {
         case varType
         case returnType
         case parameterType
@@ -69,7 +69,7 @@ extension Reference: CustomStringConvertible {
     var descriptionParts: [String] {
         let formattedName = name != nil ? "'\(name!)'" : "nil"
 
-        return [kind.rawValue, formattedName, "'\(usr)'", location.shortDescription]
+        return [kind.rawValue, formattedName, "'\(usr)'", role.rawValue, location.shortDescription]
     }
 }
 

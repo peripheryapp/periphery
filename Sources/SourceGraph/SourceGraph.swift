@@ -60,7 +60,11 @@ public final class SourceGraph {
     }
 
     public func references(to decl: Declaration) -> Set<Reference> {
-        decl.usrs.flatMapSet { allReferencesByUsr[$0, default: []] }
+        decl.usrs.flatMapSet { references(to: $0) }
+    }
+
+    public func references(to usr: String) -> Set<Reference> {
+        allReferencesByUsr[usr, default: []]
     }
 
     public func hasReferences(to decl: Declaration) -> Bool {
@@ -272,6 +276,21 @@ public final class SourceGraph {
         }
 
         return nil
+    }
+
+    func allSuperDeclarationsInOverrideChain(from decl: Declaration) -> Set<Declaration> {
+        guard decl.isOverride else { return [] }
+
+        let overridenDecl = decl.related
+            .filter { $0.kind == decl.kind && $0.name == decl.name }
+            .compactMap { declaration(withUsr: $0.usr) }
+            .first
+
+        guard let overridenDecl else {
+            return []
+        }
+
+        return Set([overridenDecl]).union(allSuperDeclarationsInOverrideChain(from: overridenDecl))
     }
 
     func baseDeclaration(fromOverride decl: Declaration) -> (Declaration, Bool) {
