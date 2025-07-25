@@ -231,6 +231,7 @@ public final class Declaration {
     public var related: Set<Reference> = []
     public var isImplicit: Bool = false
     public var isObjcAccessible: Bool = false
+    public var referencedFiles: Set<SourceFile>
 
     private let hashValueCache: Int
 
@@ -296,6 +297,7 @@ public final class Declaration {
         self.kind = kind
         self.usrs = usrs
         self.location = location
+        self.referencedFiles = [location.file]
         hashValueCache = usrs.hashValue
     }
 
