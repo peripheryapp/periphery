@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Added the `--retain-unused-imported-modules` option.
 
 ##### Bug Fixes
 
