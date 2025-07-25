@@ -34,6 +34,19 @@ final class ExtensionReferenceBuilder: SourceGraphMutator {
             extendedDeclaration.references.formUnion(extensionDeclaration.references)
             extendedDeclaration.related.formUnion(extensionDeclaration.related)
 
+            // Add the extension's file to the extended declaration's referencedFiles set.
+            extendedDeclaration.referencedFiles.insert(extensionDeclaration.location.file)
+            // Propagate the extension's file to all member declarations being merged.
+            for member in extensionDeclaration.declarations {
+                member.referencedFiles.insert(extensionDeclaration.location.file)
+            }
+            // Also update referencedFiles of existing members that are referenced in this extension.
+            for reference in extensionDeclaration.references {
+                if let referencedDecl = graph.declaration(withUsr: reference.usr) {
+                    referencedDecl.referencedFiles.insert(extensionDeclaration.location.file)
+                }
+            }
+
             extensionDeclaration.declarations.forEach { $0.parent = extendedDeclaration }
             extensionDeclaration.references.forEach { $0.parent = extendedDeclaration }
             extensionDeclaration.related.forEach { $0.parent = extendedDeclaration }

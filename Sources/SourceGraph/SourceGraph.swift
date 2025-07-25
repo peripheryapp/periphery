@@ -9,6 +9,8 @@ public final class SourceGraph {
     public private(set) var redundantProtocols: [Declaration: (references: Set<Reference>, inherited: Set<Reference>)] = [:]
     public private(set) var rootDeclarations: Set<Declaration> = []
     public private(set) var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
+    public private(set) var redundantInternalAccessibility: [Declaration: Set<SourceFile>] = [:]
+    public private(set) var redundantFilePrivateAccessibility: [Declaration: Set<SourceFile>] = [:]
     public private(set) var rootReferences: Set<Reference> = []
     public private(set) var allReferences: Set<Reference> = []
     public private(set) var retainedDeclarations: Set<Declaration> = []
@@ -85,6 +87,22 @@ public final class SourceGraph {
         _ = redundantPublicAccessibility.removeValue(forKey: declaration)
     }
 
+    func markRedundantInternalAccessibility(_ declaration: Declaration, file: SourceFile) {
+        redundantInternalAccessibility[declaration, default: []].insert(file)
+    }
+
+    func unmarkRedundantInternalAccessibility(_ declaration: Declaration) {
+        _ = redundantInternalAccessibility.removeValue(forKey: declaration)
+    }
+
+    func markRedundantFilePrivateAccessibility(_ declaration: Declaration, file: SourceFile) {
+        redundantFilePrivateAccessibility[declaration, default: []].insert(file)
+    }
+
+    func unmarkRedundantFilePrivateAccessibility(_ declaration: Declaration) {
+        _ = redundantFilePrivateAccessibility.removeValue(forKey: declaration)
+    }
+
     func markIgnored(_ declaration: Declaration) {
         _ = ignoredDeclarations.insert(declaration)
     }
@@ -143,6 +161,9 @@ public final class SourceGraph {
     public func add(_ reference: Reference) {
         _ = allReferences.insert(reference)
         allReferencesByUsr[reference.usr, default: []].insert(reference)
+        if let decl = declaration(withUsr: reference.usr) {
+            decl.referencedFiles.insert(reference.location.file)
+        }
     }
 
     public func add(_ references: Set<Reference>) {

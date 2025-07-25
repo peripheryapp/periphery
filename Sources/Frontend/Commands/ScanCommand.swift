@@ -60,6 +60,12 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Disable identification of redundant public accessibility")
     var disableRedundantPublicAnalysis: Bool = defaultConfiguration.$disableRedundantPublicAnalysis.defaultValue
 
+    @Flag(help: "Disable identification of redundant internal accessibility")
+    var disableRedundantInternalAnalysis: Bool = defaultConfiguration.$disableRedundantInternalAnalysis.defaultValue
+
+    @Flag(help: "Disable identification of redundant fileprivate accessibility")
+    var disableRedundantFilePrivateAnalysis: Bool = defaultConfiguration.$disableRedundantFilePrivateAnalysis.defaultValue
+
     @Flag(help: "Disable identification of unused imports")
     var disableUnusedImportAnalysis: Bool = defaultConfiguration.$disableUnusedImportAnalysis.defaultValue
 
@@ -173,6 +179,8 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$retainUnusedProtocolFuncParams, retainUnusedProtocolFuncParams)
         configuration.apply(\.$retainSwiftUIPreviews, retainSwiftUIPreviews)
         configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
+        configuration.apply(\.$disableRedundantInternalAnalysis, disableRedundantInternalAnalysis)
+        configuration.apply(\.$disableRedundantFilePrivateAnalysis, disableRedundantFilePrivateAnalysis)
         configuration.apply(\.$disableUnusedImportAnalysis, disableUnusedImportAnalysis)
         configuration.apply(\.$retainUnusedImportedModules, retainUnusedImportedModules)
         configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
