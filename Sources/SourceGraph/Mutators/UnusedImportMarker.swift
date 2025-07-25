@@ -9,10 +9,12 @@ import Shared
 final class UnusedImportMarker: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
+    private let retainedModules: Set<String>
 
     required init(graph: SourceGraph, configuration: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
         self.configuration = configuration
+        retainedModules = Set(configuration.retainUnusedImportedModules)
     }
 
     func mutate() throws {
@@ -63,6 +65,8 @@ final class UnusedImportMarker: SourceGraphMutator {
                         // Exclude exported/public imports because even though they may be unreferenced
                         // in the current file, their exported symbols may be referenced in others.
                         !$0.isExported &&
+                        // Exclude explicitly retained modules.
+                        !retainedModules.contains($0.module) &&
                         // Only Consider modules that have been indexed as we need to see which modules
                         // they export.
                         graph.isModuleIndexed($0.module) &&

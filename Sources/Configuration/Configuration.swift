@@ -80,6 +80,9 @@ public final class Configuration {
     @Setting(key: "disable_unused_import_analysis", defaultValue: false)
     public var disableUnusedImportAnalysis: Bool
 
+    @Setting(key: "retain_unused_imported_modules", defaultValue: [])
+    public var retainUnusedImportedModules: [String]
+
     @Setting(key: "retain_codable_properties", defaultValue: false)
     public var retainCodableProperties: Bool
 
@@ -193,10 +196,11 @@ public final class Configuration {
         $project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat,
         $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible,
         $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis,
-        $disableUnusedImportAnalysis, $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses,
-        $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild, $skipSchemesValidation, $cleanBuild,
-        $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath, $retainCodableProperties,
-        $retainEncodableProperties, $baseline, $writeBaseline, $writeResults, $genericProjectConfig, $bazel, $bazelFilter,
+        $disableUnusedImportAnalysis, $retainUnusedImportedModules, $externalEncodableProtocols, $externalCodableProtocols,
+        $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild,
+        $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath,
+        $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline, $writeResults, $genericProjectConfig,
+        $bazel, $bazelFilter,
     ]
 
     private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {
