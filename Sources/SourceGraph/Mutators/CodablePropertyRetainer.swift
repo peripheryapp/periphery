@@ -13,7 +13,7 @@ final class CodablePropertyRetainer: SourceGraphMutator {
 
     func mutate() {
         if configuration.retainCodableProperties {
-            for decl in graph.declarations(ofKinds: Declaration.Kind.discreteConformableKinds) {
+            for decl in graph.declarations(ofKinds: Declaration.Kind.concreteTypeDeclarableKinds) {
                 guard graph.isCodable(decl) else { continue }
 
                 for decl in decl.declarations {
@@ -22,7 +22,7 @@ final class CodablePropertyRetainer: SourceGraphMutator {
                 }
             }
         } else if configuration.retainEncodableProperties {
-            for decl in graph.declarations(ofKinds: Declaration.Kind.discreteConformableKinds) {
+            for decl in graph.declarations(ofKinds: Declaration.Kind.concreteTypeDeclarableKinds) {
                 guard graph.isEncodable(decl) else { continue }
 
                 for decl in decl.declarations {

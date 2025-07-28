@@ -133,19 +133,15 @@ public final class Declaration {
         }
 
         public var isExtendableKind: Bool {
-            isConcreteTypeDeclarableKind || self == .protocol
+            isConcreteExtendableKind || self == .protocol
+        }
+
+        public var isConcreteExtendableKind: Bool {
+            isConcreteTypeDeclarableKind
         }
 
         public var isConformableKind: Bool {
-            isDiscreteConformableKind || isExtensionKind
-        }
-
-        public var isDiscreteConformableKind: Bool {
-            Self.discreteConformableKinds.contains(self)
-        }
-
-        static var discreteConformableKinds: Set<Kind> {
-            [.class, .struct, .enum]
+            isConcreteTypeDeclarableKind || isExtensionKind
         }
 
         public var isConcreteTypeDeclarableKind: Bool {
