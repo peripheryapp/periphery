@@ -201,6 +201,8 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$bazel, bazel)
         configuration.apply(\.$bazelFilter, bazelFilter)
 
+        configuration.buildFilenameMatchers()
+
         let logger = Logger(
             quiet: configuration.quiet,
             verbose: configuration.verbose
