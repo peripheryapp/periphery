@@ -158,6 +158,7 @@ struct ScanCommand: FrontendCommand {
         }
 
         configuration.guidedSetup = setup
+        configuration.projectRoot = projectRoot
         configuration.apply(\.$project, project)
         configuration.apply(\.$schemes, schemes)
         configuration.apply(\.$indexExclude, indexExclude)

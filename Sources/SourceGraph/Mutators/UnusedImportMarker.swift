@@ -23,9 +23,15 @@ final class UnusedImportMarker: SourceGraphMutator {
         var referencedModulesByFile = graph.indexedSourceFiles.reduce(into: [SourceFile: Set<String>]()) { result, file in
             result[file] = []
         }
+        var moduleCache: [String: Set<String>] = [:]
 
         // Build a mapping of source files and the modules they reference.
         for ref in graph.allReferences {
+            if let modules = moduleCache[ref.usr] {
+                referencedModulesByFile[ref.location.file, default: []].formUnion(modules)
+                continue
+            }
+
             var directModules: Set<String> = []
             var indirectModules: Set<String> = []
 
@@ -48,6 +54,7 @@ final class UnusedImportMarker: SourceGraphMutator {
             let referencedModules = directModules
                 .union(indirectModules)
                 .union(modulesExtending(ref))
+            moduleCache[ref.usr] = referencedModules
             referencedModulesByFile[ref.location.file, default: []].formUnion(referencedModules)
         }
 

@@ -139,6 +139,7 @@ public final class Configuration {
 
     // Non user facing.
     public var guidedSetup: Bool = false
+    public var projectRoot: FilePath = .init()
 
     public var hasNonDefaultValues: Bool {
         settings.contains(where: \.hasNonDefaultValue)
