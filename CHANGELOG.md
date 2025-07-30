@@ -13,6 +13,7 @@
 - Fix concurrent mutation crash.
 - Fix unused import false-positive for when a declaration's associated types are declared in different module than module that declares the declaration.
 - Fix unused import false-positive for modules that export unindexed modules.
+- Exclude conditionally imported modules from unused import detection, as they may provide symbols for code that was not compiled.
 
 ## 3.2.0 (2025-06-27)
 
