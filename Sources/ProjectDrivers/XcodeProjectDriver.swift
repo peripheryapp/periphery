@@ -34,8 +34,9 @@
 
             try xcodebuild.ensureConfigured()
 
-            let project: XcodeProjectlike = if projectPath.extension == "xcworkspace" {
-                try XcodeWorkspace(
+            let project: XcodeProjectlike
+            if projectPath.extension == "xcworkspace" {
+                project = try XcodeWorkspace(
                     path: .makeAbsolute(projectPath),
                     xcodebuild: xcodebuild,
                     configuration: configuration,
@@ -43,8 +44,10 @@
                     shell: shell
                 )
             } else {
-                try XcodeProject(
+                var loadedProjectPaths: Set<FilePath> = []
+                project = try XcodeProject(
                     path: .makeAbsolute(projectPath),
+                    loadedProjectPaths: &loadedProjectPaths,
                     xcodebuild: xcodebuild,
                     shell: shell,
                     logger: logger
