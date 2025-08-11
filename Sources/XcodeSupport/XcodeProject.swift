@@ -17,7 +17,7 @@ public final class XcodeProject: XcodeProjectlike {
 
     convenience init?(
         path: FilePath,
-        loadedProjectPaths: Set<FilePath> = [],
+        loadedProjectPaths: inout Set<FilePath>,
         referencedBy refPath:
         FilePath,
         shell: Shell,
@@ -31,7 +31,7 @@ public final class XcodeProject: XcodeProjectlike {
         let xcodebuild = Xcodebuild(shell: shell, logger: logger)
         try self.init(
             path: path,
-            loadedProjectPaths: loadedProjectPaths,
+            loadedProjectPaths: &loadedProjectPaths,
             xcodebuild: xcodebuild,
             shell: shell,
             logger: logger
@@ -40,7 +40,7 @@ public final class XcodeProject: XcodeProjectlike {
 
     public required init(
         path: FilePath,
-        loadedProjectPaths: Set<FilePath> = [],
+        loadedProjectPaths: inout Set<FilePath>,
         xcodebuild: Xcodebuild,
         shell: Shell,
         logger: Logger
@@ -59,7 +59,7 @@ public final class XcodeProject: XcodeProjectlike {
         }
 
         var subProjects: [XcodeProject] = []
-        let loadedProjectPaths = loadedProjectPaths.union([path])
+        loadedProjectPaths.insert(path)
 
         // Don't search for sub projects within CocoaPods.
         if !path.components.contains("Pods.xcodeproj") {
@@ -74,7 +74,7 @@ public final class XcodeProject: XcodeProjectlike {
 
                     return try XcodeProject(
                         path: projectPath,
-                        loadedProjectPaths: loadedProjectPaths,
+                        loadedProjectPaths: &loadedProjectPaths,
                         referencedBy: path,
                         shell: shell,
                         logger: logger
