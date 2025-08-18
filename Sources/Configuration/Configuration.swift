@@ -80,6 +80,9 @@ public final class Configuration {
     @Setting(key: "disable_unused_import_analysis", defaultValue: false)
     public var disableUnusedImportAnalysis: Bool
 
+    @Setting(key: "retain_unused_imported_modules", defaultValue: [])
+    public var retainUnusedImportedModules: [String]
+
     @Setting(key: "retain_codable_properties", defaultValue: false)
     public var retainCodableProperties: Bool
 
@@ -122,6 +125,9 @@ public final class Configuration {
     @Setting(key: "write_baseline", defaultValue: nil, setter: filePathSetter)
     public var writeBaseline: FilePath?
 
+    @Setting(key: "write_results", defaultValue: nil, setter: filePathSetter)
+    public var writeResults: FilePath?
+
     @Setting(key: "generic_project_config", defaultValue: nil, setter: filePathSetter)
     public var genericProjectConfig: FilePath?
 
@@ -133,6 +139,7 @@ public final class Configuration {
 
     // Non user facing.
     public var guidedSetup: Bool = false
+    public var projectRoot: FilePath = .init()
 
     public var hasNonDefaultValues: Bool {
         settings.contains(where: \.hasNonDefaultValue)
@@ -169,10 +176,6 @@ public final class Configuration {
         }
     }
 
-    public func reset() {
-        settings.forEach { $0.reset() }
-    }
-
     // MARK: - Helpers
 
     public func apply<T: Equatable>(_ path: KeyPath<Configuration, Setting<T>>, _ value: T) {
@@ -183,40 +186,30 @@ public final class Configuration {
         }
     }
 
-    private var _indexExcludeMatchers: [FilenameMatcher]?
-    public var indexExcludeMatchers: [FilenameMatcher] {
-        if let _indexExcludeMatchers {
-            return _indexExcludeMatchers
-        }
-
-        let matchers = buildFilenameMatchers(with: indexExclude)
-        _indexExcludeMatchers = matchers
-        return matchers
+    public func buildFilenameMatchers() {
+        indexExcludeMatchers = buildFilenameMatchers(with: indexExclude)
+        retainFilesMatchers = buildFilenameMatchers(with: retainFiles)
+        reportExcludeMatchers = buildFilenameMatchers(with: reportExclude)
+        reportIncludeMatchers = buildFilenameMatchers(with: reportInclude)
     }
 
-    private var _retainFilesMatchers: [FilenameMatcher]?
-    public var retainFilesMatchers: [FilenameMatcher] {
-        if let _retainFilesMatchers {
-            return _retainFilesMatchers
-        }
-
-        let matchers = buildFilenameMatchers(with: retainFiles)
-        _retainFilesMatchers = matchers
-        return matchers
-    }
-
-    public func resetMatchers() {
-        _indexExcludeMatchers = nil
-        _retainFilesMatchers = nil
-    }
-
-    public lazy var reportExcludeMatchers: [FilenameMatcher] = buildFilenameMatchers(with: reportExclude)
-
-    public lazy var reportIncludeMatchers: [FilenameMatcher] = buildFilenameMatchers(with: reportInclude)
+    public var indexExcludeMatchers: [FilenameMatcher] = []
+    public var retainFilesMatchers: [FilenameMatcher] = []
+    public var reportExcludeMatchers: [FilenameMatcher] = []
+    public var reportIncludeMatchers: [FilenameMatcher] = []
 
     // MARK: - Private
 
-    lazy var settings: [any AbstractSetting] = [$project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat, $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible, $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis, $disableUnusedImportAnalysis, $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline, $genericProjectConfig, $bazel, $bazelFilter]
+    lazy var settings: [any AbstractSetting] = [
+        $project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat,
+        $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible,
+        $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis,
+        $disableUnusedImportAnalysis, $retainUnusedImportedModules, $externalEncodableProtocols, $externalCodableProtocols,
+        $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild,
+        $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath,
+        $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline, $writeResults, $genericProjectConfig,
+        $bazel, $bazelFilter,
+    ]
 
     private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {
         // TODO: respect filesystem case sensitivity.
@@ -244,7 +237,6 @@ protocol AbstractSetting {
     var hasNonDefaultValue: Bool { get }
     var wrappedValue: Value { get }
 
-    func reset()
     func assign(_ value: Any)
 }
 
@@ -281,10 +273,6 @@ protocol AbstractSetting {
 
     public func assign(_ newValue: Any) {
         value = setter(newValue) ?? defaultValue
-    }
-
-    func reset() {
-        wrappedValue = defaultValue
     }
 }
 

@@ -20,12 +20,16 @@ public final class OutputDeclarationFilter {
 
         if let baseline {
             var didFilterDeclaration = false
+            let ignoredUsrs = declarations
+                .flatMapSet(\.usrs)
+                .intersection(baseline.usrs)
+
             declarations = declarations.filter {
-                let isDisjoint = $0.usrs.isDisjoint(with: baseline.usrs)
-                if !isDisjoint {
+                let isIgnored = $0.usrs.contains { ignoredUsrs.contains($0) }
+                if isIgnored {
                     didFilterDeclaration = true
                 }
-                return isDisjoint
+                return !isIgnored
             }
 
             if !didFilterDeclaration {
@@ -39,11 +43,28 @@ public final class OutputDeclarationFilter {
 
         return declarations
             .filter { [contextualLogger] in
-                let path = $0.declaration.location.file.path
+                var path = $0.declaration.location.file.path
+
+                // If the declaration has a location override, use it as the path for filtering.
+                for command in $0.declaration.commentCommands {
+                    switch command {
+                    case let .override(overrides):
+                        for override in overrides {
+                            switch override {
+                            case let .location(overridePath, _, _):
+                                path = FilePath(overridePath)
+                            default:
+                                break
+                            }
+                        }
+                    default:
+                        break
+                    }
+                }
 
                 if configuration.reportIncludeMatchers.isEmpty {
                     if configuration.reportExcludeMatchers.anyMatch(filename: path.string) {
-                        contextualLogger.debug("Excluding \(path.string)")
+                        contextualLogger.debug("Excluding \(path)")
                         return false
                     }
 
@@ -51,7 +72,7 @@ public final class OutputDeclarationFilter {
                 }
 
                 if configuration.reportIncludeMatchers.anyMatch(filename: path.string) {
-                    contextualLogger.debug("Including \(path.string)")
+                    contextualLogger.debug("Including \(path)")
                     return true
                 }
 

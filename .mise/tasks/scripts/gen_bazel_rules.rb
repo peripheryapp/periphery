@@ -14,6 +14,10 @@ PRODUCTS = {
     "AEXML" => "@aexml",
 }
 
+MACOS_DEPS = [
+    "//Sources:XcodeSupport"
+]
+
 def parse_json
     JSON.parse(`swift package describe --type json`)
 rescue JSON::ParserError => e
@@ -40,12 +44,16 @@ def generate_sources(target)
 end
 
 def generate_dependencies(target, target_labels)
-    deps = (target["target_dependencies"] || []).map { |dep| "\"#{target_labels[dep]}\"" }
+    deps = (target["target_dependencies"] || []).map { |dep| "#{target_labels[dep]}" }
     deps += (target["product_dependencies"] || []).map do |dep|
         pkg = PRODUCTS[dep]
-        "\"#{pkg}//:#{dep}\""
+        "#{pkg}//:#{dep}"
     end
     deps
+end
+
+def quote(deps)
+    deps.map { |dep| "\"#{dep}\"" }
 end
 
 def generate_attrs(target, name, path, sources, deps)
@@ -55,10 +63,20 @@ def generate_attrs(target, name, path, sources, deps)
         "srcs" => sources.map { |src| src }
     }
 
-    if target["type"] == "library"
+    macos_deps = MACOS_DEPS & deps
+    default_deps = deps - macos_deps
+
+    if macos_deps.any?
+        attrs["deps"] = """
+        select({
+            \"@platforms//os:macos\": [#{quote(deps).join(",\n")}],
+            \"//conditions:default\": [#{quote(default_deps).join(",\n")}],
+        })
+        """
+    else
+        attrs["deps"] = "[#{quote(deps).sort.join(",")}]" unless deps.empty?
     end
 
-    attrs["deps"] = "[\n        #{deps.sort.join(",\n        ")}\n    ]" unless deps.empty?
     attrs
 end
 

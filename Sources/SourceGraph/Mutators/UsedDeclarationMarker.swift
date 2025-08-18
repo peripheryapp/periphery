@@ -26,7 +26,7 @@ final class UsedDeclarationMarker: SourceGraphMutator {
         for protocolDecl in graph.declarations(ofKind: .protocol) {
             for memberDecl in protocolDecl.declarations {
                 for relatedRef in memberDecl.related {
-                    guard let relatedDecl = graph.explicitDeclaration(withUsr: relatedRef.usr) else { continue }
+                    guard let relatedDecl = graph.declaration(withUsr: relatedRef.usr) else { continue }
 
                     let hasDereferencedAncestor = relatedDecl.ancestralDeclarations.contains {
                         !(graph.isRetained($0) || graph.hasReferences(to: $0))
@@ -59,7 +59,7 @@ final class UsedDeclarationMarker: SourceGraphMutator {
     private func declarationsReferenced(by reference: Reference) -> Set<Declaration> {
         var declarations: Set<Declaration> = []
 
-        if let declaration = graph.explicitDeclaration(withUsr: reference.usr) {
+        if let declaration = graph.declaration(withUsr: reference.usr) {
             declarations.insert(declaration)
         }
 

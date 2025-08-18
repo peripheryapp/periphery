@@ -1,13 +1,19 @@
-// swift-tools-version:5.10
+import CompilerPluginSupport
+
+// swift-tools-version: 6.0
 import PackageDescription
 
 let package = Package(
     name: "SPMProject",
+    platforms: [.macOS(.v13)],
     products: [
         .executable(
             name: "frontend",
             targets: ["Frontend"]
         ),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/swiftlang/swift-syntax", from: "601.0.1"),
     ],
     targets: [
         .executableTarget(
@@ -16,7 +22,19 @@ let package = Package(
         ),
         .target(
             name: "SPMProjectKit",
-            dependencies: []
+            dependencies: ["SPMProjectMacros"]
+        ),
+        .macro(
+            name: "SPMProjectMacros",
+            dependencies: [
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+            ]
+        ),
+        .testTarget(
+            name: "Tests",
+            dependencies: ["SPMProjectKit"]
         ),
     ]
 )

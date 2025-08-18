@@ -1,10 +1,11 @@
+import Configuration
 import Foundation
 import ProjectDrivers
 import SystemPackage
 @testable import TestShared
 
 class XcodeSourceGraphTestCase: SourceGraphTestCase {
-    static func build(projectPath: FilePath) {
+    static func build(projectPath: FilePath, configuration: Configuration) {
         projectPath.chdir {
             let driver = try! XcodeProjectDriver(
                 projectPath: projectPath,

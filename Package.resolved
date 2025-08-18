@@ -1,13 +1,13 @@
 {
-  "originHash" : "564f682d7bdc21f92e080a8c7de90ea373fb3c339d2f29e5ab3e3b22f01e2897",
+  "originHash" : "5721dfb32ba5c6a2d9de0a2f4bdab589e6aeddaaed5e86a2c16379849121c52a",
   "pins" : [
     {
       "identity" : "aexml",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tadija/AEXML",
       "state" : {
-        "revision" : "38f7d00b23ecd891e1ee656fa6aeebd6ba04ecc3",
-        "version" : "4.6.1"
+        "revision" : "db806756c989760b35108146381535aec231092b",
+        "version" : "4.7.0"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-syntax",
       "state" : {
-        "revision" : "0687f71944021d616d34d922343dcef086855920",
-        "version" : "600.0.1"
+        "revision" : "f99ae8aa18f0cf0d53481901f88a0991dc3bd4a2",
+        "version" : "601.0.1"
       }
     },
     {
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tuist/xcodeproj",
       "state" : {
-        "revision" : "02bc2dd6224aa59147941d85fdc45a7677af62f6",
-        "version" : "8.27.3"
+        "revision" : "128d90e4633a8e6941586dea75426e177dfb92e6",
+        "version" : "9.0.0"
       }
     },
     {

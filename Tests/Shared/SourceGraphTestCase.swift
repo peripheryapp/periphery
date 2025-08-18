@@ -9,7 +9,6 @@ import XCTest
 
 open class SourceGraphTestCase: XCTestCase {
     static var plan: IndexPlan!
-    static var configuration: Configuration!
     static var shell: Shell!
     static var logger: Logger!
     static var results: [ScanResult] = []
@@ -17,22 +16,15 @@ open class SourceGraphTestCase: XCTestCase {
     private static var graph: SourceGraph!
     private static var allIndexedDeclarations: Set<Declaration> = []
 
-    var configuration: Configuration { Self.configuration }
-
     private var scopeStack: [DeclarationScope] = []
 
     override open class func setUp() {
         super.setUp()
-        configuration = Configuration()
-        configuration.quiet = true
         logger = Logger(quiet: true)
         shell = Shell(logger: logger)
-        graph = SourceGraph(configuration: configuration)
-    }
-
-    override open func setUp() {
-        super.setUp()
-        configuration.reset()
+        let configuration = Configuration()
+        configuration.quiet = true
+        graph = SourceGraph(configuration: configuration, logger: logger)
     }
 
     override open func tearDown() {
@@ -45,7 +37,11 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
-    static func index(sourceFiles: [FilePath]? = nil) {
+    func index(sourceFiles: [FilePath]? = nil, configuration: Configuration = .init()) {
+        Self.index(sourceFiles: sourceFiles, configuration: configuration)
+    }
+
+    static func index(sourceFiles: [FilePath]? = nil, configuration: Configuration) {
         var newPlan = plan!
 
         if let sourceFiles {
@@ -58,7 +54,7 @@ open class SourceGraphTestCase: XCTestCase {
             )
         }
 
-        graph = SourceGraph(configuration: configuration)
+        graph = SourceGraph(configuration: configuration, logger: logger)
         let pipeline = IndexPipeline(
             plan: newPlan,
             graph: SynchronizedSourceGraph(graph: graph),
@@ -82,7 +78,6 @@ open class SourceGraphTestCase: XCTestCase {
             if let declaration = Self.graph.unusedModuleImports.first(where: { $0.name == description.name }) {
                 XCTFail("Expected declaration to be referenced: \(declaration)", file: file, line: line)
             }
-
         } else {
             guard let declaration = materialize(description, file: file, line: line) else { return }
 
@@ -209,6 +204,27 @@ open class SourceGraphTestCase: XCTestCase {
         scopeStack.append(.declaration(declaration))
         scopedAssertions?()
         scopeStack.removeLast()
+    }
+
+    func assertOverrides(_ description: DeclarationDescription, _ overrides: [CommentCommand.Override], file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, file: file, line: line) else {
+            XCTFail("Failed to materialize \(description)", file: file, line: line)
+            return
+        }
+
+        let declOverrides = declaration.commentCommands.flatMap {
+            if case let .override(overrides) = $0 {
+                return overrides
+            }
+
+            return []
+        }
+
+        for override in overrides {
+            if !declOverrides.contains(override) {
+                XCTFail("Expected override: \(override)", file: file, line: line)
+            }
+        }
     }
 
     func module(_ name: String, scopedAssertions: (() -> Void)? = nil) {

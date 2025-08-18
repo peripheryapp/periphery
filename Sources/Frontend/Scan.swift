@@ -17,7 +17,7 @@ final class Scan {
         self.configuration = configuration
         self.logger = logger
         self.swiftVersion = swiftVersion
-        graph = SourceGraph(configuration: configuration)
+        graph = SourceGraph(configuration: configuration, logger: logger)
     }
 
     func perform(project: Project) throws -> [ScanResult] {
@@ -63,7 +63,7 @@ final class Scan {
         let indexInterval = logger.beginInterval("index")
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
-            let asterisk = colorize("*", .boldGreen)
+            let asterisk = Logger.colorize("*", .boldGreen)
             logger.info("\(asterisk) Indexing...")
         }
 
@@ -79,7 +79,7 @@ final class Scan {
         let analyzeInterval = logger.beginInterval("analyze")
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
-            let asterisk = colorize("*", .boldGreen)
+            let asterisk = Logger.colorize("*", .boldGreen)
             logger.info("\(asterisk) Analyzing...")
         }
 

@@ -49,6 +49,10 @@ public final class Declaration {
             Set(Kind.allCases.filter(\.isFunctionKind))
         }
 
+        static var variableKinds: Set<Kind> {
+            Set(Kind.allCases.filter(\.isVariableKind))
+        }
+
         static var protocolMemberKinds: [Kind] {
             let functionKinds: [Kind] = [.functionMethodInstance, .functionMethodStatic, .functionSubscript, .functionOperator, .functionOperatorInfix, .functionOperatorPostfix, .functionOperatorPrefix, .functionConstructor]
             let variableKinds: [Kind] = [.varInstance, .varStatic]
@@ -71,10 +75,6 @@ public final class Declaration {
 
         public var isFunctionKind: Bool {
             rawValue.hasPrefix("function")
-        }
-
-        static var variableKinds: Set<Kind> {
-            Set(Kind.allCases.filter(\.isVariableKind))
         }
 
         public var isVariableKind: Bool {
@@ -133,7 +133,7 @@ public final class Declaration {
         }
 
         public var isExtendableKind: Bool {
-            isConcreteTypeDeclarableKind
+            isConcreteTypeDeclarableKind || self == .protocol
         }
 
         public var isConformableKind: Bool {
@@ -176,7 +176,7 @@ public final class Declaration {
             [.class, .struct, .enum]
         }
 
-        public var displayName: String? {
+        public var displayName: String {
             switch self {
             case .module:
                 "imported module"
@@ -198,7 +198,7 @@ public final class Declaration {
                 "initializer"
             case .extension, .extensionEnum, .extensionClass, .extensionStruct, .extensionProtocol:
                 "extension"
-            case .functionMethodClass, .functionMethodStatic, .functionMethodInstance, .functionFree, .functionOperator, .functionOperatorInfix, .functionOperatorPostfix, .functionOperatorPrefix, .functionSubscript:
+            case .functionMethodClass, .functionMethodStatic, .functionMethodInstance, .functionFree, .functionOperator, .functionOperatorInfix, .functionOperatorPostfix, .functionOperatorPrefix, .functionSubscript, .functionAccessorAddress, .functionAccessorMutableaddress, .functionAccessorDidset, .functionAccessorGetter, .functionAccessorSetter, .functionAccessorWillset, .functionAccessorRead, .functionAccessorModify, .functionAccessorInit, .functionDestructor:
                 "function"
             case .varStatic, .varInstance, .varClass, .varGlobal, .varLocal:
                 "property"
@@ -206,8 +206,10 @@ public final class Declaration {
                 "parameter"
             case .genericTypeParam:
                 "generic type parameter"
-            default:
-                nil
+            case .precedenceGroup:
+                "precedence group"
+            case .macro:
+                "macro"
             }
         }
     }
@@ -224,7 +226,6 @@ public final class Declaration {
     public var commentCommands: Set<CommentCommand> = []
     public var references: Set<Reference> = []
     public var declaredType: String?
-    public var hasCapitalSelfFunctionCall: Bool = false
     public var hasGenericFunctionReturnedMetatypeParameters: Bool = false
     public var parent: Declaration?
     public var related: Set<Reference> = []

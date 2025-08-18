@@ -22,10 +22,18 @@ public final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
             }
         }
         let location = sourceLocationBuilder.location(at: node.positionAfterSkippingLeadingTrivia)
+
+        var isConditional = false
+
+        if let parent = node.parent?.parent?.parent?.as(IfConfigClauseSyntax.self) {
+            isConditional = true
+        }
+
         let statement = ImportStatement(
             module: module,
             isTestable: attributes.contains("testable"),
             isExported: attributes.contains("_exported") || node.modifiers.contains { $0.name.text == "public" },
+            isConditional: isConditional,
             location: location,
             commentCommands: CommentCommand.parseCommands(in: node.leadingTrivia.merging(node.trailingTrivia))
         )

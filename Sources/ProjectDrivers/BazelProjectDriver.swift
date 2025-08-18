@@ -80,7 +80,6 @@ public class BazelProjectDriver: ProjectDriver {
 
         let configPath = outputPath.appending("periphery.yml")
         configuration.bazel = false // Generic project mode is used for the actual scan.
-        configuration.reportExclude.append("**/bazel-out/**/*")
         try configuration.save(to: configPath)
         contextLogger.debug("Configuration written to \(configPath)")
 
@@ -103,7 +102,7 @@ public class BazelProjectDriver: ProjectDriver {
         contextLogger.debug("Build file written to \(buildPath)")
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
-            let asterisk = colorize("*", .boldGreen)
+            let asterisk = Logger.colorize("*", .boldGreen)
             logger.info("\(asterisk) Building...")
         }
 
