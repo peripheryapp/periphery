@@ -44,7 +44,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                     // Find all superclasses.
                     let superclassDecls = graph.inheritedTypeReferences(of: conformingClass)
                         .filter { $0.kind == .class }
-                        .compactMap { graph.explicitDeclaration(withUsr: $0.usr) }
+                        .compactMap { graph.declaration(withUsr: $0.usr) }
                         .flatMap(\.declarations)
 
                     for unimplementedProtoDecl in unimplementedProtoDecls {
@@ -104,7 +104,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
             guard equivalentDeclarationKinds.contains(conformingDeclaration.kind),
                   conformingDeclaration.name == relatedReference.name else { continue }
 
-            if let protocolDeclaration = graph.explicitDeclaration(withUsr: relatedReference.usr) {
+            if let protocolDeclaration = graph.declaration(withUsr: relatedReference.usr) {
                 // Invert the related reference such that instead of the conforming declaration
                 // referencing the declaration within the protocol, the protocol declaration
                 // now references the conforming declaration.

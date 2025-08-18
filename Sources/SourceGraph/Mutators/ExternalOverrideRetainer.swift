@@ -29,7 +29,7 @@ final class ExternalOverrideRetainer: SourceGraphMutator {
                 {
                     didIdentifyRelatedRef = true
 
-                    if graph.explicitDeclaration(withUsr: relatedRef.usr) == nil {
+                    if graph.declaration(withUsr: relatedRef.usr) == nil {
                         // The related decl is external.
                         graph.markRetained(decl)
                     }

@@ -1,5 +1,6 @@
 import Configuration
 import Foundation
+import Logger
 import Shared
 
 public final class SourceGraph {
@@ -15,25 +16,29 @@ public final class SourceGraph {
     public private(set) var assetReferences: Set<AssetReference> = []
     public private(set) var mainAttributedDeclarations: Set<Declaration> = []
     public private(set) var allReferencesByUsr: [String: Set<Reference>] = [:]
-    public private(set) var indexedModules: Set<String> = []
     public private(set) var indexedSourceFiles: [SourceFile] = []
     public private(set) var unusedModuleImports: Set<Declaration> = []
     public private(set) var assignOnlyProperties: Set<Declaration> = []
     public private(set) var extensions: [Declaration: Set<Declaration>] = [:]
 
+    private var indexedModules: Set<String> = []
+    private var unindexedExportedModules: Set<String> = []
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
-    public private(set) var allExplicitDeclarationsByUsr: [String: Declaration] = [:]
+    public private(set) var allDeclarationsByUsr: [String: Declaration] = [:]
     private var moduleToExportingModules: [String: Set<String>] = [:]
 
     private let configuration: Configuration
+    private let logger: Logger
 
-    public init(configuration: Configuration) {
+    public init(configuration: Configuration, logger: Logger) {
         self.configuration = configuration
+        self.logger = logger
     }
 
     public func indexingComplete() {
         rootDeclarations = allDeclarations.filter { $0.parent == nil }
         rootReferences = allReferences.filter { $0.parent == nil }
+        unindexedExportedModules = Set(moduleToExportingModules.keys).subtracting(indexedModules)
     }
 
     public var unusedDeclarations: Set<Declaration> {
@@ -52,12 +57,16 @@ public final class SourceGraph {
         kinds.flatMapSet { allDeclarationsByKind[$0, default: []] }
     }
 
-    public func explicitDeclaration(withUsr usr: String) -> Declaration? {
-        allExplicitDeclarationsByUsr[usr]
+    public func declaration(withUsr usr: String) -> Declaration? {
+        allDeclarationsByUsr[usr]
     }
 
     public func references(to decl: Declaration) -> Set<Reference> {
-        decl.usrs.flatMapSet { allReferencesByUsr[$0, default: []] }
+        decl.usrs.flatMapSet { references(to: $0) }
+    }
+
+    public func references(to usr: String) -> Set<Reference> {
+        allReferencesByUsr[usr, default: []]
     }
 
     public func hasReferences(to decl: Declaration) -> Bool {
@@ -103,22 +112,22 @@ public final class SourceGraph {
     public func add(_ declaration: Declaration) {
         allDeclarations.insert(declaration)
         allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
-
-        if !declaration.isImplicit {
-            declaration.usrs.forEach { allExplicitDeclarationsByUsr[$0] = declaration }
+        for usr in declaration.usrs {
+            if let existingDecl = allDeclarationsByUsr[usr] {
+                logger.warn("""
+                Declaration conflict detected: a declaration with the USR '\(usr)' has already been indexed.
+                This issue can cause inconsistent and incorrect results.
+                Existing declaration: \(existingDecl), declared in modules: \(existingDecl.location.file.modules.sorted())
+                Conflicting declaration: \(declaration), declared in modules: \(declaration.location.file.modules.sorted())
+                To resolve this warning, make sure all build modules are uniquely named.
+                """)
+            }
+            allDeclarationsByUsr[usr] = declaration
         }
     }
 
     public func add(_ declarations: Set<Declaration>) {
-        allDeclarations.formUnion(declarations)
-
-        for declaration in declarations {
-            allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
-
-            if !declaration.isImplicit {
-                declaration.usrs.forEach { allExplicitDeclarationsByUsr[$0] = declaration }
-            }
-        }
+        declarations.forEach { add($0) }
     }
 
     public func remove(_ declaration: Declaration) {
@@ -128,7 +137,7 @@ public final class SourceGraph {
         rootDeclarations.remove(declaration)
         usedDeclarations.remove(declaration)
         assignOnlyProperties.remove(declaration)
-        declaration.usrs.forEach { allExplicitDeclarationsByUsr.removeValue(forKey: $0) }
+        declaration.usrs.forEach { allDeclarationsByUsr.removeValue(forKey: $0) }
     }
 
     public func add(_ reference: Reference) {
@@ -175,7 +184,7 @@ public final class SourceGraph {
     }
 
     func isExternal(_ reference: Reference) -> Bool {
-        explicitDeclaration(withUsr: reference.usr) == nil
+        declaration(withUsr: reference.usr) == nil
     }
 
     public func addIndexedSourceFile(_ file: SourceFile) {
@@ -186,8 +195,18 @@ public final class SourceGraph {
         indexedModules.formUnion(modules)
     }
 
+    public func isModuleIndexed(_ module: String) -> Bool {
+        indexedModules.contains(module)
+    }
+
     public func addExportedModule(_ module: String, exportedBy exportingModules: Set<String>) {
         moduleToExportingModules[module, default: []].formUnion(exportingModules)
+    }
+
+    public func moduleExportsUnindexedModules(_ module: String) -> Bool {
+        unindexedExportedModules.contains { unindexedModule in
+            isModule(unindexedModule, exportedBy: module)
+        }
     }
 
     public func isModule(_ module: String, exportedBy exportingModule: String) -> Bool {
@@ -206,7 +225,7 @@ public final class SourceGraph {
     }
 
     func markUnusedModuleImport(_ statement: ImportStatement) {
-        let location = statement.location.relativeTo(.current)
+        let location = statement.location.relativeTo(configuration.projectRoot)
         let usr = "import-\(statement.module)-\(location)"
         let decl = Declaration(kind: .module, usrs: [usr], location: statement.location)
         decl.name = statement.module
@@ -223,7 +242,7 @@ public final class SourceGraph {
         for reference in decl.immediateInheritedTypeReferences {
             references.insert(reference)
 
-            if let inheritedDecl = explicitDeclaration(withUsr: reference.usr) {
+            if let inheritedDecl = declaration(withUsr: reference.usr) {
                 // Detect circular references. The following is valid Swift.
                 // class SomeClass {}
                 // extension SomeClass: SomeProtocol {}
@@ -237,14 +256,14 @@ public final class SourceGraph {
     }
 
     func inheritedDeclarations(of decl: Declaration) -> [Declaration] {
-        inheritedTypeReferences(of: decl).compactMap { explicitDeclaration(withUsr: $0.usr) }
+        inheritedTypeReferences(of: decl).compactMap { declaration(withUsr: $0.usr) }
     }
 
     func immediateSubclasses(of decl: Declaration) -> Set<Declaration> {
         references(to: decl)
             .filter { $0.isRelated && $0.kind == .class }
             .flatMap { $0.parent?.usrs ?? [] }
-            .compactMapSet { explicitDeclaration(withUsr: $0) }
+            .compactMapSet { declaration(withUsr: $0) }
     }
 
     func subclasses(of decl: Declaration) -> Set<Declaration> {
@@ -264,11 +283,26 @@ public final class SourceGraph {
     func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
         guard let extendedReference = try extendedDeclarationReference(forExtension: extensionDeclaration) else { return nil }
 
-        if let extendedDeclaration = allExplicitDeclarationsByUsr[extendedReference.usr] {
+        if let extendedDeclaration = declaration(withUsr: extendedReference.usr) {
             return extendedDeclaration
         }
 
         return nil
+    }
+
+    func allSuperDeclarationsInOverrideChain(from decl: Declaration) -> Set<Declaration> {
+        guard decl.isOverride else { return [] }
+
+        let overridenDecl = decl.related
+            .filter { $0.kind == decl.kind && $0.name == decl.name }
+            .compactMap { declaration(withUsr: $0.usr) }
+            .first
+
+        guard let overridenDecl else {
+            return []
+        }
+
+        return Set([overridenDecl]).union(allSuperDeclarationsInOverrideChain(from: overridenDecl))
     }
 
     func baseDeclaration(fromOverride decl: Declaration) -> (Declaration, Bool) {
@@ -293,7 +327,7 @@ public final class SourceGraph {
 
     func allOverrideDeclarations(fromBase decl: Declaration) -> Set<Declaration> {
         decl.relatedEquivalentReferences
-            .compactMap { explicitDeclaration(withUsr: $0.usr) }
+            .compactMap { declaration(withUsr: $0.usr) }
             .reduce(into: .init()) { result, decl in
                 guard decl.isOverride else { return }
                 result.insert(decl)

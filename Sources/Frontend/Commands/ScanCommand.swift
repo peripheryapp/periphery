@@ -65,6 +65,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Disable identification of unused imports")
     var disableUnusedImportAnalysis: Bool = defaultConfiguration.$disableUnusedImportAnalysis.defaultValue
 
+    @Option(parsing: .upToNextOption, help: "Names of unused imported modules to retain")
+    var retainUnusedImportedModules: [String] = defaultConfiguration.$retainUnusedImportedModules.defaultValue
+
     @Flag(help: "Retain properties that are assigned, but never used")
     var retainAssignOnlyProperties: Bool = defaultConfiguration.$retainAssignOnlyProperties.defaultValue
 
@@ -131,6 +134,9 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Baseline file path where results are written. Pass the same path to '--baseline' in subsequent scans to exclude the results recorded in the baseline.")
     var writeBaseline: FilePath?
 
+    @Option(help: "File path where formatted results are written.")
+    var writeResults: FilePath?
+
     @Option(help: "Project configuration for non-Apple build systems")
     var genericProjectConfig: FilePath?
 
@@ -154,6 +160,7 @@ struct ScanCommand: FrontendCommand {
         }
 
         configuration.guidedSetup = setup
+        configuration.projectRoot = projectRoot
         configuration.apply(\.$project, project)
         configuration.apply(\.$schemes, schemes)
         configuration.apply(\.$indexExclude, indexExclude)
@@ -170,6 +177,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$retainSwiftUIPreviews, retainSwiftUIPreviews)
         configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
         configuration.apply(\.$disableUnusedImportAnalysis, disableUnusedImportAnalysis)
+        configuration.apply(\.$retainUnusedImportedModules, retainUnusedImportedModules)
         configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
         configuration.apply(\.$externalCodableProtocols, externalCodableProtocols)
         configuration.apply(\.$externalTestCaseClasses, externalTestCaseClasses)
@@ -190,9 +198,12 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$jsonPackageManifestPath, jsonPackageManifestPath)
         configuration.apply(\.$baseline, baseline)
         configuration.apply(\.$writeBaseline, writeBaseline)
+        configuration.apply(\.$writeResults, writeResults)
         configuration.apply(\.$genericProjectConfig, genericProjectConfig)
         configuration.apply(\.$bazel, bazel)
         configuration.apply(\.$bazelFilter, bazelFilter)
+
+        configuration.buildFilenameMatchers()
 
         let logger = Logger(
             quiet: configuration.quiet,
@@ -203,6 +214,11 @@ struct ScanCommand: FrontendCommand {
         let swiftVersion = SwiftVersion(shell: shell)
         logger.debug(swiftVersion.fullVersion)
         try swiftVersion.validateVersion()
+
+        if swiftVersion.version.isVersion(equalTo: "6.1"), !retainAssignOnlyProperties {
+            logger.warn("Assign-only property analysis is disabled with Swift 6.1 due to a Swift bug: https://github.com/swiftlang/swift/issues/80394.")
+            configuration.retainAssignOnlyProperties = true
+        }
 
         let project: Project = if configuration.guidedSetup {
             try GuidedSetup(configuration: configuration, shell: shell, logger: logger).perform()
@@ -238,12 +254,27 @@ struct ScanCommand: FrontendCommand {
             try data.write(to: baselinePath.url)
         }
 
-        if let output = try configuration.outputFormat.formatter.init(configuration: configuration).format(filteredResults) {
-            if configuration.outputFormat.supportsAuxiliaryOutput {
+        let outputFormat = configuration.outputFormat
+        let formatter = outputFormat.formatter.init(configuration: configuration)
+
+        if let output = try formatter.format(filteredResults, colored: outputFormat.supportsColoredOutput) {
+            if outputFormat.supportsAuxiliaryOutput {
                 logger.info("", canQuiet: true)
             }
 
             logger.info(output, canQuiet: false)
+
+            if !filteredResults.isEmpty, let resultsPath = configuration.writeResults {
+                var output = output
+
+                if outputFormat.supportsColoredOutput {
+                    // The formatted output contains ANSI escape codes, so we need to re-format
+                    // with coloring disabled.
+                    output = try formatter.format(filteredResults, colored: false) ?? ""
+                }
+
+                try output.write(to: resultsPath.url, atomically: true, encoding: .utf8)
+            }
         }
 
         logger.endInterval(interval)

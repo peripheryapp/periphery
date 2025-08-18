@@ -1,4 +1,4 @@
-// swift-tools-version:5.10
+// swift-tools-version:6.0
 import PackageDescription
 
 var dependencies: [Package.Dependency] = [
@@ -7,7 +7,7 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.3.0"),
-    .package(url: "https://github.com/apple/swift-syntax", from: "600.0.1"),
+    .package(url: "https://github.com/apple/swift-syntax", from: "601.0.1"),
     .package(url: "https://github.com/ileitch/swift-filename-matcher", from: "2.0.0"),
 ]
 
@@ -15,7 +15,7 @@ var dependencies: [Package.Dependency] = [
     dependencies.append(
         .package(
             url: "https://github.com/tuist/xcodeproj",
-            from: "8.27.3"
+            from: "9.0.0"
         )
     )
 #endif
@@ -133,6 +133,7 @@ var targets: [PackageDescription.Target] = [
         dependencies: [
             .target(name: "PeripheryKit"),
             .target(name: "ProjectDrivers"),
+            .target(name: "Configuration"),
         ],
         path: "Tests/Shared"
     ),
@@ -199,5 +200,5 @@ let package = Package(
     ],
     dependencies: dependencies,
     targets: targets,
-    swiftLanguageVersions: [.v5]
+    swiftLanguageModes: [.v5]
 )

@@ -7,6 +7,7 @@ public enum OutputFormat: String, CaseIterable {
     case checkstyle
     case codeclimate
     case githubActions = "github-actions"
+    case githubMarkdown = "github-markdown"
 
     public static let `default` = OutputFormat.xcode
 
@@ -20,6 +21,10 @@ public enum OutputFormat: String, CaseIterable {
     }
 
     @inlinable public var supportsAuxiliaryOutput: Bool {
+        self == .xcode
+    }
+
+    @inlinable public var supportsColoredOutput: Bool {
         self == .xcode
     }
 }

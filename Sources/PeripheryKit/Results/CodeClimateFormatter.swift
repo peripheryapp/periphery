@@ -10,39 +10,31 @@ final class CodeClimateFormatter: OutputFormatter {
         self.configuration = configuration
     }
 
-    func format(_ results: [ScanResult]) throws -> String? {
+    func format(_ results: [ScanResult], colored: Bool) throws -> String? {
         var jsonObject: [Any] = []
 
         for result in results {
+            let location = declarationLocation(from: result.declaration)
+
             let lines: [AnyHashable: Any] = [
-                "begin": result.declaration.location.line,
+                "begin": location.line,
             ]
 
-            let location: [AnyHashable: Any] = [
-                "path": outputPath(result.declaration.location).url.relativePath,
+            let locationDict: [AnyHashable: Any] = [
+                "path": outputPath(location).url.relativePath,
                 "lines": lines,
             ]
 
-            let description = describe(result, colored: false)
+            let description = describe(result, colored: colored)
                 .map(\.1)
                 .joined(separator: ", ")
-
-            let fingerprint: String = if result.declaration.kind == .varParameter,
-                                         let parentFingerprint = result.declaration.parent?.usrs.joined(separator: "."),
-                                         let argumentName = result.declaration.name
-            {
-                // As function parameters do not have a mangled name that can be used for the fingerprint
-                // we take the mangled name of the function and append the position
-                "\(parentFingerprint)-\(argumentName)"
-            } else {
-                result.declaration.usrs.joined(separator: ".")
-            }
+            let fingerprint = result.declaration.usrs.sorted().joined(separator: ".")
 
             let object: [AnyHashable: Any] = [
                 "description": description,
                 "fingerprint": fingerprint,
                 "severity": "major",
-                "location": location,
+                "location": locationDict,
             ]
 
             jsonObject.append(object)

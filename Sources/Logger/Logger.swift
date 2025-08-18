@@ -32,13 +32,13 @@ public enum ANSIColor: String {
     return true
 }()
 
-@inlinable
-public func colorize(_ text: String, _ color: ANSIColor) -> String {
-    guard isColorOutputCapable else { return text }
-    return "\(color.rawValue)\(text)\u{001B}[0;0m"
-}
-
 public final class Logger {
+    @inlinable
+    public static func colorize(_ text: String, _ color: ANSIColor) -> String {
+        guard isColorOutputCapable else { return text }
+        return "\(color.rawValue)\(text)\u{001B}[0;0m"
+    }
+
     public static func configureBuffering() {
         var info = stat()
         fstat(STDOUT_FILENO, &info)
@@ -87,14 +87,14 @@ public final class Logger {
         if newlinePrefix {
             log("", output: stderr)
         }
-        let text = colorize("warning: ", .boldYellow) + text
+        let text = Self.colorize("warning: ", .boldYellow) + text
         log(text, output: stderr)
     }
 
     // periphery:ignore
     @inlinable
     public func error(_ text: String) {
-        let text = colorize("error: ", .boldRed) + text
+        let text = Self.colorize("error: ", .boldRed) + text
         log(text, output: stderr)
     }
 

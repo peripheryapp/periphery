@@ -10,20 +10,21 @@ final class JsonFormatter: OutputFormatter {
         self.configuration = configuration
     }
 
-    func format(_ results: [ScanResult]) throws -> String? {
+    func format(_ results: [ScanResult], colored _: Bool) throws -> String? {
         var jsonObject: [Any] = []
 
         for result in results {
+            let location = declarationLocation(from: result.declaration)
             let object: [AnyHashable: Any] = [
-                "kind": result.declaration.kind.rawValue,
-                "modules": Array(result.declaration.location.file.modules),
+                "kind": declarationKind(from: result.declaration),
+                "modules": location.file.modules.sorted(),
                 "name": result.declaration.name ?? "",
-                "modifiers": Array(result.declaration.modifiers),
-                "attributes": Array(result.declaration.attributes),
+                "modifiers": result.declaration.modifiers.sorted(),
+                "attributes": result.declaration.attributes.sorted(),
                 "accessibility": result.declaration.accessibility.value.rawValue,
-                "ids": Array(result.declaration.usrs),
+                "ids": result.declaration.usrs.sorted(),
                 "hints": [describe(result.annotation)],
-                "location": locationDescription(result.declaration.location),
+                "location": locationDescription(location),
             ]
             jsonObject.append(object)
 

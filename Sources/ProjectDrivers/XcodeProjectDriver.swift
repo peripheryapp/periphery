@@ -22,7 +22,7 @@
             logger: Logger
         ) throws {
             if configuration.outputFormat.supportsAuxiliaryOutput {
-                let asterisk = colorize("*", .boldGreen)
+                let asterisk = Logger.colorize("*", .boldGreen)
                 logger.info("\(asterisk) Inspecting project...")
             }
 
@@ -101,7 +101,7 @@
 
             for scheme in schemes {
                 if configuration.outputFormat.supportsAuxiliaryOutput {
-                    let asterisk = colorize("*", .boldGreen)
+                    let asterisk = Logger.colorize("*", .boldGreen)
                     logger.info("\(asterisk) Building \(scheme)...")
                 }
 

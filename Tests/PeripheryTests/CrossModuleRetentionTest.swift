@@ -1,3 +1,4 @@
+import Configuration
 import SystemPackage
 @testable import TestShared
 
@@ -6,7 +7,7 @@ final class CrossModuleRetentionTest: SPMSourceGraphTestCase {
         super.setUp()
 
         build(projectPath: FixturesProjectPath)
-        index()
+        index(configuration: Configuration())
     }
 
     func testCrossModuleInheritanceWithSameName() {

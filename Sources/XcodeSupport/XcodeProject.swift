@@ -5,8 +5,6 @@ import SystemPackage
 import XcodeProj
 
 public final class XcodeProject: XcodeProjectlike {
-    private static var cache: [FilePath: XcodeProject] = [:]
-
     public let type: String = "project"
     public let path: FilePath
     public let sourceRoot: FilePath
@@ -17,17 +15,36 @@ public final class XcodeProject: XcodeProjectlike {
 
     private let xcodebuild: Xcodebuild
 
-    convenience init?(path: FilePath, referencedBy refPath: FilePath, shell: Shell, logger: Logger) throws {
+    convenience init?(
+        path: FilePath,
+        loadedProjectPaths: Set<FilePath> = [],
+        referencedBy refPath:
+        FilePath,
+        shell: Shell,
+        logger: Logger
+    ) throws {
         if !path.exists {
             logger.warn("No such project exists at '\(path.lexicallyNormalized())', referenced by '\(refPath)'.")
             return nil
         }
 
         let xcodebuild = Xcodebuild(shell: shell, logger: logger)
-        try self.init(path: path, xcodebuild: xcodebuild, shell: shell, logger: logger)
+        try self.init(
+            path: path,
+            loadedProjectPaths: loadedProjectPaths,
+            xcodebuild: xcodebuild,
+            shell: shell,
+            logger: logger
+        )
     }
 
-    public required init(path: FilePath, xcodebuild: Xcodebuild, shell: Shell, logger: Logger) throws {
+    public required init(
+        path: FilePath,
+        loadedProjectPaths: Set<FilePath> = [],
+        xcodebuild: Xcodebuild,
+        shell: Shell,
+        logger: Logger
+    ) throws {
         logger.contextualized(with: "xcode:project").debug("Loading \(path)")
 
         self.path = path
@@ -41,17 +58,28 @@ public final class XcodeProject: XcodeProjectlike {
             throw PeripheryError.underlyingError(error)
         }
 
-        // Cache before loading sub-projects to avoid infinite loop from cyclic project references.
-        XcodeProject.cache[path] = self
-
         var subProjects: [XcodeProject] = []
+        let loadedProjectPaths = loadedProjectPaths.union([path])
 
         // Don't search for sub projects within CocoaPods.
         if !path.components.contains("Pods.xcodeproj") {
             subProjects = try xcodeProject.pbxproj.fileReferences
                 .filter { $0.path?.hasSuffix(".xcodeproj") ?? false }
                 .compactMap { try $0.fullPath(sourceRoot: sourceRoot.string) }
-                .compactMap { try XcodeProject(path: FilePath($0), referencedBy: path, shell: shell, logger: logger) }
+                .compactMap {
+                    let projectPath = FilePath($0)
+
+                    // Prevent infinite loading of circular references.
+                    guard !loadedProjectPaths.contains(projectPath) else { return nil }
+
+                    return try XcodeProject(
+                        path: projectPath,
+                        loadedProjectPaths: loadedProjectPaths,
+                        referencedBy: path,
+                        shell: shell,
+                        logger: logger
+                    )
+                }
         }
 
         targets = xcodeProject.pbxproj.nativeTargets

@@ -34,7 +34,7 @@ final class RedundantProtocolMarker: SourceGraphMutator {
                 .references
                 .lazy
                 .filter { $0.kind == .extensionProtocol }
-                .compactMap { self.graph.explicitDeclaration(withUsr: $0.usr) }
+                .compactMap { self.graph.declaration(withUsr: $0.usr) }
                 .flatMap(\.declarations)
                 .allSatisfy { unusedDeclarations.contains($0) }
 

@@ -1,5 +1,6 @@
 import SourceGraph
 import SwiftSyntax
+import SystemPackage
 
 extension CommentCommand {
     static func parseCommands(in trivia: Trivia?) -> [CommentCommand] {
@@ -33,6 +34,36 @@ extension CommentCommand {
         } else if rawCommand.hasPrefix("ignore:parameters") {
             guard let params = rawCommand.split(separator: " ").last?.split(separator: ",").map({ String($0).trimmed }) else { return nil }
             return .ignoreParameters(params)
+        } else if rawCommand.hasPrefix("override") {
+            let pattern = #/(?<key>\w+)="(?<value>[^"]*)"/#
+            var params: [String: String] = [:]
+
+            for match in rawCommand.matches(of: pattern) {
+                let key = String(match.output.key)
+                let value = String(match.output.value)
+                params[key] = value
+            }
+
+            var overrides = [Override]()
+
+            for (key, value) in params {
+                switch key {
+                case "location":
+                    let parts = value.split(separator: ":")
+                    guard let file = parts[safe: 0] else { break }
+
+                    let line = Int(parts[safe: 1] ?? "1") ?? 1
+                    let column = Int(parts[safe: 2] ?? "1") ?? 1
+
+                    overrides.append(.location(String(file), line, column))
+                case "kind":
+                    overrides.append(.kind(value))
+                default:
+                    break
+                }
+            }
+
+            return .override(overrides)
         }
 
         return nil

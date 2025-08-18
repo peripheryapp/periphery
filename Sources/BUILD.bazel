@@ -133,12 +133,20 @@ swift_library(
         "ProjectDrivers/XcodeProjectDriver.swift",
     ],
     module_name = "ProjectDrivers",
-    deps = [
-        "//Sources:Indexer",
-        "//Sources:Shared",
-        "//Sources:SourceGraph",
-        "//Sources:XcodeSupport",
-    ],
+    deps =
+        select({
+            "@platforms//os:macos": [
+                "//Sources:Indexer",
+                "//Sources:Shared",
+                "//Sources:SourceGraph",
+                "//Sources:XcodeSupport",
+            ],
+            "//conditions:default": [
+                "//Sources:Indexer",
+                "//Sources:Shared",
+                "//Sources:SourceGraph",
+            ],
+        }),
 )
 
 swift_library(
@@ -149,6 +157,7 @@ swift_library(
         "PeripheryKit/Results/CodeClimateFormatter.swift",
         "PeripheryKit/Results/CsvFormatter.swift",
         "PeripheryKit/Results/GitHubActionsFormatter.swift",
+        "PeripheryKit/Results/GitHubMarkdownFormatter.swift",
         "PeripheryKit/Results/JsonFormatter.swift",
         "PeripheryKit/Results/OutputDeclarationFilter.swift",
         "PeripheryKit/Results/OutputFormatter.swift",

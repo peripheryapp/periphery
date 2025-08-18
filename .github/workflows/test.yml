@@ -35,29 +35,49 @@ jobs:
         - name: Scan
           run: bazel run //:periphery -- scan --bazel --quiet --strict --baseline baselines/bazel.json
   macOS:
+    name: macOS
     strategy:
       fail-fast: false
       matrix:
-        xcode: ["16.2", "16.1", "16.0", "15.4"]
+        step: ["main-snapshot", "16.4", "16.3", "16.2"]
         include:
-          - xcode: "16.2"
-            macos: macos-15
-          - xcode: "16.1"
-            macos: macos-15
-          - xcode: "16.0"
-            macos: macos-15
-          - xcode: "15.4"
-            macos: macos-14
-    runs-on: ${{ matrix.macos }}
-    name: macOS
+          - step: "main-snapshot"
+            xcode: "16.4"
+            swiftly: "main-snapshot"
+            continueOnError: true
+          - step: "16.4"
+            xcode: "16.4"
+          - step: "16.3"
+            xcode: "16.3"
+            baseline: "macos-swift-6.1.json"
+          - step: "16.2"
+            xcode: "16.2"
+    runs-on: macos-15
+    continue-on-error: ${{ matrix.continueOnError == true }}
     steps:
     - uses: actions/checkout@master
     - name: Select Xcode version
-      run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app; swift -version
+      run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
+    - name: Install Swiftly
+      if: ${{ matrix.swiftly }}
+      run: |
+        curl -O https://download.swift.org/swiftly/darwin/swiftly.pkg
+        installer -pkg swiftly.pkg -target CurrentUserHomeDirectory
+        ~/.swiftly/bin/swiftly init --skip-install
+        . ~/.swiftly/env.sh
+        hash -r
+        echo "PATH=$PATH" >> "$GITHUB_ENV"
+        echo "SWIFTLY_HOME_DIR=$SWIFTLY_HOME_DIR" >> "$GITHUB_ENV"
+        echo "SWIFTLY_BIN_DIR=$SWIFTLY_BIN_DIR" >> "$GITHUB_ENV"
+    - name: Install Swift (Swiftly)
+      if: ${{ matrix.swiftly }}
+      run: swiftly install ${{ matrix.swiftly }} --use
     - name: Get Swift Version
       id: get-swift-version
       run: |
-          echo "::set-output name=version::$(swift -version | head -n 1 | sed s/,// )"
+        swift_version=$(swift -version | head -n 1 | sed s/,//)
+        echo "$swift_version"
+        echo "SWIFT_VERSION=${swift_version}" >> "$GITHUB_ENV"
       shell: bash
     - name: Cache resolved dependencies
       id: cache-resolved-dependencies
@@ -66,37 +86,43 @@ jobs:
         path: |
           .build
           Package.resolved
-        key: ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
+        key: ${{ runner.os }}-${{ matrix.xcode }}-${{ env.SWIFT_VERSION }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.xcode }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-
+          ${{ runner.os }}-${{ matrix.xcode }}-${{ env.SWIFT_VERSION }}-${{ env.cache_version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}
     - name: Build
       run: ${{ env.swift_build }}
     - name: Scan
-      run: ${{ env.periphery_scan }}
+      run: ${{ env.periphery_scan }} ${{ matrix.baseline && format('--baseline baselines/{0}', matrix.baseline) || '' }}
     - name: Test
       run: ${{ env.swift_test }}
   linux:
+    name: Linux
     strategy:
       fail-fast: false
       matrix:
-        swift: ["6.0", "5.10"]
+        swift: ["nightly-main", "6.1", "6.0"]
         include:
+          - swift: "nightly-main"
+            container: "swiftlang/swift:nightly-main"
+            continueOnError: true
+          - swift: "6.1"
+            container: "swift:6.1"
           - swift: "6.0"
             container: "swift:6.0"
-          - swift: "5.10"
-            container: "swift:5.10"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container: ${{ matrix.container }}
-    name: Linux
+    continue-on-error: ${{ matrix.continueOnError == true }}
     steps:
     - uses: actions/checkout@master
     - name: Get Swift Version
       id: get-swift-version
       run: |
-        echo "::set-output name=version::$(swift -version | head -n 1 | sed s/,// )"
+        swift_version=$(swift -version | head -n 1 | sed s/,//)
+        echo "$swift_version"
+        echo "SWIFT_VERSION=${swift_version}" >> "$GITHUB_ENV"
       shell: bash
     - name: Cache resolved dependencies
       id: cache-resolved-dependencies
@@ -105,9 +131,9 @@ jobs:
         path: |
           .build
           Package.resolved
-        key: ${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
+        key: ${{ runner.os }}-${{ env.SWIFT_VERSION }}-${{ env.cache_version }}-spm-deps-${{ hashFiles('Package.swift', 'Package.resolved') }}
         restore-keys: |
-          ${{ runner.os }}-${{ steps.get-swift-version.outputs.version }}-${{ env.cache_version }}-spm-deps-
+          ${{ runner.os }}-${{ env.SWIFT_VERSION }}-${{ env.cache_version }}-spm-deps-
     - name: Resolve dependencies
       if: steps.cache-resolved-dependencies.outputs.cache-hit != 'true'
       run: ${{ env.swift_package_resolve }}

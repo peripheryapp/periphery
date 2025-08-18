@@ -16,12 +16,12 @@ struct CheckUpdateCommand: FrontendCommand {
         DispatchQueue.global().async { checker.run() }
         let latestVersion = try checker.wait().get()
         if latestVersion.isVersion(greaterThan: PeripheryVersion) {
-            logger.info(colorize("* Update Available", .boldGreen))
-            let boldLatestVersion = colorize(latestVersion, .bold)
-            let boldLocalVersion = colorize(PeripheryVersion, .bold)
+            logger.info(Logger.colorize("* Update Available", .boldGreen))
+            let boldLatestVersion = Logger.colorize(latestVersion, .bold)
+            let boldLocalVersion = Logger.colorize(PeripheryVersion, .bold)
             logger.info("Version \(boldLatestVersion) is now available, you are using version \(boldLocalVersion).")
         } else {
-            let boldLatestVersion = colorize(latestVersion, .bold)
+            let boldLatestVersion = Logger.colorize(latestVersion, .bold)
             logger.info("You are using the latest version, \(boldLatestVersion).")
         }
     }
