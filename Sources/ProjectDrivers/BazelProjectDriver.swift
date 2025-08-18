@@ -75,11 +75,7 @@ class BazelProjectDriver: ProjectDriver {
         self.fileManager = fileManager
     }
 
-    func build() throws {
-        guard let executablePath = Bundle.main.executablePath else {
-            fatalError("Expected executable path.")
-        }
-
+    public func build() throws {
         try fileManager.createDirectory(at: outputPath.url, withIntermediateDirectories: true)
 
         let configPath = outputPath.appending("periphery.yml")
