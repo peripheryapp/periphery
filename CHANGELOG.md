@@ -7,6 +7,7 @@
 ##### Enhancements
 
 - Added the `--retain-unused-imported-modules` option.
+- Added the `--format gitlab-codemagic` formatting option for GitLabs Code Quality artifact reports
 
 ##### Bug Fixes
 

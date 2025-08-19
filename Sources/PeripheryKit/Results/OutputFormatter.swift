@@ -178,6 +178,8 @@ public extension OutputFormat {
             GitHubActionsFormatter.self
         case .githubMarkdown:
             GitHubMarkdownFormatter.self
+        case .gitlabCodeQuality:
+            GitLabCodeQualityFormatter.self
         }
     }
 }
