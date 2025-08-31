@@ -80,7 +80,7 @@ The guided setup will detect your project type and configure a few options. Afte
 
 The guided setup is only intended for introductory purposes, once you are familiar with Periphery you can try some more advanced options, all of which can be seen with `periphery help scan`.
 
-To get the most from Periphery, it’s important to understand how it works. Periphery first builds your project; it does this to generate the “index store”. The index store contains detailed information about the declarations (class, struct, func, etc.) in your project and their references to other declarations. Using this store, Periphery builds an in-memory graph of the relational structure of your project, supplementing it with additional information obtained by parsing each source file. Next, the graph is mutated to make it more suitable for detecting unused code, e.g. marking your project’s entry points. Finally, the graph is traversed from its roots to identify unreferenced declarations.
+To get the most from Periphery, it’s important to understand how it works. Periphery first builds your project; it does this to generate the “index store”. The index store contains detailed information about the declarations (class, struct, func, etc.) in your project and their references to other declarations. Using this store, Periphery builds an in-memory graph of the relational structure of your project, supplementing it with additional information obtained by parsing each source file. Next, the graph is mutated to make it more suitable for detecting unused code, e.g., marking your project’s entry points. Finally, the graph is traversed from its roots to identify unreferenced declarations.
 
 > **Tip**
 >
@@ -92,11 +92,11 @@ For projects that are mixed Objective-C & Swift, it's highly recommended you [re
 
 ### Configuration
 
-Once you've settled upon the appropriate options for your project, you may wish to persist them in a YAML configuration file. The simplest way to achieve this is to run Periphery with the `--verbose` option. Near the beginning of the output you will see the `[configuration:begin]` section with your configuration formatted as YAML below. Copy & paste the configuration into `.periphery.yml` in the root of your project folder. You can now simply run `periphery scan` and the YAML configuration will be used.
+Once you've settled upon the appropriate options for your project, you may wish to persist them in a YAML configuration file. The simplest way to achieve this is to run Periphery with the `--verbose` option. Near the beginning of the output, you will see the `[configuration:begin]` section with your configuration formatted as YAML below. Copy & paste the configuration into `.periphery.yml` in the root of your project folder. You can now simply run `periphery scan` and the YAML configuration will be used.
 
 ## Analysis
 
-The goal of Periphery is to report instances of unused _declarations_. A declaration is a `class`, `struct`, `protocol`, `function`, `property`, `constructor`, `enum`, `typealias`, `associatedtype`, etc. As you'd expect, Periphery can identify simple unreferenced declarations, e.g. a `class` that is no longer used anywhere in your codebase.
+The goal of Periphery is to report instances of unused _declarations_. A declaration is a `class`, `struct`, `protocol`, `function`, `property`, `constructor`, `enum`, `typealias`, `associatedtype`, etc. As you'd expect, Periphery can identify simple unreferenced declarations, e.g., a `class` that is no longer used anywhere in your codebase.
 
 Periphery can also identify more advanced instances of unused code. The following section explains these in detail.
 
@@ -185,7 +185,7 @@ class Subclass: Base {
 
 ### Protocols
 
-A protocol which is conformed to by an object is not truly used unless it's also used as an existential type, or to specialize a generic method/class. Periphery is able to identify such redundant protocols whether they are conformed to by one, or even multiple objects.
+A protocol that is conformed to by an object is not truly used unless it's also used as an existential type or to specialize a generic method/class. Periphery is able to identify such redundant protocols whether they are conformed to by one or even multiple objects.
 
 ```swift
 protocol MyProtocol { // 'MyProtocol' is redundant
@@ -211,9 +211,9 @@ let myClass2 = MyClass2()
 myClass2.someMethod()
 ```
 
-Here we can see that despite both implementations of `someMethod` are called, at no point does an object take on the type of `MyProtocol`. Therefore the protocol itself is redundant, and there's no benefit from `MyClass1` or `MyClass2` conforming to it. We can remove `MyProtocol` along with each redundant conformance, and just keep `someMethod` in each class.
+Here we can see that despite both implementations of `someMethod` are called, at no point does an object take on the type of `MyProtocol`. Therefore the protocol itself is redundant, and there's no benefit from `MyClass1` or `MyClass2` conforming to it. We can remove `MyProtocol` along with each redundant conformance and just keep `someMethod` in each class.
 
-Just like a normal method or property of a object, individual properties and methods declared by your protocol can also be identified as unused.
+Just like a normal method or property of an object, individual properties and methods declared by your protocol can also be identified as unused.
 
 ```swift
 protocol MyProtocol {
@@ -242,11 +242,11 @@ let myClass = MyClass()
 myClass.perform()
 ```
 
-Here we can see that `MyProtocol` is itself used, and cannot be removed. However, since `unusedProperty` is never called on `MyConformingClass`, Periphery can identify that the declaration of `unusedProperty` in `MyProtocol` is also unused and can be removed along with the unused implementation of `unusedProperty`.
+Here we can see that `MyProtocol` is itself used and cannot be removed. However, since `unusedProperty` is never called on `MyConformingClass`, Periphery can identify that the declaration of `unusedProperty` in `MyProtocol` is also unused and can be removed along with the unused implementation of `unusedProperty`.
 
 ### Enumerations
 
-Along with being able to identify unused enumerations, Periphery can also identify individual unused enum cases. Plain enums that are not raw representable, i.e. that _don't_ have a `String`, `Character`, `Int`, or floating-point value type can be reliably identified. However, enumerations that _do_ have a raw value type can be dynamic, and therefore must be assumed to be used.
+Along with being able to identify unused enumerations, Periphery can also identify individual unused enum cases. Plain enums that are not raw representable, i.e., that _don't_ have a `String`, `Character`, `Int`, or floating-point value type, can be reliably identified. However, enumerations that _do_ have a raw value type can be dynamic, and therefore must be assumed to be used.
 
 Let's clear this up with a quick example:
 
@@ -262,11 +262,11 @@ func someFunction(value: String) {
 }
 ```
 
-There's no direct reference to the `myCase` case, so it's reasonable to expect it _might_ no longer be needed, however, if it were removed we can see that `somethingImportant` would never be called if `someFunction` were passed the value of `"myCase"`.
+There's no direct reference to the `myCase` case, so it's reasonable to expect it _might_ no longer be needed, however, if it were removed, we can see that `somethingImportant` would never be called if `someFunction` were passed the value of `"myCase"`.
 
 ### Assign-only Properties
 
-Properties that are assigned but never used are identified as such, e.g:
+Properties that are assigned but never used are identified as such, e.g.:
 
 ```swift
 class MyClass {
@@ -278,7 +278,7 @@ class MyClass {
 }
 ```
 
-In some cases this may be the intended behavior, therefore you have a few options available to silence such results:
+In some cases this may be the intended behavior; therefore, you have a few options available to silence such results:
 
 - Retain individual properties using [Comment Commands](#comment-commands).
 - Retain all assign-only properties by their type with `--retain-assign-only-property-types`. Given types must match their exact usage in the property declaration (sans optional question mark), e.g. `String`, `[String]`, `Set<String>`. Periphery is unable to resolve inferred property types, therefore in some instances, you may need to add explicit type annotations to your properties.
@@ -286,7 +286,7 @@ In some cases this may be the intended behavior, therefore you have a few option
 
 ### Redundant Public Accessibility
 
-Declarations that are marked `public` yet are not referenced from outside their home module, are identified as having redundant public accessibility. In this scenario, the `public` annotation can be removed from the declaration. Removing redundant public accessibility has a couple of benefits:
+Declarations that are marked `public` yet are not referenced from outside their home module are identified as having redundant public accessibility. In this scenario, the `public` annotation can be removed from the declaration. Removing redundant public accessibility has a couple of benefits:
 
 - It helps reduce the public surface area of your modules.
 - In [Whole Module Compilation](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#whole-module-optimizations-wmo) mode, Swift can infer `final` by [automatically discovering](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-if-wmo-is-enabled-use-internal-when-a-declaration-does-not-need-to-be-accessed-outside-of-module) all potentially overriding declarations. `final` classes are [better optimized](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-use-final-when-you-know-the-declaration-does-not-need-to-be-overridden) by the compiler.
@@ -295,9 +295,9 @@ This analysis can be disabled with `--disable-redundant-public-analysis`.
 
 ### Unused Imports
 
-Periphery can detect unused imports of targets it has scanned, i.e. those specified with the `--targets` argument. It cannot detect unused imports of other targets because the Swift source files are unavailable and uses of `@_exported` cannot be observed. `@_exported` is problematic because it changes the public interface of a target such that the declarations exported by the target are no longer necessarily declared by the imported target. For example, the `Foundation` target exports `Dispatch`, among other targets. If any given source file imports `Foundation` and references `DispatchQueue` but no other declarations from `Foundation`, then the `Foundation` import cannot be removed as it would also make the `DispatchQueue` type unavailable. To avoid false positives, therefore, Periphery only detects unused imports of targets it has scanned.
+Periphery can detect unused imports of targets it has scanned, i.e., those specified with the `--targets` argument. It cannot detect unused imports of other targets because the Swift source files are unavailable and uses of `@_exported` cannot be observed. `@_exported` is problematic because it changes the public interface of a target such that the declarations exported by the target are no longer necessarily declared by the imported target. For example, the `Foundation` target exports `Dispatch`, among other targets. If any given source file imports `Foundation` and references `DispatchQueue` but no other declarations from `Foundation`, then the `Foundation` import cannot be removed as it would also make the `DispatchQueue` type unavailable. To avoid false positives, therefore, Periphery only detects unused imports of targets it has scanned.
 
-Periphery will likely produce false positives for targets with mixed Swift and Objective-C, as Periphery cannot scan the Objective-C files. It is recommended therefore to disable unused import detection for projects with a significant amount of Objective-C, or manually exclude the mixed language targets from the results.
+Periphery will likely produce false positives for targets with mixed Swift and Objective-C, as Periphery cannot scan the Objective-C files. It is recommended, therefore, to disable unused import detection for projects with a significant amount of Objective-C or manually exclude the mixed language targets from the results.
 
 ### Objective-C
 
@@ -305,7 +305,7 @@ Periphery cannot analyze Objective-C code since types may be dynamically typed.
 
 By default, Periphery does not assume that declarations accessible by the Objective-C runtime are in use. If your project is a mix of Swift & Objective-C, you can enable this behavior with the `--retain-objc-accessible` option. Swift declarations that are accessible by the Objective-C runtime are those that are explicitly annotated with `@objc` or `@objcMembers`, and classes that inherit `NSObject` either directly or indirectly via another class.
 
-Alternatively, the `--retain-objc-annotated` can be used to only retain declarations that are explicitly annotated with `@objc` or `@objcMembers`. Types that inherit `NSObject` are not retained unless they have explicit annotations. This option may uncover more unused code, but with the caveat that some of the results may be incorrect if the declaration is used in Objective-C code. To resolve these incorrect results you must add an `@objc` annotation to the declaration.
+Alternatively, the `--retain-objc-annotated` can be used to only retain declarations that are explicitly annotated with `@objc` or `@objcMembers`. Types that inherit `NSObject` are not retained unless they have explicit annotations. This option may uncover more unused code, but with the caveat that some of the results may be incorrect if the declaration is used in Objective-C code. To resolve these incorrect results, you must add an `@objc` annotation to the declaration.
 
 ### Codable
 
@@ -315,7 +315,7 @@ If `Codable` conformance is declared by a protocol in an external module not sca
 
 ### XCTestCase
 
-Any class that inherits `XCTestCase` is automatically retained along with its test methods. However, when a class inherits `XCTestCase` indirectly via another class, e.g `UnitTestCase`, and that class resides in a target that isn't scanned by Periphery, you need to use the `--external-test-case-classes UnitTestCase` option to instruct Periphery to treat `UnitTestCase` as an `XCTestCase` subclass.
+Any class that inherits `XCTestCase` is automatically retained along with its test methods. However, when a class inherits `XCTestCase` indirectly via another class, e.g, `UnitTestCase`, and that class resides in a target that isn't scanned by Periphery, you need to use the `--external-test-case-classes UnitTestCase` option to instruct Periphery to treat `UnitTestCase` as an `XCTestCase` subclass.
 
 ### Interface Builder
 
@@ -325,7 +325,7 @@ If your project contains Interface Builder files (such as storyboards and XIBs),
 
 For whatever reason, you may want to keep some unused code. Source code comment commands can be used to ignore specific declarations and exclude them from the results.
 
-An ignore comment command can be placed directly on the line above any declaration to ignore it, and all descendent declarations:
+An ignore comment command can be placed directly on the line above any declaration to ignore it and all descendent declarations:
 
 ```swift
 // periphery:ignore
@@ -360,17 +360,17 @@ Select your project in the Project Navigator and click the + button at the botto
 
 ![Step 1](assets/xcode-integration/1.png)
 
-Choose a name for the new target, e.g. "Periphery" or "Unused Code".
+Choose a name for the new target, e.g., "Periphery" or "Unused Code".
 
 ![Step 2](assets/xcode-integration/2.png)
 
 ### Step 2: Add a Run Script Build Phase
 
-In the **Build Phases** section click the + button to add a new Run Script phase.
+In the **Build Phases** section, click the + button to add a new Run Script phase.
 
 ![Step 3](assets/xcode-integration/3.png)
 
-In the shell script window enter the Periphery command. Be sure to include the `--format xcode` option.
+In the shell script window, enter the Periphery command. Be sure to include the `--format xcode` option.
 
 ![Step 4](assets/xcode-integration/4.png)
 
@@ -386,7 +386,7 @@ You're ready to roll. You should now see the new scheme in the dropdown. Select 
 
 ## Excluding Files
 
-Both exclusion options described below accept a Bash v4 style path glob, either absolute or relative to your project directory. You can delimit multiple globs with a space, e.g. `--option "Sources/Single.swift" "**/Generated/*.swift" "**/*.{xib,storyboard}"`.
+Both exclusion options described below accept a Bash v4-style path glob, either absolute or relative to your project directory. You can delimit multiple globs with a space, e.g., `--option "Sources/Single.swift" "**/Generated/*.swift" "**/*.{xib,storyboard}"`.
 
 ### Excluding Results
 
@@ -408,17 +408,17 @@ To retain all declarations in files, pass the `--retain-files <globs>` option to
 
 ## Continuous Integration
 
-When integrating Periphery into a CI pipeline, you can potentially skip the build phase if your pipeline has already done so, e.g. to run tests. This can be achieved using the `--skip-build` option. However, you also need to tell Periphery the location of the index store using `--index-store-path`. This location is dependent on your project type.
+When integrating Periphery into a CI pipeline, you can potentially skip the build phase if your pipeline has already done so, e.g., to run tests. This can be achieved using the `--skip-build` option. However, you also need to tell Periphery the location of the index store using `--index-store-path`. This location is dependent on your project type.
 
-Note that when using `--skip-build` and `--index-store-path` it's vital that the index store contains data for all of the targets you specify via `--targets`. For example, if your pipeline previously built the targets 'App' and 'Lib', the index store will only contain data for the files in those targets. You cannot then instruct Periphery to scan additional targets, e.g 'Extension', or 'UnitTests'.
+Note that when using `--skip-build` and `--index-store-path` it's vital that the index store contain data for all the targets you specify via `--targets`. For example, if your pipeline previously built the targets 'App' and 'Lib', the index store will only contain data for the files in those targets. You cannot then instruct Periphery to scan additional targets, e.g., 'Extension' or 'UnitTests'.
 
 ### Xcode
 
-The index store generated by `xcodebuild` exists in DerivedData at a location dependent on your project, e.g `~/Library/Developer/Xcode/DerivedData/YourProject-abc123/Index/DataStore`. For Xcode 14 and later, the `Index` directory can be found as `Index.noindex`, which suppresses Spotlight indexing.
+The index store generated by `xcodebuild` exists in DerivedData at a location dependent on your project, e.g., `~/Library/Developer/Xcode/DerivedData/YourProject-abc123/Index/DataStore`. For Xcode 14 and later, the `Index` directory can be found as `Index.noindex`, which suppresses Spotlight indexing.
 
 ### SwiftPM
 
-By default, Periphery looks for the index store at `.build/debug/index/store`. Therefore, if you intend to run Periphery directly after calling `swift test`, you can omit the `--index-store-path` option and Periphery will use the index store created when the project was built for testing. However, if this isn't the case, then you must provide Periphery the location of the index store with `--index-store-path`.
+By default, Periphery looks for the index store at `.build/debug/index/store`. Therefore, if you intend to run Periphery directly after calling `swift test`, you can omit the `--index-store-path` option, and Periphery will use the index store created when the project was built for testing. However, if this isn't the case, then you must provide Periphery the location of the index store with `--index-store-path`.
 
 ## Build Systems
 
@@ -428,11 +428,11 @@ By default, Periphery looks for the index store at `.build/debug/index/store`. T
 bazel run @periphery -- scan --bazel
 ```
 
-The `--bazel` option enables Bazel mode which provides seamless integration with your project. It works by querying your project to identify all top-level targets, generates a hidden implementation of the [scan](https://github.com/peripheryapp/periphery/blob/master/bazel/rules.bzl) rule, and then invokes `bazel run`. You can filter the top-level targets with the `-—bazel-filter <value>` option, where `<value>` will be passed as the first argument to Bazel’s [filter](https://bazel.build/query/language#filter) operator. The generated query can be seen in the console with the `-—verbose` option.
+The `--bazel` option enables Bazel mode, which provides seamless integration with your project. It works by querying your project to identify all top-level targets, generating a hidden implementation of the [scan](https://github.com/peripheryapp/periphery/blob/master/bazel/rules.bzl) rule, and then invoking `bazel run`. You can filter the top-level targets with the `-—bazel-filter <value>` option, where `<value>` will be passed as the first argument to Bazel’s [filter](https://bazel.build/query/language#filter) operator. The generated query can be seen in the console with the `-—verbose` option.
 
 ### Other
 
-Periphery can analyze projects using other build systems, though it cannot drive them automatically like SPM, Xcode and Bazel. Instead, you need to create a configuration file that specifies the location of indexstore and other resource files. The format is as follows:
+Periphery can analyze projects using other build systems, though it cannot drive them automatically like SPM, Xcode, and Bazel. Instead, you need to create a configuration file that specifies the location of indexstore and other resource files. The format is as follows:
 
 ```json
 {
@@ -480,11 +480,11 @@ Periphery supports both macOS and Linux. macOS supports both Xcode and Swift Pac
 
 ### Erroneous results in one or more files, such as false positives and incorrect source file locations
 
-It's possible for the index store to become corrupt, or out of sync with the source file. This can happen, for example, if you forcefully terminate (^C) a scan. To rectify this, you can pass the `--clean-build` flag to the scan command to force removal of existing build artifacts.
+It's possible for the index store to become corrupt or out of sync with the source file. This can happen, for example, if you forcefully terminate (^C) a scan. To rectify this, you can pass the `--clean-build` flag to the scan command to force removal of existing build artifacts.
 
 ### Code referenced within a preprocessor macro conditional branch is unused
 
-When Periphery builds your project it uses the default build configuration, which is typically 'debug'. If you use preprocessor macros to conditionally compile code, Periphery will only have visibility into the branches that are compiled. In the example below, `releaseName` will be reported as unused as it is only referenced within the non-debug branch of the macro.
+When Periphery builds your project, it uses the default build configuration, which is typically 'debug'. If you use preprocessor macros to conditionally compile code, Periphery will only have visibility into the branches that are compiled. In the example below, `releaseName` will be reported as unused as it is only referenced within the non-debug branch of the macro.
 
 ```swift
 struct BuildInfo {
@@ -501,15 +501,15 @@ struct BuildInfo {
 }
 ```
 
-You have a few options to workaround this:
+You have a few options to work around this:
 
 - Use [Comment Commands](#comment-commands) to explicitly ignore `releaseName`.
 - Filter the results to remove known instances.
-- Run Periphery once for each build configuration and merge the results. You can pass arguments to the underlying build by specifying them after `--`, e.g. `periphery scan ... -- -configuration release`.
+- Run Periphery once for each build configuration and merge the results. You can pass arguments to the underlying build by specifying them after `--`, e.g., `periphery scan ... -- -configuration release`.
 
 ### Swift package is platform-specific
 
-Periphery uses `swift build` to compile a Swift package which will fail if the Swift package is platform-specific (e.g. to iOS).
+Periphery uses `swift build` to compile a Swift package, which will fail if the Swift package is platform-specific (e.g., to iOS).
 
 As a workaround, you can manually build the Swift package with `xcodebuild` and then use the `--skip-build` and `--index-store-path` options to target the index store previously produced by `xcodebuild`.
 
@@ -536,7 +536,7 @@ Due to some underlying bugs in Swift, Periphery may in some instances report inc
 
 ## Sponsors ![Sponsors](assets/sponsor-20.svg)
 
-Periphery is passion project that takes a huge amount of effort to maintain and develop. If you find Periphery useful, please consider sponsoring through [GitHub Sponsors](https://github.com/sponsors/peripheryapp).
+Periphery is a passion project that takes a huge amount of effort to maintain and develop. If you find Periphery useful, please consider sponsoring through [GitHub Sponsors](https://github.com/sponsors/peripheryapp).
 
 Special thanks goes to the following generous sponsors:
 
