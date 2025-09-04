@@ -30,7 +30,7 @@ final class GitLabCodeQualityFormatter: OutputFormatter {
 
             let begin = violationFileLocation.line
             let lines: [AnyHashable: Any] = [
-                "begin": begin
+                "begin": begin,
             ]
 
             let path = outputPath(violationFileLocation)
