@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        step: ["main-snapshot", "16.4", "16.3", "16.2"]
+        step: ["main-snapshot", "16.4", "16.3"]
         include:
           - step: "main-snapshot"
             xcode: "16.4"
@@ -50,8 +50,6 @@ jobs:
           - step: "16.3"
             xcode: "16.3"
             baseline: "macos-swift-6.1.json"
-          - step: "16.2"
-            xcode: "16.2"
     runs-on: macos-15
     continue-on-error: ${{ matrix.continueOnError == true }}
     steps:
