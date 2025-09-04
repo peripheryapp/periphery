@@ -8,6 +8,7 @@ public enum OutputFormat: String, CaseIterable {
     case codeclimate
     case githubActions = "github-actions"
     case githubMarkdown = "github-markdown"
+    case gitlabCodeQuality = "gitlab-codequality"
 
     public static let `default` = OutputFormat.xcode
 
