@@ -106,13 +106,16 @@ public class BazelProjectDriver: ProjectDriver {
             logger.info("\(asterisk) Building...")
         }
 
-        let status = try shell.execStatus([
+        var arguments = [
             "bazel",
             "run",
             "--check_visibility=false",
             "--ui_event_filters=-info,-debug,-warning",
-            "@periphery_generated//:scan",
-        ])
+        ]
+        arguments.append(contentsOf: configuration.buildArguments)
+        arguments.append("@periphery_generated//:scan")
+
+        let status = try shell.execStatus(arguments)
 
         // The actual scan is performed by Bazel.
         exit(status)
