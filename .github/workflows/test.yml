@@ -101,15 +101,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ["nightly-main", "6.1", "6.0"]
+        swift: ["nightly-main", "6.1"]
         include:
           - swift: "nightly-main"
             container: "swiftlang/swift:nightly-main"
             continueOnError: true
           - swift: "6.1"
             container: "swift:6.1"
-          - swift: "6.0"
-            container: "swift:6.0"
     runs-on: ubuntu-latest
     container: ${{ matrix.container }}
     continue-on-error: ${{ matrix.continueOnError == true }}
