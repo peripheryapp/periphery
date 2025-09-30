@@ -1,6 +1,7 @@
 import Foundation
 import Logger
 import Shared
+import SystemPackage
 @testable import XcodeSupport
 import XCTest
 
@@ -13,8 +14,9 @@ final class XcodebuildBuildProjectTest: XCTestCase {
 
         let logger = Logger(quiet: true)
         let shell = Shell(logger: logger)
+        var loadedProjectPaths: Set<FilePath> = []
         xcodebuild = Xcodebuild(shell: shell, logger: logger)
-        project = try! XcodeProject(path: UIKitProjectPath, xcodebuild: xcodebuild, shell: shell, logger: logger)
+        project = try! XcodeProject(path: UIKitProjectPath, loadedProjectPaths: &loadedProjectPaths, xcodebuild: xcodebuild, shell: shell, logger: logger)
     }
 
     override func tearDown() {

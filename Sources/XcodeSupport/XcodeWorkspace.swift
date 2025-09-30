@@ -31,7 +31,10 @@ public final class XcodeWorkspace: XcodeProjectlike {
         }
 
         let projectPaths = collectProjectPaths(in: xcworkspace.data.children)
-        let projects = try projectPaths.compactMapSet { try XcodeProject(path: sourceRoot.pushing($0), referencedBy: self.path, shell: shell, logger: logger) }
+        var loadedProjectPaths: Set<FilePath> = []
+        let projects = try projectPaths.compactMapSet {
+            try XcodeProject(path: sourceRoot.pushing($0), loadedProjectPaths: &loadedProjectPaths, referencedBy: self.path, shell: shell, logger: logger)
+        }
 
         targets = projects.reduce(into: .init()) { result, project in
             result.formUnion(project.targets)

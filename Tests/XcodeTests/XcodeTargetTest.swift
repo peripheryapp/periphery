@@ -1,6 +1,7 @@
 import Foundation
 import Logger
 import Shared
+import SystemPackage
 @testable import TestShared
 @testable import XcodeSupport
 import XCTest
@@ -13,8 +14,10 @@ final class XcodeTargetTest: XCTestCase {
         let logger = Logger(quiet: true)
         let shell = Shell(logger: logger)
         let xcodebuild = Xcodebuild(shell: shell, logger: logger)
+        var loadedProjectPaths: Set<FilePath> = []
         project = try! XcodeProject(
             path: UIKitProjectPath,
+            loadedProjectPaths: &loadedProjectPaths,
             xcodebuild: xcodebuild,
             shell: shell,
             logger: logger
