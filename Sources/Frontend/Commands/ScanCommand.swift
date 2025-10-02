@@ -144,6 +144,9 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Filter pattern applied to the Bazel top-level targets query")
     var bazelFilter: String?
 
+    @Option(help: "Export dependancy graph as JSON to file path")
+    var exportGraph: FilePath?
+
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
@@ -200,6 +203,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$genericProjectConfig, genericProjectConfig)
         configuration.apply(\.$bazel, bazel)
         configuration.apply(\.$bazelFilter, bazelFilter)
+        configuration.apply(\.$exportGraph, exportGraph)
 
         configuration.buildFilenameMatchers()
 
