@@ -147,6 +147,9 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Path to a global index store populated by Bazel. If provided, will be used instead of individual module stores.")
     var bazelIndexStore: FilePath?
 
+    @Option(help: "Export dependancy graph as JSON to file path")
+    var exportGraph: FilePath?
+
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
@@ -204,6 +207,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$bazel, bazel)
         configuration.apply(\.$bazelFilter, bazelFilter)
         configuration.apply(\.$bazelIndexStore, bazelIndexStore)
+        configuration.apply(\.$exportGraph, exportGraph)
 
         configuration.buildFilenameMatchers()
 

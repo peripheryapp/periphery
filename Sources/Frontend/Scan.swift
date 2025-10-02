@@ -6,6 +6,7 @@ import PeripheryKit
 import ProjectDrivers
 import Shared
 import SourceGraph
+import SystemPackage
 
 final class Scan {
     private let configuration: Configuration
@@ -41,6 +42,9 @@ final class Scan {
         try build(driver)
         try index(driver)
         try analyze()
+        if let graphPath = configuration.exportGraph {
+            try exportGraph(graphPath: graphPath)
+        }
         return buildResults()
     }
 
@@ -90,6 +94,16 @@ final class Scan {
             swiftVersion: swiftVersion
         ).perform()
         logger.endInterval(analyzeInterval)
+    }
+
+    private func exportGraph(graphPath: FilePath) throws {
+        let exportGraphInterval = logger.beginInterval("exportGraph")
+        let json = SourceGraphExporter(graph: graph).describeGraph()
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+        let data = try encoder.encode(json)
+        try data.write(to: graphPath.url)
+        logger.endInterval(exportGraphInterval)
     }
 
     private func buildResults() -> [ScanResult] {
