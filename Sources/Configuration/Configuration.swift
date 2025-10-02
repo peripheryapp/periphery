@@ -137,6 +137,9 @@ public final class Configuration {
     @Setting(key: "bazel_filter", defaultValue: nil)
     public var bazelFilter: String?
 
+    @Setting(key: "export_graph", defaultValue: nil)
+    public var exportGraph: FilePath?
+
     // Non user facing.
     public var guidedSetup: Bool = false
     public var projectRoot: FilePath = .init()
