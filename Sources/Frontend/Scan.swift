@@ -6,6 +6,7 @@ import PeripheryKit
 import ProjectDrivers
 import Shared
 import SourceGraph
+import SystemPackage
 
 final class Scan {
     private let configuration: Configuration
@@ -46,6 +47,9 @@ final class Scan {
         try build(driver)
         let loc = try index(driver)
         try analyze()
+        if let graphPath = configuration.exportGraph {
+            try exportGraph(graphPath: graphPath)
+        }
         return Output(results: buildResults(), loc: loc)
     }
 
@@ -96,6 +100,12 @@ final class Scan {
             swiftVersion: swiftVersion
         ).perform()
         logger.endInterval(analyzeInterval)
+    }
+
+    private func exportGraph(graphPath: FilePath) throws {
+        let exportGraphInterval = logger.beginInterval("exportGraph")
+        try SourceGraphExporter().describeGraph(graph: graph, to: graphPath.url)
+        logger.endInterval(exportGraphInterval)
     }
 
     private func buildResults() -> [ScanResult] {
