@@ -164,6 +164,7 @@ struct ScanCommand: FrontendCommand {
         }
 
         configuration.guidedSetup = setup
+        configuration.projectRoot = projectRoot
         configuration.apply(\.$project, project)
         configuration.apply(\.$schemes, schemes)
         configuration.apply(\.$indexExclude, indexExclude)
@@ -207,6 +208,8 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$genericProjectConfig, genericProjectConfig)
         configuration.apply(\.$bazel, bazel)
         configuration.apply(\.$bazelFilter, bazelFilter)
+
+        configuration.buildFilenameMatchers()
 
         let logger = Logger(
             quiet: configuration.quiet,

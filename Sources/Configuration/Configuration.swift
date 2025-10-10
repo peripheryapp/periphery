@@ -145,6 +145,7 @@ public final class Configuration {
 
     // Non user facing.
     public var guidedSetup: Bool = false
+    public var projectRoot: FilePath = .init()
 
     public var hasNonDefaultValues: Bool {
         settings.contains(where: \.hasNonDefaultValue)
@@ -191,10 +192,17 @@ public final class Configuration {
         }
     }
 
-    public lazy var indexExcludeMatchers: [FilenameMatcher] = buildFilenameMatchers(with: indexExclude)
-    public lazy var retainFilesMatchers: [FilenameMatcher] = buildFilenameMatchers(with: retainFiles)
-    public lazy var reportExcludeMatchers: [FilenameMatcher] = buildFilenameMatchers(with: reportExclude)
-    public lazy var reportIncludeMatchers: [FilenameMatcher] = buildFilenameMatchers(with: reportInclude)
+    public func buildFilenameMatchers() {
+        indexExcludeMatchers = buildFilenameMatchers(with: indexExclude)
+        retainFilesMatchers = buildFilenameMatchers(with: retainFiles)
+        reportExcludeMatchers = buildFilenameMatchers(with: reportExclude)
+        reportIncludeMatchers = buildFilenameMatchers(with: reportInclude)
+    }
+
+    public var indexExcludeMatchers: [FilenameMatcher] = []
+    public var retainFilesMatchers: [FilenameMatcher] = []
+    public var reportExcludeMatchers: [FilenameMatcher] = []
+    public var reportIncludeMatchers: [FilenameMatcher] = []
 
     // MARK: - Private
 

@@ -160,6 +160,7 @@ swift_library(
         "PeripheryKit/Results/CsvFormatter.swift",
         "PeripheryKit/Results/GitHubActionsFormatter.swift",
         "PeripheryKit/Results/GitHubMarkdownFormatter.swift",
+        "PeripheryKit/Results/GitLabCodeQualityFormatter.swift",
         "PeripheryKit/Results/JsonFormatter.swift",
         "PeripheryKit/Results/OutputDeclarationFilter.swift",
         "PeripheryKit/Results/OutputFormatter.swift",

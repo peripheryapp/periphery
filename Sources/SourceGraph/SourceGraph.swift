@@ -246,7 +246,7 @@ public final class SourceGraph {
     }
 
     func markUnusedModuleImport(_ statement: ImportStatement) {
-        let location = statement.location.relativeTo(.current)
+        let location = statement.location.relativeTo(configuration.projectRoot)
         let usr = "import-\(statement.module)-\(location)"
         let decl = Declaration(kind: .module, usrs: [usr], location: statement.location)
         decl.name = statement.module

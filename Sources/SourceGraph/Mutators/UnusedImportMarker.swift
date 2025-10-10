@@ -23,9 +23,15 @@ final class UnusedImportMarker: SourceGraphMutator {
         var referencedModulesByFile = graph.indexedSourceFiles.reduce(into: [SourceFile: Set<String>]()) { result, file in
             result[file] = []
         }
+        var moduleCache: [String: Set<String>] = [:]
 
         // Build a mapping of source files and the modules they reference.
         for ref in graph.allReferences {
+            if let modules = moduleCache[ref.usr] {
+                referencedModulesByFile[ref.location.file, default: []].formUnion(modules)
+                continue
+            }
+
             var directModules: Set<String> = []
             var indirectModules: Set<String> = []
 
@@ -48,6 +54,7 @@ final class UnusedImportMarker: SourceGraphMutator {
             let referencedModules = directModules
                 .union(indirectModules)
                 .union(modulesExtending(ref))
+            moduleCache[ref.usr] = referencedModules
             referencedModulesByFile[ref.location.file, default: []].formUnion(referencedModules)
         }
 
@@ -60,8 +67,11 @@ final class UnusedImportMarker: SourceGraphMutator {
 
             let unreferencedImports = file.importStatements
                 .filter {
-                    // Exclude ignore commented imports
-                    !$0.commentCommands.contains(.ignore) &&
+                    // Exclude conditional imports as they may provide symbols for sections of code
+                    // that are also conditionally compiled.
+                    !$0.isConditional &&
+                        // Exclude ignore commented imports
+                        !$0.commentCommands.contains(.ignore) &&
                         // Exclude exported/public imports because even though they may be unreferenced
                         // in the current file, their exported symbols may be referenced in others.
                         !$0.isExported &&

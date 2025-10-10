@@ -41,6 +41,8 @@ class FixtureSourceGraphTestCase: SPMSourceGraphTestCase {
         configuration.externalTestCaseClasses = externalTestCaseClasses
         configuration.retainFiles = retainFiles
 
+        configuration.buildFilenameMatchers()
+
         if !testFixturePath.exists {
             fatalError("\(testFixturePath.string) does not exist")
         }
