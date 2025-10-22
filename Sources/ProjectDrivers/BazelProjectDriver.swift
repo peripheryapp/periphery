@@ -85,6 +85,9 @@ public class BazelProjectDriver: ProjectDriver {
 
         let buildPath = outputPath.appending("BUILD.bazel")
         let deps = try queryTargets().joined(separator: ",\n")
+        let globalIndexStoreValue = configuration.bazelIndexStore.map {
+            "\"\(expandPath($0))\""
+        } ?? "None"
         let buildFileContents = """
         load("@periphery//bazel:rules.bzl", "scan")
 
@@ -92,6 +95,7 @@ public class BazelProjectDriver: ProjectDriver {
           name = "scan",
           testonly = True,
           config = "\(configPath)",
+          global_indexstore = \(globalIndexStoreValue),
           deps = [
             \(deps)
           ],
@@ -139,5 +143,12 @@ public class BazelProjectDriver: ProjectDriver {
         }
 
         return query
+    }
+
+    private func expandPath(_ path: String) -> String {
+        if path.starts(with: "/") {
+            return path
+        }
+        return FileManager.default.currentDirectoryPath + "/" + path
     }
 }

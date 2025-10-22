@@ -165,8 +165,12 @@ def scan_impl(ctx):
     xcmappingmodels = sets.to_list(xcmappingmodels_set)
     test_targets = sets.to_list(test_targets_set)
 
+    indexstores_config = [file.path for file in indexstores]
+    if ctx.attr.global_indexstore:
+        indexstores_config = [ctx.attr.global_indexstore]
+
     project_config = struct(
-        indexstores = [file.path for file in indexstores],
+        indexstores = indexstores_config,
         plists = [file.path for file in plists],
         xibs = [file.path for file in xibs],
         xcdatamodels = [file.path for file in xcdatamodels],
