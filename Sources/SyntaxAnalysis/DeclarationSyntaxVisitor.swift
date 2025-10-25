@@ -303,7 +303,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         let modifierNames = modifiers?.map(\.name.text) ?? []
         let accessibility = modifierNames.mapFirst { Accessibility(rawValue: $0) }
         let attributeNames = attributes?.compactMap {
-            AttributeSyntax($0)?.attributeName.trimmedDescription ?? AttributeSyntax($0)?.attributeName.firstToken(viewMode: .sourceAccurate)?.text
+            AttributeSyntax($0)?.attributeName.trimmed.description ?? AttributeSyntax($0)?.attributeName.firstToken(viewMode: .sourceAccurate)?.text
         } ?? []
         let location = sourceLocationBuilder.location(at: position)
         let returnClauseTypeLocations = typeNameLocations(for: returnClause)
@@ -353,11 +353,11 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
 
         let genericParameterNames = genericParameterClause
             .parameters
-            .mapSet { $0.name.trimmedDescription }
+            .mapSet { $0.name.trimmed.description }
 
         return parameterClauseTypes
             .contains {
-                if let baseTypeName = $0.as(MetatypeTypeSyntax.self)?.baseType.trimmedDescription,
+                if let baseTypeName = $0.as(MetatypeTypeSyntax.self)?.baseType.trimmed.description,
                    genericParameterNames.contains(baseTypeName),
                    returnClauseTypeLocations.contains(where: { $0.name == baseTypeName })
                 {

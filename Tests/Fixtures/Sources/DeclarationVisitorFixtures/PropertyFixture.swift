@@ -19,4 +19,5 @@ class PropertyVisitorTestFixture {
         (CustomType.NestedType, CustomType.NestedType.NestedScalar, Swift.String) = (.init(), 1, "1")
     let (implicitDestructuringPropertyA, implicitDestructuringPropertyB) = (CustomType(), "1")
     let multipleBindingPropertyA: Int = 1, multipleBindingPropertyB: String = ""
+    var simpleTypeWithComment: Bool = true // comment
 }

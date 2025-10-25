@@ -302,8 +302,8 @@ struct UnusedParameterParser {
             .compactMap {
                 if case let .attribute(attr) = $0 {
                     return Attribute(
-                        name: attr.attributeName.trimmedDescription,
-                        arguments: attr.arguments?.trimmedDescription
+                        name: attr.attributeName.trimmed.description,
+                        arguments: attr.arguments?.trimmed.description
                     )
                 }
 
