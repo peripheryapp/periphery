@@ -195,10 +195,13 @@ final class UnusedParameterTest: XCTestCase {
         assertUsed("param", in: "myFunc(param:)")
     }
 
-    func testBackquote() {
+    func testBackticks() {
         analyze()
-        assertUsed("class", in: "myFunc(class:func:)")
-        assertUnused("func", in: "myFunc(class:func:)")
+        assertUsed("class", in: "myFunc(class:func:otherUsed:otherUnused:)")
+        assertUsed("otherUsed", in: "myFunc(class:func:otherUsed:otherUnused:)")
+
+        assertUnused("func", in: "myFunc(class:func:otherUsed:otherUnused:)")
+        assertUnused("otherUnused", in: "myFunc(class:func:otherUsed:otherUnused:)")
     }
 
     // MARK: - Private
