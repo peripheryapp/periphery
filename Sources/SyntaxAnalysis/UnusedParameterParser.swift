@@ -211,8 +211,8 @@ struct UnusedParameterParser {
         let positionSyntax: SyntaxProtocol = syntax.secondName ?? syntax.firstName
         let location = sourceLocation(of: positionSyntax.positionAfterSkippingLeadingTrivia)
 
-        return Parameter(firstName: syntax.firstName.text,
-                         secondName: syntax.secondName?.text,
+        return Parameter(firstName: syntax.firstName.identifier?.name ?? "_",
+                         secondName: syntax.secondName?.identifier?.name,
                          metatype: metatype,
                          location: location)
     }
