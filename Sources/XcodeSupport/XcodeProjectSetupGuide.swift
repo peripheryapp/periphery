@@ -68,8 +68,10 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
                 shell: shell
             )
         } else if let projectPath = identifyProject() {
+            var loadedProjectPaths: Set<FilePath> = []
             project = try XcodeProject(
                 path: projectPath,
+                loadedProjectPaths: &loadedProjectPaths,
                 xcodebuild: xcodebuild,
                 shell: shell,
                 logger: logger
