@@ -12,12 +12,12 @@ struct TypeSyntaxInspector {
     let sourceLocationBuilder: SourceLocationBuilder
 
     func type(for typeSyntax: TypeSyntax) -> String {
-        PropertyTypeSanitizer.sanitize(typeSyntax.description)
+        PropertyTypeSanitizer.sanitize(typeSyntax.trimmed.description)
     }
 
     func typeNameLocations(for typeSyntax: TypeSyntax) -> Set<TypeNameSourceLocation> {
         types(for: typeSyntax).mapSet {
-            .init(name: $0.trimmedDescription,
+            .init(name: $0.trimmed.description,
                   location: sourceLocationBuilder.location(at: $0.positionAfterSkippingLeadingTrivia))
         }
     }

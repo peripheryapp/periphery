@@ -116,6 +116,12 @@ final class PropertyVisitTest: XCTestCase {
         XCTAssertEqual(propertyB.variableTypeLocations, [fixtureLocation(line: 21, column: 70)])
     }
 
+    func testSimpleTypeWithComment() {
+        let result = results[fixtureLocation(line: 22)]!
+        XCTAssertEqual(result.variableType, "Bool")
+        XCTAssertEqual(result.variableTypeLocations, [fixtureLocation(line: 22, column: 32)])
+    }
+
     // MARK: - Private
 
     private var fixturePath: SourceFile {
