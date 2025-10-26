@@ -1,4 +1,4 @@
-public enum ProjectFileKind {
+public enum ProjectFileKind: CaseIterable {
     case interfaceBuilder
     case infoPlist
     case xcDataModel

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,7 @@
 		3C1FED1E2556D91D0001BD58 /* Target_With_Spaces.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C1FED172556D91C0001BD58 /* Target_With_Spaces.framework */; };
 		3C1FED1F2556D91D0001BD58 /* Target_With_Spaces.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3C1FED172556D91C0001BD58 /* Target_With_Spaces.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3C1FED2B2556D9360001BD58 /* File With Spaces.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C1FED2A2556D9360001BD58 /* File With Spaces.swift */; };
+		3C3057582EAE734C00D290DA /* XibViewController3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3057572EAE734800D290DA /* XibViewController3.swift */; };
 		3C3ABC05256522AB00EAB309 /* XibViewController2Subclass.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3C3ABC04256522AB00EAB309 /* XibViewController2Subclass.xib */; };
 		3C3ABC09256526F900EAB309 /* XibViewController2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C3ABC08256526F900EAB309 /* XibViewController2.swift */; };
 		3C5E4E58255C25D200BF728D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C5E4E57255C25D200BF728D /* AppDelegate.swift */; };
@@ -100,6 +101,7 @@
 		3C1FED172556D91C0001BD58 /* Target_With_Spaces.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Target_With_Spaces.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3C1FED1A2556D91D0001BD58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3C1FED2A2556D9360001BD58 /* File With Spaces.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "File With Spaces.swift"; sourceTree = "<group>"; };
+		3C3057572EAE734800D290DA /* XibViewController3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XibViewController3.swift; sourceTree = "<group>"; };
 		3C3ABC04256522AB00EAB309 /* XibViewController2Subclass.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = XibViewController2Subclass.xib; sourceTree = "<group>"; };
 		3C3ABC08256526F900EAB309 /* XibViewController2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XibViewController2.swift; sourceTree = "<group>"; };
 		3C5E4E57255C25D200BF728D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -128,6 +130,10 @@
 		3CFFB5A82AEF8FDE002EFB86 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		3CFFB5AA2AEF8FDE002EFB86 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		3C3057542EAE72DB00D290DA /* FileSystemFolder */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = FileSystemFolder; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		3C1A70AE256BBAB300E07E4A /* Frameworks */ = {
@@ -236,6 +242,8 @@
 		3C84965C255405AD00900DA9 /* UIKitProject */ = {
 			isa = PBXGroup;
 			children = (
+				3C3057572EAE734800D290DA /* XibViewController3.swift */,
+				3C3057542EAE72DB00D290DA /* FileSystemFolder */,
 				3C849666255405B000900DA9 /* Info.plist */,
 				3C9B06C325542F2500E45614 /* Launch Screen.storyboard */,
 				3C9B06E625547C3800E45614 /* StoryboardViewController.storyboard */,
@@ -377,6 +385,9 @@
 				73AF86CB2968A93100BED352 /* PBXTargetDependency */,
 				3C1FED1D2556D91D0001BD58 /* PBXTargetDependency */,
 				3C1A70B7256BBAB300E07E4A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				3C3057542EAE72DB00D290DA /* FileSystemFolder */,
 			);
 			name = UIKitProject;
 			packageProductDependencies = (
@@ -537,6 +548,7 @@
 				3CD46111256C034C00856DAC /* MultiTargetStruct.swift in Sources */,
 				3CE3F7CC2685DEFB0047231C /* OldModel.xcdatamodeld in Sources */,
 				3C3ABC09256526F900EAB309 /* XibViewController2.swift in Sources */,
+				3C3057582EAE734C00D290DA /* XibViewController3.swift in Sources */,
 				3C9B06EA25547CEC00E45614 /* StoryboardViewController.swift in Sources */,
 				3CE3F7D02685E07C0047231C /* CustomEntityMigrationPolicy.swift in Sources */,
 				3C9EFBA82684E1B70071E973 /* Model.xcdatamodeld in Sources */,
