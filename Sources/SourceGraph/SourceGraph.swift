@@ -24,7 +24,7 @@ public final class SourceGraph {
     private var indexedModules: Set<String> = []
     private var unindexedExportedModules: Set<String> = []
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
-    private var allDeclarationsByUsr: [String: Declaration] = [:]
+    public private(set) var allDeclarationsByUsr: [String: Declaration] = [:]
     private var moduleToExportingModules: [String: Set<String>] = [:]
 
     private let configuration: Configuration

@@ -34,6 +34,7 @@ var targets: [PackageDescription.Target] = [
     .executableTarget(
         name: "Frontend",
         dependencies: [
+            .target(name: "Scan"),
             .target(name: "Shared"),
             .target(name: "Configuration"),
             .target(name: "SourceGraph"),
@@ -116,6 +117,18 @@ var targets: [PackageDescription.Target] = [
         ]
     ),
     .target(
+        name: "Scan",
+        dependencies: [
+            .target(name: "Configuration"),
+            .target(name: "Indexer"),
+            .target(name: "PeripheryKit"),
+            .target(name: "ProjectDrivers"),
+            .target(name: "Shared"),
+            .target(name: "SourceGraph"),
+            .target(name: "Logger"),
+        ]
+    ),
+    .target(
         name: "TestShared",
         dependencies: [
             .target(name: "PeripheryKit"),
@@ -178,7 +191,12 @@ let package = Package(
     platforms: [.macOS(.v13)],
     products: [
         .executable(name: "periphery", targets: ["Frontend"]),
-        .library(name: "PeripheryKit", targets: ["PeripheryKit"]),
+        .library(name: "PeripheryKit", targets: [
+            "SourceGraph",
+            "Configuration",
+            "ProjectDrivers",
+            "Scan",
+        ]),
     ],
     dependencies: dependencies,
     targets: targets,
