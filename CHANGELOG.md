@@ -17,6 +17,7 @@
 - Exclude conditionally imported modules from unused import detection, as they may provide symbols for code that was not compiled.
 - Fix `--retain-assign-only-property-types` for properties with trailing comments.
 - Fix unused parameter analysis for parameters with name enclosed by backticks.
+- Fix indexing of Xcode resources (storyboards, etc.) in projects using file system folders.
 
 ## 3.2.0 (2025-06-27)
 

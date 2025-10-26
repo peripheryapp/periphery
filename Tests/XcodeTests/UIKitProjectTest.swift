@@ -35,6 +35,10 @@ final class UIKitProjectTest: XcodeSourceGraphTestCase {
         }
     }
 
+    func testRetainsXibReferencedClassFromFileSystemFolder() {
+        assertReferenced(.class("XibViewController3"))
+    }
+
     func testRetainsInspectablePropertyInExtension() {
         assertReferenced(.extensionClass("UIView")) {
             self.assertReferenced(.varInstance("customBorderColor"))
