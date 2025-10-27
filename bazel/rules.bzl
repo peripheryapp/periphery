@@ -14,6 +14,7 @@ scan = rule(
             doc = "Top-level project targets to scan.",
         ),
         "config": attr.string(doc = "Path to the periphery.yml configuration file."),
+        "global_indexstore": attr.string(doc = "Path to a global index store."),
         "periphery": attr.label(
             doc = "The periphery executable target.",
             default = "@periphery//:periphery",
