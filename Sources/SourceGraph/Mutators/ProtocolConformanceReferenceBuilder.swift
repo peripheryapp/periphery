@@ -19,10 +19,10 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
     // MARK: - Private
 
     private func referenceConformingDeclarationsImplementedInSuperclass() -> Set<Reference> {
-        var newReferences: Set<Reference> = []
         let protocols = graph.declarations(ofKind: .protocol)
 
-        for proto in protocols {
+        let newReferences = Set(JobPool(jobs: Array(protocols)).flatMap { [graph] proto in
+            var result: [Reference] = []
             // Find all classes that implement this protocol.
             let conformingClasses = graph.references(to: proto)
                 .reduce(into: Set<Declaration>()) { result, ref in
@@ -66,12 +66,18 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                                 )
                                 reference.name = declInSuperclass.name
                                 reference.parent = unimplementedProtoDecl
-                                graph.add(reference, from: unimplementedProtoDecl)
-                                newReferences.insert(reference)
+                                result.append(reference)
                             }
                         }
                     }
                 }
+            }
+            return result
+        })
+        // Perform mutations on the graph based on the calculated references
+        newReferences.forEach {
+            if let parent = $0.parent {
+                graph.add($0, from: parent)
             }
         }
 
