@@ -1,3 +1,4 @@
+import Configuration
 import SystemPackage
 @testable import TestShared
 import XCTest
@@ -984,9 +985,13 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testRetainsFilesOption() {
-        analyze(retainFiles: [testFixturePath.string]) {
-            assertReferenced(.class("FixtureClass100"))
-        }
+        let retainConfiguration = Configuration()
+        retainConfiguration.retainFiles = [testFixturePath.string]
+        retainConfiguration.buildFilenameMatchers()
+
+        index(sourceFiles: [testFixturePath], configuration: retainConfiguration)
+
+        assertReferenced(.class("FixtureClass100"))
 
         analyze(retainFiles: []) {
             assertNotReferenced(.class("FixtureClass100"))
@@ -1662,6 +1667,18 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                     self.assertReferenced(.varParameter("param"))
                 }
             }
+        }
+    }
+
+    func testRetainsInterfaceBuilderActionsWhenConfigured() {
+        let configuration = Configuration()
+        configuration.retainIbaction = true
+        configuration.buildFilenameMatchers()
+
+        index(sourceFiles: [testFixturePath], configuration: configuration)
+
+        assertReferenced(.class("RetainIbactionFixture")) {
+            self.assertReferenced(.functionMethodInstance("tapped(_:)"))
         }
     }
 

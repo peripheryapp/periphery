@@ -321,6 +321,8 @@ Any class that inherits `XCTestCase` is automatically retained along with its te
 
 If your project contains Interface Builder files (such as storyboards and XIBs), Periphery will take these into account when identifying unused declarations. However, Periphery currently only identifies unused classes. This limitation exists because Periphery does not yet fully parse Interface Builder files (see [issue #212](https://github.com/peripheryapp/periphery/issues/212)). Due to Periphery's design principle of avoiding false positives, it is assumed that if a class is referenced in an Interface Builder file, all of its `IBOutlets` and `IBActions` are used, even if they might not be in reality. This approach will be revised to accurately identify unused `IBActions` and `IBOutlets` once Periphery gains the capability to parse Interface Builder files.
 
+If your Swift Package Manager targets include Interface Builder actions that aren't referenced during analysis, enable the `retain_ibaction` setting in `.periphery.yml`, or pass `--retain-ibaction` on the command line. With this setting, methods annotated with `@IBAction` or `@IBSegueAction` (and their containing types) are retained automatically.
+
 ## Comment Commands
 
 For whatever reason, you may want to keep some unused code. Source code comment commands can be used to ignore specific declarations and exclude them from the results.
