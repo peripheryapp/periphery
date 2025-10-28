@@ -74,6 +74,9 @@ public final class Configuration {
     @Setting(key: "retain_swift_ui_previews", defaultValue: false)
     public var retainSwiftUIPreviews: Bool
 
+    @Setting(key: "retain_ibaction", defaultValue: false)
+    public var retainIbaction: Bool
+
     @Setting(key: "disable_redundant_public_analysis", defaultValue: false)
     public var disableRedundantPublicAnalysis: Bool
 
@@ -203,7 +206,7 @@ public final class Configuration {
     lazy var settings: [any AbstractSetting] = [
         $project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat,
         $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible,
-        $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis,
+        $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $retainIbaction, $disableRedundantPublicAnalysis,
         $disableUnusedImportAnalysis, $retainUnusedImportedModules, $externalEncodableProtocols, $externalCodableProtocols,
         $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild,
         $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath,

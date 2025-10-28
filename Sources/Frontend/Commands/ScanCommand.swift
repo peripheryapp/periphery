@@ -93,6 +93,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Retain SwiftUI previews")
     var retainSwiftUIPreviews: Bool = defaultConfiguration.$retainSwiftUIPreviews.defaultValue
 
+    @Flag(help: "Retain declarations annotated with @IBAction or @IBSegueAction")
+    var retainIbaction: Bool = defaultConfiguration.$retainIbaction.defaultValue
+
     @Flag(help: "Retain properties on Codable types (including Encodable and Decodable)")
     var retainCodableProperties: Bool = defaultConfiguration.$retainCodableProperties.defaultValue
 
@@ -173,6 +176,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$retainObjcAnnotated, retainObjcAnnotated)
         configuration.apply(\.$retainUnusedProtocolFuncParams, retainUnusedProtocolFuncParams)
         configuration.apply(\.$retainSwiftUIPreviews, retainSwiftUIPreviews)
+        configuration.apply(\.$retainIbaction, retainIbaction)
         configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
         configuration.apply(\.$disableUnusedImportAnalysis, disableUnusedImportAnalysis)
         configuration.apply(\.$retainUnusedImportedModules, retainUnusedImportedModules)

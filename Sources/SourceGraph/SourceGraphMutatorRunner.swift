@@ -33,6 +33,7 @@ public final class SourceGraphMutatorRunner {
         DynamicMemberRetainer.self,
         UnusedParameterRetainer.self,
         AssetReferenceRetainer.self,
+        InterfaceBuilderActionRetainer.self,
         EntryPointAttributeRetainer.self,
         PubliclyAccessibleRetainer.self,
         XCTestRetainer.self,

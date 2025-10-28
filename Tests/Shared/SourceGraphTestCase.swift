@@ -81,7 +81,7 @@ open class SourceGraphTestCase: XCTestCase {
         } else {
             guard let declaration = materialize(description, file: file, line: line) else { return }
 
-            if !Self.graph.usedDeclarations.contains(declaration) {
+            if !Self.graph.usedDeclarations.contains(declaration) && !Self.graph.isRetained(declaration) {
                 XCTFail("Expected declaration to be referenced: \(declaration)", file: file, line: line)
             }
 
