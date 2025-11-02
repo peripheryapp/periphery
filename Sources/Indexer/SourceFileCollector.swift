@@ -4,6 +4,7 @@ import Logger
 import SourceGraph
 import SwiftIndexStore
 import SystemPackage
+import Shared
 
 public struct SourceFileCollector {
     private let indexStorePaths: Set<FilePath>
