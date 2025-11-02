@@ -8,6 +8,7 @@ final class XCDataModelIndexer: Indexer {
     enum XCDataModelError: Error {
         case failedToParse(path: FilePath, underlyingError: Error)
     }
+
     private let files: Set<FilePath>
     private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger

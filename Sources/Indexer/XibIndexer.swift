@@ -8,6 +8,7 @@ final class XibIndexer: Indexer {
     enum XibError: Error {
         case failedToParse(path: FilePath, underlyingError: Error)
     }
+
     private let xibFiles: Set<FilePath>
     private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger

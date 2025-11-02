@@ -8,6 +8,7 @@ final class InfoPlistIndexer: Indexer {
     enum PlistError: Error {
         case failedToParse(path: FilePath, underlyingError: Error)
     }
+
     private let infoPlistFiles: Set<FilePath>
     private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger

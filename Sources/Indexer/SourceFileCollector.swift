@@ -1,10 +1,10 @@
 import Configuration
 import Foundation
 import Logger
+import Shared
 import SourceGraph
 import SwiftIndexStore
 import SystemPackage
-import Shared
 
 public struct SourceFileCollector {
     private let indexStorePaths: Set<FilePath>

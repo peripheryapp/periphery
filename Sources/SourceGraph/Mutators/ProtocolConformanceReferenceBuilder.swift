@@ -75,9 +75,9 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
             return result
         })
         // Perform mutations on the graph based on the calculated references
-        newReferences.forEach {
-            if let parent = $0.parent {
-                graph.add($0, from: parent)
+        for newReference in newReferences {
+            if let parent = newReference.parent {
+                graph.add(newReference, from: parent)
             }
         }
 
