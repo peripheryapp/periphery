@@ -8,6 +8,7 @@
 
 - Added the `--retain-unused-imported-modules` option.
 - Added the `--format gitlab-codemagic` formatting option for GitLabs Code Quality artifact reports
+- Added the `--retain-ibaction` option and `retain_ibaction` configuration key to retain Interface Builder actions in Swift Package Manager targets.
 
 ##### Bug Fixes
 
