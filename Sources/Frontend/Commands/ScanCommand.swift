@@ -3,6 +3,8 @@ import Configuration
 import Foundation
 import Logger
 import PeripheryKit
+import ProjectDrivers
+import Scan
 import Shared
 import SystemPackage
 

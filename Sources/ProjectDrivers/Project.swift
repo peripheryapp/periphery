@@ -1,22 +1,50 @@
 import Configuration
 import Foundation
 import Logger
-import ProjectDrivers
 import Shared
 import SystemPackage
 
-final class Project {
+public final class Project {
     let kind: ProjectKind
 
     private let configuration: Configuration
     private let shell: Shell
     private let logger: Logger
 
-    convenience init(
+    public convenience init(
         configuration: Configuration,
         shell: Shell,
         logger: Logger
     ) throws {
+        try self.init(
+            kind: Self.detectKind(configuration: configuration),
+            configuration: configuration,
+            shell: shell,
+            logger: logger
+        )
+    }
+
+    // periphery:ignore
+    public init(configuration: Configuration) throws {
+        self.configuration = configuration
+        logger = Logger()
+        shell = Shell(logger: logger)
+        kind = try Self.detectKind(configuration: configuration)
+    }
+
+    public init(
+        kind: ProjectKind,
+        configuration: Configuration,
+        shell: Shell,
+        logger: Logger
+    ) {
+        self.kind = kind
+        self.configuration = configuration
+        self.shell = shell
+        self.logger = logger
+    }
+
+    static func detectKind(configuration: Configuration) throws -> ProjectKind {
         var kind: ProjectKind?
 
         if let path = configuration.project {
@@ -33,22 +61,10 @@ final class Project {
             throw PeripheryError.usageError("Failed to identify project in the current directory. For Xcode projects use the '--project' option, and for SPM projects change to the directory containing the Package.swift.")
         }
 
-        self.init(kind: kind, configuration: configuration, shell: shell, logger: logger)
+        return kind
     }
 
-    init(
-        kind: ProjectKind,
-        configuration: Configuration,
-        shell: Shell,
-        logger: Logger
-    ) {
-        self.kind = kind
-        self.configuration = configuration
-        self.shell = shell
-        self.logger = logger
-    }
-
-    func driver() throws -> ProjectDriver {
+    public func driver() throws -> ProjectDriver {
         switch kind {
         case let .xcode(projectPath):
             #if canImport(XcodeSupport)
