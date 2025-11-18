@@ -1718,9 +1718,20 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testDoesNotRetainSPIMembers() {
+        analyze(retainPublic: true, noRetainSPI: ["STP"]) {
+            assertReferenced(.class("FixtureClass220")) {
+                self.assertReferenced(.functionMethodInstance("publicFunc()"))
+                self.assertNotReferenced(.functionMethodInstance("stpSpiFunc()"))
+                self.assertReferenced(.functionMethodInstance("otherSpiFunc()"))
+            }
+            assertNotReferenced(.struct("FixtureStruct220"))
+            assertReferenced(.struct("FixtureStruct221"))
+        }
+    }
+
     // MARK: - Inherited Initializers
 
-    // https://github.com/peripheryapp/periphery/issues/957
     func testRetainsSuperclassInitializerCalledOnSubclass() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass221Parent")) {
