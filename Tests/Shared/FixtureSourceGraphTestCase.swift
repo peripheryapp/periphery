@@ -13,6 +13,7 @@ class FixtureSourceGraphTestCase: SPMSourceGraphTestCase {
     @discardableResult
     func analyze(
         retainPublic: Bool = false,
+        checkSpi: [String] = [],
         retainObjcAccessible: Bool = false,
         retainObjcAnnotated: Bool = false,
         disableRedundantPublicAnalysis: Bool = false,
@@ -29,6 +30,7 @@ class FixtureSourceGraphTestCase: SPMSourceGraphTestCase {
     ) rethrows -> [ScanResult] {
         let configuration = Configuration()
         configuration.retainPublic = retainPublic
+        configuration.checkSpi = checkSpi
         configuration.retainObjcAccessible = retainObjcAccessible
         configuration.retainObjcAnnotated = retainObjcAnnotated
         configuration.retainAssignOnlyProperties = retainAssignOnlyProperties

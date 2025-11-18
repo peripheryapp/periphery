@@ -1688,4 +1688,16 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             }
         }
     }
+
+    func testDoesNotRetainSTPSPIMembers() {
+        analyze(retainPublic: true, checkSpi: ["STP"]) {
+            assertReferenced(.class("FixtureClass220")) {
+                self.assertReferenced(.functionMethodInstance("publicFunc()"))
+                self.assertNotReferenced(.functionMethodInstance("stpSpiFunc()"))
+                self.assertReferenced(.functionMethodInstance("otherSpiFunc()"))
+            }
+            assertNotReferenced(.struct("FixtureStruct220"))
+            assertReferenced(.struct("FixtureStruct221"))
+        }
+    }
 }
