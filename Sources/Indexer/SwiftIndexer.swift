@@ -483,7 +483,7 @@ final class SwiftIndexer: Indexer {
                             graph.markRetainedWithoutLock(paramDecl)
                         }
 
-                        if (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) || ignoredParamNames.contains(param.name) {
+                        if (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) || ignoredParamNames.contains(param.name.text) {
                             graph.markRetainedWithoutLock(paramDecl)
                         }
                     }

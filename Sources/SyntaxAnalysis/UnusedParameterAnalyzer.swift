@@ -41,7 +41,7 @@ public final class UnusedParameterAnalyzer {
     }
 
     private func isParam(_ param: Parameter, usedIn function: Function) -> Bool {
-        if param.name == "_" {
+        if case .wildcard = param.name {
             // Params named '_' are explicitly not intended for use, ignore them.
             return true
         }
@@ -110,13 +110,13 @@ public final class UnusedParameterAnalyzer {
             }
 
             // Next check if the variable shadows the param.
-            if item.names.contains(param.name) {
+            if item.names.contains(param.name.text) {
                 return .shadowed
             }
 
             return .unused
         case let item as Closure:
-            if item.params.contains(param.name) {
+            if item.params.contains(param.name.text) {
                 return .shadowed
             }
 
@@ -124,7 +124,7 @@ public final class UnusedParameterAnalyzer {
                 return .used
             }
         case let item as Identifier:
-            return item.name == param.name ? .used : .unused
+            return item.name == param.name.text ? .used : .unused
         case let item as GenericItem where item.node.is(LabeledExprListSyntax.self): // function call arguments
             for item in item.items where isParam(param, usedIn: item) {
                 return .used
