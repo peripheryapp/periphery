@@ -32,6 +32,20 @@ public struct Attribute {
 }
 
 public struct Parameter: Item, Hashable {
+    public enum PartKind {
+        case identifier(String)
+        case wildcard
+
+        public var text: String {
+            switch self {
+            case let .identifier(name):
+                name
+            case .wildcard:
+                "_"
+            }
+        }
+    }
+
     public static func == (lhs: Parameter, rhs: Parameter) -> Bool {
         lhs.location == rhs.location
     }
@@ -40,21 +54,18 @@ public struct Parameter: Item, Hashable {
         hasher.combine(location)
     }
 
-    let firstName: String?
-    let secondName: String?
+    let label: PartKind
+    public let name: PartKind
     let metatype: String?
     let location: Location
-    public let items: [Item] = []
 
-    public var name: String {
-        secondName ?? firstName ?? ""
-    }
+    public let items: [Item] = []
 
     public func makeDeclaration(withParent parent: Declaration) -> Declaration {
         let parentUsrs = parent.usrs.sorted().joined(separator: "-")
-        let usr = "param-\(name)-\(parent.name ?? "unknown-function")-\(parentUsrs)"
+        let usr = "param-\(name.text)-\(parent.name ?? "unknown-function")-\(parentUsrs)"
         let decl = Declaration(kind: .varParameter, usrs: [usr], location: location)
-        decl.name = name
+        decl.name = name.text
         decl.parent = parent
         return decl
     }
@@ -211,8 +222,29 @@ struct UnusedParameterParser {
         let positionSyntax: SyntaxProtocol = syntax.secondName ?? syntax.firstName
         let location = sourceLocation(of: positionSyntax.positionAfterSkippingLeadingTrivia)
 
-        return Parameter(firstName: syntax.firstName.identifier?.name ?? "_",
-                         secondName: syntax.secondName?.identifier?.name,
+        let labelSyntax = syntax.firstName
+        let nameSyntax = syntax.secondName ?? syntax.firstName
+
+        let label: Parameter.PartKind = switch labelSyntax.tokenKind {
+        case .wildcard:
+            .wildcard
+        case .identifier:
+            .identifier(labelSyntax.identifier?.name ?? labelSyntax.text)
+        default:
+            .identifier(labelSyntax.text)
+        }
+
+        let name: Parameter.PartKind = switch nameSyntax.tokenKind {
+        case .wildcard:
+            .wildcard
+        case .identifier:
+            .identifier(nameSyntax.identifier?.name ?? nameSyntax.text)
+        default:
+            .identifier(nameSyntax.text)
+        }
+
+        return Parameter(label: label,
+                         name: name,
                          metatype: metatype,
                          location: location)
     }
@@ -322,9 +354,7 @@ struct UnusedParameterParser {
     }
 
     private func buildFullName(for function: String, with params: [Parameter]) -> String {
-        let strParams = params.map {
-            [$0.firstName, $0.secondName].compactMap(\.self).joined(separator: " ")
-        }.joined(separator: ":")
+        let strParams = params.map(\.label.text).joined(separator: ":")
         return "\(function)(\(strParams):)"
     }
 
