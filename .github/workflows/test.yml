@@ -39,12 +39,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        step: ["main-snapshot", "26.0", "16.4"]
+        step: ["main-snapshot", "26.1.1", "26.0", "16.4"]
         include:
           - step: "main-snapshot"
             xcode: "26.0"
             swiftly: "main-snapshot"
             continueOnError: true
+          - step: "26.1.1"
+            xcode: "26.1.1"
           - step: "26.0"
             xcode: "26.0"
           - step: "16.4"
