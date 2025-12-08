@@ -140,6 +140,9 @@ public final class Configuration {
     @Setting(key: "bazel_index_store", defaultValue: nil)
     public var bazelIndexStore: FilePath?
 
+    @Setting(key: "export_graph", defaultValue: nil)
+    public var exportGraph: FilePath?
+
     // Non user facing.
     public var guidedSetup: Bool = false
     public var projectRoot: FilePath = .init()
