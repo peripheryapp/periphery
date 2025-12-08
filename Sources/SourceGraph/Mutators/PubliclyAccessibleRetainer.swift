@@ -20,14 +20,30 @@ final class PubliclyAccessibleRetainer: SourceGraphMutator {
 
         let publicDeclarations = declarations.filter { $0.accessibility.value == .public || $0.accessibility.value == .open }
 
-        publicDeclarations.forEach { graph.markRetained($0) }
+        // Only filter if checkSpi is configured (performance optimization)
+        let declarationsToRetain: [Declaration]
+        if configuration.checkSpi.isEmpty {
+            declarationsToRetain = publicDeclarations
+        } else {
+            declarationsToRetain = publicDeclarations.filter { decl in
+                !shouldCheckSpi(decl)
+            }
+        }
+
+        declarationsToRetain.forEach { graph.markRetained($0) }
 
         // Enum cases inherit the accessibility of the enum.
-        publicDeclarations
+        declarationsToRetain
             .lazy
             .filter { $0.kind == .enum }
             .flatMap(\.declarations)
             .filter { $0.kind == .enumelement }
             .forEach { graph.markRetained($0) }
+    }
+
+    private func shouldCheckSpi(_ declaration: Declaration) -> Bool {
+        configuration.checkSpi.contains { spiName in
+            declaration.attributes.contains("_spi\(spiName)")
+        }
     }
 }

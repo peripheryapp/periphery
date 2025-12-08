@@ -57,6 +57,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Retain all public declarations, recommended for framework/library projects")
     var retainPublic: Bool = defaultConfiguration.$retainPublic.defaultValue
 
+    @Option(parsing: .upToNextOption, help: "SPIs to check for unused code even when retain-public is enabled")
+    var checkSpi: [String] = defaultConfiguration.$checkSpi.defaultValue
+
     @Flag(help: "Disable identification of redundant public accessibility")
     var disableRedundantPublicAnalysis: Bool = defaultConfiguration.$disableRedundantPublicAnalysis.defaultValue
 
@@ -170,6 +173,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$outputFormat, format)
         configuration.apply(\.$retainFiles, retainFiles)
         configuration.apply(\.$retainPublic, retainPublic)
+        configuration.apply(\.$checkSpi, checkSpi)
         configuration.apply(\.$retainAssignOnlyProperties, retainAssignOnlyProperties)
         configuration.apply(\.$retainAssignOnlyPropertyTypes, retainAssignOnlyPropertyTypes)
         configuration.apply(\.$retainObjcAccessible, retainObjcAccessible)
