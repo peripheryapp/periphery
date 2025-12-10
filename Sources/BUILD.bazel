@@ -68,6 +68,7 @@ swift_library(
         "SourceGraph/Mutators/ExternalOverrideRetainer.swift",
         "SourceGraph/Mutators/ExternalTypeProtocolConformanceReferenceRemover.swift",
         "SourceGraph/Mutators/GenericClassAndStructConstructorReferenceBuilder.swift",
+        "SourceGraph/Mutators/InterfaceBuilderActionRetainer.swift",
         "SourceGraph/Mutators/InterfaceBuilderPropertyRetainer.swift",
         "SourceGraph/Mutators/ObjCAccessibleRetainer.swift",
         "SourceGraph/Mutators/PropertyWrapperRetainer.swift",
