@@ -1,6 +1,7 @@
 import Configuration
 import Foundation
 import Logger
+import Shared
 import SourceGraph
 import SwiftIndexStore
 import SystemPackage
@@ -26,11 +27,12 @@ public struct SourceFileCollector {
     public func collect() throws -> [SourceFile: [IndexUnit]] {
         let excludedTargets = excludedTestTargets.union(configuration.excludeTargets)
         let currentFilePath = FilePath.current
+        let lib = try LibIndexStore.open()
 
         return try JobPool(jobs: Array(indexStorePaths))
             .flatMap { indexStorePath in
                 logger.debug("Reading \(indexStorePath)")
-                let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: .open())
+                let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: lib)
                 let units = indexStore.units(includeSystem: false)
 
                 return try units.compactMap { unit -> (FilePath, IndexStore, IndexStoreUnit, String?)? in

@@ -16,19 +16,13 @@ public final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
         let module = parts.first ?? ""
         let attributes = node.attributes.compactMap {
             if case let .attribute(attr) = $0 {
-                attr.attributeName.trimmedDescription
+                attr.attributeName.trimmed.description
             } else {
                 nil
             }
         }
         let location = sourceLocationBuilder.location(at: node.positionAfterSkippingLeadingTrivia)
-
-        var isConditional = false
-
-        if let parent = node.parent?.parent?.parent?.as(IfConfigClauseSyntax.self) {
-            isConditional = true
-        }
-
+        let isConditional = node.parent?.parent?.parent?.is(IfConfigClauseSyntax.self) ?? false
         let statement = ImportStatement(
             module: module,
             isTestable: attributes.contains("testable"),

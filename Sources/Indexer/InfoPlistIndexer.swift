@@ -5,6 +5,10 @@ import SourceGraph
 import SystemPackage
 
 final class InfoPlistIndexer: Indexer {
+    enum PlistError: Error {
+        case failedToParse(path: FilePath, underlyingError: Error)
+    }
+
     private let infoPlistFiles: Set<FilePath>
     private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger
@@ -24,9 +28,13 @@ final class InfoPlistIndexer: Indexer {
             guard let self else { return }
 
             let elapsed = try Benchmark.measure {
-                try InfoPlistParser(path: path)
-                    .parse()
-                    .forEach { self.graph.add($0) }
+                do {
+                    try InfoPlistParser(path: path)
+                        .parse()
+                        .forEach { self.graph.add($0) }
+                } catch {
+                    throw PlistError.failedToParse(path: path, underlyingError: error)
+                }
             }
 
             logger.debug("\(path.string) (\(elapsed)s)")

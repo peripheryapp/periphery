@@ -106,6 +106,7 @@ swift_library(
     srcs = [
         "Shared/Benchmark.swift",
         "Shared/Constants.swift",
+        "Shared/JobPool.swift",
         "Shared/PeripheryError.swift",
         "Shared/ProjectKind.swift",
         "Shared/PropertyTypeSanitizer.swift",
@@ -196,7 +197,6 @@ swift_library(
         "Indexer/Indexer.swift",
         "Indexer/InfoPlistIndexer.swift",
         "Indexer/InfoPlistParser.swift",
-        "Indexer/JobPool.swift",
         "Indexer/SourceFileCollector.swift",
         "Indexer/SwiftIndexer.swift",
         "Indexer/XCDataModelIndexer.swift",

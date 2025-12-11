@@ -150,6 +150,9 @@ struct ScanCommand: FrontendCommand {
     @Option(help: "Filter pattern applied to the Bazel top-level targets query")
     var bazelFilter: String?
 
+    @Option(help: "Path to a global index store populated by Bazel. If provided, will be used instead of individual module stores.")
+    var bazelIndexStore: FilePath?
+
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
@@ -208,6 +211,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$genericProjectConfig, genericProjectConfig)
         configuration.apply(\.$bazel, bazel)
         configuration.apply(\.$bazelFilter, bazelFilter)
+        configuration.apply(\.$bazelIndexStore, bazelIndexStore)
 
         configuration.buildFilenameMatchers()
 

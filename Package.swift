@@ -7,7 +7,7 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     .package(url: "https://github.com/kateinoigakukun/swift-indexstore", from: "0.4.0"),
-    .package(url: "https://github.com/apple/swift-syntax", from: "601.0.1"),
+    .package(url: "https://github.com/apple/swift-syntax", from: "602.0.0"),
     .package(url: "https://github.com/ileitch/swift-filename-matcher", from: "2.0.0"),
 ]
 

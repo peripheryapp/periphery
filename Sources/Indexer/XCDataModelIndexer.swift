@@ -5,6 +5,10 @@ import SourceGraph
 import SystemPackage
 
 final class XCDataModelIndexer: Indexer {
+    enum XCDataModelError: Error {
+        case failedToParse(path: FilePath, underlyingError: Error)
+    }
+
     private let files: Set<FilePath>
     private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger
@@ -24,9 +28,13 @@ final class XCDataModelIndexer: Indexer {
             guard let self else { return }
 
             let elapsed = try Benchmark.measure {
-                try XCDataModelParser(path: path)
-                    .parse()
-                    .forEach { self.graph.add($0) }
+                do {
+                    try XCDataModelParser(path: path)
+                        .parse()
+                        .forEach { self.graph.add($0) }
+                } catch {
+                    throw XCDataModelError.failedToParse(path: path, underlyingError: error)
+                }
             }
 
             logger.debug("\(path.string) (\(elapsed)s)")

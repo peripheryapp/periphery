@@ -23,6 +23,20 @@ public final class XcodeTarget {
     }
 
     public func identifyFiles() throws {
+        let sourceRoot = project.sourceRoot.lexicallyNormalized()
+        let rootFileSystemFiles = try project.xcodeProject.pbxproj.fileSystemSynchronizedRootGroups.flatMapSet {
+            if let stringPath = try $0.fullPath(sourceRoot: sourceRoot.string) {
+                let path = FilePath(stringPath)
+                return FilePath.glob(path.appending("**/*").string)
+            }
+
+            return []
+        }
+
+        try identifyFiles(in: rootFileSystemFiles)
+        try identifyFiles(in: rootFileSystemFiles)
+        try identifyFiles(in: rootFileSystemFiles)
+
         let sourcesBuildPhases = project.xcodeProject.pbxproj.sourcesBuildPhases
         let resourcesBuildPhases = project.xcodeProject.pbxproj.resourcesBuildPhases
 
@@ -42,7 +56,7 @@ public final class XcodeTarget {
         let targetPhases = buildPhases.filter { target.buildPhases.contains($0) }
         let sourceRoot = project.sourceRoot.lexicallyNormalized()
 
-        files[kind] = try targetPhases.flatMapSet {
+        let foundFiles = try targetPhases.flatMapSet {
             try ($0.files ?? []).compactMapSet {
                 if let stringPath = try $0.file?.fullPath(sourceRoot: sourceRoot.string) {
                     let path = FilePath(stringPath)
@@ -52,6 +66,17 @@ public final class XcodeTarget {
                 }
 
                 return nil
+            }
+        }
+        files[kind, default: []].formUnion(foundFiles)
+    }
+
+    private func identifyFiles(in paths: Set<FilePath>) throws {
+        for path in paths {
+            for kind in ProjectFileKind.allCases {
+                if let ext = path.extension, kind.extensions.contains(ext.lowercased()) {
+                    files[kind, default: []].insert(path)
+                }
             }
         }
     }
