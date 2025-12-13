@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 3.3.0 (2025-12-13)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Added the `--retain-unused-imported-modules` option.
 - Added the `--format gitlab-codemagic` formatting option for GitLabs Code Quality artifact reports
 - Added the `--bazel-index-store` option to specify the path of a global index store.
