@@ -8,6 +8,7 @@
 
 - Added the `--retain-unused-imported-modules` option.
 - Added the `--format gitlab-codemagic` formatting option for GitLabs Code Quality artifact reports
+- Added the `--bazel-index-store` option to specify the path of a global index store.
 
 ##### Bug Fixes
 
@@ -18,6 +19,7 @@
 - Fix `--retain-assign-only-property-types` for properties with trailing comments.
 - Fix unused parameter analysis for parameters with name enclosed by backticks.
 - Fix indexing of Xcode resources (storyboards, etc.) in projects using file system folders.
+- Fix infinite loop loading Xcode projects with circular references.
 
 ## 3.2.0 (2025-06-27)
 
