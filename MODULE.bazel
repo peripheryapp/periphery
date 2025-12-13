@@ -8,7 +8,7 @@ module(
 bazel_dep(name = "rules_swift", version = "2.8.1", max_compatibility_level = 3)
 bazel_dep(name = "rules_apple", version = "4.0.1")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
-bazel_dep(name = "apple_support", version = "1.21.1")
+bazel_dep(name = "apple_support", version = "1.23.1")
 bazel_dep(name = "platforms", version = "0.0.11")
 
 # Swift dependencies
@@ -17,13 +17,13 @@ bazel_dep(name = "swift_argument_parser", version = "1.6.2")
 bazel_dep(name = "swift-filename-matcher", version = "2.0.1")
 bazel_dep(name = "swift-indexstore", version = "0.4.0")
 bazel_dep(name = "swift-syntax", version = "602.0.0")
-bazel_dep(name = "swift-system", version = "1.5.0")
+bazel_dep(name = "swift-system", version = "1.6.3")
 bazel_dep(name = "pathkit", version = "1.0.1.1")
-bazel_dep(name = "xcodeproj", version = "9.4.2")
+bazel_dep(name = "xcodeproj", version = "9.6.0")
 bazel_dep(name = "yams", version = "6.2.0")
 
 # Generated repo
 use_repo(use_extension("//bazel:generated.bzl", "generated"), "periphery_generated")
 
 # Bazel dev dependencies
-bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
+bazel_dep(name = "buildifier_prebuilt", version = "8.2.1.1", dev_dependency = True)

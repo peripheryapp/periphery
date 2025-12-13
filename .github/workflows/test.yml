@@ -13,19 +13,19 @@ env:
   cache_version: 1
 jobs:
   lint:
-    runs-on: macos-15
+    runs-on: macos-26
     name: Lint
     steps:
       - uses: actions/checkout@master
       - uses: jdx/mise-action@v2
       - run: mise run lint-ci
   bazel:
-      runs-on: macos-15
+      runs-on: macos-26
       name: Bazel
       steps:
         - uses: actions/checkout@master
         - uses: jdx/mise-action@v2
-        - uses: bazel-contrib/setup-bazel@0.14.0
+        - uses: bazel-contrib/setup-bazel@0.15.0
           with:
             bazelisk-cache: true
             disk-cache: ${{ github.workflow }}
@@ -39,19 +39,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        step: ["main-snapshot", "26.1.1", "26.0", "16.4"]
+        step: ["main-snapshot", "26.2.0", "26.1.1", "26.0", "16.4"]
         include:
           - step: "main-snapshot"
             xcode: "26.0"
             swiftly: "main-snapshot"
             continueOnError: true
+            macos: "macos-26"
+          - step: "26.2.0"
+            xcode: "26.2.0"
+            macos: "macos-26"
           - step: "26.1.1"
             xcode: "26.1.1"
+            macos: "macos-26"
           - step: "26.0"
             xcode: "26.0"
+            macos: "macos-26"
           - step: "16.4"
             xcode: "16.4"
-    runs-on: macos-26
+            macos: "macos-15"
+    runs-on: ${{ matrix.macos }}
     continue-on-error: ${{ matrix.continueOnError == true }}
     steps:
     - uses: actions/checkout@master
