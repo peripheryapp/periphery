@@ -81,4 +81,4 @@ _ = PublicInheritedAssociatedTypeClass().items
 _ = PublicInheritedAssociatedTypeDefaultTypeClass().items
 
 // Internal accessibility tests
-// _ = InternalPropertyUsedInExtension() // Commented out for now
+_ = InternalPropertyUsedInExtension()

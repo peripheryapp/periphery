@@ -11,7 +11,6 @@ final class RedundantInternalAccessibilityTest: SPMSourceGraphTestCase {
     func testInternalPropertyUsedInExtensionInOtherFile() {
         // This should NOT be flagged as redundant
         // Tests the case where an internal property is used in an extension in a different file
-        // Like delayedClearBoatHistory in AppState.swift used in AppState+BoatTracking.swift
         index()
         
         // InternalPropertyUsedInExtension.propertyUsedInExtension should NOT be flagged as redundant
