@@ -1,9 +1,9 @@
 // NotRedundantInternalClassComponents.swift
 // Tests for internal classes/members that should NOT be flagged as redundant
 
-class NotRedundantInternalClassComponents {
+class NotRedundantInternalClass {
     public init() {}
-    
+
     internal func usedInternalMethod() {}
 }
 

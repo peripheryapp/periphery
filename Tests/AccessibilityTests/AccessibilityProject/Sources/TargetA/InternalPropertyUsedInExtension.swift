@@ -9,4 +9,12 @@ internal class InternalPropertyUsedInExtension {
     func useSameFileProperty() {
         print(propertyOnlyUsedInSameFile)
     }
+}
+
+public class InternalPropertyUsedInExtensionRetainer {
+    public init() {}
+    public func retain() {
+        let instance = InternalPropertyUsedInExtension()
+        instance.useSameFileProperty()
+    }
 } 

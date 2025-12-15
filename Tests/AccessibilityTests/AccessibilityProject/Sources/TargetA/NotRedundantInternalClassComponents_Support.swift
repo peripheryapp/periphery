@@ -10,7 +10,7 @@ class NotRedundantInternalClassComponents_Support {
     public init() {}
     
     func useInternalMethod() {
-        let cls = NotRedundantInternalClassComponents()
+        let cls = NotRedundantInternalClass()
         cls.usedInternalMethod()
     }
 } 
