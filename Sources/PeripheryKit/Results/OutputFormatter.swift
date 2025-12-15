@@ -74,7 +74,7 @@ extension OutputFormatter {
                 description += " is declared internal, but not used outside of \(filesJoined)"
             case let .redundantFilePrivateAccessibility(files):
                 let filesJoined = files.sorted { $0.path.string < $1.path.string }.map { $0.path.string }.joined(separator: ", ")
-                description += " is declared fileprivate, but not used outside of \(filesJoined)"
+                description += " is declared fileprivate, but not used outside its enclosing scope in \(filesJoined)"
             }
         } else {
             description += "unused"
