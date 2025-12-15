@@ -153,9 +153,6 @@ public final class SourceGraph {
     public func add(_ reference: Reference) {
         _ = allReferences.insert(reference)
         allReferencesByUsr[reference.usr, default: []].insert(reference)
-        if let decl = declaration(withUsr: reference.usr) {
-            decl.referencedFiles.insert(reference.location.file)
-        }
     }
 
     public func add(_ references: Set<Reference>) {
