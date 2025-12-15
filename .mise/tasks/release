@@ -109,7 +109,7 @@ git tag -a ${version} -m "Periphery ${version}"
 git push origin master
 git push origin ${version}
 
-code --wait release_notes.md
+cursor --wait release_notes.md
 echo -e "$(cat release_notes.md)" > release_notes.md
 echo
 echo "Release Notes:"
