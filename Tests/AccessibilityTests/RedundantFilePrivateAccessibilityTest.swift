@@ -5,6 +5,7 @@ import XCTest
 final class RedundantFilePrivateAccessibilityTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
+        _ = RedundantFilePrivateClass()
         build(projectPath: AccessibilityProjectPath)
     }
     
@@ -17,6 +18,20 @@ final class RedundantFilePrivateAccessibilityTest: SPMSourceGraphTestCase {
     func testNotRedundantFilePrivateClass() {
         // This should NOT be flagged as redundant
         index()
+        NotRedundantFilePrivateClass.staticMethodCallingFilePrivate()
         assertNotRedundantFilePrivateAccessibility(.class("NotRedundantFilePrivateClass"))
     }
-} 
+}
+
+fileprivate class NotRedundantFilePrivateClass {
+    fileprivate static func usedFilePrivateMethod() {}
+    
+    static func staticMethodCallingFilePrivate() {
+        usedFilePrivateMethod()
+    }
+}
+
+fileprivate class RedundantFilePrivateClass {
+    fileprivate func unusedFilePrivateMethod() {}
+}
+ 

@@ -85,6 +85,3 @@ takeExtensionSameTypeGenericRequirement(.defaultInstance)
 
 // Typed throws
 try? PublicTypeUsedAsPublicFunctionThrowTypeRetainer().retain()
-
-// Internal accessibility tests
-_ = InternalPropertyUsedInExtension()

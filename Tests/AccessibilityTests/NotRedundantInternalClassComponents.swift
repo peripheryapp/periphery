@@ -9,7 +9,7 @@ class NotRedundantInternalClassComponents {
 
 internal struct NotRedundantInternalStruct {
     internal var usedInternalProperty: Int = 0
-    func useProperty() -> Int {
+    func useInternalProperty() -> Int {
         return usedInternalProperty
     }
 }

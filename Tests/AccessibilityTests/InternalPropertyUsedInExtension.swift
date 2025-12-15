@@ -5,4 +5,8 @@
 internal class InternalPropertyUsedInExtension {
     internal var propertyUsedInExtension: String = "test"
     internal var propertyOnlyUsedInSameFile: String = "test" // This should be flagged as redundant
+
+    func useSameFileProperty() {
+        print(propertyOnlyUsedInSameFile)
+    }
 } 
