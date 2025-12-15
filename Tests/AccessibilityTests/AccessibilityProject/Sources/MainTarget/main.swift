@@ -79,6 +79,3 @@ inlinableFunction()
 // Associated types
 _ = PublicInheritedAssociatedTypeClass().items
 _ = PublicInheritedAssociatedTypeDefaultTypeClass().items
-
-// Internal accessibility tests
-_ = InternalPropertyUsedInExtension()
