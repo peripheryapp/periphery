@@ -1220,6 +1220,9 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
                 self.assertReferenced(.varInstance("ignoredSimpleUnreadVar"))
                 self.assertNotAssignOnlyProperty(.varInstance("ignoredSimpleUnreadVar"))
+
+                self.assertReferenced(.varInstance("wrappedProperty"))
+                self.assertNotAssignOnlyProperty(.varInstance("wrappedProperty"))
             }
         }
 
@@ -1248,6 +1251,9 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
                 self.assertReferenced(.varInstance("ignoredSimpleUnreadVar"))
                 self.assertNotAssignOnlyProperty(.varInstance("ignoredSimpleUnreadVar"))
+
+                self.assertReferenced(.varInstance("wrappedProperty"))
+                self.assertNotAssignOnlyProperty(.varInstance("wrappedProperty"))
             }
         }
     }

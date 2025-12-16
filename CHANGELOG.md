@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Exclude wrapped properties from assign-only analysis, as Periphery cannot observe the behavior of the property wrapper.
 
 ##### Bug Fixes
 
