@@ -25,6 +25,9 @@ public class FixtureClass70 {
     // periphery:ignore
     var ignoredSimpleUnreadVar: String
 
+    @Wrapped
+    var wrappedProperty: String
+
     init() {
         simpleUnreadVar = "Hello"
         simpleUnreadShadowedVar = "Hello"
@@ -33,6 +36,7 @@ public class FixtureClass70 {
         complexUnreadVar1 = "Hello"
         readVar = "Hello"
         ignoredSimpleUnreadVar = "Hello"
+        wrappedProperty = "Hello"
         FixtureClass70.simpleStaticUnreadVar = "Hello"
     }
 
@@ -42,5 +46,13 @@ public class FixtureClass70 {
         complexUnreadVar1 = "Hello"
         complexUnreadVar2 = "Hello"
         print(readVar)
+    }
+}
+
+@propertyWrapper
+struct Wrapped<Value> {
+    var wrappedValue: Value
+    init(wrappedValue: Value) {
+        self.wrappedValue = wrappedValue
     }
 }
