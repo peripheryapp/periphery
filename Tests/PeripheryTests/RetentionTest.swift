@@ -3,8 +3,6 @@ import SystemPackage
 import XCTest
 
 final class RetentionTest: FixtureSourceGraphTestCase {
-    let performKnownFailures = false
-
     func testNonReferencedClass() {
         analyze {
             assertNotReferenced(.class("FixtureClass1"))
@@ -1679,12 +1677,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    // MARK: - Known Failures
-
-    // https://github.com/peripheryapp/periphery/issues/676
     func testRetainsInitializerCalledOnTypeAlias() {
-        guard performKnownFailures else { return }
-
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass219")) {
                 self.assertReferenced(.functionConstructor("init(foo:)"))
