@@ -55,6 +55,7 @@ swift_library(
         "SourceGraph/Elements/SourceFile.swift",
         "SourceGraph/Mutators/AccessibilityCascader.swift",
         "SourceGraph/Mutators/AncestralReferenceEliminator.swift",
+        "SourceGraph/Mutators/AppIntentsRetainer.swift",
         "SourceGraph/Mutators/AssetReferenceRetainer.swift",
         "SourceGraph/Mutators/AssignOnlyPropertyReferenceEliminator.swift",
         "SourceGraph/Mutators/CodablePropertyRetainer.swift",

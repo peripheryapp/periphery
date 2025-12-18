@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Fix indexing of xib/storyboard files in SPM projects.
+- Fix types conforming to App Intents protocols being reported as unused.
 
 ## 3.3.0 (2025-12-13)
 

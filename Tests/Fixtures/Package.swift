@@ -45,6 +45,9 @@ targets.append(contentsOf: [
     ),
     .target(
         name: "ObjcAnnotatedRetentionFixtures"
+    ),
+    .target(
+        name: "AppIntentsRetentionFixtures"
     )
 ])
 #endif
