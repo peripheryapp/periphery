@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix indexing of xib/storyboard files in SPM projects.
 
 ## 3.3.0 (2025-12-13)
 
