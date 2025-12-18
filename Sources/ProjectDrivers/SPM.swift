@@ -31,14 +31,7 @@ public enum SPM {
             try shell.exec(["swift", "build", "--build-tests"] + additionalArguments)
         }
 
-        public func testTargetNames() throws -> Set<String> {
-            let description = try load()
-            return description.targets.filter(\.isTestTarget).mapSet(\.name)
-        }
-
-        // MARK: - Private
-
-        private func load() throws -> PackageDescription {
+        public func load() throws -> PackageDescription {
             logger.contextualized(with: "spm:package").debug("Loading \(FilePath.current)")
 
             let jsonData: Data
@@ -62,15 +55,21 @@ public enum SPM {
     }
 }
 
-struct PackageDescription: Decodable {
-    let targets: [Target]
+public struct PackageDescription: Decodable {
+    public let targets: [Target]
 }
 
-struct Target: Decodable {
-    let name: String
-    let type: String
+public struct Target: Decodable {
+    public let name: String
+    public let type: String
+    public let path: String
+    public let resources: [Resource]?
 
-    var isTestTarget: Bool {
+    public var isTestTarget: Bool {
         type == "test"
     }
+}
+
+public struct Resource: Decodable {
+    public let path: String
 }

@@ -50,7 +50,10 @@ extension SPMProjectDriver: ProjectDriver {
             [pkg.path.appending(".build/debug/index/store")]
         }
 
-        let excludedTestTargets = configuration.excludeTests ? try pkg.testTargetNames() : []
+        // Load package description once and reuse it
+        let description = try pkg.load()
+
+        let excludedTestTargets = configuration.excludeTests ? testTargetNames(from: description) : []
         let collector = SourceFileCollector(
             indexStorePaths: indexStorePaths,
             excludedTestTargets: excludedTestTargets,
@@ -58,7 +61,43 @@ extension SPMProjectDriver: ProjectDriver {
             configuration: configuration
         )
         let sourceFiles = try collector.collect()
+        let xibPaths = interfaceBuilderFiles(from: description)
 
-        return IndexPlan(sourceFiles: sourceFiles)
+        return IndexPlan(
+            sourceFiles: sourceFiles,
+            xibPaths: xibPaths
+        )
+    }
+
+    // MARK: - Private
+
+    private func testTargetNames(from description: PackageDescription) -> Set<String> {
+        description.targets.filter(\.isTestTarget).mapSet(\.name)
+    }
+
+    private func interfaceBuilderFiles(from description: PackageDescription) -> Set<FilePath> {
+        var xibFiles: Set<FilePath> = []
+
+        for target in description.targets {
+            let targetPath = pkg.path.appending(target.path)
+
+            guard let resources = target.resources else { continue }
+
+            for resource in resources {
+                // Resource.path is always a single file path
+                let resourceFilePath = FilePath(resource.path)
+                let resourcePath: FilePath = resourceFilePath.isAbsolute
+                    ? resourceFilePath
+                    : targetPath.appending(resource.path)
+
+                // Check if the resource path exists and is a xib/storyboard file
+                guard resourcePath.exists else { continue }
+                guard let ext = resourcePath.extension?.lowercased(), ["xib", "storyboard"].contains(ext) else { continue }
+
+                xibFiles.insert(resourcePath)
+            }
+        }
+
+        return xibFiles
     }
 }
