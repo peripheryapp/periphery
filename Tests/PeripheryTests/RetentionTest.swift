@@ -1671,18 +1671,15 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    // MARK: - Known Failures
-
-    // https://github.com/apple/swift/issues/56165
     func testCustomConstructorWithLiteral() {
-        guard performKnownFailures else { return }
-
         analyze(retainPublic: true) {
             assertReferenced(.extensionStruct("Array")) {
                 self.assertReferenced(.functionConstructor("init(title:)"))
             }
         }
     }
+
+    // MARK: - Known Failures
 
     // https://github.com/peripheryapp/periphery/issues/676
     func testRetainsInitializerCalledOnTypeAlias() {
