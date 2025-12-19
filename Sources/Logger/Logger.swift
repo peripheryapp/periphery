@@ -21,21 +21,27 @@ public enum ANSIColor: String {
     case gray = "\u{001B}[0;1;30m"
 }
 
-@usableFromInline var isColorOutputCapable: Bool = {
-    guard let term = ProcessInfo.processInfo.environment["TERM"],
-          term.lowercased() != "dumb",
-          isatty(fileno(stdout)) != 0
-    else {
-        return false
+public final class Logger {
+    @usableFromInline static var coloredOutputEnabled: Bool = true
+
+    @usableFromInline static var isColorOutputCapable: Bool = {
+        guard let term = ProcessInfo.processInfo.environment["TERM"],
+              term.lowercased() != "dumb",
+              isatty(fileno(stdout)) != 0
+        else {
+            return false
+        }
+
+        return true
+    }()
+
+    public static func setColoredOutput(enabled: Bool) {
+        coloredOutputEnabled = enabled
     }
 
-    return true
-}()
-
-public final class Logger {
     @inlinable
     public static func colorize(_ text: String, _ color: ANSIColor) -> String {
-        guard isColorOutputCapable else { return text }
+        guard isColorOutputCapable, coloredOutputEnabled else { return text }
         return "\(color.rawValue)\(text)\u{001B}[0;0m"
     }
 
