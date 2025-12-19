@@ -29,6 +29,7 @@ public final class SourceGraphMutatorRunner {
         EnumCaseReferenceBuilder.self,
         DefaultConstructorReferenceBuilder.self,
         StructImplicitInitializerReferenceBuilder.self,
+        InheritedImplicitInitializerReferenceBuilder.self,
 
         DynamicMemberRetainer.self,
         UnusedParameterRetainer.self,

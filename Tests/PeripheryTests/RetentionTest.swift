@@ -1679,6 +1679,18 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    // MARK: - Inherited Initializers
+
+    // https://github.com/peripheryapp/periphery/issues/957
+    func testRetainsSuperclassInitializerCalledOnSubclass() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass221Parent")) {
+                self.assertReferenced(.functionConstructor("init(param:)"))
+            }
+            assertReferenced(.class("FixtureClass221Child"))
+        }
+    }
+
     // MARK: - Known Failures
 
     // https://github.com/peripheryapp/periphery/issues/676
