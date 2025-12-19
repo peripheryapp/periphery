@@ -6,6 +6,7 @@
 
 ##### Enhancements
 
+- Added the `--no-color`/`--color` option to disable/enable colored output.
 - Exclude wrapped properties from assign-only analysis, as Periphery cannot observe the behavior of the property wrapper.
 
 ##### Bug Fixes
