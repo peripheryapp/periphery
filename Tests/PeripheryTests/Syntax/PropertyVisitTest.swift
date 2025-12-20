@@ -1,4 +1,6 @@
 import Foundation
+import Logger
+import Shared
 @testable import SourceGraph
 @testable import SyntaxAnalysis
 @testable import TestShared
@@ -9,7 +11,9 @@ final class PropertyVisitTest: XCTestCase {
 
     override func setUpWithError() throws {
         try super.setUpWithError()
-        let multiplexingVisitor = try MultiplexingSyntaxVisitor(file: fixturePath)
+        let shell = Shell(logger: Logger(quiet: true))
+        let swiftVersion = SwiftVersion(shell: shell)
+        let multiplexingVisitor = try MultiplexingSyntaxVisitor(file: fixturePath, swiftVersion: swiftVersion)
         let visitor = multiplexingVisitor.add(DeclarationSyntaxVisitor.self)
         multiplexingVisitor.visit()
         results = visitor.resultsByLocation

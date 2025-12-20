@@ -55,11 +55,13 @@ open class SourceGraphTestCase: XCTestCase {
         }
 
         graph = SourceGraph(configuration: configuration, logger: logger)
+        let swiftVersion = SwiftVersion(shell: shell)
         let pipeline = IndexPipeline(
             plan: newPlan,
             graph: SynchronizedSourceGraph(graph: graph),
             logger: logger.contextualized(with: "index"),
-            configuration: configuration
+            configuration: configuration,
+            swiftVersion: swiftVersion
         )
         try! pipeline.perform()
 
@@ -68,7 +70,7 @@ open class SourceGraphTestCase: XCTestCase {
             graph: graph,
             logger: logger,
             configuration: configuration,
-            swiftVersion: SwiftVersion(shell: shell)
+            swiftVersion: swiftVersion
         ).perform()
         results = ScanResultBuilder.build(for: graph)
     }
