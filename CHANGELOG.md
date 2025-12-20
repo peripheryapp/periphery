@@ -14,6 +14,7 @@
 - Fix indexing of xib/storyboard files in SPM projects.
 - Fix types conforming to App Intents protocols being reported as unused.
 - Fix superclass initializer reported as unused when called on subclass.
+- Fix unused parameter false-positive for parameters used in closure capture lists.
 
 ## 3.3.0 (2025-12-13)
 

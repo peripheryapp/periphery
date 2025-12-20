@@ -206,6 +206,33 @@ final class UnusedParameterTest: XCTestCase {
         assertUnused(label: "otherUnused", name: "otherUnused", in: "myFunc(class:func:otherUsed:otherUnused:)")
     }
 
+    // https://github.com/peripheryapp/periphery/issues/994
+    func testCaptureListUsage() {
+        analyze()
+        // Parameter used in capture list should be considered used
+        assertUsed(label: "_", name: "state", in: "functionWithCaptureList(_:)")
+
+        // Multiple parameters - some used in capture list, one unused
+        assertUsed(label: "param1", name: "param1", in: "multipleParamsInCaptureList(param1:param2:unusedParam:)")
+        assertUsed(label: "param2", name: "param2", in: "multipleParamsInCaptureList(param1:param2:unusedParam:)")
+        assertUnused(label: "unusedParam", name: "unusedParam", in: "multipleParamsInCaptureList(param1:param2:unusedParam:)")
+
+        // Parameter used both in capture list and directly
+        assertUsed(label: "param", name: "param", in: "paramUsedInCaptureListAndDirectly(param:)")
+
+        // Weak capture (common pattern for avoiding retain cycles)
+        assertUsed(label: "object", name: "object", in: "weakCapture(object:)")
+
+        // Nested closure with capture list
+        assertUsed(label: "outerParam", name: "outerParam", in: "nestedClosureWithCaptureList(outerParam:)")
+
+        // Shorthand capture (just [param] without assignment)
+        assertUsed(label: "param", name: "param", in: "shorthandCapture(param:)")
+
+        // Capture list only - parameter not used in body, only in capture
+        assertUsed(label: "param", name: "param", in: "captureListOnly(param:)")
+    }
+
     // MARK: - Private
 
     private var unusedParamsByFunction: [(Function, Set<Parameter>)] = []
