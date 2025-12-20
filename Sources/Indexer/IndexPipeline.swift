@@ -1,6 +1,7 @@
 import Configuration
 import Foundation
 import Logger
+import Shared
 import SourceGraph
 
 public struct IndexPipeline {
@@ -8,12 +9,14 @@ public struct IndexPipeline {
     private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger
     private let configuration: Configuration
+    private let swiftVersion: SwiftVersion
 
-    public init(plan: IndexPlan, graph: SynchronizedSourceGraph, logger: ContextualLogger, configuration: Configuration) {
+    public init(plan: IndexPlan, graph: SynchronizedSourceGraph, logger: ContextualLogger, configuration: Configuration, swiftVersion: SwiftVersion) {
         self.plan = plan
         self.graph = graph
         self.logger = logger
         self.configuration = configuration
+        self.swiftVersion = swiftVersion
     }
 
     public func perform() throws {
@@ -21,7 +24,8 @@ public struct IndexPipeline {
             sourceFiles: plan.sourceFiles,
             graph: graph,
             logger: logger,
-            configuration: configuration
+            configuration: configuration,
+            swiftVersion: swiftVersion
         ).perform()
 
         if !plan.plistPaths.isEmpty {
