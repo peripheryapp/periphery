@@ -119,7 +119,7 @@ final class SwiftIndexer: Indexer {
         }
 
         struct RawDeclaration {
-            public struct Key: Hashable {
+            struct Key: Hashable {
                 let kind: Declaration.Kind
                 let name: String?
                 let isImplicit: Bool
