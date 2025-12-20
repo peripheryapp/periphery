@@ -82,8 +82,7 @@ The guided setup is only intended for introductory purposes. Once you are famili
 
 To get the most from Periphery, it’s important to understand how it works. Periphery first builds your project; it does this to generate the “index store”. The index store contains detailed information about the declarations (class, struct, func, etc.) in your project and their references to other declarations. Using this store, Periphery builds an in-memory graph of the relational structure of your project, supplementing it with additional information obtained by parsing each source file. Next, the graph is mutated to make it more suitable for detecting unused code, e.g., marking your project’s entry points. Finally, the graph is traversed from its roots to identify unreferenced declarations.
 
-> **Tip**
->
+> [!TIP]
 > The index store only contains information about source files in the build targets compiled during the build phase. If a given class is only referenced in a source file that was not compiled, then Periphery will identify the class as unused. It's important to ensure you build all the targets you expect to contain references. For an Xcode project, this is controlled using the `--schemes` option. For a Swift package, all targets are built automatically.
 
 If your project consists of one or more standalone frameworks that do not also contain some kind of application that consumes their interfaces, you need to tell Periphery to assume that all public declarations are used with the `--retain-public` option.
@@ -125,8 +124,7 @@ class InformalGreeter: Greeter {
 }
 ```
 
-> **Tip**
->
+> [!TIP]
 > You can ignore all unused parameters from protocols and conforming functions with the `--retain-unused-protocol-func-params` option.
 
 #### Overrides
@@ -363,11 +361,11 @@ The `kind` override allows you to specify a custom kind that will be shown in th
 
 ## Xcode Integration
 
-Before setting up Xcode integration, we highly recommend you first get Periphery working in a terminal, as you will be using the same command via Xcode.
+Before setting up Xcode integration, first get Periphery working in a terminal, as you will be using the same command via Xcode. Your project may require passing the `-destination` argument to xcodebuild. This can be done by supplying it as an additional argument, e.g. `periphery scan ... -- -destination "generic/platform=iOS Simulator"`.
 
 ### Step 1: Create an Aggregate Target
 
-Select your project in the Project Navigator and click the + button at the bottom left of the Targets section. Select **Cross-platform** and choose **Aggregate**. Hit Next.
+Select your project in the Project Navigator and click the + button at the bottom left of the Targets section. Select **Other** and choose **Aggregate**. Hit Next.
 
 ![Step 1](assets/xcode-integration/1.png)
 
@@ -381,19 +379,28 @@ In the **Build Phases** section, click the + button to add a new Run Script phas
 
 ![Step 3](assets/xcode-integration/3.png)
 
-In the shell script window, enter the Periphery command. Be sure to include the `--format xcode` option.
+Copy and paste your Periphery command into the script input.
+
+> [!TIP]
+> 1. Include the `--format xcode` option to ensure results are always formatted so that Xcode can parse them.
+> 2. Use the absolute path to `periphery`.
 
 ![Step 4](assets/xcode-integration/4.png)
 
-### Step 3: Select & Run
+### Step 3: Disable User Script Sandboxing
+
+You must disable **User Script Sandboxing** for the Run Script phase. Periphery requires access to your project's index store and source files, which are blocked by Xcode's default sandbox. To disable sandboxing, set the `ENABLE_USER_SCRIPT_SANDBOXING` option to `No` in the Build Settings for the Periphery aggregate target.
+
+![Step 4](assets/xcode-integration/5.png)
+
+### Step 4: Select & Run
 
 You're ready to roll. You should now see the new scheme in the dropdown. Select it and hit run.
 
-> **Tip**
->
+> [!TIP]
 > If you'd like others on your team to be able to use the scheme, you'll need to mark it as _Shared_. This can be done by selecting _Manage Schemes..._ and selecting the _Shared_ checkbox next to the new scheme. The scheme definition can now be checked into source control.
 
-![Step 5](assets/xcode-integration/5.png)
+![Step 5](assets/xcode-integration/6.png)
 
 ## Excluding Files
 
@@ -467,8 +474,7 @@ Periphery can analyze projects using other build systems, though it cannot drive
 }
 ```
 
-> **Tip**
->
+> [!TIP]
 > Relative paths are assumed to be relative to the current directory.
 
 You can then invoke Periphery as follows:
@@ -477,8 +483,7 @@ You can then invoke Periphery as follows:
 periphery scan --generic-project-config config.json
 ```
 
-> **Tip**
->
+> [!TIP]
 > Both options support multiple paths.
 
 ## Platforms
