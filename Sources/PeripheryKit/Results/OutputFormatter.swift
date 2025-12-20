@@ -42,32 +42,30 @@ extension OutputFormatter {
         let kindDisplayName = declarationKindDisplayName(from: result.declaration)
 
         if var name = result.declaration.name {
-            description += "\(kindDisplayName.first?.uppercased() ?? "")\(kindDisplayName.dropFirst()) "
             name = colored ? Logger.colorize(name, .lightBlue) : name
-            description += "'\(name)'"
 
             switch result.annotation {
             case .unused:
-                description += " is unused"
+                description += "Unused \(kindDisplayName) '\(name)'"
             case .assignOnlyProperty:
-                description += " is assigned, but never used"
+                description += "Assign-only \(kindDisplayName) '\(name)' is assigned, but never used"
             case let .redundantProtocol(references, inherited):
-                description += " is redundant as it's never used as an existential type"
+                description += "Redundant protocol '\(name)' (never used as an existential type)"
                 secondaryResults = references.map {
-                    var msg = "Protocol '\(name)' conformance is redundant"
+                    var msg = "Redundant protocol conformance '\(name)'"
 
                     if !inherited.isEmpty {
-                        msg += ", replace with '\(inherited.sorted().joined(separator: ", "))'"
+                        msg += " (replace with '\(inherited.sorted().joined(separator: ", "))')"
                     }
 
                     return ($0.location, msg)
                 }
             case let .redundantPublicAccessibility(modules):
                 let modulesJoined = modules.sorted().joined(separator: ", ")
-                description += " is declared public, but not used outside of \(modulesJoined)"
+                description += "Redundant public accessibility for \(kindDisplayName) '\(name)' (not used outside of \(modulesJoined))"
             }
         } else {
-            description += "unused"
+            description += "Unused"
         }
 
         return [(location, description)] + secondaryResults
