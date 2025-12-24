@@ -18,6 +18,33 @@ var targets: [PackageDescription.Target] = [
         name: "CrossModuleRetentionSupportFixtures"
     ),
     .target(
+        name: "UnusedImportFixtureA",
+        path: "Sources/UnusedImportFixtures/A"
+    ),
+    .target(
+        name: "UnusedImportFixtureB",
+        dependencies: [
+            .target(name: "UnusedImportFixtureA")
+        ],
+        path: "Sources/UnusedImportFixtures/B"
+    ),
+    .target(
+        name: "UnusedImportFixtureC",
+        dependencies: [
+            .target(name: "UnusedImportFixtureA")
+        ],
+        path: "Sources/UnusedImportFixtures/C"
+    ),
+    .target(
+        name: "UnusedImportFixtureD",
+        dependencies: [
+            .target(name: "UnusedImportFixtureA"),
+            .target(name: "UnusedImportFixtureB"),
+            .target(name: "UnusedImportFixtureC")
+        ],
+        path: "Sources/UnusedImportFixtures/D"
+    ),
+    .target(
         name: "RetentionFixtures",
         dependencies: [
             .target(name: "ExternalModuleFixtures"),
