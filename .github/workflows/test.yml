@@ -11,6 +11,9 @@ env:
   swift_test: swift test
   periphery_scan: ./.build/debug/periphery scan --quiet --clean-build --strict
   cache_version: 1
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 jobs:
   lint:
     runs-on: macos-26
@@ -39,11 +42,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        step: ["main-snapshot", "26.2.0", "26.1.1", "26.0", "16.4"]
+        step: ["main-snapshot", "6.3-snapshot", "26.2.0", "26.1.1", "26.0", "16.4"]
         include:
           - step: "main-snapshot"
             xcode: "26.0"
             swiftly: "main-snapshot"
+            continueOnError: true
+            macos: "macos-26"
+          - step: "6.3-snapshot"
+            xcode: "26.0"
+            swiftly: "6.3-snapshot"
             continueOnError: true
             macos: "macos-26"
           - step: "26.2.0"
@@ -109,10 +117,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ["nightly-main", "6.2", "6.1"]
+        swift: ["nightly-main", "nightly-6.3", "6.2", "6.1"]
         include:
           - swift: "nightly-main"
             container: "swiftlang/swift:nightly-main"
+            continueOnError: true
+          - swift: "nightly-6.3"
+            container: "swiftlang/swift:nightly-6.3-noble"
             continueOnError: true
           - swift: "6.2"
             container: "swift:6.2"
