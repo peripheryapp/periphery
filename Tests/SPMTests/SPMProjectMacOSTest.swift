@@ -13,8 +13,12 @@
 
         func testRetainsInterfaceBuilderDeclarations() {
             assertReferenced(.class("SPMXibViewController")) {
+                // Referenced via XIB (connected)
                 self.assertReferenced(.functionMethodInstance("buttonTapped(_:)"))
                 self.assertReferenced(.varInstance("button"))
+                // Unreferenced - not connected in XIB
+                self.assertNotReferenced(.varInstance("unusedMacOutlet"))
+                self.assertNotReferenced(.functionMethodInstance("unusedMacAction(_:)"))
             }
         }
     }

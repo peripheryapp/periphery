@@ -29,6 +29,10 @@ final class UIKitProjectTest: XcodeSourceGraphTestCase {
             self.assertReferenced(.varInstance("button"))
             self.assertReferenced(.varInstance("controllerProperty"))
             self.assertReferenced(.functionMethodInstance("click(_:)"))
+            // Unused @IB* members should NOT be retained
+            self.assertNotReferenced(.varInstance("unusedOutlet"))
+            self.assertNotReferenced(.functionMethodInstance("unusedAction(_:)"))
+            self.assertNotReferenced(.varInstance("unusedInspectable"))
         }
         assertReferenced(.class("XibView")) {
             self.assertReferenced(.varInstance("viewProperty"))
@@ -41,20 +45,33 @@ final class UIKitProjectTest: XcodeSourceGraphTestCase {
 
     func testRetainsInspectablePropertyInExtension() {
         assertReferenced(.extensionClass("UIView")) {
+            // Referenced via XIB (used in userDefinedRuntimeAttributes)
             self.assertReferenced(.varInstance("customBorderColor"))
+            // Unreferenced - not used in any XIB
+            self.assertNotReferenced(.varInstance("unusedExtensionInspectable"))
         }
     }
 
     func testRetainsIBActionReferencedViaSubclass() {
         assertReferenced(.class("XibViewController2Base")) {
+            // Referenced via XIB (connected in XibViewController2Subclass.xib)
             self.assertReferenced(.functionMethodInstance("clickFromSubclass(_:)"))
+            // Unreferenced - not connected in XIB
+            self.assertNotReferenced(.varInstance("button"))
+            self.assertNotReferenced(.varInstance("unusedBaseOutlet"))
+            self.assertNotReferenced(.functionMethodInstance("unusedBaseAction(_:)"))
         }
     }
 
     func testRetainsStoryboardReferencedClass() {
         assertReferenced(.class("StoryboardViewController")) {
+            // Referenced via storyboard (connected)
             self.assertReferenced(.varInstance("button"))
             self.assertReferenced(.functionMethodInstance("click(_:)"))
+            // Unreferenced - not connected in storyboard
+            self.assertNotReferenced(.varInstance("unusedStoryboardOutlet"))
+            self.assertNotReferenced(.functionMethodInstance("unusedStoryboardAction(_:)"))
+            self.assertNotReferenced(.varInstance("unusedStoryboardInspectable"))
         }
     }
 
