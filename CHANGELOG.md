@@ -9,6 +9,7 @@
 - Added the `--no-color`/`--color` option to disable/enable colored output.
 - Exclude wrapped properties from assign-only analysis, as Periphery cannot observe the behavior of the property wrapper.
 - Improved the readability of result messages.
+- Periphery now parses Interface Builder files to detect unused `@IBOutlet`, `@IBAction`, `@IBInspectable`, and `@IBSegueAction` members. Previously, all `@IB*` members were blindly retained if their containing class was referenced in a XIB or storyboard.
 
 ##### Bug Fixes
 
