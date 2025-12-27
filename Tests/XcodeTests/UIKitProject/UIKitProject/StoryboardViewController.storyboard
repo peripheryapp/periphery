@@ -12,6 +12,11 @@
         <scene sceneID="pxd-GT-AmU">
             <objects>
                 <viewController id="91c-VY-v8t" customClass="StoryboardViewController" customModule="UIKitProject" customModuleProvider="target" sceneMemberID="viewController">
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                            <real key="value" value="8"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
                     <view key="view" contentMode="scaleToFill" id="ISi-Ab-UHC">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
