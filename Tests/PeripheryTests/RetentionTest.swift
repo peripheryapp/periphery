@@ -755,6 +755,19 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testConstrainedProtocolExtensionSatisfiesProtocolRequirement() {
+        analyze(retainPublic: true) {
+            assertReferenced(.protocol("FixtureProtocol1021A")) {
+                self.assertReferenced(.varInstance("value"))
+            }
+            assertReferenced(.protocol("FixtureProtocol1021B"))
+            assertReferenced(.extensionProtocol("FixtureProtocol1021B")) {
+                // The extension's value satisfies FixtureProtocol1021A's requirement
+                self.assertReferenced(.varInstance("value"))
+            }
+        }
+    }
+
     func testDoesNotRetainProtocolMembersImplementedByExternalType() {
         analyze(retainPublic: true) {
             assertReferenced(.protocol("FixtureProtocol110")) {
