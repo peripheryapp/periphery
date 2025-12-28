@@ -13,6 +13,7 @@
 
 ##### Bug Fixes
 
+- Fix inline ignore comment not working on properties.
 - Fix false positive when a constrained protocol extension provides a default implementation that satisfies a requirement of the constraining protocol.
 - Fix indexing of xib/storyboard files in SPM projects.
 - Fix types conforming to App Intents protocols being reported as unused.
