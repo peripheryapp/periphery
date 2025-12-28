@@ -1113,6 +1113,16 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.class("Fixture205"))
             assertReferenced(.protocol("Fixture205Protocol"))
             assertNotRedundantProtocol("Fixture205Protocol")
+
+            // Inline ignore comments on properties (issue #941)
+            assertReferenced(.class("Fixture310Class")) {
+                self.assertReferenced(.varInstance("simplePropertyInlineIgnored"))
+                self.assertReferenced(.varInstance("computedPropertyInlineIgnored"))
+                self.assertReferenced(.varInstance("computedPropertyWithOpenBraceIgnore"))
+            }
+            assertReferenced(.protocol("Fixture311Protocol")) {
+                self.assertReferenced(.varInstance("protocolPropertyInlineIgnored"))
+            }
         }
 
         // inline comment command tests

@@ -528,7 +528,7 @@ private extension SyntaxProtocol {
     /// Foo {} // periphery:ignore
     /// ```
     var commentCommandTrivia: Trivia {
-        var commandTrivia = leadingTrivia
+        var commandTrivia = leadingTrivia.merging(trailingTrivia)
 
         if let hasMemberBlock = self as? HasMemberBlock {
             commandTrivia = commandTrivia
@@ -540,6 +540,12 @@ private extension SyntaxProtocol {
             commandTrivia = commandTrivia
                 .merging(body.leftBrace.trailingTrivia)
                 .merging(body.rightBrace.trailingTrivia)
+        }
+
+        if let hasAccessorBlock = self as? HasAccessorBlock, let accessorBlock = hasAccessorBlock.accessorBlock {
+            commandTrivia = commandTrivia
+                .merging(accessorBlock.leftBrace.trailingTrivia)
+                .merging(accessorBlock.rightBrace.trailingTrivia)
         }
 
         return commandTrivia
@@ -566,3 +572,14 @@ private protocol HasCodeBody {
 extension FunctionDeclSyntax: HasCodeBody {}
 extension InitializerDeclSyntax: HasCodeBody {}
 extension DeinitializerDeclSyntax: HasCodeBody {}
+
+/// Identifies types with an AccessorBlockSyntax child
+private protocol HasAccessorBlock {
+    var accessorBlock: AccessorBlockSyntax? { get }
+}
+
+extension VariableDeclSyntax: HasAccessorBlock {
+    var accessorBlock: AccessorBlockSyntax? {
+        bindings.first?.accessorBlock
+    }
+}
