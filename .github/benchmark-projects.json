@@ -1,0 +1,18 @@
+{
+  "projects": [
+    {
+      "name": "Alamofire",
+      "url": "https://github.com/Alamofire/Alamofire.git",
+      "ref": "5.10.0",
+      "build": "spm"
+    },
+    {
+      "name": "stripe-ios",
+      "url": "https://github.com/stripe/stripe-ios.git",
+      "ref": "25.3.1",
+      "build": "xcodebuild",
+      "scheme": "AllStripeFrameworks",
+      "destination": "generic/platform=iOS Simulator"
+    }
+  ]
+}
