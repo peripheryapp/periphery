@@ -22,21 +22,37 @@ jobs:
       - uses: actions/checkout@master
       - uses: jdx/mise-action@v2
       - run: mise run lint-ci
+      - name: Check generated Bazel rules
+        run: mise r gen-bazel-rules && git diff --quiet --exit-code
   bazel:
-      runs-on: macos-26
-      name: Bazel
+      name: Bazel (${{ matrix.os }})
+      strategy:
+        fail-fast: false
+        matrix:
+          os: [macOS, Linux]
+          include:
+            - os: macOS
+              runs-on: macos-26
+              baseline: bazel.json
+            - os: Linux
+              runs-on: ubuntu-latest
+              container: swift:latest
+              cc: clang
+              baseline: linux-bazel.json
+      runs-on: ${{ matrix.runs-on }}
+      container: ${{ matrix.container }}
+      env:
+        CC: ${{ matrix.cc }}
       steps:
         - uses: actions/checkout@master
-        - uses: jdx/mise-action@v2
         - uses: bazel-contrib/setup-bazel@0.15.0
           with:
+            bazelisk-version: 1.x
             bazelisk-cache: true
-            disk-cache: ${{ github.workflow }}
+            disk-cache: bazel-${{ matrix.os }}
             repository-cache: true
-        - name: Check generated rules
-          run: mise r gen-bazel-rules && git diff --quiet --exit-code
         - name: Scan
-          run: bazel run //:periphery -- scan --bazel --quiet --strict --baseline baselines/bazel.json
+          run: bazel run //:periphery -- scan --bazel --quiet --strict --baseline baselines/${{ matrix.baseline }}
   macOS:
     name: macOS
     strategy:
