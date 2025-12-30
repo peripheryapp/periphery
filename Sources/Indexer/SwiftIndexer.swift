@@ -17,17 +17,20 @@ final class SwiftIndexer: Indexer {
     private let graph: SynchronizedSourceGraph
     private let logger: ContextualLogger
     private let configuration: Configuration
+    private let swiftVersion: SwiftVersion
 
     required init(
         sourceFiles: [SourceFile: [IndexUnit]],
         graph: SynchronizedSourceGraph,
         logger: ContextualLogger,
-        configuration: Configuration
+        configuration: Configuration,
+        swiftVersion: SwiftVersion
     ) {
         self.sourceFiles = sourceFiles
         self.graph = graph
         self.logger = logger.contextualized(with: "swift")
         self.configuration = configuration
+        self.swiftVersion = swiftVersion
         super.init(configuration: configuration)
     }
 
@@ -39,7 +42,8 @@ final class SwiftIndexer: Indexer {
                 retainAllDeclarations: isRetained(file),
                 graph: graph,
                 logger: logger,
-                configuration: configuration
+                configuration: configuration,
+                swiftVersion: swiftVersion
             )
         }
 
@@ -88,6 +92,7 @@ final class SwiftIndexer: Indexer {
         private let logger: ContextualLogger
         private let configuration: Configuration
         private var retainAllDeclarations: Bool
+        private let swiftVersion: SwiftVersion
 
         required init(
             sourceFile: SourceFile,
@@ -95,7 +100,8 @@ final class SwiftIndexer: Indexer {
             retainAllDeclarations: Bool,
             graph: SynchronizedSourceGraph,
             logger: ContextualLogger,
-            configuration: Configuration
+            configuration: Configuration,
+            swiftVersion: SwiftVersion
         ) {
             self.sourceFile = sourceFile
             self.units = units
@@ -103,6 +109,7 @@ final class SwiftIndexer: Indexer {
             self.graph = graph
             self.logger = logger
             self.configuration = configuration
+            self.swiftVersion = swiftVersion
         }
 
         // swiftlint:disable nesting
@@ -119,7 +126,7 @@ final class SwiftIndexer: Indexer {
         }
 
         struct RawDeclaration {
-            public struct Key: Hashable {
+            struct Key: Hashable {
                 let kind: Declaration.Kind
                 let name: String?
                 let isImplicit: Bool
@@ -242,7 +249,7 @@ final class SwiftIndexer: Indexer {
                 graph.addIndexedModules(sourceFile.modules)
             }
 
-            let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: sourceFile)
+            let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: sourceFile, swiftVersion: swiftVersion)
             let declarationSyntaxVisitor = multiplexingSyntaxVisitor.add(DeclarationSyntaxVisitor.self)
             let importSyntaxVisitor = multiplexingSyntaxVisitor.add(ImportSyntaxVisitor.self)
 

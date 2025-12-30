@@ -113,3 +113,16 @@ public class Fixture308Class {
 public class Fixture309Class { // periphery:ignore
     public let reference = Fixture308Class()
 }
+
+// Test inline ignore comments on properties
+public class Fixture310Class {
+    var simplePropertyInlineIgnored: Int = 0 // periphery:ignore
+    var computedPropertyInlineIgnored: Int { 0 } // periphery:ignore
+    var computedPropertyWithOpenBraceIgnore: Int { // periphery:ignore
+        0
+    }
+}
+
+public protocol Fixture311Protocol {
+    var protocolPropertyInlineIgnored: String { get } // periphery:ignore
+}

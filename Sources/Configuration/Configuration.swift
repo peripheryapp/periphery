@@ -101,6 +101,9 @@ public final class Configuration {
     @Setting(key: "quiet", defaultValue: false)
     public var quiet: Bool
 
+    @Setting(key: "color", defaultValue: true)
+    public var color: Bool
+
     @Setting(key: "disable_update_check", defaultValue: false)
     public var disableUpdateCheck: Bool
 
@@ -215,10 +218,10 @@ public final class Configuration {
         $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis,
         $disableRedundantInternalAnalysis, $disableRedundantFilePrivateAnalysis,
         $disableUnusedImportAnalysis, $retainUnusedImportedModules, $externalEncodableProtocols, $externalCodableProtocols,
-        $externalTestCaseClasses, $verbose, $quiet, $disableUpdateCheck, $strict, $indexStorePath, $skipBuild,
-        $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults, $jsonPackageManifestPath,
-        $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline, $writeResults, $genericProjectConfig,
-        $bazel, $bazelFilter, $bazelIndexStore,
+        $externalTestCaseClasses, $verbose, $quiet, $color, $disableUpdateCheck, $strict, $indexStorePath,
+        $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults,
+        $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline,
+        $writeResults, $genericProjectConfig, $bazel, $bazelFilter, $bazelIndexStore,
     ]
 
     private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {

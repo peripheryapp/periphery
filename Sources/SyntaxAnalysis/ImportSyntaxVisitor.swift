@@ -1,4 +1,5 @@
 import Foundation
+import Shared
 import SourceGraph
 import SwiftSyntax
 
@@ -7,8 +8,9 @@ public final class ImportSyntaxVisitor: PeripherySyntaxVisitor {
 
     private let sourceLocationBuilder: SourceLocationBuilder
 
-    public init(sourceLocationBuilder: SourceLocationBuilder) {
+    public init(sourceLocationBuilder: SourceLocationBuilder, swiftVersion _: SwiftVersion) {
         self.sourceLocationBuilder = sourceLocationBuilder
+        // swiftVersion is not used in this visitor but is required by the protocol
     }
 
     public func visit(_ node: ImportDeclSyntax) {

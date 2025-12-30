@@ -1,11 +1,12 @@
 import Foundation
+import Shared
 import SourceGraph
 import SwiftParser
 import SwiftSyntax
 import SystemPackage
 
 public protocol PeripherySyntaxVisitor {
-    init(sourceLocationBuilder: SourceLocationBuilder)
+    init(sourceLocationBuilder: SourceLocationBuilder, swiftVersion: SwiftVersion)
 
     func visit(_ node: ActorDeclSyntax)
     func visit(_ node: ClassDeclSyntax)
@@ -95,20 +96,22 @@ public final class MultiplexingSyntaxVisitor: SyntaxVisitor {
     public let syntax: SourceFileSyntax
     public let locationConverter: SourceLocationConverter
     let sourceLocationBuilder: SourceLocationBuilder
+    let swiftVersion: SwiftVersion
 
     private var visitors: [PeripherySyntaxVisitor] = []
 
-    public required init(file: SourceFile) throws {
+    public required init(file: SourceFile, swiftVersion: SwiftVersion) throws {
         sourceFile = file
         let source = try String(contentsOf: file.path.url)
         syntax = Parser.parse(source: source)
         locationConverter = SourceLocationConverter(fileName: file.path.string, tree: syntax)
         sourceLocationBuilder = SourceLocationBuilder(file: file, locationConverter: locationConverter)
+        self.swiftVersion = swiftVersion
         super.init(viewMode: .sourceAccurate)
     }
 
     public func add<T: PeripherySyntaxVisitor>(_ visitorType: T.Type) -> T {
-        let visitor = visitorType.init(sourceLocationBuilder: sourceLocationBuilder)
+        let visitor = visitorType.init(sourceLocationBuilder: sourceLocationBuilder, swiftVersion: swiftVersion)
         visitors.append(visitor)
         return visitor
     }

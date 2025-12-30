@@ -5,3 +5,9 @@ import SystemPackage
 var SPMProjectPath: FilePath {
     ProjectRootPath.appending("Tests/SPMTests/SPMProject")
 }
+
+#if os(macOS)
+    var SPMProjectMacOSPath: FilePath {
+        ProjectRootPath.appending("Tests/SPMTests/SPMProjectMacOS")
+    }
+#endif

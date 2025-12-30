@@ -6,11 +6,19 @@
 
 ##### Enhancements
 
-- None.
+- Added the `--no-color`/`--color` option to disable/enable colored output.
+- Exclude wrapped properties from assign-only analysis, as Periphery cannot observe the behavior of the property wrapper.
+- Improved the readability of result messages.
+- Improved Interface Builder file parsing to detect unused `@IBOutlet`, `@IBAction`, `@IBInspectable`, and `@IBSegueAction` members. Previously, all `@IB*` members were blindly retained if their containing class was referenced in a XIB or storyboard.
 
 ##### Bug Fixes
 
-- None.
+- Fix inline ignore comment not working on properties.
+- Fix false positive when a constrained protocol extension provides a default implementation that satisfies a requirement of the constraining protocol.
+- Fix indexing of xib/storyboard files in SPM projects.
+- Fix types conforming to App Intents protocols being reported as unused.
+- Fix superclass initializer reported as unused when called on subclass.
+- Fix unused parameter false-positive for parameters used in closure capture lists.
 
 ## 3.3.0 (2025-12-13)
 

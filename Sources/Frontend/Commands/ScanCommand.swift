@@ -129,6 +129,9 @@ struct ScanCommand: FrontendCommand {
     @Flag(help: "Only output results")
     var quiet: Bool = defaultConfiguration.$quiet.defaultValue
 
+    @Flag(inversion: .prefixedNo, help: "Colored output")
+    var color: Bool = defaultConfiguration.$color.defaultValue
+
     @Option(help: "JSON package manifest path (obtained using `swift package describe --type json` or manually)")
     var jsonPackageManifestPath: FilePath?
 
@@ -192,6 +195,7 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$externalTestCaseClasses, externalTestCaseClasses)
         configuration.apply(\.$verbose, verbose)
         configuration.apply(\.$quiet, quiet)
+        configuration.apply(\.$color, color)
         configuration.apply(\.$disableUpdateCheck, disableUpdateCheck)
         configuration.apply(\.$strict, strict)
         configuration.apply(\.$indexStorePath, indexStorePath)
@@ -214,6 +218,10 @@ struct ScanCommand: FrontendCommand {
         configuration.apply(\.$bazelIndexStore, bazelIndexStore)
 
         configuration.buildFilenameMatchers()
+
+        if !configuration.color {
+            Logger.setColoredOutput(enabled: false)
+        }
 
         let logger = Logger(
             quiet: configuration.quiet,
@@ -266,8 +274,9 @@ struct ScanCommand: FrontendCommand {
 
         let outputFormat = configuration.outputFormat
         let formatter = outputFormat.formatter.init(configuration: configuration)
+        let colored = outputFormat.supportsColoredOutput && configuration.color
 
-        if let output = try formatter.format(filteredResults, colored: outputFormat.supportsColoredOutput) {
+        if let output = try formatter.format(filteredResults, colored: colored) {
             if outputFormat.supportsAuxiliaryOutput {
                 logger.info("", canQuiet: true)
             }
@@ -277,7 +286,7 @@ struct ScanCommand: FrontendCommand {
             if !filteredResults.isEmpty, let resultsPath = configuration.writeResults {
                 var output = output
 
-                if outputFormat.supportsColoredOutput {
+                if colored {
                     // The formatted output contains ANSI escape codes, so we need to re-format
                     // with coloring disabled.
                     output = try formatter.format(filteredResults, colored: false) ?? ""

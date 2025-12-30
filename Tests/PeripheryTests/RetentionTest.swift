@@ -755,6 +755,19 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testConstrainedProtocolExtensionSatisfiesProtocolRequirement() {
+        analyze(retainPublic: true) {
+            assertReferenced(.protocol("FixtureProtocol1021A")) {
+                self.assertReferenced(.varInstance("value"))
+            }
+            assertReferenced(.protocol("FixtureProtocol1021B"))
+            assertReferenced(.extensionProtocol("FixtureProtocol1021B")) {
+                // The extension's value satisfies FixtureProtocol1021A's requirement
+                self.assertReferenced(.varInstance("value"))
+            }
+        }
+    }
+
     func testDoesNotRetainProtocolMembersImplementedByExternalType() {
         analyze(retainPublic: true) {
             assertReferenced(.protocol("FixtureProtocol110")) {
@@ -1100,6 +1113,16 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.class("Fixture205"))
             assertReferenced(.protocol("Fixture205Protocol"))
             assertNotRedundantProtocol("Fixture205Protocol")
+
+            // Inline ignore comments on properties (issue #941)
+            assertReferenced(.class("Fixture310Class")) {
+                self.assertReferenced(.varInstance("simplePropertyInlineIgnored"))
+                self.assertReferenced(.varInstance("computedPropertyInlineIgnored"))
+                self.assertReferenced(.varInstance("computedPropertyWithOpenBraceIgnore"))
+            }
+            assertReferenced(.protocol("Fixture311Protocol")) {
+                self.assertReferenced(.varInstance("protocolPropertyInlineIgnored"))
+            }
         }
 
         // inline comment command tests
@@ -1220,6 +1243,9 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
                 self.assertReferenced(.varInstance("ignoredSimpleUnreadVar"))
                 self.assertNotAssignOnlyProperty(.varInstance("ignoredSimpleUnreadVar"))
+
+                self.assertReferenced(.varInstance("wrappedProperty"))
+                self.assertNotAssignOnlyProperty(.varInstance("wrappedProperty"))
             }
         }
 
@@ -1248,6 +1274,9 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
                 self.assertReferenced(.varInstance("ignoredSimpleUnreadVar"))
                 self.assertNotAssignOnlyProperty(.varInstance("ignoredSimpleUnreadVar"))
+
+                self.assertReferenced(.varInstance("wrappedProperty"))
+                self.assertNotAssignOnlyProperty(.varInstance("wrappedProperty"))
             }
         }
     }
@@ -1665,18 +1694,27 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
-    // MARK: - Known Failures
-
-    // https://github.com/apple/swift/issues/56165
     func testCustomConstructorWithLiteral() {
-        guard performKnownFailures else { return }
-
         analyze(retainPublic: true) {
             assertReferenced(.extensionStruct("Array")) {
                 self.assertReferenced(.functionConstructor("init(title:)"))
             }
         }
     }
+
+    // MARK: - Inherited Initializers
+
+    // https://github.com/peripheryapp/periphery/issues/957
+    func testRetainsSuperclassInitializerCalledOnSubclass() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass221Parent")) {
+                self.assertReferenced(.functionConstructor("init(param:)"))
+            }
+            assertReferenced(.class("FixtureClass221Child"))
+        }
+    }
+
+    // MARK: - Known Failures
 
     // https://github.com/peripheryapp/periphery/issues/676
     func testRetainsInitializerCalledOnTypeAlias() {

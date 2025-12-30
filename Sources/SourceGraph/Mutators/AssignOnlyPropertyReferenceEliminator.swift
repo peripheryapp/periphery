@@ -7,7 +7,6 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphMutator {
     private let configuration: Configuration
     private let retainAssignOnlyPropertyTypes: [String]
     private let defaultRetainedTypes = ["AnyCancellable", "Set<AnyCancellable>", "[AnyCancellable]", "NSKeyValueObservation"]
-    private let retainedAttributes = ["State", "Binding"]
 
     required init(graph: SourceGraph, configuration: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
@@ -24,7 +23,7 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphMutator {
             guard let declaredType = property.declaredType,
                   !retainAssignOnlyPropertyTypes.contains(declaredType),
                   !graph.isRetained(property),
-                  property.attributes.isDisjoint(with: retainedAttributes),
+                  property.attributes.isEmpty,
                   !property.isComplexProperty,
                   // A protocol property can technically be assigned and never used when the protocol is used as an existential
                   // type, however communicating that succinctly would be very tricky, and most likely just lead to confusion.

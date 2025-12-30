@@ -2,6 +2,12 @@ import Configuration
 import Foundation
 import Shared
 
+/// Inverts references between protocol requirements and their conforming implementations.
+///
+/// The Swift indexer creates references from conforming declarations TO protocol requirements
+/// (e.g., `S.foo -> P.foo`). We invert these so protocol requirements reference their implementations
+/// (`P.foo -> S.foo`). This ensures that when code calls a method on a protocol type, the conforming
+/// implementations are transitively marked as used.
 final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
     private let graph: SourceGraph
 

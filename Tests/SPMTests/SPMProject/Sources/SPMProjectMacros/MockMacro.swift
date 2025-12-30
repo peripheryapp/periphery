@@ -4,7 +4,7 @@ import SwiftSyntax
 import SwiftSyntaxMacros
 
 struct MockMacro: PeerMacro {
-    public static func expansion(
+    static func expansion(
         of _: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
         in _: some MacroExpansionContext

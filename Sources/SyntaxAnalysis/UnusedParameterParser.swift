@@ -253,8 +253,12 @@ struct UnusedParameterParser {
         let signature = syntax.children(viewMode: .sourceAccurate).mapFirst { $0.as(ClosureSignatureSyntax.self) }
         let rawParams = signature?.parameterClause?.children(viewMode: .sourceAccurate).compactMap { $0.as(ClosureShorthandParameterSyntax.self) }
         let params = rawParams?.map(\.name.text) ?? []
-        let items = syntax.statements.compactMap { parse(node: $0.item, collector) }
-        return Closure(params: params, items: items)
+
+        // Parse capture list expressions (e.g., [captured = state.someProperty])
+        let captureItems = signature?.capture?.items.compactMap { parse(node: $0.initializer?.value, collector) } ?? []
+
+        let bodyItems = syntax.statements.compactMap { parse(node: $0.item, collector) }
+        return Closure(params: params, items: captureItems + bodyItems)
     }
 
     private func parse(variableDecl syntax: VariableDeclSyntax, _ collector: Collector<some Any>?) -> Variable {

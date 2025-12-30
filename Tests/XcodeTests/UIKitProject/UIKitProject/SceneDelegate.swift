@@ -8,37 +8,36 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         print(MultiTargetStruct.usedInApp)
         print(MultiTargetStruct.usedInBoth)
 
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard scene is UIWindowScene else { return }
+        guard let windowScene = scene as? UIWindowScene else { return }
+
+        let window = UIWindow(windowScene: windowScene)
+
+        // Create a tab bar controller to navigate between different XIB/storyboard view controllers
+        let tabBarController = UITabBarController()
+
+        // Tab 1: XibViewController (from XIB)
+        let xibVC = XibViewController(nibName: "XibViewController", bundle: nil)
+        xibVC.tabBarItem = UITabBarItem(title: "XIB", image: UIImage(systemName: "1.circle"), tag: 0)
+
+        // Tab 2: StoryboardViewController (from storyboard)
+        let storyboard = UIStoryboard(name: "StoryboardViewController", bundle: nil)
+        let storyboardVC = storyboard.instantiateInitialViewController() ?? StoryboardViewController()
+        storyboardVC.tabBarItem = UITabBarItem(title: "Storyboard", image: UIImage(systemName: "2.circle"), tag: 1)
+
+        // Tab 3: XibViewController2Subclass (tests inherited IBAction)
+        let xibVC2 = XibViewController2Subclass(nibName: "XibViewController2Subclass", bundle: nil)
+        xibVC2.tabBarItem = UITabBarItem(title: "Subclass", image: UIImage(systemName: "3.circle"), tag: 2)
+
+        tabBarController.viewControllers = [xibVC, storyboardVC, xibVC2]
+
+        window.rootViewController = tabBarController
+        window.makeKeyAndVisible()
+        self.window = window
     }
 
-    func sceneDidDisconnect(_ scene: UIScene) {
-        // Called as the scene is being released by the system.
-        // This occurs shortly after the scene enters the background, or when its session is discarded.
-        // Release any resources associated with this scene that can be re-created the next time the scene connects.
-        // The scene may re-connect later, as its session was not necessarily discarded (see `application:didDiscardSceneSessions` instead).
-    }
-
-    func sceneDidBecomeActive(_ scene: UIScene) {
-        // Called when the scene has moved from an inactive state to an active state.
-        // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
-    }
-
-    func sceneWillResignActive(_ scene: UIScene) {
-        // Called when the scene will move from an active state to an inactive state.
-        // This may occur due to temporary interruptions (ex. an incoming phone call).
-    }
-
-    func sceneWillEnterForeground(_ scene: UIScene) {
-        // Called as the scene transitions from the background to the foreground.
-        // Use this method to undo the changes made on entering the background.
-    }
-
-    func sceneDidEnterBackground(_ scene: UIScene) {
-        // Called as the scene transitions from the foreground to the background.
-        // Use this method to save data, release shared resources, and store enough scene-specific state information
-        // to restore the scene back to its current state.
-    }
+    func sceneDidDisconnect(_ scene: UIScene) {}
+    func sceneDidBecomeActive(_ scene: UIScene) {}
+    func sceneWillResignActive(_ scene: UIScene) {}
+    func sceneWillEnterForeground(_ scene: UIScene) {}
+    func sceneDidEnterBackground(_ scene: UIScene) {}
 }
