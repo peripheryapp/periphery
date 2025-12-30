@@ -18,10 +18,6 @@ final class RedundantInternalAccessibilityTest: SPMSourceGraphTestCase {
         assertNotRedundantInternalAccessibility(.varInstance("propertyUsedInExtension"))
     }
     
-/*
-failed - Expected declaration to have redundant internal accessibility: 
-Declaration(var.instance, 'propertyOnlyUsedInSameFile', explicit, internal, [internal], [], [], [s:7TargetA31InternalPropertyUsedInExtensionC012propertyOnlydE8SameFileSSvp], InternalPropertyUsedInExtension.swift:7:18)
-*/
     func testInternalPropertyUsedOnlyInSameFile() {
         // This should be flagged as redundant
         // Tests the case where an internal property is only used within its own file
