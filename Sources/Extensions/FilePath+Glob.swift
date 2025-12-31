@@ -28,7 +28,7 @@ private final class Glob {
     private let excludedDirectories: [String]
     private var isDirectoryCache: [String: Bool] = [:]
 
-    fileprivate var paths: Set<String> = []
+    internal var paths: Set<String> = []
 
     init(
         pattern: String,
