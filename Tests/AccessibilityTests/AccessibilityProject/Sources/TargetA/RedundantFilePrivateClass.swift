@@ -1,6 +1,7 @@
 /*
  RedundantFilePrivateClass.swift
- Tests that a fileprivate class is flagged as redundant when it's only referenced from within its own declaration
+ This file tests a case where fileprivate is actually NOT redundant because the
+ class is accessed from a different type (RedundantFilePrivateClassRetainer).
 */
 
 fileprivate class RedundantFilePrivateClass {
@@ -18,9 +19,8 @@ fileprivate class RedundantFilePrivateClass {
 }
 
 /*
- This retainer ensures the file is indexed and calls a method on the class.
- The fileprivate class is used, but only within the same file and not by other declarations,
- making the fileprivate access level redundant (could be private).
+ This retainer accesses RedundantFilePrivateClass from a different type,
+ which means fileprivate is necessary (NOT redundant).
 */
 public class RedundantFilePrivateClassRetainer {
     public init() {}

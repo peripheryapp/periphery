@@ -200,18 +200,6 @@ open class SourceGraphTestCase: XCTestCase {
         scopeStack.removeLast()
     }
 
-    func assertRedundantFilePrivateAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
-        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
-
-        if !Self.results.redundantFilePrivateAccessibilityDeclarations.contains(declaration) {
-            XCTFail("Expected declaration to have redundant fileprivate accessibility: \(declaration)", file: file, line: line)
-        }
-
-        scopeStack.append(.declaration(declaration))
-        scopedAssertions?()
-        scopeStack.removeLast()
-    }
-
     func assertNotRedundantFilePrivateAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
 

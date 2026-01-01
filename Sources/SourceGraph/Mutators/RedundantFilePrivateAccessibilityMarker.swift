@@ -29,7 +29,7 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
 
     private func validate(_ decl: Declaration) throws {
         if decl.accessibility.isExplicitly(.fileprivate) {
-            if !graph.isRetained(decl), !isReferencedOutsideFile(decl) {
+            if !graph.isRetained(decl), !isReferencedOutsideFile(decl), !isReferencedFromDifferentTypeInSameFile(decl) {
                 mark(decl)
             }
         }
@@ -63,7 +63,9 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
 
     private func markExplicitFilePrivateDescendentDeclarations(from decl: Declaration) {
         for descDecl in descendentFilePrivateDeclarations(from: decl) {
-            mark(descDecl)
+            if !graph.isRetained(descDecl), !isReferencedOutsideFile(descDecl), !isReferencedFromDifferentTypeInSameFile(descDecl) {
+                mark(descDecl)
+            }
         }
     }
 
@@ -75,5 +77,73 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
     private func descendentFilePrivateDeclarations(from decl: Declaration) -> Set<Declaration> {
         let filePrivateDeclarations = decl.declarations.filter { !$0.isImplicit && $0.accessibility.isExplicitly(.fileprivate) }
         return filePrivateDeclarations.flatMapSet { descendentFilePrivateDeclarations(from: $0) }.union(filePrivateDeclarations)
+    }
+
+    /**
+     Finds the top-level type declaration by walking up the parent chain.
+     Returns the outermost type that contains the given declaration.
+     */
+    private func topLevelType(of decl: Declaration) -> Declaration? {
+        let baseTypeKinds: Set<Declaration.Kind> = [.class, .struct, .enum, .protocol]
+        let typeKinds = baseTypeKinds.union(Declaration.Kind.extensionKinds)
+        let ancestors = [decl] + Array(decl.ancestralDeclarations)
+        return ancestors.last { typeDecl in
+            guard typeKinds.contains(typeDecl.kind) else { return false }
+            guard let parent = typeDecl.parent else { return true }
+            return !typeKinds.contains(parent.kind)
+        }
+    }
+
+    /**
+     Gets the logical type for comparison purposes.
+     For extensions of types in the SAME FILE, treats the extension as the extended type.
+     For extensions of types in DIFFERENT FILES (like extending external types),
+     treats the extension as its own distinct type for the purpose of this file.
+     */
+    private func logicalType(of decl: Declaration, inFile file: SourceFile) -> Declaration? {
+        if decl.kind.isExtensionKind {
+            if let extendedDecl = try? graph.extendedDeclaration(forExtension: decl),
+               extendedDecl.location.file == file
+            {
+                return extendedDecl
+            }
+            return decl
+        }
+        return decl
+    }
+
+    /**
+     Checks if a declaration is referenced from a different type in the same file.
+     Returns true if any same-file reference comes from a different logical type,
+     indicating that fileprivate access is necessary.
+
+     Even for top-level declarations, private and fileprivate are different:
+     - private: only accessible within the declaration itself and its extensions in the same file
+     - fileprivate: accessible from anywhere in the same file
+     */
+    private func isReferencedFromDifferentTypeInSameFile(_ decl: Declaration) -> Bool {
+        let file = decl.location.file
+        let sameFileReferences = graph.references(to: decl).filter { $0.location.file == file }
+
+        guard let declTopLevel = topLevelType(of: decl) else {
+            return false
+        }
+
+        let declLogicalType = logicalType(of: declTopLevel, inFile: file)
+
+        for ref in sameFileReferences {
+            guard let refParent = ref.parent,
+                  let refTopLevel = topLevelType(of: refParent)
+            else {
+                continue
+            }
+
+            let refLogicalType = logicalType(of: refTopLevel, inFile: file)
+
+            if declLogicalType !== refLogicalType {
+                return true
+            }
+        }
+        return false
     }
 }
