@@ -103,6 +103,7 @@ var targets: [PackageDescription.Target] = [
         dependencies: [
             .target(name: "Configuration"),
             .product(name: "SwiftSyntax", package: "swift-syntax"),
+            .product(name: "SystemPackage", package: "swift-system"),
             .target(name: "Shared"),
         ]
     ),

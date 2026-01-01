@@ -1163,9 +1163,14 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
     func testCommentCommandOverride() {
         analyze(retainPublic: true) {
+            // Test relative path override (gets converted to absolute)
             assertOverrides(.class("FixtureClass136"), [
-                .location("some/other/file.swift", 12, 34),
+                .location(FilePath.current.pushing("some/other/file.swift"), 12, 34),
                 .kind("banana"),
+            ])
+            // Test absolute path override (stays absolute)
+            assertOverrides(.class("FixtureClass137"), [
+                .location("/absolute/path/file.swift", 56, 78),
             ])
         }
     }

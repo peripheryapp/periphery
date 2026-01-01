@@ -46,20 +46,9 @@ public final class OutputDeclarationFilter {
                 var path = $0.declaration.location.file.path
 
                 // If the declaration has a location override, use it as the path for filtering.
-                for command in $0.declaration.commentCommands {
-                    switch command {
-                    case let .override(overrides):
-                        for override in overrides {
-                            switch override {
-                            case let .location(overridePath, _, _):
-                                path = FilePath(overridePath)
-                            default:
-                                break
-                            }
-                        }
-                    default:
-                        break
-                    }
+                if let override = $0.declaration.commentCommands.locationOverride {
+                    let (overridePath, _, _) = override
+                    path = overridePath
                 }
 
                 if configuration.reportIncludeMatchers.isEmpty {

@@ -93,20 +93,8 @@ extension OutputFormatter {
     func declarationKind(from declaration: Declaration) -> String {
         var kind = declaration.kind.rawValue
 
-        for command in declaration.commentCommands {
-            switch command {
-            case let .override(overrides):
-                for override in overrides {
-                    switch override {
-                    case let .kind(overrideKind):
-                        kind = overrideKind
-                    default:
-                        break
-                    }
-                }
-            default:
-                break
-            }
+        if let overrideKind = declaration.commentCommands.kindOverride {
+            kind = overrideKind
         }
 
         return kind
@@ -115,20 +103,8 @@ extension OutputFormatter {
     func declarationKindDisplayName(from declaration: Declaration) -> String {
         var kind = declaration.kind.displayName
 
-        for command in declaration.commentCommands {
-            switch command {
-            case let .override(overrides):
-                for override in overrides {
-                    switch override {
-                    case let .kind(overrideKind):
-                        kind = overrideKind
-                    default:
-                        break
-                    }
-                }
-            default:
-                break
-            }
+        if let overrideKind = declaration.commentCommands.kindOverride {
+            kind = overrideKind
         }
 
         return kind
@@ -137,22 +113,11 @@ extension OutputFormatter {
     func declarationLocation(from declaration: Declaration) -> Location {
         var location = declaration.location
 
-        for command in declaration.commentCommands {
-            switch command {
-            case let .override(overrides):
-                for override in overrides {
-                    switch override {
-                    case let .location(file, line, column):
-                        let sourceFile = SourceFile(path: FilePath(String(file)), modules: [])
-                        let overrideLocation = Location(file: sourceFile, line: line, column: column)
-                        location = overrideLocation
-                    default:
-                        break
-                    }
-                }
-            default:
-                break
-            }
+        if let override = declaration.commentCommands.locationOverride {
+            let (path, line, column) = override
+            let sourceFile = SourceFile(path: path, modules: [])
+            let overrideLocation = Location(file: sourceFile, line: line, column: column)
+            location = overrideLocation
         }
 
         return location

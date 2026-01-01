@@ -86,7 +86,7 @@ public class BazelProjectDriver: ProjectDriver {
         let buildPath = outputPath.appending("BUILD.bazel")
         let deps = try queryTargets().joined(separator: ",\n")
         let globalIndexStoreValue = configuration.bazelIndexStore.map {
-            "\"\(FilePath.makeAbsolute($0)))\""
+            "\"\($0.makeAbsolute()))\""
         } ?? "None"
         let buildFileContents = """
         load("@periphery//bazel:rules.bzl", "scan")

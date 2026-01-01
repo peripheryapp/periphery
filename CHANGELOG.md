@@ -19,6 +19,7 @@
 - Fix types conforming to App Intents protocols being reported as unused.
 - Fix superclass initializer reported as unused when called on subclass.
 - Fix unused parameter false-positive for parameters used in closure capture lists.
+- Fix sorting of results with a location override.
 
 ## 3.3.0 (2025-12-13)
 
