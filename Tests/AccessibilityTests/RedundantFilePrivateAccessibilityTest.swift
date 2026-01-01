@@ -18,4 +18,3 @@ final class RedundantFilePrivateAccessibilityTest: SPMSourceGraphTestCase {
         assertNotRedundantFilePrivateAccessibility(.class("NotRedundantFilePrivateClass"))
     }
 }
- 

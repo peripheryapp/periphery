@@ -35,21 +35,22 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
         }
 
         /*
-         Always check descendents, even if parent is not redundant.
+          Always check descendents, even if parent is not redundant.
 
-         A parent declaration may be used outside its file (making it not redundant),
-         while still having child declarations that are only used within the same file
-         (making those children redundant). For example, a class used cross-file may have
-         a fileprivate property only referenced within the same file - that property should
-         be flagged as redundant even though the parent class is not.
-        */
+          A parent declaration may be used outside its file (making it not redundant),
+          while still having child declarations that are only used within the same file
+          (making those children redundant). For example, a class used cross-file may have
+          a fileprivate property only referenced within the same file - that property should
+          be flagged as redundant even though the parent class is not.
+         */
         markExplicitFilePrivateDescendentDeclarations(from: decl)
     }
 
     private func validateExtension(_ decl: Declaration) throws {
         if decl.accessibility.isExplicitly(.fileprivate) {
             if let extendedDecl = try? graph.extendedDeclaration(forExtension: decl),
-               graph.redundantFilePrivateAccessibility.keys.contains(extendedDecl) {
+               graph.redundantFilePrivateAccessibility.keys.contains(extendedDecl)
+            {
                 mark(decl)
             }
         }
@@ -75,4 +76,4 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
         let filePrivateDeclarations = decl.declarations.filter { !$0.isImplicit && $0.accessibility.isExplicitly(.fileprivate) }
         return filePrivateDeclarations.flatMapSet { descendentFilePrivateDeclarations(from: $0) }.union(filePrivateDeclarations)
     }
-} 
+}

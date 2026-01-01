@@ -38,21 +38,22 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         }
 
         /*
-         Always check descendents, even if parent is not redundant.
+          Always check descendents, even if parent is not redundant.
 
-         A parent declaration may be used outside its file (making it not redundant),
-         while still having child declarations that are only used within the same file
-         (making those children redundant). For example, a class used cross-file may have
-         an internal property only referenced within the same file - that property should
-         be flagged as redundant even though the parent class is not.
-        */
+          A parent declaration may be used outside its file (making it not redundant),
+          while still having child declarations that are only used within the same file
+          (making those children redundant). For example, a class used cross-file may have
+          an internal property only referenced within the same file - that property should
+          be flagged as redundant even though the parent class is not.
+         */
         markExplicitInternalDescendentDeclarations(from: decl)
     }
 
     private func validateExtension(_ decl: Declaration) throws {
         if decl.accessibility.isExplicitly(.internal) {
             if let extendedDecl = try? graph.extendedDeclaration(forExtension: decl),
-               graph.redundantInternalAccessibility.keys.contains(extendedDecl) {
+               graph.redundantInternalAccessibility.keys.contains(extendedDecl)
+            {
                 mark(decl)
             }
         }
@@ -78,7 +79,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         // Use graph.references(to: decl) to get all references to this declaration
         let allReferences = graph.references(to: decl)
         let referenceFiles = allReferences.map(\.location.file)
-        
+
         let result = referenceFiles.contains { $0 != decl.location.file }
         return result
     }
@@ -87,4 +88,4 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         let internalDeclarations = decl.declarations.filter { !$0.isImplicit && $0.accessibility.isExplicitly(.internal) }
         return internalDeclarations.flatMapSet { descendentInternalDeclarations(from: $0) }.union(internalDeclarations)
     }
-} 
+}
