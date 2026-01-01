@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+export DOCKER_CLI_HINTS=false
+docker build -t periphery -f docker/Dockerfile-Bazel .
+docker run --name periphery_write_baseline -t periphery scan "$@" --bazel --write-baseline /baseline.json
+docker cp periphery_write_baseline:baseline.json ./baselines/linux-bazel.json
+docker rm periphery_write_baseline
+jq . ./baselines/linux-bazel.json > ./baselines/linux-bazel.json.tmp
+mv ./baselines/linux-bazel.json.tmp ./baselines/linux-bazel.json

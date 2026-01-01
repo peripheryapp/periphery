@@ -3,7 +3,9 @@
 set -e
 
 export DOCKER_CLI_HINTS=false
-docker build -t periphery -f docker/Dockerfile.linux .
-docker run --name periphery_write_linux_baseline -t periphery scan "$@" --write-baseline /linux.json
-docker cp periphery_write_linux_baseline:linux.json ./baselines/linux.json
-docker rm periphery_write_linux_baseline
+docker build -t periphery -f docker/Dockerfile-Linux .
+docker run --name periphery_write_baseline -t periphery scan "$@" --write-baseline /baseline.json
+docker cp periphery_write_baseline:baseline.json ./baselines/linux.json
+docker rm periphery_write_baseline
+jq . ./baselines/linux.json > ./baselines/linux.json.tmp
+mv ./baselines/linux.json.tmp ./baselines/linux.json
