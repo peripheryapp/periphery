@@ -69,10 +69,10 @@ extension OutputFormatter {
             let modulesJoined = modules.sorted().joined(separator: ", ")
             description += "Redundant public accessibility for \(kindDisplayName) '\(name)' (not used outside of \(modulesJoined))"
         case let .redundantInternalAccessibility(files):
-            let filesJoined = files.sorted { $0.path.string < $1.path.string }.map { $0.path.string }.joined(separator: ", ")
+            let filesJoined = files.sorted { $0.path.string < $1.path.string }.map(\.path.string).joined(separator: ", ")
             description += "Redundant internal accessibility for \(kindDisplayName) '\(name)' (not used outside of \(filesJoined))"
         case let .redundantFilePrivateAccessibility(files):
-            let filesJoined = files.sorted { $0.path.string < $1.path.string }.map { $0.path.string }.joined(separator: ", ")
+            let filesJoined = files.sorted { $0.path.string < $1.path.string }.map(\.path.string).joined(separator: ", ")
             description += "Redundant fileprivate accessibility for \(kindDisplayName) '\(name)' (not used outside its enclosing scope in \(filesJoined))"
         case .superfluousIgnoreCommand:
             description += "Superfluous ignore comment for \(kindDisplayName) '\(name)' (declaration is referenced and should not be ignored)"
