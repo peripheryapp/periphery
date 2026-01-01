@@ -120,4 +120,10 @@ final class UIKitProjectTest: XcodeSourceGraphTestCase {
         assertReferenced(.struct("LocalPackageUsedType"))
         assertNotReferenced(.struct("LocalPackageUnusedType"))
     }
+
+    func testLocalizedStrings() {
+        assertReferenced(.localizedString("used_string_key"))
+        assertReferenced(.localizedString("another_used_key"))
+        assertNotReferenced(.localizedString("unused_string_key"))
+    }
 }

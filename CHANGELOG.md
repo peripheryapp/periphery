@@ -10,6 +10,7 @@
 - Exclude wrapped properties from assign-only analysis, as Periphery cannot observe the behavior of the property wrapper.
 - Improved the readability of result messages.
 - Improved Interface Builder file parsing to detect unused `@IBOutlet`, `@IBAction`, `@IBInspectable`, and `@IBSegueAction` members. Previously, all `@IB*` members were blindly retained if their containing class was referenced in a XIB or storyboard.
+- Added detection of unused localized strings in String Catalogs (`.xcstrings`). Disable with `--disable-unused-localized-string-analysis`.
 
 ##### Bug Fixes
 

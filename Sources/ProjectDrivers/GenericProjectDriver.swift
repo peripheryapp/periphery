@@ -13,6 +13,7 @@ public final class GenericProjectDriver {
         let xibs: Set<String>
         let xcdatamodels: Set<String>
         let xcmappingmodels: Set<String>
+        let xcstrings: Set<String>
         let testTargets: Set<String>
     }
 
@@ -21,6 +22,7 @@ public final class GenericProjectDriver {
     private let xibPaths: Set<FilePath>
     private let xcDataModelsPaths: Set<FilePath>
     private let xcMappingModelsPaths: Set<FilePath>
+    private let xcStringsPaths: Set<FilePath>
     private let testTargets: Set<String>
     private let configuration: Configuration
 
@@ -37,6 +39,7 @@ public final class GenericProjectDriver {
         let xibPaths = config.xibs.mapSet { FilePath.makeAbsolute($0) }
         let xcDataModelPaths = config.xcdatamodels.mapSet { FilePath.makeAbsolute($0) }
         let xcMappingModelPaths = config.xcmappingmodels.mapSet { FilePath.makeAbsolute($0) }
+        let xcStringsPaths = config.xcstrings.mapSet { FilePath.makeAbsolute($0) }
         let indexstorePaths = config.indexstores.mapSet { FilePath.makeAbsolute($0) }
 
         self.init(
@@ -45,6 +48,7 @@ public final class GenericProjectDriver {
             xibPaths: xibPaths,
             xcDataModelsPaths: xcDataModelPaths,
             xcMappingModelsPaths: xcMappingModelPaths,
+            xcStringsPaths: xcStringsPaths,
             testTargets: config.testTargets,
             configuration: configuration
         )
@@ -56,6 +60,7 @@ public final class GenericProjectDriver {
         xibPaths: Set<FilePath>,
         xcDataModelsPaths: Set<FilePath>,
         xcMappingModelsPaths: Set<FilePath>,
+        xcStringsPaths: Set<FilePath>,
         testTargets: Set<String>,
         configuration: Configuration
     ) {
@@ -64,6 +69,7 @@ public final class GenericProjectDriver {
         self.xibPaths = xibPaths
         self.xcDataModelsPaths = xcDataModelsPaths
         self.xcMappingModelsPaths = xcMappingModelsPaths
+        self.xcStringsPaths = xcStringsPaths
         self.testTargets = testTargets
         self.configuration = configuration
     }
@@ -85,7 +91,8 @@ extension GenericProjectDriver: ProjectDriver {
             plistPaths: plistPaths,
             xibPaths: xibPaths,
             xcDataModelPaths: xcDataModelsPaths,
-            xcMappingModelPaths: xcMappingModelsPaths
+            xcMappingModelPaths: xcMappingModelsPaths,
+            xcStringsPaths: xcStringsPaths
         )
     }
 }

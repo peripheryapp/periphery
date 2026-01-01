@@ -44,6 +44,7 @@ public final class Declaration {
         case varParameter = "var.parameter"
         case varStatic = "var.static"
         case macro
+        case localizedString = "localized_string"
 
         static var functionKinds: Set<Kind> {
             Set(Kind.allCases.filter(\.isFunctionKind))
@@ -210,6 +211,8 @@ public final class Declaration {
                 "precedence group"
             case .macro:
                 "macro"
+            case .localizedString:
+                "localized string"
             }
         }
     }

@@ -33,6 +33,7 @@
     - [Codable](#codable)
     - [XCTestCase](#xctestcase)
     - [Interface Builder](#interface-builder)
+    - [Localized Strings](#localized-strings)
 - [Comment Commands](#comment-commands)
 - [Xcode Integration](#xcode-integration)
 - [Excluding Files](#excluding-files)
@@ -319,6 +320,22 @@ Any class that inherits `XCTestCase` is automatically retained along with its te
 
 If your project contains Interface Builder files (such as storyboards and XIBs), Periphery will take these into account when identifying unused declarations. Periphery parses these files to identify which classes, `@IBOutlet` properties, `@IBAction` methods, and `@IBInspectable` properties are actually referenced. Only those members that are connected in the Interface Builder file will be retained. Any `@IB*` members that are declared but not connected will be reported as unused.
 
+### Localized Strings
+
+Periphery can identify unused localized strings in String Catalog (`.xcstrings`) files. It detects keys used via `NSLocalizedString`, `String(localized:)`, `LocalizedStringKey`, `LocalizedStringResource`, `Text`, and `Bundle.localizedString(forKey:)`. This analysis can be disabled with `--disable-unused-localized-string-analysis`.
+
+> [!NOTE]
+> Only static string literals are detected. Dynamic keys (e.g., `String(localized: variable)`) cannot be analyzed and may result in false positives. Where possible, refactor dynamic keys to use conditional expressions with static literals:
+> ```swift
+> var message: String {
+>     if condition {
+>         String(localized: "message_success")
+>     } else {
+>         String(localized: "message_failure")
+>     }
+> }
+> ```
+
 ## Comment Commands
 
 For whatever reason, you may want to keep some unused code. Source code comment commands can be used to ignore specific declarations and exclude them from the results.
@@ -470,6 +487,9 @@ Periphery can analyze projects using other build systems, though it cannot drive
     ],
     "xcmappingmodels": [
         "path/to/file.xcmappingmodel"
+    ],
+    "xcstrings": [
+        "path/to/Localizable.xcstrings"
     ]
 }
 ```

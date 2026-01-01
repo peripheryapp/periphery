@@ -15,6 +15,7 @@ PeripheryInfo = provider(
         "xibs": "A depset of .xib and .storyboard files.",
         "xcdatamodels": "A depset of .xcdatamodel files.",
         "xcmappingmodels": "A depset of .xcmappingmodel files",
+        "xcstrings": "A depset of .xcstrings files.",
         "test_targets": "A depset of test only target names.",
     },
 )
@@ -44,6 +45,7 @@ def _scan_inputs_aspect_impl(target, ctx):
     xibs = []
     xcdatamodels = []
     xcmappingmodels = []
+    xcstrings = []
 
     if not target.label.workspace_name:  # Ignore external deps
         modules = []
@@ -90,6 +92,11 @@ def _scan_inputs_aspect_impl(target, ctx):
                     elif ".xcmappingmodel" in resource.path:
                         xcmappingmodels.append(resource)
 
+            if hasattr(info, "strings"):
+                for resource in info.strings[0][2].to_list():
+                    if resource.path.endswith(".xcstrings"):
+                        xcstrings.append(resource)
+
     deps = getattr(ctx.rule.attr, "deps", [])
     providers = [dep[PeripheryInfo] for dep in deps]
     swift_target = getattr(ctx.rule.attr, "swift_target", None)
@@ -125,6 +132,10 @@ def _scan_inputs_aspect_impl(target, ctx):
         direct = xcmappingmodels,
         transitive = [provider.xcmappingmodels for provider in providers],
     )
+    xcstrings_depset = depset(
+        direct = xcstrings,
+        transitive = [provider.xcstrings for provider in providers],
+    )
 
     return [
         PeripheryInfo(
@@ -134,6 +145,7 @@ def _scan_inputs_aspect_impl(target, ctx):
             xibs = xibs_depset,
             xcdatamodels = xcdatamodels_depset,
             xcmappingmodels = xcmappingmodels_depset,
+            xcstrings = xcstrings_depset,
             test_targets = test_targets_depset,
         ),
     ]
@@ -146,6 +158,7 @@ def scan_impl(ctx):
     xibs_set = sets.make()
     xcdatamodels_set = sets.make()
     xcmappingmodels_set = sets.make()
+    xcstrings_set = sets.make()
     test_targets_set = sets.make()
 
     for dep in ctx.attr.deps:
@@ -155,6 +168,7 @@ def scan_impl(ctx):
         xibs_set = sets.union(xibs_set, sets.make(dep[PeripheryInfo].xibs.to_list()))
         xcdatamodels_set = sets.union(xcdatamodels_set, sets.make(dep[PeripheryInfo].xcdatamodels.to_list()))
         xcmappingmodels_set = sets.union(xcmappingmodels_set, sets.make(dep[PeripheryInfo].xcmappingmodels.to_list()))
+        xcstrings_set = sets.union(xcstrings_set, sets.make(dep[PeripheryInfo].xcstrings.to_list()))
         test_targets_set = sets.union(test_targets_set, sets.make(dep[PeripheryInfo].test_targets.to_list()))
 
     swift_srcs = sets.to_list(swift_srcs_set)
@@ -163,6 +177,7 @@ def scan_impl(ctx):
     xibs = sets.to_list(xibs_set)
     xcdatamodels = sets.to_list(xcdatamodels_set)
     xcmappingmodels = sets.to_list(xcmappingmodels_set)
+    xcstrings = sets.to_list(xcstrings_set)
     test_targets = sets.to_list(test_targets_set)
 
     indexstores_config = [file.path for file in indexstores]
@@ -175,6 +190,7 @@ def scan_impl(ctx):
         xibs = [file.path for file in xibs],
         xcdatamodels = [file.path for file in xcdatamodels],
         xcmappingmodels = [file.path for file in xcmappingmodels],
+        xcstrings = [file.path for file in xcstrings],
         test_targets = test_targets,
     )
 
@@ -200,7 +216,7 @@ def scan_impl(ctx):
             # Swift sources are not included in the generated project file, yet they are referenced
             # in the indexstores and will be read by Periphery, and therefore must be present in
             # the runfiles.
-            files = swift_srcs + indexstores + plists + xibs + xcdatamodels + xcmappingmodels + [periphery],
+            files = swift_srcs + indexstores + plists + xibs + xcdatamodels + xcmappingmodels + xcstrings + [periphery],
         ),
     )
 
