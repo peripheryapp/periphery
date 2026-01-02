@@ -1,6 +1,22 @@
 import Configuration
 import Shared
 
+/**
+ Identifies declarations explicitly marked `fileprivate` that don't actually need file-level access.
+
+ Swift's `fileprivate` exists specifically to allow access from other types within the same file.
+ If a `fileprivate` declaration is only accessed within its own type (not from other types in
+ the same file), it should be marked `private` instead.
+
+ This mutator is more complex than RedundantInternalAccessibilityMarker because it must:
+ - Distinguish between access from the same type vs. different types in the same file
+ - Handle extensions of types (both same-file and cross-file extensions)
+ - Walk the type hierarchy to find the top-level containing type for comparison
+
+ The key insight: `private` and `fileprivate` differ in that `private` is accessible only within
+ the declaration and its extensions in the same file, while `fileprivate` is accessible from
+ anywhere in the same file.
+ */
 final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
