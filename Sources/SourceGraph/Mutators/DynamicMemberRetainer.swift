@@ -17,7 +17,7 @@ final class DynamicMemberRetainer: SourceGraphMutator {
         }
 
         for decl in graph.declarations(ofKinds: Declaration.Kind.functionKinds.union(Declaration.Kind.variableKinds)) {
-            if decl.attributes.contains("_dynamicReplacement") {
+            if decl.attributes.contains(where: { $0.hasPrefix("_dynamicReplacement") }) {
                 graph.markRetained(decl)
             }
         }
