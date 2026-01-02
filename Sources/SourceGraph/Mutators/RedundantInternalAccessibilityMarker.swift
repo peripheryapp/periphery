@@ -1,6 +1,17 @@
 import Configuration
 import Shared
 
+/**
+ Identifies declarations explicitly marked `internal` that are not referenced outside
+ the file they're defined in.
+
+ Since `internal` is Swift's default access level, declarations that are only used within
+ their defining file should be marked `private` or `fileprivate` instead. This improves
+ encapsulation and can help with compilation performance.
+
+ This mutator follows the same pattern as RedundantPublicAccessibilityMarker but checks
+ for file-scoped usage instead of module-scoped usage.
+ */
 final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
