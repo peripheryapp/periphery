@@ -13,6 +13,7 @@
 
 ##### Bug Fixes
 
+- Fix redundant public accessibility false positive for types referenced via static members in property initializers.
 - Fix inline ignore comment not working on properties.
 - Fix false positive when a constrained protocol extension provides a default implementation that satisfies a requirement of the constraining protocol.
 - Fix indexing of xib/storyboard files in SPM projects.

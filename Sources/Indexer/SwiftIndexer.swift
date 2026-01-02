@@ -421,6 +421,8 @@ final class SwiftIndexer: Indexer {
                         ref.role = .functionCallMetatypeArgument
                     } else if result.typeInitializerLocations.contains(ref.location) {
                         ref.role = .initializerType
+                    } else if result.variableInitExprLocations.contains(ref.location) {
+                        ref.role = .initializerType
                     }
                 }
             }
