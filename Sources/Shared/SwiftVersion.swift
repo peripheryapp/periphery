@@ -16,7 +16,7 @@ public struct SwiftVersion {
         if version.isVersion(lessThan: Self.minimumVersion) {
             throw PeripheryError.swiftVersionUnsupportedError(
                 version: fullVersion,
-                minimumVersion: Self.minimumVersion
+                minimumVersion: Self.minimumVersion,
             )
         }
     }

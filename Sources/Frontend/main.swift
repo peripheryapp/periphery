@@ -13,7 +13,7 @@ struct PeripheryCommand: FrontendCommand {
             CheckUpdateCommand.self,
             ClearCacheCommand.self,
             VersionCommand.self,
-        ]
+        ],
     )
 }
 
@@ -21,7 +21,7 @@ signal(SIGINT) { _ in
     let logger = Logger()
     logger.warn(
         "Termination can result in a corrupt index. Try the '--clean-build' flag if you get erroneous results such as false-positives and incorrect source file locations.",
-        newlinePrefix: true // Print a newline after ^C
+        newlinePrefix: true, // Print a newline after ^C
     )
     ShellProcessStore.shared.interruptRunning()
     exit(0)

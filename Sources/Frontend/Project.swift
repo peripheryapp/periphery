@@ -15,7 +15,7 @@ final class Project {
     convenience init(
         configuration: Configuration,
         shell: Shell,
-        logger: Logger
+        logger: Logger,
     ) throws {
         var kind: ProjectKind?
 
@@ -40,7 +40,7 @@ final class Project {
         kind: ProjectKind,
         configuration: Configuration,
         shell: Shell,
-        logger: Logger
+        logger: Logger,
     ) {
         self.kind = kind
         self.configuration = configuration
@@ -56,7 +56,7 @@ final class Project {
                     projectPath: projectPath,
                     configuration: configuration,
                     shell: shell,
-                    logger: logger
+                    logger: logger,
                 )
             #else
                 fatalError("Xcode projects are not supported on this platform.")
@@ -67,12 +67,12 @@ final class Project {
             return BazelProjectDriver(
                 configuration: configuration,
                 shell: shell,
-                logger: logger
+                logger: logger,
             )
         case let .generic(genericProjectConfig):
             return try GenericProjectDriver(
                 genericProjectConfig: genericProjectConfig,
-                configuration: configuration
+                configuration: configuration,
             )
         }
     }

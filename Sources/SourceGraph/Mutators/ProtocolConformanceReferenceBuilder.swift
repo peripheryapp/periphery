@@ -68,7 +68,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                                     kind: declInSuperclass.kind,
                                     usr: usr,
                                     location: declInSuperclass.location,
-                                    isRelated: true
+                                    isRelated: true,
                                 )
                                 reference.name = declInSuperclass.name
                                 reference.parent = unimplementedProtoDecl
@@ -132,7 +132,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                         kind: relatedReference.kind,
                         usr: usr,
                         location: relatedReference.location,
-                        isRelated: true
+                        isRelated: true,
                     )
                     newReference.name = relatedReference.name
                     newReference.parent = protocolDeclaration

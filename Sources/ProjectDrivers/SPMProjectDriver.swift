@@ -58,14 +58,14 @@ extension SPMProjectDriver: ProjectDriver {
             indexStorePaths: indexStorePaths,
             excludedTestTargets: excludedTestTargets,
             logger: logger,
-            configuration: configuration
+            configuration: configuration,
         )
         let sourceFiles = try collector.collect()
         let xibPaths = interfaceBuilderFiles(from: description)
 
         return IndexPlan(
             sourceFiles: sourceFiles,
-            xibPaths: xibPaths
+            xibPaths: xibPaths,
         )
     }
 

@@ -24,7 +24,7 @@ final class SwiftIndexer: Indexer {
         graph: SynchronizedSourceGraph,
         logger: ContextualLogger,
         configuration: Configuration,
-        swiftVersion: SwiftVersion
+        swiftVersion: SwiftVersion,
     ) {
         self.sourceFiles = sourceFiles
         self.graph = graph
@@ -43,7 +43,7 @@ final class SwiftIndexer: Indexer {
                 graph: graph,
                 logger: logger,
                 configuration: configuration,
-                swiftVersion: swiftVersion
+                swiftVersion: swiftVersion,
             )
         }
 
@@ -101,7 +101,7 @@ final class SwiftIndexer: Indexer {
             graph: SynchronizedSourceGraph,
             logger: ContextualLogger,
             configuration: Configuration,
-            swiftVersion: SwiftVersion
+            swiftVersion: SwiftVersion,
         ) {
             self.sourceFile = sourceFile
             self.units = units
@@ -175,7 +175,7 @@ final class SwiftIndexer: Indexer {
                                 occurrence,
                                 usr,
                                 location,
-                                relations
+                                relations,
                             ) {
                                 rawDeclsByKey[decl.key, default: []].append((decl, relations))
                             }
@@ -186,7 +186,7 @@ final class SwiftIndexer: Indexer {
                                 occurrence,
                                 usr,
                                 location,
-                                relations
+                                relations,
                             ))
                         }
 
@@ -194,7 +194,7 @@ final class SwiftIndexer: Indexer {
                             try references.formUnion(parseImplicit(
                                 usr,
                                 location,
-                                relations
+                                relations,
                             ))
                         }
 
@@ -463,7 +463,7 @@ final class SwiftIndexer: Indexer {
                 file: syntaxVisitor.sourceFile,
                 syntax: syntaxVisitor.syntax,
                 locationConverter: syntaxVisitor.locationConverter,
-                parseProtocols: true
+                parseProtocols: true,
             )
 
             for (function, params) in paramsByFunction {
@@ -504,7 +504,7 @@ final class SwiftIndexer: Indexer {
             _ occurrence: IndexStoreOccurrence,
             _ usr: String,
             _ location: Location,
-            _ relations: [IndexStoreRelation]
+            _ relations: [IndexStoreRelation],
         ) throws -> (RawDeclaration, [RawRelation])? {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
             else { return nil }
@@ -533,7 +533,7 @@ final class SwiftIndexer: Indexer {
                 name: occurrence.symbol.name,
                 isImplicit: occurrence.roles.contains(.implicit),
                 isObjcAccessible: usr.hasPrefix("c:"),
-                location: location
+                location: location,
             )
 
             let rawRelations = relations.map {
@@ -542,9 +542,9 @@ final class SwiftIndexer: Indexer {
                         name: $0.symbol.name,
                         usr: $0.symbol.usr,
                         kind: $0.symbol.kind,
-                        subKind: $0.symbol.subKind
+                        subKind: $0.symbol.subKind,
                     ),
-                    roles: $0.roles
+                    roles: $0.roles,
                 )
             }
             return (decl, rawRelations)
@@ -552,7 +552,7 @@ final class SwiftIndexer: Indexer {
 
         private func parseDeclaration(
             _ decl: Declaration,
-            _ relations: [RawRelation]
+            _ relations: [RawRelation],
         ) throws -> Set<Reference> {
             var references: Set<Reference> = []
 
@@ -575,7 +575,7 @@ final class SwiftIndexer: Indexer {
                             kind: baseFuncKind,
                             usr: baseFuncUsr,
                             location: decl.location,
-                            isRelated: true
+                            isRelated: true,
                         )
                         reference.name = baseFunc.name
                         reference.parent = decl
@@ -593,7 +593,7 @@ final class SwiftIndexer: Indexer {
                                 kind: decl.kind,
                                 usr: usr,
                                 location: decl.location,
-                                isRelated: rel.roles.contains(.baseOf)
+                                isRelated: rel.roles.contains(.baseOf),
                             )
                             reference.name = decl.name
                             references.insert(reference)
@@ -609,7 +609,7 @@ final class SwiftIndexer: Indexer {
         private func parseImplicit(
             _ occurrenceUsr: String,
             _ location: Location,
-            _ relations: [IndexStoreRelation]
+            _ relations: [IndexStoreRelation],
         ) throws -> [Reference] {
             var refs = [Reference]()
 
@@ -622,7 +622,7 @@ final class SwiftIndexer: Indexer {
                             kind: baseFuncKind,
                             usr: baseFuncUsr,
                             location: location,
-                            isRelated: true
+                            isRelated: true,
                         )
                         reference.name = baseFunc.name
                         referencesByUsr[occurrenceUsr, default: []].insert(reference)
@@ -638,7 +638,7 @@ final class SwiftIndexer: Indexer {
             _ occurrence: IndexStoreOccurrence,
             _ occurrenceUsr: String,
             _ location: Location,
-            _ relations: [IndexStoreRelation]
+            _ relations: [IndexStoreRelation],
         ) throws -> [Reference] {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
             else { return [] }
@@ -659,7 +659,7 @@ final class SwiftIndexer: Indexer {
                             kind: kind,
                             usr: occurrenceUsr,
                             location: location,
-                            isRelated: relation.roles.contains(.baseOf)
+                            isRelated: relation.roles.contains(.baseOf),
                         )
                         ref.name = occurrence.symbol.name
                         refs.append(ref)

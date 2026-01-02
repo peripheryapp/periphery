@@ -20,7 +20,7 @@ public struct AssetReference: Hashable {
         source: ProjectFileKind,
         outlets: [String],
         actions: [String],
-        runtimeAttributes: [String]
+        runtimeAttributes: [String],
     ) {
         if let name = absoluteName.split(separator: ".").last {
             self.name = String(name)

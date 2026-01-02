@@ -15,8 +15,8 @@ var dependencies: [Package.Dependency] = [
     dependencies.append(
         .package(
             url: "https://github.com/tuist/xcodeproj",
-            from: "9.0.0"
-        )
+            from: "9.0.0",
+        ),
     )
 #endif
 
@@ -41,7 +41,7 @@ var targets: [PackageDescription.Target] = [
             .target(name: "ProjectDrivers"),
             .product(name: "ArgumentParser", package: "swift-argument-parser"),
             .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
-        ]
+        ],
     ),
     .target(
         name: "Configuration",
@@ -52,14 +52,14 @@ var targets: [PackageDescription.Target] = [
             .product(name: "Yams", package: "Yams"),
             .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
-        ]
+        ],
     ),
     .target(
         name: "Extensions",
         dependencies: [
             .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
-        ]
+        ],
     ),
     .target(name: "Logger"),
     .target(
@@ -74,7 +74,7 @@ var targets: [PackageDescription.Target] = [
             .product(name: "SwiftParser", package: "swift-syntax"),
             .product(name: "SwiftIndexStore", package: "swift-indexstore"),
             .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
-        ]
+        ],
     ),
     .target(
         name: "Indexer",
@@ -83,11 +83,11 @@ var targets: [PackageDescription.Target] = [
             .target(name: "Shared"),
             .product(name: "SwiftIndexStore", package: "swift-indexstore"),
             .product(name: "AEXML", package: "AEXML"),
-        ]
+        ],
     ),
     .target(
         name: "ProjectDrivers",
-        dependencies: projectDriverDependencies
+        dependencies: projectDriverDependencies,
     ),
     .target(
         name: "SyntaxAnalysis",
@@ -96,7 +96,7 @@ var targets: [PackageDescription.Target] = [
             .target(name: "Shared"),
             .product(name: "SwiftSyntax", package: "swift-syntax"),
             .product(name: "SwiftParser", package: "swift-syntax"),
-        ]
+        ],
     ),
     .target(
         name: "SourceGraph",
@@ -105,7 +105,7 @@ var targets: [PackageDescription.Target] = [
             .product(name: "SwiftSyntax", package: "swift-syntax"),
             .product(name: "SystemPackage", package: "swift-system"),
             .target(name: "Shared"),
-        ]
+        ],
     ),
     .target(
         name: "Shared",
@@ -114,7 +114,7 @@ var targets: [PackageDescription.Target] = [
             .target(name: "Logger"),
             .product(name: "SystemPackage", package: "swift-system"),
             .product(name: "FilenameMatcher", package: "swift-filename-matcher"),
-        ]
+        ],
     ),
     .target(
         name: "TestShared",
@@ -123,14 +123,14 @@ var targets: [PackageDescription.Target] = [
             .target(name: "ProjectDrivers"),
             .target(name: "Configuration"),
         ],
-        path: "Tests/Shared"
+        path: "Tests/Shared",
     ),
     .testTarget(
         name: "PeripheryTests",
         dependencies: [
             .target(name: "TestShared"),
             .target(name: "PeripheryKit"),
-        ]
+        ],
     ),
     .testTarget(
         name: "SPMTests",
@@ -138,7 +138,7 @@ var targets: [PackageDescription.Target] = [
             .target(name: "TestShared"),
             .target(name: "PeripheryKit"),
         ],
-        exclude: ["SPMProject", "SPMProjectMacOS"]
+        exclude: ["SPMProject", "SPMProjectMacOS"],
     ),
     .testTarget(
         name: "AccessibilityTests",
@@ -147,7 +147,7 @@ var targets: [PackageDescription.Target] = [
             .target(name: "PeripheryKit"),
             .target(name: "Configuration"),
         ],
-        exclude: ["AccessibilityProject"]
+        exclude: ["AccessibilityProject"],
     ),
 ]
 
@@ -160,7 +160,7 @@ var targets: [PackageDescription.Target] = [
                 .target(name: "Shared"),
                 .target(name: "PeripheryKit"),
                 .product(name: "XcodeProj", package: "XcodeProj"),
-            ]
+            ],
         ),
         .testTarget(
             name: "XcodeTests",
@@ -169,7 +169,7 @@ var targets: [PackageDescription.Target] = [
                 .target(name: "TestShared"),
                 .target(name: "PeripheryKit"),
             ],
-            exclude: ["UIKitProject", "SwiftUIProject"]
+            exclude: ["UIKitProject", "SwiftUIProject"],
         ),
     ])
 #endif
@@ -183,5 +183,5 @@ let package = Package(
     ],
     dependencies: dependencies,
     targets: targets,
-    swiftLanguageModes: [.v5]
+    swiftLanguageModes: [.v5],
 )

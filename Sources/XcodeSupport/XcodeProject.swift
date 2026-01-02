@@ -21,7 +21,7 @@ public final class XcodeProject: XcodeProjectlike {
         referencedBy refPath:
         FilePath,
         shell: Shell,
-        logger: Logger
+        logger: Logger,
     ) throws {
         if !path.exists {
             logger.warn("No such project exists at '\(path.lexicallyNormalized())', referenced by '\(refPath)'.")
@@ -34,7 +34,7 @@ public final class XcodeProject: XcodeProjectlike {
             loadedProjectPaths: &loadedProjectPaths,
             xcodebuild: xcodebuild,
             shell: shell,
-            logger: logger
+            logger: logger,
         )
     }
 
@@ -43,7 +43,7 @@ public final class XcodeProject: XcodeProjectlike {
         loadedProjectPaths: inout Set<FilePath>,
         xcodebuild: Xcodebuild,
         shell: Shell,
-        logger: Logger
+        logger: Logger,
     ) throws {
         logger.contextualized(with: "xcode:project").debug("Loading \(path)")
 
@@ -77,7 +77,7 @@ public final class XcodeProject: XcodeProjectlike {
                         loadedProjectPaths: &loadedProjectPaths,
                         referencedBy: path,
                         shell: shell,
-                        logger: logger
+                        logger: logger,
                     )
                 }
         }

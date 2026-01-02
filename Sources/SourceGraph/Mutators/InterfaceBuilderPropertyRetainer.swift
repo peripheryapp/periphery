@@ -34,7 +34,7 @@ class InterfaceBuilderPropertyRetainer {
         in declaration: Declaration,
         referencedOutlets: Set<String>,
         referencedActions: Set<String>,
-        referencedAttributes: Set<String>
+        referencedAttributes: Set<String>,
     ) {
         let inheritedDeclarations = graph.inheritedDeclarations(of: declaration)
         let descendentInheritedDeclarations = inheritedDeclarations.map(\.declarations).joined()

@@ -7,7 +7,7 @@ struct MockMacro: PeerMacro {
     static func expansion(
         of _: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
-        in _: some MacroExpansionContext
+        in _: some MacroExpansionContext,
     ) throws -> [DeclSyntax] {
         guard let protocolDecl = declaration.as(ProtocolDeclSyntax.self) else { return [] }
 
@@ -21,8 +21,8 @@ struct MockMacro: PeerMacro {
                 inheritanceClause: InheritanceClauseSyntax {
                     InheritedTypeSyntax(type: TypeSyntax(stringLiteral: protocolName))
                 },
-                memberBlock: MemberBlockSyntax {}
-            )
+                memberBlock: MemberBlockSyntax {},
+            ),
         )
 
         return [mockClass]

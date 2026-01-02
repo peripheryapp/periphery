@@ -48,7 +48,7 @@ final class AssetReferenceRetainer: SourceGraphMutator {
                         in: declaration,
                         referencedOutlets: aggregated?.outlets ?? [],
                         referencedActions: aggregated?.actions ?? [],
-                        referencedAttributes: aggregated?.runtimeAttributes ?? []
+                        referencedAttributes: aggregated?.runtimeAttributes ?? [],
                     )
                 default:
                     break

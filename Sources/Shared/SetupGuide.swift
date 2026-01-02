@@ -85,7 +85,7 @@ open class SetupGuideHelpers {
                 "/" +
                 "(" + Logger.colorize("N", .boldGreen) + ")o" +
                 Logger.colorize("\n=> ", .bold),
-            terminator: ""
+            terminator: "",
         )
 
         if let answer = readLine(strippingNewline: true)?.trimmed.lowercased(),

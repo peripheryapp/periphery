@@ -14,7 +14,7 @@ public extension FilePath {
 
         return Glob(
             pattern: absolutePattern,
-            excludedDirectories: [".build", "node_modules", ".gems", "gems", ".swiftpm"]
+            excludedDirectories: [".build", "node_modules", ".gems", "gems", ".swiftpm"],
         ).paths.mapSet { FilePath($0).lexicallyNormalized() }
     }
 }
@@ -32,7 +32,7 @@ private class Glob {
 
     init(
         pattern: String,
-        excludedDirectories: [String]
+        excludedDirectories: [String],
     ) {
         self.excludedDirectories = excludedDirectories
 

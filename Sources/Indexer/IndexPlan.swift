@@ -14,7 +14,7 @@ public struct IndexPlan {
         plistPaths: Set<FilePath> = [],
         xibPaths: Set<FilePath> = [],
         xcDataModelPaths: Set<FilePath> = [],
-        xcMappingModelPaths: Set<FilePath> = []
+        xcMappingModelPaths: Set<FilePath> = [],
     ) {
         self.sourceFiles = sourceFiles
         self.plistPaths = plistPaths

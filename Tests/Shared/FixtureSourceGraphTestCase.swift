@@ -25,7 +25,7 @@ class FixtureSourceGraphTestCase: SPMSourceGraphTestCase {
         additionalFilesToIndex: [FilePath] = [],
         externalTestCaseClasses: [String] = [],
         retainFiles: [String] = [],
-        testBlock: () throws -> Void
+        testBlock: () throws -> Void,
     ) rethrows -> [ScanResult] {
         let configuration = Configuration()
         configuration.retainPublic = retainPublic

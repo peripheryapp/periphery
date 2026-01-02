@@ -43,7 +43,7 @@ open class Shell {
         throw PeripheryError.shellCommandFailed(
             cmd: args,
             status: status,
-            output: [stdout, stderr].filter { !$0.isEmpty }.joined(separator: "\n").trimmed
+            output: [stdout, stderr].filter { !$0.isEmpty }.joined(separator: "\n").trimmed,
         )
     }
 
@@ -57,7 +57,7 @@ open class Shell {
 
     private func exec(
         _ cmd: [String],
-        captureOutput: Bool = true
+        captureOutput: Bool = true,
     ) throws -> (Int32, String, String) {
         let process = Process()
         process.launchPath = "/bin/bash"
@@ -87,7 +87,7 @@ open class Shell {
                 ShellProcessStore.shared.remove(process)
                 throw PeripheryError.shellOutputEncodingFailed(
                     cmd: cmd,
-                    encoding: .utf8
+                    encoding: .utf8,
                 )
             }
             standardOutput = stdoutStr
@@ -99,7 +99,7 @@ open class Shell {
                 ShellProcessStore.shared.remove(process)
                 throw PeripheryError.shellOutputEncodingFailed(
                     cmd: cmd,
-                    encoding: .utf8
+                    encoding: .utf8,
                 )
             }
             standardError = stderrStr

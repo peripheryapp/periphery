@@ -6,7 +6,7 @@ import Logger
 struct CheckUpdateCommand: FrontendCommand {
     static let configuration = CommandConfiguration(
         commandName: "check-update",
-        abstract: "Check for available update"
+        abstract: "Check for available update",
     )
 
     func run() throws {
