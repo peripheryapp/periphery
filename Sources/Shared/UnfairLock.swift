@@ -30,7 +30,6 @@ public final class UnfairLock {
     }
 
     @discardableResult
-    @inline(__always)
     public func perform<T>(_ operation: () throws -> T) rethrows -> T {
         #if canImport(os)
             osAllocatedUnfairLock.lock()

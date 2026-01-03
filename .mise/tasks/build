@@ -3,7 +3,7 @@
 
 set -eo pipefail
 
-SWIFT_BUILD_FLAGS="--product periphery --configuration release --disable-sandbox --scratch-path .build"
+SWIFT_BUILD_FLAGS="--product periphery --configuration release -Xswiftc -cross-module-optimization --disable-sandbox --scratch-path .build"
 EXECUTABLE_X86_64="$(swift build ${SWIFT_BUILD_FLAGS} --arch x86_64 --show-bin-path)/periphery"
 EXECUTABLE_ARM64="$(swift build ${SWIFT_BUILD_FLAGS} --arch arm64 --show-bin-path)/periphery"
 
