@@ -9,7 +9,7 @@ import SystemPackage
 struct ScanCommand: FrontendCommand {
     static let configuration = CommandConfiguration(
         commandName: "scan",
-        abstract: "Scan for unused code",
+        abstract: "Scan for unused code"
     )
 
     @Argument(help: "Arguments following '--' will be passed to the underlying build tool, which is either 'swift build' or 'xcodebuild' depending on your project")
@@ -217,7 +217,7 @@ struct ScanCommand: FrontendCommand {
 
         let logger = Logger(
             quiet: configuration.quiet,
-            verbose: configuration.verbose,
+            verbose: configuration.verbose
         )
         logger.contextualized(with: "version").debug(PeripheryVersion)
         let shell = Shell(logger: logger)
@@ -242,7 +242,7 @@ struct ScanCommand: FrontendCommand {
         let results = try Scan(
             configuration: configuration,
             logger: logger,
-            swiftVersion: swiftVersion,
+            swiftVersion: swiftVersion
         ).perform(project: project)
 
         let interval = logger.beginInterval("result:output")

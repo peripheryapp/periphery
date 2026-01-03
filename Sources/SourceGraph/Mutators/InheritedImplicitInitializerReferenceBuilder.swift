@@ -39,7 +39,7 @@ final class InheritedImplicitInitializerReferenceBuilder: SourceGraphMutator {
                             kind: .functionConstructor,
                             usr: usr,
                             location: implicitInit.location,
-                            isRelated: true,
+                            isRelated: true
                         )
                         reference.name = explicitInit.name
                         reference.parent = implicitInit

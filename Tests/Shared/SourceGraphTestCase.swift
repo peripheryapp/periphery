@@ -50,7 +50,7 @@ open class SourceGraphTestCase: XCTestCase {
                 plistPaths: plan.plistPaths,
                 xibPaths: plan.xibPaths,
                 xcDataModelPaths: plan.xcDataModelPaths,
-                xcMappingModelPaths: plan.xcMappingModelPaths,
+                xcMappingModelPaths: plan.xcMappingModelPaths
             )
         }
 
@@ -61,7 +61,7 @@ open class SourceGraphTestCase: XCTestCase {
             graph: SynchronizedSourceGraph(graph: graph),
             logger: logger.contextualized(with: "index"),
             configuration: configuration,
-            swiftVersion: swiftVersion,
+            swiftVersion: swiftVersion
         )
         try! pipeline.perform()
 
@@ -70,7 +70,7 @@ open class SourceGraphTestCase: XCTestCase {
             graph: graph,
             logger: logger,
             configuration: configuration,
-            swiftVersion: swiftVersion,
+            swiftVersion: swiftVersion
         ).perform()
         results = ScanResultBuilder.build(for: graph)
     }
@@ -113,7 +113,7 @@ open class SourceGraphTestCase: XCTestCase {
         implementedBy conformances: DeclarationDescription...,
         inherits inheritedProtocols: DeclarationDescription...,
         file: StaticString = #file,
-        line: UInt = #line,
+        line: UInt = #line
     ) {
         guard let declaration = materialize(.protocol(name), file: file, line: line) else { return }
 

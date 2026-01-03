@@ -14,7 +14,7 @@ public struct ImportStatement {
         isExported: Bool,
         isConditional: Bool,
         location: Location,
-        commentCommands: [CommentCommand],
+        commentCommands: [CommentCommand]
     ) {
         self.module = module
         self.isTestable = isTestable

@@ -9,7 +9,7 @@ let package = Package(
     products: [
         .executable(
             name: "frontend",
-            targets: ["Frontend"],
+            targets: ["Frontend"]
         ),
     ],
     dependencies: [
@@ -18,11 +18,11 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "Frontend",
-            dependencies: ["SPMProjectKit"],
+            dependencies: ["SPMProjectKit"]
         ),
         .target(
             name: "SPMProjectKit",
-            dependencies: ["SPMProjectMacros"],
+            dependencies: ["SPMProjectMacros"]
         ),
         .macro(
             name: "SPMProjectMacros",
@@ -30,11 +30,11 @@ let package = Package(
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-            ],
+            ]
         ),
         .testTarget(
             name: "Tests",
-            dependencies: ["SPMProjectKit"],
+            dependencies: ["SPMProjectKit"]
         ),
-    ],
+    ]
 )

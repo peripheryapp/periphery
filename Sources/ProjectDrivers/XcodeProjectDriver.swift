@@ -19,7 +19,7 @@
             projectPath: FilePath,
             configuration: Configuration,
             shell: Shell,
-            logger: Logger,
+            logger: Logger
         ) throws {
             if configuration.outputFormat.supportsAuxiliaryOutput {
                 let asterisk = Logger.colorize("*", .boldGreen)
@@ -41,7 +41,7 @@
                     xcodebuild: xcodebuild,
                     configuration: configuration,
                     logger: logger,
-                    shell: shell,
+                    shell: shell
                 )
             } else {
                 var loadedProjectPaths: Set<FilePath> = []
@@ -50,7 +50,7 @@
                     loadedProjectPaths: &loadedProjectPaths,
                     xcodebuild: xcodebuild,
                     shell: shell,
-                    logger: logger,
+                    logger: logger
                 )
             }
 
@@ -61,7 +61,7 @@
             } else {
                 // Ensure schemes exist within the project
                 schemes = try project.schemes(
-                    additionalArguments: configuration.xcodeListArguments,
+                    additionalArguments: configuration.xcodeListArguments
                 ).filter { configuration.schemes.contains($0) }
                 let validSchemeNames = schemes.mapSet { $0 }
 
@@ -75,7 +75,7 @@
                 configuration: configuration,
                 xcodebuild: xcodebuild,
                 project: project,
-                schemes: schemes,
+                schemes: schemes
             )
         }
 
@@ -84,7 +84,7 @@
             configuration: Configuration,
             xcodebuild: Xcodebuild,
             project: XcodeProjectlike,
-            schemes: Set<String>,
+            schemes: Set<String>
         ) {
             self.logger = logger
             self.configuration = configuration
@@ -129,7 +129,7 @@
                 indexStorePaths: indexStorePaths,
                 excludedTestTargets: excludedTestTargets,
                 logger: logger,
-                configuration: configuration,
+                configuration: configuration
             )
             let sourceFiles = try collector.collect()
             let infoPlistPaths = targets.flatMapSet { $0.files(kind: .infoPlist) }
@@ -142,7 +142,7 @@
                 plistPaths: infoPlistPaths,
                 xibPaths: xibPaths,
                 xcDataModelPaths: xcDataModelPaths,
-                xcMappingModelPaths: xcMappingModelPaths,
+                xcMappingModelPaths: xcMappingModelPaths
             )
         }
     }

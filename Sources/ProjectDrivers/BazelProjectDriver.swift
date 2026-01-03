@@ -67,7 +67,7 @@ public class BazelProjectDriver: ProjectDriver {
         configuration: Configuration,
         shell: Shell,
         logger: Logger,
-        fileManager: FileManager = .default,
+        fileManager: FileManager = .default
     ) {
         self.configuration = configuration
         self.shell = shell

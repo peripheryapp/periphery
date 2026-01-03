@@ -28,7 +28,7 @@ final class XibParser {
                 source: .interfaceBuilder,
                 outlets: Array(members.outlets),
                 actions: Array(members.actions),
-                runtimeAttributes: Array(members.runtimeAttributes),
+                runtimeAttributes: Array(members.runtimeAttributes)
             )
         }
     }
@@ -49,7 +49,7 @@ final class XibParser {
     private func collectReferences(
         from element: AEXMLElement,
         idToCustomClass: [String: String],
-        into referencesByClass: inout [String: (outlets: Set<String>, actions: Set<String>, runtimeAttributes: Set<String>)],
+        into referencesByClass: inout [String: (outlets: Set<String>, actions: Set<String>, runtimeAttributes: Set<String>)]
     ) {
         // Check if this element has a customClass
         if let customClass = element.attributes["customClass"] {
@@ -82,7 +82,7 @@ final class XibParser {
     private func collectOutlets(
         from element: AEXMLElement,
         forClass customClass: String,
-        into referencesByClass: inout [String: (outlets: Set<String>, actions: Set<String>, runtimeAttributes: Set<String>)],
+        into referencesByClass: inout [String: (outlets: Set<String>, actions: Set<String>, runtimeAttributes: Set<String>)]
     ) {
         for child in element.children where child.name == "connections" {
             for connection in child.children {
@@ -99,7 +99,7 @@ final class XibParser {
     private func collectActions(
         from element: AEXMLElement,
         idToCustomClass: [String: String],
-        into referencesByClass: inout [String: (outlets: Set<String>, actions: Set<String>, runtimeAttributes: Set<String>)],
+        into referencesByClass: inout [String: (outlets: Set<String>, actions: Set<String>, runtimeAttributes: Set<String>)]
     ) {
         for child in element.children where child.name == "connections" {
             for connection in child.children where connection.name == "action" {
@@ -124,7 +124,7 @@ final class XibParser {
     private func collectRuntimeAttributes(
         from element: AEXMLElement,
         forClass customClass: String,
-        into referencesByClass: inout [String: (outlets: Set<String>, actions: Set<String>, runtimeAttributes: Set<String>)],
+        into referencesByClass: inout [String: (outlets: Set<String>, actions: Set<String>, runtimeAttributes: Set<String>)]
     ) {
         for child in element.children where child.name == "userDefinedRuntimeAttributes" {
             for attr in child.children where attr.name == "userDefinedRuntimeAttribute" {
@@ -140,7 +140,7 @@ final class XibParser {
     private func collectBindings(
         from element: AEXMLElement,
         idToCustomClass: [String: String],
-        into referencesByClass: inout [String: (outlets: Set<String>, actions: Set<String>, runtimeAttributes: Set<String>)],
+        into referencesByClass: inout [String: (outlets: Set<String>, actions: Set<String>, runtimeAttributes: Set<String>)]
     ) {
         for child in element.children where child.name == "connections" {
             for connection in child.children where connection.name == "binding" {

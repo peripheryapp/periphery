@@ -1,9 +1,7 @@
---swiftversion 6.2
+--swiftversion 6.0
 
 --exclude **/.build/
 --exclude Tests/Fixtures/
 --exclude Tests/AccessibilityTests/AccessibilityProject/
 --exclude Tests/XcodeTests/UIKitProject/
 --exclude Tests/XcodeTests/SwiftUIProject/
---exclude Tests/XcodeTests/SPMProject/
---exclude Tests/XcodeTests/SPMProjectMacOS/

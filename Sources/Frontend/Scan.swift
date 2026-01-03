@@ -87,7 +87,7 @@ final class Scan {
             graph: graph,
             logger: logger,
             configuration: configuration,
-            swiftVersion: swiftVersion,
+            swiftVersion: swiftVersion
         ).perform()
         logger.endInterval(analyzeInterval)
     }

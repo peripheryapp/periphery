@@ -46,7 +46,7 @@ public final class GenericProjectDriver {
             xcDataModelsPaths: xcDataModelPaths,
             xcMappingModelsPaths: xcMappingModelPaths,
             testTargets: config.testTargets,
-            configuration: configuration,
+            configuration: configuration
         )
     }
 
@@ -57,7 +57,7 @@ public final class GenericProjectDriver {
         xcDataModelsPaths: Set<FilePath>,
         xcMappingModelsPaths: Set<FilePath>,
         testTargets: Set<String>,
-        configuration: Configuration,
+        configuration: Configuration
     ) {
         self.indexstorePaths = indexstorePaths
         self.plistPaths = plistPaths
@@ -76,7 +76,7 @@ extension GenericProjectDriver: ProjectDriver {
             indexStorePaths: Set(configuration.indexStorePath).union(indexstorePaths),
             excludedTestTargets: excludedTestTargets,
             logger: logger,
-            configuration: configuration,
+            configuration: configuration
         )
         let sourceFiles = try collector.collect()
 
@@ -85,7 +85,7 @@ extension GenericProjectDriver: ProjectDriver {
             plistPaths: plistPaths,
             xibPaths: xibPaths,
             xcDataModelPaths: xcDataModelsPaths,
-            xcMappingModelPaths: xcMappingModelsPaths,
+            xcMappingModelPaths: xcMappingModelsPaths
         )
     }
 }

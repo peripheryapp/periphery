@@ -17,7 +17,7 @@ public final class UnusedParameterAnalyzer {
             file: file,
             syntax: syntax,
             locationConverter: locationConverter,
-            parseProtocols: parseProtocols,
+            parseProtocols: parseProtocols
         )
 
         return functions.reduce(into: [Function: Set<Parameter>]()) { result, function in

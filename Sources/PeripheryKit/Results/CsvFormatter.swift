@@ -23,7 +23,7 @@ final class CsvFormatter: OutputFormatter {
                 accessibility: result.declaration.accessibility.value.rawValue,
                 usrs: result.declaration.usrs,
                 location: declarationLocation(from: result.declaration),
-                hint: describe(result.annotation),
+                hint: describe(result.annotation)
             )
             lines.append(line)
 
@@ -38,7 +38,7 @@ final class CsvFormatter: OutputFormatter {
                         accessibility: nil,
                         usrs: [ref.usr],
                         location: ref.location,
-                        hint: redundantConformanceHint(with: inherited),
+                        hint: redundantConformanceHint(with: inherited)
                     )
                     lines.append(line)
                 }
@@ -60,7 +60,7 @@ final class CsvFormatter: OutputFormatter {
         accessibility: String?,
         usrs: Set<String>,
         location: Location,
-        hint: String?,
+        hint: String?
     ) -> String {
         let joinedModifiers = attributes.sorted().joined(separator: "|")
         let joinedAttributes = modifiers.sorted().joined(separator: "|")

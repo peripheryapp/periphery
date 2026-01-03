@@ -258,7 +258,7 @@ protocol AbstractSetting {
     init(
         key: String,
         defaultValue: Value,
-        setter: @escaping Setter = { $0 as? Value },
+        setter: @escaping Setter = { $0 as? Value }
     ) {
         self.key = key
         value = defaultValue
@@ -308,7 +308,7 @@ extension Setting where Value == [String] {
     convenience init(
         key: String,
         defaultValue: Value,
-        requireDefaultValues: Bool,
+        requireDefaultValues: Bool
     ) {
         self.init(
             key: key,
@@ -316,7 +316,7 @@ extension Setting where Value == [String] {
             setter: { value in
                 guard let typedValue = value as? [String] else { return nil }
                 return requireDefaultValues ? Array(Set(typedValue).union(defaultValue)) : typedValue
-            },
+            }
         )
     }
 }

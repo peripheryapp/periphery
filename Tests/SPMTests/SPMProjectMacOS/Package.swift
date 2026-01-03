@@ -7,18 +7,18 @@ let package = Package(
     products: [
         .executable(
             name: "frontend",
-            targets: ["Frontend"],
+            targets: ["Frontend"]
         ),
     ],
     dependencies: [],
     targets: [
         .executableTarget(
             name: "Frontend",
-            dependencies: ["SPMProjectMacOSKit"],
+            dependencies: ["SPMProjectMacOSKit"]
         ),
         .target(
             name: "SPMProjectMacOSKit",
-            resources: [.process("Resources")],
+            resources: [.process("Resources")]
         ),
-    ],
+    ]
 )

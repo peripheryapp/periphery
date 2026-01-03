@@ -20,7 +20,7 @@ final class XcodeTargetTest: XCTestCase {
             loadedProjectPaths: &loadedProjectPaths,
             xcodebuild: xcodebuild,
             shell: shell,
-            logger: logger,
+            logger: logger
         )
     }
 

@@ -25,7 +25,7 @@ public struct IndexPipeline {
             graph: graph,
             logger: logger,
             configuration: configuration,
-            swiftVersion: swiftVersion,
+            swiftVersion: swiftVersion
         ).perform()
 
         if !plan.plistPaths.isEmpty {
@@ -33,7 +33,7 @@ public struct IndexPipeline {
                 infoPlistFiles: plan.plistPaths,
                 graph: graph,
                 logger: logger,
-                configuration: configuration,
+                configuration: configuration
             ).perform()
         }
 
@@ -42,7 +42,7 @@ public struct IndexPipeline {
                 xibFiles: plan.xibPaths,
                 graph: graph,
                 logger: logger,
-                configuration: configuration,
+                configuration: configuration
             ).perform()
         }
 
@@ -51,7 +51,7 @@ public struct IndexPipeline {
                 files: plan.xcDataModelPaths,
                 graph: graph,
                 logger: logger,
-                configuration: configuration,
+                configuration: configuration
             ).perform()
         }
 
@@ -60,7 +60,7 @@ public struct IndexPipeline {
                 files: plan.xcMappingModelPaths,
                 graph: graph,
                 logger: logger,
-                configuration: configuration,
+                configuration: configuration
             ).perform()
         }
 

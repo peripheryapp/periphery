@@ -73,7 +73,7 @@ public final class Xcodebuild {
         try schemes(
             type: project.type,
             path: project.path.lexicallyNormalized().string,
-            additionalArguments: additionalArguments,
+            additionalArguments: additionalArguments
         )
     }
 

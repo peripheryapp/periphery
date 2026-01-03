@@ -95,7 +95,7 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
                         kind: matchingRequirement.kind,
                         usr: usr,
                         location: memberDeclaration.location,
-                        isRelated: true,
+                        isRelated: true
                     )
                     relatedReference.name = matchingRequirement.name
                     relatedReference.parent = memberDeclaration

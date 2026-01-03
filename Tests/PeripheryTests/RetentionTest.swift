@@ -171,7 +171,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertRedundantProtocol(
                 "FixtureProtocol128",
                 implementedBy: .class("FixtureClass134"),
-                inherits: .protocol("FixtureProtocol128_Inherited"),
+                inherits: .protocol("FixtureProtocol128_Inherited")
             )
         }
     }
@@ -547,7 +547,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             retainPublic: true,
             // CustomStringConvertible doesn't actually inherit Codable, we're just using it because we don't have an
             // external module in which to declare our own type.
-            externalCodableProtocols: ["CustomStringConvertible"],
+            externalCodableProtocols: ["CustomStringConvertible"]
         ) {
             assertReferenced(.class("FixtureClass74")) {
                 self.assertReferenced(.enum("CodingKeys"))
@@ -952,7 +952,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         analyze(
             retainPublic: true,
             retainCodableProperties: false,
-            retainAssignOnlyProperties: false,
+            retainAssignOnlyProperties: false
         ) {
             assertReferenced(.struct("FixtureStruct14")) {
                 self.assertNotReferenced(.functionConstructor("init(unused:)"))
@@ -962,7 +962,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
         analyze(
             retainPublic: true,
-            retainCodableProperties: true,
+            retainCodableProperties: true
         ) {
             assertReferenced(.struct("FixtureStruct14")) {
                 self.assertNotReferenced(.functionConstructor("init(unused:)"))
@@ -976,7 +976,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         analyze(
             retainPublic: true,
             retainEncodableProperties: false,
-            retainAssignOnlyProperties: false,
+            retainAssignOnlyProperties: false
         ) {
             assertReferenced(.struct("FixtureStruct15")) {
                 self.assertNotReferenced(.functionConstructor("init(unused:)"))
@@ -986,7 +986,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
         analyze(
             retainPublic: true,
-            retainEncodableProperties: true,
+            retainEncodableProperties: true
         ) {
             assertReferenced(.struct("FixtureStruct15")) {
                 self.assertNotReferenced(.functionConstructor("init(unused:)"))
@@ -1299,7 +1299,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         analyze(
             retainPublic: true,
             retainAssignOnlyProperties: false,
-            retainAssignOnlyPropertyTypes: ["CustomType", "(CustomType, String)", "Swift.Double"],
+            retainAssignOnlyPropertyTypes: ["CustomType", "(CustomType, String)", "Swift.Double"]
         ) {
             assertReferenced(.class("FixtureClass123")) {
                 self.assertReferenced(.varInstance("retainedSimpleProperty"))
@@ -1483,7 +1483,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     func testRetainUnusedProtocolFuncParams() {
         analyze(
             retainPublic: true,
-            retainUnusedProtocolFuncParams: true,
+            retainUnusedProtocolFuncParams: true
         ) {
             assertReferenced(.protocol("FixtureProtocol107")) {
                 self.assertReferenced(.functionMethodInstance("myFunc(param:)")) {

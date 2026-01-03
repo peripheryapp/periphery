@@ -101,13 +101,13 @@ struct UnusedParameterParser {
         file: SourceFile,
         syntax: SourceFileSyntax,
         locationConverter: SourceLocationConverter,
-        parseProtocols: Bool,
+        parseProtocols: Bool
     ) -> [Function] {
         let parser = self.init(
             file: file,
             syntax: syntax,
             locationConverter: locationConverter,
-            parseProtocols: parseProtocols,
+            parseProtocols: parseProtocols
         )
         return parser.parse()
     }
@@ -120,7 +120,7 @@ struct UnusedParameterParser {
             file: file,
             syntax: syntax,
             locationConverter: locationConverter,
-            parseProtocols: parseProtocols,
+            parseProtocols: parseProtocols
         )
     }
 
@@ -321,7 +321,7 @@ struct UnusedParameterParser {
         body: CodeBlockSyntax?,
         named name: String,
         position: AbsolutePosition,
-        _ collector: Collector<some Any>?,
+        _ collector: Collector<some Any>?
     ) -> Function? {
         if body == nil, !parseProtocols {
             // Function has no body, must be a protocol declaration.
@@ -339,7 +339,7 @@ struct UnusedParameterParser {
                 if case let .attribute(attr) = $0 {
                     return Attribute(
                         name: attr.attributeName.trimmed.description,
-                        arguments: attr.arguments?.trimmed.description,
+                        arguments: attr.arguments?.trimmed.description
                     )
                 }
 
@@ -353,7 +353,7 @@ struct UnusedParameterParser {
             items: items,
             parameters: params,
             genericParameters: genericParamNames,
-            attributes: parsedAttributes,
+            attributes: parsedAttributes
         )
     }
 

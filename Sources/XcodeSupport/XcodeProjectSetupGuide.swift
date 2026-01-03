@@ -30,7 +30,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
             projectPaths: projectPaths,
             configuration: configuration,
             shell: shell,
-            logger: logger,
+            logger: logger
         )
     }
 
@@ -39,7 +39,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
         projectPaths: Set<FilePath>,
         configuration: Configuration,
         shell: Shell,
-        logger: Logger,
+        logger: Logger
     ) {
         self.workspacePaths = workspacePaths
         self.projectPaths = projectPaths
@@ -65,7 +65,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
                 xcodebuild: xcodebuild,
                 configuration: configuration,
                 logger: logger,
-                shell: shell,
+                shell: shell
             )
         } else if let projectPath = identifyProject() {
             var loadedProjectPaths: Set<FilePath> = []
@@ -74,7 +74,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
                 loadedProjectPaths: &loadedProjectPaths,
                 xcodebuild: xcodebuild,
                 shell: shell,
-                logger: logger,
+                logger: logger
             )
         }
 
@@ -84,7 +84,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
 
         let schemes = try filter(
             project.schemes(additionalArguments: configuration.xcodeListArguments),
-            project,
+            project
         ).map(\.self).sorted()
 
         print(Logger.colorize("\nSelect the schemes to build:", .bold))
@@ -143,7 +143,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
         return try xcodebuild.schemes(
             type: "project",
             path: path.lexicallyNormalized().string,
-            additionalArguments: configuration.xcodeListArguments,
+            additionalArguments: configuration.xcodeListArguments
         )
     }
 
