@@ -3,9 +3,17 @@ import Foundation
 import Logger
 import Shared
 
-Logger.configureBuffering()
+// When stdout is a pipe, enable line buffering so output is flushed after each
+// newline rather than block-buffered, ensuring timely output to the consumer.
+var info = stat()
+fstat(STDOUT_FILENO, &info)
 
-struct PeripheryCommand: FrontendCommand {
+if (info.st_mode & S_IFMT) == S_IFIFO {
+    setlinebuf(stdout)
+    setlinebuf(stderr)
+}
+
+struct PeripheryCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "periphery",
         subcommands: [
@@ -18,7 +26,7 @@ struct PeripheryCommand: FrontendCommand {
 }
 
 signal(SIGINT) { _ in
-    let logger = Logger()
+    let logger = Logger(quiet: false, verbose: false, coloredOutputEnabled: false)
     logger.warn(
         "Termination can result in a corrupt index. Try the '--clean-build' flag if you get erroneous results such as false-positives and incorrect source file locations.",
         newlinePrefix: true // Print a newline after ^C

@@ -13,7 +13,7 @@ final class XcodebuildSchemesTest: XCTestCase {
         super.setUp()
 
         shell = ShellMock()
-        let logger = Logger(quiet: true)
+        let logger = Logger(quiet: true, verbose: false, coloredOutputEnabled: false)
         var loadedProjectPaths: Set<FilePath> = []
         xcodebuild = Xcodebuild(shell: shell, logger: logger)
         project = try! XcodeProject(path: UIKitProjectPath, loadedProjectPaths: &loadedProjectPaths, xcodebuild: xcodebuild, shell: shell, logger: logger)

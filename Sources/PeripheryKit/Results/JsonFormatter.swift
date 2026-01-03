@@ -1,12 +1,15 @@
 import Configuration
 import Foundation
+import Logger
 import SystemPackage
 
 final class JsonFormatter: OutputFormatter {
     let configuration: Configuration
+    let logger: Logger
     lazy var currentFilePath: FilePath = .current
 
-    init(configuration: Configuration) {
+    init(configuration: Configuration, logger: Logger) {
+        self.logger = logger
         self.configuration = configuration
     }
 

@@ -10,21 +10,20 @@ import Shared
 final class GuidedSetup: SetupGuideHelpers {
     private let configuration: Configuration
     private let shell: Shell
-    private let logger: Logger
 
     required init(configuration: Configuration, shell: Shell, logger: Logger) {
         self.configuration = configuration
         self.shell = shell
-        self.logger = logger
+        super.init(logger: logger)
     }
 
     func perform() throws -> Project {
-        print(Logger.colorize("Welcome to Periphery!", .boldGreen))
+        print(logger.colorize("Welcome to Periphery!", .boldGreen))
         print("This guided setup will help you select the appropriate configuration for your project.\n")
 
         var projectGuides: [SetupGuide] = []
 
-        if let guide = SPMProjectSetupGuide.detect() {
+        if let guide = SPMProjectSetupGuide.detect(logger: logger) {
             projectGuides.append(guide)
         }
 
@@ -34,19 +33,19 @@ final class GuidedSetup: SetupGuideHelpers {
             }
         #endif
 
-        if let guide = BazelProjectSetupGuide.detect() {
+        if let guide = BazelProjectSetupGuide.detect(logger: logger) {
             projectGuides.append(guide)
         }
 
         var projectGuide_: SetupGuide?
 
         if projectGuides.count > 1 {
-            print(Logger.colorize("Select which project to use:", .bold))
+            print(logger.colorize("Select which project to use:", .bold))
             let kindName = select(single: projectGuides.map(\.projectKindName))
             projectGuide_ = projectGuides.first { $0.projectKindName == kindName }
             print("")
         } else if let singleGuide = projectGuides.first {
-            print(Logger.colorize("*", .boldGreen) + " Detected \(singleGuide.projectKindName) project")
+            print(logger.colorize("*", .boldGreen) + " Detected \(singleGuide.projectKindName) project")
             projectGuide_ = singleGuide
         }
 
@@ -54,19 +53,19 @@ final class GuidedSetup: SetupGuideHelpers {
             fatalError("Failed to identify project type.")
         }
 
-        print(Logger.colorize("*", .boldGreen) + " Inspecting project...")
+        print(logger.colorize("*", .boldGreen) + " Inspecting project...")
 
         let kind = try projectGuide.perform()
         let project = Project(kind: kind, configuration: configuration, shell: shell, logger: logger)
 
-        let commonGuide = CommonSetupGuide(configuration: configuration)
+        let commonGuide = CommonSetupGuide(configuration: configuration, logger: logger)
         try commonGuide.perform()
 
         let options = projectGuide.commandLineOptions + commonGuide.commandLineOptions
         var shouldSave = false
 
         if configuration.hasNonDefaultValues {
-            print(Logger.colorize("\nSave configuration to \(Configuration.defaultConfigurationFile)?", .bold))
+            print(logger.colorize("\nSave configuration to \(Configuration.defaultConfigurationFile)?", .bold))
             shouldSave = selectBoolean()
 
             if shouldSave {
@@ -74,8 +73,8 @@ final class GuidedSetup: SetupGuideHelpers {
             }
         }
 
-        print(Logger.colorize("\n*", .boldGreen) + " Executing command:")
-        print(Logger.colorize(formatScanCommand(options: options, didSave: shouldSave) + "\n", .bold))
+        print(logger.colorize("\n*", .boldGreen) + " Executing command:")
+        print(logger.colorize(formatScanCommand(options: options, didSave: shouldSave) + "\n", .bold))
 
         return project
     }

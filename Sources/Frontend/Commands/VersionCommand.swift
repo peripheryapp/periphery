@@ -1,7 +1,7 @@
 import ArgumentParser
 import Foundation
 
-struct VersionCommand: FrontendCommand {
+struct VersionCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "version",
         abstract: "Display the version of Periphery"
