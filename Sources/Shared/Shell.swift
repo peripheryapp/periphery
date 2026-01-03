@@ -1,14 +1,14 @@
 import Foundation
 import Logger
+import Synchronization
 
 public class ShellProcessStore {
     public static let shared = ShellProcessStore()
 
-    private var processes: Set<Process> = []
-    private let lock = UnfairLock()
+    private let processes = Mutex<Set<Process>>([])
 
     public func interruptRunning() {
-        lock.perform {
+        processes.withLock { processes in
             for process in processes {
                 process.interrupt()
                 process.waitUntilExit()
@@ -17,11 +17,11 @@ public class ShellProcessStore {
     }
 
     func add(_ process: Process) {
-        lock.perform { _ = processes.insert(process) }
+        processes.withLock { _ = $0.insert(process) }
     }
 
     func remove(_ process: Process) {
-        lock.perform { _ = processes.remove(process) }
+        processes.withLock { _ = $0.remove(process) }
     }
 }
 

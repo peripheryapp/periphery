@@ -1,4 +1,5 @@
 import Foundation
+import Synchronization
 
 public struct JobPool<Job> {
     let jobs: [Job]
@@ -29,8 +30,7 @@ public struct JobPool<Job> {
     /// Throwing variant
     public func flatMap<Result>(_ block: @escaping (Job) throws -> [Result]) throws -> [Result] {
         var error: Error?
-        var results: [Result] = []
-        let lock = UnfairLock()
+        let results = Mutex<[Result]>([])
 
         DispatchQueue.concurrentPerform(iterations: jobs.count) { idx in
             guard error == nil else { return }
@@ -38,10 +38,7 @@ public struct JobPool<Job> {
             do {
                 let job = jobs[idx]
                 let result = try block(job)
-
-                lock.perform {
-                    results.append(contentsOf: result)
-                }
+                results.withLock { $0.append(contentsOf: result) }
             } catch let e {
                 error = e
             }
@@ -51,23 +48,19 @@ public struct JobPool<Job> {
             throw error
         }
 
-        return results
+        return results.withLock { $0 }
     }
 
     /// Non-throwing variant
     public func flatMap<Result>(_ block: @escaping (Job) -> [Result]) -> [Result] {
-        var results: [Result] = []
-        let lock = UnfairLock()
+        let results = Mutex<[Result]>([])
 
         DispatchQueue.concurrentPerform(iterations: jobs.count) { idx in
             let job = jobs[idx]
             let result = block(job)
-
-            lock.perform {
-                results.append(contentsOf: result)
-            }
+            results.withLock { $0.append(contentsOf: result) }
         }
 
-        return results
+        return results.withLock { $0 }
     }
 }

@@ -169,7 +169,7 @@ public final class Configuration {
     public func load(from path: FilePath?) throws {
         guard let path = try configurationPath(withUserProvided: path) else { return }
 
-        let encodedYAML = try String(contentsOf: path.url)
+        let encodedYAML = try String(contentsOf: path.url, encoding: .utf8)
         let yaml = try Yams.load(yaml: encodedYAML) as? [String: Any] ?? [:]
         let logger = Logger(quiet: false, verbose: false, coloredOutputEnabled: false)
 
