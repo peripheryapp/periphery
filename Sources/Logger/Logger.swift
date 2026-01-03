@@ -22,9 +22,16 @@ public enum ANSIColor: String {
 }
 
 public struct Logger: Sendable {
-    @usableFromInline let coloredOutputEnabled: Bool
+    let outputQueue: DispatchQueue
+    let quiet: Bool
+    let verbose: Bool
+    let coloredOutputEnabled: Bool
 
-    @usableFromInline private(set) var isColorOutputCapable: Bool = {
+    #if canImport(os)
+        let signposter = OSSignposter()
+    #endif
+
+    private var isColorOutputCapable: Bool = {
         guard let term = ProcessInfo.processInfo.environment["TERM"],
               term.lowercased() != "dumb",
               isatty(fileno(stdout)) != 0
@@ -35,15 +42,6 @@ public struct Logger: Sendable {
         return true
     }()
 
-    @usableFromInline let outputQueue: DispatchQueue
-    @usableFromInline let quiet: Bool
-    @usableFromInline let verbose: Bool
-
-    #if canImport(os)
-        @usableFromInline let signposter = OSSignposter()
-    #endif
-
-    @inlinable
     public init(
         quiet: Bool,
         verbose: Bool,
@@ -55,30 +53,25 @@ public struct Logger: Sendable {
         outputQueue = DispatchQueue(label: "Logger.outputQueue")
     }
 
-    @inlinable
     public func colorize(_ text: String, _ color: ANSIColor) -> String {
         guard isColorOutputCapable, coloredOutputEnabled else { return text }
         return "\(color.rawValue)\(text)\u{001B}[0;0m"
     }
 
-    @inlinable
     public func contextualized(with context: String) -> ContextualLogger {
         .init(logger: self, context: context)
     }
 
-    @inlinable
     public func info(_ text: String, canQuiet: Bool = true) {
         guard !(quiet && canQuiet) else { return }
         log(text, output: stdout)
     }
 
-    @inlinable
     public func debug(_ text: String) {
         guard verbose else { return }
         log(text, output: stdout)
     }
 
-    @inlinable
     public func warn(_ text: String, newlinePrefix: Bool = false) {
         guard !quiet else { return }
         if newlinePrefix {
@@ -89,13 +82,11 @@ public struct Logger: Sendable {
     }
 
     // periphery:ignore
-    @inlinable
     public func error(_ text: String) {
         let text = colorize("error: ", .boldRed) + text
         log(text, output: stderr)
     }
 
-    @inlinable
     public func beginInterval(_ name: StaticString) -> SignpostInterval {
         #if canImport(os)
             let id = signposter.makeSignpostID()
@@ -106,7 +97,6 @@ public struct Logger: Sendable {
         #endif
     }
 
-    @inlinable
     public func endInterval(_ interval: SignpostInterval) {
         #if canImport(os)
             signposter.endInterval(interval.name, interval.state)
@@ -115,38 +105,27 @@ public struct Logger: Sendable {
 
     // MARK: - Private
 
-    @inlinable
     func log(_ line: String, output: UnsafeMutablePointer<FILE>) {
         _ = outputQueue.sync { fputs(line + "\n", output) }
     }
 }
 
 public struct ContextualLogger {
-    @usableFromInline let logger: Logger
-    @usableFromInline let context: String
+    let logger: Logger
+    let context: String
 
-    @inlinable
-    init(logger: Logger, context: String) {
-        self.logger = logger
-        self.context = context
-    }
-
-    @inlinable
     public func contextualized(with innerContext: String) -> ContextualLogger {
         logger.contextualized(with: "\(context):\(innerContext)")
     }
 
-    @inlinable
     public func debug(_ text: String) {
         logger.debug("[\(context)] \(text)")
     }
 
-    @inlinable
     public func beginInterval(_ name: StaticString) -> SignpostInterval {
         logger.beginInterval(name)
     }
 
-    @inlinable
     public func endInterval(_ interval: SignpostInterval) {
         logger.endInterval(interval)
     }
@@ -154,14 +133,8 @@ public struct ContextualLogger {
 
 #if canImport(os)
     public struct SignpostInterval {
-        @usableFromInline let name: StaticString
-        @usableFromInline let state: OSSignpostIntervalState
-
-        @inlinable
-        init(name: StaticString, state: OSSignpostIntervalState) {
-            self.name = name
-            self.state = state
-        }
+        let name: StaticString
+        let state: OSSignpostIntervalState
     }
 #else
     public struct SignpostInterval {
