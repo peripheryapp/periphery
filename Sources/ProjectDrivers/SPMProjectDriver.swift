@@ -62,10 +62,12 @@ extension SPMProjectDriver: ProjectDriver {
         )
         let sourceFiles = try collector.collect()
         let xibPaths = interfaceBuilderFiles(from: description)
+        let xcStringsPaths = stringCatalogFiles(from: description)
 
         return IndexPlan(
             sourceFiles: sourceFiles,
-            xibPaths: xibPaths
+            xibPaths: xibPaths,
+            xcStringsPaths: xcStringsPaths
         )
     }
 
@@ -76,7 +78,15 @@ extension SPMProjectDriver: ProjectDriver {
     }
 
     private func interfaceBuilderFiles(from description: PackageDescription) -> Set<FilePath> {
-        var xibFiles: Set<FilePath> = []
+        resourceFiles(from: description, withExtensions: ["xib", "storyboard"])
+    }
+
+    private func stringCatalogFiles(from description: PackageDescription) -> Set<FilePath> {
+        resourceFiles(from: description, withExtensions: ["xcstrings"])
+    }
+
+    private func resourceFiles(from description: PackageDescription, withExtensions extensions: [String]) -> Set<FilePath> {
+        var files: Set<FilePath> = []
 
         for target in description.targets {
             let targetPath = pkg.path.appending(target.path)
@@ -90,14 +100,14 @@ extension SPMProjectDriver: ProjectDriver {
                     ? resourceFilePath
                     : targetPath.appending(resource.path)
 
-                // Check if the resource path exists and is a xib/storyboard file
+                // Check if the resource path exists and has the expected extension
                 guard resourcePath.exists else { continue }
-                guard let ext = resourcePath.extension?.lowercased(), ["xib", "storyboard"].contains(ext) else { continue }
+                guard let ext = resourcePath.extension?.lowercased(), extensions.contains(ext) else { continue }
 
-                xibFiles.insert(resourcePath)
+                files.insert(resourcePath)
             }
         }
 
-        return xibFiles
+        return files
     }
 }

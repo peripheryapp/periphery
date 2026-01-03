@@ -252,6 +252,9 @@ final class SwiftIndexer: Indexer {
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: sourceFile, swiftVersion: swiftVersion)
             let declarationSyntaxVisitor = multiplexingSyntaxVisitor.add(DeclarationSyntaxVisitor.self)
             let importSyntaxVisitor = multiplexingSyntaxVisitor.add(ImportSyntaxVisitor.self)
+            let localizedStringSyntaxVisitor: LocalizedStringSyntaxVisitor? = configuration.disableUnusedLocalizedStringAnalysis
+                ? nil
+                : multiplexingSyntaxVisitor.add(LocalizedStringSyntaxVisitor.self)
 
             multiplexingSyntaxVisitor.visit()
 
@@ -262,6 +265,11 @@ final class SwiftIndexer: Indexer {
                 for stmt in sourceFile.importStatements where stmt.isExported {
                     graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
                 }
+            }
+
+            // Collect used localized string keys
+            if let localizedStringSyntaxVisitor, !localizedStringSyntaxVisitor.usedStringKeys.isEmpty {
+                graph.addUsedLocalizedStringKeys(localizedStringSyntaxVisitor.usedStringKeys)
             }
 
             associateLatentReferences()

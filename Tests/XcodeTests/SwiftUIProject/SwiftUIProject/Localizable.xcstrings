@@ -1,0 +1,37 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "swiftui_used_key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SwiftUI Used String"
+          }
+        }
+      }
+    },
+    "swiftui_text_key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SwiftUI Text Key"
+          }
+        }
+      }
+    },
+    "swiftui_unused_key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SwiftUI Unused String"
+          }
+        }
+      }
+    }
+  }
+}
+

@@ -136,13 +136,15 @@
             let xibPaths = targets.flatMapSet { $0.files(kind: .interfaceBuilder) }
             let xcDataModelPaths = targets.flatMapSet { $0.files(kind: .xcDataModel) }
             let xcMappingModelPaths = targets.flatMapSet { $0.files(kind: .xcMappingModel) }
+            let xcStringsPaths = targets.flatMapSet { $0.files(kind: .xcStrings) }
 
             return IndexPlan(
                 sourceFiles: sourceFiles,
                 plistPaths: infoPlistPaths,
                 xibPaths: xibPaths,
                 xcDataModelPaths: xcDataModelPaths,
-                xcMappingModelPaths: xcMappingModelPaths
+                xcMappingModelPaths: xcMappingModelPaths,
+                xcStringsPaths: xcStringsPaths
             )
         }
     }

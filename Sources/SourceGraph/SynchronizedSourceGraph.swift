@@ -48,6 +48,12 @@ public final class SynchronizedSourceGraph {
         }
     }
 
+    public func addUsedLocalizedStringKeys(_ keys: Set<String>) {
+        withLock {
+            graph.addUsedLocalizedStringKeys(keys)
+        }
+    }
+
     // MARK: - Without Lock
 
     public func removeWithoutLock(_ declaration: Declaration) {

@@ -105,4 +105,8 @@ struct DeclarationDescription: CustomStringConvertible {
     static func extensionClass(_ name: String, line: Int? = nil) -> Self {
         self.init(kind: .extensionClass, name: name, line: line)
     }
+
+    static func localizedString(_ name: String, line: Int? = nil) -> Self {
+        self.init(kind: .localizedString, name: name, line: line)
+    }
 }

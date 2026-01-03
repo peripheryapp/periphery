@@ -3,7 +3,9 @@
     "usrs": [
       "import-TestShared-Tests/PeripheryTests/ObjcAccessibleRetentionTest.swift:2:1",
       "import-TestShared-Tests/PeripheryTests/ObjcAnnotatedRetentionTest.swift:2:1",
+      "s:10TestShared22DeclarationDescriptionV15localizedString_4lineACSS_SiSgtFZ",
       "s:11SourceGraph15ProjectFileKindO10extensionsSaySSGvp",
+      "s:11SourceGraph15ProjectFileKindO9xcStringsyA2CmF",
       "s:6Shared14SetupSelectionO",
       "s:6Shared17SetupGuideHelpersC6select8multipleAA0B9SelectionOSaySSG_tF",
       "s:SS10ExtensionsE17withEscapedQuotesSSvp",

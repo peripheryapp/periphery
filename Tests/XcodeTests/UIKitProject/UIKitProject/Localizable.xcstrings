@@ -1,0 +1,37 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "used_string_key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Used String"
+          }
+        }
+      }
+    },
+    "another_used_key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Another Used String"
+          }
+        }
+      }
+    },
+    "unused_string_key": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unused String"
+          }
+        }
+      }
+    }
+  }
+}
+

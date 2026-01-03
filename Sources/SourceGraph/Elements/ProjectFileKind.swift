@@ -3,6 +3,7 @@ public enum ProjectFileKind: CaseIterable {
     case infoPlist
     case xcDataModel
     case xcMappingModel
+    case xcStrings
 
     public var extensions: [String] {
         switch self {
@@ -14,6 +15,8 @@ public enum ProjectFileKind: CaseIterable {
             ["xcdatamodeld"]
         case .xcMappingModel:
             ["xcmappingmodel"]
+        case .xcStrings:
+            ["xcstrings"]
         }
     }
 }
