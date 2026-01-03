@@ -6,7 +6,7 @@ class ShellMock: Shell {
     var output: String = ""
 
     convenience init() {
-        let logger = Logger(quiet: true)
+        let logger = Logger(quiet: true, verbose: false, coloredOutputEnabled: false)
         self.init(logger: logger)
     }
 

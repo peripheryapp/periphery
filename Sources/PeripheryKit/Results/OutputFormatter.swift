@@ -6,9 +6,10 @@ import SystemPackage
 
 public protocol OutputFormatter: AnyObject {
     var configuration: Configuration { get }
+    var logger: Logger { get }
     var currentFilePath: FilePath { get }
 
-    init(configuration: Configuration)
+    init(configuration: Configuration, logger: Logger)
     func format(_ results: [ScanResult], colored: Bool) throws -> String?
 }
 
@@ -42,7 +43,7 @@ extension OutputFormatter {
         let kindDisplayName = declarationKindDisplayName(from: result.declaration)
 
         if var name = result.declaration.name {
-            name = colored ? Logger.colorize(name, .lightBlue) : name
+            name = colored ? logger.colorize(name, .lightBlue) : name
 
             switch result.annotation {
             case .unused:

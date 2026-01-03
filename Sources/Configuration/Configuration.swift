@@ -171,7 +171,7 @@ public final class Configuration {
 
         let encodedYAML = try String(contentsOf: path.url)
         let yaml = try Yams.load(yaml: encodedYAML) as? [String: Any] ?? [:]
-        let logger = Logger(quiet: false)
+        let logger = Logger(quiet: false, verbose: false, coloredOutputEnabled: false)
 
         for (key, value) in yaml {
             if let setting = settings.first(where: { key == $0.key }) {

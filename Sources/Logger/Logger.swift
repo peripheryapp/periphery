@@ -21,10 +21,10 @@ public enum ANSIColor: String {
     case gray = "\u{001B}[0;1;30m"
 }
 
-public final class Logger {
-    @usableFromInline static var coloredOutputEnabled: Bool = true
+public struct Logger: Sendable {
+    @usableFromInline let coloredOutputEnabled: Bool
 
-    @usableFromInline static var isColorOutputCapable: Bool = {
+    @usableFromInline private(set) var isColorOutputCapable: Bool = {
         guard let term = ProcessInfo.processInfo.environment["TERM"],
               term.lowercased() != "dumb",
               isatty(fileno(stdout)) != 0
@@ -35,26 +35,6 @@ public final class Logger {
         return true
     }()
 
-    public static func setColoredOutput(enabled: Bool) {
-        coloredOutputEnabled = enabled
-    }
-
-    @inlinable
-    public static func colorize(_ text: String, _ color: ANSIColor) -> String {
-        guard isColorOutputCapable, coloredOutputEnabled else { return text }
-        return "\(color.rawValue)\(text)\u{001B}[0;0m"
-    }
-
-    public static func configureBuffering() {
-        var info = stat()
-        fstat(STDOUT_FILENO, &info)
-
-        if (info.st_mode & S_IFMT) == S_IFIFO {
-            setlinebuf(stdout)
-            setlinebuf(stderr)
-        }
-    }
-
     @usableFromInline let outputQueue: DispatchQueue
     @usableFromInline let quiet: Bool
     @usableFromInline let verbose: Bool
@@ -64,10 +44,21 @@ public final class Logger {
     #endif
 
     @inlinable
-    public required init(quiet: Bool = false, verbose: Bool = false) {
+    public init(
+        quiet: Bool,
+        verbose: Bool,
+        coloredOutputEnabled: Bool
+    ) {
         self.quiet = quiet
         self.verbose = verbose
+        self.coloredOutputEnabled = coloredOutputEnabled
         outputQueue = DispatchQueue(label: "Logger.outputQueue")
+    }
+
+    @inlinable
+    public func colorize(_ text: String, _ color: ANSIColor) -> String {
+        guard isColorOutputCapable, coloredOutputEnabled else { return text }
+        return "\(color.rawValue)\(text)\u{001B}[0;0m"
     }
 
     @inlinable
@@ -93,14 +84,14 @@ public final class Logger {
         if newlinePrefix {
             log("", output: stderr)
         }
-        let text = Self.colorize("warning: ", .boldYellow) + text
+        let text = colorize("warning: ", .boldYellow) + text
         log(text, output: stderr)
     }
 
     // periphery:ignore
     @inlinable
     public func error(_ text: String) {
-        let text = Self.colorize("error: ", .boldRed) + text
+        let text = colorize("error: ", .boldRed) + text
         log(text, output: stderr)
     }
 

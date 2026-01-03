@@ -11,7 +11,7 @@ final class ImportVisitTest: XCTestCase {
 
     override func setUpWithError() throws {
         try super.setUpWithError()
-        let shell = Shell(logger: Logger(quiet: true))
+        let shell = Shell(logger: Logger(quiet: true, verbose: false, coloredOutputEnabled: false))
         let swiftVersion = SwiftVersion(shell: shell)
         let multiplexingVisitor = try MultiplexingSyntaxVisitor(file: fixturePath, swiftVersion: swiftVersion)
         let visitor = multiplexingVisitor.add(ImportSyntaxVisitor.self)

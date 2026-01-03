@@ -6,7 +6,7 @@ import PeripheryKit
 import Shared
 import SystemPackage
 
-struct ScanCommand: FrontendCommand {
+struct ScanCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "scan",
         abstract: "Scan for unused code"
@@ -211,14 +211,7 @@ struct ScanCommand: FrontendCommand {
 
         configuration.buildFilenameMatchers()
 
-        if !configuration.color {
-            Logger.setColoredOutput(enabled: false)
-        }
-
-        let logger = Logger(
-            quiet: configuration.quiet,
-            verbose: configuration.verbose
-        )
+        let logger = Logger(configuration: configuration)
         logger.contextualized(with: "version").debug(PeripheryVersion)
         let shell = Shell(logger: logger)
         let swiftVersion = SwiftVersion(shell: shell)
@@ -265,7 +258,7 @@ struct ScanCommand: FrontendCommand {
         }
 
         let outputFormat = configuration.outputFormat
-        let formatter = outputFormat.formatter.init(configuration: configuration)
+        let formatter = outputFormat.formatter.init(configuration: configuration, logger: logger)
         let colored = outputFormat.supportsColoredOutput && configuration.color
 
         if let output = try formatter.format(filteredResults, colored: colored) {

@@ -6,9 +6,11 @@ import SystemPackage
 
 final class XcodeFormatter: OutputFormatter {
     let configuration: Configuration
+    let logger: Logger
     lazy var currentFilePath: FilePath = .current
 
-    init(configuration: Configuration) {
+    init(configuration: Configuration, logger: Logger) {
+        self.logger = logger
         self.configuration = configuration
     }
 
@@ -46,6 +48,6 @@ final class XcodeFormatter: OutputFormatter {
 
     private func colorize(_ text: String, _ color: ANSIColor, colored: Bool) -> String {
         guard colored else { return text }
-        return Logger.colorize(text, color)
+        return logger.colorize(text, color)
     }
 }

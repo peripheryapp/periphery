@@ -12,7 +12,7 @@ final class XcodebuildBuildProjectTest: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let logger = Logger(quiet: true)
+        let logger = Logger(quiet: true, verbose: false, coloredOutputEnabled: false)
         let shell = Shell(logger: logger)
         var loadedProjectPaths: Set<FilePath> = []
         xcodebuild = Xcodebuild(shell: shell, logger: logger)
