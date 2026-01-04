@@ -91,7 +91,7 @@ swift_library(
         "SourceGraph/SourceGraphDebugger.swift",
         "SourceGraph/SourceGraphMutator.swift",
         "SourceGraph/SourceGraphMutatorRunner.swift",
-        "SourceGraph/SynchronizedSourceGraph.swift",
+        "SourceGraph/SourceGraphMutex.swift",
     ],
     module_name = "SourceGraph",
     deps = [
@@ -115,7 +115,6 @@ swift_library(
         "Shared/Shell.swift",
         "Shared/SwiftVersion.swift",
         "Shared/SwiftVersionParser.swift",
-        "Shared/UnfairLock.swift",
     ],
     module_name = "Shared",
     deps = [

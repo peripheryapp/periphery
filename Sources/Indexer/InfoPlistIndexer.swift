@@ -10,10 +10,10 @@ final class InfoPlistIndexer: Indexer {
     }
 
     private let infoPlistFiles: Set<FilePath>
-    private let graph: SynchronizedSourceGraph
+    private let graph: SourceGraphMutex
     private let logger: ContextualLogger
 
-    required init(infoPlistFiles: Set<FilePath>, graph: SynchronizedSourceGraph, logger: ContextualLogger, configuration: Configuration) {
+    required init(infoPlistFiles: Set<FilePath>, graph: SourceGraphMutex, logger: ContextualLogger, configuration: Configuration) {
         self.infoPlistFiles = infoPlistFiles
         self.graph = graph
         self.logger = logger.contextualized(with: "infoplist")
@@ -29,9 +29,11 @@ final class InfoPlistIndexer: Indexer {
 
             let elapsed = try Benchmark.measure {
                 do {
-                    try InfoPlistParser(path: path)
+                    let refs = try InfoPlistParser(path: path)
                         .parse()
-                        .forEach { self.graph.add($0) }
+                    self.graph.withLock { graph in
+                        refs.forEach { graph.add($0) }
+                    }
                 } catch {
                     throw PlistError.failedToParse(path: path, underlyingError: error)
                 }

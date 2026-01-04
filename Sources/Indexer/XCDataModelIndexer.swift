@@ -10,10 +10,10 @@ final class XCDataModelIndexer: Indexer {
     }
 
     private let files: Set<FilePath>
-    private let graph: SynchronizedSourceGraph
+    private let graph: SourceGraphMutex
     private let logger: ContextualLogger
 
-    required init(files: Set<FilePath>, graph: SynchronizedSourceGraph, logger: ContextualLogger, configuration: Configuration) {
+    required init(files: Set<FilePath>, graph: SourceGraphMutex, logger: ContextualLogger, configuration: Configuration) {
         self.files = files
         self.graph = graph
         self.logger = logger.contextualized(with: "xcdatamodel")
@@ -29,9 +29,11 @@ final class XCDataModelIndexer: Indexer {
 
             let elapsed = try Benchmark.measure {
                 do {
-                    try XCDataModelParser(path: path)
+                    let refs = try XCDataModelParser(path: path)
                         .parse()
-                        .forEach { self.graph.add($0) }
+                    self.graph.withLock { graph in
+                        refs.forEach { graph.add($0) }
+                    }
                 } catch {
                     throw XCDataModelError.failedToParse(path: path, underlyingError: error)
                 }
