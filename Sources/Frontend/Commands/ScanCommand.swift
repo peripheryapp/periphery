@@ -213,7 +213,12 @@ struct ScanCommand: ParsableCommand {
 
         let logger = Logger(configuration: configuration)
         logger.contextualized(with: "version").debug(PeripheryVersion)
-        let shell = Shell(logger: logger)
+        let shell = ShellImpl(logger: logger) {
+            logger.warn(
+                "Termination can result in a corrupt index. Try the '--clean-build' flag if you get erroneous results such as false-positives and incorrect source file locations.",
+                newlinePrefix: true // Print a newline after ^C
+            )
+        }
         let swiftVersion = SwiftVersion(shell: shell)
         logger.debug(swiftVersion.fullVersion)
         try swiftVersion.validateVersion()

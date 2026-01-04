@@ -1,7 +1,5 @@
 import ArgumentParser
 import Foundation
-import Logger
-import Shared
 
 // When stdout is a pipe, enable line buffering so output is flushed after each
 // newline rather than block-buffered, ensuring timely output to the consumer.
@@ -23,16 +21,6 @@ struct PeripheryCommand: ParsableCommand {
             VersionCommand.self,
         ]
     )
-}
-
-signal(SIGINT) { _ in
-    let logger = Logger(quiet: false, verbose: false, coloredOutputEnabled: false)
-    logger.warn(
-        "Termination can result in a corrupt index. Try the '--clean-build' flag if you get erroneous results such as false-positives and incorrect source file locations.",
-        newlinePrefix: true // Print a newline after ^C
-    )
-    ShellProcessStore.shared.interruptRunning()
-    exit(0)
 }
 
 do {
