@@ -10,10 +10,10 @@ final class XibIndexer: Indexer {
     }
 
     private let xibFiles: Set<FilePath>
-    private let graph: SynchronizedSourceGraph
+    private let graph: SourceGraphMutex
     private let logger: ContextualLogger
 
-    required init(xibFiles: Set<FilePath>, graph: SynchronizedSourceGraph, logger: ContextualLogger, configuration: Configuration) {
+    required init(xibFiles: Set<FilePath>, graph: SourceGraphMutex, logger: ContextualLogger, configuration: Configuration) {
         self.xibFiles = xibFiles
         self.graph = graph
         self.logger = logger.contextualized(with: "xib")
@@ -29,9 +29,11 @@ final class XibIndexer: Indexer {
 
             let elapsed = try Benchmark.measure {
                 do {
-                    try XibParser(path: xibPath)
+                    let refs = try XibParser(path: xibPath)
                         .parse()
-                        .forEach { self.graph.add($0) }
+                    self.graph.withLock { graph in
+                        refs.forEach { graph.add($0) }
+                    }
                 } catch {
                     throw XibError.failedToParse(path: xibPath, underlyingError: error)
                 }

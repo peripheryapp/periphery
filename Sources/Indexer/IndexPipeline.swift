@@ -6,12 +6,12 @@ import SourceGraph
 
 public struct IndexPipeline {
     private let plan: IndexPlan
-    private let graph: SynchronizedSourceGraph
+    private let graph: SourceGraphMutex
     private let logger: ContextualLogger
     private let configuration: Configuration
     private let swiftVersion: SwiftVersion
 
-    public init(plan: IndexPlan, graph: SynchronizedSourceGraph, logger: ContextualLogger, configuration: Configuration, swiftVersion: SwiftVersion) {
+    public init(plan: IndexPlan, graph: SourceGraphMutex, logger: ContextualLogger, configuration: Configuration, swiftVersion: SwiftVersion) {
         self.plan = plan
         self.graph = graph
         self.logger = logger
@@ -64,6 +64,6 @@ public struct IndexPipeline {
             ).perform()
         }
 
-        graph.indexingComplete()
+        graph.withLock { $0.indexingComplete() }
     }
 }

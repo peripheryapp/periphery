@@ -102,7 +102,7 @@ public final class MultiplexingSyntaxVisitor: SyntaxVisitor {
 
     public required init(file: SourceFile, swiftVersion: SwiftVersion) throws {
         sourceFile = file
-        let source = try String(contentsOf: file.path.url)
+        let source = try String(contentsOf: file.path.url, encoding: .utf8)
         syntax = Parser.parse(source: source)
         locationConverter = SourceLocationConverter(fileName: file.path.string, tree: syntax)
         sourceLocationBuilder = SourceLocationBuilder(file: file, locationConverter: locationConverter)

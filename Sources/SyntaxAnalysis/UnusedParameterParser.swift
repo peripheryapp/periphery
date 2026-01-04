@@ -113,7 +113,7 @@ struct UnusedParameterParser {
     }
 
     static func parse(file: SourceFile, parseProtocols: Bool) throws -> [Function] {
-        let source = try String(contentsOf: file.path.url)
+        let source = try String(contentsOf: file.path.url, encoding: .utf8)
         let syntax = Parser.parse(source: source)
         let locationConverter = SourceLocationConverter(fileName: file.path.string, tree: syntax)
         return parse(

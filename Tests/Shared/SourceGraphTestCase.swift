@@ -58,7 +58,7 @@ open class SourceGraphTestCase: XCTestCase {
         let swiftVersion = SwiftVersion(shell: shell)
         let pipeline = IndexPipeline(
             plan: newPlan,
-            graph: SynchronizedSourceGraph(graph: graph),
+            graph: SourceGraphMutex(graph: graph),
             logger: logger.contextualized(with: "index"),
             configuration: configuration,
             swiftVersion: swiftVersion

@@ -176,7 +176,7 @@ var targets: [PackageDescription.Target] = [
 
 let package = Package(
     name: "Periphery",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v15)],
     products: [
         .executable(name: "periphery", targets: ["Frontend"]),
         .library(name: "PeripheryKit", targets: ["PeripheryKit"]),
