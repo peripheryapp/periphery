@@ -2,12 +2,10 @@ import Foundation
 import Logger
 import Synchronization
 
-public class ShellProcessStore {
-    public static let shared = ShellProcessStore()
-
+final class ShellProcessStore: Sendable {
     private let processes = Mutex<Set<Process>>([])
 
-    public func interruptRunning() {
+    func interruptRunning() {
         processes.withLock { processes in
             for process in processes {
                 process.interrupt()
@@ -25,15 +23,33 @@ public class ShellProcessStore {
     }
 }
 
-open class Shell {
-    private let logger: ContextualLogger
+public protocol Shell: Sendable {
+    @discardableResult
+    func exec(_ args: [String]) throws -> String
+    func execStatus(_ args: [String]) throws -> Int32
+}
 
-    public required init(logger: Logger) {
+public final class ShellImpl: Shell {
+    private let logger: ContextualLogger
+    private let store: ShellProcessStore
+    private let signalSource: DispatchSourceSignal
+
+    public required init(logger: Logger, sigintHandler: @escaping () -> Void = {}) {
         self.logger = logger.contextualized(with: "shell")
+        store = ShellProcessStore()
+
+        signal(SIGINT, SIG_IGN)
+        signalSource = DispatchSource.makeSignalSource(signal: SIGINT, queue: .global())
+        signalSource.setEventHandler { [store] in
+            sigintHandler()
+            store.interruptRunning()
+            exit(0)
+        }
+        signalSource.resume()
     }
 
     @discardableResult
-    open func exec(_ args: [String]) throws -> String {
+    public func exec(_ args: [String]) throws -> String {
         let (status, stdout, stderr) = try exec(args)
 
         if status == 0 {
@@ -48,7 +64,7 @@ open class Shell {
     }
 
     @discardableResult
-    open func execStatus(_ args: [String]) throws -> Int32 {
+    public func execStatus(_ args: [String]) throws -> Int32 {
         let (status, _, _) = try exec(args, captureOutput: false)
         return status
     }
@@ -64,7 +80,7 @@ open class Shell {
         process.arguments = ["-c", cmd.joined(separator: " ")]
 
         logger.debug("\(cmd.joined(separator: " "))")
-        ShellProcessStore.shared.add(process)
+        store.add(process)
 
         var stdoutPipe: Pipe?
         var stderrPipe: Pipe?
@@ -84,7 +100,7 @@ open class Shell {
         if let stdoutData = try stdoutPipe?.fileHandleForReading.readToEnd() {
             guard let stdoutStr = String(data: stdoutData, encoding: .utf8)
             else {
-                ShellProcessStore.shared.remove(process)
+                store.remove(process)
                 throw PeripheryError.shellOutputEncodingFailed(
                     cmd: cmd,
                     encoding: .utf8
@@ -96,7 +112,7 @@ open class Shell {
         if let stderrData = try stderrPipe?.fileHandleForReading.readToEnd() {
             guard let stderrStr = String(data: stderrData, encoding: .utf8)
             else {
-                ShellProcessStore.shared.remove(process)
+                store.remove(process)
                 throw PeripheryError.shellOutputEncodingFailed(
                     cmd: cmd,
                     encoding: .utf8
@@ -106,7 +122,7 @@ open class Shell {
         }
 
         process.waitUntilExit()
-        ShellProcessStore.shared.remove(process)
+        store.remove(process)
         return (process.terminationStatus, standardOutput, standardError)
     }
 }

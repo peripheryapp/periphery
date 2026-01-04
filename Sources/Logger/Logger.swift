@@ -110,7 +110,7 @@ public struct Logger: Sendable {
     }
 }
 
-public struct ContextualLogger {
+public struct ContextualLogger: Sendable {
     let logger: Logger
     let context: String
 
