@@ -68,7 +68,6 @@ jobs:
           - step: "6.3-snapshot"
             xcode: "26.0"
             swiftly: "6.3-snapshot"
-            continueOnError: true
             macos: "macos-26"
           - step: "26.2.0"
             xcode: "26.2.0"
@@ -140,7 +139,6 @@ jobs:
             continueOnError: true
           - swift: "nightly-6.3"
             container: "swiftlang/swift:nightly-6.3-noble"
-            continueOnError: true
           - swift: "6.2"
             container: "swift:6.2"
           - swift: "6.1"

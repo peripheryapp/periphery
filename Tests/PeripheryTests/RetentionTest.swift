@@ -3,8 +3,6 @@ import SystemPackage
 import XCTest
 
 final class RetentionTest: FixtureSourceGraphTestCase {
-    let performKnownFailures = false
-
     func testNonReferencedClass() {
         analyze {
             assertNotReferenced(.class("FixtureClass1"))
@@ -1707,6 +1705,19 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRetainsInitializerCalledOnTypeAlias() {
+        // Resolved by https://github.com/swiftlang/swift/commit/178d6c315dcce9d1110bb23ad905dffaf28c2c3b
+        guard Self.swiftVersion.version.isVersion(greaterThan: "6.2.3") else {
+            return
+        }
+
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass219")) {
+                self.assertReferenced(.functionConstructor("init(foo:)"))
+            }
+        }
+    }
+
     // MARK: - Inherited Initializers
 
     // https://github.com/peripheryapp/periphery/issues/957
@@ -1716,19 +1727,6 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 self.assertReferenced(.functionConstructor("init(param:)"))
             }
             assertReferenced(.class("FixtureClass221Child"))
-        }
-    }
-
-    // MARK: - Known Failures
-
-    // https://github.com/peripheryapp/periphery/issues/676
-    func testRetainsInitializerCalledOnTypeAlias() {
-        guard performKnownFailures else { return }
-
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass219")) {
-                self.assertReferenced(.functionConstructor("init(foo:)"))
-            }
         }
     }
 }
