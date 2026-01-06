@@ -314,8 +314,16 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     ) {
         let modifierNames = modifiers?.map(\.name.text) ?? []
         let accessibility = modifierNames.mapFirst { Accessibility(rawValue: $0) }
-        let attributeNames = attributes?.compactMap {
-            AttributeSyntax($0)?.attributeName.trimmed.description ?? AttributeSyntax($0)?.attributeName.firstToken(viewMode: .sourceAccurate)?.text
+        let attributeNames: [String] = attributes?.compactMap { attr in
+            guard case let .attribute(attrSyntax) = attr else { return nil }
+            let name = attrSyntax.attributeName.trimmedDescription
+
+            if let arguments = attrSyntax.arguments {
+                let arguments = arguments.trimmedDescription
+                return "\(name)(\(arguments))"
+            } else {
+                return name
+            }
         } ?? []
         let location = sourceLocationBuilder.location(at: position)
         let returnClauseTypeLocations = typeNameLocations(for: returnClause)

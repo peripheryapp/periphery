@@ -7,6 +7,7 @@
 ##### Enhancements
 
 - Added the `--no-color`/`--color` option to disable/enable colored output.
+- Added the `--no-retain-spi` option to not retain the given SPI (System Programming Interface) attributed members when using `--retain-public`.
 - Exclude wrapped properties from assign-only analysis, as Periphery cannot observe the behavior of the property wrapper.
 - Improved the readability of result messages.
 - Improved Interface Builder file parsing to detect unused `@IBOutlet`, `@IBAction`, `@IBInspectable`, and `@IBSegueAction` members. Previously, all `@IB*` members were blindly retained if their containing class was referenced in a XIB or storyboard.
