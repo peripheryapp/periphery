@@ -77,6 +77,8 @@ swift_library(
         "SourceGraph/Mutators/ProtocolExtensionReferenceBuilder.swift",
         "SourceGraph/Mutators/PubliclyAccessibleRetainer.swift",
         "SourceGraph/Mutators/RedundantExplicitPublicAccessibilityMarker.swift",
+        "SourceGraph/Mutators/RedundantFilePrivateAccessibilityMarker.swift",
+        "SourceGraph/Mutators/RedundantInternalAccessibilityMarker.swift",
         "SourceGraph/Mutators/RedundantProtocolMarker.swift",
         "SourceGraph/Mutators/ResultBuilderRetainer.swift",
         "SourceGraph/Mutators/StringInterpolationAppendInterpolationRetainer.swift",

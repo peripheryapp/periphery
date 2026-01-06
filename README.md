@@ -28,6 +28,8 @@
     - [Enumerations](#enumerations)
     - [Assign-only Properties](#assign-only-properties)
     - [Redundant Public Accessibility](#redundant-public-accessibility)
+    - [Redundant Internal Accessibility](#redundant-internal-accessibility)
+    - [Redundant Fileprivate Accessibility](#redundant-fileprivate-accessibility)
     - [Unused Imports](#unused-imports)
     - [Objective-C](#objective-c)
     - [Codable](#codable)
@@ -291,6 +293,18 @@ Declarations that are marked `public` yet are not referenced from outside their 
 - In [Whole Module Compilation](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#whole-module-optimizations-wmo) mode, Swift can infer `final` by [automatically discovering](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-if-wmo-is-enabled-use-internal-when-a-declaration-does-not-need-to-be-accessed-outside-of-module) all potentially overriding declarations. `final` classes are [better optimized](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-use-final-when-you-know-the-declaration-does-not-need-to-be-overridden) by the compiler.
 
 This analysis can be disabled with `--disable-redundant-public-analysis`.
+
+### Redundant Internal Accessibility
+
+Declarations that are marked `internal` (or are unmarked, since this is Swift's default access level), yet are not referenced outside the file they're defined in are identified as having redundant internal accessibility. In this scenario, the declaration could be marked `private` or `fileprivate`. Reducing the visibility of declarations — encapsulation — helps with code maintainability and can improve compilation performance.
+
+This analysis can be disabled with `--disable-redundant-internal-analysis`.
+
+### Redundant Fileprivate Accessibility
+
+Declarations that are marked `fileprivate` yet are not accessed from other types within the same file are identified as having redundant fileprivate accessibility. If a `fileprivate` declaration is only used within its own type, it should be marked `private` instead. Reducing the visibility of declarations helps with code maintainability and makes access boundaries clearer.
+
+This analysis can be disabled with `--disable-redundant-fileprivate-analysis`.
 
 ### Unused Imports
 
