@@ -8,7 +8,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         location: Location,
         accessibility: Accessibility?,
         modifiers: [String],
-        attributes: [String],
+        attributes: Set<DeclarationAttribute>,
         commentCommands: [CommentCommand],
         variableType: String?,
         variableTypeLocations: Set<Location>,
@@ -314,18 +314,20 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     ) {
         let modifierNames = modifiers?.map(\.name.text) ?? []
         let accessibility = modifierNames.mapFirst { Accessibility(rawValue: $0) }
-        let attributeNames: [String] = attributes?.compactMap { attr in
-            guard case let .attribute(attrSyntax) = attr else { return nil }
 
-            let name = attrSyntax.attributeName.trimmedDescription
+        var parsedAttributes: Set<DeclarationAttribute> = []
 
-            if let arguments = attrSyntax.arguments {
-                let arguments = arguments.trimmedDescription
-                return "\(name)(\(arguments))"
-            } else {
-                return name
+        if let attributes {
+            parsedAttributes = attributes.compactMapSet { attr in
+                guard case let .attribute(attrSyntax) = attr else { return nil }
+
+                return DeclarationAttribute(
+                    name: attrSyntax.attributeName.trimmedDescription,
+                    arguments: attrSyntax.arguments?.trimmedDescription
+                )
             }
-        } ?? []
+        }
+
         let location = sourceLocationBuilder.location(at: position)
         let returnClauseTypeLocations = typeNameLocations(for: returnClause)
         let parameterClauseTypes = parameterClause?.parameters.map(\.type) ?? []
@@ -347,7 +349,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             location: location,
             accessibility: accessibility,
             modifiers: modifierNames,
-            attributes: attributeNames,
+            attributes: parsedAttributes,
             commentCommands: CommentCommand.parseCommands(in: trivia),
             variableType: type(for: variableType),
             variableTypeLocations: typeLocations(for: variableType),

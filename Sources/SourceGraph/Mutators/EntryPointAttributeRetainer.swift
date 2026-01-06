@@ -14,9 +14,9 @@ final class EntryPointAttributeRetainer: SourceGraphMutator {
             .declarations(ofKinds: [.class, .struct, .enum])
             .lazy
             .filter {
-                $0.attributes.contains("NSApplicationMain") ||
-                    $0.attributes.contains("UIApplicationMain") ||
-                    $0.attributes.contains("main")
+                $0.attributes.contains(where: { $0.name == "NSApplicationMain" }) ||
+                    $0.attributes.contains(where: { $0.name == "UIApplicationMain" }) ||
+                    $0.attributes.contains(where: { $0.name == "main" })
             }
             .forEach {
                 graph.markRetained($0)
@@ -26,7 +26,7 @@ final class EntryPointAttributeRetainer: SourceGraphMutator {
                     graph.markRetained(ancestralDeclaration)
                 }
 
-                if $0.attributes.contains("main") {
+                if $0.attributes.contains(where: { $0.name == "main" }) {
                     // @main requires a static main() function.
                     $0.declarations
                         .filter { $0.kind == .functionMethodStatic && $0.name == "main()" }

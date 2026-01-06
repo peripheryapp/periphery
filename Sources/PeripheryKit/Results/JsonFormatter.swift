@@ -23,7 +23,7 @@ final class JsonFormatter: OutputFormatter {
                 "modules": location.file.modules.sorted(),
                 "name": result.declaration.name ?? "",
                 "modifiers": result.declaration.modifiers.sorted(),
-                "attributes": result.declaration.attributes.sorted(),
+                "attributes": result.declaration.attributes.sorted().map(\.description),
                 "accessibility": result.declaration.accessibility.value.rawValue,
                 "ids": result.declaration.usrs.sorted(),
                 "hints": [describe(result.annotation)],

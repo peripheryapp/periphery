@@ -48,6 +48,7 @@ swift_library(
         "SourceGraph/Elements/AssetReference.swift",
         "SourceGraph/Elements/CommentCommand.swift",
         "SourceGraph/Elements/Declaration.swift",
+        "SourceGraph/Elements/DeclarationAttribute.swift",
         "SourceGraph/Elements/ImportStatement.swift",
         "SourceGraph/Elements/Location.swift",
         "SourceGraph/Elements/ProjectFileKind.swift",

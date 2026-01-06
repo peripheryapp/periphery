@@ -113,9 +113,9 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
                     }
 
                     return $0.parent
-                } else if decl.attributes.contains("propertyWrapper") {
+                } else if decl.attributes.contains(where: { $0.name == "propertyWrapper" }) {
                     return $0.parent
-                } else if let parent = $0.parent, parent.attributes.contains("inlinable") {
+                } else if let parent = $0.parent, parent.attributes.contains(where: { $0.name == "inlinable" }) {
                     // Declarations referenced within a public @inlinable function must either be
                     // public or @useableFromInline.
                     return parent
