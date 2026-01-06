@@ -22,7 +22,7 @@ final class CsvFormatter: OutputFormatter {
                 kind: declarationKind(from: result.declaration),
                 name: result.declaration.name,
                 modifiers: result.declaration.modifiers,
-                attributes: result.declaration.attributes,
+                attributes: result.declaration.attributes.mapSet(\.description),
                 accessibility: result.declaration.accessibility.value.rawValue,
                 usrs: result.declaration.usrs,
                 location: declarationLocation(from: result.declaration),

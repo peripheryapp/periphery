@@ -5,12 +5,12 @@ import Shared
 final class PubliclyAccessibleRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
-    private let noRetainSPIAttributes: [String]
+    private let noRetainSPIAttributes: [DeclarationAttribute]
 
     required init(graph: SourceGraph, configuration: Configuration, swiftVersion _: SwiftVersion) {
         self.graph = graph
         self.configuration = configuration
-        noRetainSPIAttributes = configuration.noRetainSPI.map { "_spi(\($0))" }
+        noRetainSPIAttributes = configuration.noRetainSPI.map { DeclarationAttribute(name: "_spi", arguments: $0) }
     }
 
     func mutate() {

@@ -215,7 +215,7 @@ public final class Declaration {
     }
 
     public let location: Location
-    public var attributes: Set<String> = []
+    public var attributes: Set<DeclarationAttribute> = []
     public var modifiers: Set<String> = []
     public var accessibility: DeclarationAccessibility = .init(value: .internal, isExplicit: false)
     public let kind: Kind
@@ -319,7 +319,7 @@ extension Declaration: CustomStringConvertible {
 
     private var descriptionParts: [String] {
         let formattedName = name != nil ? "'\(name!)'" : "nil"
-        let formattedAttributes = "[" + attributes.sorted().joined(separator: ", ") + "]"
+        let formattedAttributes = "[" + attributes.sorted().map(\.description).joined(separator: ", ") + "]"
         let formattedModifiers = "[" + modifiers.sorted().joined(separator: ", ") + "]"
         let formattedCommentCommands = "[" + commentCommands.map(\.description).sorted().joined(separator: ", ") + "]"
         let formattedUsrs = "[" + usrs.sorted().joined(separator: ", ") + "]"
