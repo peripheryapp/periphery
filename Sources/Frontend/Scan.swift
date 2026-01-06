@@ -63,14 +63,14 @@ final class Scan {
         let indexInterval = logger.beginInterval("index")
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
-            let asterisk = Logger.colorize("*", .boldGreen)
+            let asterisk = logger.colorize("*", .boldGreen)
             logger.info("\(asterisk) Indexing...")
         }
 
         let indexLogger = logger.contextualized(with: "index")
         let plan = try driver.plan(logger: indexLogger)
-        let syncSourceGraph = SynchronizedSourceGraph(graph: graph)
-        let pipeline = IndexPipeline(plan: plan, graph: syncSourceGraph, logger: indexLogger, configuration: configuration, swiftVersion: swiftVersion)
+        let graphMutex = SourceGraphMutex(graph: graph)
+        let pipeline = IndexPipeline(plan: plan, graph: graphMutex, logger: indexLogger, configuration: configuration, swiftVersion: swiftVersion)
         try pipeline.perform()
         logger.endInterval(indexInterval)
     }
@@ -79,7 +79,7 @@ final class Scan {
         let analyzeInterval = logger.beginInterval("analyze")
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
-            let asterisk = Logger.colorize("*", .boldGreen)
+            let asterisk = logger.colorize("*", .boldGreen)
             logger.info("\(asterisk) Analyzing...")
         }
 

@@ -11,6 +11,7 @@ open class SourceGraphTestCase: XCTestCase {
     static var plan: IndexPlan!
     static var shell: Shell!
     static var logger: Logger!
+    static var swiftVersion: SwiftVersion!
     static var results: [ScanResult] = []
 
     private static var graph: SourceGraph!
@@ -20,8 +21,9 @@ open class SourceGraphTestCase: XCTestCase {
 
     override open class func setUp() {
         super.setUp()
-        logger = Logger(quiet: true)
-        shell = Shell(logger: logger)
+        logger = Logger(quiet: true, verbose: false, colorMode: .never)
+        shell = ShellImpl(logger: logger)
+        swiftVersion = SwiftVersion(shell: shell)
         let configuration = Configuration()
         configuration.quiet = true
         graph = SourceGraph(configuration: configuration, logger: logger)
@@ -55,10 +57,9 @@ open class SourceGraphTestCase: XCTestCase {
         }
 
         graph = SourceGraph(configuration: configuration, logger: logger)
-        let swiftVersion = SwiftVersion(shell: shell)
         let pipeline = IndexPipeline(
             plan: newPlan,
-            graph: SynchronizedSourceGraph(graph: graph),
+            graph: SourceGraphMutex(graph: graph),
             logger: logger.contextualized(with: "index"),
             configuration: configuration,
             swiftVersion: swiftVersion

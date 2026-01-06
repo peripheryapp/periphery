@@ -215,7 +215,7 @@ public final class Declaration {
     }
 
     public let location: Location
-    public var attributes: Set<String> = []
+    public var attributes: Set<DeclarationAttribute> = []
     public var modifiers: Set<String> = []
     public var accessibility: DeclarationAccessibility = .init(value: .internal, isExplicit: false)
     public let kind: Kind
@@ -295,6 +295,7 @@ public final class Declaration {
 
     func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {
         guard let parent else { return false }
+
         return parent.kind == kind
     }
 }
@@ -318,7 +319,7 @@ extension Declaration: CustomStringConvertible {
 
     private var descriptionParts: [String] {
         let formattedName = name != nil ? "'\(name!)'" : "nil"
-        let formattedAttributes = "[" + attributes.sorted().joined(separator: ", ") + "]"
+        let formattedAttributes = "[" + attributes.sorted().map(\.description).joined(separator: ", ") + "]"
         let formattedModifiers = "[" + modifiers.sorted().joined(separator: ", ") + "]"
         let formattedCommentCommands = "[" + commentCommands.map(\.description).sorted().joined(separator: ", ") + "]"
         let formattedUsrs = "[" + usrs.sorted().joined(separator: ", ") + "]"
@@ -339,11 +340,26 @@ extension Declaration: CustomStringConvertible {
 
 extension Declaration: Comparable {
     public static func < (lhs: Declaration, rhs: Declaration) -> Bool {
-        if lhs.location == rhs.location {
+        var lhsLocation = lhs.location
+        var rhsLocation = rhs.location
+
+        if let locationOverride = lhs.commentCommands.locationOverride {
+            let (path, line, column) = locationOverride
+            let sourceFile = SourceFile(path: path, modules: [])
+            lhsLocation = Location(file: sourceFile, line: line, column: column)
+        }
+
+        if let locationOverride = rhs.commentCommands.locationOverride {
+            let (path, line, column) = locationOverride
+            let sourceFile = SourceFile(path: path, modules: [])
+            rhsLocation = Location(file: sourceFile, line: line, column: column)
+        }
+
+        if lhsLocation == rhsLocation {
             return lhs.usrs.sorted().joined() < rhs.usrs.sorted().joined()
         }
 
-        return lhs.location < rhs.location
+        return lhsLocation < rhsLocation
     }
 }
 

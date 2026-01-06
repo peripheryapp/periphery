@@ -35,6 +35,7 @@
     - [Codable](#codable)
     - [XCTestCase](#xctestcase)
     - [Interface Builder](#interface-builder)
+    - [SPI (System Programming Interface)](#spi-system-programming-interface)
 - [Comment Commands](#comment-commands)
 - [Xcode Integration](#xcode-integration)
 - [Excluding Files](#excluding-files)
@@ -333,6 +334,19 @@ Any class that inherits `XCTestCase` is automatically retained along with its te
 
 If your project contains Interface Builder files (such as storyboards and XIBs), Periphery will take these into account when identifying unused declarations. Periphery parses these files to identify which classes, `@IBOutlet` properties, `@IBAction` methods, and `@IBInspectable` properties are actually referenced. Only those members that are connected in the Interface Builder file will be retained. Any `@IB*` members that are declared but not connected will be reported as unused.
 
+### SPI (System Programming Interface)
+
+Swift's `@_spi` attribute marks declarations as pseudo-private, making them accessible only to clients that explicitly import the SPI. While these declarations are technically `public`, they're intended for internal or restricted use.
+
+When using `--retain-public` for framework projects, all public declarations are retained, including those marked with `@_spi`. However, you may want to check for unused code within specific SPIs. The `--no-retain-spi` option allows you to specify which SPIs should be checked for unused code even when `--retain-public` is enabled.
+
+For example, with `--retain-public --no-retain-spi Internal`, Periphery will:
+- Retain regular `public` declarations
+- Retain `@_spi(Testing) public` declarations (different SPI)
+- **Check** `@_spi(Internal) public` declarations for unused code
+
+This is particularly useful for internal SPIs that should be audited for unused code while still retaining the framework's public API.
+
 ## Comment Commands
 
 For whatever reason, you may want to keep some unused code. Source code comment commands can be used to ignore specific declarations and exclude them from the results.
@@ -371,7 +385,7 @@ In generated code scenarios where the generated code is too low-level or obtuse 
 func generatedFunction() {}
 ```
 
-The `kind` override allows you to specify a custom kind that will be shown in the result. The `location` override uses the format `file:line:column` (line and column default to 1 if omitted). This is particularly useful when you want to report results at a higher-level definition rather than at the low-level generated code.
+The `kind` override allows you to specify a custom kind that will be shown in the result. The `location` override uses the format `file:line:column` (line and column default to 1 if omitted). This is particularly useful when you want to report results at a higher-level definition rather than at the low-level generated code. The `location` file path is assumed to be relative to the project root if a relative path is given.
 
 ## Xcode Integration
 

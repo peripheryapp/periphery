@@ -14,14 +14,14 @@ public struct IndexUnit {
 
 final class SwiftIndexer: Indexer {
     private let sourceFiles: [SourceFile: [IndexUnit]]
-    private let graph: SynchronizedSourceGraph
+    private let graph: SourceGraphMutex
     private let logger: ContextualLogger
     private let configuration: Configuration
     private let swiftVersion: SwiftVersion
 
     required init(
         sourceFiles: [SourceFile: [IndexUnit]],
-        graph: SynchronizedSourceGraph,
+        graph: SourceGraphMutex,
         logger: ContextualLogger,
         configuration: Configuration,
         swiftVersion: SwiftVersion
@@ -80,15 +80,16 @@ final class SwiftIndexer: Indexer {
 
     private func debug(logger: ContextualLogger, sourceFile: SourceFile, elapsed: String) {
         guard configuration.verbose else { return }
+
         let modules = sourceFile.modules.joined(separator: ", ")
         logger.debug("\(sourceFile.path.string) (\(modules)) (\(elapsed)s)")
     }
 
-    private class Job {
+    private final class Job {
         let sourceFile: SourceFile
 
         private let units: [IndexUnit]
-        private let graph: SynchronizedSourceGraph
+        private let graph: SourceGraphMutex
         private let logger: ContextualLogger
         private let configuration: Configuration
         private var retainAllDeclarations: Bool
@@ -98,7 +99,7 @@ final class SwiftIndexer: Indexer {
             sourceFile: SourceFile,
             units: [IndexUnit],
             retainAllDeclarations: Bool,
-            graph: SynchronizedSourceGraph,
+            graph: SourceGraphMutex,
             logger: ContextualLogger,
             configuration: Configuration,
             swiftVersion: SwiftVersion
@@ -216,11 +217,11 @@ final class SwiftIndexer: Indexer {
                 decl.isObjcAccessible = key.isObjcAccessible
 
                 if decl.isImplicit {
-                    graph.markRetained(decl)
+                    graph.withLock { $0.markRetained(decl) }
                 }
 
                 if decl.isObjcAccessible, configuration.retainObjcAccessible {
-                    graph.markRetained(decl)
+                    graph.withLock { $0.markRetained(decl) }
                 }
 
                 let relations = values.flatMap(\.1)
@@ -230,12 +231,12 @@ final class SwiftIndexer: Indexer {
                 declarations.append(decl)
             }
 
-            graph.withLock {
-                graph.addWithoutLock(references)
-                graph.addWithoutLock(newDeclarations)
+            graph.withLock { graph in
+                graph.add(references)
+                graph.add(newDeclarations)
 
                 if retainAllDeclarations {
-                    graph.markRetainedWithoutLock(newDeclarations)
+                    graph.markRetained(newDeclarations)
                 }
             }
 
@@ -245,8 +246,10 @@ final class SwiftIndexer: Indexer {
         /// Phase two associates latent references, and performs other actions that depend on the completed source graph.
         func phaseTwo() throws {
             if !configuration.disableUnusedImportAnalysis {
-                graph.addIndexedSourceFile(sourceFile)
-                graph.addIndexedModules(sourceFile.modules)
+                graph.withLock { graph in
+                    graph.addIndexedSourceFile(sourceFile)
+                    graph.addIndexedModules(sourceFile.modules)
+                }
             }
 
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: sourceFile, swiftVersion: swiftVersion)
@@ -260,7 +263,9 @@ final class SwiftIndexer: Indexer {
 
             if !configuration.disableUnusedImportAnalysis {
                 for stmt in sourceFile.importStatements where stmt.isExported {
-                    graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
+                    graph.withLock { graph in
+                        graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
+                    }
                 }
             }
 
@@ -281,12 +286,12 @@ final class SwiftIndexer: Indexer {
         private var extensionUsrMap: [String: String] = [:]
 
         private func establishDeclarationHierarchy() {
-            graph.withLock {
+            graph.withLock { graph in
                 for (parent, decls) in childDeclsByParentUsr {
-                    guard let parentDecl = graph.declarationWithoutLock(withUsr: parent) else {
+                    guard let parentDecl = graph.declaration(withUsr: parent) else {
                         if varParameterUsrs.contains(parent) {
                             // These declarations are children of a parameter and are redundant.
-                            decls.forEach { graph.removeWithoutLock($0) }
+                            decls.forEach { graph.remove($0) }
                         }
 
                         continue
@@ -303,8 +308,8 @@ final class SwiftIndexer: Indexer {
 
         private func associateLatentReferences() {
             for (usr, refs) in referencesByUsr {
-                graph.withLock {
-                    if let decl = graph.declarationWithoutLock(withUsr: usr) {
+                graph.withLock { graph in
+                    if let decl = graph.declaration(withUsr: usr) {
                         for ref in refs {
                             associateUnsafe(ref, with: decl)
                         }
@@ -385,7 +390,7 @@ final class SwiftIndexer: Indexer {
         }
 
         private func applyDeclarationMetadata(to decl: Declaration, with result: DeclarationSyntaxVisitor.Result) {
-            graph.withLock {
+            graph.withLock { _ in
                 if let accessibility = result.accessibility {
                     decl.accessibility = .init(value: accessibility, isExplicit: true)
                 }
@@ -421,6 +426,8 @@ final class SwiftIndexer: Indexer {
                         ref.role = .functionCallMetatypeArgument
                     } else if result.typeInitializerLocations.contains(ref.location) {
                         ref.role = .initializerType
+                    } else if result.variableInitExprLocations.contains(ref.location) {
+                        ref.role = .initializerType
                     }
                 }
             }
@@ -428,14 +435,16 @@ final class SwiftIndexer: Indexer {
 
         private func retainHierarchy(_ decls: [Declaration]) {
             for decl in decls {
-                graph.markRetained(decl)
-                decl.unusedParameters.forEach { graph.markRetained($0) }
+                graph.withLock { graph in
+                    graph.markRetained(decl)
+                    decl.unusedParameters.forEach { graph.markRetained($0) }
+                }
                 retainHierarchy(Array(decl.declarations))
             }
         }
 
         private func associate(_ ref: Reference, with decl: Declaration) {
-            graph.withLock {
+            graph.withLock { _ in
                 associateUnsafe(ref, with: decl)
             }
         }
@@ -480,18 +489,18 @@ final class SwiftIndexer: Indexer {
                     }
                 }
 
-                graph.withLock {
+                graph.withLock { graph in
                     for param in params {
                         let paramDecl = param.makeDeclaration(withParent: functionDecl)
                         functionDecl.unusedParameters.insert(paramDecl)
-                        graph.addWithoutLock(paramDecl)
+                        graph.add(paramDecl)
 
                         if retainAllDeclarations {
-                            graph.markRetainedWithoutLock(paramDecl)
+                            graph.markRetained(paramDecl)
                         }
 
                         if (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) || ignoredParamNames.contains(param.name.text) {
-                            graph.markRetainedWithoutLock(paramDecl)
+                            graph.markRetained(paramDecl)
                         }
                     }
                 }
@@ -506,7 +515,6 @@ final class SwiftIndexer: Indexer {
         ) throws -> (RawDeclaration, [RawRelation])? {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
             else { return nil }
-
             guard kind != .varParameter else {
                 // Ignore indexed parameters as unused parameter identification is performed separately using SwiftSyntax.
                 // Record the USR so that we can also ignore implicit accessor declarations.
@@ -640,7 +648,6 @@ final class SwiftIndexer: Indexer {
         ) throws -> [Reference] {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
             else { return [] }
-
             guard kind != .varParameter else {
                 // Ignore indexed parameters as unused parameter identification is performed separately using SwiftSyntax.
                 return []

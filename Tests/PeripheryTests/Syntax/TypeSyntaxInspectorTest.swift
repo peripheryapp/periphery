@@ -128,7 +128,7 @@ final class TypeSyntaxInspectorTest: XCTestCase {
     }
 }
 
-private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
+private final class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
     private let syntax: SourceFileSyntax
     private let locationConverter: SourceLocationConverter
     private let sourceLocationBuilder: SourceLocationBuilder
@@ -139,7 +139,7 @@ private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
     var results: [Location: Result] = [:]
 
     init(file: SourceFile) throws {
-        let source = try String(contentsOf: file.path.url)
+        let source = try String(contentsOf: file.path.url, encoding: .utf8)
         syntax = Parser.parse(source: source)
         locationConverter = .init(fileName: file.path.string, tree: syntax)
         sourceLocationBuilder = .init(file: file, locationConverter: locationConverter)

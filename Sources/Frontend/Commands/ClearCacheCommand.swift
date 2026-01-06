@@ -4,7 +4,7 @@ import Foundation
 import Logger
 import Shared
 
-struct ClearCacheCommand: FrontendCommand {
+struct ClearCacheCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "clear-cache",
         abstract: "Clear Periphery's build cache"
@@ -13,7 +13,7 @@ struct ClearCacheCommand: FrontendCommand {
     func run() throws {
         let configuration = Configuration()
         let logger = Logger(configuration: configuration)
-        let shell = Shell(logger: logger)
+        let shell = ShellImpl(logger: logger)
         try shell.exec(["rm", "-rf", Constants.cachePath().string])
     }
 }

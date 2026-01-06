@@ -258,6 +258,7 @@ public final class SourceGraph {
                 // extension SomeClass: SomeProtocol {}
                 // protocol SomeProtocol: SomeClass {}
                 guard !seenDeclarations.contains(inheritedDecl) else { continue }
+
                 references = inheritedTypeReferences(of: inheritedDecl, seenDeclarations: seenDeclarations.union([decl])).union(references)
             }
         }
@@ -340,6 +341,7 @@ public final class SourceGraph {
             .compactMap { declaration(withUsr: $0.usr) }
             .reduce(into: .init()) { result, decl in
                 guard decl.isOverride else { return }
+
                 result.insert(decl)
                 result.formUnion(allOverrideDeclarations(fromBase: decl))
             }
@@ -350,6 +352,7 @@ public final class SourceGraph {
 
         return inheritedTypeReferences(of: decl).contains {
             guard let name = $0.name else { return false }
+
             return [.protocol, .typealias].contains($0.kind) && codableTypes.contains(name)
         }
     }
@@ -359,6 +362,7 @@ public final class SourceGraph {
 
         return inheritedTypeReferences(of: decl).contains {
             guard let name = $0.name else { return false }
+
             return [.protocol, .typealias].contains($0.kind) && encodableTypes.contains(name)
         }
     }

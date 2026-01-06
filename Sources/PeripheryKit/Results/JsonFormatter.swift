@@ -1,12 +1,15 @@
 import Configuration
 import Foundation
+import Logger
 import SystemPackage
 
 final class JsonFormatter: OutputFormatter {
     let configuration: Configuration
+    let logger: Logger
     lazy var currentFilePath: FilePath = .current
 
-    init(configuration: Configuration) {
+    init(configuration: Configuration, logger: Logger) {
+        self.logger = logger
         self.configuration = configuration
     }
 
@@ -20,7 +23,7 @@ final class JsonFormatter: OutputFormatter {
                 "modules": location.file.modules.sorted(),
                 "name": result.declaration.name ?? "",
                 "modifiers": result.declaration.modifiers.sorted(),
-                "attributes": result.declaration.attributes.sorted(),
+                "attributes": result.declaration.attributes.sorted().map(\.description),
                 "accessibility": result.declaration.accessibility.value.rawValue,
                 "ids": result.declaration.usrs.sorted(),
                 "hints": [describe(result.annotation)],

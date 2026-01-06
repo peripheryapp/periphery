@@ -8,7 +8,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         location: Location,
         accessibility: Accessibility?,
         modifiers: [String],
-        attributes: [String],
+        attributes: Set<DeclarationAttribute>,
         commentCommands: [CommentCommand],
         variableType: String?,
         variableTypeLocations: Set<Location>,
@@ -20,6 +20,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         variableInitFunctionCallLocations: Set<Location>,
         functionCallMetatypeArgumentLocations: Set<Location>,
         typeInitializerLocations: Set<Location>,
+        variableInitExprLocations: Set<Location>,
         hasGenericFunctionReturnedMetatypeParameters: Bool
     )
 
@@ -200,6 +201,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
                     closureParameterClause: closureParameters,
                     returnClause: closureSignature?.returnClause,
                     variableInitFunctionCallExpr: functionCallExpr,
+                    variableInitExpr: binding.initializer?.value,
                     at: binding.positionAfterSkippingLeadingTrivia
                 )
             } else if let tuplePatternSyntax = binding.pattern.as(TuplePatternSyntax.self) {
@@ -306,14 +308,26 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         genericParameterClause: GenericParameterClauseSyntax? = nil,
         genericWhereClause: GenericWhereClauseSyntax? = nil,
         variableInitFunctionCallExpr: FunctionCallExprSyntax? = nil,
+        variableInitExpr: ExprSyntax? = nil,
         typeInitializerClause: TypeInitializerClauseSyntax? = nil,
         at position: AbsolutePosition
     ) {
         let modifierNames = modifiers?.map(\.name.text) ?? []
         let accessibility = modifierNames.mapFirst { Accessibility(rawValue: $0) }
-        let attributeNames = attributes?.compactMap {
-            AttributeSyntax($0)?.attributeName.trimmed.description ?? AttributeSyntax($0)?.attributeName.firstToken(viewMode: .sourceAccurate)?.text
-        } ?? []
+
+        var parsedAttributes: Set<DeclarationAttribute> = []
+
+        if let attributes {
+            parsedAttributes = attributes.compactMapSet { attr in
+                guard case let .attribute(attrSyntax) = attr else { return nil }
+
+                return DeclarationAttribute(
+                    name: attrSyntax.attributeName.trimmedDescription,
+                    arguments: attrSyntax.arguments?.trimmedDescription
+                )
+            }
+        }
+
         let location = sourceLocationBuilder.location(at: position)
         let returnClauseTypeLocations = typeNameLocations(for: returnClause)
         let parameterClauseTypes = parameterClause?.parameters.map(\.type) ?? []
@@ -335,7 +349,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             location: location,
             accessibility: accessibility,
             modifiers: modifierNames,
-            attributes: attributeNames,
+            attributes: parsedAttributes,
             commentCommands: CommentCommand.parseCommands(in: trivia),
             variableType: type(for: variableType),
             variableTypeLocations: typeLocations(for: variableType),
@@ -347,6 +361,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             variableInitFunctionCallLocations: locations(for: variableInitFunctionCallExpr),
             functionCallMetatypeArgumentLocations: functionCallMetatypeArgumentLocations(for: variableInitFunctionCallExpr),
             typeInitializerLocations: typeLocations(for: typeInitializerClause?.value),
+            variableInitExprLocations: memberBaseLocations(for: variableInitExpr),
             hasGenericFunctionReturnedMetatypeParameters: hasGenericFunctionReturnedMetatypeParameters
         ))
     }
@@ -379,11 +394,13 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
 
     private func type(for typeSyntax: TypeSyntax?) -> String? {
         guard let typeSyntax else { return nil }
+
         return typeSyntaxInspector.type(for: typeSyntax)
     }
 
     private func typeLocations(for typeSyntax: TypeSyntax?) -> Set<Location> {
         guard let typeSyntax else { return [] }
+
         return typeSyntaxInspector.typeLocations(for: typeSyntax)
     }
 
@@ -503,6 +520,53 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
                     result.insert(location)
                 }
             }
+    }
+
+    /// Extracts locations of type references from member access expressions in variable initializers.
+    /// For example, in `[SomeEnum.foo]`, this returns the location of `SomeEnum`.
+    private func memberBaseLocations(for expr: ExprSyntax?) -> Set<Location> {
+        guard let expr else { return [] }
+
+        var locations = Set<Location>()
+        collectMemberBaseLocations(from: expr, into: &locations)
+        return locations
+    }
+
+    private func collectMemberBaseLocations(from expr: ExprSyntax, into locations: inout Set<Location>) {
+        if let arrayExpr = expr.as(ArrayExprSyntax.self) {
+            for element in arrayExpr.elements {
+                collectMemberBaseLocations(from: element.expression, into: &locations)
+            }
+        } else if let dictExpr = expr.as(DictionaryExprSyntax.self) {
+            if case let .elements(elements) = dictExpr.content {
+                for element in elements {
+                    collectMemberBaseLocations(from: element.key, into: &locations)
+                    collectMemberBaseLocations(from: element.value, into: &locations)
+                }
+            }
+        } else if let memberExpr = expr.as(MemberAccessExprSyntax.self) {
+            if let baseIdentifier = memberExpr.base?.as(DeclReferenceExprSyntax.self) {
+                let location = sourceLocationBuilder.location(at: baseIdentifier.positionAfterSkippingLeadingTrivia)
+                locations.insert(location)
+            } else if let base = memberExpr.base {
+                collectMemberBaseLocations(from: base, into: &locations)
+            }
+        } else if let tupleExpr = expr.as(TupleExprSyntax.self) {
+            for element in tupleExpr.elements {
+                collectMemberBaseLocations(from: element.expression, into: &locations)
+            }
+        } else if let callExpr = expr.as(FunctionCallExprSyntax.self) {
+            for argument in callExpr.arguments {
+                collectMemberBaseLocations(from: argument.expression, into: &locations)
+            }
+        } else if let ternaryExpr = expr.as(TernaryExprSyntax.self) {
+            collectMemberBaseLocations(from: ternaryExpr.thenExpression, into: &locations)
+            collectMemberBaseLocations(from: ternaryExpr.elseExpression, into: &locations)
+        } else if let sequenceExpr = expr.as(SequenceExprSyntax.self) {
+            for element in sequenceExpr.elements {
+                collectMemberBaseLocations(from: element, into: &locations)
+            }
+        }
     }
 }
 

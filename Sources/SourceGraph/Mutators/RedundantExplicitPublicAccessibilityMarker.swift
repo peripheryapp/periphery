@@ -20,12 +20,14 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
         for decl in nonExtensionKinds {
             // Open declarations are not yet implemented.
             guard !decl.accessibility.isExplicitly(.open) else { continue }
+
             try validate(decl)
         }
 
         for decl in extensionKinds {
             // Open declarations are not yet implemented.
             guard !decl.accessibility.isExplicitly(.open) else { continue }
+
             try validateExtension(decl)
         }
     }
@@ -69,6 +71,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     private func mark(_ decl: Declaration) {
         // This declaration may already be retained by a comment command.
         guard !graph.isRetained(decl) else { return }
+
         graph.markRedundantPublicAccessibility(decl, modules: decl.location.file.modules)
     }
 
@@ -110,9 +113,9 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
                     }
 
                     return $0.parent
-                } else if decl.attributes.contains("propertyWrapper") {
+                } else if decl.attributes.contains(where: { $0.name == "propertyWrapper" }) {
                     return $0.parent
-                } else if let parent = $0.parent, parent.attributes.contains("inlinable") {
+                } else if let parent = $0.parent, parent.attributes.contains(where: { $0.name == "inlinable" }) {
                     // Declarations referenced within a public @inlinable function must either be
                     // public or @useableFromInline.
                     return parent

@@ -12,8 +12,8 @@ final class XcodebuildBuildProjectTest: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        let logger = Logger(quiet: true)
-        let shell = Shell(logger: logger)
+        let logger = Logger(quiet: true, verbose: false, colorMode: .never)
+        let shell = ShellImpl(logger: logger)
         var loadedProjectPaths: Set<FilePath> = []
         xcodebuild = Xcodebuild(shell: shell, logger: logger)
         project = try! XcodeProject(path: UIKitProjectPath, loadedProjectPaths: &loadedProjectPaths, xcodebuild: xcodebuild, shell: shell, logger: logger)

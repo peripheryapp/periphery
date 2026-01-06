@@ -2,7 +2,7 @@ import Configuration
 @testable import TestShared
 import XCTest
 
-class RedundantPublicAccessibilityTest: SPMSourceGraphTestCase {
+final class RedundantPublicAccessibilityTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 
@@ -49,6 +49,12 @@ class RedundantPublicAccessibilityTest: SPMSourceGraphTestCase {
 
         assertNotRedundantPublicAccessibility(.struct("PublicTypeUsedAsPublicPropertyInitializer_Simple"))
         assertNotRedundantPublicAccessibility(.struct("PublicTypeUsedAsPublicPropertyInitializer_GenericParameter"))
+        assertNotRedundantPublicAccessibility(.enum("PublicTypeUsedAsPublicPropertyInitializer_ArrayLiteralEnum"))
+        assertNotRedundantPublicAccessibility(.enum("PublicTypeUsedAsPublicPropertyInitializer_DictLiteralKeyEnum"))
+        assertNotRedundantPublicAccessibility(.enum("PublicTypeUsedAsPublicPropertyInitializer_DictLiteralValueEnum"))
+        assertNotRedundantPublicAccessibility(.enum("PublicTypeUsedAsPublicPropertyInitializer_DirectMemberAccessEnum"))
+        assertNotRedundantPublicAccessibility(.enum("PublicTypeUsedAsPublicPropertyInitializer_SetLiteralEnum"))
+        assertNotRedundantPublicAccessibility(.enum("PublicTypeUsedAsPublicPropertyInitializer_TernaryEnum"))
     }
 
     func testPublicTypeUsedAsPublicInitializerParameterType() {

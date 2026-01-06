@@ -1,13 +1,16 @@
 import Configuration
 import Foundation
+import Logger
 import SourceGraph
 import SystemPackage
 
 final class CsvFormatter: OutputFormatter {
     let configuration: Configuration
+    let logger: Logger
     lazy var currentFilePath: FilePath = .current
 
-    init(configuration: Configuration) {
+    init(configuration: Configuration, logger: Logger) {
+        self.logger = logger
         self.configuration = configuration
     }
 
@@ -19,7 +22,7 @@ final class CsvFormatter: OutputFormatter {
                 kind: declarationKind(from: result.declaration),
                 name: result.declaration.name,
                 modifiers: result.declaration.modifiers,
-                attributes: result.declaration.attributes,
+                attributes: result.declaration.attributes.mapSet(\.description),
                 accessibility: result.declaration.accessibility.value.rawValue,
                 usrs: result.declaration.usrs,
                 location: declarationLocation(from: result.declaration),

@@ -18,6 +18,7 @@ final class CodablePropertyRetainer: SourceGraphMutator {
 
                 for decl in decl.declarations {
                     guard decl.kind == .varInstance else { continue }
+
                     graph.markRetained(decl)
                 }
             }
@@ -27,6 +28,7 @@ final class CodablePropertyRetainer: SourceGraphMutator {
 
                 for decl in decl.declarations {
                     guard decl.kind == .varInstance else { continue }
+
                     graph.markRetained(decl)
                 }
             }

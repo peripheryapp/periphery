@@ -3,8 +3,6 @@ import SystemPackage
 import XCTest
 
 final class RetentionTest: FixtureSourceGraphTestCase {
-    let performKnownFailures = false
-
     func testNonReferencedClass() {
         analyze {
             assertNotReferenced(.class("FixtureClass1"))
@@ -1163,9 +1161,14 @@ final class RetentionTest: FixtureSourceGraphTestCase {
 
     func testCommentCommandOverride() {
         analyze(retainPublic: true) {
+            // Test relative path override (gets converted to absolute)
             assertOverrides(.class("FixtureClass136"), [
-                .location("some/other/file.swift", 12, 34),
+                .location(FilePath.current.pushing("some/other/file.swift"), 12, 34),
                 .kind("banana"),
+            ])
+            // Test absolute path override (stays absolute)
+            assertOverrides(.class("FixtureClass137"), [
+                .location("/absolute/path/file.swift", 56, 78),
             ])
         }
     }
@@ -1702,28 +1705,39 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRetainsInitializerCalledOnTypeAlias() {
+        // Resolved by https://github.com/swiftlang/swift/commit/178d6c315dcce9d1110bb23ad905dffaf28c2c3b
+        guard Self.swiftVersion.version.isVersion(greaterThan: "6.2.3") else {
+            return
+        }
+
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClass219")) {
+                self.assertReferenced(.functionConstructor("init(foo:)"))
+            }
+        }
+    }
+
+    func testDoesNotRetainSPIMembers() {
+        analyze(retainPublic: true, noRetainSPI: ["STP"]) {
+            assertReferenced(.class("FixtureClass220")) {
+                self.assertReferenced(.functionMethodInstance("publicFunc()"))
+                self.assertNotReferenced(.functionMethodInstance("stpSpiFunc()"))
+                self.assertReferenced(.functionMethodInstance("otherSpiFunc()"))
+            }
+            assertNotReferenced(.struct("FixtureStruct220"))
+            assertReferenced(.struct("FixtureStruct221"))
+        }
+    }
+
     // MARK: - Inherited Initializers
 
-    // https://github.com/peripheryapp/periphery/issues/957
     func testRetainsSuperclassInitializerCalledOnSubclass() {
         analyze(retainPublic: true) {
             assertReferenced(.class("FixtureClass221Parent")) {
                 self.assertReferenced(.functionConstructor("init(param:)"))
             }
             assertReferenced(.class("FixtureClass221Child"))
-        }
-    }
-
-    // MARK: - Known Failures
-
-    // https://github.com/peripheryapp/periphery/issues/676
-    func testRetainsInitializerCalledOnTypeAlias() {
-        guard performKnownFailures else { return }
-
-        analyze(retainPublic: true) {
-            assertReferenced(.class("FixtureClass219")) {
-                self.assertReferenced(.functionConstructor("init(foo:)"))
-            }
         }
     }
 }

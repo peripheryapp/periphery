@@ -11,13 +11,13 @@ final class DynamicMemberRetainer: SourceGraphMutator {
 
     func mutate() throws {
         for decl in graph.declarations(ofKind: .functionSubscript) {
-            if decl.name == "subscript(dynamicMember:)", decl.parent?.attributes.contains("dynamicMemberLookup") ?? false {
+            if decl.name == "subscript(dynamicMember:)", decl.parent?.attributes.contains(where: { $0.name == "dynamicMemberLookup" }) ?? false {
                 graph.markRetained(decl)
             }
         }
 
         for decl in graph.declarations(ofKinds: Declaration.Kind.functionKinds.union(Declaration.Kind.variableKinds)) {
-            if decl.attributes.contains("_dynamicReplacement") {
+            if decl.attributes.contains(where: { $0.name == "_dynamicReplacement" }) {
                 graph.markRetained(decl)
             }
         }

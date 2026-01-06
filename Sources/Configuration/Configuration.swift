@@ -65,6 +65,9 @@ public final class Configuration {
     @Setting(key: "retain_public", defaultValue: false)
     public var retainPublic: Bool
 
+    @Setting(key: "no_retain_spi", defaultValue: [])
+    public var noRetainSPI: [String]
+
     @Setting(key: "retain_assign_only_properties", defaultValue: false)
     public var retainAssignOnlyProperties: Bool
 
@@ -101,8 +104,8 @@ public final class Configuration {
     @Setting(key: "quiet", defaultValue: false)
     public var quiet: Bool
 
-    @Setting(key: "color", defaultValue: true)
-    public var color: Bool
+    @Setting(key: "color", defaultValue: .default, setter: { ColorOption(anyValue: $0) })
+    public var color: ColorOption
 
     @Setting(key: "disable_update_check", defaultValue: false)
     public var disableUpdateCheck: Bool
@@ -175,9 +178,9 @@ public final class Configuration {
     public func load(from path: FilePath?) throws {
         guard let path = try configurationPath(withUserProvided: path) else { return }
 
-        let encodedYAML = try String(contentsOf: path.url)
+        let encodedYAML = try String(contentsOf: path.url, encoding: .utf8)
         let yaml = try Yams.load(yaml: encodedYAML) as? [String: Any] ?? [:]
-        let logger = Logger(quiet: false)
+        let logger = Logger(quiet: false, verbose: false, colorMode: .never)
 
         for (key, value) in yaml {
             if let setting = settings.first(where: { key == $0.key }) {
@@ -214,7 +217,7 @@ public final class Configuration {
 
     lazy var settings: [any AbstractSetting] = [
         $project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat,
-        $retainPublic, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible,
+        $retainPublic, $noRetainSPI, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible,
         $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis,
         $disableRedundantInternalAnalysis, $disableRedundantFilePrivateAnalysis,
         $disableUnusedImportAnalysis, $retainUnusedImportedModules, $externalEncodableProtocols, $externalCodableProtocols,
@@ -322,6 +325,7 @@ extension Setting where Value == [String] {
             defaultValue: defaultValue,
             setter: { value in
                 guard let typedValue = value as? [String] else { return nil }
+
                 return requireDefaultValues ? Array(Set(typedValue).union(defaultValue)) : typedValue
             }
         )
@@ -339,5 +343,11 @@ extension OutputFormat: Yams.ScalarRepresentable {
 extension FilePath: Yams.ScalarRepresentable {
     public func represented() -> Node.Scalar {
         string.represented()
+    }
+}
+
+extension ColorOption: Yams.ScalarRepresentable {
+    public func represented() -> Node.Scalar {
+        rawValue.represented()
     }
 }

@@ -8,7 +8,6 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
     private let workspacePaths: Set<FilePath>
     private let projectPaths: Set<FilePath>
     private let configuration: Configuration
-    private let logger: Logger
     private let shell: Shell
     private let xcodebuild: Xcodebuild
 
@@ -44,10 +43,9 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
         self.workspacePaths = workspacePaths
         self.projectPaths = projectPaths
         self.configuration = configuration
-        self.logger = logger
         self.shell = shell
         xcodebuild = Xcodebuild(shell: shell, logger: logger)
-        super.init()
+        super.init(logger: logger)
     }
 
     public var projectKindName: String {
@@ -87,22 +85,22 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
             project
         ).map(\.self).sorted()
 
-        print(Logger.colorize("\nSelect the schemes to build:", .bold))
+        print(logger.colorize("\nSelect the schemes to build:", .bold))
         print("Periphery will scan all files built by your chosen schemes.")
         configuration.schemes = select(multiple: schemes).selectedValues
 
-        print(Logger.colorize("\nDoes this project contain Objective-C code?", .bold))
+        print(logger.colorize("\nDoes this project contain Objective-C code?", .bold))
         let containsObjC = selectBoolean()
 
         if containsObjC {
-            print(Logger.colorize("\nPeriphery cannot scan Objective-C code and, as a result, cannot detect Swift types referenced by Objective-C code.", .bold))
+            print(logger.colorize("\nPeriphery cannot scan Objective-C code and, as a result, cannot detect Swift types referenced by Objective-C code.", .bold))
             print("To avoid false positives, you have a few options:")
-            let retainObjcAccessibleOption = Logger.colorize("Assume all types accessible from Objective-C are in use:", .bold) + " This includes public NSObject instances (and their subclasses), as well as any types explicitly annotated with @objc. This approach will eliminate false positives but may also result in a lot of missed unused code."
-            let retainObjcAnnotationOption = Logger.colorize("Assume only types annotated with @objc are in use:", .bold) + " This option may lead to false positives, but they can be easily corrected by adding the necessary @objc annotations."
+            let retainObjcAccessibleOption = logger.colorize("Assume all types accessible from Objective-C are in use:", .bold) + " This includes public NSObject instances (and their subclasses), as well as any types explicitly annotated with @objc. This approach will eliminate false positives but may also result in a lot of missed unused code."
+            let retainObjcAnnotationOption = logger.colorize("Assume only types annotated with @objc are in use:", .bold) + " This option may lead to false positives, but they can be easily corrected by adding the necessary @objc annotations."
             let objcChoice = select(single: [
                 retainObjcAccessibleOption,
                 retainObjcAnnotationOption,
-                Logger.colorize("Do nothing:", .bold) + " Do not assume any Swift types are used in Objective-C code.",
+                logger.colorize("Do nothing:", .bold) + " Do not assume any Swift types are used in Objective-C code.",
             ])
 
             if objcChoice == retainObjcAccessibleOption {
@@ -140,6 +138,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
     private func getPodSchemes(in project: XcodeProjectlike) throws -> Set<String> {
         let path = project.sourceRoot.appending("Pods/Pods.xcodeproj")
         guard path.exists else { return [] }
+
         return try xcodebuild.schemes(
             type: "project",
             path: path.lexicallyNormalized().string,
@@ -158,7 +157,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
         var workspacePath: FilePath?
 
         if workspacePaths.count > 1 {
-            print(Logger.colorize("Found multiple workspaces, please select the one that defines the schemes for building your project:", .bold))
+            print(logger.colorize("Found multiple workspaces, please select the one that defines the schemes for building your project:", .bold))
             let workspaces = workspacePaths.map { $0.relativeTo(.current).string }
             let workspace = select(single: workspaces)
             workspacePath = FilePath.makeAbsolute(workspace)
@@ -179,7 +178,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
         var projectPath: FilePath?
 
         if projectPaths.count > 1 {
-            print(Logger.colorize("Found multiple projects, please select the one that defines the schemes for building your project:", .bold))
+            print(logger.colorize("Found multiple projects, please select the one that defines the schemes for building your project:", .bold))
             let projects = projectPaths.map { $0.relativeTo(.current).string }.sorted()
             let project = select(single: projects)
             projectPath = FilePath.makeAbsolute(project)

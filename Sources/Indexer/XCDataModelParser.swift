@@ -14,8 +14,10 @@ final class XCDataModelParser {
         try FileManager.default.contentsOfDirectory(atPath: path.string).flatMap { subPath -> [AssetReference] in
             let modelPath = path.appending(subPath)
             guard modelPath.extension == "xcdatamodel" else { return [] }
+
             let contentsPath = modelPath.appending("contents")
             guard let data = FileManager.default.contents(atPath: contentsPath.string) else { return [] }
+
             let structure = try AEXMLDocument(xml: data)
             return references(from: structure.root).map {
                 AssetReference(absoluteName: $0, source: .xcDataModel)

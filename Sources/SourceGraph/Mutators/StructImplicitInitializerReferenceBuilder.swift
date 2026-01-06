@@ -26,6 +26,7 @@ final class StructImplicitInitializerReferenceBuilder: SourceGraphMutator {
                 let initPropertyDecls = structDecl.declarations.filter {
                     guard $0.kind == .varInstance, let name = $0.name, propertyNames.contains(name)
                     else { return false }
+
                     return true
                 }
 

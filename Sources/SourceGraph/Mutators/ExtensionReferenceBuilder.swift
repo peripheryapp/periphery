@@ -20,7 +20,6 @@ final class ExtensionReferenceBuilder: SourceGraphMutator {
     private func foldExtension(kind: Declaration.Kind) throws {
         for extensionDeclaration in graph.declarations(ofKind: kind) {
             guard let extendedTypeReference = try graph.extendedDeclarationReference(forExtension: extensionDeclaration) else { continue }
-
             guard let extendedDeclaration = graph.declaration(withUsr: extendedTypeReference.usr) else {
                 // This is an extension on an external type and cannot be folded.
                 graph.markRetained(extensionDeclaration)

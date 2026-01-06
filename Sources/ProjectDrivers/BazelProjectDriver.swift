@@ -4,7 +4,7 @@ import Logger
 import Shared
 import SystemPackage
 
-public class BazelProjectDriver: ProjectDriver {
+public final class BazelProjectDriver: ProjectDriver {
     public static var isSupported: Bool {
         FilePath("MODULE.bazel").exists || FilePath("WORKSPACE").exists
     }
@@ -86,7 +86,7 @@ public class BazelProjectDriver: ProjectDriver {
         let buildPath = outputPath.appending("BUILD.bazel")
         let deps = try queryTargets().joined(separator: ",\n")
         let globalIndexStoreValue = configuration.bazelIndexStore.map {
-            "\"\(FilePath.makeAbsolute($0)))\""
+            "\"\($0.makeAbsolute()))\""
         } ?? "None"
         let buildFileContents = """
         load("@periphery//bazel:rules.bzl", "scan")
@@ -106,7 +106,7 @@ public class BazelProjectDriver: ProjectDriver {
         contextLogger.debug("Build file written to \(buildPath)")
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
-            let asterisk = Logger.colorize("*", .boldGreen)
+            let asterisk = logger.colorize("*", .boldGreen)
             logger.info("\(asterisk) Building...")
         }
 

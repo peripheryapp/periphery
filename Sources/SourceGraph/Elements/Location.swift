@@ -1,7 +1,7 @@
 import Foundation
 import SystemPackage
 
-public class Location {
+public final class Location {
     public let file: SourceFile
     public let line: Int
     public let column: Int

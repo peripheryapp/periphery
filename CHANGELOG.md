@@ -2,23 +2,40 @@
 
 ##### Breaking
 
+- The `--no-color` option has been replaced with `--color=never`.
+
+##### Enhancements
+
+- The `--color` option now accepts one of `auto`, `always` and `never`. In `auto` mode, color is disabled for dumb terminals and non-TTYs.
+
+##### Bug Fixes
+
+- None.
+
+## 3.4.0 (2026-01-06)
+
+##### Breaking
+
 - None.
 
 ##### Enhancements
 
 - Added the `--no-color`/`--color` option to disable/enable colored output.
+- Added the `--no-retain-spi` option to not retain the given SPI (System Programming Interface) attributed members when using `--retain-public`.
 - Exclude wrapped properties from assign-only analysis, as Periphery cannot observe the behavior of the property wrapper.
 - Improved the readability of result messages.
 - Improved Interface Builder file parsing to detect unused `@IBOutlet`, `@IBAction`, `@IBInspectable`, and `@IBSegueAction` members. Previously, all `@IB*` members were blindly retained if their containing class was referenced in a XIB or storyboard.
 
 ##### Bug Fixes
 
+- Fix redundant public accessibility false positive for types referenced via static members in property initializers.
 - Fix inline ignore comment not working on properties.
 - Fix false positive when a constrained protocol extension provides a default implementation that satisfies a requirement of the constraining protocol.
 - Fix indexing of xib/storyboard files in SPM projects.
 - Fix types conforming to App Intents protocols being reported as unused.
 - Fix superclass initializer reported as unused when called on subclass.
 - Fix unused parameter false-positive for parameters used in closure capture lists.
+- Fix sorting of results with a location override.
 
 ## 3.3.0 (2025-12-13)
 

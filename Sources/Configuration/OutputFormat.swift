@@ -18,6 +18,7 @@ public enum OutputFormat: String, CaseIterable {
             return
         }
         guard let stringValue = anyValue as? String else { return nil }
+
         self.init(rawValue: stringValue)
     }
 

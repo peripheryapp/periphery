@@ -1,13 +1,16 @@
 import Configuration
 import Foundation
+import Logger
 import SourceGraph
 import SystemPackage
 
 final class CheckstyleFormatter: OutputFormatter {
     let configuration: Configuration
+    let logger: Logger
     lazy var currentFilePath: FilePath = .current
 
-    init(configuration: Configuration) {
+    init(configuration: Configuration, logger: Logger) {
+        self.logger = logger
         self.configuration = configuration
     }
 

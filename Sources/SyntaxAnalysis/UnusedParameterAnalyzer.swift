@@ -37,6 +37,7 @@ public final class UnusedParameterAnalyzer {
 
     private func unusedParams(in function: Function) -> [Parameter] {
         guard !function.attributes.contains(where: { $0.name == "IBAction" }) else { return [] }
+
         return function.parameters.filter { !isParam($0, usedIn: function) }
     }
 

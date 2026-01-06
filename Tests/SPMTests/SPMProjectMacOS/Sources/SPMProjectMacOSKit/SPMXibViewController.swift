@@ -1,6 +1,6 @@
 import AppKit
 
-public class SPMXibViewController: NSViewController {
+public final class SPMXibViewController: NSViewController {
     // MARK: - Referenced via XIB (connected)
 
     @IBOutlet var button: NSButton!

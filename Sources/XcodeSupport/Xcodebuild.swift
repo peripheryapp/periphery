@@ -66,6 +66,7 @@ public final class Xcodebuild {
         guard let path = pathsToTry.first(where: { $0.exists }) else {
             throw PeripheryError.indexStoreNotFound(derivedDataPath: derivedDataPath.string)
         }
+
         return path
     }
 
@@ -111,6 +112,7 @@ public final class Xcodebuild {
     private func deserialize(_ jsonString: String) throws -> [String: Any]? {
         do {
             guard let jsonData = jsonString.data(using: .utf8) else { return nil }
+
             return try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
         } catch {
             throw PeripheryError.jsonDeserializationError(error: error, json: jsonString)

@@ -20,7 +20,11 @@ public enum SetupSelection {
 }
 
 open class SetupGuideHelpers {
-    public init() {}
+    public let logger: Logger
+
+    public init(logger: Logger) {
+        self.logger = logger
+    }
 
     func display(options: [String]) {
         let maxPaddingCount = String(options.count).count
@@ -28,14 +32,14 @@ open class SetupGuideHelpers {
         for (index, option) in options.enumerated() {
             let paddingCount = maxPaddingCount - String(index + 1).count
             let padding = String(repeating: " ", count: paddingCount)
-            print(padding + Logger.colorize("\(index + 1) ", .boldGreen) + option)
+            print(padding + logger.colorize("\(index + 1) ", .boldGreen) + option)
         }
     }
 
     public func select(single options: [String]) -> String {
         display(options: options)
-        print(Logger.colorize("?", .boldYellow) + " Type the number for the option you wish to select")
-        print(Logger.colorize("=> ", .bold), terminator: "")
+        print(logger.colorize("?", .boldYellow) + " Type the number for the option you wish to select")
+        print(logger.colorize("=> ", .bold), terminator: "")
 
         if let strChoice = readLine(strippingNewline: true)?.trimmed,
            let choice = Int(strChoice)
@@ -43,11 +47,11 @@ open class SetupGuideHelpers {
             if let option = options[safe: choice - 1] {
                 return option
             } else {
-                print(Logger.colorize("\nInvalid option: \(strChoice)\n", .boldYellow))
+                print(logger.colorize("\nInvalid option: \(strChoice)\n", .boldYellow))
             }
         }
 
-        print(Logger.colorize("\nInvalid input, expected a number.\n", .boldYellow))
+        print(logger.colorize("\nInvalid input, expected a number.\n", .boldYellow))
         return select(single: options)
     }
 
@@ -55,8 +59,8 @@ open class SetupGuideHelpers {
         let helpMsg = " Delimit choices with a single space, e.g: 1 2 3"
 
         display(options: options)
-        print(Logger.colorize("?", .boldYellow) + helpMsg)
-        print(Logger.colorize("=> ", .bold), terminator: "")
+        print(logger.colorize("?", .boldYellow) + helpMsg)
+        print(logger.colorize("=> ", .bold), terminator: "")
 
         if let strChoices = readLine(strippingNewline: true)?.trimmed.split(separator: " ", omittingEmptySubsequences: true) {
             var selected: [String] = []
@@ -67,7 +71,7 @@ open class SetupGuideHelpers {
                 {
                     selected.append(option)
                 } else {
-                    print(Logger.colorize("\nInvalid option: \(strChoice)\n", .boldYellow))
+                    print(logger.colorize("\nInvalid option: \(strChoice)\n", .boldYellow))
                     return select(multiple: options)
                 }
             }
@@ -75,16 +79,16 @@ open class SetupGuideHelpers {
             if !selected.isEmpty { return .some(selected) }
         }
 
-        print(Logger.colorize("\nInvalid input, expected a number.\n", .boldYellow))
+        print(logger.colorize("\nInvalid input, expected a number.\n", .boldYellow))
         return select(multiple: options)
     }
 
     public func selectBoolean() -> Bool {
         print(
-            "(" + Logger.colorize("Y", .boldGreen) + ")es" +
+            "(" + logger.colorize("Y", .boldGreen) + ")es" +
                 "/" +
-                "(" + Logger.colorize("N", .boldGreen) + ")o" +
-                Logger.colorize("\n=> ", .bold),
+                "(" + logger.colorize("N", .boldGreen) + ")o" +
+                logger.colorize("\n=> ", .bold),
             terminator: ""
         )
 
@@ -98,7 +102,7 @@ open class SetupGuideHelpers {
             }
         }
 
-        print(Logger.colorize("\nInvalid input, expected 'y' or 'n'.\n", .boldYellow))
+        print(logger.colorize("\nInvalid input, expected 'y' or 'n'.\n", .boldYellow))
         return selectBoolean()
     }
 }

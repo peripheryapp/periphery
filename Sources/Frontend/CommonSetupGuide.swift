@@ -6,13 +6,13 @@ import Shared
 final class CommonSetupGuide: SetupGuideHelpers {
     private let configuration: Configuration
 
-    required init(configuration: Configuration) {
+    required init(configuration: Configuration, logger: Logger) {
         self.configuration = configuration
-        super.init()
+        super.init(logger: logger)
     }
 
     func perform() throws {
-        print(Logger.colorize("\nAssume all 'public' declarations are in use?", .bold))
+        print(logger.colorize("\nAssume all 'public' declarations are in use?", .bold))
         print("Choose 'Yes' if your project is a framework/library without a main application target.")
         configuration.retainPublic = selectBoolean()
     }

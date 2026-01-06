@@ -6,10 +6,10 @@ import SystemPackage
 
 final class XCMappingModelIndexer: Indexer {
     private let files: Set<FilePath>
-    private let graph: SynchronizedSourceGraph
+    private let graph: SourceGraphMutex
     private let logger: ContextualLogger
 
-    required init(files: Set<FilePath>, graph: SynchronizedSourceGraph, logger: ContextualLogger, configuration: Configuration) {
+    required init(files: Set<FilePath>, graph: SourceGraphMutex, logger: ContextualLogger, configuration: Configuration) {
         self.files = files
         self.graph = graph
         self.logger = logger.contextualized(with: "xcmappingmodel")
@@ -24,9 +24,11 @@ final class XCMappingModelIndexer: Indexer {
             guard let self else { return }
 
             let elapsed = try Benchmark.measure {
-                try XCMappingModelParser(path: path)
+                let refs = try XCMappingModelParser(path: path)
                     .parse()
-                    .forEach { self.graph.add($0) }
+                self.graph.withLock { graph in
+                    refs.forEach { graph.add($0) }
+                }
             }
 
             logger.debug("\(path.string) (\(elapsed)s)")
