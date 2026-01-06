@@ -30,7 +30,7 @@ struct ScanCommand: ParsableCommand {
     @Option(parsing: .upToNextOption, help: "Schemes to build. All targets built by these schemes will be scanned")
     var schemes: [String] = defaultConfiguration.$schemes.defaultValue
 
-    @Option(help: "Output format (allowed: \(OutputFormat.allValueStrings.joined(separator: ", ")))")
+    @Option(help: "Output format")
     var format: OutputFormat = defaultConfiguration.$outputFormat.defaultValue
 
     @Flag(help: "Exclude test targets from indexing")
@@ -126,8 +126,11 @@ struct ScanCommand: ParsableCommand {
     @Flag(help: "Only output results")
     var quiet: Bool = defaultConfiguration.$quiet.defaultValue
 
-    @Flag(inversion: .prefixedNo, help: "Colored output")
-    var color: Bool = defaultConfiguration.$color.defaultValue
+    @Option(help: "Colored output mode")
+    var color: ColorOption = defaultConfiguration.$color.defaultValue
+
+    @Flag(name: .customLong("no-color"), help: .hidden)
+    var noColor: Bool = false
 
     @Option(help: "JSON package manifest path (obtained using `swift package describe --type json` or manually)")
     var jsonPackageManifestPath: FilePath?
@@ -191,7 +194,7 @@ struct ScanCommand: ParsableCommand {
         configuration.apply(\.$externalTestCaseClasses, externalTestCaseClasses)
         configuration.apply(\.$verbose, verbose)
         configuration.apply(\.$quiet, quiet)
-        configuration.apply(\.$color, color)
+        configuration.apply(\.$color, noColor ? .never : color)
         configuration.apply(\.$disableUpdateCheck, disableUpdateCheck)
         configuration.apply(\.$strict, strict)
         configuration.apply(\.$indexStorePath, indexStorePath)
@@ -268,7 +271,7 @@ struct ScanCommand: ParsableCommand {
 
         let outputFormat = configuration.outputFormat
         let formatter = outputFormat.formatter.init(configuration: configuration, logger: logger)
-        let colored = outputFormat.supportsColoredOutput && configuration.color
+        let colored = outputFormat.supportsColoredOutput && logger.isColoredOutputEnabled
 
         if let output = try formatter.format(filteredResults, colored: colored) {
             if outputFormat.supportsAuxiliaryOutput {
@@ -309,6 +312,7 @@ struct ScanCommand: ParsableCommand {
 }
 
 extension OutputFormat: ExpressibleByArgument {}
+extension ColorOption: ExpressibleByArgument {}
 
 extension FilePath: ArgumentParser.ExpressibleByArgument {
     public init?(argument: String) {

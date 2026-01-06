@@ -21,40 +21,46 @@ public enum ANSIColor: String {
     case gray = "\u{001B}[0;1;30m"
 }
 
+public enum LoggerColorMode: Sendable {
+    case auto
+    case always
+    case never
+}
+
 public struct Logger: Sendable {
     let outputQueue: DispatchQueue
     let quiet: Bool
     let verbose: Bool
-    let coloredOutputEnabled: Bool
+    let colorMode: LoggerColorMode
 
     #if canImport(os)
         let signposter = OSSignposter()
     #endif
 
-    private var isColorOutputCapable: Bool = {
-        guard let term = ProcessInfo.processInfo.environment["TERM"],
-              term.lowercased() != "dumb",
-              isatty(fileno(stdout)) != 0
-        else {
-            return false
+    public var isColoredOutputEnabled: Bool {
+        switch colorMode {
+        case .auto:
+            isColorOutputCapable
+        case .always:
+            true
+        case .never:
+            false
         }
-
-        return true
-    }()
+    }
 
     public init(
         quiet: Bool,
         verbose: Bool,
-        coloredOutputEnabled: Bool
+        colorMode: LoggerColorMode
     ) {
         self.quiet = quiet
         self.verbose = verbose
-        self.coloredOutputEnabled = coloredOutputEnabled
+        self.colorMode = colorMode
         outputQueue = DispatchQueue(label: "Logger.outputQueue")
     }
 
     public func colorize(_ text: String, _ color: ANSIColor) -> String {
-        guard isColorOutputCapable, coloredOutputEnabled else { return text }
+        guard isColoredOutputEnabled else { return text }
 
         return "\(color.rawValue)\(text)\u{001B}[0;0m"
     }
@@ -112,6 +118,17 @@ public struct Logger: Sendable {
     func log(_ line: String, output: UnsafeMutablePointer<FILE>) {
         _ = outputQueue.sync { fputs(line + "\n", output) }
     }
+
+    private var isColorOutputCapable: Bool = {
+        guard let term = ProcessInfo.processInfo.environment["TERM"],
+              term.lowercased() != "dumb",
+              isatty(fileno(stdout)) != 0
+        else {
+            return false
+        }
+
+        return true
+    }()
 }
 
 public struct ContextualLogger: Sendable {

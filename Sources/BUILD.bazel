@@ -275,6 +275,7 @@ swift_library(
 swift_library(
     name = "Configuration",
     srcs = [
+        "Configuration/ColorOption.swift",
         "Configuration/Configuration.swift",
         "Configuration/OutputFormat.swift",
     ],
