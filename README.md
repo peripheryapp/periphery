@@ -27,7 +27,7 @@
     - [Protocols](#protocols-1)
     - [Enumerations](#enumerations)
     - [Assign-only Properties](#assign-only-properties)
-    - [Redundant Accessibility](#redundant-accessibility)
+    - [Redundant Public Accessibility](#redundant-public-accessibility)
     - [Unused Imports](#unused-imports)
     - [Objective-C](#objective-c)
     - [Codable](#codable)
@@ -283,9 +283,7 @@ In some cases this may be the intended behavior; therefore, you have a few optio
 - Retain all assign-only properties by their type with `--retain-assign-only-property-types`. Given types must match their exact usage in the property declaration (sans optional question mark), e.g. `String`, `[String]`, `Set<String>`. Periphery is unable to resolve inferred property types, therefore in some instances, you may need to add explicit type annotations to your properties.
 - Disable assign-only property analysis entirely with `--retain-assign-only-properties`.
 
-### Redundant Accessibility
-
-#### Public
+### Redundant Public Accessibility
 
 Declarations that are marked `public` yet are not referenced from outside their home module are identified as having redundant public accessibility. In this scenario, the `public` annotation can be removed from the declaration. Removing redundant public accessibility has a couple of benefits:
 
@@ -293,18 +291,6 @@ Declarations that are marked `public` yet are not referenced from outside their 
 - In [Whole Module Compilation](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#whole-module-optimizations-wmo) mode, Swift can infer `final` by [automatically discovering](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-if-wmo-is-enabled-use-internal-when-a-declaration-does-not-need-to-be-accessed-outside-of-module) all potentially overriding declarations. `final` classes are [better optimized](https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst#advice-use-final-when-you-know-the-declaration-does-not-need-to-be-overridden) by the compiler.
 
 This analysis can be disabled with `--disable-redundant-public-analysis`.
-
-#### Internal
-
-Declarations that are marked `internal` (or are unmarked, since this is Swift's default access level), yet are not referenced outside the file they're defined in are identified as having redundant internal accessibility. In this scenario, the declaration could be marked `private` or `fileprivate`. Reducing the visibility of declarations — encapsulation — helps with code maintainability and can improve compilation performance.
-
-This analysis can be disabled with `--disable-redundant-internal-analysis`.
-
-#### Fileprivate
-
-Declarations that are marked `fileprivate` yet are not accessed from other types within the same file are identified as having redundant fileprivate accessibility. If a `fileprivate` declaration is only used within its own type, it should be marked `private` instead. Reducing the visibility of declarations helps with code maintainability and makes access boundaries clearer.
-
-This analysis can be disabled with `--disable-redundant-fileprivate-analysis`.
 
 ### Unused Imports
 

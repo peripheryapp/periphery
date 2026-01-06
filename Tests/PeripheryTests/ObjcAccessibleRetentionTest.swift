@@ -4,7 +4,7 @@ import XCTest
 
 #if os(macOS)
     final class ObjcAccessibleRetentionTest: FixtureSourceGraphTestCase {
-        let performKnownFailures = false
+        private let performKnownFailures = false
 
         // https://github.com/apple/swift/issues/56327
         func testRetainsOptionalProtocolMethodImplementedInSubclass() {
