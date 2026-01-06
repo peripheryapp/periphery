@@ -1,17 +1,15 @@
 import Configuration
 import Shared
 
-/**
- Identifies declarations explicitly marked `internal` that are not referenced outside
- the file they're defined in.
-
- Since `internal` is Swift's default access level, declarations that are only used within
- their defining file should be marked `private` or `fileprivate` instead. This improves
- encapsulation and can help with compilation performance.
-
- This mutator follows the same pattern as RedundantPublicAccessibilityMarker but checks
- for file-scoped usage instead of module-scoped usage.
- */
+/// Identifies declarations explicitly marked `internal` that are not referenced outside
+/// the file they're defined in.
+///
+/// Since `internal` is Swift's default access level, declarations that are only used within
+/// their defining file should be marked `private` or `fileprivate` instead. This improves
+/// encapsulation and can help with compilation performance.
+///
+/// This mutator follows the same pattern as RedundantPublicAccessibilityMarker but checks
+/// for file-scoped usage instead of module-scoped usage.
 final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
@@ -48,15 +46,13 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
             }
         }
 
-        /*
-          Always check descendents, even if parent is not redundant.
-
-          A parent declaration may be used outside its file (making it not redundant),
-          while still having child declarations that are only used within the same file
-          (making those children redundant). For example, a class used cross-file may have
-          an internal property only referenced within the same file - that property should
-          be flagged as redundant even though the parent class is not.
-         */
+        // Always check descendents, even if parent is not redundant.
+        //
+        // A parent declaration may be used outside its file (making it not redundant),
+        // while still having child declarations that are only used within the same file
+        // (making those children redundant). For example, a class used cross-file may have
+        // an internal property only referenced within the same file - that property should
+        // be flagged as redundant even though the parent class is not.
         markExplicitInternalDescendentDeclarations(from: decl)
     }
 

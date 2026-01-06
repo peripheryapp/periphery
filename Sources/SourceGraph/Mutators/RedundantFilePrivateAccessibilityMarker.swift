@@ -1,22 +1,20 @@
 import Configuration
 import Shared
 
-/**
- Identifies declarations explicitly marked `fileprivate` that don't actually need file-level access.
-
- Swift's `fileprivate` exists specifically to allow access from other types within the same file.
- If a `fileprivate` declaration is only accessed within its own type (not from other types in
- the same file), it should be marked `private` instead.
-
- This mutator is more complex than RedundantInternalAccessibilityMarker because it must:
- - Distinguish between access from the same type vs. different types in the same file
- - Handle extensions of types (both same-file and cross-file extensions)
- - Walk the type hierarchy to find the top-level containing type for comparison
-
- The key insight: `private` and `fileprivate` differ in that `private` is accessible only within
- the declaration and its extensions in the same file, while `fileprivate` is accessible from
- anywhere in the same file.
- */
+/// Identifies declarations explicitly marked `fileprivate` that don't actually need file-level access.
+///
+/// Swift's `fileprivate` exists specifically to allow access from other types within the same file.
+/// If a `fileprivate` declaration is only accessed within its own type (not from other types in
+/// the same file), it should be marked `private` instead.
+///
+/// This mutator is more complex than RedundantInternalAccessibilityMarker because it must:
+/// - Distinguish between access from the same type vs. different types in the same file
+/// - Handle extensions of types (both same-file and cross-file extensions)
+/// - Walk the type hierarchy to find the top-level containing type for comparison
+///
+/// The key insight: `private` and `fileprivate` differ in that `private` is accessible only within
+/// the declaration and its extensions in the same file, while `fileprivate` is accessible from
+/// anywhere in the same file.
 final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
@@ -50,15 +48,13 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
             }
         }
 
-        /*
-          Always check descendents, even if parent is not redundant.
-
-          A parent declaration may be used outside its file (making it not redundant),
-          while still having child declarations that are only used within the same file
-          (making those children redundant). For example, a class used cross-file may have
-          a fileprivate property only referenced within the same file - that property should
-          be flagged as redundant even though the parent class is not.
-         */
+        // Always check descendents, even if parent is not redundant.
+        //
+        // A parent declaration may be used outside its file (making it not redundant),
+        // while still having child declarations that are only used within the same file
+        // (making those children redundant). For example, a class used cross-file may have
+        // a fileprivate property only referenced within the same file - that property should
+        // be flagged as redundant even though the parent class is not.
         markExplicitFilePrivateDescendentDeclarations(from: decl)
     }
 
@@ -95,10 +91,8 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
         return filePrivateDeclarations.flatMapSet { descendentFilePrivateDeclarations(from: $0) }.union(filePrivateDeclarations)
     }
 
-    /**
-     Finds the top-level type declaration by walking up the parent chain.
-     Returns the outermost type that contains the given declaration.
-     */
+    /// Finds the top-level type declaration by walking up the parent chain.
+    /// Returns the outermost type that contains the given declaration.
     private func topLevelType(of decl: Declaration) -> Declaration? {
         let baseTypeKinds: Set<Declaration.Kind> = [.class, .struct, .enum, .protocol]
         let typeKinds = baseTypeKinds.union(Declaration.Kind.extensionKinds)
@@ -110,12 +104,10 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
         }
     }
 
-    /**
-     Gets the logical type for comparison purposes.
-     For extensions of types in the SAME FILE, treats the extension as the extended type.
-     For extensions of types in DIFFERENT FILES (like extending external types),
-     treats the extension as its own distinct type for the purpose of this file.
-     */
+    /// Gets the logical type for comparison purposes.
+    /// For extensions of types in the SAME FILE, treats the extension as the extended type.
+    /// For extensions of types in DIFFERENT FILES (like extending external types),
+    /// treats the extension as its own distinct type for the purpose of this file.
     private func logicalType(of decl: Declaration, inFile file: SourceFile) -> Declaration? {
         if decl.kind.isExtensionKind {
             if let extendedDecl = try? graph.extendedDeclaration(forExtension: decl),
@@ -128,15 +120,13 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
         return decl
     }
 
-    /**
-     Checks if a declaration is referenced from a different type in the same file.
-     Returns true if any same-file reference comes from a different logical type,
-     indicating that fileprivate access is necessary.
-
-     Even for top-level declarations, private and fileprivate are different:
-     - private: only accessible within the declaration itself and its extensions in the same file
-     - fileprivate: accessible from anywhere in the same file
-     */
+    /// Checks if a declaration is referenced from a different type in the same file.
+    /// Returns true if any same-file reference comes from a different logical type,
+    /// indicating that fileprivate access is necessary.
+    ///
+    /// Even for top-level declarations, private and fileprivate are different:
+    /// - private: only accessible within the declaration itself and its extensions in the same file
+    /// - fileprivate: accessible from anywhere in the same file
     private func isReferencedFromDifferentTypeInSameFile(_ decl: Declaration) -> Bool {
         let file = decl.location.file
         let sameFileReferences = graph.references(to: decl).filter { $0.location.file == file }
