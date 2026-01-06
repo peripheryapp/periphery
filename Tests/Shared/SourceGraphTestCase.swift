@@ -21,7 +21,7 @@ open class SourceGraphTestCase: XCTestCase {
 
     override open class func setUp() {
         super.setUp()
-        logger = Logger(quiet: true, verbose: false, coloredOutputEnabled: false)
+        logger = Logger(quiet: true, verbose: false, colorMode: .never)
         shell = ShellImpl(logger: logger)
         swiftVersion = SwiftVersion(shell: shell)
         let configuration = Configuration()

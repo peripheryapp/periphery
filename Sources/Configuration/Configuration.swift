@@ -98,8 +98,8 @@ public final class Configuration {
     @Setting(key: "quiet", defaultValue: false)
     public var quiet: Bool
 
-    @Setting(key: "color", defaultValue: true)
-    public var color: Bool
+    @Setting(key: "color", defaultValue: .default, setter: { ColorOption(anyValue: $0) })
+    public var color: ColorOption
 
     @Setting(key: "disable_update_check", defaultValue: false)
     public var disableUpdateCheck: Bool
@@ -174,7 +174,7 @@ public final class Configuration {
 
         let encodedYAML = try String(contentsOf: path.url, encoding: .utf8)
         let yaml = try Yams.load(yaml: encodedYAML) as? [String: Any] ?? [:]
-        let logger = Logger(quiet: false, verbose: false, coloredOutputEnabled: false)
+        let logger = Logger(quiet: false, verbose: false, colorMode: .never)
 
         for (key, value) in yaml {
             if let setting = settings.first(where: { key == $0.key }) {
@@ -336,5 +336,11 @@ extension OutputFormat: Yams.ScalarRepresentable {
 extension FilePath: Yams.ScalarRepresentable {
     public func represented() -> Node.Scalar {
         string.represented()
+    }
+}
+
+extension ColorOption: Yams.ScalarRepresentable {
+    public func represented() -> Node.Scalar {
+        rawValue.represented()
     }
 }

@@ -2,11 +2,11 @@
 
 ##### Breaking
 
-- None.
+- The `--no-color` option has been replaced with `--color=never`.
 
 ##### Enhancements
 
-- None.
+- The `--color` option now accepts one of `auto`, `always` and `never`. In `auto` mode, color is disabled for dumb terminals and non-TTYs.
 
 ##### Bug Fixes
 
