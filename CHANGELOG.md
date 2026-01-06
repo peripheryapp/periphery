@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 3.4.0 (2026-01-06)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Added the `--no-color`/`--color` option to disable/enable colored output.
 - Added the `--no-retain-spi` option to not retain the given SPI (System Programming Interface) attributed members when using `--retain-public`.
 - Exclude wrapped properties from assign-only analysis, as Periphery cannot observe the behavior of the property wrapper.
