@@ -80,11 +80,12 @@ final class SwiftIndexer: Indexer {
 
     private func debug(logger: ContextualLogger, sourceFile: SourceFile, elapsed: String) {
         guard configuration.verbose else { return }
+
         let modules = sourceFile.modules.joined(separator: ", ")
         logger.debug("\(sourceFile.path.string) (\(modules)) (\(elapsed)s)")
     }
 
-    private class Job {
+    private final class Job {
         let sourceFile: SourceFile
 
         private let units: [IndexUnit]
@@ -514,7 +515,6 @@ final class SwiftIndexer: Indexer {
         ) throws -> (RawDeclaration, [RawRelation])? {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
             else { return nil }
-
             guard kind != .varParameter else {
                 // Ignore indexed parameters as unused parameter identification is performed separately using SwiftSyntax.
                 // Record the USR so that we can also ignore implicit accessor declarations.
@@ -648,7 +648,6 @@ final class SwiftIndexer: Indexer {
         ) throws -> [Reference] {
             guard let kind = transformDeclarationKind(occurrence.symbol.kind, occurrence.symbol.subKind)
             else { return [] }
-
             guard kind != .varParameter else {
                 // Ignore indexed parameters as unused parameter identification is performed separately using SwiftSyntax.
                 return []

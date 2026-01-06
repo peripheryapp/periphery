@@ -48,6 +48,7 @@ public extension FilePath {
         for component in components {
             guard relativePathComponents.count > commonPathComponents.count else { break }
             guard relativePathComponents[commonPathComponents.count] == component else { break }
+
             commonPathComponents.append(component)
         }
 

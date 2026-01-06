@@ -325,6 +325,7 @@ extension Setting where Value == [String] {
             defaultValue: defaultValue,
             setter: { value in
                 guard let typedValue = value as? [String] else { return nil }
+
                 return requireDefaultValues ? Array(Set(typedValue).union(defaultValue)) : typedValue
             }
         )

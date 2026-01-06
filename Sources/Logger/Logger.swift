@@ -55,6 +55,7 @@ public struct Logger: Sendable {
 
     public func colorize(_ text: String, _ color: ANSIColor) -> String {
         guard isColorOutputCapable, coloredOutputEnabled else { return text }
+
         return "\(color.rawValue)\(text)\u{001B}[0;0m"
     }
 
@@ -64,16 +65,19 @@ public struct Logger: Sendable {
 
     public func info(_ text: String, canQuiet: Bool = true) {
         guard !(quiet && canQuiet) else { return }
+
         log(text, output: stdout)
     }
 
     public func debug(_ text: String) {
         guard verbose else { return }
+
         log(text, output: stdout)
     }
 
     public func warn(_ text: String, newlinePrefix: Bool = false) {
         guard !quiet else { return }
+
         if newlinePrefix {
             log("", output: stderr)
         }

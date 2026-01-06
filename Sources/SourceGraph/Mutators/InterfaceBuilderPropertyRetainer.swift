@@ -1,6 +1,6 @@
 import Foundation
 
-class InterfaceBuilderPropertyRetainer {
+final class InterfaceBuilderPropertyRetainer {
     private let graph: SourceGraph
     private let ibOutletAttributes: Set<String> = ["IBOutlet"]
     private let ibActionAttributes: Set<String> = ["IBAction", "IBSegueAction"]

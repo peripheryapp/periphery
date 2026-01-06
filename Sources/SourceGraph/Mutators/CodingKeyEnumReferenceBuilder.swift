@@ -23,6 +23,7 @@ final class CodingKeyEnumReferenceBuilder: SourceGraphMutator {
             // Retain each enum element.
             for elem in enumDeclaration.declarations {
                 guard elem.kind == .enumelement else { continue }
+
                 graph.markRetained(elem)
             }
 

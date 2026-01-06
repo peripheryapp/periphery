@@ -1,7 +1,7 @@
 import Foundation
 import SystemPackage
 
-public class SourceFile {
+public final class SourceFile {
     public let path: FilePath
     public let modules: Set<String>
     public var importStatements: [ImportStatement] = []

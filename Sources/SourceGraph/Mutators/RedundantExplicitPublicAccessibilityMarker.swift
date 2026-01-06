@@ -20,12 +20,14 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
         for decl in nonExtensionKinds {
             // Open declarations are not yet implemented.
             guard !decl.accessibility.isExplicitly(.open) else { continue }
+
             try validate(decl)
         }
 
         for decl in extensionKinds {
             // Open declarations are not yet implemented.
             guard !decl.accessibility.isExplicitly(.open) else { continue }
+
             try validateExtension(decl)
         }
     }
@@ -69,6 +71,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     private func mark(_ decl: Declaration) {
         // This declaration may already be retained by a comment command.
         guard !graph.isRetained(decl) else { return }
+
         graph.markRedundantPublicAccessibility(decl, modules: decl.location.file.modules)
     }
 

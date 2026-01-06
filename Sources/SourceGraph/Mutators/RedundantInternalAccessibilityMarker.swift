@@ -68,6 +68,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
 
     private func mark(_ decl: Declaration) {
         guard !graph.isRetained(decl) else { return }
+
         graph.markRedundantInternalAccessibility(decl, file: decl.location.file)
     }
 

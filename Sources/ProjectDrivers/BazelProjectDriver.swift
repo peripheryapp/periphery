@@ -4,7 +4,7 @@ import Logger
 import Shared
 import SystemPackage
 
-public class BazelProjectDriver: ProjectDriver {
+public final class BazelProjectDriver: ProjectDriver {
     public static var isSupported: Bool {
         FilePath("MODULE.bazel").exists || FilePath("WORKSPACE").exists
     }

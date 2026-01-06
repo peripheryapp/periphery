@@ -295,6 +295,7 @@ public final class Declaration {
 
     func isDeclaredInExtension(kind: Declaration.Kind) -> Bool {
         guard let parent else { return false }
+
         return parent.kind == kind
     }
 }

@@ -7,6 +7,7 @@ import SystemPackage
 final class BazelProjectSetupGuide: SetupGuideHelpers, SetupGuide {
     static func detect(logger: Logger) -> Self? {
         guard BazelProjectDriver.isSupported else { return nil }
+
         return Self(logger: logger)
     }
 

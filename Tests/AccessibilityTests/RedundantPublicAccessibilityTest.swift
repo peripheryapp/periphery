@@ -2,7 +2,7 @@ import Configuration
 @testable import TestShared
 import XCTest
 
-class RedundantPublicAccessibilityTest: SPMSourceGraphTestCase {
+final class RedundantPublicAccessibilityTest: SPMSourceGraphTestCase {
     override static func setUp() {
         super.setUp()
 

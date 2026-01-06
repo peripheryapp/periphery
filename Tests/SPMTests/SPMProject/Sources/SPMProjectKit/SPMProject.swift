@@ -4,5 +4,5 @@ public struct SPMProject {
     public var text = "Hello, World!"
 }
 
-public class PublicCrossModuleReferenced {}
-public class PublicCrossModuleNotReferenced {}
+public final class PublicCrossModuleReferenced {}
+public final class PublicCrossModuleNotReferenced {}

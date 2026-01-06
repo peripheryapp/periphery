@@ -138,6 +138,7 @@ public final class XcodeProjectSetupGuide: SetupGuideHelpers, SetupGuide {
     private func getPodSchemes(in project: XcodeProjectlike) throws -> Set<String> {
         let path = project.sourceRoot.appending("Pods/Pods.xcodeproj")
         guard path.exists else { return [] }
+
         return try xcodebuild.schemes(
             type: "project",
             path: path.lexicallyNormalized().string,

@@ -24,7 +24,7 @@ public extension FilePath {
 ///    - Files from the root directory of the globstar are also included.
 ///      For example, with the pattern "dir/**/*.ext" the file "dir/file.ext" is also included.
 ///    - When the pattern ends with a trailing slash, only directories are matched.
-private class Glob {
+private final class Glob {
     private let excludedDirectories: [String]
     private var isDirectoryCache: [String: Bool] = [:]
 

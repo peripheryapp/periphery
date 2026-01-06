@@ -70,6 +70,7 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
 
     private func mark(_ decl: Declaration) {
         guard !graph.isRetained(decl) else { return }
+
         graph.markRedundantFilePrivateAccessibility(decl, file: decl.location.file)
     }
 
@@ -100,6 +101,7 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
         return ancestors.last { typeDecl in
             guard typeKinds.contains(typeDecl.kind) else { return false }
             guard let parent = typeDecl.parent else { return true }
+
             return !typeKinds.contains(parent.kind)
         }
     }

@@ -12,6 +12,7 @@ final class XCMappingModelParser {
 
     func parse() throws -> [AssetReference] {
         guard let data = FileManager.default.contents(atPath: path.string) else { return [] }
+
         let structure = try AEXMLDocument(xml: data)
         return references(from: structure.root).map {
             AssetReference(absoluteName: $0, source: .xcMappingModel)

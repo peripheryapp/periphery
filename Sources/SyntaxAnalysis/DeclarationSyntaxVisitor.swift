@@ -316,6 +316,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         let accessibility = modifierNames.mapFirst { Accessibility(rawValue: $0) }
         let attributeNames: [String] = attributes?.compactMap { attr in
             guard case let .attribute(attrSyntax) = attr else { return nil }
+
             let name = attrSyntax.attributeName.trimmedDescription
 
             if let arguments = attrSyntax.arguments {
@@ -391,11 +392,13 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
 
     private func type(for typeSyntax: TypeSyntax?) -> String? {
         guard let typeSyntax else { return nil }
+
         return typeSyntaxInspector.type(for: typeSyntax)
     }
 
     private func typeLocations(for typeSyntax: TypeSyntax?) -> Set<Location> {
         guard let typeSyntax else { return [] }
+
         return typeSyntaxInspector.typeLocations(for: typeSyntax)
     }
 
@@ -521,6 +524,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
     /// For example, in `[SomeEnum.foo]`, this returns the location of `SomeEnum`.
     private func memberBaseLocations(for expr: ExprSyntax?) -> Set<Location> {
         guard let expr else { return [] }
+
         var locations = Set<Location>()
         collectMemberBaseLocations(from: expr, into: &locations)
         return locations

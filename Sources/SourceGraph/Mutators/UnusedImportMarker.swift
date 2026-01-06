@@ -133,6 +133,7 @@ final class UnusedImportMarker: SourceGraphMutator {
         } else if decl.kind == .typealias {
             let transitiveReferences = decl.references.flatMapSet { ref -> Set<Reference> in
                 guard let refDecl = graph.declaration(withUsr: ref.usr) else { return [] }
+
                 return referencedTypes(from: refDecl)
             }
             references = decl.references.union(transitiveReferences)

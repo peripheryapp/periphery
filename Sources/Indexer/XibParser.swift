@@ -12,6 +12,7 @@ final class XibParser {
 
     func parse() throws -> [AssetReference] {
         guard let data = FileManager.default.contents(atPath: path.string) else { return [] }
+
         let structure = try AEXMLDocument(xml: data)
 
         // Build a map of element id -> customClass for resolving action destinations
@@ -88,6 +89,7 @@ final class XibParser {
             for connection in child.children {
                 // Handle both regular outlets and outlet collections (for @IBOutlet arrays like [UIButton])
                 guard connection.name == "outlet" || connection.name == "outletCollection" else { continue }
+
                 if let property = connection.attributes["property"] {
                     referencesByClass[customClass]?.outlets.insert(property)
                 }

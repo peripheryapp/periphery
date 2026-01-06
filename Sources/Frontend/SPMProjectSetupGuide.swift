@@ -7,6 +7,7 @@ import SystemPackage
 final class SPMProjectSetupGuide: SetupGuideHelpers, SetupGuide {
     static func detect(logger: Logger) -> Self? {
         guard SPM.isSupported else { return nil }
+
         return Self(logger: logger)
     }
 

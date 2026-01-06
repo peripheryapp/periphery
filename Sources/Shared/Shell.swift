@@ -106,6 +106,7 @@ public final class ShellImpl: Shell {
                     encoding: .utf8
                 )
             }
+
             standardOutput = stdoutStr
         }
 
@@ -118,6 +119,7 @@ public final class ShellImpl: Shell {
                     encoding: .utf8
                 )
             }
+
             standardError = stderrStr
         }
 

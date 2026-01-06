@@ -33,6 +33,7 @@ struct TypeSyntaxInspector {
             // Simple type.
             var result: Set<TokenSyntax> = identifierType.genericArgumentClause?.arguments.flatMapSet {
                 guard case let .type(argumentType) = $0.argument else { return [] }
+
                 return types(for: argumentType)
             } ?? []
             return result.inserting(identifierType.name)
@@ -44,6 +45,7 @@ struct TypeSyntaxInspector {
             return types(for: memberType.baseType)
                 .union(memberType.genericArgumentClause?.arguments.flatMapSet {
                     guard case let .type(argumentType) = $0.argument else { return [] }
+
                     return types(for: argumentType)
                 } ?? [])
                 .union([memberType.name])

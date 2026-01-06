@@ -7,3 +7,6 @@
 --exclude Tests/XcodeTests/SwiftUIProject/
 
 --enable blockComments
+--enable blankLinesAfterGuardStatements
+--enable blankLinesAroundMark
+--enable blankLinesBetweenImports

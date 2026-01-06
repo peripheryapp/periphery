@@ -128,7 +128,7 @@ final class TypeSyntaxInspectorTest: XCTestCase {
     }
 }
 
-private class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
+private final class TypeSyntaxInspectorTestVisitor: SyntaxVisitor {
     private let syntax: SourceFileSyntax
     private let locationConverter: SourceLocationConverter
     private let sourceLocationBuilder: SourceLocationBuilder
