@@ -27,9 +27,7 @@
     - [Protocols](#protocols-1)
     - [Enumerations](#enumerations)
     - [Assign-only Properties](#assign-only-properties)
-    - [Redundant Public Accessibility](#redundant-public-accessibility)
-    - [Redundant Internal Accessibility](#redundant-internal-accessibility)
-    - [Redundant Fileprivate Accessibility](#redundant-fileprivate-accessibility)
+    - [Redundant Accessibility](#redundant-accessibility)
     - [Unused Imports](#unused-imports)
     - [Objective-C](#objective-c)
     - [Codable](#codable)
@@ -285,7 +283,9 @@ In some cases this may be the intended behavior; therefore, you have a few optio
 - Retain all assign-only properties by their type with `--retain-assign-only-property-types`. Given types must match their exact usage in the property declaration (sans optional question mark), e.g. `String`, `[String]`, `Set<String>`. Periphery is unable to resolve inferred property types, therefore in some instances, you may need to add explicit type annotations to your properties.
 - Disable assign-only property analysis entirely with `--retain-assign-only-properties`.
 
-### Redundant Public Accessibility
+### Redundant Accessibility
+
+#### Public
 
 Declarations that are marked `public` yet are not referenced from outside their home module are identified as having redundant public accessibility. In this scenario, the `public` annotation can be removed from the declaration. Removing redundant public accessibility has a couple of benefits:
 
@@ -294,13 +294,13 @@ Declarations that are marked `public` yet are not referenced from outside their 
 
 This analysis can be disabled with `--disable-redundant-public-analysis`.
 
-### Redundant Internal Accessibility
+#### Internal
 
 Declarations that are marked `internal` (or are unmarked, since this is Swift's default access level), yet are not referenced outside the file they're defined in are identified as having redundant internal accessibility. In this scenario, the declaration could be marked `private` or `fileprivate`. Reducing the visibility of declarations — encapsulation — helps with code maintainability and can improve compilation performance.
 
 This analysis can be disabled with `--disable-redundant-internal-analysis`.
 
-### Redundant Fileprivate Accessibility
+#### Fileprivate
 
 Declarations that are marked `fileprivate` yet are not accessed from other types within the same file are identified as having redundant fileprivate accessibility. If a `fileprivate` declaration is only used within its own type, it should be marked `private` instead. Reducing the visibility of declarations helps with code maintainability and makes access boundaries clearer.
 
