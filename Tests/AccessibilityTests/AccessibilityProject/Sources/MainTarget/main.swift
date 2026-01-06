@@ -5,8 +5,6 @@ PublicDeclarationInInternalParentRetainer().retain()
 PublicExtensionOnRedundantPublicKindRetainer().retain()
 IgnoreCommentCommandRetainer().retain()
 IgnoreAllCommentCommandRetainer().retain()
-RedundantFilePrivateClassRetainer().retain()
-InternalPropertyUsedInExtensionRetainer().retain()
 
 _ = PublicTypeUsedAsPublicInitializerParameterTypeRetainer()
 
