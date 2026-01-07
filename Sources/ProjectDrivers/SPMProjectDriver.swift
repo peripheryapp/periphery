@@ -20,7 +20,7 @@ public final class SPMProjectDriver {
         self.init(pkg: pkg, configuration: configuration, logger: logger)
     }
 
-    init(pkg: SPM.Package, configuration: Configuration, logger: Logger) {
+    private init(pkg: SPM.Package, configuration: Configuration, logger: Logger) {
         self.pkg = pkg
         self.configuration = configuration
         self.logger = logger
