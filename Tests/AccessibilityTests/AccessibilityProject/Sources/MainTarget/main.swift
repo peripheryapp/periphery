@@ -81,3 +81,12 @@ inlinableFunction()
 // Associated types
 _ = PublicInheritedAssociatedTypeClass().items
 _ = PublicInheritedAssociatedTypeDefaultTypeClass().items
+
+// Redundant accessibility tests
+TrulyRedundantFilePrivateMembersRetainer().retain()
+ProtocolRequirementAccessibilityRetainer().retain()
+PropertyWrapperAccessibilityRetainer().retain()
+NestedTypeAccessibilityRetainer().retain()
+InternalSuggestingPrivateVsFileprivateRetainer().retain()
+ImplicitlyInternalRetainer().retain()
+NotRedundantInternalClassComponents_Support().useImplicitlyInternalStruct()

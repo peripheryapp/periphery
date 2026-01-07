@@ -43,10 +43,10 @@ public enum ScanResultBuilder {
             .init(declaration: $0.0, annotation: .redundantPublicAccessibility(modules: $0.1))
         }
         let annotatedRedundantInternalAccessibility: [ScanResult] = redundantInternalAccessibility.map {
-            .init(declaration: $0.0, annotation: .redundantInternalAccessibility(files: $0.1))
+            .init(declaration: $0.0, annotation: .redundantInternalAccessibility(files: $0.1.files, suggestedAccessibility: $0.1.suggestedAccessibility))
         }
         let annotatedRedundantFilePrivateAccessibility: [ScanResult] = redundantFilePrivateAccessibility.map {
-            .init(declaration: $0.0, annotation: .redundantFilePrivateAccessibility(files: $0.1))
+            .init(declaration: $0.0, annotation: .redundantFilePrivateAccessibility(files: $0.1.files, containingTypeName: $0.1.containingTypeName))
         }
         let allAnnotatedDeclarations = annotatedRemovableDeclarations +
             annotatedAssignOnlyProperties +

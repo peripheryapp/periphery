@@ -9,8 +9,8 @@ public final class SourceGraph {
     public private(set) var redundantProtocols: [Declaration: (references: Set<Reference>, inherited: Set<Reference>)] = [:]
     public private(set) var rootDeclarations: Set<Declaration> = []
     public private(set) var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
-    public private(set) var redundantInternalAccessibility: [Declaration: Set<SourceFile>] = [:]
-    public private(set) var redundantFilePrivateAccessibility: [Declaration: Set<SourceFile>] = [:]
+    public private(set) var redundantInternalAccessibility: [Declaration: (files: Set<SourceFile>, suggestedAccessibility: Accessibility?)] = [:]
+    public private(set) var redundantFilePrivateAccessibility: [Declaration: (files: Set<SourceFile>, containingTypeName: String?)] = [:]
     public private(set) var rootReferences: Set<Reference> = []
     public private(set) var allReferences: Set<Reference> = []
     public private(set) var retainedDeclarations: Set<Declaration> = []
@@ -87,12 +87,23 @@ public final class SourceGraph {
         _ = redundantPublicAccessibility.removeValue(forKey: declaration)
     }
 
-    func markRedundantInternalAccessibility(_ declaration: Declaration, file: SourceFile) {
-        redundantInternalAccessibility[declaration, default: []].insert(file)
+    func markRedundantInternalAccessibility(_ declaration: Declaration, file: SourceFile, suggestedAccessibility: Accessibility?) {
+        if let existing = redundantInternalAccessibility[declaration] {
+            var files = existing.files
+            files.insert(file)
+            redundantInternalAccessibility[declaration] = (files: files, suggestedAccessibility: existing.suggestedAccessibility)
+        } else {
+            redundantInternalAccessibility[declaration] = (files: [file], suggestedAccessibility: suggestedAccessibility)
+        }
     }
 
-    func markRedundantFilePrivateAccessibility(_ declaration: Declaration, file: SourceFile) {
-        redundantFilePrivateAccessibility[declaration, default: []].insert(file)
+    func markRedundantFilePrivateAccessibility(_ declaration: Declaration, file: SourceFile, containingTypeName: String?) {
+        if var existing = redundantFilePrivateAccessibility[declaration] {
+            existing.files.insert(file)
+            redundantFilePrivateAccessibility[declaration] = existing
+        } else {
+            redundantFilePrivateAccessibility[declaration] = (files: [file], containingTypeName: containingTypeName)
+        }
     }
 
     func markIgnored(_ declaration: Declaration) {
