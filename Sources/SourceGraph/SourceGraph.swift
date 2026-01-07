@@ -281,7 +281,7 @@ public final class SourceGraph {
         inheritedTypeReferences(of: decl).compactMap { declaration(withUsr: $0.usr) }
     }
 
-    func immediateSubclasses(of decl: Declaration) -> Set<Declaration> {
+    private func immediateSubclasses(of decl: Declaration) -> Set<Declaration> {
         references(to: decl)
             .filter { $0.isRelated && $0.kind == .class }
             .flatMap { $0.parent?.usrs ?? [] }

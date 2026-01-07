@@ -2,7 +2,7 @@ import Extensions
 import Foundation
 
 public struct SwiftVersion {
-    static let minimumVersion = "5.10"
+    private static let minimumVersion = "5.10"
 
     public let version: VersionString
     public let fullVersion: String

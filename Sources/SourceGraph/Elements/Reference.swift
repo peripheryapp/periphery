@@ -66,7 +66,7 @@ extension Reference: CustomStringConvertible {
         return "\(referenceType)(\(descriptionParts.joined(separator: ", ")))"
     }
 
-    var descriptionParts: [String] {
+    private var descriptionParts: [String] {
         let formattedName = name != nil ? "'\(name!)'" : "nil"
 
         return [kind.rawValue, formattedName, "'\(usr)'", role.rawValue, location.shortDescription]

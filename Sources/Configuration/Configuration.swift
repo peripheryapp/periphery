@@ -218,7 +218,7 @@ public final class Configuration {
 
     // MARK: - Private
 
-    lazy var settings: [any AbstractSetting] = [
+    private lazy var settings: [any AbstractSetting] = [
         $project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat,
         $retainPublic, $noRetainSPI, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible,
         $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis,
@@ -249,7 +249,7 @@ public final class Configuration {
     }
 }
 
-protocol AbstractSetting {
+private protocol AbstractSetting {
     associatedtype Value
 
     var key: String { get }

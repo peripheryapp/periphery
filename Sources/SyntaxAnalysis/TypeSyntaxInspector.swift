@@ -28,7 +28,7 @@ struct TypeSyntaxInspector {
 
     // MARK: - Private
 
-    func types(for typeSyntax: TypeSyntax) -> Set<TokenSyntax> {
+    private func types(for typeSyntax: TypeSyntax) -> Set<TokenSyntax> {
         if let identifierType = typeSyntax.as(IdentifierTypeSyntax.self) {
             // Simple type.
             var result: Set<TokenSyntax> = identifierType.genericArgumentClause?.arguments.flatMapSet {
