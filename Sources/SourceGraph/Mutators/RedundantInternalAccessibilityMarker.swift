@@ -168,6 +168,13 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         // Override methods must be at least as accessible as what they override.
         if decl.isOverride { return true }
 
+        // Declarations with @usableFromInline must remain internal (or package).
+        // This attribute allows internal declarations to be inlined into client code,
+        // requiring them to maintain internal visibility.
+        if decl.attributes.contains(where: { $0.name == "usableFromInline" }) {
+            return true
+        }
+
         return false
     }
 

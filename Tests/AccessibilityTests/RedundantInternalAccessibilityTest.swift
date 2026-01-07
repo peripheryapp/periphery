@@ -176,4 +176,49 @@ final class RedundantInternalAccessibilityTest: SPMSourceGraphTestCase {
 
         assertNotRedundantInternalAccessibility(.struct("ImplicitlyInternalStructUsedFromAnotherFile"))
     }
+
+    /// Tests that internal declarations accessed from test files via @testable import
+    /// are NOT flagged as redundant internal.
+    ///
+    /// This verifies that @testable import references count as legitimate cross-file usage,
+    /// preventing false positives when test files access internal members. Since tests ARE
+    /// using these internal members from a different file, they require internal accessibility.
+    func testInternalUsedViaTestableImportNotFlagged() {
+        index()
+
+        // InternalUsedOnlyInTest should NOT be flagged because it IS used from
+        // a test file (different file) via @testable import
+        assertNotRedundantInternalAccessibility(.class("InternalUsedOnlyInTest"))
+    }
+
+    /// Tests that internal declarations used from production code in the same module
+    /// are NOT flagged as redundant (baseline behavior verification).
+    func testInternalUsedInProductionNotFlagged() {
+        index()
+
+        // InternalUsedInBoth should NOT be flagged because it's used from
+        // production code (InternalTestableImportUsage_Support.swift) within the same module
+        assertNotRedundantInternalAccessibility(.class("InternalUsedInBoth"))
+    }
+
+    /// Tests that declarations with @usableFromInline are NOT flagged as redundant internal.
+    ///
+    /// The @usableFromInline attribute allows internal declarations to be inlined into
+    /// client code, requiring them to maintain internal (or package) visibility. Marking
+    /// them as fileprivate or private would cause a compiler error because @usableFromInline
+    /// is incompatible with those access levels.
+    ///
+    /// This test verifies the fix for a build error on Linux where @usableFromInline
+    /// declarations were incorrectly flagged as redundant internal, and changing them
+    /// to fileprivate caused: "@usableFromInline attribute can only be applied to
+    /// internal or package declarations".
+    func testUsableFromInlineNotFlagged() {
+        index()
+
+        // All @usableFromInline members should NOT be flagged, even if only used in same file
+        assertNotRedundantInternalAccessibility(.functionConstructor("init()"))
+        assertNotRedundantInternalAccessibility(.functionMethodInstance("inlinableHelper()"))
+        assertNotRedundantInternalAccessibility(.varInstance("inlinableProperty"))
+        assertNotRedundantInternalAccessibility(.functionMethodStatic("inlinableStaticMethod()"))
+    }
 }
