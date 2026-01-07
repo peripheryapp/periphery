@@ -87,3 +87,12 @@ takeExtensionSameTypeGenericRequirement(.defaultInstance)
 
 // Typed throws
 try? PublicTypeUsedAsPublicFunctionThrowTypeRetainer().retain()
+
+// Redundant accessibility tests
+TrulyRedundantFilePrivateMembersRetainer().retain()
+ProtocolRequirementAccessibilityRetainer().retain()
+PropertyWrapperAccessibilityRetainer().retain()
+NestedTypeAccessibilityRetainer().retain()
+InternalSuggestingPrivateVsFileprivateRetainer().retain()
+ImplicitlyInternalRetainer().retain()
+NotRedundantInternalClassComponents_Support().useImplicitlyInternalStruct()

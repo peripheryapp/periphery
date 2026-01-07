@@ -19,4 +19,9 @@ internal enum NotRedundantInternalEnum {
     func useCase() -> NotRedundantInternalEnum {
         return .usedCase
     }
+}
+
+// Test case for implicitly internal declaration used from another file - should NOT be flagged.
+struct ImplicitlyInternalStructUsedFromAnotherFile {
+    var implicitlyInternalProperty: Int = 42
 } 

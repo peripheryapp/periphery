@@ -177,11 +177,20 @@ open class SourceGraphTestCase: XCTestCase {
         scopeStack.removeLast()
     }
 
-    func assertRedundantInternalAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+    func assertRedundantInternalAccessibility(_ description: DeclarationDescription, suggestedAccessibility: Accessibility? = nil, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
 
         if !Self.results.redundantInternalAccessibilityDeclarations.contains(declaration) {
             XCTFail("Expected declaration to have redundant internal accessibility: \(declaration)", file: file, line: line)
+        }
+
+        if let suggestedAccessibility {
+            if let info = Self.graph.redundantInternalAccessibility[declaration] {
+                if info.suggestedAccessibility != suggestedAccessibility {
+                    let actualText = info.suggestedAccessibility?.rawValue ?? "nil"
+                    XCTFail("Expected suggested accessibility to be '\(suggestedAccessibility.rawValue)', but got '\(actualText)': \(declaration)", file: file, line: line)
+                }
+            }
         }
 
         scopeStack.append(.declaration(declaration))
@@ -194,6 +203,26 @@ open class SourceGraphTestCase: XCTestCase {
 
         if Self.results.redundantInternalAccessibilityDeclarations.contains(declaration) {
             XCTFail("Expected declaration to not have redundant internal accessibility: \(declaration)", file: file, line: line)
+        }
+
+        scopeStack.append(.declaration(declaration))
+        scopedAssertions?()
+        scopeStack.removeLast()
+    }
+
+    func assertRedundantFilePrivateAccessibility(_ description: DeclarationDescription, containingTypeName: String? = nil, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
+
+        if !Self.results.redundantFilePrivateAccessibilityDeclarations.contains(declaration) {
+            XCTFail("Expected declaration to have redundant fileprivate accessibility: \(declaration)", file: file, line: line)
+        }
+
+        if let containingTypeName {
+            if let info = Self.graph.redundantFilePrivateAccessibility[declaration] {
+                if info.containingTypeName != containingTypeName {
+                    XCTFail("Expected containing type name to be '\(containingTypeName)', but got '\(info.containingTypeName ?? "nil")': \(declaration)", file: file, line: line)
+                }
+            }
         }
 
         scopeStack.append(.declaration(declaration))
