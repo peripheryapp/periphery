@@ -27,7 +27,7 @@ extension CommentCommand {
             }
     }
 
-    static func parse(_ rawCommand: String) -> Self? {
+    private static func parse(_ rawCommand: String) -> Self? {
         if rawCommand == "ignore" {
             return .ignore
         } else if rawCommand == "ignore:all" {

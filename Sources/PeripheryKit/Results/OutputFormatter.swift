@@ -33,6 +33,10 @@ extension OutputFormatter {
             "redundantProtocol"
         case .redundantPublicAccessibility:
             "redundantPublicAccessibility"
+        case .redundantInternalAccessibility:
+            "redundantInternalAccessibility"
+        case .redundantFilePrivateAccessibility:
+            "redundantFilePrivateAccessibility"
         }
     }
 
@@ -64,6 +68,14 @@ extension OutputFormatter {
             case let .redundantPublicAccessibility(modules):
                 let modulesJoined = modules.sorted().joined(separator: ", ")
                 description += "Redundant public accessibility for \(kindDisplayName) '\(name)' (not used outside of \(modulesJoined))"
+            case let .redundantInternalAccessibility(_, suggestedAccessibility):
+                let accessibilityText = suggestedAccessibility?.rawValue ?? "private/fileprivate"
+                description += "Redundant internal accessibility for \(kindDisplayName) '\(name)' (not used outside of file; can be \(accessibilityText))"
+            // Hint: if we wanted to output the USR for helping build bazel.json, we could also output:
+            // result.declaration.usrs.joined(separator: ", ")
+            case let .redundantFilePrivateAccessibility(_, containingTypeName):
+                let context = containingTypeName.map { "only used within \($0)" } ?? "not used outside of file"
+                description += "Redundant fileprivate accessibility for \(kindDisplayName) '\(name)' (\(context); can be private)"
             }
         } else {
             description += "Unused"

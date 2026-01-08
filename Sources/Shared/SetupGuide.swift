@@ -26,7 +26,7 @@ open class SetupGuideHelpers {
         self.logger = logger
     }
 
-    func display(options: [String]) {
+    private func display(options: [String]) {
         let maxPaddingCount = String(options.count).count
 
         for (index, option) in options.enumerated() {

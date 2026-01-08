@@ -95,8 +95,8 @@ public final class MultiplexingSyntaxVisitor: SyntaxVisitor {
     public let sourceFile: SourceFile
     public let syntax: SourceFileSyntax
     public let locationConverter: SourceLocationConverter
-    let sourceLocationBuilder: SourceLocationBuilder
-    let swiftVersion: SwiftVersion
+    private let sourceLocationBuilder: SourceLocationBuilder
+    private let swiftVersion: SwiftVersion
 
     private var visitors: [PeripherySyntaxVisitor] = []
 

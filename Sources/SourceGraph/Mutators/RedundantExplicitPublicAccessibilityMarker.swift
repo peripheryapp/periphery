@@ -184,7 +184,8 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
     }
 
     private func descendentPublicDeclarations(from decl: Declaration) -> Set<Declaration> {
-        let publicDeclarations = decl.declarations.filter { !$0.isImplicit && $0.accessibility.isExplicitly(.public) }
-        return publicDeclarations.flatMapSet { descendentPublicDeclarations(from: $0) }.union(publicDeclarations)
+        decl.descendentDeclarations(matching: {
+            !$0.isImplicit && $0.accessibility.isExplicitly(.public)
+        })
     }
 }

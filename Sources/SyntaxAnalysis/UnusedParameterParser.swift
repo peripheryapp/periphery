@@ -131,7 +131,7 @@ struct UnusedParameterParser {
         self.parseProtocols = parseProtocols
     }
 
-    func parse() -> [Function] {
+    private func parse() -> [Function] {
         parse(node: syntax, collecting: Function.self)
     }
 
