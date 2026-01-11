@@ -77,4 +77,15 @@ public extension Sequence<CommentCommand> {
 
         return nil
     }
+
+    var ignoredParameterNames: [String] {
+        flatMap { command -> [String] in
+            switch command {
+            case let .ignoreParameters(params):
+                params
+            default:
+                []
+            }
+        }
+    }
 }

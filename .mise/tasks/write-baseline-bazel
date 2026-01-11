@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -euo pipefail
+
+source "$(dirname "$0")/scripts/helpers.sh"
+
+bazel run :periphery -- scan --bazel --write-baseline baselines/bazel.json
+format_baseline baselines/bazel.json

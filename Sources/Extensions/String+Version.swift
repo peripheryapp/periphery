@@ -1,5 +1,3 @@
-// periphery:ignore:all
-
 import Foundation
 
 public typealias VersionString = String
