@@ -4,12 +4,7 @@ import XCTest
 
 #if os(macOS)
     final class ObjcAccessibleRetentionTest: FixtureSourceGraphTestCase {
-        private let performKnownFailures = false
-
-        // https://github.com/apple/swift/issues/56327
         func testRetainsOptionalProtocolMethodImplementedInSubclass() {
-            guard performKnownFailures else { return }
-
             analyze(retainPublic: true) {
                 assertReferenced(.class("FixtureClass125Base"))
                 assertReferenced(.class("FixtureClass125")) {
