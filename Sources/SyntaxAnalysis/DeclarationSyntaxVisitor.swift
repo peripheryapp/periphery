@@ -578,18 +578,18 @@ private extension SyntaxProtocol {
     /// Matches uses like these:
     ///
     /// ```
-    /// // periphery:ignore
+    /// // ignore
     /// Foo {
     /// }
     /// ```
     ///
     /// ```
-    /// Foo { // periphery:ignore
+    /// Foo { // ignore
     /// }
     /// ```
     ///
     /// ```
-    /// Foo {} // periphery:ignore
+    /// Foo {} // ignore
     /// ```
     var commentCommandTrivia: Trivia {
         var commandTrivia = leadingTrivia.merging(trailingTrivia)

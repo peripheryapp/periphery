@@ -20,6 +20,8 @@ public final class SourceGraph {
     public private(set) var unusedModuleImports: Set<Declaration> = []
     public private(set) var assignOnlyProperties: Set<Declaration> = []
     public private(set) var extensions: [Declaration: Set<Declaration>] = [:]
+    public private(set) var explicitlyIgnoredDeclarations: Set<Declaration> = []
+    public private(set) var functionsWithIgnoredParameters: Set<Declaration> = []
 
     private var indexedModules: Set<String> = []
     private var unindexedExportedModules: Set<String> = []
@@ -87,6 +89,14 @@ public final class SourceGraph {
 
     func markIgnored(_ declaration: Declaration) {
         _ = ignoredDeclarations.insert(declaration)
+    }
+
+    public func markExplicitlyIgnored(_ declaration: Declaration) {
+        _ = explicitlyIgnoredDeclarations.insert(declaration)
+    }
+
+    public func markHasIgnoredParameters(_ declaration: Declaration) {
+        _ = functionsWithIgnoredParameters.insert(declaration)
     }
 
     public func markRetained(_ declaration: Declaration) {
