@@ -1,11 +1,12 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
+
+source "$(dirname "$0")/scripts/helpers.sh"
 
 export DOCKER_CLI_HINTS=false
 docker build -t periphery -f docker/Dockerfile-Linux .
 docker run --name periphery_write_baseline -t periphery scan "$@" --write-baseline /baseline.json
 docker cp periphery_write_baseline:baseline.json ./baselines/linux.json
 docker rm periphery_write_baseline
-jq . ./baselines/linux.json > ./baselines/linux.json.tmp
-mv ./baselines/linux.json.tmp ./baselines/linux.json
+format_baseline baselines/linux.json

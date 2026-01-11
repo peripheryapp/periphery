@@ -371,10 +371,10 @@ final class SwiftIndexer: Indexer {
             let fileCommands = syntaxVisitor.parseComments()
 
             if fileCommands.contains(.ignoreAll) {
-                retainHierarchy(declarations)
+                retainHierarchy(declarations, markExplicitlyIgnored: true)
             } else {
                 for decl in declarations where decl.commentCommands.contains(.ignore) {
-                    retainHierarchy([decl])
+                    retainHierarchy([decl], markExplicitlyIgnored: true)
                 }
             }
         }
@@ -399,6 +399,7 @@ final class SwiftIndexer: Indexer {
                 decl.modifiers = Set(result.modifiers)
                 decl.commentCommands = Set(result.commentCommands)
                 decl.declaredType = result.variableType
+
                 decl.hasGenericFunctionReturnedMetatypeParameters = result.hasGenericFunctionReturnedMetatypeParameters
 
                 for ref in decl.references.union(decl.related) {
@@ -433,13 +434,17 @@ final class SwiftIndexer: Indexer {
             }
         }
 
-        private func retainHierarchy(_ decls: [Declaration]) {
+        private func retainHierarchy(_ decls: [Declaration], markExplicitlyIgnored: Bool = false) {
             for decl in decls {
                 graph.withLock { graph in
                     graph.markRetained(decl)
                     decl.unusedParameters.forEach { graph.markRetained($0) }
+                    if markExplicitlyIgnored {
+                        graph.markExplicitlyIgnored(decl)
+                        decl.unusedParameters.forEach { graph.markExplicitlyIgnored($0) }
+                    }
                 }
-                retainHierarchy(Array(decl.declarations))
+                retainHierarchy(Array(decl.declarations), markExplicitlyIgnored: markExplicitlyIgnored)
             }
         }
 
@@ -465,6 +470,17 @@ final class SwiftIndexer: Indexer {
                 $0[$1.location] = $1
             }
 
+            // Build a map of ignored param names per function, and track functions with ignored
+            // params so ScanResultBuilder can efficiently detect superfluous ignores.
+            var ignoredParamsByLocation: [Location: [String]] = [:]
+            for functionDecl in functionDecls {
+                let ignoredParamNames = functionDecl.commentCommands.ignoredParameterNames
+                if !ignoredParamNames.isEmpty {
+                    ignoredParamsByLocation[functionDecl.location] = ignoredParamNames
+                    graph.withLock { $0.markHasIgnoredParameters(functionDecl) }
+                }
+            }
+
             let analyzer = UnusedParameterAnalyzer()
             let paramsByFunction = analyzer.analyze(
                 file: syntaxVisitor.sourceFile,
@@ -480,14 +496,7 @@ final class SwiftIndexer: Indexer {
                     continue
                 }
 
-                let ignoredParamNames = functionDecl.commentCommands.flatMap { command -> [String] in
-                    switch command {
-                    case let .ignoreParameters(params):
-                        return params
-                    default:
-                        return []
-                    }
-                }
+                let ignoredParamNames = ignoredParamsByLocation[functionDecl.location] ?? []
 
                 graph.withLock { graph in
                     for param in params {
@@ -501,6 +510,7 @@ final class SwiftIndexer: Indexer {
 
                         if (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) || ignoredParamNames.contains(param.name.text) {
                             graph.markRetained(paramDecl)
+                            graph.markExplicitlyIgnored(paramDecl)
                         }
                     }
                 }
