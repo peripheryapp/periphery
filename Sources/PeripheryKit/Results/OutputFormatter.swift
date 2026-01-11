@@ -33,6 +33,8 @@ extension OutputFormatter {
             "redundantProtocol"
         case .redundantPublicAccessibility:
             "redundantPublicAccessibility"
+        case .superfluousIgnoreCommand:
+            "superfluousIgnoreCommand"
         }
     }
 
@@ -64,6 +66,8 @@ extension OutputFormatter {
             case let .redundantPublicAccessibility(modules):
                 let modulesJoined = modules.sorted().joined(separator: ", ")
                 description += "Redundant public accessibility for \(kindDisplayName) '\(name)' (not used outside of \(modulesJoined))"
+            case .superfluousIgnoreCommand:
+                description += "Superfluous ignore comment for \(kindDisplayName) '\(name)' (declaration is referenced and should not be ignored)"
             }
         } else {
             description += "Unused"

@@ -20,6 +20,17 @@ extension CommentCommand {
             .compactMap { comment in
                 guard let range = comment.range(of: "periphery:") else { return nil }
 
+                // Only respect commands where "periphery:" appears at the start of the comment
+                // (after the comment marker and optional whitespace)
+                let prefix = String(comment[..<range.lowerBound])
+                let trimmedPrefix = prefix
+                    .replacingOccurrences(of: "///", with: "")
+                    .replacingOccurrences(of: "//", with: "")
+                    .replacingOccurrences(of: "/**", with: "")
+                    .replacingOccurrences(of: "/*", with: "")
+                    .trimmingCharacters(in: .whitespaces)
+                guard trimmedPrefix.isEmpty else { return nil }
+
                 var rawCommand = String(comment[range.upperBound...]).replacingOccurrences(of: "*/", with: "").trimmed
                 // Anything after '-' in a comment command is ignored.
                 rawCommand = String(rawCommand.split(separator: "-").first ?? "").trimmed

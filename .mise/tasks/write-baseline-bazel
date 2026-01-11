@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -euo pipefail
+
+bazel run :periphery -- scan --bazel --write-baseline baselines/bazel.json.tmp
+jq . baselines/bazel.json.tmp > baselines/bazel.json
+rm baselines/bazel.json.tmp
