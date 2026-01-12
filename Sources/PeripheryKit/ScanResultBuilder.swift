@@ -48,19 +48,92 @@ public enum ScanResultBuilder {
         let annotatedRedundantFilePrivateAccessibility: [ScanResult] = redundantFilePrivateAccessibility.map {
             .init(declaration: $0.0, annotation: .redundantFilePrivateAccessibility(files: $0.1.files, containingTypeName: $0.1.containingTypeName))
         }
+
+        // Detect superfluous ignore commands
+        // 1. Declarations with ignore comments that have references from non-ignored code
+        let superfluousDeclarations = graph.explicitlyIgnoredDeclarations
+            .filter { decl in
+                hasReferencesFromNonIgnoredCode(decl, graph: graph)
+            }
+
+        // 2. Parameters with ignore comments that are actually used (not in unusedParameters)
+        let superfluousParamResults = findSuperfluousParameterIgnores(graph: graph)
+
+        let annotatedSuperfluousIgnoreCommands: [ScanResult] = superfluousDeclarations
+            .map { .init(declaration: $0, annotation: .superfluousIgnoreCommand) }
+            + superfluousParamResults
+
         let allAnnotatedDeclarations = annotatedRemovableDeclarations +
             annotatedAssignOnlyProperties +
             annotatedRedundantProtocols +
             annotatedRedundantPublicAccessibility +
             annotatedRedundantInternalAccessibility +
-            annotatedRedundantFilePrivateAccessibility
+            annotatedRedundantFilePrivateAccessibility +
+            annotatedSuperfluousIgnoreCommands
 
         return allAnnotatedDeclarations
-            .filter {
-                !$0.declaration.isImplicit &&
-                    !$0.declaration.kind.isAccessorKind &&
-                    !graph.ignoredDeclarations.contains($0.declaration) &&
-                    !graph.retainedDeclarations.contains($0.declaration)
+            .filter { result in
+                guard !result.declaration.isImplicit,
+                      !result.declaration.kind.isAccessorKind,
+                      !graph.ignoredDeclarations.contains(result.declaration)
+                else { return false }
+
+                // Superfluous ignore command results must bypass the retained filter below.
+                // Declarations with ignore comments are always in retainedDeclarations (that's
+                // how ignore comments work), so filtering them out would prevent us from ever
+                // reporting superfluous ignore commands.
+                if case .superfluousIgnoreCommand = result.annotation {
+                    return true
+                }
+
+                return !graph.retainedDeclarations.contains(result.declaration)
             }
+    }
+
+    /// Checks if a declaration has references from code that is not part of the explicitly ignored set.
+    /// This indicates that the declaration would have been marked as used even without the ignore command.
+    private static func hasReferencesFromNonIgnoredCode(_ decl: Declaration, graph: SourceGraph) -> Bool {
+        let references = graph.references(to: decl)
+
+        for ref in references {
+            guard let parent = ref.parent else { continue }
+
+            // Check if the parent is not in the explicitly ignored set.
+            // This covers deeply nested declarations because retainHierarchy marks
+            // the entire descendant tree as explicitly ignored, not just the root.
+            if !graph.explicitlyIgnoredDeclarations.contains(parent) {
+                // Also check that the parent is actually used (not itself unused)
+                if graph.usedDeclarations.contains(parent) {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    /// Finds parameters that have `// periphery:ignore:parameters` comments but are actually used.
+    /// If a parameter is ignored but NOT in unusedParameters, it means it's used and the ignore is superfluous.
+    private static func findSuperfluousParameterIgnores(graph: SourceGraph) -> [ScanResult] {
+        var results: [ScanResult] = []
+
+        for decl in graph.functionsWithIgnoredParameters {
+            let ignoredParamNames = decl.commentCommands.ignoredParameterNames
+            let unusedParamNames = Set(decl.unusedParameters.compactMap(\.name))
+
+            for ignoredParamName in ignoredParamNames {
+                if !unusedParamNames.contains(ignoredParamName) {
+                    // The ignored parameter is actually used - create a result for it
+                    let parentUsrs = decl.usrs.sorted().joined(separator: "-")
+                    let usr = "param-\(ignoredParamName)-\(decl.name ?? "unknown-function")-\(parentUsrs)"
+                    let paramDecl = Declaration(kind: .varParameter, usrs: [usr], location: decl.location)
+                    paramDecl.name = ignoredParamName
+                    paramDecl.parent = decl
+                    results.append(.init(declaration: paramDecl, annotation: .superfluousIgnoreCommand))
+                }
+            }
+        }
+
+        return results
     }
 }

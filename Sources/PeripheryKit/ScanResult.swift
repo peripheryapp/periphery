@@ -9,6 +9,7 @@ public struct ScanResult {
         case redundantPublicAccessibility(modules: Set<String>)
         case redundantInternalAccessibility(files: Set<SourceFile>, suggestedAccessibility: Accessibility?)
         case redundantFilePrivateAccessibility(files: Set<SourceFile>, containingTypeName: String?)
+        case superfluousIgnoreCommand
     }
 
     let declaration: Declaration
@@ -16,5 +17,13 @@ public struct ScanResult {
 
     public var usrs: Set<String> {
         declaration.usrs
+    }
+
+    /// Indicates whether this result should be included in baselines.
+    /// Superfluous ignore command results are excluded since they're warnings
+    /// about unnecessary comments, not unused code.
+    public var includeInBaseline: Bool {
+        if case .superfluousIgnoreCommand = annotation { return false }
+        return true
     }
 }

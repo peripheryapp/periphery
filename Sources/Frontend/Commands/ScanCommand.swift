@@ -274,6 +274,7 @@ struct ScanCommand: ParsableCommand {
 
         if let baselinePath = configuration.writeBaseline {
             let usrs = filteredResults
+                .filter(\.includeInBaseline)
                 .flatMapSet { $0.usrs }
                 .union(baseline?.usrs ?? [])
             let baseline = Baseline.v1(usrs: usrs.sorted())

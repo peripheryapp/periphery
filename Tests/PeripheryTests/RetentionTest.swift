@@ -1173,6 +1173,52 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testSuperfluousIgnoreCommand() {
+        analyze(retainPublic: true) {
+            // These have ignore commands but are actually used, so the ignore is superfluous
+            assertSuperfluousIgnoreCommand(.functionFree("superfluouslyIgnoredFunc()"))
+            assertSuperfluousIgnoreCommand(.class("SuperfluouslyIgnoredClass"))
+
+            // These have ignore commands and are NOT used, so the ignore is needed
+            assertNotSuperfluousIgnoreCommand(.functionFree("correctlyIgnoredFunc()"))
+            assertNotSuperfluousIgnoreCommand(.class("CorrectlyIgnoredClass"))
+
+            // The callers should be referenced normally
+            assertReferenced(.functionFree("callerOfSuperfluouslyIgnoredFunc()"))
+            assertReferenced(.functionFree("useSuperfluouslyIgnoredClass()"))
+
+            // Test ignored declarations within non-ignored parent
+            assertReferenced(.class("NonIgnoredParentClass")) {
+                // This method is ignored but used by callerMethod - superfluous
+                self.assertSuperfluousIgnoreCommand(.functionMethodInstance("superfluouslyIgnoredMethod()"))
+                // This method is ignored and not used - correctly ignored
+                self.assertNotSuperfluousIgnoreCommand(.functionMethodInstance("correctlyIgnoredMethod()"))
+                // The caller method should be referenced normally
+                self.assertReferenced(.functionMethodInstance("callerMethod()"))
+            }
+
+            // Test deeply nested declarations within ignored hierarchy.
+            // Internal references between members of an ignored class should NOT
+            // make those members appear superfluously ignored.
+            assertNotSuperfluousIgnoreCommand(.class("DeeplyNestedIgnoredClass"))
+            assertNotSuperfluousIgnoreCommand(.functionMethodInstance("methodA()"))
+            assertNotSuperfluousIgnoreCommand(.functionMethodInstance("methodB()"))
+            assertNotSuperfluousIgnoreCommand(.functionMethodInstance("methodC()"))
+
+            // Test superfluous ignore for parameters
+            assertReferenced(.class("ParameterIgnoreClass")) {
+                self.assertReferenced(.functionMethodInstance("superfluousParamIgnore(usedParam:)")) {
+                    // Parameter is ignored but actually used - superfluous
+                    self.assertSuperfluousIgnoreCommand(.varParameter("usedParam"))
+                }
+                self.assertReferenced(.functionMethodInstance("correctParamIgnore(unusedParam:)")) {
+                    // Parameter is ignored and not used - correctly ignored
+                    self.assertNotSuperfluousIgnoreCommand(.varParameter("unusedParam"))
+                }
+            }
+        }
+    }
+
     // MARK: - Swift Testing
 
     #if canImport(Testing)

@@ -4,27 +4,29 @@ import SystemPackage
 
 extension CommentCommand {
     static func parseCommands(in trivia: Trivia?) -> [CommentCommand] {
-        let comments: [String] = trivia?.compactMap {
-            switch $0 {
-            case let .lineComment(comment),
-                 let .blockComment(comment),
-                 let .docLineComment(comment),
-                 let .docBlockComment(comment):
-                comment
-            default:
-                nil
+        trivia?.compactMap { piece -> CommentCommand? in
+            // Extract comment text and marker length based on trivia piece kind
+            let parsed: (comment: String, markerLength: Int)? = switch piece {
+            case let .lineComment(text): (text, 2) // //
+            case let .docLineComment(text): (text, 3) // ///
+            case let .blockComment(text): (text, 2) // /*
+            case let .docBlockComment(text): (text, 3) // /**
+            default: nil
             }
+
+            guard let (comment, markerLength) = parsed,
+                  let range = comment.range(of: "periphery:") else { return nil }
+
+            // Only respect commands at the start of a comment (after the marker and whitespace).
+            let prefixStart = comment.index(comment.startIndex, offsetBy: markerLength)
+            let prefixBeforeCommand = String(comment[prefixStart ..< range.lowerBound])
+            guard prefixBeforeCommand.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+
+            var rawCommand = String(comment[range.upperBound...]).replacingOccurrences(of: "*/", with: "").trimmed
+            // Anything after '-' in a comment command is ignored.
+            rawCommand = String(rawCommand.split(separator: "-").first ?? "").trimmed
+            return CommentCommand.parse(rawCommand)
         } ?? []
-
-        return comments
-            .compactMap { comment in
-                guard let range = comment.range(of: "periphery:") else { return nil }
-
-                var rawCommand = String(comment[range.upperBound...]).replacingOccurrences(of: "*/", with: "").trimmed
-                // Anything after '-' in a comment command is ignored.
-                rawCommand = String(rawCommand.split(separator: "-").first ?? "").trimmed
-                return CommentCommand.parse(rawCommand)
-            }
     }
 
     private static func parse(_ rawCommand: String) -> Self? {

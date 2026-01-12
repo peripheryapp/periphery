@@ -274,6 +274,44 @@ open class SourceGraphTestCase: XCTestCase {
         scopeStack.removeLast()
     }
 
+    func assertSuperfluousIgnoreCommand(_ description: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
+        // For parameters, we need to check results directly since they're created at result-building time
+        if description.kind == .varParameter {
+            let found = Self.results.superfluousIgnoreCommandDeclarations.contains {
+                $0.kind == description.kind && $0.name == description.name
+            }
+            if !found {
+                XCTFail("Expected superfluous ignore command for parameter: \(description.name)", file: file, line: line)
+            }
+            return
+        }
+
+        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
+
+        if !Self.results.superfluousIgnoreCommandDeclarations.contains(declaration) {
+            XCTFail("Expected declaration to have superfluous ignore command: \(declaration)", file: file, line: line)
+        }
+    }
+
+    func assertNotSuperfluousIgnoreCommand(_ description: DeclarationDescription, file: StaticString = #file, line: UInt = #line) {
+        // For parameters, we need to check results directly since they're created at result-building time
+        if description.kind == .varParameter {
+            let found = Self.results.superfluousIgnoreCommandDeclarations.contains {
+                $0.kind == description.kind && $0.name == description.name
+            }
+            if found {
+                XCTFail("Expected no superfluous ignore command for parameter: \(description.name)", file: file, line: line)
+            }
+            return
+        }
+
+        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
+
+        if Self.results.superfluousIgnoreCommandDeclarations.contains(declaration) {
+            XCTFail("Expected declaration to not have superfluous ignore command: \(declaration)", file: file, line: line)
+        }
+    }
+
     func assertOverrides(_ description: DeclarationDescription, _ overrides: [CommentCommand.Override], file: StaticString = #file, line: UInt = #line) {
         guard let declaration = materialize(description, file: file, line: line) else {
             XCTFail("Failed to materialize \(description)", file: file, line: line)
@@ -391,6 +429,16 @@ private extension [ScanResult] {
     var redundantFilePrivateAccessibilityDeclarations: Set<Declaration> {
         compactMapSet {
             if case .redundantFilePrivateAccessibility = $0.annotation {
+                return $0.declaration
+            }
+
+            return nil
+        }
+    }
+
+    var superfluousIgnoreCommandDeclarations: Set<Declaration> {
+        compactMapSet {
+            if case .superfluousIgnoreCommand = $0.annotation {
                 return $0.declaration
             }
 
