@@ -33,4 +33,15 @@ final class SwiftUIProjectTest: XcodeSourceGraphTestCase {
     func testRetainsUIApplicationDelegateAdaptorReferencedType() {
         assertReferenced(.class("AppDelegate"))
     }
+
+    func testDoesNotRetainPreviewMacro() {
+        // Mirrors testDoesNotRetainPreviewProvider
+        // DetailView is only referenced from #Preview, so should not be retained
+        assertNotReferenced(.struct("DetailView"))
+    }
+
+    func testDoesNotRetainNestedTypeFromPreviewMacro() {
+        // Tests nested type references from #Preview
+        assertNotReferenced(.struct("PreviewHelpers"))
+    }
 }

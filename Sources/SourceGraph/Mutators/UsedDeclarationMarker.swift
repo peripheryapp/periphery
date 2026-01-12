@@ -13,13 +13,44 @@ final class UsedDeclarationMarker: SourceGraphMutator {
         removeErroneousProtocolReferences()
         markUsed(graph.retainedDeclarations)
 
-        graph.rootReferences.forEach { markUsed(declarationsReferenced(by: $0)) }
+        // Pre-compute preview-only declarations for efficient lookup.
+        // A declaration is preview-only if ALL its non-root references come from
+        // ignored declarations (like #Preview macro machinery).
+        // Example: MyPreviewOnlyView is ONLY referenced by makePreview() (which is ignored).
+        let previewOnlyDeclarations = computePreviewOnlyDeclarations()
 
+        // Process root references (protocol conformances, etc.) but skip those targeting
+        // preview-only code. Even though a root reference exists (View conformance), we skip
+        // it so MyPreviewOnlyView remains unused and gets reported.
+        for rootRef in graph.rootReferences {
+            let targetDecls = declarationsReferenced(by: rootRef)
+            let hasActualUsage = targetDecls.contains { !previewOnlyDeclarations.contains($0) }
+            if hasActualUsage {
+                markUsed(targetDecls)
+            }
+        }
         ignoreUnusedDescendents(in: graph.rootDeclarations,
                                 unusedDeclarations: graph.unusedDeclarations)
     }
 
     // MARK: - Private
+
+    private func computePreviewOnlyDeclarations() -> Set<Declaration> {
+        let previewOnly = graph.allDeclarations.filter { decl in
+            let refs = graph.references(to: decl)
+            guard !refs.isEmpty else { return false }
+
+            let nonRootRefs = refs.filter { $0.parent != nil }
+
+            // Declaration is preview-only if all non-root references come from ignored declarations
+            return !nonRootRefs.isEmpty && nonRootRefs.allSatisfy { ref in
+                guard let parent = ref.parent else { return false }
+
+                return graph.ignoredDeclarations.contains(parent)
+            }
+        }
+        return Set(previewOnly)
+    }
 
     // Removes references from protocol member decls to conforming decls that have a dereferenced ancestor.
     private func removeErroneousProtocolReferences() {
@@ -46,12 +77,21 @@ final class UsedDeclarationMarker: SourceGraphMutator {
 
             graph.markUsed(declaration)
 
-            for ref in declaration.references {
-                markUsed(declarationsReferenced(by: ref))
-            }
+            // Skip processing references FROM ignored declarations (like #Preview machinery).
+            // This prevents preview code from marking the code it references as "used".
+            // Example: makePreview() is ignored. When we mark it as used (above), we then
+            // check if it's ignored. Since it is, we skip processing its references to
+            // MyPreviewOnlyView, so MyPreviewOnlyView stays unused.
+            let shouldProcessReferences = !graph.ignoredDeclarations.contains(declaration)
 
-            for ref in declaration.related {
-                markUsed(declarationsReferenced(by: ref))
+            if shouldProcessReferences {
+                for ref in declaration.references {
+                    markUsed(declarationsReferenced(by: ref))
+                }
+
+                for ref in declaration.related {
+                    markUsed(declarationsReferenced(by: ref))
+                }
             }
         }
     }
