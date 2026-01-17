@@ -28,13 +28,13 @@ public enum LoggerColorMode: Sendable {
 }
 
 public struct Logger: Sendable {
-    let outputQueue: DispatchQueue
-    let quiet: Bool
-    let verbose: Bool
-    let colorMode: LoggerColorMode
+    private let outputQueue: DispatchQueue
+    private let quiet: Bool
+    private let verbose: Bool
+    private let colorMode: LoggerColorMode
 
     #if canImport(os)
-        let signposter = OSSignposter()
+        private let signposter = OSSignposter()
     #endif
 
     public var isColoredOutputEnabled: Bool {
@@ -115,7 +115,7 @@ public struct Logger: Sendable {
 
     // MARK: - Private
 
-    func log(_ line: String, output: UnsafeMutablePointer<FILE>) {
+    private func log(_ line: String, output: UnsafeMutablePointer<FILE>) {
         _ = outputQueue.sync { fputs(line + "\n", output) }
     }
 
@@ -132,8 +132,8 @@ public struct Logger: Sendable {
 }
 
 public struct ContextualLogger: Sendable {
-    let logger: Logger
-    let context: String
+    fileprivate let logger: Logger
+    fileprivate let context: String
 
     public func contextualized(with innerContext: String) -> ContextualLogger {
         logger.contextualized(with: "\(context):\(innerContext)")
@@ -154,8 +154,8 @@ public struct ContextualLogger: Sendable {
 
 #if canImport(os)
     public struct SignpostInterval {
-        let name: StaticString
-        let state: OSSignpostIntervalState
+        fileprivate let name: StaticString
+        fileprivate let state: OSSignpostIntervalState
     }
 #else
     public struct SignpostInterval {

@@ -33,7 +33,7 @@ final class EnumCaseReferenceBuilder: SourceGraphMutator {
 
     // MARK: - Private
 
-    func isRawRepresentable(_ enumDeclaration: Declaration) -> Bool {
+    private func isRawRepresentable(_ enumDeclaration: Declaration) -> Bool {
         // If the enum has a related struct it's very likely to be raw representable,
         // and thus is dynamic in nature.
 

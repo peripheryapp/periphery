@@ -6,7 +6,7 @@ import Shared
 import SystemPackage
 
 final class Project {
-    let kind: ProjectKind
+    private let kind: ProjectKind
 
     private let configuration: Configuration
     private let shell: Shell
