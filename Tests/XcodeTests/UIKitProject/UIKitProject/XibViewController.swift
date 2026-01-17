@@ -14,9 +14,34 @@ class XibViewController: UIViewController {
         showAlert(title: "IBAction", message: "clickFromSubclass(_:) - Connected via Interface Builder")
     }
 
+    // IBAction with named first parameter (selector: clickWithNamedParamWithSender:)
+    @IBAction func clickWithNamedParam(sender: Any) {
+        showAlert(title: "IBAction", message: "clickWithNamedParam(sender:) - Connected via Interface Builder")
+    }
+
+    // IBAction with no parameters (selector: clickNoParams)
+    @IBAction func clickNoParams() {
+        showAlert(title: "IBAction", message: "clickNoParams() - Connected via Interface Builder")
+    }
+
+    // IBAction with preposition first parameter (selector: clickFor:)
+    @IBAction func click(for sender: Any) {
+        showAlert(title: "IBAction", message: "click(for:) - Connected via Interface Builder")
+    }
+
     // Unreferenced - not connected in XIB
     @IBAction func unusedAction(_ sender: Any) {
         showAlert(title: "Unused", message: "unusedAction(_:) - This should be reported as unused!")
+    }
+
+    // Unreferenced - IBAction with named param but not connected
+    @IBAction func unusedActionWithNamedParam(sender: Any) {
+        showAlert(title: "Unused", message: "unusedActionWithNamedParam(sender:) - This should be reported as unused!")
+    }
+
+    // Unreferenced - IBAction with no params but not connected
+    @IBAction func unusedActionNoParams() {
+        showAlert(title: "Unused", message: "unusedActionNoParams() - This should be reported as unused!")
     }
 
     // MARK: - IBInspectable

@@ -53,7 +53,7 @@ final class InterfaceBuilderPropertyRetainer {
 
             // Check IBAction/IBSegueAction methods
             if decl.attributes.contains(where: { ibActionAttributes.contains($0.name) }) {
-                let selectorName = swiftNameToSelector(declName)
+                let selectorName = Self.swiftNameToSelector(declName)
                 if referencedActions.contains(selectorName) {
                     graph.markRetained(decl)
                 }
@@ -70,13 +70,38 @@ final class InterfaceBuilderPropertyRetainer {
         }
     }
 
-    // MARK: - Private
+    // MARK: - Helpers
+
+    /// Prepositions that Swift recognizes for Objective-C selector conversion.
+    /// When a first parameter label is one of these, it's just capitalized without adding "With".
+    /// Source: https://github.com/apple/swift/blob/main/lib/Basic/PartsOfSpeech.def
+    private static let knownPrepositions: Set<String> = [
+        "above", "after", "along", "alongside", "as", "at",
+        "before", "below", "by",
+        "following", "for", "from",
+        "given",
+        "in", "including", "inside", "into",
+        "matching",
+        "of", "on",
+        "passing", "preceding",
+        "since",
+        "to",
+        "until", "using",
+        "via",
+        "when", "with", "within",
+    ]
 
     /// Converts a Swift function name like `click(_:)` or `doSomething(_:withValue:)`
     /// to an Objective-C selector like `click:` or `doSomething:withValue:`.
-    private func swiftNameToSelector(_ swiftName: String) -> String {
-        // Remove the trailing parenthesis content to get just the method name with params
-        // e.g., "click(_:)" -> "click:" or "handleTap(_:forEvent:)" -> "handleTap:forEvent:"
+    ///
+    /// Swift to Objective-C selector conversion rules:
+    /// - `func myMethod()` → `myMethod` (no parameters, no colon)
+    /// - `func myMethod(_ sender: Any)` → `myMethod:` (unnamed first param)
+    /// - `func myMethod(sender: Any)` → `myMethodWithSender:` (named first param gets "With" prefix)
+    /// - `func myMethod(for value: Any)` → `myMethodFor:` (preposition labels are just capitalized)
+    /// - `func myMethod(_:secondParam:)` → `myMethod:secondParam:`
+    /// - `func myMethod(firstParam:secondParam:)` → `myMethodWithFirstParam:secondParam:`
+    static func swiftNameToSelector(_ swiftName: String) -> String {
         guard let parenStart = swiftName.firstIndex(of: "("),
               let parenEnd = swiftName.lastIndex(of: ")")
         else {
@@ -86,15 +111,37 @@ final class InterfaceBuilderPropertyRetainer {
         let methodName = String(swiftName[..<parenStart])
         let paramsSection = String(swiftName[swiftName.index(after: parenStart) ..< parenEnd])
 
+        // No parameters: return just the method name (no colon)
+        if paramsSection.isEmpty {
+            return methodName
+        }
+
         // Split by ":" to get parameter labels
         let params = paramsSection.split(separator: ":", omittingEmptySubsequences: false)
 
-        // Build the selector: methodName + ":" for each parameter
+        // Build the selector
         var selector = methodName
         for (index, param) in params.enumerated() {
             if index == 0 {
-                // First parameter: just add ":"
-                selector += ":"
+                // First parameter handling
+                if param == "_" || param.isEmpty {
+                    // Unnamed first param: just add ":"
+                    selector += ":"
+                } else {
+                    let label = String(param)
+                    let lowercasedLabel = label.lowercased()
+
+                    // Check if label is a known preposition or starts with "with"
+                    if knownPrepositions.contains(lowercasedLabel) || lowercasedLabel.hasPrefix("with") {
+                        // Prepositions and "with*" labels are just capitalized
+                        // e.g., "for" -> "For:", "with" -> "With:", "withSender" -> "WithSender:"
+                        selector += label.prefix(1).uppercased() + label.dropFirst() + ":"
+                    } else {
+                        // Other labels get "With" prefix
+                        // e.g., "sender" -> "WithSender:"
+                        selector += "With" + label.prefix(1).uppercased() + label.dropFirst() + ":"
+                    }
+                }
             } else if !param.isEmpty {
                 // Subsequent parameters: add label + ":"
                 selector += String(param) + ":"

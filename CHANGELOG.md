@@ -11,7 +11,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix IBAction methods with named parameters or no parameters incorrectly marked as unused.
 
 ## 3.4.0 (2026-01-06)
 
