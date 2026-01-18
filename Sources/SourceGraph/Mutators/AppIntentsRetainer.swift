@@ -25,7 +25,7 @@ final class AppIntentsRetainer: SourceGraphMutator {
             .filter {
                 $0.related.contains {
                     self.graph.isExternal($0) &&
-                        $0.kind == .protocol &&
+                        $0.declarationKind == .protocol &&
                         $0.usr.hasPrefix(Self.appIntentsModuleUsrPrefix)
                 }
             }

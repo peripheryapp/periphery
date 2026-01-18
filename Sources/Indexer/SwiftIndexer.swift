@@ -404,9 +404,9 @@ final class SwiftIndexer: Indexer {
 
                 for ref in decl.references.union(decl.related) {
                     if result.inheritedTypeLocations.contains(ref.location) {
-                        if decl.kind.isConformableKind, ref.kind == .protocol {
+                        if decl.kind.isConformableKind, ref.declarationKind == .protocol {
                             ref.role = .conformedType
-                        } else if decl.kind == .protocol, ref.kind == .protocol {
+                        } else if decl.kind == .protocol, ref.declarationKind == .protocol {
                             ref.role = .refinedProtocolType
                         } else if decl.kind == .class || decl.kind == .associatedtype {
                             ref.role = .inheritedType
@@ -457,7 +457,7 @@ final class SwiftIndexer: Indexer {
         private func associateUnsafe(_ ref: Reference, with decl: Declaration) {
             ref.parent = decl
 
-            if ref.isRelated {
+            if ref.kind == .related {
                 decl.related.insert(ref)
             } else {
                 decl.references.insert(ref)
@@ -588,10 +588,10 @@ final class SwiftIndexer: Indexer {
 
                     if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformDeclarationKind(baseFunc.kind, baseFunc.subKind) {
                         let reference = Reference(
-                            kind: baseFuncKind,
+                            kind: .related,
+                            declarationKind: baseFuncKind,
                             usr: baseFuncUsr,
-                            location: decl.location,
-                            isRelated: true
+                            location: decl.location
                         )
                         reference.name = baseFunc.name
                         reference.parent = decl
@@ -606,10 +606,10 @@ final class SwiftIndexer: Indexer {
                     if let referencerUsr = referencer.usr {
                         for usr in decl.usrs {
                             let reference = Reference(
-                                kind: decl.kind,
+                                kind: rel.roles.contains(.baseOf) ? .related : .normal,
+                                declarationKind: decl.kind,
                                 usr: usr,
-                                location: decl.location,
-                                isRelated: rel.roles.contains(.baseOf)
+                                location: decl.location
                             )
                             reference.name = decl.name
                             references.insert(reference)
@@ -635,10 +635,10 @@ final class SwiftIndexer: Indexer {
 
                     if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformDeclarationKind(baseFunc.kind, baseFunc.subKind) {
                         let reference = Reference(
-                            kind: baseFuncKind,
+                            kind: .related,
+                            declarationKind: baseFuncKind,
                             usr: baseFuncUsr,
-                            location: location,
-                            isRelated: true
+                            location: location
                         )
                         reference.name = baseFunc.name
                         referencesByUsr[occurrenceUsr, default: []].insert(reference)
@@ -671,10 +671,10 @@ final class SwiftIndexer: Indexer {
 
                     if let referencerUsr = referencer.usr {
                         let ref = Reference(
-                            kind: kind,
+                            kind: relation.roles.contains(.baseOf) ? .related : .normal,
+                            declarationKind: kind,
                             usr: occurrenceUsr,
-                            location: location,
-                            isRelated: relation.roles.contains(.baseOf)
+                            location: location
                         )
                         ref.name = occurrence.symbol.name
                         refs.append(ref)
@@ -684,13 +684,18 @@ final class SwiftIndexer: Indexer {
             }
 
             if refs.isEmpty {
-                let ref = Reference(kind: kind, usr: occurrenceUsr, location: location)
+                let ref = Reference(
+                    kind: .normal,
+                    declarationKind: kind,
+                    usr: occurrenceUsr,
+                    location: location
+                )
                 ref.name = occurrence.symbol.name
                 refs.append(ref)
 
                 // The index store doesn't contain any relations for this reference, save it so that we can attempt
                 // to associate it with the correct declaration later based on location.
-                if ref.kind != .module {
+                if ref.declarationKind != .module {
                     danglingReferences.append(ref)
                 }
             }

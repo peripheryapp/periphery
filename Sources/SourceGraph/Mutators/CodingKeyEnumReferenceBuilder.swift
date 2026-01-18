@@ -15,7 +15,7 @@ final class CodingKeyEnumReferenceBuilder: SourceGraphMutator {
             guard let parent = enumDeclaration.parent else { continue }
 
             let isCodingKey = graph.inheritedTypeReferences(of: enumDeclaration).contains {
-                $0.kind == .protocol && $0.name == "CodingKey"
+                $0.declarationKind == .protocol && $0.name == "CodingKey"
             }
 
             guard isCodingKey else { continue }
@@ -30,7 +30,12 @@ final class CodingKeyEnumReferenceBuilder: SourceGraphMutator {
             if graph.isCodable(parent) {
                 // Build a reference from the Codable type to the CodingKey enum.
                 for usr in enumDeclaration.usrs {
-                    let newReference = Reference(kind: .enum, usr: usr, location: enumDeclaration.location)
+                    let newReference = Reference(
+                        kind: .normal,
+                        declarationKind: .enum,
+                        usr: usr,
+                        location: enumDeclaration.location
+                    )
                     newReference.name = enumDeclaration.name
                     newReference.parent = parent
                     graph.add(newReference, from: parent)

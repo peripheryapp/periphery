@@ -34,7 +34,7 @@ final class CsvFormatter: OutputFormatter {
             case let .redundantProtocol(references, inherited):
                 for ref in references {
                     let line = format(
-                        kind: ref.kind.rawValue,
+                        kind: ref.declarationKind.rawValue,
                         name: ref.name,
                         modifiers: [],
                         attributes: [],

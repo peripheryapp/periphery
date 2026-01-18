@@ -32,7 +32,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
             // Find all classes that implement this protocol.
             let conformingClasses = graph.references(to: proto)
                 .reduce(into: Set<Declaration>()) { result, ref in
-                    if ref.isRelated, let parent = ref.parent, parent.kind == .class {
+                    if ref.kind == .related, let parent = ref.parent, parent.kind == .class {
                         result.insert(parent)
                     }
                 }
@@ -49,7 +49,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                 if !unimplementedProtoDecls.isEmpty {
                     // Find all superclasses.
                     let superclassDecls = graph.inheritedTypeReferences(of: conformingClass)
-                        .filter { $0.kind == .class }
+                        .filter { $0.declarationKind == .class }
                         .compactMap { graph.declaration(withUsr: $0.usr) }
                         .flatMap(\.declarations)
 
@@ -65,10 +65,10 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                             // declaration implemented by the superclass.
                             for usr in declInSuperclass.usrs {
                                 let reference = Reference(
-                                    kind: declInSuperclass.kind,
+                                    kind: .related,
+                                    declarationKind: declInSuperclass.kind,
                                     usr: usr,
-                                    location: declInSuperclass.location,
-                                    isRelated: true
+                                    location: declInSuperclass.location
                                 )
                                 reference.name = declInSuperclass.name
                                 reference.parent = unimplementedProtoDecl
@@ -91,25 +91,25 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
     }
 
     private func invertReferencesFromProtocolToDeclaration(_ nonInvertableReferences: Set<Reference>) {
-        let relatedReferences = graph.allReferences.filter { $0.isRelated && $0.kind.isProtocolMemberConformingKind }
+        let relatedReferences = graph.allReferences.filter { $0.kind == .related && $0.declarationKind.isProtocolMemberConformingKind }
 
         for relatedReference in relatedReferences.subtracting(nonInvertableReferences) {
             guard let conformingDeclaration = relatedReference.parent
             else { continue }
 
-            var equivalentDeclarationKinds = [relatedReference.kind]
+            var equivalentDeclarationKinds = [relatedReference.declarationKind]
 
             // A conforming declaration can be declared either 'class' or 'static', whereas
             // protocol members can only be declared as 'static'.
-            if relatedReference.kind == .functionMethodStatic {
+            if relatedReference.declarationKind == .functionMethodStatic {
                 equivalentDeclarationKinds.append(.functionMethodClass)
-            } else if relatedReference.kind == .functionMethodClass {
+            } else if relatedReference.declarationKind == .functionMethodClass {
                 equivalentDeclarationKinds.append(.functionMethodStatic)
-            } else if relatedReference.kind == .varStatic {
+            } else if relatedReference.declarationKind == .varStatic {
                 equivalentDeclarationKinds.append(.varClass)
-            } else if relatedReference.kind == .varClass {
+            } else if relatedReference.declarationKind == .varClass {
                 equivalentDeclarationKinds.append(.varStatic)
-            } else if relatedReference.kind == .associatedtype {
+            } else if relatedReference.declarationKind == .associatedtype {
                 equivalentDeclarationKinds.append(contentsOf: Declaration.Kind.concreteTypeDeclarableKinds)
             }
 
@@ -129,17 +129,16 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
 
                 for usr in conformingDeclaration.usrs {
                     let newReference = Reference(
-                        kind: relatedReference.kind,
+                        kind: .related,
+                        declarationKind: relatedReference.declarationKind,
                         usr: usr,
-                        location: relatedReference.location,
-                        isRelated: true
+                        location: relatedReference.location
                     )
                     newReference.name = relatedReference.name
                     newReference.parent = protocolDeclaration
                     graph.add(newReference, from: protocolDeclaration)
                 }
             } else {
-                // The referenced declaration is external, e.g from stdlib/Foundation.
                 graph.markRetained(conformingDeclaration)
             }
         }
