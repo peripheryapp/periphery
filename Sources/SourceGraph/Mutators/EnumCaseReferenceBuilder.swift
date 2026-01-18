@@ -13,7 +13,7 @@ final class EnumCaseReferenceBuilder: SourceGraphMutator {
     func mutate() {
         for enumDeclaration in graph.declarations(ofKind: .enum) {
             let isCodingKey = graph.inheritedTypeReferences(of: enumDeclaration).contains {
-                $0.kind == .protocol && $0.name == "CodingKey"
+                $0.declarationKind == .protocol && $0.name == "CodingKey"
             }
 
             if !isCodingKey, isRawRepresentable(enumDeclaration) {
@@ -21,7 +21,12 @@ final class EnumCaseReferenceBuilder: SourceGraphMutator {
 
                 for enumCase in enumCases {
                     for usr in enumCase.usrs {
-                        let reference = Reference(kind: .enumelement, usr: usr, location: enumCase.location)
+                        let reference = Reference(
+                            kind: .normal,
+                            declarationKind: .enumelement,
+                            usr: usr,
+                            location: enumCase.location
+                        )
                         reference.name = enumCase.name
                         reference.parent = enumDeclaration
                         graph.add(reference, from: enumDeclaration)
@@ -37,12 +42,12 @@ final class EnumCaseReferenceBuilder: SourceGraphMutator {
         // If the enum has a related struct it's very likely to be raw representable,
         // and thus is dynamic in nature.
 
-        if enumDeclaration.related.contains(where: { $0.kind == .struct }) {
+        if enumDeclaration.related.contains(where: { $0.declarationKind == .struct }) {
             return true
         }
 
         return graph.inheritedTypeReferences(of: enumDeclaration).contains {
-            $0.kind == .protocol && $0.name == "RawRepresentable"
+            $0.declarationKind == .protocol && $0.name == "RawRepresentable"
         }
     }
 }

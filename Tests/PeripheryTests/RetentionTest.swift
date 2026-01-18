@@ -120,7 +120,7 @@ final class RetentionTest: FixtureSourceGraphTestCase {
     }
 
     func testConformanceToExternalProtocolIsRetained() {
-        analyze {
+        analyze(retainPublic: true) {
             // Retained because it's a method from an external declaration (in this case, Equatable)
             assertReferenced(.class("FixtureClass55")) {
                 self.assertReferenced(.functionOperatorInfix("==(_:_:)"))

@@ -100,11 +100,25 @@ public final class SourceGraph {
     }
 
     public func markRetained(_ declaration: Declaration) {
-        _ = retainedDeclarations.insert(declaration)
+        if let parent = declaration.parent {
+            for usr in declaration.usrs {
+                let reference = Reference(
+                    kind: .retained,
+                    declarationKind: declaration.kind,
+                    usr: usr,
+                    location: declaration.location
+                )
+                reference.name = declaration.name
+                reference.parent = parent
+                add(reference, from: parent)
+            }
+        } else {
+            _ = retainedDeclarations.insert(declaration)
+        }
     }
 
     public func markRetained(_ declarations: Set<Declaration>) {
-        retainedDeclarations.formUnion(declarations)
+        declarations.forEach { markRetained($0) }
     }
 
     func markAssignOnlyProperty(_ declaration: Declaration) {
@@ -116,7 +130,7 @@ public final class SourceGraph {
     }
 
     public func isRetained(_ declaration: Declaration) -> Bool {
-        retainedDeclarations.contains(declaration)
+        retainedDeclarations.contains(declaration) || references(to: declaration).contains { $0.kind == .retained }
     }
 
     public func add(_ declaration: Declaration) {
@@ -161,7 +175,7 @@ public final class SourceGraph {
     }
 
     public func add(_ reference: Reference, from declaration: Declaration) {
-        if reference.isRelated {
+        if reference.kind == .related {
             _ = declaration.related.insert(reference)
         } else {
             _ = declaration.references.insert(reference)
@@ -272,7 +286,7 @@ public final class SourceGraph {
 
     func immediateSubclasses(of decl: Declaration) -> Set<Declaration> {
         references(to: decl)
-            .filter { $0.isRelated && $0.kind == .class }
+            .filter { $0.kind == .related && $0.declarationKind == .class }
             .flatMap { $0.parent?.usrs ?? [] }
             .compactMapSet { declaration(withUsr: $0) }
     }
@@ -288,7 +302,7 @@ public final class SourceGraph {
             throw PeripheryError.sourceGraphIntegrityError(message: "Unknown extended reference kind for extension '\(extensionDeclaration.kind.rawValue)'")
         }
 
-        return extensionDeclaration.references.first(where: { $0.kind == extendedKind && $0.name == extensionDeclaration.name })
+        return extensionDeclaration.references.first(where: { $0.declarationKind == extendedKind && $0.name == extensionDeclaration.name })
     }
 
     func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
@@ -305,7 +319,7 @@ public final class SourceGraph {
         guard decl.isOverride else { return [] }
 
         let overridenDecl = decl.related
-            .filter { $0.kind == decl.kind && $0.name == decl.name }
+            .filter { $0.declarationKind == decl.kind && $0.name == decl.name }
             .compactMap { declaration(withUsr: $0.usr) }
             .first
 
@@ -321,8 +335,8 @@ public final class SourceGraph {
 
         let baseDecl = references(to: decl)
             .filter {
-                $0.isRelated &&
-                    $0.kind == decl.kind &&
+                $0.kind == .related &&
+                    $0.declarationKind == decl.kind &&
                     $0.name == decl.name
             }
             .compactMap(\.parent)
@@ -353,7 +367,7 @@ public final class SourceGraph {
         return inheritedTypeReferences(of: decl).contains {
             guard let name = $0.name else { return false }
 
-            return [.protocol, .typealias].contains($0.kind) && codableTypes.contains(name)
+            return [.protocol, .typealias].contains($0.declarationKind) && codableTypes.contains(name)
         }
     }
 
@@ -363,7 +377,7 @@ public final class SourceGraph {
         return inheritedTypeReferences(of: decl).contains {
             guard let name = $0.name else { return false }
 
-            return [.protocol, .typealias].contains($0.kind) && encodableTypes.contains(name)
+            return [.protocol, .typealias].contains($0.declarationKind) && encodableTypes.contains(name)
         }
     }
 }

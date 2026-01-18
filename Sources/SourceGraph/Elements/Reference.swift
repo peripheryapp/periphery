@@ -1,4 +1,10 @@
 public final class Reference {
+    public enum Kind: String {
+        case normal
+        case related
+        case retained
+    }
+
     public enum Role: String {
         case varType
         case returnType
@@ -24,8 +30,8 @@ public final class Reference {
     }
 
     public let location: Location
-    public let kind: Declaration.Kind
-    public let isRelated: Bool
+    public let kind: Kind
+    public let declarationKind: Declaration.Kind
     public var name: String?
     public var parent: Declaration?
     public var references: Set<Reference> = []
@@ -34,12 +40,17 @@ public final class Reference {
 
     private let hashValueCache: Int
 
-    public init(kind: Declaration.Kind, usr: String, location: Location, isRelated: Bool = false) {
+    public init(
+        kind: Kind,
+        declarationKind: Declaration.Kind,
+        usr: String,
+        location: Location
+    ) {
         self.kind = kind
+        self.declarationKind = declarationKind
         self.usr = usr
-        self.isRelated = isRelated
         self.location = location
-        hashValueCache = [usr.hashValue, location.hashValue, isRelated.hashValue].hashValue
+        hashValueCache = [usr.hashValue, location.hashValue, kind.hashValue].hashValue
     }
 
     var descendentReferences: Set<Reference> {
@@ -55,21 +66,19 @@ extension Reference: Hashable {
 
 extension Reference: Equatable {
     public static func == (lhs: Reference, rhs: Reference) -> Bool {
-        lhs.usr == rhs.usr && lhs.location == rhs.location && lhs.isRelated == rhs.isRelated
+        lhs.usr == rhs.usr && lhs.location == rhs.location && lhs.kind == rhs.kind
     }
 }
 
 extension Reference: CustomStringConvertible {
     public var description: String {
-        let referenceType = isRelated ? "Related" : "Reference"
-
-        return "\(referenceType)(\(descriptionParts.joined(separator: ", ")))"
+        "Reference(\(descriptionParts.joined(separator: ", ")))"
     }
 
     var descriptionParts: [String] {
         let formattedName = name != nil ? "'\(name!)'" : "nil"
 
-        return [kind.rawValue, formattedName, "'\(usr)'", role.rawValue, location.shortDescription]
+        return [kind.rawValue, declarationKind.rawValue, formattedName, "'\(usr)'", role.rawValue, location.shortDescription]
     }
 }
 

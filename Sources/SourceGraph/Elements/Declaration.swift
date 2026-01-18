@@ -254,10 +254,10 @@ public final class Declaration {
     }
 
     public var immediateInheritedTypeReferences: Set<Reference> {
-        let superclassReferences = related.filter { [.class, .struct, .protocol].contains($0.kind) }
+        let superclassReferences = related.filter { [.class, .struct, .protocol].contains($0.declarationKind) }
 
         // Inherited typealiases are References instead of a Related.
-        let typealiasReferences = references.filter { $0.kind == .typealias }
+        let typealiasReferences = references.filter { $0.declarationKind == .typealias }
         return superclassReferences.union(typealiasReferences)
     }
 
@@ -283,7 +283,7 @@ public final class Declaration {
     }
 
     public var relatedEquivalentReferences: [Reference] {
-        related.filter { $0.kind == kind && $0.name == name }
+        related.filter { $0.declarationKind == kind && $0.name == name }
     }
 
     public init(kind: Kind, usrs: Set<String>, location: Location) {
