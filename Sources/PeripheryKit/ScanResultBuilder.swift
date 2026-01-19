@@ -96,7 +96,7 @@ public enum ScanResultBuilder {
         let references = graph.references(to: decl)
 
         for ref in references {
-            guard let parent = ref.parent else { continue }
+            guard ref.kind != .retained, let parent = ref.parent else { continue }
 
             // Check if the parent is not in the explicitly ignored set.
             // This covers deeply nested declarations because retainHierarchy marks

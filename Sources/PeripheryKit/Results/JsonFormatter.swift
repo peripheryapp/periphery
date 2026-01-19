@@ -35,7 +35,7 @@ final class JsonFormatter: OutputFormatter {
             case let .redundantProtocol(references, inherited):
                 for ref in references {
                     let object: [AnyHashable: Any] = [
-                        "kind": ref.kind.rawValue,
+                        "kind": ref.declarationKind.rawValue,
                         "name": ref.name ?? "",
                         "modifiers": [String](),
                         "attributes": [String](),

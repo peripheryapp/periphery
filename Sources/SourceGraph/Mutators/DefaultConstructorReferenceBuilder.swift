@@ -26,9 +26,12 @@ final class DefaultConstructorReferenceBuilder: SourceGraphMutator {
         for constructor in defaultConstructors {
             if let parent = constructor.parent {
                 for usr in constructor.usrs {
-                    let reference = Reference(kind: .functionConstructor,
-                                              usr: usr,
-                                              location: parent.location)
+                    let reference = Reference(
+                        kind: .normal,
+                        declarationKind: .functionConstructor,
+                        usr: usr,
+                        location: parent.location
+                    )
                     reference.name = constructor.name
                     reference.parent = parent
                     graph.add(reference, from: parent)
@@ -41,9 +44,12 @@ final class DefaultConstructorReferenceBuilder: SourceGraphMutator {
         for destructor in graph.declarations(ofKind: .functionDestructor) {
             if let parent = destructor.parent {
                 for usr in destructor.usrs {
-                    let reference = Reference(kind: .functionDestructor,
-                                              usr: usr,
-                                              location: parent.location)
+                    let reference = Reference(
+                        kind: .normal,
+                        declarationKind: .functionDestructor,
+                        usr: usr,
+                        location: parent.location
+                    )
                     reference.name = destructor.name
                     reference.parent = parent
                     graph.add(reference, from: parent)
