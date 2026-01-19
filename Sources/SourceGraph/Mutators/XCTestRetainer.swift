@@ -16,7 +16,7 @@ final class XCTestRetainer: SourceGraphMutator {
             $0.related.contains {
                 guard let name = $0.name else { return false }
 
-                return $0.kind == .class && self.testCaseClassNames.contains(name)
+                return $0.declarationKind == .class && self.testCaseClassNames.contains(name)
             }
         }
 

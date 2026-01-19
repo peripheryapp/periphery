@@ -21,7 +21,12 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
             // First, create a reference from each protocol to the extension.
             if let extendedProtocol = try graph.extendedDeclaration(forExtension: extensionDeclaration) {
                 for usr in extensionDeclaration.usrs {
-                    let reference = Reference(kind: .extensionProtocol, usr: usr, location: extendedProtocol.location)
+                    let reference = Reference(
+                        kind: .normal,
+                        declarationKind: .extensionProtocol,
+                        usr: usr,
+                        location: extendedProtocol.location
+                    )
                     reference.name = extendedProtocol.name
                     reference.parent = extendedProtocol
                     graph.add(reference, from: extendedProtocol)
@@ -39,14 +44,24 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
                     for reference in graph.references(to: memberDeclaration) {
                         if let parentDeclaration = reference.parent {
                             for usr in extensionDeclaration.usrs {
-                                let extensionReference = Reference(kind: .extensionProtocol, usr: usr, location: reference.location)
+                                let extensionReference = Reference(
+                                    kind: .normal,
+                                    declarationKind: .extensionProtocol,
+                                    usr: usr,
+                                    location: reference.location
+                                )
                                 extensionReference.name = extensionDeclaration.name
                                 extensionReference.parent = parentDeclaration
                                 graph.add(extensionReference, from: parentDeclaration)
                             }
 
                             for usr in extendedProtocol.usrs {
-                                let protocolReference = Reference(kind: .protocol, usr: usr, location: reference.location)
+                                let protocolReference = Reference(
+                                    kind: .normal,
+                                    declarationKind: .protocol,
+                                    usr: usr,
+                                    location: reference.location
+                                )
                                 protocolReference.name = extendedProtocol.name
                                 protocolReference.parent = parentDeclaration
                                 graph.add(protocolReference, from: parentDeclaration)
@@ -71,7 +86,7 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
     /// which will then be inverted by ProtocolConformanceReferenceBuilder.
     private func referenceConstrainedExtensionImplementations(extensionDeclaration: Declaration) throws {
         // Find all protocols this extension is constrained by (via `where Self: ProtocolName`)
-        let constrainingProtocolRefs = extensionDeclaration.references.filter { $0.role == .genericRequirementType && $0.kind == .protocol }
+        let constrainingProtocolRefs = extensionDeclaration.references.filter { $0.role == .genericRequirementType && $0.declarationKind == .protocol }
 
         for constrainingProtocolRef in constrainingProtocolRefs {
             guard let constrainingProtocol = graph.declaration(withUsr: constrainingProtocolRef.usr) else { continue }
@@ -92,10 +107,10 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
                 // from the protocol requirement to the extension's implementation.
                 for usr in matchingRequirement.usrs {
                     let relatedReference = Reference(
-                        kind: matchingRequirement.kind,
+                        kind: .related,
+                        declarationKind: matchingRequirement.kind,
                         usr: usr,
-                        location: memberDeclaration.location,
-                        isRelated: true
+                        location: memberDeclaration.location
                     )
                     relatedReference.name = matchingRequirement.name
                     relatedReference.parent = memberDeclaration

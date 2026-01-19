@@ -33,7 +33,7 @@ final class SwiftUIRetainer: SourceGraphMutator {
             .lazy
             .filter {
                 $0.related.contains {
-                    self.graph.isExternal($0) && $0.kind == .protocol && names.contains($0.name ?? "")
+                    self.graph.isExternal($0) && $0.declarationKind == .protocol && names.contains($0.name ?? "")
                 }
             }
             .forEach { graph.markRetained($0) }
@@ -76,7 +76,7 @@ final class SwiftUIRetainer: SourceGraphMutator {
             .filter { $0.kind == .varInstance }
             .filter {
                 $0.references.contains {
-                    ($0.kind == .struct || $0.kind == .enum) && Self.applicationDelegateAdaptorStructNames.contains($0.name ?? "")
+                    ($0.declarationKind == .struct || $0.declarationKind == .enum) && Self.applicationDelegateAdaptorStructNames.contains($0.name ?? "")
                 }
             }
             .forEach { graph.markRetained($0) }

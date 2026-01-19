@@ -24,7 +24,7 @@ final class RedundantProtocolMarker: SourceGraphMutator {
             // that '<' is used when calling sort().
             let inheritsForeignProtocol = graph
                 .inheritedTypeReferences(of: protocolDecl)
-                .filter { !($0.kind == .typealias && $0.name == "AnyObject") }
+                .filter { !($0.declarationKind == .typealias && $0.name == "AnyObject") }
                 .contains { graph.isExternal($0) }
 
             guard !inheritsForeignProtocol else { continue }
@@ -33,7 +33,7 @@ final class RedundantProtocolMarker: SourceGraphMutator {
             let areAllExtensionsMembersUnused = protocolDecl
                 .references
                 .lazy
-                .filter { $0.kind == .extensionProtocol }
+                .filter { $0.declarationKind == .extensionProtocol }
                 .compactMap { self.graph.declaration(withUsr: $0.usr) }
                 .flatMap(\.declarations)
                 .allSatisfy { unusedDeclarations.contains($0) }
@@ -50,7 +50,7 @@ final class RedundantProtocolMarker: SourceGraphMutator {
             let protocolReferences = graph.references(to: protocolDecl)
 
             let areAllReferencesConformances = protocolReferences.allSatisfy { reference in
-                guard reference.isRelated, let parent = reference.parent else {
+                guard reference.kind == .related, let parent = reference.parent else {
                     return false
                 }
 
@@ -59,7 +59,7 @@ final class RedundantProtocolMarker: SourceGraphMutator {
 
             if areAllReferencesConformances {
                 // The protocol is redundant.
-                let inherited = graph.inheritedTypeReferences(of: protocolDecl).filter { $0.kind == .protocol }
+                let inherited = graph.inheritedTypeReferences(of: protocolDecl).filter { $0.declarationKind == .protocol }
                 graph.markRedundantProtocol(protocolDecl, references: protocolReferences, inherited: inherited)
                 protocolDecl.declarations.forEach { graph.markIgnored($0) }
             }

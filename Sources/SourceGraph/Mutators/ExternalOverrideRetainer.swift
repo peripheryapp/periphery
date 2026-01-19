@@ -23,7 +23,7 @@ final class ExternalOverrideRetainer: SourceGraphMutator {
             var didIdentifyRelatedRef = false
 
             for relatedRef in decl.related {
-                if relatedRef.kind == decl.kind,
+                if relatedRef.declarationKind == decl.kind,
                    relatedRef.name == decl.name,
                    relatedRef.location == decl.location
                 {

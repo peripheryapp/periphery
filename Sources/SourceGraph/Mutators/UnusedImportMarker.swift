@@ -103,7 +103,7 @@ final class UnusedImportMarker: SourceGraphMutator {
     /// Identifies any modules that extend the given declaration reference, as they may provide
     /// members and conformances that are required for compilation.
     private func modulesExtending(_ ref: Reference) -> Set<String> {
-        guard ref.kind.isExtendableKind else { return [] }
+        guard ref.declarationKind.isExtendableKind else { return [] }
 
         if let modules = extendedDeclCache[ref.usr] {
             return modules
@@ -112,7 +112,7 @@ final class UnusedImportMarker: SourceGraphMutator {
         let modules: Set<String> = graph.references(to: ref.usr)
             .flatMapSet {
                 guard let parent = $0.parent,
-                      parent.kind == ref.kind.extensionKind,
+                      parent.kind == ref.declarationKind.extensionKind,
                       parent.name == ref.name
                 else { return [] }
 

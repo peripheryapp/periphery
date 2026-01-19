@@ -23,7 +23,7 @@ final class UnusedParameterRetainer: SourceGraphMutator {
 
             for protoFuncDecl in protoFuncDecls {
                 let relatedFuncDecls = protoFuncDecl.related
-                    .filter(\.kind.isFunctionKind)
+                    .filter(\.declarationKind.isFunctionKind)
                     .compactMapSet { graph.declaration(withUsr: $0.usr) }
                 let extFuncDecls = relatedFuncDecls.filter { $0.parent?.kind.isExtensionKind ?? false }
                 let conformingDecls = relatedFuncDecls.subtracting(extFuncDecls)

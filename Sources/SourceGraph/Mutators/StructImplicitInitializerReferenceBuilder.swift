@@ -36,7 +36,12 @@ final class StructImplicitInitializerReferenceBuilder: SourceGraphMutator {
 
                     for decl in [propertyDecl, setterDecl] {
                         for usr in decl.usrs {
-                            let ref = Reference(kind: decl.kind, usr: usr, location: implicitInitDecl.location)
+                            let ref = Reference(
+                                kind: .normal,
+                                declarationKind: decl.kind,
+                                usr: usr,
+                                location: implicitInitDecl.location
+                            )
                             ref.name = decl.name
                             ref.parent = implicitInitDecl
                             graph.add(ref, from: implicitInitDecl)

@@ -30,11 +30,19 @@ final class UIKitProjectTest: XcodeSourceGraphTestCase {
             self.assertReferenced(.varInstance("button"))
             self.assertReferenced(.varInstance("controllerProperty"))
             self.assertReferenced(.functionMethodInstance("click(_:)"))
+            // IBAction with named first parameter
+            self.assertReferenced(.functionMethodInstance("clickWithNamedParam(sender:)"))
+            // IBAction with no parameters
+            self.assertReferenced(.functionMethodInstance("clickNoParams()"))
+            // IBAction with preposition first parameter
+            self.assertReferenced(.functionMethodInstance("click(for:)"))
             // Unreferenced - not connected in XIB
             self.assertNotReferenced(.varInstance("unusedOutlet"))
             self.assertNotReferenced(.functionMethodInstance("unusedAction(_:)"))
             self.assertNotReferenced(.functionMethodInstance("clickFromSubclass(_:)"))
             self.assertNotReferenced(.varInstance("unusedInspectable"))
+            self.assertNotReferenced(.functionMethodInstance("unusedActionWithNamedParam(sender:)"))
+            self.assertNotReferenced(.functionMethodInstance("unusedActionNoParams()"))
         }
         assertReferenced(.class("XibView")) {
             self.assertReferenced(.varInstance("viewProperty"))

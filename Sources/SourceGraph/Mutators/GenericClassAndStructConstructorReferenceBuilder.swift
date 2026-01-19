@@ -22,9 +22,12 @@ final class GenericClassAndStructConstructorReferenceBuilder: SourceGraphMutator
 
             for constructor in constructors {
                 for usr in constructor.usrs {
-                    let reference = Reference(kind: .functionConstructor,
-                                              usr: usr,
-                                              location: declaration.location)
+                    let reference = Reference(
+                        kind: .normal,
+                        declarationKind: .functionConstructor,
+                        usr: usr,
+                        location: declaration.location
+                    )
                     reference.name = constructor.name
                     reference.parent = declaration
                     graph.add(reference, from: declaration)
