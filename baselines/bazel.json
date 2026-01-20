@@ -1,6 +1,8 @@
 {
     "v1": {
         "usrs": [
+            "s:11SourceGraph0aB8DebuggerC",
+            "s:11SourceGraph32InterfaceBuilderPropertyRetainerC19swiftNameToSelectoryS2SFZ",
             "s:13Configuration15AbstractSettingP5resetyyF",
             "s:13Configuration7SettingC5resetyyF",
             "s:13ConfigurationAAC13resetMatchersyyF",
