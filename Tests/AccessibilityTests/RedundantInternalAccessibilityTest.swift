@@ -221,4 +221,29 @@ final class RedundantInternalAccessibilityTest: SPMSourceGraphTestCase {
         assertNotRedundantInternalAccessibility(.varInstance("inlinableProperty"))
         assertNotRedundantInternalAccessibility(.functionMethodStatic("inlinableStaticMethod()"))
     }
+
+    /// Tests that internal types conforming to external protocols are NOT flagged as redundant.
+    ///
+    /// When a type conforms to an external protocol (from another module), its protocol
+    /// requirement implementations must maintain their accessibility to fulfill the
+    /// protocol contract. This prevents false positives like those seen with
+    /// CheckUpdateCommand, ScanCommand, etc. implementing ArgumentParser's ParsableCommand.
+    func testExternalProtocolConformanceNotFlagged() {
+        index()
+
+        // Internal struct conforming to ExternalProtocol should NOT be flagged
+        assertNotRedundantInternalAccessibility(.struct("InternalStructConformingToExternalProtocol"))
+        // The protocol requirement implementation should NOT be flagged (line 10 in fixture)
+        assertNotRedundantInternalAccessibility(.functionMethodInstance("someExternalProtocolMethod()", line: 10))
+    }
+
+    /// Tests that implicitly internal types conforming to external protocols are NOT flagged.
+    func testImplicitlyInternalExternalProtocolConformanceNotFlagged() {
+        index()
+
+        // Implicitly internal class conforming to ExternalProtocol should NOT be flagged
+        assertNotRedundantInternalAccessibility(.class("ImplicitlyInternalClassConformingToExternalProtocol"))
+        // The protocol requirement implementation should NOT be flagged (line 15 in fixture)
+        assertNotRedundantInternalAccessibility(.functionMethodInstance("someExternalProtocolMethod()", line: 15))
+    }
 }

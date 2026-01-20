@@ -7,7 +7,8 @@
       "s:14SyntaxAnalysis8FunctionV8fullNameSSvp",
       "s:14SyntaxAnalysis23UnusedParameterAnalyzerC7analyze8functionShyAA0D0VGAA8FunctionV_tF",
       "s:14SyntaxAnalysis9ParameterV5labelAC8PartKindOvp",
-      "s:14SyntaxAnalysis9ParameterV8location11SourceGraph8LocationCvp"
+      "s:14SyntaxAnalysis9ParameterV8location11SourceGraph8LocationCvp",
+      "s:11SourceGraph32InterfaceBuilderPropertyRetainerC19swiftNameToSelectoryS2SFZ"
     ]
   }
 }
