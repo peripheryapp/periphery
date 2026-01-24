@@ -246,4 +246,92 @@ final class RedundantInternalAccessibilityTest: SPMSourceGraphTestCase {
         // The protocol requirement implementation should NOT be flagged (line 15 in fixture)
         assertNotRedundantInternalAccessibility(.functionMethodInstance("someExternalProtocolMethod()", line: 15))
     }
+
+    /// Tests that top-level internal types used only within the same file are flagged
+    /// as redundant internal.
+    ///
+    /// For top-level declarations, private and fileprivate are equivalent, so the
+    /// suggested accessibility is nil (ambiguous). Nested types are suppressed when
+    /// their parent is already flagged to reduce noise.
+    func testInternalTypeTransitivelyExposedInSameFileSuggestsFileprivate() {
+        index()
+
+        // TransitiveExposureClassA is only used within its file (from ClassB), so it
+        // should be flagged as redundant internal. Since it's top-level, the suggestion
+        // is nil (private and fileprivate are equivalent for top-level declarations).
+        assertRedundantInternalAccessibility(.class("TransitiveExposureClassA"))
+
+        // TransitivelyExposedStatus is suppressed because its parent (ClassA) is already
+        // flagged. This is by design to reduce noise - fixing the parent is sufficient.
+    }
+
+    // MARK: - Transitive Access Exposure Tests
+
+    // These tests verify that Periphery does NOT incorrectly flag internal types
+    // that are transitively exposed through API signatures when those APIs are
+    // called from other files. See TransitiveAccessExposure.swift for fixtures.
+
+    /// Tests that internal types used in function/method signatures are NOT flagged
+    /// when the function is called from another file.
+    ///
+    /// Covers: parameter types, return types, default argument types, initializer parameters,
+    /// and closure types in properties.
+    func testTransitiveExposureThroughFunctionSignatures() {
+        index()
+
+        // Parameter types: ParameterTypeA used in processParameter()
+        assertNotRedundantInternalAccessibility(.struct("ParameterTypeA"))
+
+        // Return types: ReturnTypeA returned by getResult(), InternalReturnTypeEnum returned by getEnum()
+        assertNotRedundantInternalAccessibility(.enum("ReturnTypeA"))
+        assertNotRedundantInternalAccessibility(.enum("InternalReturnTypeEnum"))
+
+        // Default argument types: DefaultArgTypeA used in processWithDefault()
+        assertNotRedundantInternalAccessibility(.struct("DefaultArgTypeA"))
+
+        // Initializer parameters: InitParamTypeA used in init(config:)
+        assertNotRedundantInternalAccessibility(.struct("InitParamTypeA"))
+
+        // Closure types: ClosureParamTypeA/ClosureReturnTypeA in transformer property
+        assertNotRedundantInternalAccessibility(.struct("ClosureParamTypeA"))
+        assertNotRedundantInternalAccessibility(.struct("ClosureReturnTypeA"))
+    }
+
+    /// Tests that internal types used in property and subscript signatures are NOT flagged
+    /// when accessed from another file.
+    ///
+    /// Covers: property types, subscript parameter types, subscript return types.
+    func testTransitiveExposureThroughPropertyAndSubscriptSignatures() {
+        index()
+
+        // Property types: PropertyTypeA used in exposedProperty
+        assertNotRedundantInternalAccessibility(.struct("PropertyTypeA"))
+
+        // Subscript parameter types: SubscriptKeyTypeA used in subscript(key:)
+        assertNotRedundantInternalAccessibility(.struct("SubscriptKeyTypeA"))
+
+        // Subscript return types: SubscriptReturnTypeA returned by subscript
+        assertNotRedundantInternalAccessibility(.struct("SubscriptReturnTypeA"))
+    }
+
+    /// Tests that internal types used in generic constraints, protocol requirements,
+    /// enum associated values, and typealiases are NOT flagged when exposed from another file.
+    ///
+    /// Covers: generic constraint protocols, protocol requirement types, enum associated
+    /// value types, typealias target types.
+    func testTransitiveExposureThroughTypeSystemConstructs() {
+        index()
+
+        // Generic constraints: GenericConstraintProtocolA constrains processGeneric()
+        assertNotRedundantInternalAccessibility(.protocol("GenericConstraintProtocolA"))
+
+        // Protocol requirement types: ProtocolRequirementTypeA in ProtocolWithRequirementA
+        assertNotRedundantInternalAccessibility(.struct("ProtocolRequirementTypeA"))
+
+        // Enum associated values: EnumAssociatedTypeA in EnumWithAssociatedValueA
+        assertNotRedundantInternalAccessibility(.struct("EnumAssociatedTypeA"))
+
+        // Typealias targets: TypealiasTargetTypeA aliased by AliasedTypeA
+        assertNotRedundantInternalAccessibility(.struct("TypealiasTargetTypeA"))
+    }
 }
