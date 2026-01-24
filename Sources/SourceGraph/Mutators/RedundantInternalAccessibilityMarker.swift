@@ -40,7 +40,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         if decl.accessibility.value == .internal {
             if !graph.isRetained(decl), !shouldSkipMarking(decl) {
                 let isReferencedOutside = decl.isReferencedOutsideFile(graph: graph)
-                if !isReferencedOutside {
+                if !isReferencedOutside, !isTransitivelyExposedOutsideFile(decl) {
                     mark(decl)
                 }
             }
@@ -82,8 +82,11 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         // to indicate the ambiguity in the output message.
         // If the declaration is referenced from different types in the same file,
         // it needs fileprivate. Otherwise, private is sufficient.
+        // Also check transitive exposure: if the type is used as return/parameter type of a
+        // function called from a different type in the same file, it needs fileprivate.
         let isTopLevel = decl.parent == nil
-        let suggestedAccessibility: Accessibility? = isTopLevel ? nil : (isReferencedFromDifferentTypeInSameFile(decl) ? .fileprivate : .private)
+        let needsFileprivate = isReferencedFromDifferentTypeInSameFile(decl) || isTransitivelyExposedFromDifferentTypeInSameFile(decl)
+        let suggestedAccessibility: Accessibility? = isTopLevel ? nil : (needsFileprivate ? .fileprivate : .private)
 
         // Check if the parent's accessibility already constrains this member.
         // If the parent is `private`, the member is already effectively `private`.
@@ -114,7 +117,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         for descDecl in descendants {
             if !graph.isRetained(descDecl), !shouldSkipMarking(descDecl) {
                 let isReferencedOutside = descDecl.isReferencedOutsideFile(graph: graph)
-                if !isReferencedOutside {
+                if !isReferencedOutside, !isTransitivelyExposedOutsideFile(descDecl) {
                     mark(descDecl)
                 }
             }
@@ -345,5 +348,102 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
             return decl
         }
         return decl
+    }
+
+    /// Checks if a type is transitively exposed outside its file through an API signature.
+    ///
+    /// A type is transitively exposed when it appears in the signature of a function, property,
+    /// or initializer (as return type, parameter type, etc.) where that API is referenced from
+    /// a different file. Even if the type itself is never directly referenced outside its file,
+    /// it must remain `internal` (not `fileprivate` or `private`) if it's part of an API that
+    /// is used from other files.
+    ///
+    /// For example, if `ScanProgress` is the return type of `runFullScanWithStreaming()`, and
+    /// that function is called from another file, then `ScanProgress` is transitively exposed
+    /// and should not be marked as redundantly internal.
+    private func isTransitivelyExposedOutsideFile(_ decl: Declaration) -> Bool {
+        let refs = graph.references(to: decl)
+
+        for ref in refs {
+            // Check if this reference is in an API signature role (return type, parameter type, etc.)
+            guard ref.role.isPubliclyExposable else { continue }
+
+            // Get the parent declaration (the function/property that uses this type in its signature)
+            guard let parent = ref.parent else { continue }
+
+            // Check if that parent API is referenced from outside this file
+            if parent.isReferencedOutsideFile(graph: graph) {
+                return true
+            }
+
+            // For properties, also check if the containing type is used from outside the file.
+            // When code accesses `obj.property`, the property's type is exposed even if
+            // `property` itself isn't directly referenced from outside.
+            if parent.kind.isVariableKind {
+                if let containingType = parent.parent,
+                   containingType.isReferencedOutsideFile(graph: graph)
+                {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    /// Checks if a type is transitively exposed from a different type within the same file.
+    ///
+    /// This is similar to `isTransitivelyExposedOutsideFile`, but checks for exposure within
+    /// the same file from a different type. When a type is used as a return type or parameter
+    /// type of a function that is called from a different type in the same file, the type
+    /// needs to be at least `fileprivate` (not `private`).
+    ///
+    /// For example:
+    /// ```swift
+    /// class ClassA {
+    ///     enum Status { case active }  // Only directly referenced in ClassA
+    ///     func getStatus() -> Status { .active }  // Called from ClassB
+    /// }
+    /// class ClassB {
+    ///     func use() { _ = ClassA().getStatus() }  // Uses Status transitively
+    /// }
+    /// ```
+    /// Here, `Status` should be suggested as `fileprivate`, not `private`.
+    private func isTransitivelyExposedFromDifferentTypeInSameFile(_ decl: Declaration) -> Bool {
+        let file = decl.location.file
+        let refs = graph.references(to: decl)
+
+        guard let declTopLevel = topLevelType(of: decl) else {
+            return false
+        }
+
+        let declLogicalType = logicalType(of: declTopLevel, inFile: file)
+
+        for ref in refs {
+            // Check if this reference is in an API signature role (return type, parameter type, etc.)
+            guard ref.role.isPubliclyExposable else { continue }
+
+            // Get the parent declaration (the function/property that uses this type in its signature)
+            guard let parent = ref.parent else { continue }
+
+            // Check references to that parent from the same file
+            let parentRefs = graph.references(to: parent).filter { $0.location.file == file }
+
+            for parentRef in parentRefs {
+                guard let refParent = parentRef.parent,
+                      let refTopLevel = topLevelType(of: refParent)
+                else {
+                    continue
+                }
+
+                let refLogicalType = logicalType(of: refTopLevel, inFile: file)
+
+                if declLogicalType !== refLogicalType {
+                    return true
+                }
+            }
+        }
+
+        return false
     }
 }
