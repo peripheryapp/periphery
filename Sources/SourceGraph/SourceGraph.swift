@@ -117,6 +117,20 @@ public final class SourceGraph {
         }
     }
 
+    func unmarkRetained(_ declaration: Declaration) {
+        retainedDeclarations.remove(declaration)
+
+        let retainedReferences = declaration.usrs.flatMapSet { usr in
+            allReferencesByUsr[usr, default: []]
+        }.filter { reference in
+            reference.kind == .retained && reference.parent === declaration.parent
+        }
+
+        for reference in retainedReferences {
+            remove(reference)
+        }
+    }
+
     public func markRetained(_ declarations: Set<Declaration>) {
         declarations.forEach { markRetained($0) }
     }
