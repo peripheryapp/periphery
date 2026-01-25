@@ -16,6 +16,7 @@ final class SwiftUIRetainer: SourceGraphMutator {
     func mutate() {
         retainSpecialProtocolConformances()
         retainApplicationDelegateAdaptors()
+        unretainPreviewMacroExpansions()
     }
 
     // MARK: - Private
@@ -50,5 +51,23 @@ final class SwiftUIRetainer: SourceGraphMutator {
                 }
             }
             .forEach { graph.markRetained($0) }
+    }
+
+    private func unretainPreviewMacroExpansions() {
+        guard !configuration.retainSwiftUIPreviews else { return }
+
+        let previewRegistryUsr = "s:21DeveloperToolsSupport15PreviewRegistryP"
+        let macroReferences = graph.references(to: previewRegistryUsr)
+        guard !macroReferences.isEmpty else { return }
+
+        for reference in macroReferences {
+            if let parent = reference.parent, parent.isImplicit {
+                graph.unmarkRetained(parent)
+
+                for decl in parent.declarations {
+                    graph.unmarkRetained(decl)
+                }
+            }
+        }
     }
 }

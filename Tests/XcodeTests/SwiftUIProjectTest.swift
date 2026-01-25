@@ -17,11 +17,13 @@ final class SwiftUIProjectTest: XcodeSourceGraphTestCase {
     }
 
     func testDoesNotRetainPreviewProvider() {
-        assertNotReferenced(.struct("ContentView_Previews"))
+        assertNotReferenced(.struct("PreviewOnlyView"))
+        assertNotReferenced(.struct("PreviewOnlyView_PreviewProvider"))
     }
 
     func testRetainsLibraryContentProvider() {
-        assertReferenced(.struct("LibraryViewContent"))
+        assertReferenced(.struct("LibraryOnlyView"))
+        assertReferenced(.struct("LibraryOnlyView_LibraryContentProvider"))
     }
 
     func testRetainsUIApplicationDelegateAdaptorProperty() {

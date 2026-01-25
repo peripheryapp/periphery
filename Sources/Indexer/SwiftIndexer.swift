@@ -325,12 +325,11 @@ final class SwiftIndexer: Indexer {
         private func associateDanglingReferences() {
             guard !danglingReferences.isEmpty else { return }
 
-            let explicitDeclarations = declarations.filter { !$0.isImplicit }
-            let declsByLocation = explicitDeclarations
+            let declsByLocation = declarations
                 .reduce(into: [Location: [Declaration]]()) { result, decl in
                     result[decl.location, default: []].append(decl)
                 }
-            let declsByLine = explicitDeclarations
+            let declsByLine = declarations
                 .reduce(into: [Int: [Declaration]]()) { result, decl in
                     result[decl.location.line, default: []].append(decl)
                 }
@@ -344,11 +343,12 @@ final class SwiftIndexer: Indexer {
                 if let sameLineCandidateDecls {
                     candidateDecls = sameLineCandidateDecls
                 } else {
-                    // Enum case parameters are not associated with case elements. For parameters
-                    // that exist on a line below the case statement we need to find the nearest
-                    // preceding case.
+                    // For references with no declaration on the same line, find the nearest preceding declaration.
                     if let line = sortedDeclLines.first(where: { $0 < ref.location.line }) {
-                        candidateDecls = declsByLine[line]?.filter { $0.kind == .enumelement } ?? []
+                        candidateDecls = declsByLine[line]?.filter {
+                            !$0.usrs.contains(ref.usr) &&
+                                !$0.ancestralDeclarations.contains(where: { $0.usrs.contains(ref.usr) })
+                        } ?? []
                     }
                 }
 

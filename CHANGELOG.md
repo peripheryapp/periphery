@@ -13,6 +13,7 @@
 ##### Bug Fixes
 
 - Fix IBAction methods with named parameters or no parameters incorrectly marked as unused.
+- Fix `--retain-swift-ui-previews` for the `#Preview` macro.
 
 ## 3.4.0 (2026-01-06)
 
