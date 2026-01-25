@@ -7,7 +7,7 @@
 ##### Enhancements
 
 - The `--color` option now accepts one of `auto`, `always` and `never`. In `auto` mode, color is disabled for dumb terminals and non-TTYs.
-- Added detection of superfluous `// periphery:ignore` comments. A warning is now reported when an ignore comment is unnecessary because the declaration is actually used.
+- Added detection of superfluous `// periphery:ignore` comments. A result is now reported when an ignore comment is unnecessary because the declaration is actually used. Can be disabled with `--no-superfluous-ignore-comments`.
 - More unused code is now reported in a single scan, rather than requiring repeated remove-and-rescan cycles.
 
 ##### Bug Fixes
