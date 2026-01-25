@@ -447,7 +447,20 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     /// For example, if `ScanProgress` is the return type of `runFullScanWithStreaming()`, and
     /// that function is called from another file, then `ScanProgress` is transitively exposed
     /// and should not be marked as redundantly internal.
+    ///
+    /// This check is recursive: if TypeA is used as a property type in Container, and Container
+    /// is used as a property type in OuterContainer, and OuterContainer is referenced from
+    /// outside the file, then TypeA is transitively exposed through the chain.
     private func isTransitivelyExposedOutsideFile(_ decl: Declaration) -> Bool {
+        var visited: Set<ObjectIdentifier> = []
+        return isTransitivelyExposedOutsideFileRecursive(decl, visited: &visited)
+    }
+
+    private func isTransitivelyExposedOutsideFileRecursive(_ decl: Declaration, visited: inout Set<ObjectIdentifier>) -> Bool {
+        let id = ObjectIdentifier(decl)
+        guard !visited.contains(id) else { return false }
+        visited.insert(id)
+
         let refs = graph.references(to: decl)
 
         for ref in refs {
@@ -465,18 +478,20 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
             // For properties, also check if they could be accessed from outside the file
             // through their containing type. The property's type is exposed when:
             // 1. The property is internal (accessible from outside the file)
-            // 2. The containing type is used from outside the file
+            // 2. The containing type is used from outside the file OR transitively exposed
             // 3. The property is not actually referenced from outside (already checked above)
-            // If the property is already referenced from outside, we would have returned
-            // true at line 472. This check catches cases where the property COULD be
-            // accessed but hasn't been yet.
             if parent.kind.isVariableKind,
                parent.accessibility.value == .internal || parent.accessibility.isAccessibleCrossModule
             {
-                if let containingType = parent.parent,
-                   containingType.isReferencedOutsideFile(graph: graph)
-                {
-                    return true
+                if let containingType = parent.parent {
+                    // Direct reference from outside the file
+                    if containingType.isReferencedOutsideFile(graph: graph) {
+                        return true
+                    }
+                    // Recursive: the containing type itself is transitively exposed
+                    if isTransitivelyExposedOutsideFileRecursive(containingType, visited: &visited) {
+                        return true
+                    }
                 }
             }
         }
@@ -502,15 +517,39 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     /// }
     /// ```
     /// Here, `Status` should be suggested as `fileprivate`, not `private`.
+    ///
+    /// This check is recursive: if TypeA is used as a property type in Container, and Container
+    /// is used as a property type in another type that is accessed from a different type in
+    /// the same file, then TypeA needs fileprivate.
     private func isTransitivelyExposedFromDifferentTypeInSameFile(_ decl: Declaration) -> Bool {
         let file = decl.location.file
-        let refs = graph.references(to: decl)
 
         guard let declContainingType = immediateContainingType(of: decl) else {
             return false
         }
 
         let declLogicalType = logicalType(of: declContainingType, inFile: file)
+        var visited: Set<ObjectIdentifier> = []
+
+        return isTransitivelyExposedFromDifferentTypeInSameFileRecursive(
+            decl,
+            declLogicalType: declLogicalType,
+            file: file,
+            visited: &visited
+        )
+    }
+
+    private func isTransitivelyExposedFromDifferentTypeInSameFileRecursive(
+        _ decl: Declaration,
+        declLogicalType: Declaration?,
+        file: SourceFile,
+        visited: inout Set<ObjectIdentifier>
+    ) -> Bool {
+        let id = ObjectIdentifier(decl)
+        guard !visited.contains(id) else { return false }
+        visited.insert(id)
+
+        let refs = graph.references(to: decl)
 
         for ref in refs {
             // Check if this reference is in an API signature role (return type, parameter type, etc.)
@@ -533,6 +572,23 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
 
                 if declLogicalType !== refLogicalType {
                     return true
+                }
+            }
+
+            // For properties, also check if the containing type is transitively exposed
+            // from a different type in the same file
+            if parent.kind.isVariableKind,
+               parent.accessibility.value == .internal || parent.accessibility.isAccessibleCrossModule
+            {
+                if let containingType = parent.parent {
+                    if isTransitivelyExposedFromDifferentTypeInSameFileRecursive(
+                        containingType,
+                        declLogicalType: declLogicalType,
+                        file: file,
+                        visited: &visited
+                    ) {
+                        return true
+                    }
                 }
             }
         }

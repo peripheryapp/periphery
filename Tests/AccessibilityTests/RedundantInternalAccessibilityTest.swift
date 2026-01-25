@@ -387,4 +387,45 @@ final class RedundantInternalAccessibilityTest: SPMSourceGraphTestCase {
         // requirement). It should NOT be flagged as redundant internal.
         assertNotRedundantInternalAccessibility(.struct("TypeUsedInExternalProtocolSignature"))
     }
+
+    // MARK: - Stored Property Type Transitive Exposure Tests
+
+    /// Tests that types used as stored property types are NOT flagged when the containing
+    /// type is instantiated from another file.
+    ///
+    /// When a type T is used as a property type in struct/class C, and C is used from
+    /// outside the file, T is transitively exposed and must remain internal.
+    func testStoredPropertyTypeNotFlagged() {
+        index()
+
+        // StoredPropertyRole is used as the type of StoredPropertyContainer.role
+        // StoredPropertyContainer is instantiated from StoredPropertyTypeExposure_Consumer.swift
+        assertNotRedundantInternalAccessibility(.enum("StoredPropertyRole"))
+        assertNotRedundantInternalAccessibility(.struct("StoredPropertyContainer"))
+    }
+
+    /// Tests that nested types used as property types are NOT flagged when the containing
+    /// type is instantiated from another file.
+    func testNestedTypeAsPropertyTypeNotFlagged() {
+        index()
+
+        // NestedPhase is used as the type of ClassWithNestedType.phase
+        // ClassWithNestedType is instantiated from StoredPropertyTypeExposure_Consumer.swift
+        assertNotRedundantInternalAccessibility(.enum("NestedPhase"))
+        assertNotRedundantInternalAccessibility(.class("ClassWithNestedType"))
+    }
+
+    /// Tests that types in a chain of property types are NOT flagged when the outermost
+    /// type is instantiated from another file.
+    ///
+    /// This tests the recursive transitive exposure check: InnerType -> MiddleContainer -> OuterContainer
+    func testChainedPropertyTypeExposureNotFlagged() {
+        index()
+
+        // InnerType is used in MiddleContainer, which is used in OuterContainer
+        // OuterContainer is instantiated from StoredPropertyTypeExposure_Consumer.swift
+        assertNotRedundantInternalAccessibility(.struct("InnerType"))
+        assertNotRedundantInternalAccessibility(.struct("MiddleContainer"))
+        assertNotRedundantInternalAccessibility(.struct("OuterContainer"))
+    }
 }
