@@ -370,4 +370,21 @@ final class RedundantInternalAccessibilityTest: SPMSourceGraphTestCase {
         assertNotRedundantInternalAccessibility(.varInstance("memberwiseProperty"))
         assertNotRedundantInternalAccessibility(.varInstance("propertyWithDefault"))
     }
+
+    // MARK: - External Protocol Requirement Signature Tests
+
+    /// Tests that types used in external protocol requirement signatures are NOT flagged.
+    ///
+    /// When a type is used as a return type or parameter type of a method that implements
+    /// an external protocol (like Equatable, NSViewRepresentable, etc.), the type must
+    /// remain internal because the protocol method's accessibility is constrained by the
+    /// protocol, and its signature types must be at least as accessible.
+    func testTypeUsedInExternalProtocolSignatureNotFlagged() {
+        index()
+
+        // TypeUsedInExternalProtocolSignature conforms to Equatable, which means
+        // it's used as the parameter type for the == operator (an external protocol
+        // requirement). It should NOT be flagged as redundant internal.
+        assertNotRedundantInternalAccessibility(.struct("TypeUsedInExternalProtocolSignature"))
+    }
 }
