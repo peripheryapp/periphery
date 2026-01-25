@@ -158,6 +158,10 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
             return true
         }
 
+        if isUsedInExternalProtocolRequirementSignature(decl) {
+            return true
+        }
+
         return false
     }
 
@@ -563,6 +567,60 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
 
             // Check if that parent is a protocol requirement
             if isProtocolRequirement(parent) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /// Checks if a type is used in the signature of a method that conforms to an external protocol.
+    ///
+    /// Types used in external protocol requirement signatures must remain `internal` because:
+    /// 1. The method implementing the protocol requirement can't be more restrictive than the protocol
+    /// 2. The types used in its signature must be at least as accessible as the method
+    ///
+    /// For example, with NSViewRepresentable:
+    /// ```swift
+    /// class FocusableNSView: NSView { ... }  // Must stay internal!
+    ///
+    /// struct FocusClaimingView: NSViewRepresentable {
+    ///     func makeNSView(context: Context) -> FocusableNSView { ... }  // Protocol requirement
+    ///     func updateNSView(_ nsView: FocusableNSView, context: Context) { ... }  // Protocol requirement
+    /// }
+    /// ```
+    /// Here, `FocusableNSView` cannot be made `fileprivate` or `private` because the protocol
+    /// methods that use it must remain at the protocol's required accessibility level.
+    private func isUsedInExternalProtocolRequirementSignature(_ decl: Declaration) -> Bool {
+        let refs = graph.references(to: decl)
+
+        for ref in refs {
+            // Check if this reference is in an API signature role (return type, parameter type, etc.)
+            guard ref.role.isPubliclyExposable else { continue }
+
+            // Get the parent declaration (the function/property that uses this type in its signature)
+            guard let parent = ref.parent else { continue }
+
+            // Check if that parent conforms to an external protocol requirement
+            if isExternalProtocolRequirement(parent) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /// Checks if a declaration implements an external protocol requirement.
+    ///
+    /// External protocols are those defined outside our codebase (e.g., NSViewRepresentable,
+    /// Codable, etc.). When a declaration implements such a protocol, its accessibility is
+    /// constrained by the protocol.
+    private func isExternalProtocolRequirement(_ decl: Declaration) -> Bool {
+        // Check for .related references FROM this declaration to protocol members
+        // where the protocol is external (not in our graph).
+        for ref in decl.related where ref.declarationKind.isProtocolMemberConformingKind {
+            // If we can't find the declaration in our graph, it's external
+            if graph.declaration(withUsr: ref.usr) == nil, ref.name == decl.name {
                 return true
             }
         }
