@@ -334,4 +334,40 @@ final class RedundantInternalAccessibilityTest: SPMSourceGraphTestCase {
         // Typealias targets: TypealiasTargetTypeA aliased by AliasedTypeA
         assertNotRedundantInternalAccessibility(.struct("TypealiasTargetTypeA"))
     }
+
+    // MARK: - Enum Case Tests
+
+    /// Tests that enum cases are NOT flagged as redundant internal.
+    ///
+    /// Enum cases cannot have explicit access modifiers in Swift - they always
+    /// inherit the accessibility of their containing enum. Suggesting to make
+    /// them private or fileprivate would cause a syntax error.
+    func testEnumCasesNotFlagged() {
+        index()
+
+        // Enum cases should never be flagged
+        assertNotRedundantInternalAccessibility(.enumelement("usedCase"))
+        assertNotRedundantInternalAccessibility(.enumelement("anotherUsedCase"))
+        assertNotRedundantInternalAccessibility(.enumelement("internalCase"))
+        assertNotRedundantInternalAccessibility(.enumelement("anotherInternalCase"))
+    }
+
+    // MARK: - Struct Memberwise Initializer Tests
+
+    /// Tests that struct stored properties used in implicit memberwise initializers
+    /// are NOT flagged as redundant internal.
+    ///
+    /// Stored properties that are parameters to a struct's memberwise initializer
+    /// are part of the struct's public API. Even if they're only directly accessed
+    /// within the same file, they must remain accessible for the initializer.
+    func testStructMemberwiseInitPropertiesNotFlagged() {
+        index()
+
+        // Properties used in memberwise init should not be flagged
+        assertNotRedundantInternalAccessibility(.varInstance("memberwiseProperty1"))
+        assertNotRedundantInternalAccessibility(.varInstance("memberwiseProperty2"))
+        assertNotRedundantInternalAccessibility(.varInstance("memberwiseConstant"))
+        assertNotRedundantInternalAccessibility(.varInstance("memberwiseProperty"))
+        assertNotRedundantInternalAccessibility(.varInstance("propertyWithDefault"))
+    }
 }
