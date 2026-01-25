@@ -66,6 +66,9 @@ struct ScanCommand: ParsableCommand {
     @Flag(help: "Disable identification of unused imports")
     var disableUnusedImportAnalysis: Bool = defaultConfiguration.$disableUnusedImportAnalysis.defaultValue
 
+    @Flag(inversion: .prefixedNo, help: "Report superfluous ignore comments")
+    var superfluousIgnoreComments: Bool = defaultConfiguration.$superfluousIgnoreComments.defaultValue
+
     @Option(parsing: .upToNextOption, help: "Names of unused imported modules to retain")
     var retainUnusedImportedModules: [String] = defaultConfiguration.$retainUnusedImportedModules.defaultValue
 
@@ -188,6 +191,7 @@ struct ScanCommand: ParsableCommand {
         configuration.apply(\.$retainSwiftUIPreviews, retainSwiftUIPreviews)
         configuration.apply(\.$disableRedundantPublicAnalysis, disableRedundantPublicAnalysis)
         configuration.apply(\.$disableUnusedImportAnalysis, disableUnusedImportAnalysis)
+        configuration.apply(\.$superfluousIgnoreComments, superfluousIgnoreComments)
         configuration.apply(\.$retainUnusedImportedModules, retainUnusedImportedModules)
         configuration.apply(\.$externalEncodableProtocols, externalEncodableProtocols)
         configuration.apply(\.$externalCodableProtocols, externalCodableProtocols)
