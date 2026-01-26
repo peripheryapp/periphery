@@ -1217,6 +1217,12 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 }
             }
         }
+
+        analyze(retainPublic: true, superfluousIgnoreComments: false) {
+            // Superfluous ignore warnings should be suppressed when disabled.
+            assertNotSuperfluousIgnoreCommand(.functionFree("superfluouslyIgnoredFunc()"))
+            assertNotSuperfluousIgnoreCommand(.class("SuperfluouslyIgnoredClass"))
+        }
     }
 
     // MARK: - Swift Testing

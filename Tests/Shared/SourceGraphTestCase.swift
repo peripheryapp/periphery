@@ -73,7 +73,7 @@ open class SourceGraphTestCase: XCTestCase {
             configuration: configuration,
             swiftVersion: swiftVersion
         ).perform()
-        results = ScanResultBuilder.build(for: graph)
+        results = ScanResultBuilder.build(for: graph, configuration: configuration)
     }
 
     func assertReferenced(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {

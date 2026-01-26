@@ -17,6 +17,7 @@ class FixtureSourceGraphTestCase: SPMSourceGraphTestCase {
         retainObjcAccessible: Bool = false,
         retainObjcAnnotated: Bool = false,
         disableRedundantPublicAnalysis: Bool = false,
+        superfluousIgnoreComments: Bool = true,
         retainCodableProperties: Bool = false,
         retainEncodableProperties: Bool = false,
         retainUnusedProtocolFuncParams: Bool = false,
@@ -35,6 +36,7 @@ class FixtureSourceGraphTestCase: SPMSourceGraphTestCase {
         configuration.retainObjcAnnotated = retainObjcAnnotated
         configuration.retainAssignOnlyProperties = retainAssignOnlyProperties
         configuration.disableRedundantPublicAnalysis = disableRedundantPublicAnalysis
+        configuration.superfluousIgnoreComments = superfluousIgnoreComments
         configuration.externalCodableProtocols = externalCodableProtocols
         configuration.retainCodableProperties = retainCodableProperties
         configuration.retainEncodableProperties = retainEncodableProperties

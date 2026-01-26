@@ -1,8 +1,9 @@
+import Configuration
 import Foundation
 import SourceGraph
 
 public enum ScanResultBuilder {
-    public static func build(for graph: SourceGraph) -> [ScanResult] {
+    public static func build(for graph: SourceGraph, configuration: Configuration) -> [ScanResult] {
         let assignOnlyProperties = graph.assignOnlyProperties
         let removableDeclarations = graph.unusedDeclarations
             .subtracting(assignOnlyProperties)
@@ -49,19 +50,23 @@ public enum ScanResultBuilder {
             .init(declaration: $0.0, annotation: .redundantFilePrivateAccessibility(files: $0.1.files, containingTypeName: $0.1.containingTypeName))
         }
 
-        // Detect superfluous ignore commands
-        // 1. Declarations with ignore comments that have references from non-ignored code
-        let superfluousDeclarations = graph.explicitlyIgnoredDeclarations
-            .filter { decl in
-                hasReferencesFromNonIgnoredCode(decl, graph: graph)
-            }
+        let annotatedSuperfluousIgnoreCommands: [ScanResult] = {
+            guard configuration.superfluousIgnoreComments else { return [] }
 
-        // 2. Parameters with ignore comments that are actually used (not in unusedParameters)
-        let superfluousParamResults = findSuperfluousParameterIgnores(graph: graph)
+            // Detect superfluous ignore commands
+            // 1. Declarations with ignore comments that have references from non-ignored code
+            let superfluousDeclarations = graph.explicitlyIgnoredDeclarations
+                .filter { decl in
+                    hasReferencesFromNonIgnoredCode(decl, graph: graph)
+                }
 
-        let annotatedSuperfluousIgnoreCommands: [ScanResult] = superfluousDeclarations
-            .map { .init(declaration: $0, annotation: .superfluousIgnoreCommand) }
-            + superfluousParamResults
+            // 2. Parameters with ignore comments that are actually used (not in unusedParameters)
+            let superfluousParamResults = findSuperfluousParameterIgnores(graph: graph)
+
+            return superfluousDeclarations
+                .map { .init(declaration: $0, annotation: .superfluousIgnoreCommand) }
+                + superfluousParamResults
+        }()
 
         let allAnnotatedDeclarations = annotatedRemovableDeclarations +
             annotatedAssignOnlyProperties +
