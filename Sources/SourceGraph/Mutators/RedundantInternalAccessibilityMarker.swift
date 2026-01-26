@@ -162,6 +162,11 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
             return true
         }
 
+        // Check if type is constrained by same-file type usage
+        if isConstrainedBySameFileTypeUsage(decl) {
+            return true
+        }
+
         return false
     }
 
@@ -294,19 +299,14 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     }
 
     /// Checks if a declaration is a stored property that's part of a struct's implicit memberwise
-    /// initializer AND that initializer is used from outside the file.
-    ///
-    /// Struct stored properties that are parameters to the implicit memberwise initializer
-    /// must maintain sufficient accessibility for that initializer to work when called from
-    /// other files. If the memberwise init is only used within the same file, the properties
-    /// can still be marked as redundantly internal with a suggestion of fileprivate.
+    /// initializer AND that initializer is used (either from outside the file OR from within
+    /// the same file when the struct must remain internal).
     private func isStructMemberwiseInitProperty(_ decl: Declaration) -> Bool {
         guard decl.kind == .varInstance,
               let parent = decl.parent,
               parent.kind == .struct
         else { return false }
 
-        // Check if the struct has an implicit memberwise initializer that includes this property.
         let implicitInits = parent.declarations.filter { $0.kind == .functionConstructor && $0.isImplicit }
 
         for implicitInit in implicitInits {
@@ -314,18 +314,110 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
                   let propertyName = decl.name
             else { continue }
 
-            // Parse the init parameter names from the init signature (e.g., "init(foo:bar:)")
             let parameterNames = initName
                 .dropFirst("init(".count)
                 .dropLast(")".count)
                 .split(separator: ":")
                 .map(String.init)
 
-            // Only skip if this property is part of the memberwise init AND
-            // the init is used from outside the file.
-            if parameterNames.contains(propertyName),
-               implicitInit.isReferencedOutsideFile(graph: graph)
+            guard parameterNames.contains(propertyName) else { continue }
+
+            // Case 1: Init referenced outside file -> properties must stay internal
+            if implicitInit.isReferencedOutsideFile(graph: graph) {
+                return true
+            }
+
+            // Case 2: Init referenced in same file AND struct must remain internal
+            // (because it's used outside file or transitively exposed)
+            let hasAnyReference = !graph.references(to: implicitInit).isEmpty
+            if hasAnyReference {
+                if parent.isReferencedOutsideFile(graph: graph) {
+                    return true
+                }
+                if isTransitivelyExposedOutsideFile(parent) {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    /// Checks if a type is constrained by being used in the signature of another
+    /// internal declaration (in the same file) that must remain internal.
+    ///
+    /// In Swift, types used in a declaration's signature must be at least as accessible
+    /// as that declaration. If TypeA is used as a property type, return type, parameter
+    /// type, or generic constraint in TypeB/MemberB, and TypeB must remain internal
+    /// (because it's referenced outside the file or transitively exposed), then TypeA
+    /// cannot be made fileprivate/private.
+    ///
+    /// This complements isTransitivelyExposedOutsideFile() which handles cross-file
+    /// scenarios. This function handles same-file scenarios where the constraint chain
+    /// exists entirely within one file.
+    private func isConstrainedBySameFileTypeUsage(_ decl: Declaration) -> Bool {
+        let typeKinds: Set<Declaration.Kind> = [.enum, .struct, .class, .protocol]
+        guard typeKinds.contains(decl.kind) else { return false }
+
+        var visited: Set<ObjectIdentifier> = []
+        return isConstrainedBySameFileTypeUsageRecursive(decl, visited: &visited)
+    }
+
+    private func isConstrainedBySameFileTypeUsageRecursive(
+        _ decl: Declaration,
+        visited: inout Set<ObjectIdentifier>
+    ) -> Bool {
+        let id = ObjectIdentifier(decl)
+        guard !visited.contains(id) else { return false }
+
+        visited.insert(id)
+
+        let typeKinds: Set<Declaration.Kind> = [.enum, .struct, .class, .protocol]
+        let file = decl.location.file
+        let refs = graph.references(to: decl)
+
+        for ref in refs {
+            // Check if this reference is in ANY publicly exposable role
+            // (property type, return type, parameter type, generic constraint, etc.)
+            guard ref.role.isPubliclyExposable else { continue }
+
+            // Must be in the same file (cross-file is handled by isTransitivelyExposedOutsideFile)
+            guard ref.location.file == file else { continue }
+
+            // Get the declaration that uses this type in its signature
+            guard let usingDecl = ref.parent else { continue }
+
+            // Find the containing type of that declaration
+            let containingType: Declaration?
+            if typeKinds.contains(usingDecl.kind) || usingDecl.kind.isExtensionKind {
+                // The using declaration IS a type (e.g., conformedType, inheritedType)
+                containingType = usingDecl
+            } else if let parent = usingDecl.parent,
+                      typeKinds.contains(parent.kind) || parent.kind.isExtensionKind
             {
+                // The using declaration is a member of a type
+                containingType = parent
+            } else {
+                continue
+            }
+
+            guard let containingType else { continue }
+
+            // Check if the containing type must remain internal
+            guard containingType.accessibility.value == .internal else { continue }
+
+            // If the containing type is referenced outside the file, our type is constrained
+            if containingType.isReferencedOutsideFile(graph: graph) {
+                return true
+            }
+
+            // If the containing type is transitively exposed outside the file
+            if isTransitivelyExposedOutsideFile(containingType) {
+                return true
+            }
+
+            // Recursive: if the containing type is itself constrained
+            if isConstrainedBySameFileTypeUsageRecursive(containingType, visited: &visited) {
                 return true
             }
         }
@@ -459,6 +551,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     private func isTransitivelyExposedOutsideFileRecursive(_ decl: Declaration, visited: inout Set<ObjectIdentifier>) -> Bool {
         let id = ObjectIdentifier(decl)
         guard !visited.contains(id) else { return false }
+
         visited.insert(id)
 
         let refs = graph.references(to: decl)
@@ -547,6 +640,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     ) -> Bool {
         let id = ObjectIdentifier(decl)
         guard !visited.contains(id) else { return false }
+
         visited.insert(id)
 
         let refs = graph.references(to: decl)
