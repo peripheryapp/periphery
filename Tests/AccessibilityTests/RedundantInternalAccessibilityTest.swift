@@ -428,4 +428,64 @@ final class RedundantInternalAccessibilityTest: SPMSourceGraphTestCase {
         assertNotRedundantInternalAccessibility(.struct("MiddleContainer"))
         assertNotRedundantInternalAccessibility(.struct("OuterContainer"))
     }
+
+    // MARK: - Same-File Type Constraint Tests
+
+    /// Tests that types used as property types in internal types are NOT flagged
+    /// when the containing type must remain internal.
+    func testSameFilePropertyTypeConstraintNotFlagged() {
+        index()
+
+        // SameFileConstrainedEnum is used as property type in SameFileConstrainingStruct
+        // SameFileConstrainingStruct is used from another file
+        assertNotRedundantInternalAccessibility(.enum("SameFileConstrainedEnum"))
+        assertNotRedundantInternalAccessibility(.struct("SameFileConstrainingStruct"))
+    }
+
+    /// Tests that types used as return types are NOT flagged when the containing
+    /// type must remain internal.
+    func testSameFileReturnTypeConstraintNotFlagged() {
+        index()
+
+        // SameFileReturnType is returned by SameFileClassWithReturnType.getReturnType()
+        // SameFileClassWithReturnType is used from another file
+        assertNotRedundantInternalAccessibility(.struct("SameFileReturnType"))
+        assertNotRedundantInternalAccessibility(.class("SameFileClassWithReturnType"))
+    }
+
+    /// Tests that types used as parameter types are NOT flagged when the containing
+    /// type must remain internal.
+    func testSameFileParamTypeConstraintNotFlagged() {
+        index()
+
+        // SameFileParamType is a parameter to SameFileClassWithParamType.process()
+        // SameFileClassWithParamType is used from another file
+        assertNotRedundantInternalAccessibility(.struct("SameFileParamType"))
+        assertNotRedundantInternalAccessibility(.class("SameFileClassWithParamType"))
+    }
+
+    /// Tests that protocols used as generic constraints are NOT flagged when the
+    /// containing type must remain internal.
+    func testSameFileGenericConstraintNotFlagged() {
+        index()
+
+        // SameFileConstraintProtocol is used as generic constraint in SameFileClassWithGenericConstraint
+        // SameFileClassWithGenericConstraint is used from another file
+        assertNotRedundantInternalAccessibility(.protocol("SameFileConstraintProtocol"))
+        assertNotRedundantInternalAccessibility(.class("SameFileClassWithGenericConstraint"))
+    }
+
+    // MARK: - Same-File Memberwise Init Tests
+
+    /// Tests that struct memberwise init properties are NOT flagged when the struct
+    /// is instantiated in the same file AND the struct must remain internal due to
+    /// being used as a property type in another struct that's used from outside.
+    func testSameFileMemberwiseInitPropertiesNotFlagged() {
+        index()
+
+        // SameFileMemberwiseStruct is used as property type in SameFileOuterStruct
+        // SameFileOuterStruct is used from another file
+        assertNotRedundantInternalAccessibility(.struct("SameFileMemberwiseStruct"))
+        assertNotRedundantInternalAccessibility(.struct("SameFileOuterStruct"))
+    }
 }
