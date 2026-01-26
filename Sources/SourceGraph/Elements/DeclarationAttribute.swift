@@ -1,6 +1,6 @@
 public struct DeclarationAttribute: Hashable, CustomStringConvertible {
     let name: String
-    let arguments: String?
+    private let arguments: String?
 
     public init(name: String, arguments: String?) {
         self.name = name

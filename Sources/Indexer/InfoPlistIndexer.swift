@@ -5,7 +5,7 @@ import SourceGraph
 import SystemPackage
 
 final class InfoPlistIndexer: Indexer {
-    enum PlistError: Error {
+    private enum PlistError: Error {
         case failedToParse(path: FilePath, underlyingError: Error)
     }
 

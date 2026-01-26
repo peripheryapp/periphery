@@ -4,7 +4,7 @@ import SystemPackage
 import XcodeProj
 
 public final class XcodeTarget {
-    let project: XcodeProject
+    private let project: XcodeProject
 
     private let target: PBXTarget
     private var files: [ProjectFileKind: Set<FilePath>] = [:]
