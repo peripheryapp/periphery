@@ -66,6 +66,17 @@ final class UsedDeclarationMarker: SourceGraphMutator {
             for ref in declaration.related {
                 markUsed(declarationsReferenced(by: ref))
             }
+
+            // Follow type references from child property declarations.
+            // Property type references are associated with the property declaration
+            // by the indexer, not the containing type. Walking varType references
+            // ensures types used as property types are marked used when the parent
+            // type is used.
+            for childDecl in declaration.declarations where childDecl.kind.isVariableKind {
+                for ref in childDecl.references where ref.role == .varType {
+                    markUsed(declarationsReferenced(by: ref))
+                }
+            }
         }
     }
 
