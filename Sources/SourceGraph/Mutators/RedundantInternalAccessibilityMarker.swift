@@ -439,12 +439,15 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     /// `private` would break the preview because the macro expansion needs to access them.
     private func isReferencedByPreviewMacro(_ decl: Declaration) -> Bool {
         guard configuration.retainSwiftUIPreviews else { return false }
+
         let previewRegistryUsr = "s:21DeveloperToolsSupport15PreviewRegistryP"
+
         for ref in graph.references(to: decl) {
             guard let parent = ref.parent, parent.isImplicit else { continue }
-            // Check if this implicit parent references PreviewRegistry,
+
+            // Check if this implicit parent has a related reference to PreviewRegistry,
             // which identifies it as a #Preview macro expansion.
-            if parent.references.contains(where: { $0.usr == previewRegistryUsr }) {
+            if parent.related.contains(where: { $0.usr == previewRegistryUsr }) {
                 return true
             }
         }
