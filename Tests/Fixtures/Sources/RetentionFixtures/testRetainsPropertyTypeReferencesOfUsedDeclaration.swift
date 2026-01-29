@@ -10,7 +10,6 @@ public struct FixtureViewModel222 {
         let id: UUID
         var equipment: [FixtureItem222]
     }
-
     var sections: [FixtureSection222] = []
 
     public mutating func addSection() {
