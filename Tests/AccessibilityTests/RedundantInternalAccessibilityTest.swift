@@ -475,6 +475,40 @@ final class RedundantInternalAccessibilityTest: SPMSourceGraphTestCase {
         assertNotRedundantInternalAccessibility(.class("SameFileClassWithGenericConstraint"))
     }
 
+    // MARK: - Memberwise Init Called From Different Type Tests
+
+    /// Tests that struct properties are NOT flagged as redundant internal when
+    /// the struct's memberwise initializer is called from a different type in
+    /// the same file (e.g., a ViewModifier creating a struct).
+    func testMemberwiseInitCalledFromDifferentTypeNotFlagged() {
+        index()
+
+        assertNotRedundantInternalAccessibility(.varInstance("crossTypeProperty1"))
+        assertNotRedundantInternalAccessibility(.varInstance("crossTypeProperty2"))
+    }
+
+    // MARK: - Method Called From Free Function Tests
+
+    /// Tests that type members are NOT flagged as private when called from
+    /// a free function in the same file.
+    ///
+    /// Free functions have no containing type, so members accessed from them
+    /// need at least fileprivate, not private.
+    func testMethodCalledFromFreeFunctionNotFlaggedAsPrivate() {
+        index()
+
+        // Members called from a free function should suggest fileprivate, not private,
+        // because a free function has no containing type.
+        assertRedundantInternalAccessibility(
+            .functionMethodInstance("methodCalledFromFreeFunction()"),
+            suggestedAccessibility: .fileprivate
+        )
+        assertRedundantInternalAccessibility(
+            .varInstance("propertyUsedFromFreeFunction"),
+            suggestedAccessibility: .fileprivate
+        )
+    }
+
     // MARK: - Same-File Memberwise Init Tests
 
     /// Tests that struct memberwise init properties are NOT flagged when the struct
