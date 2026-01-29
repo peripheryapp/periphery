@@ -335,7 +335,8 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
 
             // Case 2: Init referenced in same file AND struct must remain internal
             // (because it's used outside file or transitively exposed)
-            let hasAnyReference = !graph.references(to: implicitInit).isEmpty
+            let initReferences = graph.references(to: implicitInit)
+            let hasAnyReference = !initReferences.isEmpty
             if hasAnyReference {
                 if parent.isReferencedOutsideFile(graph: graph) {
                     return true
@@ -343,6 +344,31 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
                 if isTransitivelyExposedOutsideFile(parent) {
                     return true
                 }
+            }
+
+            // Case 3: Init referenced from a different type (or free function) in the same file.
+            // The properties need at least fileprivate access, so skip marking them as private.
+            let file = parent.location.file
+            let sameFileInitRefs = initReferences.filter { $0.location.file == file }
+            for ref in sameFileInitRefs {
+                guard let refParent = ref.parent else { continue }
+                guard let refContainingType = immediateContainingType(of: refParent) else {
+                    // Called from a free function or top-level code
+                    return true
+                }
+
+                let parentLogicalType = logicalType(of: parent, inFile: file)
+                let refLogicalType = logicalType(of: refContainingType, inFile: file)
+                if parentLogicalType !== refLogicalType {
+                    return true
+                }
+            }
+
+            // Case 4: Init is referenced AND the parent struct is referenced by a #Preview macro.
+            // Preview macro expansions generate implicit types that cannot have access modifiers,
+            // so the properties must remain accessible.
+            if hasAnyReference, isReferencedByPreviewMacro(parent) {
+                return true
             }
         }
 
@@ -496,10 +522,11 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         let declLogicalType = logicalType(of: declContainingType, inFile: file)
 
         for ref in sameFileReferences {
-            guard let refParent = ref.parent,
-                  let refContainingType = immediateContainingType(of: refParent)
-            else {
-                continue
+            guard let refParent = ref.parent else { continue }
+            guard let refContainingType = immediateContainingType(of: refParent) else {
+                // Reference from a free function or top-level code — no containing type.
+                // This is effectively a different type, so fileprivate is needed.
+                return true
             }
 
             let refLogicalType = logicalType(of: refContainingType, inFile: file)
@@ -685,10 +712,10 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
             let parentRefs = graph.references(to: parent).filter { $0.location.file == file }
 
             for parentRef in parentRefs {
-                guard let refParent = parentRef.parent,
-                      let refContainingType = immediateContainingType(of: refParent)
-                else {
-                    continue
+                guard let refParent = parentRef.parent else { continue }
+                guard let refContainingType = immediateContainingType(of: refParent) else {
+                    // Reference from a free function or top-level code — no containing type.
+                    return true
                 }
 
                 let refLogicalType = logicalType(of: refContainingType, inFile: file)

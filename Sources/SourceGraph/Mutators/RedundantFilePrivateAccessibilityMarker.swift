@@ -168,10 +168,10 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
         let declLogicalType = logicalType(of: declTopLevel, inFile: file)
 
         for ref in sameFileReferences {
-            guard let refParent = ref.parent,
-                  let refTopLevel = topLevelType(of: refParent)
-            else {
-                continue
+            guard let refParent = ref.parent else { continue }
+            guard let refTopLevel = topLevelType(of: refParent) else {
+                // Reference from a free function or top-level code — no containing type.
+                return true
             }
 
             let refLogicalType = logicalType(of: refTopLevel, inFile: file)
