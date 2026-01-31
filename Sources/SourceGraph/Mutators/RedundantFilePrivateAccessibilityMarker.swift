@@ -44,7 +44,7 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
     private func validate(_ decl: Declaration) throws {
         if decl.accessibility.isExplicitly(.fileprivate) {
             if !graph.isRetained(decl),
-               !decl.isReferencedOutsideFile(graph: graph),
+               !decl.isReferencedOutsideFileIncludingChildren(graph: graph),
                !isReferencedFromDifferentTypeInSameFile(decl)
             {
                 mark(decl)
@@ -95,7 +95,7 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
 
         for descDecl in descendants {
             if !graph.isRetained(descDecl),
-               !descDecl.isReferencedOutsideFile(graph: graph),
+               !descDecl.isReferencedOutsideFileIncludingChildren(graph: graph),
                !isReferencedFromDifferentTypeInSameFile(descDecl)
             {
                 mark(descDecl)
@@ -180,6 +180,29 @@ final class RedundantFilePrivateAccessibilityMarker: SourceGraphMutator {
                 return true
             }
         }
+
+        // For type declarations, also check if any child declaration is referenced
+        // from a different type in the same file. This catches cases where enum cases
+        // are used via type inference (e.g., `.small`) from outside the parent type.
+        let typeKinds: Set<Declaration.Kind> = [.enum, .struct, .class, .protocol]
+        if typeKinds.contains(decl.kind) {
+            for child in decl.declarations {
+                let childSameFileRefs = graph.references(to: child).filter { $0.location.file == file }
+                for ref in childSameFileRefs {
+                    guard let refParent = ref.parent else { continue }
+                    guard let refTopLevel = topLevelType(of: refParent) else {
+                        return true
+                    }
+
+                    let refLogicalType = logicalType(of: refTopLevel, inFile: file)
+
+                    if declLogicalType !== refLogicalType {
+                        return true
+                    }
+                }
+            }
+        }
+
         return false
     }
 }

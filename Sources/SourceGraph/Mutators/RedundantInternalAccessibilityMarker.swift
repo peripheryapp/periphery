@@ -39,7 +39,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     private func validate(_ decl: Declaration) throws {
         if decl.accessibility.value == .internal {
             if !graph.isRetained(decl), !shouldSkipMarking(decl) {
-                let isReferencedOutside = decl.isReferencedOutsideFile(graph: graph)
+                let isReferencedOutside = decl.isReferencedOutsideFileIncludingChildren(graph: graph)
                 if !isReferencedOutside, !isTransitivelyExposedOutsideFile(decl) {
                     mark(decl)
                 }
@@ -126,7 +126,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
 
         for descDecl in descendants {
             if !graph.isRetained(descDecl), !shouldSkipMarking(descDecl) {
-                let isReferencedOutside = descDecl.isReferencedOutsideFile(graph: graph)
+                let isReferencedOutside = descDecl.isReferencedOutsideFileIncludingChildren(graph: graph)
                 if !isReferencedOutside, !isTransitivelyExposedOutsideFile(descDecl) {
                     mark(descDecl)
                 }
@@ -535,6 +535,29 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
                 return true
             }
         }
+
+        // For type declarations, also check if any child declaration is referenced
+        // from a different type in the same file. This catches cases where enum cases
+        // are used via type inference (e.g., `.small`) from outside the parent type.
+        let typeKinds: Set<Declaration.Kind> = [.enum, .struct, .class, .protocol]
+        if typeKinds.contains(decl.kind) {
+            for child in decl.declarations {
+                let childSameFileRefs = graph.references(to: child).filter { $0.location.file == file }
+                for ref in childSameFileRefs {
+                    guard let refParent = ref.parent else { continue }
+                    guard let refContainingType = immediateContainingType(of: refParent) else {
+                        return true
+                    }
+
+                    let refLogicalType = logicalType(of: refContainingType, inFile: file)
+
+                    if declLogicalType !== refLogicalType {
+                        return true
+                    }
+                }
+            }
+        }
+
         return false
     }
 

@@ -40,6 +40,30 @@ extension Declaration {
         return false
     }
 
+    /// Checks if this declaration or any of its immediate child declarations are
+    /// referenced outside the defining file.
+    ///
+    /// For type declarations (enum, struct, class, protocol), Swift's indexer may create
+    /// references to child declarations (e.g., enum cases via type inference like `.small`)
+    /// without creating a reference to the parent type itself. This method catches those
+    /// indirect cross-file usages that `isReferencedOutsideFile` would miss.
+    func isReferencedOutsideFileIncludingChildren(graph: SourceGraph) -> Bool {
+        if isReferencedOutsideFile(graph: graph) {
+            return true
+        }
+
+        let typeKinds: Set<Declaration.Kind> = [.enum, .struct, .class, .protocol]
+        guard typeKinds.contains(kind) else { return false }
+
+        for child in declarations {
+            if child.isReferencedOutsideFile(graph: graph) {
+                return true
+            }
+        }
+
+        return false
+    }
+
     /// Counts the number of ancestors for this declaration.
     /// Used for sorting declarations by depth to ensure parents are marked before children,
     /// which is important for nested redundant accessibility suppression logic.
