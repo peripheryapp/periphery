@@ -475,6 +475,21 @@ final class RedundantInternalAccessibilityTest: SPMSourceGraphTestCase {
         assertNotRedundantInternalAccessibility(.class("SameFileClassWithGenericConstraint"))
     }
 
+    // MARK: - Nested Enum Child Reference Tests
+
+    /// Tests that a nested enum is NOT flagged as redundant internal when its cases
+    /// are referenced from outside the file via type inference.
+    ///
+    /// When enum cases are used via type inference (e.g., `.small` instead of
+    /// `TransportButtonSize.small`), the Swift indexer creates references to the
+    /// enum cases but NOT to the parent enum type. Periphery must recognize these
+    /// indirect references to avoid falsely suggesting `private`.
+    func testNestedEnumCaseUsedFromOutsideFileNotFlagged() {
+        index()
+
+        assertNotRedundantInternalAccessibility(.enum("TransportButtonSize"))
+    }
+
     // MARK: - Memberwise Init Called From Different Type Tests
 
     /// Tests that struct properties are NOT flagged as redundant internal when
