@@ -72,7 +72,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         // Unless explicitly requested, skip marking nested declarations when an ancestor is already marked.
         // This avoids redundant warnings since fixing the parent's accessibility fixes the children too.
         if !configuration.showNestedRedundantAccessibility,
-           decl.isAnyAncestorMarked(in: graph.redundantInternalAccessibility)
+           decl.isAnyAncestorMarked(in: graph.redundantInternalAccessibility.keys)
         {
             return
         }
@@ -85,7 +85,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         // Additionally, types used in protocol requirement signatures need fileprivate even
         // at top level (private would make them inaccessible from the protocol method).
         let isTopLevel = decl.parent == nil
-        let needsFileprivate = isReferencedFromDifferentTypeInSameFile(decl) ||
+        let needsFileprivate = graph.isReferencedFromDifferentTypeInSameFile(decl) ||
             isTransitivelyExposedFromDifferentTypeInSameFile(decl) ||
             isUsedInProtocolRequirementSignature(decl)
 
@@ -103,18 +103,13 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         // If the parent is `fileprivate` and we would suggest `fileprivate`, it's already constrained.
         // Marking these would be misleading since changing them would actually increase visibility.
         if let maxAccessibility = effectiveMaximumAccessibility(for: decl),
-           let suggestedAccessibility
+           let suggestedAccessibility,
+           suggestedAccessibility >= maxAccessibility
         {
-            let accessibilityOrder: [Accessibility] = [.private, .fileprivate, .internal, .public, .open]
-            let maxIndex = accessibilityOrder.firstIndex(of: maxAccessibility) ?? 0
-            let suggestedIndex = accessibilityOrder.firstIndex(of: suggestedAccessibility) ?? 0
-
-            if suggestedIndex >= maxIndex {
-                return
-            }
+            return
         }
 
-        graph.markRedundantInternalAccessibility(decl, file: decl.location.file, suggestedAccessibility: suggestedAccessibility)
+        graph.markRedundantInternalAccessibility(decl, suggestedAccessibility: suggestedAccessibility)
     }
 
     private func markInternalDescendentDeclarations(from decl: Declaration) {
@@ -143,7 +138,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     /// - They are struct stored properties used in an implicit memberwise initializer
     /// - They are referenced by a `#Preview` macro expansion (when retainSwiftUIPreviews is enabled)
     private func shouldSkipMarking(_ decl: Declaration) -> Bool {
-        if shouldSkipAccessibilityAnalysis(for: decl) {
+        if decl.shouldSkipAccessibilityAnalysis {
             return true
         }
 
@@ -183,37 +178,6 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     }
 
     // MARK: - Internal Accessibility Analysis Helpers
-
-    /// Determines if a declaration should be skipped from accessibility analysis entirely.
-    ///
-    /// This helper is specific to internal accessibility analysis, checking conditions
-    /// that make a declaration ineligible for redundant internal marking.
-    private func shouldSkipAccessibilityAnalysis(for decl: Declaration) -> Bool {
-        // Generic type parameters must match their container's accessibility.
-        if decl.kind == .genericTypeParam { return true }
-
-        // Skip implicit (compiler-generated) declarations.
-        if decl.isImplicit { return true }
-
-        // Deinitializers cannot have explicit access modifiers in Swift.
-        if decl.kind == .functionDestructor { return true }
-
-        // Enum cases cannot have explicit access modifiers in Swift.
-        // They inherit the accessibility of their containing enum.
-        if decl.kind == .enumelement { return true }
-
-        // Override methods must be at least as accessible as what they override.
-        if decl.isOverride { return true }
-
-        // Declarations with @usableFromInline must remain internal (or package).
-        // This attribute allows internal declarations to be inlined into client code,
-        // requiring them to maintain internal visibility.
-        if decl.attributes.contains(where: { $0.name == "usableFromInline" }) {
-            return true
-        }
-
-        return false
-    }
 
     /// Checks if a declaration is a protocol requirement or protocol conformance.
     ///
@@ -328,47 +292,37 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
 
             guard parameterNames.contains(propertyName) else { continue }
 
-            // Case 1: Init referenced outside file -> properties must stay internal
+            // Init referenced outside file -> properties must stay internal.
             if implicitInit.isReferencedOutsideFile(graph: graph) {
                 return true
             }
 
-            // Case 2: Init referenced in same file AND struct must remain internal
-            // (because it's used outside file or transitively exposed)
             let initReferences = graph.references(to: implicitInit)
-            let hasAnyReference = !initReferences.isEmpty
-            if hasAnyReference {
-                if parent.isReferencedOutsideFile(graph: graph) {
-                    return true
-                }
-                if isTransitivelyExposedOutsideFile(parent) {
-                    return true
-                }
-            }
+            guard !initReferences.isEmpty else { continue }
 
-            // Case 3: Init referenced from a different type (or free function) in the same file.
-            // The properties need at least fileprivate access, so skip marking them as private.
-            let file = parent.location.file
-            let sameFileInitRefs = initReferences.filter { $0.location.file == file }
-            for ref in sameFileInitRefs {
-                guard let refParent = ref.parent else { continue }
-                guard let refContainingType = immediateContainingType(of: refParent) else {
-                    // Called from a free function or top-level code
-                    return true
-                }
-
-                let parentLogicalType = logicalType(of: parent, inFile: file)
-                let refLogicalType = logicalType(of: refContainingType, inFile: file)
-                if parentLogicalType !== refLogicalType {
-                    return true
-                }
-            }
-
-            // Case 4: Init is referenced AND the parent struct is referenced by a #Preview macro.
-            // Preview macro expansions generate implicit types that cannot have access modifiers,
-            // so the properties must remain accessible.
-            if hasAnyReference, isReferencedByPreviewMacro(parent) {
+            // The struct must remain internal if it's referenced outside the file,
+            // transitively exposed, or used by a #Preview macro expansion (whose
+            // implicit types cannot have access modifiers).
+            if parent.isReferencedOutsideFile(graph: graph)
+                || isTransitivelyExposedOutsideFile(parent)
+                || isReferencedByPreviewMacro(parent)
+            {
                 return true
+            }
+
+            // Init referenced from a different type (or free function) in the same file.
+            // The properties need at least fileprivate access, so skip marking them.
+            let file = parent.location.file
+            let parentLogicalType = graph.logicalType(of: parent, inFile: file)
+            for ref in initReferences where ref.location.file == file {
+                guard let refParent = ref.parent else { continue }
+                guard let refContainingType = graph.immediateContainingType(of: refParent) else {
+                    return true
+                }
+
+                if graph.logicalType(of: refContainingType, inFile: file) !== parentLogicalType {
+                    return true
+                }
             }
         }
 
@@ -388,23 +342,18 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     /// scenarios. This function handles same-file scenarios where the constraint chain
     /// exists entirely within one file.
     private func isConstrainedBySameFileTypeUsage(_ decl: Declaration) -> Bool {
-        let typeKinds: Set<Declaration.Kind> = [.enum, .struct, .class, .protocol]
-        guard typeKinds.contains(decl.kind) else { return false }
+        guard Declaration.Kind.concreteTypeKinds.contains(decl.kind) else { return false }
 
-        var visited: Set<ObjectIdentifier> = []
-        return isConstrainedBySameFileTypeUsageRecursive(decl, visited: &visited)
+        var guard_ = RecursionGuard()
+        return isConstrainedBySameFileTypeUsageRecursive(decl, guard: &guard_)
     }
 
     private func isConstrainedBySameFileTypeUsageRecursive(
         _ decl: Declaration,
-        visited: inout Set<ObjectIdentifier>
+        guard guard_: inout RecursionGuard
     ) -> Bool {
-        let id = ObjectIdentifier(decl)
-        guard !visited.contains(id) else { return false }
+        guard guard_.firstVisit(decl) else { return false }
 
-        visited.insert(id)
-
-        let typeKinds: Set<Declaration.Kind> = [.enum, .struct, .class, .protocol]
         let file = decl.location.file
         let refs = graph.references(to: decl)
 
@@ -421,11 +370,11 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
 
             // Find the containing type of that declaration
             let containingType: Declaration?
-            if typeKinds.contains(usingDecl.kind) || usingDecl.kind.isExtensionKind {
+            if Declaration.Kind.allTypeKinds.contains(usingDecl.kind) {
                 // The using declaration IS a type (e.g., conformedType, inheritedType)
                 containingType = usingDecl
             } else if let parent = usingDecl.parent,
-                      typeKinds.contains(parent.kind) || parent.kind.isExtensionKind
+                      Declaration.Kind.allTypeKinds.contains(parent.kind)
             {
                 // The using declaration is a member of a type
                 containingType = parent
@@ -449,7 +398,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
             }
 
             // Recursive: if the containing type is itself constrained
-            if isConstrainedBySameFileTypeUsageRecursive(containingType, visited: &visited) {
+            if isConstrainedBySameFileTypeUsageRecursive(containingType, guard: &guard_) {
                 return true
             }
         }
@@ -489,122 +438,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         guard let parent = decl.parent else { return nil }
 
         let parentAccessibility = parent.accessibility.value
-
-        switch parentAccessibility {
-        case .private:
-            return .private
-        case .fileprivate:
-            return .fileprivate
-        case .internal:
-            return .internal
-        case .public, .open:
-            return nil
-        }
-    }
-
-    /// Checks if a declaration is referenced from a different type in the same file.
-    ///
-    /// For internal accessibility analysis, this determines whether to suggest `fileprivate`
-    /// versus `private` when a declaration is only used within its file.
-    ///
-    /// This uses the **immediate containing type** (not the top-level type) because:
-    /// - For nested types like `OuterStruct.InnerStruct`, a member of `InnerStruct` that's
-    ///   accessed from code inside `OuterStruct` (but outside `InnerStruct`) needs `fileprivate`
-    /// - Using top-level type would incorrectly see both as belonging to `OuterStruct`
-    private func isReferencedFromDifferentTypeInSameFile(_ decl: Declaration) -> Bool {
-        let file = decl.location.file
-        let sameFileReferences = graph.references(to: decl).filter { $0.location.file == file }
-
-        guard let declContainingType = immediateContainingType(of: decl) else {
-            return false
-        }
-
-        let declLogicalType = logicalType(of: declContainingType, inFile: file)
-
-        for ref in sameFileReferences {
-            guard let refParent = ref.parent else { continue }
-            guard let refContainingType = immediateContainingType(of: refParent) else {
-                // Reference from a free function or top-level code — no containing type.
-                // This is effectively a different type, so fileprivate is needed.
-                return true
-            }
-
-            let refLogicalType = logicalType(of: refContainingType, inFile: file)
-
-            if declLogicalType !== refLogicalType {
-                return true
-            }
-        }
-
-        // For type declarations, also check if any child declaration is referenced
-        // from a different type in the same file. This catches cases where enum cases
-        // are used via type inference (e.g., `.small`) from outside the parent type.
-        let typeKinds: Set<Declaration.Kind> = [.enum, .struct, .class, .protocol]
-        if typeKinds.contains(decl.kind) {
-            for child in decl.declarations {
-                let childSameFileRefs = graph.references(to: child).filter { $0.location.file == file }
-                for ref in childSameFileRefs {
-                    guard let refParent = ref.parent else { continue }
-                    guard let refContainingType = immediateContainingType(of: refParent) else {
-                        return true
-                    }
-
-                    let refLogicalType = logicalType(of: refContainingType, inFile: file)
-
-                    if declLogicalType !== refLogicalType {
-                        return true
-                    }
-                }
-            }
-        }
-
-        return false
-    }
-
-    /// Finds the immediate containing type of a declaration.
-    ///
-    /// For members (properties, methods, etc.), this returns their containing type.
-    /// For nested types, this returns the type that contains them (the outer type).
-    /// For top-level types, this returns the type itself (they are their own container).
-    private func immediateContainingType(of decl: Declaration) -> Declaration? {
-        let baseTypeKinds: Set<Declaration.Kind> = [.class, .struct, .enum, .protocol]
-        let typeKinds = baseTypeKinds.union(Declaration.Kind.extensionKinds)
-
-        // For types, check if they have a parent type (nested type case).
-        // If so, return the parent type. If not (top-level), return the type itself.
-        if typeKinds.contains(decl.kind) {
-            if let parent = decl.parent, typeKinds.contains(parent.kind) {
-                return parent
-            }
-            return decl
-        }
-
-        // Walk up the parent chain to find the first containing type
-        var current = decl.parent
-        while let parent = current {
-            if typeKinds.contains(parent.kind) {
-                return parent
-            }
-            current = parent.parent
-        }
-
-        return nil
-    }
-
-    /// Gets the logical type for comparison purposes when analyzing internal accessibility.
-    ///
-    /// For extensions of types in the SAME FILE, treats the extension as the extended type.
-    /// For extensions of types in DIFFERENT FILES, treats the extension as its own distinct type.
-    private func logicalType(of decl: Declaration, inFile file: SourceFile) -> Declaration? {
-        if decl.kind.isExtensionKind {
-            if let extendedDecl = try? graph.extendedDeclaration(forExtension: decl),
-               extendedDecl.location.file == file
-            {
-                return extendedDecl
-            }
-            return decl
-        }
-        return decl
+        return parentAccessibility <= .internal ? parentAccessibility : nil
     }
 
     /// Checks if a type is transitively exposed outside its file through an API signature.
@@ -623,15 +457,12 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     /// is used as a property type in OuterContainer, and OuterContainer is referenced from
     /// outside the file, then TypeA is transitively exposed through the chain.
     private func isTransitivelyExposedOutsideFile(_ decl: Declaration) -> Bool {
-        var visited: Set<ObjectIdentifier> = []
-        return isTransitivelyExposedOutsideFileRecursive(decl, visited: &visited)
+        var guard_ = RecursionGuard()
+        return isTransitivelyExposedOutsideFileRecursive(decl, guard: &guard_)
     }
 
-    private func isTransitivelyExposedOutsideFileRecursive(_ decl: Declaration, visited: inout Set<ObjectIdentifier>) -> Bool {
-        let id = ObjectIdentifier(decl)
-        guard !visited.contains(id) else { return false }
-
-        visited.insert(id)
+    private func isTransitivelyExposedOutsideFileRecursive(_ decl: Declaration, guard guard_: inout RecursionGuard) -> Bool {
+        guard guard_.firstVisit(decl) else { return false }
 
         let refs = graph.references(to: decl)
 
@@ -661,7 +492,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
                         return true
                     }
                     // Recursive: the containing type itself is transitively exposed
-                    if isTransitivelyExposedOutsideFileRecursive(containingType, visited: &visited) {
+                    if isTransitivelyExposedOutsideFileRecursive(containingType, guard: &guard_) {
                         return true
                     }
                 }
@@ -696,18 +527,18 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
     private func isTransitivelyExposedFromDifferentTypeInSameFile(_ decl: Declaration) -> Bool {
         let file = decl.location.file
 
-        guard let declContainingType = immediateContainingType(of: decl) else {
+        guard let declContainingType = graph.immediateContainingType(of: decl) else {
             return false
         }
 
-        let declLogicalType = logicalType(of: declContainingType, inFile: file)
-        var visited: Set<ObjectIdentifier> = []
+        let declLogicalType = graph.logicalType(of: declContainingType, inFile: file)
+        var guard_ = RecursionGuard()
 
         return isTransitivelyExposedFromDifferentTypeInSameFileRecursive(
             decl,
             declLogicalType: declLogicalType,
             file: file,
-            visited: &visited
+            guard: &guard_
         )
     }
 
@@ -715,12 +546,9 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
         _ decl: Declaration,
         declLogicalType: Declaration?,
         file: SourceFile,
-        visited: inout Set<ObjectIdentifier>
+        guard guard_: inout RecursionGuard
     ) -> Bool {
-        let id = ObjectIdentifier(decl)
-        guard !visited.contains(id) else { return false }
-
-        visited.insert(id)
+        guard guard_.firstVisit(decl) else { return false }
 
         let refs = graph.references(to: decl)
 
@@ -736,12 +564,12 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
 
             for parentRef in parentRefs {
                 guard let refParent = parentRef.parent else { continue }
-                guard let refContainingType = immediateContainingType(of: refParent) else {
+                guard let refContainingType = graph.immediateContainingType(of: refParent) else {
                     // Reference from a free function or top-level code — no containing type.
                     return true
                 }
 
-                let refLogicalType = logicalType(of: refContainingType, inFile: file)
+                let refLogicalType = graph.logicalType(of: refContainingType, inFile: file)
 
                 if declLogicalType !== refLogicalType {
                     return true
@@ -758,7 +586,7 @@ final class RedundantInternalAccessibilityMarker: SourceGraphMutator {
                         containingType,
                         declLogicalType: declLogicalType,
                         file: file,
-                        visited: &visited
+                        guard: &guard_
                     ) {
                         return true
                     }
