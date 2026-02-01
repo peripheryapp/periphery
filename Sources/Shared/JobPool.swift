@@ -2,7 +2,7 @@ import Foundation
 import Synchronization
 
 public struct JobPool<Job> {
-    let jobs: [Job]
+    private let jobs: [Job]
 
     public init(jobs: [Job]) {
         self.jobs = jobs

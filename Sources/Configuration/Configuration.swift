@@ -80,6 +80,15 @@ public final class Configuration {
     @Setting(key: "disable_redundant_public_analysis", defaultValue: false)
     public var disableRedundantPublicAnalysis: Bool
 
+    @Setting(key: "disable_redundant_internal_analysis", defaultValue: false)
+    public var disableRedundantInternalAnalysis: Bool
+
+    @Setting(key: "disable_redundant_fileprivate_analysis", defaultValue: false)
+    public var disableRedundantFilePrivateAnalysis: Bool
+
+    @Setting(key: "show_nested_redundant_accessibility", defaultValue: false)
+    public var showNestedRedundantAccessibility: Bool
+
     @Setting(key: "disable_unused_import_analysis", defaultValue: false)
     public var disableUnusedImportAnalysis: Bool
 
@@ -212,10 +221,11 @@ public final class Configuration {
 
     // MARK: - Private
 
-    lazy var settings: [any AbstractSetting] = [
+    private lazy var settings: [any AbstractSetting] = [
         $project, $schemes, $excludeTargets, $excludeTests, $indexExclude, $reportExclude, $reportInclude, $outputFormat,
         $retainPublic, $noRetainSPI, $retainFiles, $retainAssignOnlyProperties, $retainAssignOnlyPropertyTypes, $retainObjcAccessible,
         $retainObjcAnnotated, $retainUnusedProtocolFuncParams, $retainSwiftUIPreviews, $disableRedundantPublicAnalysis,
+        $disableRedundantInternalAnalysis, $disableRedundantFilePrivateAnalysis, $showNestedRedundantAccessibility,
         $disableUnusedImportAnalysis, $superfluousIgnoreComments, $retainUnusedImportedModules,
         $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses, $verbose, $quiet, $color,
         $disableUpdateCheck, $strict, $indexStorePath,
@@ -243,7 +253,7 @@ public final class Configuration {
     }
 }
 
-protocol AbstractSetting {
+private protocol AbstractSetting {
     associatedtype Value
 
     var key: String { get }
