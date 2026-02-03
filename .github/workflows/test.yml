@@ -20,7 +20,9 @@ jobs:
     name: Lint
     steps:
       - uses: actions/checkout@master
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@v3
+        with:
+          cache: false
       - run: mise run lint-ci
       - name: Check generated Bazel rules
         run: mise r gen-bazel-rules && git diff --quiet --exit-code
