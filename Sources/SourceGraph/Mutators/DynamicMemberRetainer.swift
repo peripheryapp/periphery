@@ -10,8 +10,11 @@ final class DynamicMemberRetainer: SourceGraphMutator {
     }
 
     func mutate() throws {
+        // Retain all subscript(dynamicMember:) declarations. This signature is specific to
+        // @dynamicMemberLookup and may be declared in extensions of external types where we
+        // cannot verify the attribute exists.
         for decl in graph.declarations(ofKind: .functionSubscript) {
-            if decl.name == "subscript(dynamicMember:)", decl.parent?.attributes.contains(where: { $0.name == "dynamicMemberLookup" }) ?? false {
+            if decl.name == "subscript(dynamicMember:)" {
                 graph.markRetained(decl)
             }
         }
