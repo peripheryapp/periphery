@@ -946,6 +946,14 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRetainsDynamicMemberLookupSubscriptInExternalTypeExtension() {
+        analyze(retainPublic: true) {
+            assertReferenced(.extensionEnum("AttributeDynamicLookup")) {
+                self.assertReferenced(.functionSubscript("subscript(dynamicMember:)"))
+            }
+        }
+    }
+
     func testRetainsCodableProperties() {
         analyze(
             retainPublic: true,
