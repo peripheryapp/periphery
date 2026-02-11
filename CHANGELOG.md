@@ -2,6 +2,20 @@
 
 ##### Breaking
 
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 3.5.0 (2026-02-11)
+
+##### Breaking
+
 - The `--no-color` option has been replaced with `--color=never`.
 
 ##### Enhancements
