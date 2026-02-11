@@ -127,6 +127,8 @@ jobs:
       run: ${{ env.swift_build }}
     - name: Scan
       run: ${{ env.periphery_scan }} ${{ matrix.baseline && format('--baseline baselines/{0}', matrix.baseline) || '' }}
+    - name: Clean SwiftPM cache
+      run: rm -rf ~/Library/Caches/org.swift.swiftpm
     - name: Test
       run: ${{ env.swift_test }}
   linux:
@@ -174,5 +176,7 @@ jobs:
       run: ${{ env.swift_build }}
     - name: Scan
       run: ${{ env.periphery_scan }} --baseline baselines/linux.json
+    - name: Clean SwiftPM cache
+      run: rm -rf ~/.cache/org.swift.swiftpm
     - name: Test
       run: ${{ env.swift_test }}

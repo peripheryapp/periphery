@@ -5,7 +5,7 @@ import SourceGraph
 import SystemPackage
 
 final class XibIndexer: Indexer {
-    enum XibError: Error {
+    private enum XibError: Error {
         case failedToParse(path: FilePath, underlyingError: Error)
     }
 

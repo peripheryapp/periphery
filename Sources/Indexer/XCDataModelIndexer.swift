@@ -5,7 +5,7 @@ import SourceGraph
 import SystemPackage
 
 final class XCDataModelIndexer: Indexer {
-    enum XCDataModelError: Error {
+    private enum XCDataModelError: Error {
         case failedToParse(path: FilePath, underlyingError: Error)
     }
 

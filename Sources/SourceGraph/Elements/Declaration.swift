@@ -98,6 +98,10 @@ public final class Declaration {
             Set(Kind.allCases.filter(\.isExtensionKind))
         }
 
+        static let concreteTypeKinds: Set<Kind> = [.class, .struct, .enum, .protocol]
+
+        static let allTypeKinds: Set<Kind> = concreteTypeKinds.union(extensionKinds)
+
         public var extendedKind: Kind? {
             switch self {
             case .extensionClass:

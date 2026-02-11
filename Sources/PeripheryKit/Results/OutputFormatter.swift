@@ -33,6 +33,10 @@ extension OutputFormatter {
             "redundantProtocol"
         case .redundantPublicAccessibility:
             "redundantPublicAccessibility"
+        case .redundantInternalAccessibility:
+            "redundantInternalAccessibility"
+        case .redundantFilePrivateAccessibility:
+            "redundantFilePrivateAccessibility"
         case .superfluousIgnoreCommand:
             "superfluousIgnoreCommand"
         }
@@ -66,6 +70,12 @@ extension OutputFormatter {
             case let .redundantPublicAccessibility(modules):
                 let modulesJoined = modules.sorted().joined(separator: ", ")
                 description += "Redundant public accessibility for \(kindDisplayName) '\(name)' (not used outside of \(modulesJoined))"
+            case let .redundantInternalAccessibility(suggestedAccessibility):
+                let accessibilityText = suggestedAccessibility?.rawValue ?? "private/fileprivate"
+                description += "Redundant internal accessibility for \(kindDisplayName) '\(name)' (not used outside of file; can be \(accessibilityText))"
+            case let .redundantFilePrivateAccessibility(containingTypeName):
+                let context = containingTypeName.map { "only used within \($0)" } ?? "not used outside of file"
+                description += "Redundant fileprivate accessibility for \(kindDisplayName) '\(name)' (\(context); can be private)"
             case .superfluousIgnoreCommand:
                 description += "Superfluous ignore comment for \(kindDisplayName) '\(name)' (declaration is referenced and should not be ignored)"
             }
