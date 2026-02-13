@@ -371,10 +371,10 @@ final class SwiftIndexer: Indexer {
             let fileCommands = syntaxVisitor.parseComments()
 
             if fileCommands.contains(.ignoreAll) {
-                retainHierarchy(declarations, markExplicitlyIgnored: true)
+                commandIgnore(declarations, kind: .file)
             } else {
                 for decl in declarations where decl.commentCommands.contains(.ignore) {
-                    retainHierarchy([decl], markExplicitlyIgnored: true)
+                    commandIgnore([decl], kind: .declaration)
                 }
             }
         }
@@ -434,17 +434,16 @@ final class SwiftIndexer: Indexer {
             }
         }
 
-        private func retainHierarchy(_ decls: [Declaration], markExplicitlyIgnored: Bool = false) {
+        private func commandIgnore(_ decls: [Declaration], kind: CommandIgnoreKind) {
             for decl in decls {
                 graph.withLock { graph in
                     graph.markRetained(decl)
                     decl.unusedParameters.forEach { graph.markRetained($0) }
-                    if markExplicitlyIgnored {
-                        graph.markExplicitlyIgnored(decl)
-                        decl.unusedParameters.forEach { graph.markExplicitlyIgnored($0) }
-                    }
+
+                    graph.markCommandIgnored(decl, kind: kind)
+                    decl.unusedParameters.forEach { graph.markCommandIgnored($0, kind: kind) }
                 }
-                retainHierarchy(Array(decl.declarations), markExplicitlyIgnored: markExplicitlyIgnored)
+                commandIgnore(Array(decl.declarations), kind: kind)
             }
         }
 
@@ -504,13 +503,11 @@ final class SwiftIndexer: Indexer {
                         functionDecl.unusedParameters.insert(paramDecl)
                         graph.add(paramDecl)
 
-                        if retainAllDeclarations {
+                        if retainAllDeclarations || (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) {
                             graph.markRetained(paramDecl)
-                        }
-
-                        if (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) || ignoredParamNames.contains(param.name.text) {
+                        } else if ignoredParamNames.contains(param.name.text) {
                             graph.markRetained(paramDecl)
-                            graph.markExplicitlyIgnored(paramDecl)
+                            graph.markCommandIgnored(paramDecl, kind: .declaration)
                         }
                     }
                 }
