@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Exclude declarations ignored by a file-level `// periphery:ignore:all` comment from superfluous ignore commend detection.
 
 ## 3.5.0 (2026-02-11)
 
