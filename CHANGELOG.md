@@ -2,7 +2,7 @@
 
 ##### Breaking
 
-- None.
+- The minimum supported Swift version is now 6.1.2.
 
 ##### Enhancements
 

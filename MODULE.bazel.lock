@@ -192,7 +192,7 @@
     "//bazel:generated.bzl%generated": {
       "general": {
         "bzlTransitiveDigest": "nMR2FBcoRPImVocN9DNOnm2NQWyTbJPu7SHJgAXsLFw=",
-        "usagesDigest": "S5zTCGsw3nugb0U3s6bPvFYl04dzqTMrLLUzzabunO8=",
+        "usagesDigest": "lq2YbwTx/S91ByxxpT5yFQ8K/9bpq7P1iVT1gEj0UBM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
