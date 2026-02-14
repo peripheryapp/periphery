@@ -14,14 +14,9 @@ public struct ScanResult {
     let annotation: Annotation
 
     public var usrs: Set<String> {
-        declaration.usrs
-    }
-
-    /// Indicates whether this result should be included in baselines.
-    /// Superfluous ignore command results are excluded since they're warnings
-    /// about unnecessary comments, not unused code.
-    public var includeInBaseline: Bool {
-        if case .superfluousIgnoreCommand = annotation { return false }
-        return true
+        if case .superfluousIgnoreCommand = annotation {
+            return declaration.usrs.mapSet { "superfluous-ignore-\($0)" }
+        }
+        return declaration.usrs
     }
 }

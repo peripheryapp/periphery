@@ -11,7 +11,8 @@
 ##### Bug Fixes
 
 - Fix false positive redundant public accessibility for types used in same-type generic requirements on extensions, e.g. `extension SomeProtocol where Self == MyType`.
-- Exclude declarations ignored by a file-level `// periphery:ignore:all` comment from superfluous ignore commend detection.
+- Exclude declarations ignored by a file-level `// periphery:ignore:all` comment from superfluous ignore comment detection.
+- Superfluous ignore comment results are now included in baselines.
 
 ## 3.5.0 (2026-02-11)
 
