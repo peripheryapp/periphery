@@ -482,6 +482,10 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         return clause.requirements.reduce(into: .init()) { result, requirement in
             if let conformanceRequirementType = requirement.requirement.as(ConformanceRequirementSyntax.self) {
                 result.formUnion(typeSyntaxInspector.typeLocations(for: conformanceRequirementType.rightType))
+            } else if let sameTypeRequirement = requirement.requirement.as(SameTypeRequirementSyntax.self) {
+                if case let .type(rightType) = sameTypeRequirement.rightType {
+                    result.formUnion(typeSyntaxInspector.typeLocations(for: rightType))
+                }
             }
         }
     }

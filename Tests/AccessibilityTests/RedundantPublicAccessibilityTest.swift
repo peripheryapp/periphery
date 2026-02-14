@@ -331,6 +331,12 @@ final class RedundantPublicAccessibilityTest: SPMSourceGraphTestCase {
         assertNotRedundantPublicAccessibility(.protocol("PublicInheritedAssociatedTypeDefaultType"))
     }
 
+    func testPublicTypeUsedAsExtensionSameTypeGenericRequirement() {
+        index()
+
+        assertNotRedundantPublicAccessibility(.struct("PublicTypeUsedAsExtensionSameTypeGenericRequirement"))
+    }
+
     func testPublicComparableOperatorFunction() {
         index()
 
