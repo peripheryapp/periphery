@@ -124,7 +124,21 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
                 return nil
             }
 
-        return referenceDecls.contains { $0.accessibility.isAccessibleCrossModule }
+        return referenceDecls.contains {
+            if $0.accessibility.isAccessibleCrossModule {
+                return true
+            }
+
+            // Extensions may not have explicit public accessibility themselves, but their members
+            // can be public. Types used in an extension's generic constraints (e.g.,
+            // `extension SomeProtocol where Self == SomeType`) are effectively exposed publicly
+            // if the extension contains any public members.
+            if $0.kind.isExtensionKind {
+                return $0.declarations.contains { $0.accessibility.isAccessibleCrossModule }
+            }
+
+            return false
+        }
     }
 
     /// A public protocol that is not directly referenced cross-module may still be exposed by a public member declared

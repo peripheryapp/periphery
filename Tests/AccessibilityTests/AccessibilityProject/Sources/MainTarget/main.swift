@@ -79,3 +79,6 @@ inlinableFunction()
 // Associated types
 _ = PublicInheritedAssociatedTypeClass().items
 _ = PublicInheritedAssociatedTypeDefaultTypeClass().items
+
+// Extension with same-type generic requirement
+takeExtensionSameTypeGenericRequirement(.defaultInstance)
