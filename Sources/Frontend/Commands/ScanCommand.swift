@@ -234,11 +234,6 @@ struct ScanCommand: ParsableCommand {
         logger.debug(swiftVersion.fullVersion)
         try swiftVersion.validateVersion()
 
-        if swiftVersion.version.isVersion(equalTo: "6.1"), !retainAssignOnlyProperties {
-            logger.warn("Assign-only property analysis is disabled with Swift 6.1 due to a Swift bug: https://github.com/swiftlang/swift/issues/80394.")
-            configuration.retainAssignOnlyProperties = true
-        }
-
         let project: Project = if configuration.guidedSetup {
             try GuidedSetup(configuration: configuration, shell: shell, logger: logger).perform()
         } else {

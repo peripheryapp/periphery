@@ -1,0 +1,13 @@
+matrix:
+  platform:
+    - macos_arm64
+tasks:
+  verify_targets:
+    name: Verify build targets
+    platform: ${{ platform }}
+    xcode_version: "26.2"
+    bazel: 8.x
+    build_targets:
+      - '@periphery//:periphery'
+    build_flags:
+      - "--repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1"

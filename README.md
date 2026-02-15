@@ -497,9 +497,6 @@ You can then invoke Periphery as follows:
 periphery scan --generic-project-config config.json
 ```
 
-> [!TIP]
-> Both options support multiple paths.
-
 ## Platforms
 
 Periphery supports both macOS and Linux. macOS supports both Xcode and Swift Package Manager (SPM) projects, whereas only SPM projects are supported on Linux.

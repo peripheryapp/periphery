@@ -1,0 +1,16 @@
+{
+    "homepage": "https://github.com/peripheryapp/periphery",
+    "maintainers": [
+        {
+            "email": "ian@leitch.io",
+            "github": "ileitch",
+            "name": "Ian Leitch",
+            "github_user_id": 48235
+        }
+    ],
+    "repository": [
+        "github:peripheryapp/periphery"
+    ],
+    "versions": [],
+    "yanked_versions": {}
+}
