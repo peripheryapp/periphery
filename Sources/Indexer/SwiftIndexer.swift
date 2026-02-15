@@ -325,11 +325,15 @@ final class SwiftIndexer: Indexer {
         private func associateDanglingReferences() {
             guard !danglingReferences.isEmpty else { return }
 
-            let declsByLocation = declarations
+            // Sort declarations to ensure deterministic candidate selection when
+            // multiple declarations exist at the same location.
+            let sortedDeclarations = declarations.sorted()
+
+            let declsByLocation = sortedDeclarations
                 .reduce(into: [Location: [Declaration]]()) { result, decl in
                     result[decl.location, default: []].append(decl)
                 }
-            let declsByLine = declarations
+            let declsByLine = sortedDeclarations
                 .reduce(into: [Int: [Declaration]]()) { result, decl in
                     result[decl.location.line, default: []].append(decl)
                 }
