@@ -162,5 +162,4 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
             graph.markRetained(declaration)
         }
     }
-
 }

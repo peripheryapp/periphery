@@ -417,5 +417,4 @@ public final class SourceGraph {
         }
         return lhs.declarationKind.rawValue < rhs.declarationKind.rawValue
     }
-
 }
