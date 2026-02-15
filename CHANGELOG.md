@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix some causes of potentially non-deterministic results.
 
 ## 3.5.1 (2026-02-15)
 
