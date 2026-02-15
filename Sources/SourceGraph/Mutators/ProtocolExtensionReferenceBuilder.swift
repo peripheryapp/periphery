@@ -96,7 +96,7 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
                 // Find matching requirement in the constraining protocol
                 let matchingRequirement = constrainingProtocol.declarations
                     .filter { $0.kind == memberDeclaration.kind && $0.name == memberDeclaration.name }
-                    .min(by: Declaration.deterministicSort)
+                    .min()
 
                 guard let matchingRequirement else { continue }
 

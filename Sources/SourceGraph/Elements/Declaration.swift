@@ -338,23 +338,6 @@ extension Declaration: CustomStringConvertible {
     }
 }
 
-extension Declaration {
-    static func deterministicSort(_ lhs: Declaration, _ rhs: Declaration) -> Bool {
-        if lhs.location != rhs.location {
-            return lhs.location < rhs.location
-        }
-        if lhs.kind != rhs.kind {
-            return lhs.kind.rawValue < rhs.kind.rawValue
-        }
-        let lhsName = lhs.name ?? ""
-        let rhsName = rhs.name ?? ""
-        if lhsName != rhsName {
-            return lhsName < rhsName
-        }
-        return lhs.usrs.sorted().joined(separator: ",") < rhs.usrs.sorted().joined(separator: ",")
-    }
-}
-
 extension Declaration: Comparable {
     public static func < (lhs: Declaration, rhs: Declaration) -> Bool {
         var lhsLocation = lhs.location

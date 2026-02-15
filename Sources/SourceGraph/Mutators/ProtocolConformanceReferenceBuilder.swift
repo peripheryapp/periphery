@@ -60,7 +60,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                                 $0.kind == unimplementedProtoDecl.kind &&
                                     $0.name == unimplementedProtoDecl.name
                             }
-                            .min(by: Declaration.deterministicSort)
+                            .min()
 
                         if let declInSuperclass {
                             // Build a reference from the protocol declarations to the
