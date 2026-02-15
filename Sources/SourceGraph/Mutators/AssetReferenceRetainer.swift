@@ -26,22 +26,26 @@ final class AssetReferenceRetainer: SourceGraphMutator {
         graph
             .declarations(ofKind: .class)
             .lazy
-            .compactMap { declaration -> (AssetReference, Declaration)? in
-                if let reference = self.reference(for: declaration) {
-                    return (reference, declaration)
+            .compactMap { declaration -> ([AssetReference], Declaration)? in
+                let references = self.references(for: declaration)
+                if !references.isEmpty {
+                    return (references, declaration)
                 }
 
                 return nil
             }
-            .forEach { reference, declaration in
+            .forEach { references, declaration in
                 graph.markRetained(declaration)
 
-                switch reference.source {
-                case .xcDataModel:
+                let sources = Set(references.map(\.source))
+
+                if sources.contains(.xcDataModel) {
                     // ValueTransformer subclasses are referenced by generated code that Periphery cannot analyze.
                     graph.unmarkRedundantPublicAccessibility(declaration)
                     declaration.descendentDeclarations.forEach { graph.unmarkRedundantPublicAccessibility($0) }
-                case .interfaceBuilder:
+                }
+
+                if sources.contains(.interfaceBuilder) {
                     // Get aggregated references for this class
                     let aggregated = ibReferencesByClass[declaration.name ?? ""]
                     interfaceBuilderPropertyRetainer.retainPropertiesDeclared(
@@ -50,16 +54,14 @@ final class AssetReferenceRetainer: SourceGraphMutator {
                         referencedActions: aggregated?.actions ?? [],
                         referencedAttributes: aggregated?.runtimeAttributes ?? []
                     )
-                default:
-                    break
                 }
             }
     }
 
     // MARK: - Private
 
-    private func reference(for declaration: Declaration) -> AssetReference? {
-        graph.assetReferences.first { $0.name == declaration.name }
+    private func references(for declaration: Declaration) -> [AssetReference] {
+        graph.assetReferences.filter { $0.name == declaration.name }
     }
 
     /// Aggregates all Interface Builder references by class name, combining outlets, actions,

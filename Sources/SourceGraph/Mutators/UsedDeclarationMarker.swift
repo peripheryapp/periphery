@@ -23,20 +23,33 @@ final class UsedDeclarationMarker: SourceGraphMutator {
 
     // Removes references from protocol member decls to conforming decls that have a dereferenced ancestor.
     private func removeErroneousProtocolReferences() {
+        // Evaluate ancestor dereference status from a stable pre-mutation snapshot to avoid
+        // order-dependent behavior when iterating sets and removing references.
+        let dereferencedDeclarations = graph.allDeclarations.filter {
+            !(graph.isRetained($0) || graph.hasReferences(to: $0))
+        }
+
+        let dereferencedAncestors = Set(dereferencedDeclarations)
+        var referencesToRemove = Set<Reference>()
+
         for protocolDecl in graph.declarations(ofKind: .protocol) {
             for memberDecl in protocolDecl.declarations {
                 for relatedRef in memberDecl.related {
                     guard let relatedDecl = graph.declaration(withUsr: relatedRef.usr) else { continue }
 
                     let hasDereferencedAncestor = relatedDecl.ancestralDeclarations.contains {
-                        !(graph.isRetained($0) || graph.hasReferences(to: $0))
+                        dereferencedAncestors.contains($0)
                     }
 
                     if hasDereferencedAncestor {
-                        graph.remove(relatedRef)
+                        referencesToRemove.insert(relatedRef)
                     }
                 }
             }
+        }
+
+        for reference in referencesToRemove {
+            graph.remove(reference)
         }
     }
 

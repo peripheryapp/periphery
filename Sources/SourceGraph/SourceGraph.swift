@@ -159,8 +159,14 @@ public final class SourceGraph {
                 Conflicting declaration: \(declaration), declared in modules: \(declaration.location.file.modules.sorted())
                 To resolve this warning, make sure all build modules are uniquely named.
                 """)
+                // Keep the declaration that sorts first to ensure deterministic results
+                // regardless of indexing order.
+                if declaration < existingDecl {
+                    allDeclarationsByUsr[usr] = declaration
+                }
+            } else {
+                allDeclarationsByUsr[usr] = declaration
             }
-            allDeclarationsByUsr[usr] = declaration
         }
     }
 
@@ -316,7 +322,9 @@ public final class SourceGraph {
             throw PeripheryError.sourceGraphIntegrityError(message: "Unknown extended reference kind for extension '\(extensionDeclaration.kind.rawValue)'")
         }
 
-        return extensionDeclaration.references.first(where: { $0.declarationKind == extendedKind && $0.name == extensionDeclaration.name })
+        return extensionDeclaration.references
+            .filter { $0.declarationKind == extendedKind && $0.name == extensionDeclaration.name }
+            .min()
     }
 
     func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
@@ -335,7 +343,7 @@ public final class SourceGraph {
         let overridenDecl = decl.related
             .filter { $0.declarationKind == decl.kind && $0.name == decl.name }
             .compactMap { declaration(withUsr: $0.usr) }
-            .first
+            .min()
 
         guard let overridenDecl else {
             return []
@@ -354,7 +362,7 @@ public final class SourceGraph {
                     $0.name == decl.name
             }
             .compactMap(\.parent)
-            .first
+            .min()
 
         guard let baseDecl else {
             // Base reference is external, return the current function as it's the closest.

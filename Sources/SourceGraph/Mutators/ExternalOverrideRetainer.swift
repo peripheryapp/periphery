@@ -17,18 +17,17 @@ final class ExternalOverrideRetainer: SourceGraphMutator {
         for decl in graph.declarations(ofKinds: Declaration.Kind.overrideKinds) {
             guard decl.isOverride else { continue }
 
-            for relatedRef in decl.related {
-                if relatedRef.declarationKind == decl.kind,
-                   relatedRef.name == decl.name,
-                   relatedRef.location == decl.location
-                {
-                    if graph.declaration(withUsr: relatedRef.usr) == nil {
-                        // The related decl is external.
-                        graph.markRetained(decl)
-                    }
+            let matchingRelatedRefs = decl.related.filter {
+                $0.declarationKind == decl.kind &&
+                    $0.name == decl.name &&
+                    $0.location == decl.location
+            }
 
-                    break
-                }
+            let hasExternalMatch = matchingRelatedRefs.contains { graph.declaration(withUsr: $0.usr) == nil }
+
+            if hasExternalMatch {
+                // One or more matching related declarations are external.
+                graph.markRetained(decl)
             }
         }
     }

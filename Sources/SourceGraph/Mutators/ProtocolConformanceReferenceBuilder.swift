@@ -55,10 +55,12 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
 
                     for unimplementedProtoDecl in unimplementedProtoDecls {
                         // Find the implementation declaration in a superclass.
-                        let declInSuperclass = superclassDecls.first {
-                            $0.kind == unimplementedProtoDecl.kind &&
-                                $0.name == unimplementedProtoDecl.name
-                        }
+                        let declInSuperclass = superclassDecls
+                            .filter {
+                                $0.kind == unimplementedProtoDecl.kind &&
+                                    $0.name == unimplementedProtoDecl.name
+                            }
+                            .min()
 
                         if let declInSuperclass {
                             // Build a reference from the protocol declarations to the
@@ -93,6 +95,12 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
     private func invertReferencesFromProtocolToDeclaration(_ nonInvertableReferences: Set<Reference>) {
         let relatedReferences = graph.allReferences.filter { $0.kind == .related && $0.declarationKind.isProtocolMemberConformingKind }
 
+        // Collect all mutations before applying them to avoid order-dependent behavior
+        // when iterating non-deterministically ordered Sets.
+        var referencesToRemove: [Reference] = []
+        var referencesToAdd: [(reference: Reference, parent: Declaration)] = []
+        var declarationsToRetain: [Declaration] = []
+
         for relatedReference in relatedReferences.subtracting(nonInvertableReferences) {
             guard let conformingDeclaration = relatedReference.parent
             else { continue }
@@ -124,7 +132,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                 // Note: we don't remove this reference if the conforming declaration is a default
                 // implementation declared within an extension.
                 if !conformingDeclaration.isDeclaredInExtension(kind: .extensionProtocol) {
-                    graph.remove(relatedReference)
+                    referencesToRemove.append(relatedReference)
                 }
 
                 for usr in conformingDeclaration.usrs {
@@ -136,11 +144,22 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                     )
                     newReference.name = relatedReference.name
                     newReference.parent = protocolDeclaration
-                    graph.add(newReference, from: protocolDeclaration)
+                    referencesToAdd.append((newReference, protocolDeclaration))
                 }
             } else {
-                graph.markRetained(conformingDeclaration)
+                declarationsToRetain.append(conformingDeclaration)
             }
+        }
+
+        // Apply all mutations after traversal completes.
+        for reference in referencesToRemove {
+            graph.remove(reference)
+        }
+        for (reference, parent) in referencesToAdd {
+            graph.add(reference, from: parent)
+        }
+        for declaration in declarationsToRetain {
+            graph.markRetained(declaration)
         }
     }
 }

@@ -94,9 +94,9 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
             // For each member declared in the extension, check if it satisfies a requirement of the constraining protocol
             for memberDeclaration in extensionDeclaration.declarations {
                 // Find matching requirement in the constraining protocol
-                let matchingRequirement = constrainingProtocol.declarations.first {
-                    $0.kind == memberDeclaration.kind && $0.name == memberDeclaration.name
-                }
+                let matchingRequirement = constrainingProtocol.declarations
+                    .filter { $0.kind == memberDeclaration.kind && $0.name == memberDeclaration.name }
+                    .min()
 
                 guard let matchingRequirement else { continue }
 
