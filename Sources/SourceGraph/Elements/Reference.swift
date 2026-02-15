@@ -84,6 +84,6 @@ extension Reference: CustomStringConvertible {
 
 extension Reference: Comparable {
     public static func < (lhs: Reference, rhs: Reference) -> Bool {
-        lhs.location < rhs.location
+        (lhs.location, lhs.usr) < (rhs.location, rhs.usr)
     }
 }

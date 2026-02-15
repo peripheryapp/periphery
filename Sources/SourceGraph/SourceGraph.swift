@@ -324,7 +324,7 @@ public final class SourceGraph {
 
         return extensionDeclaration.references
             .filter { $0.declarationKind == extendedKind && $0.name == extensionDeclaration.name }
-            .min(by: Self.referenceSort)
+            .min()
     }
 
     func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
@@ -401,20 +401,5 @@ public final class SourceGraph {
 
             return [.protocol, .typealias].contains($0.declarationKind) && encodableTypes.contains(name)
         }
-    }
-
-    private static func referenceSort(_ lhs: Reference, _ rhs: Reference) -> Bool {
-        if lhs.location != rhs.location {
-            return lhs.location < rhs.location
-        }
-        if lhs.usr != rhs.usr {
-            return lhs.usr < rhs.usr
-        }
-        let lhsName = lhs.name ?? ""
-        let rhsName = rhs.name ?? ""
-        if lhsName != rhsName {
-            return lhsName < rhsName
-        }
-        return lhs.declarationKind.rawValue < rhs.declarationKind.rawValue
     }
 }
