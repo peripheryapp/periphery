@@ -11,3 +11,12 @@ tasks:
       - '@periphery//:periphery'
     build_flags:
       - "--repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1"
+  verify_targets_bazel9:
+    name: Verify build targets (Bazel 9.x)
+    platform: ${{ platform }}
+    xcode_version: "26.2"
+    bazel: 9.x
+    build_targets:
+      - '@periphery//:periphery'
+    build_flags:
+      - "--repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1"

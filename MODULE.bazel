@@ -5,22 +5,22 @@ module(
 )
 
 # Bazel dependencies
-bazel_dep(name = "rules_swift", version = "2.8.1", max_compatibility_level = 3)
-bazel_dep(name = "rules_apple", version = "4.0.1")
-bazel_dep(name = "bazel_skylib", version = "1.7.1")
-bazel_dep(name = "apple_support", version = "1.23.1")
-bazel_dep(name = "platforms", version = "0.0.11")
+bazel_dep(name = "rules_swift", version = "3.5.0", max_compatibility_level = 3)
+bazel_dep(name = "rules_apple", version = "4.5.2")
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+bazel_dep(name = "apple_support", version = "2.4.0")
+bazel_dep(name = "platforms", version = "1.0.0")
 
 # Swift dependencies
 bazel_dep(name = "aexml", version = "4.7.0.1")
 bazel_dep(name = "swift_argument_parser", version = "1.7.0")
 bazel_dep(name = "swift-filename-matcher", version = "2.0.1")
-bazel_dep(name = "swift-index-store", version = "1.9.0")
-bazel_dep(name = "swift-syntax", version = "603.0.0")
-bazel_dep(name = "swift-system", version = "1.6.3")
+bazel_dep(name = "swift-index-store", version = "1.9.1")
+bazel_dep(name = "swift-syntax", version = "603.0.0.bcr.1")
+bazel_dep(name = "swift-system", version = "1.6.4.bcr.1")
 bazel_dep(name = "pathkit", version = "1.0.1.1")
-bazel_dep(name = "xcodeproj", version = "9.9.0")
-bazel_dep(name = "yams", version = "6.2.0")
+bazel_dep(name = "xcodeproj", version = "9.10.1")
+bazel_dep(name = "yams", version = "6.2.1")
 
 # Generated repo
 use_repo(use_extension("//bazel:generated.bzl", "generated"), "periphery_generated")

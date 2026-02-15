@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Added support for Bazel 9.x.
 
 ##### Bug Fixes
 
