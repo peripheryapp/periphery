@@ -127,6 +127,6 @@ fi
 cd ..
 gh release create --latest="${is_latest}" -F .release/release_notes.md "${version}" ".release/${zip_filename}" ".release/${zip_artifactbundle}" ".release/${bazel_zip_filename}"
 
-echo "Next steps:"
-echo "* Update Homebrew formula"
-echo "* Update Bazel Central Registry"
+echo "Follow PRs:"
+echo "* Homebrew: https://github.com/Homebrew/homebrew-core/pulls?q=is%3Apr+periphery"
+echo "* BCR: https://github.com/bazelbuild/bazel-central-registry/pulls?q=is%3Apr+periphery"
