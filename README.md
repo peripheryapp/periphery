@@ -460,6 +460,11 @@ bazel run @periphery -- scan --bazel
 
 The `--bazel` option enables Bazel mode, which provides seamless integration with your project. It works by querying your project to identify all top-level targets, generating a hidden implementation of the [scan](https://github.com/peripheryapp/periphery/blob/master/bazel/rules.bzl) rule, and then invoking `bazel run`. You can filter the top-level targets with the `--bazel-filter <value>` option, where `<value>` will be passed as the first argument to Bazel's [filter](https://bazel.build/query/language#filter) operator. The generated query can be seen in the console with the `--verbose` option.
 
+> [!TIP]
+> By default, Periphery passes `--check_visibility=false` to `bazel run` to simplify integration, since the generated scan target references your project's targets which may not otherwise be visible. However, disabling visibility checking can invalidate Bazel's analysis cache, resulting in slower subsequent builds.
+>
+> You can disable this behavior with the `--bazel-check-visibility` option. You must ensure the necessary targets are visible to the generated package by adding the `@@+generated+periphery_generated//:__pkg__` visibility label to your targets.
+
 ### Other
 
 Periphery can analyze projects using other build systems, though it cannot drive them automatically like SPM, Xcode, and Bazel. Instead, you need to create a configuration file that specifies the location of indexstore and other resource files. The format is as follows:

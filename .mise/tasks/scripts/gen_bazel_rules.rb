@@ -14,6 +14,10 @@ PRODUCTS = {
     "AEXML" => "@aexml",
 }
 
+VISIBILITY = {
+    "Frontend" => "@@+generated+periphery_generated//:__pkg__",
+}
+
 MACOS_DEPS = [
     "//Sources:XcodeSupport"
 ]
@@ -56,7 +60,7 @@ def quote(deps)
     deps.map { |dep| "\"#{dep}\"" }
 end
 
-def generate_attrs(target, name, path, sources, deps)
+def generate_attrs(target, name, path, sources, deps, visibility)
     attrs = {
         "name" => "\"#{name}\"",
         "module_name" => "\"#{name}\"",
@@ -77,6 +81,10 @@ def generate_attrs(target, name, path, sources, deps)
         attrs["deps"] = "[#{quote(deps).sort.join(",")}]" unless deps.empty?
     end
 
+    if visibility
+        attrs["visibility"] = "[\"#{visibility}\"]"
+    end
+
     attrs
 end
 
@@ -91,7 +99,10 @@ def generate_bazel_rule(path, rule, name, attrs)
         optimized_swift_binary(
             name = "#{name}_opt",
             target = ":#{name}",
-            visibility = ["//:__pkg__"],
+            visibility = [
+                "//:__pkg__",
+                "@@+generated+periphery_generated//:__pkg__",
+            ],
         )
         EOS
     else
@@ -120,7 +131,8 @@ rules = json["targets"].map do |target|
             else "swift_library"
             end
 
-    attrs = generate_attrs(target, name, path, sources, deps)
+    visibility = VISIBILITY[name]
+    attrs = generate_attrs(target, name, path, sources, deps, visibility)
     generate_bazel_rule(path, rule, name, attrs)
 end
 

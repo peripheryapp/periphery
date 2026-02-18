@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Added the `--bazel-check-visibility` to disable passing `--check_visibility=false` to `bazel run`.
 
 ##### Bug Fixes
 

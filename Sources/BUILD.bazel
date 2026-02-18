@@ -236,6 +236,7 @@ swift_binary(
         "Frontend/main.swift",
     ],
     module_name = "Frontend",
+    visibility = ["@@+generated+periphery_generated//:__pkg__"],
     deps = [
         "//Sources:Configuration",
         "//Sources:PeripheryKit",
@@ -250,7 +251,10 @@ swift_binary(
 optimized_swift_binary(
     name = "Frontend_opt",
     target = ":Frontend",
-    visibility = ["//:__pkg__"],
+    visibility = [
+        "//:__pkg__",
+        "@@+generated+periphery_generated//:__pkg__",
+    ],
 )
 
 swift_library(
