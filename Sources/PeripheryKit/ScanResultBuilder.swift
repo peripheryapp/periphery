@@ -90,12 +90,17 @@ public enum ScanResultBuilder {
     /// This indicates that the declaration would have been marked as used even without the ignore command.
     private static func hasReferencesFromNonIgnoredCode(_ decl: Declaration, graph: SourceGraph) -> Bool {
         let references = graph.references(to: decl)
+        let isProtocolMember = decl.parent?.kind == .protocol
 
         for ref in references {
             guard ref.kind != .retained, let parent = ref.parent else { continue }
 
+            // Protocol members naturally accumulate related references from conformances and
+            // default implementations even when genuinely unused. Only normal references indicate
+            // actual usage.
+            if isProtocolMember, ref.kind != .normal { continue }
+
             if graph.commandIgnoredDeclarations[parent] == nil {
-                // Check that the parent is actually used (not itself unused)
                 if graph.usedDeclarations.contains(parent) {
                     return true
                 }

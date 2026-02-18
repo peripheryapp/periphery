@@ -1236,6 +1236,22 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testSuperfluousIgnoreCommandOnProtocolMember() {
+        analyze(retainPublic: true) {
+            // Protocol member with ignore that only has related references (from conformances
+            // and default implementations) - the ignore is NOT superfluous.
+            assertReferenced(.protocol("CorrectlyIgnoredProtocol")) {
+                self.assertNotSuperfluousIgnoreCommand(.varInstance("ignoredProperty"))
+            }
+
+            // Protocol member with ignore that has normal references (actually used) -
+            // the ignore IS superfluous.
+            assertReferenced(.protocol("SuperfluouslyIgnoredProtocol")) {
+                self.assertSuperfluousIgnoreCommand(.varInstance("superfluousProperty"))
+            }
+        }
+    }
+
     // MARK: - Swift Testing
 
     #if canImport(Testing)
