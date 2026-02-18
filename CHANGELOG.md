@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Fix some causes of potentially non-deterministic results.
+- Fix incorrect superfluous ignore comment results for protocol members.
 
 ## 3.5.1 (2026-02-15)
 
