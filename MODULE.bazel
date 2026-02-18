@@ -17,10 +17,10 @@ bazel_dep(name = "swift_argument_parser", version = "1.7.0")
 bazel_dep(name = "swift-filename-matcher", version = "2.0.1")
 bazel_dep(name = "swift-indexstore", version = "0.4.0")
 bazel_dep(name = "swift-syntax", version = "602.0.0.1")
-bazel_dep(name = "swift-system", version = "1.6.3")
+bazel_dep(name = "swift-system", version = "1.6.4")
 bazel_dep(name = "pathkit", version = "1.0.1.1")
 bazel_dep(name = "xcodeproj", version = "9.7.1")
-bazel_dep(name = "yams", version = "6.2.0")
+bazel_dep(name = "yams", version = "6.2.1")
 
 # Generated repo
 use_repo(use_extension("//bazel:generated.bzl", "generated"), "periphery_generated")
