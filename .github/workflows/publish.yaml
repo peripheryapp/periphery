@@ -13,7 +13,7 @@ jobs:
   publish:
     uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.1.0
     with:
-      tag_name: ${{ inputs.tag_name }}
+      tag_name: ${{ inputs.tag_name || github.ref_name }}
       registry_fork: peripheryapp/bazel-central-registry
       tag_prefix: ""
       attest: false
