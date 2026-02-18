@@ -159,6 +159,9 @@ struct ScanCommand: ParsableCommand {
     @Option(help: "Path to a global index store populated by Bazel. If provided, will be used instead of individual module stores.")
     var bazelIndexStore: FilePath?
 
+    @Flag(help: "Enable Bazel visibility checking")
+    var bazelCheckVisibility: Bool = defaultConfiguration.$bazelCheckVisibility.defaultValue
+
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
@@ -219,6 +222,7 @@ struct ScanCommand: ParsableCommand {
         configuration.apply(\.$bazel, bazel)
         configuration.apply(\.$bazelFilter, bazelFilter)
         configuration.apply(\.$bazelIndexStore, bazelIndexStore)
+        configuration.apply(\.$bazelCheckVisibility, bazelCheckVisibility)
 
         configuration.buildFilenameMatchers()
 

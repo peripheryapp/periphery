@@ -110,10 +110,11 @@ public final class BazelProjectDriver: ProjectDriver {
             logger.info("\(asterisk) Building...")
         }
 
+        let checkVisibility = configuration.bazelCheckVisibility ? "true" : "false"
         var arguments = [
             "bazel",
             "run",
-            "--check_visibility=false",
+            "--check_visibility=\(checkVisibility)",
             "--ui_event_filters=-info,-debug,-warning",
         ]
         arguments.append(contentsOf: configuration.buildArguments)
