@@ -125,30 +125,34 @@ public final class Xcodebuild {
         }
     }
 
-    private func findIndexStorePath(in derivedDataPath: FilePath) -> FilePath? {
+    func findIndexStorePath(in derivedDataPath: FilePath) -> FilePath? {
         ["Index.noindex/DataStore", "Index/DataStore"]
             .map { derivedDataPath.appending($0) }
             .first { $0.exists }
     }
 
-    private func findIndexStoreInDefaultDerivedData(projectName: String) -> FilePath? {
+    func findIndexStoreInDefaultDerivedData(projectName: String) -> FilePath? {
         let defaultDerivedData = FilePath(
             NSHomeDirectory()
         ).appending("Library/Developer/Xcode/DerivedData")
 
-        guard defaultDerivedData.exists else { return nil }
+        return findIndexStoreInDerivedData(projectName: projectName, derivedDataRoot: defaultDerivedData)
+    }
+
+    func findIndexStoreInDerivedData(projectName: String, derivedDataRoot: FilePath) -> FilePath? {
+        guard derivedDataRoot.exists else { return nil }
 
         // Xcode names DerivedData subdirectories as "<ProjectName>-<hash>".
         // Find the most recently modified one matching the project name.
         let fm = FileManager.default
-        guard let entries = try? fm.contentsOfDirectory(atPath: defaultDerivedData.string) else {
+        guard let entries = try? fm.contentsOfDirectory(atPath: derivedDataRoot.string) else {
             return nil
         }
 
         let candidates = entries
             .filter { $0.hasPrefix("\(projectName)-") }
             .compactMap { entry -> (path: FilePath, modified: Date)? in
-                let entryPath = defaultDerivedData.appending(entry)
+                let entryPath = derivedDataRoot.appending(entry)
                 guard let attrs = try? fm.attributesOfItem(atPath: entryPath.string),
                       let modified = attrs[.modificationDate] as? Date else {
                     return nil
