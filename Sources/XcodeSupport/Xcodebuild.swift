@@ -61,13 +61,19 @@ public final class Xcodebuild {
 
     public func indexStorePath(project: XcodeProjectlike, schemes: [String]) throws -> FilePath {
         let derivedDataPath = try derivedDataPath(for: project, schemes: schemes)
-        let pathsToTry = ["Index.noindex/DataStore", "Index/DataStore"]
-            .map { derivedDataPath.appending($0) }
-        guard let path = pathsToTry.first(where: { $0.exists }) else {
-            throw PeripheryError.indexStoreNotFound(derivedDataPath: derivedDataPath.string)
+
+        if let path = findIndexStorePath(in: derivedDataPath) {
+            return path
         }
 
-        return path
+        // Periphery's own DerivedData may not exist when --skip-build is used and
+        // the project was built by Xcode or xcodebuild. Fall back to searching
+        // Xcode's default DerivedData location for a matching project directory.
+        if let path = findIndexStoreInDefaultDerivedData(projectName: project.name) {
+            return path
+        }
+
+        throw PeripheryError.indexStoreNotFound(derivedDataPath: derivedDataPath.string)
     }
 
     func schemes(project: XcodeProjectlike, additionalArguments: [String]) throws -> Set<String> {
@@ -117,6 +123,47 @@ public final class Xcodebuild {
         } catch {
             throw PeripheryError.jsonDeserializationError(error: error, json: jsonString)
         }
+    }
+
+    private func findIndexStorePath(in derivedDataPath: FilePath) -> FilePath? {
+        ["Index.noindex/DataStore", "Index/DataStore"]
+            .map { derivedDataPath.appending($0) }
+            .first { $0.exists }
+    }
+
+    private func findIndexStoreInDefaultDerivedData(projectName: String) -> FilePath? {
+        let defaultDerivedData = FilePath(
+            NSHomeDirectory()
+        ).appending("Library/Developer/Xcode/DerivedData")
+
+        guard defaultDerivedData.exists else { return nil }
+
+        // Xcode names DerivedData subdirectories as "<ProjectName>-<hash>".
+        // Find the most recently modified one matching the project name.
+        let fm = FileManager.default
+        guard let entries = try? fm.contentsOfDirectory(atPath: defaultDerivedData.string) else {
+            return nil
+        }
+
+        let candidates = entries
+            .filter { $0.hasPrefix("\(projectName)-") }
+            .compactMap { entry -> (path: FilePath, modified: Date)? in
+                let entryPath = defaultDerivedData.appending(entry)
+                guard let attrs = try? fm.attributesOfItem(atPath: entryPath.string),
+                      let modified = attrs[.modificationDate] as? Date else {
+                    return nil
+                }
+                return (entryPath, modified)
+            }
+            .sorted { $0.modified > $1.modified }
+
+        for candidate in candidates {
+            if let path = findIndexStorePath(in: candidate.path) {
+                return path
+            }
+        }
+
+        return nil
     }
 
     private func derivedDataPath(for project: XcodeProjectlike, schemes: [String]) throws -> FilePath {
