@@ -594,6 +594,23 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRetainsStaticMethodOnExternalTypeExtension() {
+        analyze(retainPublic: true) {
+            assertReferenced(.class("FixtureClassStaticExtMethod")) {
+                self.assertReferenced(.functionMethodInstance("someMethod()"))
+            }
+            assertReferenced(.extensionStruct("Array", line: 11)) {
+                self.assertReferenced(.functionMethodStatic("emptyArray()"))
+            }
+            assertReferenced(.extensionStruct("Array", line: 15)) {
+                self.assertReferenced(.functionMethodStatic("constrainedFactory(_:)"))
+            }
+            assertReferenced(.extensionClass("NumberFormatter", line: 19)) {
+                self.assertReferenced(.functionMethodStatic("customFormat()"))
+            }
+        }
+    }
+
     func testRetainsExtendedTypeAlias() {
         analyze(retainPublic: true) {
             assertReferenced(.typealias("Fixture214TypeAlias"))
@@ -848,7 +865,14 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertReferenced(.class("FixtureClass71")) {
                 self.assertNotReferenced(.varInstance("someVar"))
             }
-            assertNotReferenced(.class("FixtureClass72"))
+            assertReferenced(.class("FixtureClass72"))
+        }
+    }
+
+    func testRetainsPropertyTypeReferencesOfUsedDeclaration() {
+        analyze(retainPublic: true) {
+            assertReferenced(.struct("FixtureViewModel222"))
+            assertReferenced(.struct("FixtureItem222"))
         }
     }
 
