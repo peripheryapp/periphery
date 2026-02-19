@@ -1,0 +1,296 @@
+name: Benchmark
+on:
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [labeled]
+env:
+  HYPERFINE_ARGS: --show-output --warmup 1 --runs 5
+  SCAN_ARGS: --quiet --skip-build
+
+jobs:
+  setup:
+    name: Setup
+    if: |
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/benchmark')) ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'benchmark')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      pr_number: ${{ steps.pr-number.outputs.number }}
+      head_sha: ${{ steps.pr.outputs.head_sha }}
+      merge_base: ${{ steps.commits.outputs.merge_base }}
+    steps:
+      - name: Get PR number
+        id: pr-number
+        run: |
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            echo "number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Get PR details
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_DATA=$(gh api repos/${{ github.repository }}/pulls/${{ steps.pr-number.outputs.number }})
+          HEAD_SHA=$(echo "$PR_DATA" | jq -r '.head.sha')
+          HEAD_REF=$(echo "$PR_DATA" | jq -r '.head.ref')
+          BASE_REF=$(echo "$PR_DATA" | jq -r '.base.ref')
+          echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+          echo "head_ref=$HEAD_REF" >> "$GITHUB_OUTPUT"
+          echo "base_ref=$BASE_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Add reaction to comment
+        if: github.event_name == 'issue_comment'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+            -f content='+1'
+
+      - uses: actions/checkout@master
+        with:
+          ref: ${{ steps.pr.outputs.head_sha }}
+          fetch-depth: 0
+
+      - name: Get merge-base
+        id: commits
+        run: |
+          git fetch origin ${{ steps.pr.outputs.base_ref }}
+          MERGE_BASE=$(git merge-base HEAD origin/${{ steps.pr.outputs.base_ref }})
+          echo "merge_base=$MERGE_BASE" >> "$GITHUB_OUTPUT"
+
+      - name: Generate matrix
+        id: matrix
+        run: |
+          # Prepend hardcoded periphery (self) project to the list from config
+          PERIPHERY='{"name": "periphery", "self": true}'
+          MATRIX=$(jq -c --argjson periphery "$PERIPHERY" '{project: ([$periphery] + .projects)}' .github/benchmark-projects.json)
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
+  build-head:
+    name: Build HEAD
+    needs: setup
+    runs-on: macos-26
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@master
+        with:
+          ref: ${{ needs.setup.outputs.head_sha }}
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_26.2.0.app
+
+      - name: Build
+        run: swift build -c release --product periphery
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: periphery-head
+          path: .build/release/periphery
+
+  build-base:
+    name: Build merge-base
+    needs: setup
+    runs-on: macos-26
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@master
+        with:
+          ref: ${{ needs.setup.outputs.merge_base }}
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_26.2.0.app
+
+      - name: Build
+        run: swift build -c release --product periphery
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: periphery-base
+          path: .build/release/periphery
+
+  benchmark:
+    name: Benchmark (${{ matrix.project.name }})
+    needs: [setup, build-head, build-base]
+    runs-on: macos-26
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@master
+        if: ${{ matrix.project.self }}
+        with:
+          ref: ${{ needs.setup.outputs.head_sha }}
+          fetch-depth: 0
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_26.2.0.app
+
+      - name: Download HEAD build
+        uses: actions/download-artifact@v4
+        with:
+          name: periphery-head
+          path: .build/release
+
+      - name: Make binary executable
+        run: chmod +x .build/release/periphery
+
+      - name: Install hyperfine
+        run: brew install hyperfine
+
+      - name: Clone target project
+        if: ${{ !matrix.project.self }}
+        run: |
+          git clone --depth 1 --branch ${{ matrix.project.ref }} ${{ matrix.project.url }} /tmp/target-project
+
+      - name: Build project (SPM)
+        if: ${{ matrix.project.build == 'spm' || matrix.project.self }}
+        working-directory: ${{ matrix.project.self && '.' || '/tmp/target-project' }}
+        run: swift build
+
+      - name: Build project (Xcode)
+        if: ${{ matrix.project.build == 'xcodebuild' }}
+        working-directory: /tmp/target-project
+        run: |
+          xcodebuild build -scheme '${{ matrix.project.scheme }}' -destination '${{ matrix.project.destination }}' -derivedDataPath .derivedData -quiet
+
+      - name: Benchmark HEAD (self)
+        if: ${{ matrix.project.self }}
+        run: |
+          hyperfine $HYPERFINE_ARGS --export-json head-benchmark.json \
+            "./.build/release/periphery scan $SCAN_ARGS"
+
+      - name: Benchmark HEAD (SPM)
+        if: ${{ matrix.project.build == 'spm' }}
+        working-directory: /tmp/target-project
+        run: |
+          hyperfine $HYPERFINE_ARGS --export-json ${{ github.workspace }}/head-benchmark.json \
+            "${{ github.workspace }}/.build/release/periphery scan $SCAN_ARGS"
+
+      - name: Benchmark HEAD (Xcode)
+        if: ${{ matrix.project.build == 'xcodebuild' }}
+        working-directory: /tmp/target-project
+        run: |
+          hyperfine $HYPERFINE_ARGS --export-json ${{ github.workspace }}/head-benchmark.json \
+            "${{ github.workspace }}/.build/release/periphery scan $SCAN_ARGS --schemes ${{ matrix.project.scheme }} --index-store-path .derivedData/Index.noindex/DataStore"
+
+      - name: Download merge-base build
+        uses: actions/download-artifact@v4
+        with:
+          name: periphery-base
+          path: .build/release
+
+      - name: Make binary executable
+        run: chmod +x .build/release/periphery
+
+      - name: Benchmark merge-base (self)
+        if: ${{ matrix.project.self }}
+        run: |
+          hyperfine $HYPERFINE_ARGS --export-json base-benchmark.json \
+            "./.build/release/periphery scan $SCAN_ARGS"
+
+      - name: Benchmark merge-base (SPM)
+        if: ${{ matrix.project.build == 'spm' }}
+        working-directory: /tmp/target-project
+        run: |
+          hyperfine $HYPERFINE_ARGS --export-json ${{ github.workspace }}/base-benchmark.json \
+            "${{ github.workspace }}/.build/release/periphery scan $SCAN_ARGS"
+
+      - name: Benchmark merge-base (Xcode)
+        if: ${{ matrix.project.build == 'xcodebuild' }}
+        working-directory: /tmp/target-project
+        run: |
+          hyperfine $HYPERFINE_ARGS --export-json ${{ github.workspace }}/base-benchmark.json \
+            "${{ github.workspace }}/.build/release/periphery scan $SCAN_ARGS --schemes ${{ matrix.project.scheme }} --index-store-path .derivedData/Index.noindex/DataStore"
+
+      - name: Generate result summary
+        run: |
+          HEAD_MEAN=$(jq '.results[0].mean' head-benchmark.json)
+          BASE_MEAN=$(jq '.results[0].mean' base-benchmark.json)
+          HEAD_STDDEV=$(jq '.results[0].stddev' head-benchmark.json)
+          BASE_STDDEV=$(jq '.results[0].stddev' base-benchmark.json)
+          CHANGE=$(echo "scale=2; (($HEAD_MEAN - $BASE_MEAN) / $BASE_MEAN) * 100" | bc)
+
+          jq -n \
+            --arg name "${{ matrix.project.name }}" \
+            --argjson head_mean "$HEAD_MEAN" \
+            --argjson base_mean "$BASE_MEAN" \
+            --argjson head_stddev "$HEAD_STDDEV" \
+            --argjson base_stddev "$BASE_STDDEV" \
+            --argjson change "$CHANGE" \
+            '{name: $name, head_mean: $head_mean, base_mean: $base_mean, head_stddev: $head_stddev, base_stddev: $base_stddev, change: $change}' \
+            > result-${{ matrix.project.name }}.json
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-${{ matrix.project.name }}
+          path: |
+            head-benchmark.json
+            base-benchmark.json
+            result-${{ matrix.project.name }}.json
+
+  summary:
+    name: Post Results
+    needs: [setup, benchmark]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-*
+          merge-multiple: true
+
+      - name: Generate comment
+        id: comment
+        run: |
+          echo "## Benchmark Results" > comment.md
+          echo "" >> comment.md
+          echo "Comparing \`${{ needs.setup.outputs.merge_base }}\` (merge-base) → \`${{ needs.setup.outputs.head_sha }}\` (HEAD)" >> comment.md
+          echo "" >> comment.md
+          echo "| Project | Merge-base (s) | HEAD (s) | Change |" >> comment.md
+          echo "|---------|----------------|----------|--------|" >> comment.md
+
+          for f in result-*.json; do
+            NAME=$(jq -r '.name' "$f")
+            BASE_MEAN=$(jq -r '.base_mean' "$f")
+            HEAD_MEAN=$(jq -r '.head_mean' "$f")
+            BASE_STDDEV=$(jq -r '.base_stddev' "$f")
+            HEAD_STDDEV=$(jq -r '.head_stddev' "$f")
+            CHANGE=$(jq -r '.change' "$f")
+
+            printf "| %s | %.3f ±%.3f | %.3f ±%.3f | %+.1f%% |\n" \
+              "$NAME" "$BASE_MEAN" "$BASE_STDDEV" "$HEAD_MEAN" "$HEAD_STDDEV" "$CHANGE" >> comment.md
+          done
+
+      - name: Post comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment ${{ needs.setup.outputs.pr_number }} \
+            --repo ${{ github.repository }} \
+            --body-file comment.md
+
+      - name: Remove benchmark label
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr edit ${{ needs.setup.outputs.pr_number }} \
+            --repo ${{ github.repository }} \
+            --remove-label benchmark
