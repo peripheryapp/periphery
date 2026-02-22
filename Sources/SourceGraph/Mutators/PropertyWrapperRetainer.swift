@@ -13,7 +13,7 @@ final class PropertyWrapperRetainer: SourceGraphMutator {
     func mutate() {
         for decl in graph.declarations(ofKinds: Declaration.Kind.toplevelAttributableKind) where decl.attributes.contains(where: { $0.name == "propertyWrapper" }) {
             decl.declarations
-                .filter { $0.kind == .varInstance && specialProperties.contains($0.name ?? "") }
+                .filter { $0.kind == .varInstance && specialProperties.contains($0.name) }
                 .forEach { graph.markRetained($0) }
         }
     }

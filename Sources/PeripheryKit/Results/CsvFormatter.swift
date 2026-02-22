@@ -57,7 +57,7 @@ final class CsvFormatter: OutputFormatter {
 
     private func format(
         kind: String,
-        name: String?,
+        name: String,
         modifiers: Set<String>,
         attributes: Set<String>,
         accessibility: String?,
@@ -69,6 +69,6 @@ final class CsvFormatter: OutputFormatter {
         let joinedAttributes = modifiers.sorted().joined(separator: "|")
         let joinedUsrs = usrs.sorted().joined(separator: "|")
         let path = locationDescription(location)
-        return "\(kind),\(name ?? ""),\(joinedModifiers),\(joinedAttributes),\(accessibility ?? ""),\(joinedUsrs),\(path),\(hint ?? "")"
+        return "\(kind),\(name),\(joinedModifiers),\(joinedAttributes),\(accessibility ?? ""),\(joinedUsrs),\(path),\(hint ?? "")"
     }
 }

@@ -1,9 +1,9 @@
 import Configuration
 import Foundation
+import IndexStore
 import Logger
 import Shared
 import SourceGraph
-import SwiftIndexStore
 import SystemPackage
 
 public struct SourceFileCollector {
@@ -27,16 +27,16 @@ public struct SourceFileCollector {
     public func collect() throws -> [SourceFile: [IndexUnit]] {
         let excludedTargets = excludedTestTargets.union(configuration.excludeTargets)
         let currentFilePath = FilePath.current
-        let lib = try LibIndexStore.open()
 
         return try JobPool(jobs: Array(indexStorePaths))
             .flatMap { indexStorePath in
                 logger.debug("Reading \(indexStorePath)")
-                let indexStore = try IndexStore.open(store: URL(fileURLWithPath: indexStorePath.string), lib: lib)
-                let units = indexStore.units(includeSystem: false)
+                let indexStore = try IndexStore(path: indexStorePath.string)
 
-                return try units.compactMap { unit -> (FilePath, IndexStore, IndexStoreUnit, String?)? in
-                    guard let filePath = try indexStore.mainFilePath(for: unit), !filePath.isEmpty else {
+                return indexStore.units.filter { !$0.isSystem }.compactMap { unit -> (FilePath, IndexStore, UnitReader, String)? in
+                    let filePath = unit.mainFile
+
+                    guard !filePath.isEmpty else {
                         return nil
                     }
 
@@ -48,18 +48,17 @@ public struct SourceFileCollector {
                             return nil
                         }
 
-                        let module = try indexStore.moduleName(for: unit)
-                        if let module, excludedTargets.contains(module) {
+                        if excludedTargets.contains(unit.moduleName) {
                             return nil
                         }
 
-                        return (file, indexStore, unit, module)
+                        return (file, indexStore, unit, unit.moduleName)
                     }
 
                     return nil
                 }
             }
-            .reduce(into: [FilePath: [(IndexStore, IndexStoreUnit, String?)]]()) { result, tuple in
+            .reduce(into: [FilePath: [(IndexStore, UnitReader, String)]]()) { result, tuple in
                 let (file, indexStore, unit, module) = tuple
                 result[file, default: []].append((indexStore, unit, module))
             }

@@ -36,12 +36,12 @@ final class InheritedImplicitInitializerReferenceBuilder: SourceGraphMutator {
                     // Add the inverse reference: implicit init -> explicit init
                     for usr in explicitInit.usrs {
                         let reference = Reference(
+                            name: explicitInit.name,
                             kind: .related,
                             declarationKind: .functionConstructor,
                             usr: usr,
                             location: implicitInit.location
                         )
-                        reference.name = explicitInit.name
                         reference.parent = implicitInit
                         graph.add(reference, from: implicitInit)
                     }

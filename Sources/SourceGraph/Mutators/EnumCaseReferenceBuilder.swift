@@ -22,12 +22,12 @@ final class EnumCaseReferenceBuilder: SourceGraphMutator {
                 for enumCase in enumCases {
                     for usr in enumCase.usrs {
                         let reference = Reference(
+                            name: enumCase.name,
                             kind: .normal,
                             declarationKind: .enumelement,
                             usr: usr,
                             location: enumCase.location
                         )
-                        reference.name = enumCase.name
                         reference.parent = enumDeclaration
                         graph.add(reference, from: enumDeclaration)
                     }

@@ -1,9 +1,9 @@
 import Configuration
 import Foundation
 import Indexer
+import IndexStore
 import Logger
 import Shared
-import SwiftIndexStore
 import SystemPackage
 
 public final class SPMProjectDriver {

@@ -29,8 +29,7 @@ final class DeterminismRegressionTest: XCTestCase {
         usr: String,
         location: Location
     ) -> Declaration {
-        let declaration = Declaration(kind: kind, usrs: [usr], location: location)
-        declaration.name = name
+        let declaration = Declaration(name: name, kind: kind, usrs: [usr], location: location)
         return declaration
     }
 
@@ -44,12 +43,12 @@ final class DeterminismRegressionTest: XCTestCase {
         role: Reference.Role = .unknown
     ) -> Reference {
         let reference = Reference(
+            name: name,
             kind: kind,
             declarationKind: declarationKind,
             usr: usr,
             location: location
         )
-        reference.name = name
         reference.parent = parent
         reference.role = role
         return reference

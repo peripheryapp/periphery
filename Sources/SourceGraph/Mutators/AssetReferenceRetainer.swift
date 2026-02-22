@@ -47,7 +47,7 @@ final class AssetReferenceRetainer: SourceGraphMutator {
 
                 if sources.contains(.interfaceBuilder) {
                     // Get aggregated references for this class
-                    let aggregated = ibReferencesByClass[declaration.name ?? ""]
+                    let aggregated = ibReferencesByClass[declaration.name]
                     interfaceBuilderPropertyRetainer.retainPropertiesDeclared(
                         in: declaration,
                         referencedOutlets: aggregated?.outlets ?? [],

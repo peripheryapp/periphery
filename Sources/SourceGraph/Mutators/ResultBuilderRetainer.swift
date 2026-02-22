@@ -23,7 +23,7 @@ final class ResultBuilderRetainer: SourceGraphMutator {
     func mutate() {
         for decl in graph.declarations(ofKinds: Declaration.Kind.toplevelAttributableKind) where decl.attributes.contains(where: { $0.name == "resultBuilder" }) {
             for childDecl in decl.declarations {
-                if let name = childDecl.name, resultBuilderMethods.contains(name) {
+                if resultBuilderMethods.contains(childDecl.name) {
                     graph.markRetained(childDecl)
                 }
             }

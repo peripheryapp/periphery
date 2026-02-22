@@ -178,7 +178,7 @@ swift_library(
         "//Sources:SourceGraph",
         "@aexml//:AEXML",
         "@swift-filename-matcher//:FilenameMatcher",
-        "@swift-indexstore//:SwiftIndexStore",
+        "@swift-index-store//:IndexStore",
         "@swift-syntax//:SwiftParser",
         "@swift-syntax//:SwiftSyntax",
         "@swift-system//:SystemPackage",
@@ -213,7 +213,7 @@ swift_library(
         "//Sources:Shared",
         "//Sources:SyntaxAnalysis",
         "@aexml//:AEXML",
-        "@swift-indexstore//:SwiftIndexStore",
+        "@swift-index-store//:IndexStore",
     ],
 )
 

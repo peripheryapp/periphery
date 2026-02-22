@@ -22,12 +22,12 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
             if let extendedProtocol = try graph.extendedDeclaration(forExtension: extensionDeclaration) {
                 for usr in extensionDeclaration.usrs {
                     let reference = Reference(
+                        name: extendedProtocol.name,
                         kind: .normal,
                         declarationKind: .extensionProtocol,
                         usr: usr,
                         location: extendedProtocol.location
                     )
-                    reference.name = extendedProtocol.name
                     reference.parent = extendedProtocol
                     graph.add(reference, from: extendedProtocol)
                 }
@@ -45,24 +45,24 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
                         if let parentDeclaration = reference.parent {
                             for usr in extensionDeclaration.usrs {
                                 let extensionReference = Reference(
+                                    name: extensionDeclaration.name,
                                     kind: .normal,
                                     declarationKind: .extensionProtocol,
                                     usr: usr,
                                     location: reference.location
                                 )
-                                extensionReference.name = extensionDeclaration.name
                                 extensionReference.parent = parentDeclaration
                                 graph.add(extensionReference, from: parentDeclaration)
                             }
 
                             for usr in extendedProtocol.usrs {
                                 let protocolReference = Reference(
+                                    name: extendedProtocol.name,
                                     kind: .normal,
                                     declarationKind: .protocol,
                                     usr: usr,
                                     location: reference.location
                                 )
-                                protocolReference.name = extendedProtocol.name
                                 protocolReference.parent = parentDeclaration
                                 graph.add(protocolReference, from: parentDeclaration)
                             }
@@ -107,12 +107,12 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
                 // from the protocol requirement to the extension's implementation.
                 for usr in matchingRequirement.usrs {
                     let relatedReference = Reference(
+                        name: matchingRequirement.name,
                         kind: .related,
                         declarationKind: matchingRequirement.kind,
                         usr: usr,
                         location: memberDeclaration.location
                     )
-                    relatedReference.name = matchingRequirement.name
                     relatedReference.parent = memberDeclaration
                     graph.add(relatedReference, from: memberDeclaration)
                 }

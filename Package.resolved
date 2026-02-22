@@ -1,5 +1,5 @@
 {
-  "originHash" : "7e0d4754583f85042f304258ea6a95827a5b5de12e83cbab0f4d74ff13034404",
+  "originHash" : "253e73c3cafc42fa4d7e84faa358182595b2e9a3a4574b3980a44b7b4d68ad19",
   "pins" : [
     {
       "identity" : "aexml",
@@ -47,12 +47,11 @@
       }
     },
     {
-      "identity" : "swift-indexstore",
+      "identity" : "swift-index-store",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kateinoigakukun/swift-indexstore",
+      "location" : "https://github.com/MobileNativeFoundation/swift-index-store",
       "state" : {
-        "revision" : "055264ececff53c1265c2b7ee3513053b02604de",
-        "version" : "0.4.0"
+        "revision" : "c4665d1c0897f45add476bb78692cbf1821c0e7a"
       }
     },
     {

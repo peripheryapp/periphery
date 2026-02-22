@@ -43,34 +43,29 @@ extension OutputFormatter {
         var secondaryResults: [(Location, String)] = []
         let location = declarationLocation(from: result.declaration)
         let kindDisplayName = declarationKindDisplayName(from: result.declaration)
+        let name = colored ? logger.colorize(result.declaration.name, .lightBlue) : result.declaration.name
 
-        if var name = result.declaration.name {
-            name = colored ? logger.colorize(name, .lightBlue) : name
+        switch result.annotation {
+        case .unused:
+            description += "Unused \(kindDisplayName) '\(name)'"
+        case .assignOnlyProperty:
+            description += "Assign-only \(kindDisplayName) '\(name)' is assigned, but never used"
+        case let .redundantProtocol(references, inherited):
+            description += "Redundant protocol '\(name)' (never used as an existential type)"
+            secondaryResults = references.map {
+                var msg = "Redundant protocol conformance '\(name)'"
 
-            switch result.annotation {
-            case .unused:
-                description += "Unused \(kindDisplayName) '\(name)'"
-            case .assignOnlyProperty:
-                description += "Assign-only \(kindDisplayName) '\(name)' is assigned, but never used"
-            case let .redundantProtocol(references, inherited):
-                description += "Redundant protocol '\(name)' (never used as an existential type)"
-                secondaryResults = references.map {
-                    var msg = "Redundant protocol conformance '\(name)'"
-
-                    if !inherited.isEmpty {
-                        msg += " (replace with '\(inherited.sorted().joined(separator: ", "))')"
-                    }
-
-                    return ($0.location, msg)
+                if !inherited.isEmpty {
+                    msg += " (replace with '\(inherited.sorted().joined(separator: ", "))')"
                 }
-            case let .redundantPublicAccessibility(modules):
-                let modulesJoined = modules.sorted().joined(separator: ", ")
-                description += "Redundant public accessibility for \(kindDisplayName) '\(name)' (not used outside of \(modulesJoined))"
-            case .superfluousIgnoreCommand:
-                description += "Superfluous ignore comment for \(kindDisplayName) '\(name)' (declaration is referenced and should not be ignored)"
+
+                return ($0.location, msg)
             }
-        } else {
-            description += "Unused"
+        case let .redundantPublicAccessibility(modules):
+            let modulesJoined = modules.sorted().joined(separator: ", ")
+            description += "Redundant public accessibility for \(kindDisplayName) '\(name)' (not used outside of \(modulesJoined))"
+        case .superfluousIgnoreCommand:
+            description += "Superfluous ignore comment for \(kindDisplayName) '\(name)' (declaration is referenced and should not be ignored)"
         }
 
         return [(location, description)] + secondaryResults

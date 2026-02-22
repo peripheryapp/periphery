@@ -32,7 +32,7 @@ public final class Reference {
     public let location: Location
     public let kind: Kind
     public let declarationKind: Declaration.Kind
-    public var name: String?
+    public let name: String
     public var parent: Declaration?
     public var references: Set<Reference> = []
     public let usr: String
@@ -41,11 +41,13 @@ public final class Reference {
     private let hashValueCache: Int
 
     public init(
+        name: String,
         kind: Kind,
         declarationKind: Declaration.Kind,
         usr: String,
         location: Location
     ) {
+        self.name = name
         self.kind = kind
         self.declarationKind = declarationKind
         self.usr = usr
@@ -76,7 +78,7 @@ extension Reference: CustomStringConvertible {
     }
 
     var descriptionParts: [String] {
-        let formattedName = name != nil ? "'\(name!)'" : "nil"
+        let formattedName = "'\(name)'"
 
         return [kind.rawValue, declarationKind.rawValue, formattedName, "'\(usr)'", role.rawValue, location.shortDescription]
     }

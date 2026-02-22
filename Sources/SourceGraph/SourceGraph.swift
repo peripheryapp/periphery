@@ -103,12 +103,12 @@ public final class SourceGraph {
         if let parent = declaration.parent {
             for usr in declaration.usrs {
                 let reference = Reference(
+                    name: declaration.name,
                     kind: .retained,
                     declarationKind: declaration.kind,
                     usr: usr,
                     location: declaration.location
                 )
-                reference.name = declaration.name
                 reference.parent = parent
                 add(reference, from: parent)
             }
@@ -271,8 +271,7 @@ public final class SourceGraph {
     func markUnusedModuleImport(_ statement: ImportStatement) {
         let location = statement.location.relativeTo(configuration.projectRoot)
         let usr = "import-\(statement.module)-\(location)"
-        let decl = Declaration(kind: .module, usrs: [usr], location: statement.location)
-        decl.name = statement.module
+        let decl = Declaration(name: statement.module, kind: .module, usrs: [usr], location: statement.location)
         unusedModuleImports.insert(decl)
     }
 
@@ -387,9 +386,7 @@ public final class SourceGraph {
         let codableTypes = ["Codable", "Decodable", "Encodable"] + configuration.externalEncodableProtocols + configuration.externalCodableProtocols
 
         return inheritedTypeReferences(of: decl).contains {
-            guard let name = $0.name else { return false }
-
-            return [.protocol, .typealias].contains($0.declarationKind) && codableTypes.contains(name)
+            [.protocol, .typealias].contains($0.declarationKind) && codableTypes.contains($0.name)
         }
     }
 
@@ -397,9 +394,7 @@ public final class SourceGraph {
         let encodableTypes = ["Encodable"] + configuration.externalEncodableProtocols + configuration.externalCodableProtocols
 
         return inheritedTypeReferences(of: decl).contains {
-            guard let name = $0.name else { return false }
-
-            return [.protocol, .typealias].contains($0.declarationKind) && encodableTypes.contains(name)
+            [.protocol, .typealias].contains($0.declarationKind) && encodableTypes.contains($0.name)
         }
     }
 }

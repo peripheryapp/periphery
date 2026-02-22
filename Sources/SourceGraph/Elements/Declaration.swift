@@ -219,7 +219,7 @@ public final class Declaration {
     public var modifiers: Set<String> = []
     public var accessibility: DeclarationAccessibility = .init(value: .internal, isExplicit: false)
     public let kind: Kind
-    public var name: String?
+    public let name: String
     public let usrs: Set<String>
     public var unusedParameters: Set<Declaration> = []
     public var declarations: Set<Declaration> = []
@@ -286,7 +286,13 @@ public final class Declaration {
         related.filter { $0.declarationKind == kind && $0.name == name }
     }
 
-    public init(kind: Kind, usrs: Set<String>, location: Location) {
+    public init(
+        name: String,
+        kind: Kind,
+        usrs: Set<String>,
+        location: Location
+    ) {
+        self.name = name
         self.kind = kind
         self.usrs = usrs
         self.location = location
@@ -318,7 +324,7 @@ extension Declaration: CustomStringConvertible {
     }
 
     private var descriptionParts: [String] {
-        let formattedName = name != nil ? "'\(name!)'" : "nil"
+        let formattedName = "'\(name)'"
         let formattedAttributes = "[" + attributes.sorted().map(\.description).joined(separator: ", ") + "]"
         let formattedModifiers = "[" + modifiers.sorted().joined(separator: ", ") + "]"
         let formattedCommentCommands = "[" + commentCommands.map(\.description).sorted().joined(separator: ", ") + "]"

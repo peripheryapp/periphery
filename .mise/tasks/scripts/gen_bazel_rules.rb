@@ -5,7 +5,7 @@ require 'json'
 PRODUCTS = {
     "ArgumentParser" => "@swift_argument_parser",
     "SystemPackage" => "@swift-system",
-    "SwiftIndexStore" => "@swift-indexstore",
+    "IndexStore" => "@swift-index-store",
     "FilenameMatcher" => "@swift-filename-matcher",
     "Yams" => "@yams",
     "SwiftParser" => "@swift-syntax",

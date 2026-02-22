@@ -1,7 +1,7 @@
 import Foundation
 import Indexer
+import IndexStore
 import Logger
-import SwiftIndexStore
 
 public protocol ProjectDriver {
     func build() throws

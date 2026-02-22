@@ -31,12 +31,12 @@ final class CodingKeyEnumReferenceBuilder: SourceGraphMutator {
                 // Build a reference from the Codable type to the CodingKey enum.
                 for usr in enumDeclaration.usrs {
                     let newReference = Reference(
+                        name: enumDeclaration.name,
                         kind: .normal,
                         declarationKind: .enum,
                         usr: usr,
                         location: enumDeclaration.location
                     )
-                    newReference.name = enumDeclaration.name
                     newReference.parent = parent
                     graph.add(newReference, from: parent)
                 }

@@ -67,12 +67,12 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                             // declaration implemented by the superclass.
                             for usr in declInSuperclass.usrs {
                                 let reference = Reference(
+                                    name: declInSuperclass.name,
                                     kind: .related,
                                     declarationKind: declInSuperclass.kind,
                                     usr: usr,
                                     location: declInSuperclass.location
                                 )
-                                reference.name = declInSuperclass.name
                                 reference.parent = unimplementedProtoDecl
                                 result.append(reference)
                             }
@@ -137,12 +137,12 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
 
                 for usr in conformingDeclaration.usrs {
                     let newReference = Reference(
+                        name: relatedReference.name,
                         kind: .related,
                         declarationKind: relatedReference.declarationKind,
                         usr: usr,
                         location: relatedReference.location
                     )
-                    newReference.name = relatedReference.name
                     newReference.parent = protocolDeclaration
                     referencesToAdd.append((newReference, protocolDeclaration))
                 }
