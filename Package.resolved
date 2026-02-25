@@ -1,5 +1,5 @@
 {
-  "originHash" : "253e73c3cafc42fa4d7e84faa358182595b2e9a3a4574b3980a44b7b4d68ad19",
+  "originHash" : "a97be758f9938d2cacde83cc360f0e200c97e7b59c6ab65914e9ff050ab1a687",
   "pins" : [
     {
       "identity" : "aexml",
@@ -68,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-system",
       "state" : {
-        "revision" : "395a77f0aa927f0ff73941d7ac35f2b46d47c9db",
-        "version" : "1.6.3"
+        "revision" : "7c6ad0fc39d0763e0b699210e4124afd5041c5df",
+        "version" : "1.6.4"
       }
     },
     {
@@ -77,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tuist/xcodeproj",
       "state" : {
-        "revision" : "1cf10b32c53e003994f27bb3d37e20dcb941179d",
-        "version" : "9.7.1"
+        "revision" : "77ee0721798186f71b7ee8f7e29be8495d28360f",
+        "version" : "9.9.0"
       }
     },
     {
@@ -86,8 +86,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/jpsim/Yams",
       "state" : {
-        "revision" : "51b5127c7fb6ffac106ad6d199aaa33c5024895f",
-        "version" : "6.2.0"
+        "revision" : "deaf82e867fa2cbd3cd865978b079bfcf384ac28",
+        "version" : "6.2.1"
       }
     }
   ],

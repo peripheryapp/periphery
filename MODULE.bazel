@@ -19,7 +19,7 @@ bazel_dep(name = "swift-index-store", version = "1.9.0")
 bazel_dep(name = "swift-syntax", version = "602.0.0.1")
 bazel_dep(name = "swift-system", version = "1.6.3")
 bazel_dep(name = "pathkit", version = "1.0.1.1")
-bazel_dep(name = "xcodeproj", version = "9.7.1")
+bazel_dep(name = "xcodeproj", version = "9.9.0")
 bazel_dep(name = "yams", version = "6.2.0")
 
 # Generated repo
