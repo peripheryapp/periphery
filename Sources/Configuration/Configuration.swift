@@ -152,8 +152,8 @@ public final class Configuration {
     @Setting(key: "bazel_check_visibility", defaultValue: false)
     public var bazelCheckVisibility: Bool
 
-    @Setting(key: "sonarqube_rule_severity", defaultValue: nil)
-    public var sonarQubeRuleSeverity: SonarQubeRuleSeverity?
+    @Setting(key: "sonarqube_rule_severity", defaultValue: .default, setter: { SonarQubeRuleSeverity(anyValue: $0) })
+    public var sonarqubeRuleSeverity: SonarQubeRuleSeverity
 
     // Non user facing.
     public var guidedSetup: Bool = false
@@ -228,7 +228,7 @@ public final class Configuration {
         $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults,
         $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline,
         $writeResults, $genericProjectConfig, $bazel, $bazelFilter, $bazelIndexStore, $bazelCheckVisibility,
-        $sonarQubeRuleSeverity,
+        $sonarqubeRuleSeverity,
     ]
 
     private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {
