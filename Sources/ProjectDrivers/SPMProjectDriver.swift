@@ -10,6 +10,7 @@ public final class SPMProjectDriver {
     private let pkg: SPM.Package
     private let configuration: Configuration
     private let logger: Logger
+    private let interfaceBuilderFileExtensions: Set<String> = ["storyboard", "xib"]
 
     public convenience init(configuration: Configuration, shell: Shell, logger: Logger) throws {
         if !configuration.schemes.isEmpty {
@@ -80,22 +81,47 @@ extension SPMProjectDriver: ProjectDriver {
 
         for target in description.targets {
             let targetPath = pkg.path.appending(target.path)
+            xibFiles.formUnion(interfaceBuilderFiles(in: targetPath))
 
             guard let resources = target.resources else { continue }
 
             for resource in resources {
-                // Resource.path is always a single file path
                 let resourceFilePath = FilePath(resource.path)
                 let resourcePath: FilePath = resourceFilePath.isAbsolute
                     ? resourceFilePath
                     : targetPath.appending(resource.path)
 
-                // Check if the resource path exists and is a xib/storyboard file
                 guard resourcePath.exists else { continue }
-                guard let ext = resourcePath.extension?.lowercased(), ["xib", "storyboard"].contains(ext) else { continue }
+                guard let ext = resourcePath.extension?.lowercased(), interfaceBuilderFileExtensions.contains(ext) else { continue }
 
                 xibFiles.insert(resourcePath)
             }
+        }
+
+        return xibFiles
+    }
+
+    private func interfaceBuilderFiles(in targetPath: FilePath) -> Set<FilePath> {
+        guard targetPath.exists else { return [] }
+        guard let enumerator = FileManager.default.enumerator(
+            at: targetPath.url,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles]
+        ) else {
+            return []
+        }
+
+        var xibFiles: Set<FilePath> = []
+
+        for case let url as URL in enumerator {
+            guard let isRegularFile = try? url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile,
+                  isRegularFile == true
+            else { continue }
+
+            let path = FilePath(url.path).lexicallyNormalized()
+            guard let ext = path.extension?.lowercased(), interfaceBuilderFileExtensions.contains(ext) else { continue }
+
+            xibFiles.insert(path)
         }
 
         return xibFiles

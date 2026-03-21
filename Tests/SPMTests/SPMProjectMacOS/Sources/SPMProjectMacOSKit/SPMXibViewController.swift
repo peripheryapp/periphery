@@ -5,7 +5,7 @@ public final class SPMXibViewController: NSViewController {
 
     @IBOutlet var button: NSButton!
 
-    @IBAction func buttonTapped(_: Any) {
+    @IBAction private func buttonTapped(_: Any) {
         showAlert(title: "SPMXibViewController", message: "buttonTapped(_:) action triggered!")
     }
 
@@ -15,7 +15,7 @@ public final class SPMXibViewController: NSViewController {
 
     @IBOutlet var unusedMacOutlet: NSTextField!
 
-    @IBAction func unusedMacAction(_: Any) {
+    @IBAction private func unusedMacAction(_: Any) {
         showAlert(title: "SPMXibViewController", message: "unusedMacAction(_:) - this should be reported as unused!")
     }
 
@@ -34,5 +34,15 @@ public final class SPMXibViewController: NSViewController {
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
         alert.runModal()
+    }
+}
+
+private extension SPMXibViewController {
+    @IBAction func privateExtensionTapped(_: Any) {
+        showAlert(title: "SPMXibViewController", message: "privateExtensionTapped(_:) action triggered!")
+    }
+
+    @IBAction func unusedPrivateExtensionAction(_: Any) {
+        showAlert(title: "SPMXibViewController", message: "unusedPrivateExtensionAction(_:) - this should be reported as unused!")
     }
 }
