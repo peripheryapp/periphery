@@ -76,6 +76,19 @@ public class DeeplyNestedIgnoredClass {
     }
 }
 
+// MARK: - Non-superfluous ignore on assign-only property
+
+public struct AssignOnlyIgnoreStruct {
+    public let usedProperty: Int
+    // periphery:ignore
+    public let assignOnlyIgnored: Int
+}
+
+public func useAssignOnlyIgnoreStruct() {
+    let s = AssignOnlyIgnoreStruct(usedProperty: 0, assignOnlyIgnored: 1)
+    print(s.usedProperty)
+}
+
 // MARK: - Superfluous ignore for parameters
 
 public class ParameterIgnoreClass {

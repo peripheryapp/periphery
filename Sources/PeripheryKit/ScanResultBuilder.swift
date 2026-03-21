@@ -51,6 +51,12 @@ public enum ScanResultBuilder {
                 .keys
                 .filter { decl in
                     hasReferencesFromNonIgnoredCode(decl, graph: graph)
+                        && !AssignOnlyPropertyAnalyzer.isAssignOnlyProperty(
+                            decl,
+                            graph: graph,
+                            configuration: configuration,
+                            allowRetainedDeclaration: true
+                        )
                 }
 
             // 2. Parameters with ignore comments that are actually used (not in unusedParameters)
