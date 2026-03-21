@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix false positive redundant public accessibility for types used in typed throws clauses, e.g. `throws(MyError)`.
 
 ## 3.6.0 (2026-02-18)
 
