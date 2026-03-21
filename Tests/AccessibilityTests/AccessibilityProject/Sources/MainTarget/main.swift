@@ -82,3 +82,6 @@ _ = PublicInheritedAssociatedTypeDefaultTypeClass().items
 
 // Extension with same-type generic requirement
 takeExtensionSameTypeGenericRequirement(.defaultInstance)
+
+// Typed throws
+try? PublicTypeUsedAsPublicFunctionThrowTypeRetainer().retain()

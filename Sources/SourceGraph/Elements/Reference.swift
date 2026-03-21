@@ -9,6 +9,7 @@ public final class Reference {
         case varType
         case returnType
         case parameterType
+        case throwType
         case genericParameterType
         case genericRequirementType
         case inheritedType
@@ -21,7 +22,7 @@ public final class Reference {
 
         var isPubliclyExposable: Bool {
             switch self {
-            case .varType, .returnType, .parameterType, .genericParameterType, .genericRequirementType, .inheritedType, .refinedProtocolType, .initializerType, .variableInitFunctionCall, .functionCallMetatypeArgument:
+            case .varType, .returnType, .parameterType, .throwType, .genericParameterType, .genericRequirementType, .inheritedType, .refinedProtocolType, .initializerType, .variableInitFunctionCall, .functionCallMetatypeArgument:
                 true
             default:
                 false

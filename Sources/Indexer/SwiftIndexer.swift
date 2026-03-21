@@ -421,6 +421,8 @@ final class SwiftIndexer: Indexer {
                         ref.role = .varType
                     } else if result.returnTypeLocations.contains(ref.location) {
                         ref.role = .returnType
+                    } else if result.throwTypeLocations.contains(ref.location) {
+                        ref.role = .throwType
                     } else if result.parameterTypeLocations.contains(ref.location) {
                         ref.role = .parameterType
                     } else if result.genericParameterLocations.contains(ref.location) {
