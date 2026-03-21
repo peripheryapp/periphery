@@ -51,6 +51,7 @@ public enum ScanResultBuilder {
                 .keys
                 .filter { decl in
                     hasReferencesFromNonIgnoredCode(decl, graph: graph)
+                        && !graph.suppressedAssignOnlyProperties.contains(decl)
                 }
 
             // 2. Parameters with ignore comments that are actually used (not in unusedParameters)

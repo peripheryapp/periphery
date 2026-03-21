@@ -1216,6 +1216,12 @@ final class RetentionTest: FixtureSourceGraphTestCase {
             assertNotSuperfluousIgnoreCommand(.functionMethodInstance("methodB()"))
             assertNotSuperfluousIgnoreCommand(.functionMethodInstance("methodC()"))
 
+            // Assign-only properties with ignore comments are NOT superfluous
+            assertReferenced(.struct("AssignOnlyIgnoreStruct")) {
+                self.assertNotSuperfluousIgnoreCommand(.varInstance("assignOnlyIgnored"))
+                self.assertReferenced(.varInstance("usedProperty"))
+            }
+
             // Test superfluous ignore for parameters
             assertReferenced(.class("ParameterIgnoreClass")) {
                 self.assertReferenced(.functionMethodInstance("superfluousParamIgnore(usedParam:)")) {
