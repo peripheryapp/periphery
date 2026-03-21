@@ -2,12 +2,11 @@ import Configuration
 import Foundation
 import Shared
 
-public enum AssignOnlyPropertyAnalyzer {
-    public static func isAssignOnlyProperty(
+enum AssignOnlyPropertyAnalyzer {
+    static func isAssignOnlyProperty(
         _ property: Declaration,
         graph: SourceGraph,
-        configuration: Configuration,
-        allowRetainedDeclaration: Bool = false
+        configuration: Configuration
     ) -> Bool {
         let defaultRetainedTypes = ["AnyCancellable", "Set<AnyCancellable>", "[AnyCancellable]", "NSKeyValueObservation"]
         let retainAssignOnlyPropertyTypes = defaultRetainedTypes + configuration.retainAssignOnlyPropertyTypes.map {
@@ -18,7 +17,6 @@ public enum AssignOnlyPropertyAnalyzer {
               property.kind.isVariableKind,
               let declaredType = property.declaredType,
               !retainAssignOnlyPropertyTypes.contains(declaredType),
-              allowRetainedDeclaration || !graph.isRetained(property),
               property.attributes.isEmpty,
               !property.isComplexProperty,
               // A protocol property can technically be assigned and never used when the protocol is
@@ -47,9 +45,15 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphMutator {
     }
 
     func mutate() throws {
+        guard !configuration.retainAssignOnlyProperties else { return }
+
         for property in graph.declarations(ofKinds: Declaration.Kind.variableKinds) {
             if AssignOnlyPropertyAnalyzer.isAssignOnlyProperty(property, graph: graph, configuration: configuration) {
-                graph.markAssignOnlyProperty(property)
+                if graph.isRetained(property) {
+                    graph.markSuppressedAssignOnlyProperty(property)
+                } else {
+                    graph.markAssignOnlyProperty(property)
+                }
             }
         }
     }

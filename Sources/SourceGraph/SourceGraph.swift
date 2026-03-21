@@ -19,6 +19,7 @@ public final class SourceGraph {
     public private(set) var indexedSourceFiles: [SourceFile] = []
     public private(set) var unusedModuleImports: Set<Declaration> = []
     public private(set) var assignOnlyProperties: Set<Declaration> = []
+    public private(set) var suppressedAssignOnlyProperties: Set<Declaration> = []
     public private(set) var extensions: [Declaration: Set<Declaration>] = [:]
     public private(set) var commandIgnoredDeclarations: [Declaration: CommandIgnoreKind] = [:]
     public private(set) var functionsWithIgnoredParameters: Set<Declaration> = []
@@ -139,6 +140,10 @@ public final class SourceGraph {
         _ = assignOnlyProperties.insert(declaration)
     }
 
+    func markSuppressedAssignOnlyProperty(_ declaration: Declaration) {
+        _ = suppressedAssignOnlyProperties.insert(declaration)
+    }
+
     func markMainAttributed(_ declaration: Declaration) {
         _ = mainAttributedDeclarations.insert(declaration)
     }
@@ -181,6 +186,7 @@ public final class SourceGraph {
         rootDeclarations.remove(declaration)
         usedDeclarations.remove(declaration)
         assignOnlyProperties.remove(declaration)
+        suppressedAssignOnlyProperties.remove(declaration)
         declaration.usrs.forEach { allDeclarationsByUsr.removeValue(forKey: $0) }
     }
 

@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Fix false positive redundant public accessibility for types used in typed throws clauses, e.g. `throws(MyError)`.
+- Fix false positive superfluous ignore comment results for assign-only properties.
 
 ## 3.6.0 (2026-02-18)
 
