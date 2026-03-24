@@ -28,17 +28,19 @@ final class InheritedImplicitInitializerReferenceBuilder: SourceGraphMutator {
                     guard relatedRef.declarationKind == .functionConstructor else { continue }
 
                     // Find the declaration this related reference points to
-                    guard let implicitInit = graph.declaration(withUsr: relatedRef.usr),
+                    guard let implicitInit = graph.declaration(withUsrID: relatedRef.usrID),
                           implicitInit.isImplicit,
                           implicitInit.kind == .functionConstructor
                     else { continue }
 
                     // Add the inverse reference: implicit init -> explicit init
-                    for usr in explicitInit.usrs {
+                    for usrID in explicitInit.usrIDs {
+                        let usr = graph.usrInterner.string(for: usrID)
                         let reference = Reference(
                             name: explicitInit.name,
                             kind: .related,
                             declarationKind: .functionConstructor,
+                            usrID: usrID,
                             usr: usr,
                             location: implicitInit.location
                         )

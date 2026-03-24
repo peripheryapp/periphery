@@ -1,7 +1,9 @@
 import Foundation
 import SystemPackage
 
-public final class Location {
+// Value type to avoid a heap allocation per location instance. Location is
+// created for every indexed occurrence and stored inline in Reference/Declaration.
+public struct Location {
     public let file: SourceFile
     public let line: Int
     public let column: Int
@@ -12,14 +14,11 @@ public final class Location {
         self.file = file
         self.line = line
         self.column = column
-        hashValueCache = [file.hashValue, line, column].hashValue
-    }
-
-    func relativeTo(_ path: FilePath) -> Location {
-        let newPath = file.path.relativeTo(path)
-        let newFile = SourceFile(path: newPath, modules: file.modules)
-        newFile.importStatements = file.importStatements
-        return Location(file: newFile, line: line, column: column)
+        var hasher = Hasher()
+        hasher.combine(file)
+        hasher.combine(line)
+        hasher.combine(column)
+        hashValueCache = hasher.finalize()
     }
 
     // MARK: - Private
@@ -27,10 +26,6 @@ public final class Location {
     private func buildDescription(path: String) -> String {
         [path, line.description, column.description].joined(separator: ":")
     }
-
-    private lazy var descriptionInternal: String = buildDescription(path: file.path.string)
-
-    private lazy var shortDescriptionInternal: String = buildDescription(path: file.path.lastComponent?.string ?? "")
 }
 
 extension Location: Equatable {
@@ -47,11 +42,11 @@ extension Location: Hashable {
 
 extension Location: CustomStringConvertible {
     public var description: String {
-        descriptionInternal
+        buildDescription(path: file.path.string)
     }
 
     public var shortDescription: String {
-        shortDescriptionInternal
+        buildDescription(path: file.path.lastComponent?.string ?? "")
     }
 }
 

@@ -50,7 +50,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                     // Find all superclasses.
                     let superclassDecls = graph.inheritedTypeReferences(of: conformingClass)
                         .filter { $0.declarationKind == .class }
-                        .compactMap { graph.declaration(withUsr: $0.usr) }
+                        .compactMap { graph.declaration(withUsrID: $0.usrID) }
                         .flatMap(\.declarations)
 
                     for unimplementedProtoDecl in unimplementedProtoDecls {
@@ -63,13 +63,13 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                             .min()
 
                         if let declInSuperclass {
-                            // Build a reference from the protocol declarations to the
-                            // declaration implemented by the superclass.
-                            for usr in declInSuperclass.usrs {
+                            for usrID in declInSuperclass.usrIDs {
+                                let usr = graph.usrInterner.string(for: usrID)
                                 let reference = Reference(
                                     name: declInSuperclass.name,
                                     kind: .related,
                                     declarationKind: declInSuperclass.kind,
+                                    usrID: usrID,
                                     usr: usr,
                                     location: declInSuperclass.location
                                 )
@@ -93,7 +93,13 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
     }
 
     private func invertReferencesFromProtocolToDeclaration(_ nonInvertableReferences: Set<Reference>) {
-        let relatedReferences = graph.allReferences.filter { $0.kind == .related && $0.declarationKind.isProtocolMemberConformingKind }
+        // Collect matching references into an Array to avoid rebuilding a Set (rehashing every element).
+        var relatedReferences: [Reference] = []
+        for ref in graph.allReferences {
+            if ref.kind == .related, ref.declarationKind.isProtocolMemberConformingKind, !nonInvertableReferences.contains(ref) {
+                relatedReferences.append(ref)
+            }
+        }
 
         // Collect all mutations before applying them to avoid order-dependent behavior
         // when iterating non-deterministically ordered Sets.
@@ -101,7 +107,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
         var referencesToAdd: [(reference: Reference, parent: Declaration)] = []
         var declarationsToRetain: [Declaration] = []
 
-        for relatedReference in relatedReferences.subtracting(nonInvertableReferences) {
+        for relatedReference in relatedReferences {
             guard let conformingDeclaration = relatedReference.parent
             else { continue }
 
@@ -124,7 +130,7 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
             guard equivalentDeclarationKinds.contains(conformingDeclaration.kind),
                   conformingDeclaration.name == relatedReference.name else { continue }
 
-            if let protocolDeclaration = graph.declaration(withUsr: relatedReference.usr) {
+            if let protocolDeclaration = graph.declaration(withUsrID: relatedReference.usrID) {
                 // Invert the related reference such that instead of the conforming declaration
                 // referencing the declaration within the protocol, the protocol declaration
                 // now references the conforming declaration.
@@ -135,11 +141,13 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
                     referencesToRemove.append(relatedReference)
                 }
 
-                for usr in conformingDeclaration.usrs {
+                for usrID in conformingDeclaration.usrIDs {
+                    let usr = graph.usrInterner.string(for: usrID)
                     let newReference = Reference(
                         name: relatedReference.name,
                         kind: .related,
                         declarationKind: relatedReference.declarationKind,
+                        usrID: usrID,
                         usr: usr,
                         location: relatedReference.location
                     )
@@ -152,6 +160,10 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
         }
 
         // Apply all mutations after traversal completes.
+        // Reserve capacity to reduce Set resizing during bulk insertions.
+        let estimatedNewRefs = referencesToAdd.count + declarationsToRetain.count
+        graph.ensureReferencesCapacity(graph.allReferences.count - referencesToRemove.count + estimatedNewRefs)
+
         for reference in referencesToRemove {
             graph.remove(reference)
         }

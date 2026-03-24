@@ -3,18 +3,19 @@ import Foundation
 import Shared
 
 enum AssignOnlyPropertyAnalyzer {
+    static func retainedTypes(for configuration: Configuration) -> [String] {
+        let defaultRetainedTypes = ["AnyCancellable", "Set<AnyCancellable>", "[AnyCancellable]", "NSKeyValueObservation"]
+        return defaultRetainedTypes + configuration.retainAssignOnlyPropertyTypes.map {
+            PropertyTypeSanitizer.sanitize($0)
+        }
+    }
+
     static func isAssignOnlyProperty(
         _ property: Declaration,
         graph: SourceGraph,
-        configuration: Configuration
+        retainAssignOnlyPropertyTypes: [String]
     ) -> Bool {
-        let defaultRetainedTypes = ["AnyCancellable", "Set<AnyCancellable>", "[AnyCancellable]", "NSKeyValueObservation"]
-        let retainAssignOnlyPropertyTypes = defaultRetainedTypes + configuration.retainAssignOnlyPropertyTypes.map {
-            PropertyTypeSanitizer.sanitize($0)
-        }
-
-        guard !configuration.retainAssignOnlyProperties,
-              property.kind.isVariableKind,
+        guard property.kind.isVariableKind,
               let declaredType = property.declaredType,
               !retainAssignOnlyPropertyTypes.contains(declaredType),
               property.attributes.isEmpty,
@@ -47,8 +48,10 @@ final class AssignOnlyPropertyReferenceEliminator: SourceGraphMutator {
     func mutate() throws {
         guard !configuration.retainAssignOnlyProperties else { return }
 
+        let retainedTypes = AssignOnlyPropertyAnalyzer.retainedTypes(for: configuration)
+
         for property in graph.declarations(ofKinds: Declaration.Kind.variableKinds) {
-            if AssignOnlyPropertyAnalyzer.isAssignOnlyProperty(property, graph: graph, configuration: configuration) {
+            if AssignOnlyPropertyAnalyzer.isAssignOnlyProperty(property, graph: graph, retainAssignOnlyPropertyTypes: retainedTypes) {
                 if graph.isRetained(property) {
                     graph.markSuppressedAssignOnlyProperty(property)
                 } else {

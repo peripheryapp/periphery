@@ -94,7 +94,7 @@ final class RedundantExplicitPublicAccessibilityMarker: SourceGraphMutator {
                         // the call site arguments with function parameters, as parameters with
                         // default types can cause misalignment between the positions of the two.
                         if let functionRef = $0.parent?.references.first(where: { $0.role == .variableInitFunctionCall }),
-                           let functionDecl = graph.declaration(withUsr: functionRef.usr),
+                           let functionDecl = graph.declaration(withUsrID: functionRef.usrID),
                            functionDecl.hasGenericFunctionReturnedMetatypeParameters
                         {
                             return $0.parent

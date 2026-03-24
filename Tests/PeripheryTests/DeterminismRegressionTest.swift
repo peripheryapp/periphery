@@ -27,10 +27,11 @@ final class DeterminismRegressionTest: XCTestCase {
         kind: Declaration.Kind,
         name: String,
         usr: String,
-        location: Location
+        location: Location,
+        graph: SourceGraph
     ) -> Declaration {
-        let declaration = Declaration(name: name, kind: kind, usrs: [usr], location: location)
-        return declaration
+        let usrID = graph.usrInterner.intern(usr)
+        return Declaration(name: name, kind: kind, usrs: [usr], usrIDs: [usrID], location: location)
     }
 
     private func makeReference(
@@ -40,12 +41,15 @@ final class DeterminismRegressionTest: XCTestCase {
         name: String,
         location: Location,
         parent: Declaration,
-        role: Reference.Role = .unknown
+        role: Reference.Role = .unknown,
+        graph: SourceGraph
     ) -> Reference {
+        let usrID = graph.usrInterner.intern(usr)
         let reference = Reference(
             name: name,
             kind: kind,
             declarationKind: declarationKind,
+            usrID: usrID,
             usr: usr,
             location: location
         )
@@ -61,7 +65,8 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .extensionClass,
             name: "Widget",
             usr: "ext_widget",
-            location: makeLocation("/tmp/ext.swift", module: "Feature", line: 1)
+            location: makeLocation("/tmp/ext.swift", module: "Feature", line: 1),
+            graph: graph
         )
 
         let later = makeReference(
@@ -70,7 +75,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "class_later",
             name: "Widget",
             location: makeLocation("/tmp/widget.swift", module: "A", line: 20),
-            parent: extDecl
+            parent: extDecl,
+            graph: graph
         )
         let earlier = makeReference(
             kind: .normal,
@@ -78,7 +84,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "class_earlier",
             name: "Widget",
             location: makeLocation("/tmp/widget.swift", module: "B", line: 10),
-            parent: extDecl
+            parent: extDecl,
+            graph: graph
         )
 
         extDecl.references = [later, earlier]
@@ -94,7 +101,8 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .functionMethodInstance,
             name: "configure()",
             usr: "child_configure",
-            location: makeLocation("/tmp/child.swift", module: "Feature", line: 30)
+            location: makeLocation("/tmp/child.swift", module: "Feature", line: 30),
+            graph: graph
         )
         overrideDecl.modifiers.insert("override")
 
@@ -102,13 +110,15 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .functionMethodInstance,
             name: "configure()",
             usr: "base_later",
-            location: makeLocation("/tmp/later.swift", module: "BaseA", line: 50)
+            location: makeLocation("/tmp/later.swift", module: "BaseA", line: 50),
+            graph: graph
         )
         let baseEarlier = makeDeclaration(
             kind: .functionMethodInstance,
             name: "configure()",
             usr: "base_earlier",
-            location: makeLocation("/tmp/earlier.swift", module: "BaseB", line: 10)
+            location: makeLocation("/tmp/earlier.swift", module: "BaseB", line: 10),
+            graph: graph
         )
 
         let refToLater = makeReference(
@@ -117,7 +127,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "child_configure",
             name: "configure()",
             location: makeLocation("/tmp/ref_later.swift", module: "Feature", line: 1),
-            parent: baseLater
+            parent: baseLater,
+            graph: graph
         )
         let refToEarlier = makeReference(
             kind: .related,
@@ -125,11 +136,14 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "child_configure",
             name: "configure()",
             location: makeLocation("/tmp/ref_earlier.swift", module: "Feature", line: 2),
-            parent: baseEarlier
+            parent: baseEarlier,
+            graph: graph
         )
 
+        graph.add(overrideDecl)
         graph.add(refToLater)
         graph.add(refToEarlier)
+        graph.indexingComplete()
 
         let (base, resolved) = graph.baseDeclaration(fromOverride: overrideDecl)
         XCTAssertTrue(resolved)
@@ -145,7 +159,8 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .functionMethodInstance,
             name: "configure()",
             usr: "feature_configure",
-            location: makeLocation("/tmp/feature.swift", module: "Feature", line: 100)
+            location: makeLocation("/tmp/feature.swift", module: "Feature", line: 100),
+            graph: graph
         )
         overrideDecl.modifiers.insert("override")
 
@@ -153,7 +168,8 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .functionMethodInstance,
             name: "configure()",
             usr: "internal_base",
-            location: makeLocation("/tmp/base.swift", module: "Core", line: 10)
+            location: makeLocation("/tmp/base.swift", module: "Core", line: 10),
+            graph: graph
         )
         graph.add(internalBase)
         graph.add(overrideDecl)
@@ -164,7 +180,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "internal_base",
             name: "configure()",
             location: overrideDecl.location,
-            parent: overrideDecl
+            parent: overrideDecl,
+            graph: graph
         )
         let matchingExternal = makeReference(
             kind: .related,
@@ -172,7 +189,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "external_base",
             name: "configure()",
             location: overrideDecl.location,
-            parent: overrideDecl
+            parent: overrideDecl,
+            graph: graph
         )
         overrideDecl.related = [matchingInternal, matchingExternal]
 
@@ -188,13 +206,15 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .class,
             name: "FixtureController",
             usr: "fixture_controller",
-            location: makeLocation("/tmp/controller.swift", module: "UI", line: 1)
+            location: makeLocation("/tmp/controller.swift", module: "UI", line: 1),
+            graph: graph
         )
         let outletDecl = makeDeclaration(
             kind: .varInstance,
             name: "submitButton",
             usr: "fixture_controller_submit_button",
-            location: makeLocation("/tmp/controller.swift", module: "UI", line: 5)
+            location: makeLocation("/tmp/controller.swift", module: "UI", line: 5),
+            graph: graph
         )
         outletDecl.attributes.insert(DeclarationAttribute(name: "IBOutlet", arguments: nil))
         outletDecl.parent = classDecl
@@ -215,6 +235,7 @@ final class DeterminismRegressionTest: XCTestCase {
         )
         graph.add(xcDataModelRef)
         graph.add(ibRef)
+        graph.indexingComplete()
 
         AssetReferenceRetainer(graph: graph, configuration: configuration, swiftVersion: makeSwiftVersion()).mutate()
 
@@ -232,13 +253,15 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .protocol,
             name: "Renderable",
             usr: "proto_renderable",
-            location: makeLocation("/tmp/proto.swift", module: "Core", line: 1)
+            location: makeLocation("/tmp/proto.swift", module: "Core", line: 1),
+            graph: graph
         )
         let requirement = makeDeclaration(
             kind: .functionMethodInstance,
             name: "configure()",
             usr: "proto_requirement_configure",
-            location: makeLocation("/tmp/proto.swift", module: "Core", line: 2)
+            location: makeLocation("/tmp/proto.swift", module: "Core", line: 2),
+            graph: graph
         )
         requirement.parent = proto
         proto.declarations.insert(requirement)
@@ -247,26 +270,30 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .class,
             name: "FeatureWidget",
             usr: "feature_widget",
-            location: makeLocation("/tmp/feature.swift", module: "Feature", line: 1)
+            location: makeLocation("/tmp/feature.swift", module: "Feature", line: 1),
+            graph: graph
         )
 
         let superLater = makeDeclaration(
             kind: .class,
             name: "BaseWidgetA",
             usr: "base_widget_a",
-            location: makeLocation("/tmp/base.swift", module: "BaseA", line: 40)
+            location: makeLocation("/tmp/base.swift", module: "BaseA", line: 40),
+            graph: graph
         )
         let superEarlier = makeDeclaration(
             kind: .class,
             name: "BaseWidgetB",
             usr: "base_widget_b",
-            location: makeLocation("/tmp/base.swift", module: "BaseB", line: 5)
+            location: makeLocation("/tmp/base.swift", module: "BaseB", line: 5),
+            graph: graph
         )
         let superLaterMethod = makeDeclaration(
             kind: .functionMethodInstance,
             name: "configure()",
             usr: "base_widget_a_configure",
-            location: makeLocation("/tmp/base_method.swift", module: "BaseA", line: 41)
+            location: makeLocation("/tmp/base_method.swift", module: "BaseA", line: 41),
+            graph: graph
         )
         superLaterMethod.parent = superLater
         superLater.declarations.insert(superLaterMethod)
@@ -275,7 +302,8 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .functionMethodInstance,
             name: "configure()",
             usr: "base_widget_b_configure",
-            location: makeLocation("/tmp/base_method.swift", module: "BaseB", line: 6)
+            location: makeLocation("/tmp/base_method.swift", module: "BaseB", line: 6),
+            graph: graph
         )
         superEarlierMethod.parent = superEarlier
         superEarlier.declarations.insert(superEarlierMethod)
@@ -294,7 +322,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "proto_renderable",
             name: "Renderable",
             location: makeLocation("/tmp/feature.swift", module: "Feature", line: 3),
-            parent: conformingClass
+            parent: conformingClass,
+            graph: graph
         )
         let inheritsLater = makeReference(
             kind: .related,
@@ -302,7 +331,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "base_widget_a",
             name: "BaseWidgetA",
             location: makeLocation("/tmp/feature.swift", module: "Feature", line: 4),
-            parent: conformingClass
+            parent: conformingClass,
+            graph: graph
         )
         let inheritsEarlier = makeReference(
             kind: .related,
@@ -310,12 +340,14 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "base_widget_b",
             name: "BaseWidgetB",
             location: makeLocation("/tmp/feature.swift", module: "Feature", line: 5),
-            parent: conformingClass
+            parent: conformingClass,
+            graph: graph
         )
 
         graph.add(conformsRef, from: conformingClass)
         graph.add(inheritsLater, from: conformingClass)
         graph.add(inheritsEarlier, from: conformingClass)
+        graph.indexingComplete()
 
         ProtocolConformanceReferenceBuilder(graph: graph, configuration: configuration, swiftVersion: makeSwiftVersion()).mutate()
 
@@ -331,26 +363,30 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .protocol,
             name: "BaseWidget",
             usr: "base_protocol",
-            location: makeLocation("/tmp/base_protocol.swift", module: "Core", line: 1)
+            location: makeLocation("/tmp/base_protocol.swift", module: "Core", line: 1),
+            graph: graph
         )
         let constrainingProtocol = makeDeclaration(
             kind: .protocol,
             name: "Configurable",
             usr: "constraining_protocol",
-            location: makeLocation("/tmp/configurable.swift", module: "Core", line: 1)
+            location: makeLocation("/tmp/configurable.swift", module: "Core", line: 1),
+            graph: graph
         )
         let requirementLater = makeDeclaration(
             kind: .functionMethodInstance,
             name: "configure()",
             usr: "requirement_later",
-            location: makeLocation("/tmp/configurable.swift", module: "A", line: 40)
+            location: makeLocation("/tmp/configurable.swift", module: "A", line: 40),
+            graph: graph
         )
         requirementLater.parent = constrainingProtocol
         let requirementEarlier = makeDeclaration(
             kind: .functionMethodInstance,
             name: "configure()",
             usr: "requirement_earlier",
-            location: makeLocation("/tmp/configurable.swift", module: "B", line: 5)
+            location: makeLocation("/tmp/configurable.swift", module: "B", line: 5),
+            graph: graph
         )
         requirementEarlier.parent = constrainingProtocol
         constrainingProtocol.declarations = [requirementLater, requirementEarlier]
@@ -359,13 +395,15 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .extensionProtocol,
             name: "BaseWidget",
             usr: "base_protocol_extension",
-            location: makeLocation("/tmp/base_protocol_ext.swift", module: "Feature", line: 1)
+            location: makeLocation("/tmp/base_protocol_ext.swift", module: "Feature", line: 1),
+            graph: graph
         )
         let member = makeDeclaration(
             kind: .functionMethodInstance,
             name: "configure()",
             usr: "extension_member_configure",
-            location: makeLocation("/tmp/base_protocol_ext.swift", module: "Feature", line: 2)
+            location: makeLocation("/tmp/base_protocol_ext.swift", module: "Feature", line: 2),
+            graph: graph
         )
         member.parent = extensionDecl
         extensionDecl.declarations.insert(member)
@@ -376,7 +414,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "base_protocol",
             name: "BaseWidget",
             location: makeLocation("/tmp/base_protocol_ext.swift", module: "Feature", line: 1),
-            parent: extensionDecl
+            parent: extensionDecl,
+            graph: graph
         )
         let whereConstraintRef = makeReference(
             kind: .normal,
@@ -385,7 +424,8 @@ final class DeterminismRegressionTest: XCTestCase {
             name: "Configurable",
             location: makeLocation("/tmp/base_protocol_ext.swift", module: "Feature", line: 1),
             parent: extensionDecl,
-            role: .genericRequirementType
+            role: .genericRequirementType,
+            graph: graph
         )
         extensionDecl.references = [extendsBaseProtocolRef, whereConstraintRef]
 
@@ -413,13 +453,15 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .class,
             name: "MyClass",
             usr: "shared_usr",
-            location: makeLocation("/tmp/a.swift", module: "A", line: 10)
+            location: makeLocation("/tmp/a.swift", module: "A", line: 10),
+            graph: graph
         )
         let later = makeDeclaration(
             kind: .class,
             name: "MyClass",
             usr: "shared_usr",
-            location: makeLocation("/tmp/b.swift", module: "B", line: 20)
+            location: makeLocation("/tmp/b.swift", module: "B", line: 20),
+            graph: graph
         )
 
         // Add earlier first, then later. Before the fix, SourceGraph.add always
@@ -432,32 +474,25 @@ final class DeterminismRegressionTest: XCTestCase {
     }
 
     func testDuplicateUSRResolutionIsDeterministicRegardlessOfInsertionOrder() {
-        let earlier = makeDeclaration(
-            kind: .class,
-            name: "MyClass",
-            usr: "shared_usr",
-            location: makeLocation("/tmp/a.swift", module: "A", line: 10)
-        )
-        let later = makeDeclaration(
-            kind: .class,
-            name: "MyClass",
-            usr: "shared_usr",
-            location: makeLocation("/tmp/b.swift", module: "B", line: 20)
-        )
+        let locA = makeLocation("/tmp/a.swift", module: "A", line: 10)
+        let locB = makeLocation("/tmp/b.swift", module: "B", line: 20)
 
         let graph1 = makeGraph()
-        graph1.add(earlier)
-        graph1.add(later)
+        let earlier1 = makeDeclaration(kind: .class, name: "MyClass", usr: "shared_usr", location: locA, graph: graph1)
+        let later1 = makeDeclaration(kind: .class, name: "MyClass", usr: "shared_usr", location: locB, graph: graph1)
+        graph1.add(earlier1)
+        graph1.add(later1)
 
         let graph2 = makeGraph()
-        graph2.add(later)
-        graph2.add(earlier)
+        let later2 = makeDeclaration(kind: .class, name: "MyClass", usr: "shared_usr", location: locB, graph: graph2)
+        let earlier2 = makeDeclaration(kind: .class, name: "MyClass", usr: "shared_usr", location: locA, graph: graph2)
+        graph2.add(later2)
+        graph2.add(earlier2)
 
-        // Both graphs should resolve to the same declaration (the earlier-sorting one),
-        // regardless of insertion order. Before the fix, graph1 would have `later` and
-        // graph2 would have `earlier`, producing different results from the same input.
-        XCTAssertIdentical(graph1.declaration(withUsr: "shared_usr"), earlier)
-        XCTAssertIdentical(graph2.declaration(withUsr: "shared_usr"), earlier)
+        // Both graphs should resolve to the earlier-sorting declaration,
+        // regardless of insertion order.
+        XCTAssertIdentical(graph1.declaration(withUsr: "shared_usr"), earlier1)
+        XCTAssertIdentical(graph2.declaration(withUsr: "shared_usr"), earlier2)
     }
 
     // MARK: - AncestralReferenceEliminator with Same-Location Declarations
@@ -477,14 +512,16 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .struct,
             name: "FeatureRunner",
             usr: "feature_runner_struct",
-            location: makeLocation("/tmp/feature.swift", module: "Feature", line: 7)
+            location: makeLocation("/tmp/feature.swift", module: "Feature", line: 7),
+            graph: graph
         )
 
         let classDecl = makeDeclaration(
             kind: .class,
             name: "$FeatureRunner",
             usr: "feature_runner_class",
-            location: makeLocation("/tmp/feature.swift", module: "Feature", line: 7)
+            location: makeLocation("/tmp/feature.swift", module: "Feature", line: 7),
+            graph: graph
         )
         classDecl.parent = structDecl
         structDecl.declarations.insert(classDecl)
@@ -494,7 +531,8 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .class,
             name: "AppRunner",
             usr: "app_runner",
-            location: makeLocation("/tmp/app.swift", module: "App", line: 1)
+            location: makeLocation("/tmp/app.swift", module: "App", line: 1),
+            graph: graph
         )
         let externalRef = makeReference(
             kind: .normal,
@@ -502,7 +540,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "feature_runner_struct",
             name: "FeatureRunner",
             location: makeLocation("/tmp/app.swift", module: "App", line: 5),
-            parent: externalParent
+            parent: externalParent,
+            graph: graph
         )
 
         graph.add(structDecl)
@@ -510,9 +549,10 @@ final class DeterminismRegressionTest: XCTestCase {
         graph.add(externalParent)
         graph.add(externalRef, from: externalParent)
 
+        graph.indexingComplete()
+
         XCTAssertTrue(graph.hasReferences(to: structDecl))
 
-        graph.indexingComplete()
         AncestralReferenceEliminator(graph: graph, configuration: configuration, swiftVersion: makeSwiftVersion()).mutate()
 
         // The external reference should survive since it's not a self-reference.
@@ -532,7 +572,8 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .struct,
             name: "FeatureRunner",
             usr: "feature_runner_struct",
-            location: makeLocation("/tmp/feature.swift", module: "Feature", line: 7)
+            location: makeLocation("/tmp/feature.swift", module: "Feature", line: 7),
+            graph: graph
         )
 
         // Self-reference: a reference to the struct's own USR, parented by the struct.
@@ -542,15 +583,17 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "feature_runner_struct",
             name: "FeatureRunner",
             location: makeLocation("/tmp/feature.swift", module: "Feature", line: 7),
-            parent: structDecl
+            parent: structDecl,
+            graph: graph
         )
 
         graph.add(structDecl)
         graph.add(selfRef, from: structDecl)
 
+        graph.indexingComplete()
+
         XCTAssertTrue(graph.hasReferences(to: structDecl))
 
-        graph.indexingComplete()
         AncestralReferenceEliminator(graph: graph, configuration: configuration, swiftVersion: makeSwiftVersion()).mutate()
 
         // Self-reference should be eliminated, leaving the struct unreferenced.
@@ -570,13 +613,15 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .protocol,
             name: "Runnable",
             usr: "proto_runnable",
-            location: makeLocation("/tmp/proto.swift", module: "Core", line: 1)
+            location: makeLocation("/tmp/proto.swift", module: "Core", line: 1),
+            graph: graph
         )
         let requirement = makeDeclaration(
             kind: .functionMethodInstance,
             name: "run()",
             usr: "proto_run",
-            location: makeLocation("/tmp/proto.swift", module: "Core", line: 2)
+            location: makeLocation("/tmp/proto.swift", module: "Core", line: 2),
+            graph: graph
         )
         requirement.parent = proto
         proto.declarations.insert(requirement)
@@ -585,13 +630,15 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .class,
             name: "RunnerA",
             usr: "class_a",
-            location: makeLocation("/tmp/a.swift", module: "A", line: 1)
+            location: makeLocation("/tmp/a.swift", module: "A", line: 1),
+            graph: graph
         )
         let implA = makeDeclaration(
             kind: .functionMethodInstance,
             name: "run()",
             usr: "impl_a_run",
-            location: makeLocation("/tmp/a.swift", module: "A", line: 2)
+            location: makeLocation("/tmp/a.swift", module: "A", line: 2),
+            graph: graph
         )
         implA.parent = classA
         classA.declarations.insert(implA)
@@ -600,13 +647,15 @@ final class DeterminismRegressionTest: XCTestCase {
             kind: .class,
             name: "RunnerB",
             usr: "class_b",
-            location: makeLocation("/tmp/b.swift", module: "B", line: 1)
+            location: makeLocation("/tmp/b.swift", module: "B", line: 1),
+            graph: graph
         )
         let implB = makeDeclaration(
             kind: .functionMethodInstance,
             name: "run()",
             usr: "impl_b_run",
-            location: makeLocation("/tmp/b.swift", module: "B", line: 2)
+            location: makeLocation("/tmp/b.swift", module: "B", line: 2),
+            graph: graph
         )
         implB.parent = classB
         classB.declarations.insert(implB)
@@ -625,7 +674,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "proto_run",
             name: "run()",
             location: implA.location,
-            parent: implA
+            parent: implA,
+            graph: graph
         )
         let relatedB = makeReference(
             kind: .related,
@@ -633,7 +683,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "proto_run",
             name: "run()",
             location: implB.location,
-            parent: implB
+            parent: implB,
+            graph: graph
         )
 
         // Conformance references from classes to protocol.
@@ -643,7 +694,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "proto_runnable",
             name: "Runnable",
             location: classA.location,
-            parent: classA
+            parent: classA,
+            graph: graph
         )
         let conformsB = makeReference(
             kind: .related,
@@ -651,7 +703,8 @@ final class DeterminismRegressionTest: XCTestCase {
             usr: "proto_runnable",
             name: "Runnable",
             location: classB.location,
-            parent: classB
+            parent: classB,
+            graph: graph
         )
 
         graph.add(relatedA, from: implA)

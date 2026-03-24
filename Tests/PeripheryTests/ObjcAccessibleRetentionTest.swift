@@ -1,8 +1,9 @@
 import SystemPackage
-@testable import TestShared
 import XCTest
 
 #if os(macOS)
+    @testable import TestShared
+
     final class ObjcAccessibleRetentionTest: FixtureSourceGraphTestCase {
         func testRetainsOptionalProtocolMethodImplementedInSubclass() throws {
             try XCTSkipIf(Self.swiftVersion.version.isVersion(lessThan: "6.3"), "Requires Swift >= 6.3")

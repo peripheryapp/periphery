@@ -4,37 +4,71 @@ import SourceGraph
 import SwiftSyntax
 
 public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
-    public typealias Result = (
-        location: Location,
-        accessibility: Accessibility?,
-        modifiers: [String],
-        attributes: Set<DeclarationAttribute>,
-        commentCommands: [CommentCommand],
-        variableType: String?,
-        variableTypeLocations: Set<Location>,
-        parameterTypeLocations: Set<Location>,
-        returnTypeLocations: Set<Location>,
-        throwTypeLocations: Set<Location>,
-        inheritedTypeLocations: Set<Location>,
-        genericParameterLocations: Set<Location>,
-        genericConformanceRequirementLocations: Set<Location>,
-        variableInitFunctionCallLocations: Set<Location>,
-        functionCallMetatypeArgumentLocations: Set<Location>,
-        typeInitializerLocations: Set<Location>,
-        variableInitExprLocations: Set<Location>,
-        hasGenericFunctionReturnedMetatypeParameters: Bool
-    )
+    // Reference type (not a tuple) to avoid expensive copies when stored in
+    // both the results array and the resultsByLocation dictionary.
+    public final class Result {
+        public let accessibility: Accessibility?
+        public let modifiers: [String]
+        public let attributes: Set<DeclarationAttribute>
+        public let commentCommands: [CommentCommand]
+        public let variableType: String?
+        public let variableTypeLocations: Set<Location>
+        public let parameterTypeLocations: Set<Location>
+        public let returnTypeLocations: Set<Location>
+        public let throwTypeLocations: Set<Location>
+        public let inheritedTypeLocations: Set<Location>
+        public let genericParameterLocations: Set<Location>
+        public let genericConformanceRequirementLocations: Set<Location>
+        public let variableInitFunctionCallLocations: Set<Location>
+        public let functionCallMetatypeArgumentLocations: Set<Location>
+        public let typeInitializerLocations: Set<Location>
+        public let variableInitExprLocations: Set<Location>
+        public let hasGenericFunctionReturnedMetatypeParameters: Bool
+
+        init(
+            accessibility: Accessibility?,
+            modifiers: [String],
+            attributes: Set<DeclarationAttribute>,
+            commentCommands: [CommentCommand],
+            variableType: String?,
+            variableTypeLocations: Set<Location>,
+            parameterTypeLocations: Set<Location>,
+            returnTypeLocations: Set<Location>,
+            throwTypeLocations: Set<Location>,
+            inheritedTypeLocations: Set<Location>,
+            genericParameterLocations: Set<Location>,
+            genericConformanceRequirementLocations: Set<Location>,
+            variableInitFunctionCallLocations: Set<Location>,
+            functionCallMetatypeArgumentLocations: Set<Location>,
+            typeInitializerLocations: Set<Location>,
+            variableInitExprLocations: Set<Location>,
+            hasGenericFunctionReturnedMetatypeParameters: Bool
+        ) {
+            self.accessibility = accessibility
+            self.modifiers = modifiers
+            self.attributes = attributes
+            self.commentCommands = commentCommands
+            self.variableType = variableType
+            self.variableTypeLocations = variableTypeLocations
+            self.parameterTypeLocations = parameterTypeLocations
+            self.returnTypeLocations = returnTypeLocations
+            self.throwTypeLocations = throwTypeLocations
+            self.inheritedTypeLocations = inheritedTypeLocations
+            self.genericParameterLocations = genericParameterLocations
+            self.genericConformanceRequirementLocations = genericConformanceRequirementLocations
+            self.variableInitFunctionCallLocations = variableInitFunctionCallLocations
+            self.functionCallMetatypeArgumentLocations = functionCallMetatypeArgumentLocations
+            self.typeInitializerLocations = typeInitializerLocations
+            self.variableInitExprLocations = variableInitExprLocations
+            self.hasGenericFunctionReturnedMetatypeParameters = hasGenericFunctionReturnedMetatypeParameters
+        }
+    }
 
     private let sourceLocationBuilder: SourceLocationBuilder
     private let typeSyntaxInspector: TypeSyntaxInspector
     private let swiftVersion: SwiftVersion
     private(set) var results: [Result] = []
-
-    public var resultsByLocation: [Location: Result] {
-        results.reduce(into: [Location: Result]()) { dict, result in
-            dict[result.location] = result
-        }
-    }
+    public private(set) var resultsByLocation: [Location: Result] = [:]
 
     public init(sourceLocationBuilder: SourceLocationBuilder, swiftVersion: SwiftVersion) {
         self.sourceLocationBuilder = sourceLocationBuilder
@@ -349,8 +383,7 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         let allParameterClauseLocations = parameterClauseLocations.union(enumCaseParameterClauseLocations)
             .union(closureParameterClauseLocations)
 
-        results.append((
-            location: location,
+        let result = Result(
             accessibility: accessibility,
             modifiers: modifierNames,
             attributes: parsedAttributes,
@@ -368,7 +401,9 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
             typeInitializerLocations: typeLocations(for: typeInitializerClause?.value),
             variableInitExprLocations: memberBaseLocations(for: variableInitExpr),
             hasGenericFunctionReturnedMetatypeParameters: hasGenericFunctionReturnedMetatypeParameters
-        ))
+        )
+        results.append(result)
+        resultsByLocation[location] = result
     }
 
     /// Determines whether the function has generic metatype parameters that are also returned.

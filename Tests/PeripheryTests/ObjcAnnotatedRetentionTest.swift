@@ -1,8 +1,9 @@
 import SystemPackage
-@testable import TestShared
 import XCTest
 
 #if os(macOS)
+    @testable import TestShared
+
     final class ObjcAnnotatedRetentionTest: FixtureSourceGraphTestCase {
         func testRetainsAnnotatedExtensionDeclarations() {
             analyze(retainObjcAnnotated: true) {

@@ -20,11 +20,13 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
         for extensionDeclaration in graph.declarations(ofKind: .extensionProtocol) {
             // First, create a reference from each protocol to the extension.
             if let extendedProtocol = try graph.extendedDeclaration(forExtension: extensionDeclaration) {
-                for usr in extensionDeclaration.usrs {
+                for usrID in extensionDeclaration.usrIDs {
+                    let usr = graph.usrInterner.string(for: usrID)
                     let reference = Reference(
                         name: extendedProtocol.name,
                         kind: .normal,
                         declarationKind: .extensionProtocol,
+                        usrID: usrID,
                         usr: usr,
                         location: extendedProtocol.location
                     )
@@ -32,8 +34,8 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
                     graph.add(reference, from: extendedProtocol)
                 }
 
-                // Now remove the reference from the extension to the protocol
-                for reference in extensionDeclaration.references.filter({ extendedProtocol.usrs.contains($0.usr) }) {
+                let extendedProtocolUsrIDs = Set(extendedProtocol.usrIDs)
+                for reference in extensionDeclaration.references.filter({ extendedProtocolUsrIDs.contains($0.usrID) }) {
                     graph.remove(reference)
                 }
 
@@ -43,11 +45,13 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
                 for memberDeclaration in extensionDeclaration.declarations {
                     for reference in graph.references(to: memberDeclaration) {
                         if let parentDeclaration = reference.parent {
-                            for usr in extensionDeclaration.usrs {
+                            for usrID in extensionDeclaration.usrIDs {
+                                let usr = graph.usrInterner.string(for: usrID)
                                 let extensionReference = Reference(
                                     name: extensionDeclaration.name,
                                     kind: .normal,
                                     declarationKind: .extensionProtocol,
+                                    usrID: usrID,
                                     usr: usr,
                                     location: reference.location
                                 )
@@ -55,11 +59,13 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
                                 graph.add(extensionReference, from: parentDeclaration)
                             }
 
-                            for usr in extendedProtocol.usrs {
+                            for usrID in extendedProtocol.usrIDs {
+                                let usr = graph.usrInterner.string(for: usrID)
                                 let protocolReference = Reference(
                                     name: extendedProtocol.name,
                                     kind: .normal,
                                     declarationKind: .protocol,
+                                    usrID: usrID,
                                     usr: usr,
                                     location: reference.location
                                 )
@@ -89,7 +95,7 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
         let constrainingProtocolRefs = extensionDeclaration.references.filter { $0.role == .genericRequirementType && $0.declarationKind == .protocol }
 
         for constrainingProtocolRef in constrainingProtocolRefs {
-            guard let constrainingProtocol = graph.declaration(withUsr: constrainingProtocolRef.usr) else { continue }
+            guard let constrainingProtocol = graph.declaration(withUsrID: constrainingProtocolRef.usrID) else { continue }
 
             // For each member declared in the extension, check if it satisfies a requirement of the constraining protocol
             for memberDeclaration in extensionDeclaration.declarations {
@@ -105,11 +111,13 @@ final class ProtocolExtensionReferenceBuilder: SourceGraphMutator {
                 // declaration has a related reference to the protocol member it implements.
                 // ProtocolConformanceReferenceBuilder will then invert this to create a reference
                 // from the protocol requirement to the extension's implementation.
-                for usr in matchingRequirement.usrs {
+                for usrID in matchingRequirement.usrIDs {
+                    let usr = graph.usrInterner.string(for: usrID)
                     let relatedReference = Reference(
                         name: matchingRequirement.name,
                         kind: .related,
                         declarationKind: matchingRequirement.kind,
+                        usrID: usrID,
                         usr: usr,
                         location: memberDeclaration.location
                     )

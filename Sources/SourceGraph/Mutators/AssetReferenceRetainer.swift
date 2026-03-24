@@ -42,7 +42,7 @@ final class AssetReferenceRetainer: SourceGraphMutator {
                 if sources.contains(.xcDataModel) {
                     // ValueTransformer subclasses are referenced by generated code that Periphery cannot analyze.
                     graph.unmarkRedundantPublicAccessibility(declaration)
-                    declaration.descendentDeclarations.forEach { graph.unmarkRedundantPublicAccessibility($0) }
+                    declaration.forEachDescendentDeclaration { graph.unmarkRedundantPublicAccessibility($0) }
                 }
 
                 if sources.contains(.interfaceBuilder) {

@@ -20,12 +20,10 @@ public final class OutputDeclarationFilter {
 
         if let baseline {
             var didFilterDeclaration = false
-            let ignoredUsrs = declarations
-                .flatMapSet(\.usrs)
-                .intersection(baseline.usrs)
+            let baselineUsrs = baseline.usrs
 
             declarations = declarations.filter {
-                let isIgnored = $0.usrs.contains { ignoredUsrs.contains($0) }
+                let isIgnored = $0.usrs.contains { baselineUsrs.contains($0) }
                 if isIgnored {
                     didFilterDeclaration = true
                 }
@@ -41,31 +39,37 @@ public final class OutputDeclarationFilter {
             return declarations.sorted { $0.declaration < $1.declaration }
         }
 
+        var matchCache: [FilePath: Bool] = [:]
+
         return declarations
             .filter { [contextualLogger] in
                 var path = $0.declaration.location.file.path
 
-                // If the declaration has a location override, use it as the path for filtering.
                 if let override = $0.declaration.commentCommands.locationOverride {
                     let (overridePath, _, _) = override
                     path = overridePath
                 }
 
+                if let cached = matchCache[path] { return cached }
+
+                let included: Bool
+
                 if configuration.reportIncludeMatchers.isEmpty {
                     if configuration.reportExcludeMatchers.anyMatch(filename: path.string) {
                         contextualLogger.debug("Excluding \(path)")
-                        return false
+                        included = false
+                    } else {
+                        included = true
                     }
-
-                    return true
-                }
-
-                if configuration.reportIncludeMatchers.anyMatch(filename: path.string) {
+                } else if configuration.reportIncludeMatchers.anyMatch(filename: path.string) {
                     contextualLogger.debug("Including \(path)")
-                    return true
+                    included = true
+                } else {
+                    included = false
                 }
 
-                return false
+                matchCache[path] = included
+                return included
             }
             .sorted { $0.declaration < $1.declaration }
     }

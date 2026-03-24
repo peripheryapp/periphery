@@ -23,7 +23,7 @@ final class ExternalOverrideRetainer: SourceGraphMutator {
                     $0.location == decl.location
             }
 
-            let hasExternalMatch = matchingRelatedRefs.contains { graph.declaration(withUsr: $0.usr) == nil }
+            let hasExternalMatch = matchingRelatedRefs.contains { graph.declaration(withUsrID: $0.usrID) == nil }
 
             if hasExternalMatch {
                 // One or more matching related declarations are external.

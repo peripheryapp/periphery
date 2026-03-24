@@ -18,14 +18,13 @@ public enum ScanResultBuilder {
                !graph.retainedDeclarations.contains(removableDeclaration),
                !graph.ignoredDeclarations.contains(removableDeclaration)
             {
-                let decls = removableDeclaration.descendentDeclarations.union([removableDeclaration])
-
-                for decl in decls {
-                    let extensions = graph.extensions[decl, default: []]
-                    for ext in extensions {
+                let addExtensions = { (decl: Declaration) in
+                    for ext in graph.extensions[decl, default: []] {
                         extensionResults.append(ScanResult(declaration: ext, annotation: .unused))
                     }
                 }
+                addExtensions(removableDeclaration)
+                removableDeclaration.forEachDescendentDeclaration(addExtensions)
             }
 
             return [ScanResult(declaration: removableDeclaration, annotation: .unused)] + extensionResults
@@ -102,7 +101,7 @@ public enum ScanResultBuilder {
             if isProtocolMember, ref.kind != .normal { continue }
 
             if graph.commandIgnoredDeclarations[parent] == nil {
-                if graph.usedDeclarations.contains(parent) {
+                if parent.isUsed {
                     return true
                 }
             }
@@ -125,10 +124,12 @@ public enum ScanResultBuilder {
                     // The ignored parameter is actually used - create a result for it
                     let parentUsrs = decl.usrs.sorted().joined(separator: "-")
                     let usr = "param-\(ignoredParamName)-\(decl.name)-\(parentUsrs)"
+                    let usrID = graph.usrInterner.intern(usr)
                     let paramDecl = Declaration(
                         name: ignoredParamName,
                         kind: .varParameter,
                         usrs: [usr],
+                        usrIDs: [usrID],
                         location: decl.location
                     )
                     paramDecl.parent = decl

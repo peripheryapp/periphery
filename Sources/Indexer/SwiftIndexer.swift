@@ -4,6 +4,7 @@ import IndexStore
 import Logger
 import Shared
 import SourceGraph
+import SwiftSyntax
 import SyntaxAnalysis
 import SystemPackage
 
@@ -46,6 +47,8 @@ final class SwiftIndexer: Indexer {
                 swiftVersion: swiftVersion
             )
         }
+
+        graph.reserveCapacity(forFileCount: sourceFiles.count)
 
         let phaseOneInterval = logger.beginInterval("index:swift:phase:one")
 
@@ -154,7 +157,9 @@ final class SwiftIndexer: Indexer {
         /// phase two.
         func phaseOne() throws {
             var rawDeclsByKey: [RawDeclaration.Key: [(RawDeclaration, [RawRelation])]] = [:]
-            var references: Set<Reference> = []
+            // Array (not Set) to avoid redundant hashing -- deduplication happens
+            // in SourceGraph.allReferences when references are added under the lock.
+            var references: [Reference] = []
 
             for unit in units {
                 for recordName in unit.unit.recordNames {
@@ -162,8 +167,7 @@ final class SwiftIndexer: Indexer {
 
                     record.forEach(occurrence: { occurrence in
                         let usr = occurrence.symbol.usr
-                        guard let location = self.transformLocation(occurrence.location)
-                        else { return }
+                        let location = self.transformLocation(occurrence.location)
 
                         var relations: [RawRelation] = []
                         occurrence.forEach(relation: { relSymbol, relRoles in
@@ -190,7 +194,7 @@ final class SwiftIndexer: Indexer {
                         }
 
                         if occurrence.roles.contains(.reference) {
-                            references.formUnion(self.parseReference(
+                            references.append(contentsOf: self.parseReference(
                                 occurrence,
                                 usr,
                                 location,
@@ -199,7 +203,7 @@ final class SwiftIndexer: Indexer {
                         }
 
                         if occurrence.roles.contains(.implicit) {
-                            references.formUnion(self.parseImplicit(
+                            references.append(contentsOf: self.parseImplicit(
                                 usr,
                                 location,
                                 relations
@@ -210,32 +214,36 @@ final class SwiftIndexer: Indexer {
             }
 
             var newDeclarations: Set<Declaration> = []
+            var retainedDecls: Set<Declaration> = []
 
             for (key, values) in rawDeclsByKey {
                 let usrs = values.mapSet { $0.0.usr }
-                let decl = Declaration(name: key.name, kind: key.kind, usrs: usrs, location: key.location)
+                let usrIDs = usrs.map { cachedIntern($0) }
+                let decl = Declaration(name: key.name, kind: key.kind, usrs: usrs, usrIDs: usrIDs, location: key.location)
 
                 decl.isImplicit = key.isImplicit
                 decl.isObjcAccessible = key.isObjcAccessible
 
                 if decl.isImplicit {
-                    graph.withLock { $0.markRetained(decl) }
+                    retainedDecls.insert(decl)
                 }
 
                 if decl.isObjcAccessible, configuration.retainObjcAccessible {
-                    graph.withLock { $0.markRetained(decl) }
+                    retainedDecls.insert(decl)
                 }
 
                 let relations = values.flatMap(\.1)
-                references.formUnion(parseDeclaration(decl, relations))
+                references.append(contentsOf: parseDeclaration(decl, relations))
 
                 newDeclarations.insert(decl)
                 declarations.append(decl)
             }
 
             graph.withLock { graph in
+                graph.ensureReferencesCapacity(graph.allReferences.count + references.count)
                 graph.add(references)
                 graph.add(newDeclarations)
+                graph.markRetained(retainedDecls)
 
                 if retainAllDeclarations {
                     graph.markRetained(newDeclarations)
@@ -243,6 +251,12 @@ final class SwiftIndexer: Indexer {
             }
 
             establishDeclarationHierarchy()
+
+            // Only sort when needed -- associateDanglingReferences is the sole consumer
+            // and it early-exits when there are no dangling references.
+            if !danglingReferences.isEmpty {
+                sortedDeclarationsCache = declarations.sorted()
+            }
         }
 
         /// Phase two associates latent references, and performs other actions that depend on the completed source graph.
@@ -257,6 +271,7 @@ final class SwiftIndexer: Indexer {
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: sourceFile, swiftVersion: swiftVersion)
             let declarationSyntaxVisitor = multiplexingSyntaxVisitor.add(DeclarationSyntaxVisitor.self)
             let importSyntaxVisitor = multiplexingSyntaxVisitor.add(ImportSyntaxVisitor.self)
+            let functionCollectorVisitor = multiplexingSyntaxVisitor.add(FunctionCollectorVisitor.self)
 
             multiplexingSyntaxVisitor.visit()
 
@@ -274,18 +289,31 @@ final class SwiftIndexer: Indexer {
             associateLatentReferences()
             associateDanglingReferences()
             visitDeclarations(using: declarationSyntaxVisitor)
-            identifyUnusedParameters(using: multiplexingSyntaxVisitor)
+            identifyUnusedParameters(
+                using: multiplexingSyntaxVisitor,
+                functionNodes: functionCollectorVisitor.functionDecls,
+                initializerNodes: functionCollectorVisitor.initializerDecls
+            )
             applyCommentCommands(using: multiplexingSyntaxVisitor)
         }
 
         // MARK: - Private
 
         private var declarations: [Declaration] = []
+        private var sortedDeclarationsCache: [Declaration]?
         private var childDeclsByParentUsr: [String: Set<Declaration>] = [:]
         private var referencesByUsr: [String: Set<Reference>] = [:]
         private var danglingReferences: [Reference] = []
         private var varParameterUsrs: Set<String> = []
         private var extensionUsrMap: [String: String] = [:]
+        private var usrCache: [String: USRID] = [:]
+
+        private func cachedIntern(_ usr: String) -> USRID {
+            if let cached = usrCache[usr] { return cached }
+            let id = graph.usrInterner.intern(usr)
+            usrCache[usr] = id
+            return id
+        }
 
         private func establishDeclarationHierarchy() {
             graph.withLock { graph in
@@ -309,8 +337,8 @@ final class SwiftIndexer: Indexer {
         }
 
         private func associateLatentReferences() {
-            for (usr, refs) in referencesByUsr {
-                graph.withLock { graph in
+            graph.withLock { graph in
+                for (usr, refs) in referencesByUsr {
                     if let decl = graph.declaration(withUsr: usr) {
                         for ref in refs {
                             associateUnsafe(ref, with: decl)
@@ -327,9 +355,7 @@ final class SwiftIndexer: Indexer {
         private func associateDanglingReferences() {
             guard !danglingReferences.isEmpty else { return }
 
-            // Sort declarations to ensure deterministic candidate selection when
-            // multiple declarations exist at the same location.
-            let sortedDeclarations = declarations.sorted()
+            let sortedDeclarations = sortedDeclarationsCache ?? declarations.sorted()
 
             let declsByLocation = sortedDeclarations
                 .reduce(into: [Location: [Declaration]]()) { result, decl in
@@ -340,6 +366,8 @@ final class SwiftIndexer: Indexer {
                     result[decl.location.line, default: []].append(decl)
                 }
             let sortedDeclLines = declsByLine.keys.sorted().reversed()
+
+            var associations: [(Reference, Declaration)] = []
 
             for ref in danglingReferences {
                 let sameLineCandidateDecls = declsByLocation[ref.location] ??
@@ -352,8 +380,8 @@ final class SwiftIndexer: Indexer {
                     // For references with no declaration on the same line, find the nearest preceding declaration.
                     if let line = sortedDeclLines.first(where: { $0 < ref.location.line }) {
                         candidateDecls = declsByLine[line]?.filter {
-                            !$0.usrs.contains(ref.usr) &&
-                                !$0.ancestralDeclarations.contains(where: { $0.usrs.contains(ref.usr) })
+                            !$0.usrIDs.contains(ref.usrID) &&
+                                !$0.ancestralDeclarations.contains(where: { $0.usrIDs.contains(ref.usrID) })
                         } ?? []
                     }
                 }
@@ -362,13 +390,19 @@ final class SwiftIndexer: Indexer {
                 // however it is possible for there to be more than one. In that case, first attempt to associate with
                 // a decl without a parent, as the reference may be a related type of a class/struct/etc.
                 if let decl = candidateDecls.first(where: { $0.parent == nil }) {
-                    associate(ref, with: decl)
+                    associations.append((ref, decl))
                 } else if let decl = candidateDecls.min() {
                     // Fallback to using the first declaration.
                     // Sorting the declarations helps in the situation where the candidate declarations includes a
                     // property/subscript, and a getter on the same line. The property/subscript is more likely to be
                     // the declaration that should hold the references.
-                    associate(ref, with: decl)
+                    associations.append((ref, decl))
+                }
+            }
+
+            graph.withLock { _ in
+                for (ref, decl) in associations {
+                    associateUnsafe(ref, with: decl)
                 }
             }
         }
@@ -388,57 +422,65 @@ final class SwiftIndexer: Indexer {
         private func visitDeclarations(using declarationVisitor: DeclarationSyntaxVisitor) {
             let declarationsByLocation = declarationVisitor.resultsByLocation
 
-            for decl in declarations {
-                guard let result = declarationsByLocation[decl.location] else { continue }
+            graph.withLock { _ in
+                for decl in declarations {
+                    guard let result = declarationsByLocation[decl.location] else { continue }
 
-                applyDeclarationMetadata(to: decl, with: result)
+                    applyDeclarationMetadata(to: decl, with: result)
+                }
             }
         }
 
+        /// Must be called while holding the graph lock.
         private func applyDeclarationMetadata(to decl: Declaration, with result: DeclarationSyntaxVisitor.Result) {
-            graph.withLock { _ in
-                if let accessibility = result.accessibility {
-                    decl.accessibility = .init(value: accessibility, isExplicit: true)
+            if let accessibility = result.accessibility {
+                decl.accessibility = .init(value: accessibility, isExplicit: true)
+            }
+
+            decl.attributes = result.attributes
+            decl.modifiers = Set(result.modifiers)
+            decl.commentCommands = Set(result.commentCommands)
+            decl.declaredType = result.variableType
+
+            decl.hasGenericFunctionReturnedMetatypeParameters = result.hasGenericFunctionReturnedMetatypeParameters
+
+            for ref in decl.references {
+                assignRole(to: ref, decl: decl, result: result)
+            }
+            for ref in decl.related {
+                assignRole(to: ref, decl: decl, result: result)
+            }
+        }
+
+        private func assignRole(to ref: Reference, decl: Declaration, result: DeclarationSyntaxVisitor.Result) {
+            if result.inheritedTypeLocations.contains(ref.location) {
+                if decl.kind.isConformableKind, ref.declarationKind == .protocol {
+                    ref.role = .conformedType
+                } else if decl.kind == .protocol, ref.declarationKind == .protocol {
+                    ref.role = .refinedProtocolType
+                } else if decl.kind == .class || decl.kind == .associatedtype {
+                    ref.role = .inheritedType
                 }
-
-                decl.attributes = Set(result.attributes)
-                decl.modifiers = Set(result.modifiers)
-                decl.commentCommands = Set(result.commentCommands)
-                decl.declaredType = result.variableType
-
-                decl.hasGenericFunctionReturnedMetatypeParameters = result.hasGenericFunctionReturnedMetatypeParameters
-
-                for ref in decl.references.union(decl.related) {
-                    if result.inheritedTypeLocations.contains(ref.location) {
-                        if decl.kind.isConformableKind, ref.declarationKind == .protocol {
-                            ref.role = .conformedType
-                        } else if decl.kind == .protocol, ref.declarationKind == .protocol {
-                            ref.role = .refinedProtocolType
-                        } else if decl.kind == .class || decl.kind == .associatedtype {
-                            ref.role = .inheritedType
-                        }
-                    } else if result.variableTypeLocations.contains(ref.location) {
-                        ref.role = .varType
-                    } else if result.returnTypeLocations.contains(ref.location) {
-                        ref.role = .returnType
-                    } else if result.throwTypeLocations.contains(ref.location) {
-                        ref.role = .throwType
-                    } else if result.parameterTypeLocations.contains(ref.location) {
-                        ref.role = .parameterType
-                    } else if result.genericParameterLocations.contains(ref.location) {
-                        ref.role = .genericParameterType
-                    } else if result.genericConformanceRequirementLocations.contains(ref.location) {
-                        ref.role = .genericRequirementType
-                    } else if result.variableInitFunctionCallLocations.contains(ref.location) {
-                        ref.role = .variableInitFunctionCall
-                    } else if result.functionCallMetatypeArgumentLocations.contains(ref.location) {
-                        ref.role = .functionCallMetatypeArgument
-                    } else if result.typeInitializerLocations.contains(ref.location) {
-                        ref.role = .initializerType
-                    } else if result.variableInitExprLocations.contains(ref.location) {
-                        ref.role = .initializerType
-                    }
-                }
+            } else if result.variableTypeLocations.contains(ref.location) {
+                ref.role = .varType
+            } else if result.returnTypeLocations.contains(ref.location) {
+                ref.role = .returnType
+            } else if result.throwTypeLocations.contains(ref.location) {
+                ref.role = .throwType
+            } else if result.parameterTypeLocations.contains(ref.location) {
+                ref.role = .parameterType
+            } else if result.genericParameterLocations.contains(ref.location) {
+                ref.role = .genericParameterType
+            } else if result.genericConformanceRequirementLocations.contains(ref.location) {
+                ref.role = .genericRequirementType
+            } else if result.variableInitFunctionCallLocations.contains(ref.location) {
+                ref.role = .variableInitFunctionCall
+            } else if result.functionCallMetatypeArgumentLocations.contains(ref.location) {
+                ref.role = .functionCallMetatypeArgument
+            } else if result.typeInitializerLocations.contains(ref.location) {
+                ref.role = .initializerType
+            } else if result.variableInitExprLocations.contains(ref.location) {
+                ref.role = .initializerType
             }
         }
 
@@ -455,12 +497,6 @@ final class SwiftIndexer: Indexer {
             }
         }
 
-        private func associate(_ ref: Reference, with decl: Declaration) {
-            graph.withLock { _ in
-                associateUnsafe(ref, with: decl)
-            }
-        }
-
         private func associateUnsafe(_ ref: Reference, with decl: Declaration) {
             ref.parent = decl
 
@@ -471,21 +507,35 @@ final class SwiftIndexer: Indexer {
             }
         }
 
-        private func identifyUnusedParameters(using syntaxVisitor: MultiplexingSyntaxVisitor) {
+        private func identifyUnusedParameters(
+            using syntaxVisitor: MultiplexingSyntaxVisitor,
+            functionNodes: [FunctionDeclSyntax],
+            initializerNodes: [InitializerDeclSyntax]
+        ) {
             let functionDecls = declarations.filter(\.kind.isFunctionKind)
             let functionDeclsByLocation = functionDecls.reduce(into: [Location: Declaration]()) {
                 $0[$1.location] = $1
             }
 
-            // Build a map of ignored param names per function, and track functions with ignored
-            // params so ScanResultBuilder can efficiently detect superfluous ignores.
             var ignoredParamsByLocation: [Location: [String]] = [:]
+            var functionsWithIgnoredParams: [Declaration] = []
             for functionDecl in functionDecls {
                 let ignoredParamNames = functionDecl.commentCommands.ignoredParameterNames
                 if !ignoredParamNames.isEmpty {
                     ignoredParamsByLocation[functionDecl.location] = ignoredParamNames
-                    graph.withLock { $0.markHasIgnoredParameters(functionDecl) }
+                    functionsWithIgnoredParams.append(functionDecl)
                 }
+            }
+
+            guard !functionNodes.isEmpty || !initializerNodes.isEmpty else {
+                if !functionsWithIgnoredParams.isEmpty {
+                    graph.withLock { graph in
+                        for functionDecl in functionsWithIgnoredParams {
+                            graph.markHasIgnoredParameters(functionDecl)
+                        }
+                    }
+                }
+                return
             }
 
             let analyzer = UnusedParameterAnalyzer()
@@ -493,21 +543,28 @@ final class SwiftIndexer: Indexer {
                 file: syntaxVisitor.sourceFile,
                 syntax: syntaxVisitor.syntax,
                 locationConverter: syntaxVisitor.locationConverter,
-                parseProtocols: true
+                parseProtocols: true,
+                functionNodes: functionNodes,
+                initializerNodes: initializerNodes
             )
 
-            for (function, params) in paramsByFunction {
-                guard let functionDecl = functionDeclsByLocation[function.location] else {
-                    // The declaration may not exist if the code was not compiled due to build conditions, e.g #if.
-                    logger.debug("Failed to associate indexed function for parameter function '\(function.name)' at \(function.location).")
-                    continue
+            var unmatchedFunctions: [(String, Location)] = []
+
+            graph.withLock { graph in
+                for functionDecl in functionsWithIgnoredParams {
+                    graph.markHasIgnoredParameters(functionDecl)
                 }
 
-                let ignoredParamNames = ignoredParamsByLocation[functionDecl.location] ?? []
+                for (function, params) in paramsByFunction {
+                    guard let functionDecl = functionDeclsByLocation[function.location] else {
+                        unmatchedFunctions.append((function.name, function.location))
+                        continue
+                    }
 
-                graph.withLock { graph in
+                    let ignoredParamNames = ignoredParamsByLocation[functionDecl.location] ?? []
+
                     for param in params {
-                        let paramDecl = param.makeDeclaration(withParent: functionDecl)
+                        let paramDecl = param.makeDeclaration(withParent: functionDecl, interner: self.graph.usrInterner)
                         functionDecl.unusedParameters.insert(paramDecl)
                         graph.add(paramDecl)
 
@@ -519,6 +576,10 @@ final class SwiftIndexer: Indexer {
                         }
                     }
                 }
+            }
+
+            for (name, location) in unmatchedFunctions {
+                logger.debug("Failed to associate indexed function for parameter function '\(name)' at \(location).")
             }
         }
 
@@ -563,8 +624,8 @@ final class SwiftIndexer: Indexer {
         private func parseDeclaration(
             _ decl: Declaration,
             _ relations: [RawRelation]
-        ) -> Set<Reference> {
-            var references: Set<Reference> = []
+        ) -> [Reference] {
+            var references: [Reference] = []
 
             for rel in relations {
                 if rel.roles.contains(.childOf) {
@@ -581,16 +642,18 @@ final class SwiftIndexer: Indexer {
                     let baseFunc = rel.symbol
 
                     if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformDeclarationKind(baseFunc.kind, baseFunc.subKind) {
+                        let usrID = cachedIntern(baseFuncUsr)
                         let reference = Reference(
                             name: baseFunc.name,
                             kind: .related,
                             declarationKind: baseFuncKind,
+                            usrID: usrID,
                             usr: baseFuncUsr,
                             location: decl.location
                         )
                         reference.parent = decl
                         decl.related.insert(reference)
-                        references.insert(reference)
+                        references.append(reference)
                     }
                 }
 
@@ -598,15 +661,17 @@ final class SwiftIndexer: Indexer {
                     let referencer = rel.symbol
 
                     if let referencerUsr = referencer.usr {
-                        for usr in decl.usrs {
+                        for usrID in decl.usrIDs {
+                            let usr = graph.usrInterner.string(for: usrID)
                             let reference = Reference(
                                 name: decl.name,
                                 kind: rel.roles.contains(.baseOf) ? .related : .normal,
                                 declarationKind: decl.kind,
+                                usrID: usrID,
                                 usr: usr,
                                 location: decl.location
                             )
-                            references.insert(reference)
+                            references.append(reference)
                             referencesByUsr[referencerUsr, default: []].insert(reference)
                         }
                     }
@@ -628,10 +693,12 @@ final class SwiftIndexer: Indexer {
                     let baseFunc = relation.symbol
 
                     if let baseFuncUsr = baseFunc.usr, let baseFuncKind = transformDeclarationKind(baseFunc.kind, baseFunc.subKind) {
+                        let usrID = cachedIntern(baseFuncUsr)
                         let reference = Reference(
                             name: baseFunc.name,
                             kind: .related,
                             declarationKind: baseFuncKind,
+                            usrID: usrID,
                             usr: baseFuncUsr,
                             location: location
                         )
@@ -657,6 +724,7 @@ final class SwiftIndexer: Indexer {
                 return []
             }
 
+            let usrID = cachedIntern(occurrenceUsr)
             var refs = [Reference]()
 
             for relation in relations {
@@ -668,6 +736,7 @@ final class SwiftIndexer: Indexer {
                             name: occurrence.symbol.name,
                             kind: relation.roles.contains(.baseOf) ? .related : .normal,
                             declarationKind: kind,
+                            usrID: usrID,
                             usr: occurrenceUsr,
                             location: location
                         )
@@ -682,6 +751,7 @@ final class SwiftIndexer: Indexer {
                     name: occurrence.symbol.name,
                     kind: .normal,
                     declarationKind: kind,
+                    usrID: usrID,
                     usr: occurrenceUsr,
                     location: location
                 )
@@ -697,7 +767,7 @@ final class SwiftIndexer: Indexer {
             return refs
         }
 
-        private func transformLocation(_ input: (line: Int, column: Int)) -> Location? {
+        private func transformLocation(_ input: (line: Int, column: Int)) -> Location {
             Location(file: sourceFile, line: input.line, column: input.column)
         }
 

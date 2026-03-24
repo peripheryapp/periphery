@@ -28,12 +28,13 @@ final class CodingKeyEnumReferenceBuilder: SourceGraphMutator {
             }
 
             if graph.isCodable(parent) {
-                // Build a reference from the Codable type to the CodingKey enum.
-                for usr in enumDeclaration.usrs {
+                for usrID in enumDeclaration.usrIDs {
+                    let usr = graph.usrInterner.string(for: usrID)
                     let newReference = Reference(
                         name: enumDeclaration.name,
                         kind: .normal,
                         declarationKind: .enum,
+                        usrID: usrID,
                         usr: usr,
                         location: enumDeclaration.location
                     )

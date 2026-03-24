@@ -20,11 +20,13 @@ final class EnumCaseReferenceBuilder: SourceGraphMutator {
                 let enumCases = enumDeclaration.declarations.filter { $0.kind == .enumelement }
 
                 for enumCase in enumCases {
-                    for usr in enumCase.usrs {
+                    for usrID in enumCase.usrIDs {
+                        let usr = graph.usrInterner.string(for: usrID)
                         let reference = Reference(
                             name: enumCase.name,
                             kind: .normal,
                             declarationKind: .enumelement,
+                            usrID: usrID,
                             usr: usr,
                             location: enumCase.location
                         )

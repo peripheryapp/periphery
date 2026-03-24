@@ -21,11 +21,13 @@ final class GenericClassAndStructConstructorReferenceBuilder: SourceGraphMutator
             let constructors = declaration.declarations.filter { $0.kind == .functionConstructor }
 
             for constructor in constructors {
-                for usr in constructor.usrs {
+                for usrID in constructor.usrIDs {
+                    let usr = graph.usrInterner.string(for: usrID)
                     let reference = Reference(
                         name: constructor.name,
                         kind: .normal,
                         declarationKind: .functionConstructor,
+                        usrID: usrID,
                         usr: usr,
                         location: declaration.location
                     )

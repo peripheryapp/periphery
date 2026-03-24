@@ -64,6 +64,8 @@ public struct IndexPipeline {
             ).perform()
         }
 
+        let interval = logger.beginInterval("index:complete")
         graph.withLock { $0.indexingComplete() }
+        logger.endInterval(interval)
     }
 }

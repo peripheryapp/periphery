@@ -33,11 +33,13 @@ final class StructImplicitInitializerReferenceBuilder: SourceGraphMutator {
                     else { continue }
 
                     for decl in [propertyDecl, setterDecl] {
-                        for usr in decl.usrs {
+                        for usrID in decl.usrIDs {
+                            let usr = graph.usrInterner.string(for: usrID)
                             let ref = Reference(
                                 name: decl.name,
                                 kind: .normal,
                                 declarationKind: decl.kind,
+                                usrID: usrID,
                                 usr: usr,
                                 location: implicitInitDecl.location
                             )
@@ -59,7 +61,8 @@ final class StructImplicitInitializerReferenceBuilder: SourceGraphMutator {
                     let sortedReferences = caller.references.sorted()
 
                     for initPropertyDecl in initPropertyDecls {
-                        let firstRef = sortedReferences.first { initPropertyDecl.usrs.contains($0.usr) && $0.location > initRef.location }
+                        let initPropertyUsrIDs = Set(initPropertyDecl.usrIDs)
+                        let firstRef = sortedReferences.first { initPropertyUsrIDs.contains($0.usrID) && $0.location > initRef.location }
 
                         if let firstRef {
                             graph.remove(firstRef)

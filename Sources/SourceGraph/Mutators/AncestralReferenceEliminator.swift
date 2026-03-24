@@ -11,24 +11,29 @@ final class AncestralReferenceEliminator: SourceGraphMutator {
 
     func mutate() {
         for declaration in graph.rootDeclarations {
-            eliminateAncestralReferences(in: declaration, stack: declaration.usrs)
+            var stack = declaration.usrIDs
+            eliminateAncestralReferences(in: declaration, stack: &stack)
         }
     }
 
-    private func eliminateAncestralReferences(in declaration: Declaration, stack: Set<String>) {
+    // Uses an Array rather than a Set for the ancestor stack because the stack depth is
+    // typically 5-20 elements, where linear scan of contiguous integers is cheaper than hashing.
+    private func eliminateAncestralReferences(in declaration: Declaration, stack: inout [USRID]) {
         guard !graph.isRetained(declaration) else { return }
 
         eliminateAncestralReferences(in: declaration.references, stack: stack)
 
         for childDeclaration in declaration.declarations {
-            let newStack = stack.union(childDeclaration.usrs)
-            eliminateAncestralReferences(in: childDeclaration, stack: newStack)
+            let prevCount = stack.count
+            stack.append(contentsOf: childDeclaration.usrIDs)
+            eliminateAncestralReferences(in: childDeclaration, stack: &stack)
+            stack.removeSubrange(prevCount...)
         }
     }
 
-    private func eliminateAncestralReferences(in references: Set<Reference>, stack: Set<String>) {
+    private func eliminateAncestralReferences(in references: Set<Reference>, stack: [USRID]) {
         for reference in references {
-            if stack.contains(reference.usr) {
+            if stack.contains(reference.usrID) {
                 graph.remove(reference)
             }
 

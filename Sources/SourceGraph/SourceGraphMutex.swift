@@ -7,8 +7,16 @@ import Synchronization
 public final class SourceGraphMutex: @unchecked Sendable {
     private let graph: Mutex<SourceGraph>
 
+    /// Self-synchronizing interner, safe to call without the graph lock.
+    public let usrInterner: USRInterner
+
     public init(graph: SourceGraph) {
         self.graph = Mutex(graph)
+        usrInterner = graph.usrInterner
+    }
+
+    public func reserveCapacity(forFileCount fileCount: Int) {
+        graph.withLock { $0.reserveCapacity(forFileCount: fileCount) }
     }
 
     @discardableResult

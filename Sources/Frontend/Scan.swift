@@ -41,7 +41,11 @@ final class Scan {
         try build(driver)
         try index(driver)
         try analyze()
-        return buildResults()
+        let results = buildResults()
+        // Let the OS reclaim memory at process exit instead of paying
+        // the cost of tearing down the entire SourceGraph via ARC.
+        _ = Unmanaged.passRetained(graph)
+        return results
     }
 
     // MARK: - Private

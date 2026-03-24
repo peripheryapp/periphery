@@ -61,13 +61,15 @@ public struct Parameter: Item, Hashable {
 
     public let items: [Item] = []
 
-    public func makeDeclaration(withParent parent: Declaration) -> Declaration {
+    public func makeDeclaration(withParent parent: Declaration, interner: USRInterner) -> Declaration {
         let parentUsrs = parent.usrs.sorted().joined(separator: "-")
         let usr = "param-\(name.text)-\(parent.name)-\(parentUsrs)"
+        let usrID = interner.intern(usr)
         let decl = Declaration(
             name: name.text,
             kind: .varParameter,
             usrs: [usr],
+            usrIDs: [usrID],
             location: location
         )
         decl.parent = parent
@@ -116,6 +118,23 @@ struct UnusedParameterParser {
         return parser.parse()
     }
 
+    static func parse(
+        file: SourceFile,
+        syntax: SourceFileSyntax,
+        locationConverter: SourceLocationConverter,
+        parseProtocols: Bool,
+        functionNodes: [FunctionDeclSyntax],
+        initializerNodes: [InitializerDeclSyntax]
+    ) -> [Function] {
+        let parser = self.init(
+            file: file,
+            syntax: syntax,
+            locationConverter: locationConverter,
+            parseProtocols: parseProtocols
+        )
+        return parser.parse(functionNodes: functionNodes, initializerNodes: initializerNodes)
+    }
+
     static func parse(file: SourceFile, parseProtocols: Bool) throws -> [Function] {
         let source = try String(contentsOf: file.path.url, encoding: .utf8)
         let syntax = Parser.parse(source: source)
@@ -139,19 +158,28 @@ struct UnusedParameterParser {
         parse(node: syntax, collecting: Function.self)
     }
 
+    func parse(functionNodes: [FunctionDeclSyntax], initializerNodes: [InitializerDeclSyntax]) -> [Function] {
+        let collector = Collector<Function>()
+        for node in functionNodes {
+            if let function = parse(functionDecl: node, collector) {
+                collector.add(function)
+            }
+        }
+        for node in initializerNodes {
+            if let function = parse(initializerDecl: node, collector) {
+                collector.add(function)
+            }
+        }
+        return collector.collection
+    }
+
     // MARK: - Private
 
-    private func parse<T: Item>(node: SyntaxProtocol, collecting: T.Type) -> [T] {
-        parse(children: node.children(viewMode: .sourceAccurate), collecting: collecting)
-    }
-
-    private func parse<T: Item>(children: SyntaxChildren, collecting: T.Type) -> [T] {
-        parse(nodes: Array(children), collecting: collecting)
-    }
-
-    private func parse<T: Item>(nodes: [Syntax], collecting _: T.Type) -> [T] {
+    private func parse<T: Item>(node: SyntaxProtocol, collecting _: T.Type) -> [T] {
         let collector = Collector<T>()
-        nodes.forEach { _ = parse(node: $0, collector) }
+        for child in node.children(viewMode: .sourceAccurate) {
+            _ = parse(node: child, collector)
+        }
         return collector.collection
     }
 
@@ -201,7 +229,12 @@ struct UnusedParameterParser {
     }
 
     private func parse(childrenFrom node: Syntax, _ collector: Collector<some Any>?) -> Item? {
-        let items = node.children(viewMode: .sourceAccurate).compactMap { parse(node: $0, collector) }
+        var items: [Item] = []
+        for child in node.children(viewMode: .sourceAccurate) {
+            if let item = parse(node: child, collector) {
+                items.append(item)
+            }
+        }
         if !items.isEmpty {
             return GenericItem(node: node, items: items)
         }
@@ -333,7 +366,7 @@ struct UnusedParameterParser {
         }
 
         // Swift supports nested functions, so it's possible this function captures a param from an outer function.
-        let params = parse(children: syntax.children(viewMode: .sourceAccurate), collecting: Parameter.self)
+        let params = parse(node: syntax, collecting: Parameter.self)
         let items = parse(node: body, collector)?.items ?? []
         let fullName = buildFullName(for: name, with: params)
         let genericParamNames = genericParams?.parameters.map(\.name.text) ?? []

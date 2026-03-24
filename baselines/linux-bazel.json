@@ -7,6 +7,8 @@
       "s:13SystemPackage8FilePathV10ExtensionsE4globyShyACGSSFZ",
       "s:13SystemPackage8FilePathV10ExtensionsE5chdir7closureyyyKXE_tKF",
       "s:14SyntaxAnalysis21UnusedParameterParserV5parse4file0F9ProtocolsSayAA8FunctionVG11SourceGraph0J4FileC_SbtKFZ",
+      "s:14SyntaxAnalysis21UnusedParameterParserV5parse4file6syntax17locationConverter0F9ProtocolsSayAA8FunctionVG11SourceGraph0M4FileC_05SwiftA00moA0VAO0m8LocationJ0CSbtFZ",
+      "s:14SyntaxAnalysis21UnusedParameterParserV5parseSayAA8FunctionVGyF",
       "s:14SyntaxAnalysis8FunctionV8fullNameSSvp",
       "s:6Shared14SetupSelectionO",
       "s:6Shared17SetupGuideHelpersC6select8multipleAA0B9SelectionOSaySSG_tF",

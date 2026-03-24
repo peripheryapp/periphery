@@ -5,7 +5,6 @@ import Shared
 
 public final class SourceGraph {
     public private(set) var allDeclarations: Set<Declaration> = []
-    public private(set) var usedDeclarations: Set<Declaration> = []
     public private(set) var redundantProtocols: [Declaration: (references: Set<Reference>, inherited: Set<Reference>)] = [:]
     public private(set) var rootDeclarations: Set<Declaration> = []
     public private(set) var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
@@ -15,7 +14,10 @@ public final class SourceGraph {
     public private(set) var ignoredDeclarations: Set<Declaration> = []
     public private(set) var assetReferences: Set<AssetReference> = []
     public private(set) var mainAttributedDeclarations: Set<Declaration> = []
-    public private(set) var allReferencesByUsr: [String: Set<Reference>] = [:]
+    /// Flat array indexed by `USRID.rawValue` for O(1) reference lookup by USR.
+    /// Maintained incrementally during indexing so that `indexingComplete()` has
+    /// no per-reference hashing work to do.
+    private var referencesByUsrID: [Set<Reference>] = []
     public private(set) var indexedSourceFiles: [SourceFile] = []
     public private(set) var unusedModuleImports: Set<Declaration> = []
     public private(set) var assignOnlyProperties: Set<Declaration> = []
@@ -24,11 +26,15 @@ public final class SourceGraph {
     public private(set) var commandIgnoredDeclarations: [Declaration: CommandIgnoreKind] = [:]
     public private(set) var functionsWithIgnoredParameters: Set<Declaration> = []
 
-    private var indexedModules: Set<String> = []
-    private var unindexedExportedModules: Set<String> = []
+    let moduleInterner = ModuleNameInterner()
+    public let usrInterner = USRInterner()
+    private var indexedModules: Set<ModuleID> = []
+    private var unindexedExportedModules: Set<ModuleID> = []
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
-    private var allDeclarationsByUsr: [String: Declaration] = [:]
-    private var moduleToExportingModules: [String: Set<String>] = [:]
+    private var declarationsOfKindsCache: [Set<Declaration.Kind>: Set<Declaration>] = [:]
+    private var allDeclarationsByUsr: [USRID: Declaration] = [:]
+    private var moduleToExportingModules: [ModuleID: Set<ModuleID>] = [:]
+    private var moduleExportsUnindexedCache: [ModuleID: Bool] = [:]
 
     private let configuration: Configuration
     private let logger: Logger
@@ -38,6 +44,18 @@ public final class SourceGraph {
         self.logger = logger
     }
 
+    public func reserveCapacity(forFileCount fileCount: Int) {
+        let estimatedDeclarations = fileCount * 100
+        let estimatedReferences = fileCount * 500
+        let estimatedUsrs = fileCount * 80
+        allDeclarations.reserveCapacity(estimatedDeclarations)
+        allReferences.reserveCapacity(estimatedReferences)
+        allDeclarationsByUsr.reserveCapacity(estimatedUsrs)
+        usrInterner.reserveCapacity(estimatedUsrs)
+        retainedDeclarations.reserveCapacity(estimatedDeclarations / 4)
+        referencesByUsrID.reserveCapacity(estimatedUsrs)
+    }
+
     public func indexingComplete() {
         rootDeclarations = allDeclarations.filter { $0.parent == nil }
         rootReferences = allReferences.filter { $0.parent == nil }
@@ -45,7 +63,7 @@ public final class SourceGraph {
     }
 
     public var unusedDeclarations: Set<Declaration> {
-        allDeclarations.subtracting(usedDeclarations)
+        allDeclarations.filter { !$0.isUsed }
     }
 
     public func declarations(ofKind kind: Declaration.Kind) -> Set<Declaration> {
@@ -53,27 +71,68 @@ public final class SourceGraph {
     }
 
     public func declarations(ofKinds kinds: Set<Declaration.Kind>) -> Set<Declaration> {
-        declarations(ofKinds: Array(kinds))
+        if let cached = declarationsOfKindsCache[kinds] { return cached }
+        // Pre-size the set to avoid incremental rehashing during formUnion.
+        // Per-kind sets are disjoint so the sum is exact.
+        let totalCount = kinds.reduce(0) { $0 + (allDeclarationsByKind[$1]?.count ?? 0) }
+        var result = Set<Declaration>(minimumCapacity: totalCount)
+        for kind in kinds {
+            result.formUnion(allDeclarationsByKind[kind, default: []])
+        }
+        declarationsOfKindsCache[kinds] = result
+        return result
     }
 
     public func declarations(ofKinds kinds: [Declaration.Kind]) -> Set<Declaration> {
-        kinds.flatMapSet { allDeclarationsByKind[$0, default: []] }
+        declarations(ofKinds: Set(kinds))
     }
 
     public func declaration(withUsr usr: String) -> Declaration? {
-        allDeclarationsByUsr[usr]
+        guard let usrID = usrInterner.existing(usr) else { return nil }
+
+        return allDeclarationsByUsr[usrID]
+    }
+
+    func declaration(withUsrID usrID: USRID) -> Declaration? {
+        allDeclarationsByUsr[usrID]
     }
 
     public func references(to decl: Declaration) -> Set<Reference> {
-        decl.usrs.flatMapSet { references(to: $0) }
+        if decl.usrIDs.count == 1 {
+            return refsForUsr(decl.usrIDs[0])
+        }
+        return decl.usrIDs.flatMapSet { refsForUsr($0) }
     }
 
     public func references(to usr: String) -> Set<Reference> {
-        allReferencesByUsr[usr, default: []]
+        guard let usrID = usrInterner.existing(usr) else { return [] }
+
+        return refsForUsr(usrID)
+    }
+
+    func references(toUsrID usrID: USRID) -> Set<Reference> {
+        refsForUsr(usrID)
     }
 
     public func hasReferences(to decl: Declaration) -> Bool {
-        decl.usrs.contains { !allReferencesByUsr[$0, default: []].isEmpty }
+        decl.usrIDs.contains { usrHasRefs($0) }
+    }
+
+    private func refsForUsr(_ usrID: USRID) -> Set<Reference> {
+        let idx = usrID.rawValue
+        return idx < referencesByUsrID.count ? referencesByUsrID[idx] : []
+    }
+
+    private func usrHasRefs(_ usrID: USRID) -> Bool {
+        let idx = usrID.rawValue
+        return idx < referencesByUsrID.count && !referencesByUsrID[idx].isEmpty
+    }
+
+    private func ensureUsrBucket(for usrID: USRID) {
+        let idx = usrID.rawValue
+        if idx >= referencesByUsrID.count {
+            referencesByUsrID.append(contentsOf: repeatElement(Set<Reference>(), count: idx + 1 - referencesByUsrID.count))
+        }
     }
 
     func markRedundantProtocol(_ declaration: Declaration, references: Set<Reference>, inherited: Set<Reference>) {
@@ -102,11 +161,13 @@ public final class SourceGraph {
 
     public func markRetained(_ declaration: Declaration) {
         if let parent = declaration.parent {
-            for usr in declaration.usrs {
+            for usrID in declaration.usrIDs {
+                let usr = usrInterner.string(for: usrID)
                 let reference = Reference(
                     name: declaration.name,
                     kind: .retained,
                     declarationKind: declaration.kind,
+                    usrID: usrID,
                     usr: usr,
                     location: declaration.location
                 )
@@ -121,11 +182,8 @@ public final class SourceGraph {
     func unmarkRetained(_ declaration: Declaration) {
         retainedDeclarations.remove(declaration)
 
-        let retainedReferences = declaration.usrs.flatMapSet { usr in
-            allReferencesByUsr[usr, default: []]
-        }.filter { reference in
-            reference.kind == .retained && reference.parent === declaration.parent
-        }
+        let retainedReferences = references(to: declaration)
+            .filter { $0.kind == .retained && $0.parent === declaration.parent }
 
         for reference in retainedReferences {
             remove(reference)
@@ -155,8 +213,9 @@ public final class SourceGraph {
     public func add(_ declaration: Declaration) {
         allDeclarations.insert(declaration)
         allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
-        for usr in declaration.usrs {
-            if let existingDecl = allDeclarationsByUsr[usr] {
+        for usrID in declaration.usrIDs {
+            if let existingDecl = allDeclarationsByUsr[usrID] {
+                let usr = usrInterner.string(for: usrID)
                 logger.warn("""
                 Declaration conflict detected: a declaration with the USR '\(usr)' has already been indexed.
                 This issue can cause inconsistent and incorrect results.
@@ -164,13 +223,11 @@ public final class SourceGraph {
                 Conflicting declaration: \(declaration), declared in modules: \(declaration.location.file.modules.sorted())
                 To resolve this warning, make sure all build modules are uniquely named.
                 """)
-                // Keep the declaration that sorts first to ensure deterministic results
-                // regardless of indexing order.
                 if declaration < existingDecl {
-                    allDeclarationsByUsr[usr] = declaration
+                    allDeclarationsByUsr[usrID] = declaration
                 }
             } else {
-                allDeclarationsByUsr[usr] = declaration
+                allDeclarationsByUsr[usrID] = declaration
             }
         }
     }
@@ -183,21 +240,34 @@ public final class SourceGraph {
         declaration.parent?.declarations.remove(declaration)
         allDeclarations.remove(declaration)
         allDeclarationsByKind[declaration.kind]?.remove(declaration)
+        declarationsOfKindsCache.removeAll(keepingCapacity: true)
         rootDeclarations.remove(declaration)
-        usedDeclarations.remove(declaration)
+        declaration.isUsed = false
         assignOnlyProperties.remove(declaration)
         suppressedAssignOnlyProperties.remove(declaration)
-        declaration.usrs.forEach { allDeclarationsByUsr.removeValue(forKey: $0) }
+        declaration.usrIDs.forEach { allDeclarationsByUsr.removeValue(forKey: $0) }
     }
 
     public func add(_ reference: Reference) {
         _ = allReferences.insert(reference)
-        allReferencesByUsr[reference.usr, default: []].insert(reference)
+        ensureUsrBucket(for: reference.usrID)
+        referencesByUsrID[reference.usrID.rawValue].insert(reference)
     }
 
-    public func add(_ references: Set<Reference>) {
-        allReferences.formUnion(references)
-        references.forEach { allReferencesByUsr[$0.usr, default: []].insert($0) }
+    public func ensureReferencesCapacity(_ minimumCapacity: Int) {
+        if allReferences.capacity < minimumCapacity {
+            allReferences.reserveCapacity(minimumCapacity)
+        }
+    }
+
+    public func add(_ references: [Reference]) {
+        if let maxID = references.lazy.map(\.usrID.rawValue).max() {
+            ensureUsrBucket(for: USRID(maxID))
+        }
+        for ref in references {
+            allReferences.insert(ref)
+            referencesByUsrID[ref.usrID.rawValue].insert(ref)
+        }
     }
 
     public func add(_ reference: Reference, from declaration: Declaration) {
@@ -213,7 +283,10 @@ public final class SourceGraph {
     func remove(_ reference: Reference) {
         _ = allReferences.remove(reference)
         allReferences.subtract(reference.descendentReferences)
-        allReferencesByUsr[reference.usr]?.remove(reference)
+        let idx = reference.usrID.rawValue
+        if idx < referencesByUsrID.count {
+            referencesByUsrID[idx].remove(reference)
+        }
 
         if let parent = reference.parent {
             parent.references.remove(reference)
@@ -226,15 +299,15 @@ public final class SourceGraph {
     }
 
     func markUsed(_ declaration: Declaration) {
-        _ = usedDeclarations.insert(declaration)
+        declaration.isUsed = true
     }
 
     func isUsed(_ declaration: Declaration) -> Bool {
-        usedDeclarations.contains(declaration)
+        declaration.isUsed
     }
 
     func isExternal(_ reference: Reference) -> Bool {
-        declaration(withUsr: reference.usr) == nil
+        declaration(withUsrID: reference.usrID) == nil
     }
 
     public func addIndexedSourceFile(_ file: SourceFile) {
@@ -242,42 +315,52 @@ public final class SourceGraph {
     }
 
     public func addIndexedModules(_ modules: Set<String>) {
-        indexedModules.formUnion(modules)
+        indexedModules.formUnion(moduleInterner.intern(modules))
     }
 
-    public func isModuleIndexed(_ module: String) -> Bool {
-        indexedModules.contains(module)
+    func isModuleIndexed(_ moduleID: ModuleID) -> Bool {
+        indexedModules.contains(moduleID)
     }
 
     public func addExportedModule(_ module: String, exportedBy exportingModules: Set<String>) {
-        moduleToExportingModules[module, default: []].formUnion(exportingModules)
+        let moduleID = moduleInterner.intern(module)
+        let exportingIDs = moduleInterner.intern(exportingModules)
+        moduleToExportingModules[moduleID, default: []].formUnion(exportingIDs)
     }
 
-    public func moduleExportsUnindexedModules(_ module: String) -> Bool {
-        unindexedExportedModules.contains { unindexedModule in
-            isModule(unindexedModule, exportedBy: module)
+    func moduleExportsUnindexedModules(_ moduleID: ModuleID) -> Bool {
+        if let cached = moduleExportsUnindexedCache[moduleID] { return cached }
+        let result = unindexedExportedModules.contains { unindexedModule in
+            isModule(unindexedModule, exportedBy: moduleID)
         }
+        moduleExportsUnindexedCache[moduleID] = result
+        return result
     }
 
-    public func isModule(_ module: String, exportedBy exportingModule: String) -> Bool {
+    private var isModuleExportedCache: [Int: Bool] = [:]
+
+    func isModule(_ module: ModuleID, exportedBy exportingModule: ModuleID) -> Bool {
+        let key = module.rawValue &* 65537 &+ exportingModule.rawValue
+        if let cached = isModuleExportedCache[key] { return cached }
+
         let exportingModules = moduleToExportingModules[module, default: []]
-
-        if exportingModules.contains(exportingModule) {
-            // The module is exported directly.
-            return true
+        var result = exportingModules.contains(exportingModule)
+        if !result {
+            result = exportingModules.contains { nestedExportingModule in
+                isModule(nestedExportingModule, exportedBy: exportingModule) &&
+                    isModule(module, exportedBy: nestedExportingModule)
+            }
         }
-
-        // Recursively check if the module is exported transitively.
-        return exportingModules.contains { nestedExportingModule in
-            isModule(nestedExportingModule, exportedBy: exportingModule) &&
-                isModule(module, exportedBy: nestedExportingModule)
-        }
+        isModuleExportedCache[key] = result
+        return result
     }
 
     func markUnusedModuleImport(_ statement: ImportStatement) {
-        let location = statement.location.relativeTo(configuration.projectRoot)
-        let usr = "import-\(statement.module)-\(location)"
-        let decl = Declaration(name: statement.module, kind: .module, usrs: [usr], location: statement.location)
+        let loc = statement.location
+        let fileID = UInt(bitPattern: ObjectIdentifier(loc.file))
+        let usr = "import-\(statement.module)-\(fileID)-\(loc.line)"
+        let usrID = usrInterner.intern(usr)
+        let decl = Declaration(name: statement.module, kind: .module, usrs: [usr], usrIDs: [usrID], location: loc)
         unusedModuleImports.insert(decl)
     }
 
@@ -291,11 +374,7 @@ public final class SourceGraph {
         for reference in decl.immediateInheritedTypeReferences {
             references.insert(reference)
 
-            if let inheritedDecl = declaration(withUsr: reference.usr) {
-                // Detect circular references. The following is valid Swift.
-                // class SomeClass {}
-                // extension SomeClass: SomeProtocol {}
-                // protocol SomeProtocol: SomeClass {}
+            if let inheritedDecl = declaration(withUsrID: reference.usrID) {
                 guard !seenDeclarations.contains(inheritedDecl) else { continue }
 
                 references = inheritedTypeReferences(of: inheritedDecl, seenDeclarations: seenDeclarations.union([decl])).union(references)
@@ -306,14 +385,14 @@ public final class SourceGraph {
     }
 
     func inheritedDeclarations(of decl: Declaration) -> [Declaration] {
-        inheritedTypeReferences(of: decl).compactMap { declaration(withUsr: $0.usr) }
+        inheritedTypeReferences(of: decl).compactMap { declaration(withUsrID: $0.usrID) }
     }
 
     func immediateSubclasses(of decl: Declaration) -> Set<Declaration> {
         references(to: decl)
             .filter { $0.kind == .related && $0.declarationKind == .class }
-            .flatMap { $0.parent?.usrs ?? [] }
-            .compactMapSet { declaration(withUsr: $0) }
+            .flatMap { $0.parent?.usrIDs ?? [] }
+            .compactMapSet { declaration(withUsrID: $0) }
     }
 
     func subclasses(of decl: Declaration) -> Set<Declaration> {
@@ -335,7 +414,7 @@ public final class SourceGraph {
     func extendedDeclaration(forExtension extensionDeclaration: Declaration) throws -> Declaration? {
         guard let extendedReference = try extendedDeclarationReference(forExtension: extensionDeclaration) else { return nil }
 
-        if let extendedDeclaration = declaration(withUsr: extendedReference.usr) {
+        if let extendedDeclaration = declaration(withUsrID: extendedReference.usrID) {
             return extendedDeclaration
         }
 
@@ -347,7 +426,7 @@ public final class SourceGraph {
 
         let overridenDecl = decl.related
             .filter { $0.declarationKind == decl.kind && $0.name == decl.name }
-            .compactMap { declaration(withUsr: $0.usr) }
+            .compactMap { declaration(withUsrID: $0.usrID) }
             .min()
 
         guard let overridenDecl else {
@@ -379,7 +458,7 @@ public final class SourceGraph {
 
     func allOverrideDeclarations(fromBase decl: Declaration) -> Set<Declaration> {
         decl.relatedEquivalentReferences
-            .compactMap { declaration(withUsr: $0.usr) }
+            .compactMap { declaration(withUsrID: $0.usrID) }
             .reduce(into: .init()) { result, decl in
                 guard decl.isOverride else { return }
 
