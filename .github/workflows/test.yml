@@ -62,27 +62,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        step: ["main-snapshot", "6.3-snapshot", "26.2.0", "26.1.1", "26.0", "16.4"]
+        step: ["main-snapshot", "6.3", "6.2", "6.1"]
         include:
           - step: "main-snapshot"
-            xcode: "26.2.0"
+            xcode: "26.4.0"
             swiftly: "main-snapshot"
             continueOnError: true
             macos: "macos-26"
-          - step: "6.3-snapshot"
-            xcode: "26.2.0"
-            swiftly: "6.3-snapshot"
+          - step: "6.3"
+            xcode: "26.4.0"
             macos: "macos-26"
-          - step: "26.2.0"
-            xcode: "26.2.0"
+          - step: "6.2"
+            xcode: "26.3.0"
             macos: "macos-26"
-          - step: "26.1.1"
-            xcode: "26.1.1"
-            macos: "macos-26"
-          - step: "26.0"
-            xcode: "26.0"
-            macos: "macos-26"
-          - step: "16.4"
+          - step: "6.1"
             xcode: "16.4"
             macos: "macos-15"
     runs-on: ${{ matrix.macos }}
@@ -136,13 +129,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        swift: ["main-snapshot", "6.3-snapshot", "6.2", "6.1"]
+        swift: ["main-snapshot", "6.3", "6.2", "6.1"]
         include:
           - swift: "main-snapshot"
             container: "swiftlang/swift:nightly-main"
             continueOnError: true
-          - swift: "6.3-snapshot"
-            container: "swiftlang/swift:nightly-6.3-noble"
+          - swift: "6.3"
+            container: "swift:6.3"
           - swift: "6.2"
             container: "swift:6.2"
           - swift: "6.1"
