@@ -118,23 +118,6 @@ struct UnusedParameterParser {
         return parser.parse()
     }
 
-    static func parse(
-        file: SourceFile,
-        syntax: SourceFileSyntax,
-        locationConverter: SourceLocationConverter,
-        parseProtocols: Bool,
-        functionNodes: [FunctionDeclSyntax],
-        initializerNodes: [InitializerDeclSyntax]
-    ) -> [Function] {
-        let parser = self.init(
-            file: file,
-            syntax: syntax,
-            locationConverter: locationConverter,
-            parseProtocols: parseProtocols
-        )
-        return parser.parse(functionNodes: functionNodes, initializerNodes: initializerNodes)
-    }
-
     static func parse(file: SourceFile, parseProtocols: Bool) throws -> [Function] {
         let source = try String(contentsOf: file.path.url, encoding: .utf8)
         let syntax = Parser.parse(source: source)
@@ -156,21 +139,6 @@ struct UnusedParameterParser {
 
     func parse() -> [Function] {
         parse(node: syntax, collecting: Function.self)
-    }
-
-    func parse(functionNodes: [FunctionDeclSyntax], initializerNodes: [InitializerDeclSyntax]) -> [Function] {
-        let collector = Collector<Function>()
-        for node in functionNodes {
-            if let function = parse(functionDecl: node, collector) {
-                collector.add(function)
-            }
-        }
-        for node in initializerNodes {
-            if let function = parse(initializerDecl: node, collector) {
-                collector.add(function)
-            }
-        }
-        return collector.collection
     }
 
     // MARK: - Private

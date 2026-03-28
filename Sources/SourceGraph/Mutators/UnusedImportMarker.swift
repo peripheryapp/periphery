@@ -128,16 +128,21 @@ final class UnusedImportMarker: SourceGraphMutator {
                 continue
             }
 
+            // `perFileModules` is flattened as [file][word] so we can keep the
+            // bitsets in one contiguous buffer and index via a simple offset.
             let base = fileIdx * wordCount
             let unreferencedImports = file.importStatements
                 .filter {
                     let moduleID = graph.moduleInterner.intern($0.module)
+                    // Split the dense module ID into a 64-bit word index and
+                    // an in-word bit offset for the flattened file bitset.
                     let (word, bit) = moduleID.rawValue.quotientAndRemainder(dividingBy: 64)
                     return !$0.isConditional &&
                         !$0.commentCommands.contains(.ignore) &&
                         !$0.isExported &&
                         !retainedModuleIDs.contains(moduleID) &&
                         graph.isModuleIndexed(moduleID) &&
+                        // If the module's bit is unset, this file never referenced it.
                         (perFileModules[base + word] & (1 &<< bit) == 0) &&
                         !graph.moduleExportsUnindexedModules(moduleID)
                 }

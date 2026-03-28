@@ -12,21 +12,12 @@ public final class UnusedParameterAnalyzer {
 
     public init() {}
 
-    public func analyze(
-        file: SourceFile,
-        syntax: SourceFileSyntax,
-        locationConverter: SourceLocationConverter,
-        parseProtocols: Bool,
-        functionNodes: [FunctionDeclSyntax],
-        initializerNodes: [InitializerDeclSyntax]
-    ) -> [Function: Set<Parameter>] {
+    public func analyze(file: SourceFile, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) -> [Function: Set<Parameter>] {
         let functions = UnusedParameterParser.parse(
             file: file,
             syntax: syntax,
             locationConverter: locationConverter,
-            parseProtocols: parseProtocols,
-            functionNodes: functionNodes,
-            initializerNodes: initializerNodes
+            parseProtocols: parseProtocols
         )
 
         return analyzeAll(functions)

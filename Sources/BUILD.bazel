@@ -25,7 +25,6 @@ swift_library(
     srcs = [
         "SyntaxAnalysis/CommentCommand.swift",
         "SyntaxAnalysis/DeclarationSyntaxVisitor.swift",
-        "SyntaxAnalysis/FunctionCollectorVisitor.swift",
         "SyntaxAnalysis/ImportSyntaxVisitor.swift",
         "SyntaxAnalysis/MultiplexingSyntaxVisitor.swift",
         "SyntaxAnalysis/SourceLocationBuilder.swift",

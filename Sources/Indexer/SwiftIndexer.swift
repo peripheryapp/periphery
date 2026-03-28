@@ -243,6 +243,8 @@ final class SwiftIndexer: Indexer {
                 graph.ensureReferencesCapacity(graph.allReferences.count + references.count)
                 graph.add(references)
                 graph.add(newDeclarations)
+                // Apply batched retention after insertion so any synthetic
+                // retained references resolve against the completed file graph.
                 graph.markRetained(retainedDecls)
 
                 if retainAllDeclarations {
@@ -271,8 +273,6 @@ final class SwiftIndexer: Indexer {
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: sourceFile, swiftVersion: swiftVersion)
             let declarationSyntaxVisitor = multiplexingSyntaxVisitor.add(DeclarationSyntaxVisitor.self)
             let importSyntaxVisitor = multiplexingSyntaxVisitor.add(ImportSyntaxVisitor.self)
-            let functionCollectorVisitor = multiplexingSyntaxVisitor.add(FunctionCollectorVisitor.self)
-
             multiplexingSyntaxVisitor.visit()
 
             sourceFile.importStatements = importSyntaxVisitor.importStatements
@@ -289,11 +289,7 @@ final class SwiftIndexer: Indexer {
             associateLatentReferences()
             associateDanglingReferences()
             visitDeclarations(using: declarationSyntaxVisitor)
-            identifyUnusedParameters(
-                using: multiplexingSyntaxVisitor,
-                functionNodes: functionCollectorVisitor.functionDecls,
-                initializerNodes: functionCollectorVisitor.initializerDecls
-            )
+            identifyUnusedParameters(using: multiplexingSyntaxVisitor)
             applyCommentCommands(using: multiplexingSyntaxVisitor)
         }
 
@@ -507,11 +503,7 @@ final class SwiftIndexer: Indexer {
             }
         }
 
-        private func identifyUnusedParameters(
-            using syntaxVisitor: MultiplexingSyntaxVisitor,
-            functionNodes: [FunctionDeclSyntax],
-            initializerNodes: [InitializerDeclSyntax]
-        ) {
+        private func identifyUnusedParameters(using syntaxVisitor: MultiplexingSyntaxVisitor) {
             let functionDecls = declarations.filter(\.kind.isFunctionKind)
             let functionDeclsByLocation = functionDecls.reduce(into: [Location: Declaration]()) {
                 $0[$1.location] = $1
@@ -527,25 +519,12 @@ final class SwiftIndexer: Indexer {
                 }
             }
 
-            guard !functionNodes.isEmpty || !initializerNodes.isEmpty else {
-                if !functionsWithIgnoredParams.isEmpty {
-                    graph.withLock { graph in
-                        for functionDecl in functionsWithIgnoredParams {
-                            graph.markHasIgnoredParameters(functionDecl)
-                        }
-                    }
-                }
-                return
-            }
-
             let analyzer = UnusedParameterAnalyzer()
             let paramsByFunction = analyzer.analyze(
                 file: syntaxVisitor.sourceFile,
                 syntax: syntaxVisitor.syntax,
                 locationConverter: syntaxVisitor.locationConverter,
-                parseProtocols: true,
-                functionNodes: functionNodes,
-                initializerNodes: initializerNodes
+                parseProtocols: true
             )
 
             var unmatchedFunctions: [(String, Location)] = []

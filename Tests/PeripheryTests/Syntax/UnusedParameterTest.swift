@@ -1,5 +1,7 @@
 import Foundation
 @testable import SourceGraph
+import SwiftParser
+import SwiftSyntax
 @testable import SyntaxAnalysis
 @testable import TestShared
 import XCTest
@@ -112,6 +114,23 @@ final class UnusedParameterTest: XCTestCase {
     func testNestedFunction() {
         analyze()
         assertUsed(label: "param", name: "param", in: "myFunc(param:)")
+    }
+
+    func testNestedFunctionAnalyzerPath() {
+        let sourceFile = SourceFile(path: testFixturePath, modules: ["UnusedParameterFixtures"])
+        let source = try! String(contentsOf: sourceFile.path.url, encoding: .utf8)
+        let syntax = Parser.parse(source: source)
+        let converter = SourceLocationConverter(fileName: sourceFile.path.string, tree: syntax)
+        let analyzer = UnusedParameterAnalyzer()
+        let paramsByFunction = analyzer.analyze(
+            file: sourceFile,
+            syntax: syntax,
+            locationConverter: converter,
+            parseProtocols: false
+        )
+
+        let unusedParams = paramsByFunction.first { $0.key.fullName == "innerFunc(param:)" }?.value
+        XCTAssertEqual(unusedParams?.map(\.name.text), ["param"])
     }
 
     func testNestedVariable() {
