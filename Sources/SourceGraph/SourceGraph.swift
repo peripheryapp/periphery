@@ -341,7 +341,10 @@ public final class SourceGraph {
     private var isModuleExportedCache: [Int: Bool] = [:]
 
     func isModule(_ module: ModuleID, exportedBy exportingModule: ModuleID) -> Bool {
-        let key = module.rawValue &* 65537 &+ exportingModule.rawValue
+        // Pack the module pair into a single Int to keep this hot-path cache
+        // lookup cheaper than hashing a tuple or custom key type. `ModuleID`
+        // enforces the radix bound so this base-`packingRadix` encoding is unique.
+        let key = module.rawValue &* ModuleID.packingRadix &+ exportingModule.rawValue
         if let cached = isModuleExportedCache[key] { return cached }
 
         let exportingModules = moduleToExportingModules[module, default: []]
