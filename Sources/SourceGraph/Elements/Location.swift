@@ -1,3 +1,4 @@
+import Extensions
 import Foundation
 import SystemPackage
 
@@ -19,6 +20,13 @@ public struct Location {
         hasher.combine(line)
         hasher.combine(column)
         hashValueCache = hasher.finalize()
+    }
+
+    func relativeTo(_ path: FilePath) -> Location {
+        let newPath = file.path.relativeTo(path)
+        let newFile = SourceFile(path: newPath, modules: file.modules)
+        newFile.importStatements = file.importStatements
+        return Location(file: newFile, line: line, column: column)
     }
 
     // MARK: - Private

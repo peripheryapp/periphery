@@ -103,6 +103,7 @@ var targets: [PackageDescription.Target] = [
         name: "SourceGraph",
         dependencies: [
             .target(name: "Configuration"),
+            .target(name: "Extensions"),
             .product(name: "SwiftSyntax", package: "swift-syntax"),
             .product(name: "SystemPackage", package: "swift-system"),
             .target(name: "Shared"),

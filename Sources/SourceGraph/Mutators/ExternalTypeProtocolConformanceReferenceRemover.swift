@@ -17,7 +17,9 @@ final class ExternalTypeProtocolConformanceReferenceRemover: SourceGraphMutator 
             guard try graph.extendedDeclaration(forExtension: extDecl) == nil else { continue }
 
             // Ensure the type is extended by local protocols.
-            let protocolDecls = extDecl.related.filter { $0.declarationKind == .protocol }.map { graph.declaration(withUsrID: $0.usrID) }
+            let protocolDecls = extDecl.related
+                .filter { $0.declarationKind == .protocol }
+                .compactMap { graph.declaration(withUsrID: $0.usrID) }
             guard !protocolDecls.isEmpty else { continue }
 
             // Find all related references that may be protocol members.

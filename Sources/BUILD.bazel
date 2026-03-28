@@ -102,6 +102,7 @@ swift_library(
     module_name = "SourceGraph",
     deps = [
         "//Sources:Configuration",
+        "//Sources:Extensions",
         "//Sources:Shared",
         "@swift-syntax//:SwiftSyntax",
         "@swift-system//:SystemPackage",

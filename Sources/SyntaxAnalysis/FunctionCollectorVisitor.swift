@@ -1,7 +1,7 @@
 import Shared
 import SwiftSyntax
 
-/// Collects top-level function and initializer syntax nodes during the shared
+/// Collects non-nested function and initializer syntax nodes during the shared
 /// MultiplexingSyntaxVisitor walk, so UnusedParameterParser can skip its own
 /// full-tree traversal and parse only the pre-collected nodes.
 public final class FunctionCollectorVisitor: PeripherySyntaxVisitor {

@@ -213,6 +213,7 @@ public final class SourceGraph {
     public func add(_ declaration: Declaration) {
         allDeclarations.insert(declaration)
         allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
+        declarationsOfKindsCache.removeAll(keepingCapacity: true)
         for usrID in declaration.usrIDs {
             if let existingDecl = allDeclarationsByUsr[usrID] {
                 let usr = usrInterner.string(for: usrID)
@@ -356,11 +357,10 @@ public final class SourceGraph {
     }
 
     func markUnusedModuleImport(_ statement: ImportStatement) {
-        let loc = statement.location
-        let fileID = UInt(bitPattern: ObjectIdentifier(loc.file))
-        let usr = "import-\(statement.module)-\(fileID)-\(loc.line)"
+        let location = statement.location.relativeTo(configuration.projectRoot)
+        let usr = "import-\(statement.module)-\(location)"
         let usrID = usrInterner.intern(usr)
-        let decl = Declaration(name: statement.module, kind: .module, usrs: [usr], usrIDs: [usrID], location: loc)
+        let decl = Declaration(name: statement.module, kind: .module, usrs: [usr], usrIDs: [usrID], location: statement.location)
         unusedModuleImports.insert(decl)
     }
 
