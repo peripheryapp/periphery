@@ -36,8 +36,6 @@ final class AncestralReferenceEliminator: SourceGraphMutator {
             if stack.contains(reference.usrID) {
                 graph.remove(reference)
             }
-
-            eliminateAncestralReferences(in: reference.references, stack: stack)
         }
     }
 }

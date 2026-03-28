@@ -54,9 +54,5 @@ final class SourceGraphDebugger {
     private func describe(_ reference: Reference, depth: Int = 0) {
         let inset = String(repeating: "··", count: depth)
         print(inset + reference.description)
-
-        for reference in reference.references.sorted() {
-            describe(reference, depth: depth + 1)
-        }
     }
 }

@@ -283,7 +283,6 @@ public final class SourceGraph {
 
     func remove(_ reference: Reference) {
         _ = allReferences.remove(reference)
-        allReferences.subtract(reference.descendentReferences)
         let idx = reference.usrID.rawValue
         if idx < referencesByUsrID.count {
             referencesByUsrID[idx].remove(reference)
