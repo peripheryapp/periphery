@@ -39,8 +39,6 @@ public final class OutputDeclarationFilter {
             return declarations.sorted { $0.declaration < $1.declaration }
         }
 
-        var matchCache: [FilePath: Bool] = [:]
-
         return declarations
             .filter { [contextualLogger] in
                 var path = $0.declaration.location.file.path
@@ -50,26 +48,21 @@ public final class OutputDeclarationFilter {
                     path = overridePath
                 }
 
-                if let cached = matchCache[path] { return cached }
-
-                let included: Bool
-
                 if configuration.reportIncludeMatchers.isEmpty {
                     if configuration.reportExcludeMatchers.anyMatch(filename: path.string) {
                         contextualLogger.debug("Excluding \(path)")
-                        included = false
-                    } else {
-                        included = true
+                        return false
                     }
-                } else if configuration.reportIncludeMatchers.anyMatch(filename: path.string) {
-                    contextualLogger.debug("Including \(path)")
-                    included = true
-                } else {
-                    included = false
+
+                    return true
                 }
 
-                matchCache[path] = included
-                return included
+                if configuration.reportIncludeMatchers.anyMatch(filename: path.string) {
+                    contextualLogger.debug("Including \(path)")
+                    return true
+                }
+
+                return false
             }
             .sorted { $0.declaration < $1.declaration }
     }

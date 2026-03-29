@@ -25,7 +25,6 @@ public final class Reference {
         }
     }
 
-    // See Kind above for rationale on ordinal-based hashing/equality.
     public enum Role: String, Hashable, Equatable {
         case varType
         case returnType

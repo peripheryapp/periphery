@@ -2,8 +2,6 @@ import Extensions
 import Foundation
 import SystemPackage
 
-// Value type to avoid a heap allocation per location instance. Location is
-// created for every indexed occurrence and stored inline in Reference/Declaration.
 public struct Location {
     public let file: SourceFile
     public let line: Int

@@ -248,6 +248,9 @@ struct ScanCommand: ParsableCommand {
         let updateChecker = UpdateChecker(logger: logger, configuration: configuration)
         updateChecker.run()
 
+        print("!!!!!!!!")
+        Thread.sleep(forTimeInterval: 15)
+
         let results = try Scan(
             configuration: configuration,
             logger: logger,
