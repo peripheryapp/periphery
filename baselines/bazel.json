@@ -1,5 +1,13 @@
 {
   "v1": {
-    "usrs": []
+    "usrs": [
+      "s:11SourceGraph0aB8DebuggerC",
+      "s:13SystemPackage8FilePathV10ExtensionsE5chdir7closureyyyKXE_tKF",
+      "s:14SyntaxAnalysis21UnusedParameterParserV5parse4file0F9ProtocolsSayAA8FunctionVG11SourceGraph0J4FileC_SbtKFZ",
+      "s:14SyntaxAnalysis21UnusedParameterParserV5parse4file6syntax17locationConverter0F9ProtocolsSayAA8FunctionVG11SourceGraph0M4FileC_05SwiftA00moA0VAO0m8LocationJ0CSbtFZ",
+      "s:14SyntaxAnalysis21UnusedParameterParserV5parse6syntaxSayAA8FunctionVG05SwiftA0010SourceFileA0V_tF",
+      "s:14SyntaxAnalysis23UnusedParameterAnalyzerC7analyze4file6syntax17locationConverter14parseProtocolsSDyAA8FunctionVShyAA0D0VGG11SourceGraph0N4FileC_05SwiftA00npA0VAR0n8LocationJ0CSbtF",
+      "s:14SyntaxAnalysis8FunctionV8fullNameSSvp"
+    ]
   }
 }
