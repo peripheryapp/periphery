@@ -8,8 +8,7 @@ import XCTest
 final class DeterminismRegressionTest: XCTestCase {
     private func makeGraph() -> SourceGraph {
         let configuration = Configuration()
-        let logger = Logger(quiet: true, verbose: false, colorMode: .never)
-        return SourceGraph(configuration: configuration, logger: logger)
+        return SourceGraph(configuration: configuration)
     }
 
     private func makeSwiftVersion() -> SwiftVersion {
@@ -94,7 +93,7 @@ final class DeterminismRegressionTest: XCTestCase {
         XCTAssertEqual(selected.usr, "class_earlier")
     }
 
-    func testBaseDeclarationUsesDeterministicSelection() {
+    func testBaseDeclarationUsesDeterministicSelection() throws {
         let graph = makeGraph()
 
         let overrideDecl = makeDeclaration(
@@ -140,7 +139,7 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
 
-        graph.add(overrideDecl)
+        try graph.add(overrideDecl)
         graph.add(refToLater)
         graph.add(refToEarlier)
         graph.indexingComplete()
@@ -150,7 +149,7 @@ final class DeterminismRegressionTest: XCTestCase {
         XCTAssertEqual(base.usrs, ["base_earlier"])
     }
 
-    func testExternalOverrideRetainerRetainsWhenAnyMatchingRelatedReferenceIsExternal() {
+    func testExternalOverrideRetainerRetainsWhenAnyMatchingRelatedReferenceIsExternal() throws {
         let graph = makeGraph()
         let configuration = Configuration()
         let swiftVersion = makeSwiftVersion()
@@ -171,8 +170,8 @@ final class DeterminismRegressionTest: XCTestCase {
             location: makeLocation("/tmp/base.swift", module: "Core", line: 10),
             graph: graph
         )
-        graph.add(internalBase)
-        graph.add(overrideDecl)
+        try graph.add(internalBase)
+        try graph.add(overrideDecl)
 
         let matchingInternal = makeReference(
             kind: .related,
@@ -198,7 +197,7 @@ final class DeterminismRegressionTest: XCTestCase {
         XCTAssertTrue(graph.isRetained(overrideDecl))
     }
 
-    func testAssetReferenceRetainerHandlesAllMatchingSourcesForClassName() {
+    func testAssetReferenceRetainerHandlesAllMatchingSourcesForClassName() throws {
         let graph = makeGraph()
         let configuration = Configuration()
 
@@ -220,8 +219,8 @@ final class DeterminismRegressionTest: XCTestCase {
         outletDecl.parent = classDecl
         classDecl.declarations.insert(outletDecl)
 
-        graph.add(classDecl)
-        graph.add(outletDecl)
+        try graph.add(classDecl)
+        try graph.add(outletDecl)
         graph.markRedundantPublicAccessibility(classDecl, modules: ["UI"])
         graph.markRedundantPublicAccessibility(outletDecl, modules: ["UI"])
 
@@ -245,7 +244,7 @@ final class DeterminismRegressionTest: XCTestCase {
         XCTAssertNil(graph.redundantPublicAccessibility[outletDecl])
     }
 
-    func testProtocolConformanceReferenceBuilderDeterministicallySelectsSuperclassImplementation() {
+    func testProtocolConformanceReferenceBuilderDeterministicallySelectsSuperclassImplementation() throws {
         let graph = makeGraph()
         let configuration = Configuration()
 
@@ -308,13 +307,13 @@ final class DeterminismRegressionTest: XCTestCase {
         superEarlierMethod.parent = superEarlier
         superEarlier.declarations.insert(superEarlierMethod)
 
-        graph.add(proto)
-        graph.add(requirement)
-        graph.add(conformingClass)
-        graph.add(superLater)
-        graph.add(superEarlier)
-        graph.add(superLaterMethod)
-        graph.add(superEarlierMethod)
+        try graph.add(proto)
+        try graph.add(requirement)
+        try graph.add(conformingClass)
+        try graph.add(superLater)
+        try graph.add(superEarlier)
+        try graph.add(superLaterMethod)
+        try graph.add(superEarlierMethod)
 
         let conformsRef = makeReference(
             kind: .related,
@@ -429,12 +428,12 @@ final class DeterminismRegressionTest: XCTestCase {
         )
         extensionDecl.references = [extendsBaseProtocolRef, whereConstraintRef]
 
-        graph.add(baseProtocol)
-        graph.add(constrainingProtocol)
-        graph.add(requirementLater)
-        graph.add(requirementEarlier)
-        graph.add(extensionDecl)
-        graph.add(member)
+        try graph.add(baseProtocol)
+        try graph.add(constrainingProtocol)
+        try graph.add(requirementLater)
+        try graph.add(requirementEarlier)
+        try graph.add(extensionDecl)
+        try graph.add(member)
         graph.add(extendsBaseProtocolRef, from: extensionDecl)
         graph.add(whereConstraintRef, from: extensionDecl)
 
@@ -446,7 +445,7 @@ final class DeterminismRegressionTest: XCTestCase {
 
     // MARK: - USR Conflict Resolution
 
-    func testDuplicateUSRResolutionKeepsEarlierDeclaration() {
+    func testDuplicateUSRResolutionThrowsOnConflict() throws {
         let graph = makeGraph()
 
         let earlier = makeDeclaration(
@@ -464,40 +463,56 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
 
-        // Add earlier first, then later. Before the fix, SourceGraph.add always
-        // overwrote allDeclarationsByUsr unconditionally, so `later` would win.
-        // After the fix, the declaration that sorts first is kept.
-        graph.add(earlier)
-        graph.add(later)
+        try graph.add(earlier)
+
+        XCTAssertThrowsError(try graph.add(later)) { error in
+            guard case let PeripheryError.sourceGraphIntegrityError(message) = error else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+
+            XCTAssertTrue(message.contains("shared_usr"))
+        }
 
         XCTAssertIdentical(graph.declaration(withUsr: "shared_usr"), earlier)
     }
 
-    func testDuplicateUSRResolutionIsDeterministicRegardlessOfInsertionOrder() {
+    func testDuplicateUSRResolutionThrowsRegardlessOfInsertionOrder() throws {
         let locA = makeLocation("/tmp/a.swift", module: "A", line: 10)
         let locB = makeLocation("/tmp/b.swift", module: "B", line: 20)
 
         let graph1 = makeGraph()
         let earlier1 = makeDeclaration(kind: .class, name: "MyClass", usr: "shared_usr", location: locA, graph: graph1)
         let later1 = makeDeclaration(kind: .class, name: "MyClass", usr: "shared_usr", location: locB, graph: graph1)
-        graph1.add(earlier1)
-        graph1.add(later1)
+        try graph1.add(earlier1)
+
+        XCTAssertThrowsError(try graph1.add(later1)) { error in
+            guard case let PeripheryError.sourceGraphIntegrityError(message) = error else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+
+            XCTAssertTrue(message.contains("shared_usr"))
+        }
 
         let graph2 = makeGraph()
         let later2 = makeDeclaration(kind: .class, name: "MyClass", usr: "shared_usr", location: locB, graph: graph2)
         let earlier2 = makeDeclaration(kind: .class, name: "MyClass", usr: "shared_usr", location: locA, graph: graph2)
-        graph2.add(later2)
-        graph2.add(earlier2)
+        try graph2.add(later2)
 
-        // Both graphs should resolve to the earlier-sorting declaration,
-        // regardless of insertion order.
+        XCTAssertThrowsError(try graph2.add(earlier2)) { error in
+            guard case let PeripheryError.sourceGraphIntegrityError(message) = error else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+
+            XCTAssertTrue(message.contains("shared_usr"))
+        }
+
         XCTAssertIdentical(graph1.declaration(withUsr: "shared_usr"), earlier1)
-        XCTAssertIdentical(graph2.declaration(withUsr: "shared_usr"), earlier2)
+        XCTAssertIdentical(graph2.declaration(withUsr: "shared_usr"), later2)
     }
 
     // MARK: - AncestralReferenceEliminator with Same-Location Declarations
 
-    func testAncestralReferenceEliminatorWithSameLocationDeclarations() {
+    func testAncestralReferenceEliminatorWithSameLocationDeclarations() throws {
         // Models the real-world scenario: a struct and a macro-generated class exist at
         // the same source location. If a dangling reference (to the struct's own USR) is
         // associated with the struct itself (instead of the class), it becomes a
@@ -544,9 +559,9 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
 
-        graph.add(structDecl)
-        graph.add(classDecl)
-        graph.add(externalParent)
+        try graph.add(structDecl)
+        try graph.add(classDecl)
+        try graph.add(externalParent)
         graph.add(externalRef, from: externalParent)
 
         graph.indexingComplete()
@@ -559,7 +574,7 @@ final class DeterminismRegressionTest: XCTestCase {
         XCTAssertTrue(graph.hasReferences(to: structDecl))
     }
 
-    func testAncestralReferenceEliminatorRemovesSelfReferences() {
+    func testAncestralReferenceEliminatorRemovesSelfReferences() throws {
         // When a dangling reference is incorrectly associated with the declaration it
         // references (creating a self-reference), AncestralReferenceEliminator correctly
         // removes it. This test verifies the eliminator's behavior is correct — the fix
@@ -587,7 +602,7 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
 
-        graph.add(structDecl)
+        try graph.add(structDecl)
         graph.add(selfRef, from: structDecl)
 
         graph.indexingComplete()
@@ -602,7 +617,7 @@ final class DeterminismRegressionTest: XCTestCase {
 
     // MARK: - Protocol Conformance Inversion with Multiple Conformances
 
-    func testProtocolConformanceInversionHandlesMultipleConformances() {
+    func testProtocolConformanceInversionHandlesMultipleConformances() throws {
         // When multiple classes conform to the same protocol, the inversion must
         // process all conformances correctly. Before the batch mutation fix, graph
         // mutations during iteration could cause order-dependent skipping.
@@ -660,12 +675,12 @@ final class DeterminismRegressionTest: XCTestCase {
         implB.parent = classB
         classB.declarations.insert(implB)
 
-        graph.add(proto)
-        graph.add(requirement)
-        graph.add(classA)
-        graph.add(implA)
-        graph.add(classB)
-        graph.add(implB)
+        try graph.add(proto)
+        try graph.add(requirement)
+        try graph.add(classA)
+        try graph.add(implA)
+        try graph.add(classB)
+        try graph.add(implB)
 
         // Related references from conforming implementations to the protocol requirement.
         let relatedA = makeReference(

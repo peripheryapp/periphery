@@ -98,9 +98,9 @@ struct GenericItem: Item {
     let items: [Item]
 }
 
-/// Collects top-level (non-nested) function and initializer syntax nodes during
-/// a MultiplexingSyntaxVisitor walk, so UnusedParameterParser can process them
-/// without re-walking the entire file.
+/// Collects root function and initializer syntax nodes during a
+/// MultiplexingSyntaxVisitor walk. Nested functions are still discovered
+/// recursively when UnusedParameterParser parses those collected nodes.
 public final class FunctionSyntaxCollector: PeripherySyntaxVisitor {
     public private(set) var functionDecls: [FunctionDeclSyntax] = []
     public private(set) var initializerDecls: [InitializerDeclSyntax] = []

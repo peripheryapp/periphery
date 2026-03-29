@@ -245,10 +245,10 @@ final class SwiftIndexer: Indexer {
                 declarations.append(decl)
             }
 
-            graph.withLock { graph in
+            try graph.withLock { graph in
                 graph.ensureReferencesCapacity(graph.allReferences.count + references.count)
                 graph.add(references)
-                graph.add(newDeclarations)
+                try graph.add(newDeclarations)
                 // Apply batched retention after insertion so any synthetic
                 // retained references resolve against the completed file graph.
                 graph.markRetained(retainedDecls)
@@ -311,7 +311,7 @@ final class SwiftIndexer: Indexer {
 
             var unmatchedFunctions: [(String, Location)] = []
 
-            graph.withLock { graph in
+            try graph.withLock { graph in
                 if !configuration.disableUnusedImportAnalysis {
                     graph.addIndexedSourceFile(sourceFile)
                     graph.addIndexedModules(sourceFile.modules)
@@ -323,7 +323,7 @@ final class SwiftIndexer: Indexer {
                 associateLatentReferencesUnsafe(graph: graph)
                 associateDanglingReferencesUnsafe(tables: danglingRefTables)
                 applyDeclarationMetadataUnsafe(declarationsByLocation)
-                identifyUnusedParametersUnsafe(
+                try identifyUnusedParametersUnsafe(
                     paramsByFunction: paramsByFunction,
                     graph: graph,
                     unmatchedFunctions: &unmatchedFunctions
@@ -531,7 +531,7 @@ final class SwiftIndexer: Indexer {
             paramsByFunction: [Function: Set<Parameter>],
             graph: SourceGraph,
             unmatchedFunctions: inout [(String, Location)]
-        ) {
+        ) throws {
             let functionDecls = declarations.filter(\.kind.isFunctionKind)
             let functionDeclsByLocation = functionDecls.reduce(into: [Location: Declaration]()) {
                 $0[$1.location] = $1
@@ -562,7 +562,7 @@ final class SwiftIndexer: Indexer {
                 for param in params {
                     let paramDecl = param.makeDeclaration(withParent: functionDecl, interner: self.graph.usrInterner)
                     functionDecl.unusedParameters.insert(paramDecl)
-                    graph.add(paramDecl)
+                    try graph.add(paramDecl)
 
                     if retainAllDeclarations || (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) {
                         graph.markRetained(paramDecl)

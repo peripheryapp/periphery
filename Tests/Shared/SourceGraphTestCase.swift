@@ -26,7 +26,7 @@ open class SourceGraphTestCase: XCTestCase {
         swiftVersion = SwiftVersion(shell: shell)
         let configuration = Configuration()
         configuration.quiet = true
-        graph = SourceGraph(configuration: configuration, logger: logger)
+        graph = SourceGraph(configuration: configuration)
     }
 
     override open func tearDown() {
@@ -56,7 +56,7 @@ open class SourceGraphTestCase: XCTestCase {
             )
         }
 
-        graph = SourceGraph(configuration: configuration, logger: logger)
+        graph = SourceGraph(configuration: configuration)
         let pipeline = IndexPipeline(
             plan: newPlan,
             graph: SourceGraphMutex(graph: graph),

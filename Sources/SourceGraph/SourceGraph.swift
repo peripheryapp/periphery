@@ -1,6 +1,5 @@
 import Configuration
 import Foundation
-import Logger
 import Shared
 
 public final class SourceGraph {
@@ -37,11 +36,9 @@ public final class SourceGraph {
     private var moduleExportsUnindexedCache: [ModuleID: Bool] = [:]
 
     private let configuration: Configuration
-    private let logger: Logger
 
-    public init(configuration: Configuration, logger: Logger) {
+    public init(configuration: Configuration) {
         self.configuration = configuration
-        self.logger = logger
     }
 
     public func reserveCapacity(forFileCount fileCount: Int) {
@@ -210,31 +207,29 @@ public final class SourceGraph {
         retainedDeclarations.contains(declaration) || references(to: declaration).contains { $0.kind == .retained }
     }
 
-    public func add(_ declaration: Declaration) {
+    public func add(_ declaration: Declaration) throws {
+        try validateNoDeclarationConflict(for: declaration, existingDeclarationsByUsr: allDeclarationsByUsr)
+
         allDeclarations.insert(declaration)
         allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
         declarationsOfKindsCache.removeAll(keepingCapacity: true)
         for usrID in declaration.usrIDs {
-            if let existingDecl = allDeclarationsByUsr[usrID] {
-                let usr = usrInterner.string(for: usrID)
-                logger.warn("""
-                Declaration conflict detected: a declaration with the USR '\(usr)' has already been indexed.
-                This issue can cause inconsistent and incorrect results.
-                Existing declaration: \(existingDecl), declared in modules: \(existingDecl.location.file.modules.sorted())
-                Conflicting declaration: \(declaration), declared in modules: \(declaration.location.file.modules.sorted())
-                To resolve this warning, make sure all build modules are uniquely named.
-                """)
-                if declaration < existingDecl {
-                    allDeclarationsByUsr[usrID] = declaration
-                }
-            } else {
-                allDeclarationsByUsr[usrID] = declaration
-            }
+            allDeclarationsByUsr[usrID] = declaration
         }
     }
 
-    public func add(_ declarations: Set<Declaration>) {
-        declarations.forEach { add($0) }
+    public func add(_ declarations: Set<Declaration>) throws {
+        var seenDeclarationsByUsr = allDeclarationsByUsr
+        for declaration in declarations {
+            try validateNoDeclarationConflict(for: declaration, existingDeclarationsByUsr: seenDeclarationsByUsr)
+            for usrID in declaration.usrIDs {
+                seenDeclarationsByUsr[usrID] = declaration
+            }
+        }
+
+        for declaration in declarations {
+            try add(declaration)
+        }
     }
 
     public func remove(_ declaration: Declaration) {
@@ -482,6 +477,23 @@ public final class SourceGraph {
 
         return inheritedTypeReferences(of: decl).contains {
             [.protocol, .typealias].contains($0.declarationKind) && encodableTypes.contains($0.name)
+        }
+    }
+
+    private func validateNoDeclarationConflict(
+        for declaration: Declaration,
+        existingDeclarationsByUsr: [USRID: Declaration]
+    ) throws {
+        for usrID in declaration.usrIDs {
+            if let existingDecl = existingDeclarationsByUsr[usrID] {
+                let usr = usrInterner.string(for: usrID)
+                throw PeripheryError.sourceGraphIntegrityError(message: """
+                Declaration conflict detected: a declaration with the USR '\(usr)' has already been indexed.
+                Existing declaration: \(existingDecl), declared in modules: \(existingDecl.location.file.modules.sorted())
+                Conflicting declaration: \(declaration), declared in modules: \(declaration.location.file.modules.sorted())
+                Make sure all build modules are uniquely named.
+                """)
+            }
         }
     }
 }

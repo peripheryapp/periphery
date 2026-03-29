@@ -17,7 +17,7 @@ final class Scan {
         self.configuration = configuration
         self.logger = logger
         self.swiftVersion = swiftVersion
-        graph = SourceGraph(configuration: configuration, logger: logger)
+        graph = SourceGraph(configuration: configuration)
     }
 
     func perform(project: Project) throws -> [ScanResult] {
