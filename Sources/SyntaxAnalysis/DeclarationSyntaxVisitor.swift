@@ -121,8 +121,8 @@ public final class DeclarationSyntaxVisitor: PeripherySyntaxVisitor {
         } else if let identifierType = node.extendedType.as(IdentifierTypeSyntax.self),
                   let genericArgumentClause = identifierType.genericArgumentClause
         {
-            if swiftVersion.version.isVersion(lessThanOrEqualTo: "6.2.3") {
-                // Swift <= 6.2.3: Generic protocol extensions in the form `extension Foo<Type>` have incorrect locations
+            if swiftVersion.version.isVersion(lessThanOrEqualTo: "6.2.4") {
+                // Swift <= 6.2.4: Generic protocol extensions in the form `extension Foo<Type>` have incorrect locations
                 // in the index store. This results in syntax metadata not being applied to the declaration due to the
                 // location mismatch. To workaround this, parse this node with the incorrect location.
                 position = genericArgumentClause.rightAngle.positionAfterSkippingLeadingTrivia
