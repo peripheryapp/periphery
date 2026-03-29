@@ -23,10 +23,6 @@ public final class UnusedParameterAnalyzer {
         return analyzeAll(functions)
     }
 
-    public func analyze(functions: [Function]) -> [Function: Set<Parameter>] {
-        analyzeAll(functions)
-    }
-
     public func analyze(
         collectedFunctionDecls: [FunctionDeclSyntax],
         collectedInitializerDecls: [InitializerDeclSyntax],
