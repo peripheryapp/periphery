@@ -68,31 +68,23 @@ final class UnusedImportMarker: SourceGraphMutator {
         defer { perFileModules.deallocate() }
 
         let usrCount = graph.usrInterner.count
-        var moduleCached = [Bool](repeating: false, count: usrCount)
-        var moduleCacheValues = [ModuleBitset](repeating: emptyBitset, count: usrCount)
         extCacheFilled = [Bool](repeating: false, count: usrCount)
         extCacheValues = [ModuleBitset](repeating: emptyBitset, count: usrCount)
         refTypesCached = [Bool](repeating: false, count: usrCount)
         refTypesCacheValues = [Set<Reference>](repeating: [], count: usrCount)
 
         // Build a mapping of source files and the modules they reference.
-        for ref in graph.allReferences {
-            let idx = ref.usrID.rawValue
-
-            if moduleCached[idx] {
-                let modules = moduleCacheValues[idx]
-                if !modules.isEmpty, let fileIdx = fileToIndex[ObjectIdentifier(ref.location.file)] {
-                    let base = fileIdx * wordCount
-                    for j in 0 ..< wordCount {
-                        perFileModules[base + j] |= modules.words[j]
-                    }
-                }
-                continue
-            }
+        // Process each USR once, then fan its module bitset out to
+        // every file that references it. The bitset OR is idempotent so
+        // duplicate file hits from multiple references are harmless.
+        for idx in 0 ..< usrCount {
+            let usrID = USRID(idx)
+            let refs = graph.references(toUsrID: usrID)
+            guard let firstRef = refs.first else { continue }
 
             var referencedModules = ModuleBitset(wordCount: wordCount)
 
-            if let decl = graph.declaration(withUsrID: ref.usrID) {
+            if let decl = graph.declaration(withUsrID: usrID) {
                 referencedModules.formUnion(fileModuleBitset(decl.location.file))
                 let indirectRefs = referencedTypes(from: decl)
 
@@ -110,11 +102,12 @@ final class UnusedImportMarker: SourceGraphMutator {
                 }
             }
 
-            referencedModules.formUnion(modulesExtending(ref))
-            moduleCached[idx] = true
-            moduleCacheValues[idx] = referencedModules
+            referencedModules.formUnion(modulesExtending(firstRef))
+            guard !referencedModules.isEmpty else { continue }
 
-            if !referencedModules.isEmpty, let fileIdx = fileToIndex[ObjectIdentifier(ref.location.file)] {
+            for ref in refs {
+                guard let fileIdx = fileToIndex[ObjectIdentifier(ref.location.file)] else { continue }
+
                 let base = fileIdx * wordCount
                 for j in 0 ..< wordCount {
                     perFileModules[base + j] |= referencedModules.words[j]

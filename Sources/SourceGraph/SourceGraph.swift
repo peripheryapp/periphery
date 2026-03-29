@@ -219,11 +219,12 @@ public final class SourceGraph {
     }
 
     public func add(_ declarations: Set<Declaration>) throws {
-        var seenDeclarationsByUsr = allDeclarationsByUsr
+        var batchDeclarationsByUsr: [USRID: Declaration] = [:]
         for declaration in declarations {
-            try validateNoDeclarationConflict(for: declaration, existingDeclarationsByUsr: seenDeclarationsByUsr)
+            try validateNoDeclarationConflict(for: declaration, existingDeclarationsByUsr: allDeclarationsByUsr)
+            try validateNoDeclarationConflict(for: declaration, existingDeclarationsByUsr: batchDeclarationsByUsr)
             for usrID in declaration.usrIDs {
-                seenDeclarationsByUsr[usrID] = declaration
+                batchDeclarationsByUsr[usrID] = declaration
             }
         }
 
@@ -353,11 +354,21 @@ public final class SourceGraph {
         return result
     }
 
+    private var relativePathCache: [ObjectIdentifier: String] = [:]
+
     func markUnusedModuleImport(_ statement: ImportStatement) {
-        let location = statement.location.relativeTo(configuration.projectRoot)
-        let usr = "import-\(statement.module)-\(location)"
+        let loc = statement.location
+        let fileOID = ObjectIdentifier(loc.file)
+        let relativePath: String
+        if let cached = relativePathCache[fileOID] {
+            relativePath = cached
+        } else {
+            relativePath = loc.file.path.relativeTo(configuration.projectRoot).string
+            relativePathCache[fileOID] = relativePath
+        }
+        let usr = "import-\(statement.module)-\(relativePath):\(loc.line):\(loc.column)"
         let usrID = usrInterner.intern(usr)
-        let decl = Declaration(name: statement.module, kind: .module, usrs: [usr], usrIDs: [usrID], location: statement.location)
+        let decl = Declaration(name: statement.module, kind: .module, usrs: [usr], usrIDs: [usrID], location: loc)
         unusedModuleImports.insert(decl)
     }
 

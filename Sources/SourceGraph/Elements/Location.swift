@@ -20,13 +20,6 @@ public struct Location {
         hashValueCache = hasher.finalize()
     }
 
-    func relativeTo(_ path: FilePath) -> Location {
-        let newPath = file.path.relativeTo(path)
-        let newFile = SourceFile(path: newPath, modules: file.modules)
-        newFile.importStatements = file.importStatements
-        return Location(file: newFile, line: line, column: column)
-    }
-
     // MARK: - Private
 
     private func buildDescription(path: String) -> String {
