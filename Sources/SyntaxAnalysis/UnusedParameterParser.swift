@@ -1,4 +1,5 @@
 import Foundation
+import Shared
 import SourceGraph
 import SwiftParser
 import SwiftSyntax
@@ -97,8 +98,36 @@ struct GenericItem: Item {
     let items: [Item]
 }
 
+/// Collects top-level (non-nested) function and initializer syntax nodes during
+/// a MultiplexingSyntaxVisitor walk, so UnusedParameterParser can process them
+/// without re-walking the entire file.
+public final class FunctionSyntaxCollector: PeripherySyntaxVisitor {
+    public private(set) var functionDecls: [FunctionDeclSyntax] = []
+    public private(set) var initializerDecls: [InitializerDeclSyntax] = []
+    private var functionDepth = 0
+
+    public required init(sourceLocationBuilder _: SourceLocationBuilder, swiftVersion _: SwiftVersion) {}
+
+    public func visit(_ node: FunctionDeclSyntax) {
+        if functionDepth == 0 { functionDecls.append(node) }
+        functionDepth += 1
+    }
+
+    public func visitPost(_: FunctionDeclSyntax) {
+        functionDepth -= 1
+    }
+
+    public func visit(_ node: InitializerDeclSyntax) {
+        if functionDepth == 0 { initializerDecls.append(node) }
+        functionDepth += 1
+    }
+
+    public func visitPost(_: InitializerDeclSyntax) {
+        functionDepth -= 1
+    }
+}
+
 struct UnusedParameterParser {
-    private let syntax: SourceFileSyntax
     private let parseProtocols: Bool
     private let file: SourceFile
     private let locationConverter: SourceLocationConverter
@@ -111,11 +140,10 @@ struct UnusedParameterParser {
     ) -> [Function] {
         let parser = self.init(
             file: file,
-            syntax: syntax,
             locationConverter: locationConverter,
             parseProtocols: parseProtocols
         )
-        return parser.parse()
+        return parser.parse(syntax: syntax)
     }
 
     static func parse(file: SourceFile, parseProtocols: Bool) throws -> [Function] {
@@ -130,15 +158,45 @@ struct UnusedParameterParser {
         )
     }
 
-    private init(file: SourceFile, syntax: SourceFileSyntax, locationConverter: SourceLocationConverter, parseProtocols: Bool) {
+    static func parseCollected(
+        functionDecls: [FunctionDeclSyntax],
+        initializerDecls: [InitializerDeclSyntax],
+        file: SourceFile,
+        locationConverter: SourceLocationConverter,
+        parseProtocols: Bool
+    ) -> [Function] {
+        let parser = self.init(
+            file: file,
+            locationConverter: locationConverter,
+            parseProtocols: parseProtocols
+        )
+        return parser.parseFunctionNodes(functionDecls, initializerDecls)
+    }
+
+    private init(file: SourceFile, locationConverter: SourceLocationConverter, parseProtocols: Bool) {
         self.file = file
-        self.syntax = syntax
         self.locationConverter = locationConverter
         self.parseProtocols = parseProtocols
     }
 
-    func parse() -> [Function] {
+    func parse(syntax: SourceFileSyntax) -> [Function] {
         parse(node: syntax, collecting: Function.self)
+    }
+
+    private func parseFunctionNodes(
+        _ functionDecls: [FunctionDeclSyntax],
+        _ initializerDecls: [InitializerDeclSyntax]
+    ) -> [Function] {
+        let collector = Collector<Function>()
+        for decl in functionDecls {
+            let item = parse(functionDecl: decl, collector)
+            if let item { collector.add(item) }
+        }
+        for decl in initializerDecls {
+            let item = parse(initializerDecl: decl, collector)
+            if let item { collector.add(item) }
+        }
+        return collector.collection
     }
 
     // MARK: - Private

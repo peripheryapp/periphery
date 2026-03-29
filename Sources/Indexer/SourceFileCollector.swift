@@ -43,12 +43,12 @@ public struct SourceFileCollector {
                     let file = FilePath.makeAbsolute(filePath, relativeTo: currentFilePath)
 
                     if !isExcluded(file) {
-                        guard file.exists else {
-                            logger.debug("Source file does not exist: \(file.string)")
+                        if excludedTargets.contains(unit.moduleName) {
                             return nil
                         }
 
-                        if excludedTargets.contains(unit.moduleName) {
+                        guard file.exists else {
+                            logger.debug("Source file does not exist: \(file.string)")
                             return nil
                         }
 

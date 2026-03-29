@@ -13,6 +13,12 @@ public struct IndexUnit {
     let unit: UnitReader
 }
 
+private struct DanglingReferenceTables {
+    let declsByLocation: [Location: [Declaration]]
+    let declsByLine: [Int: [Declaration]]
+    let sortedDeclLines: ReversedCollection<[Int]>
+}
+
 final class SwiftIndexer: Indexer {
     private let sourceFiles: [SourceFile: [IndexUnit]]
     private let graph: SourceGraphMutex
@@ -263,34 +269,71 @@ final class SwiftIndexer: Indexer {
 
         /// Phase two associates latent references, and performs other actions that depend on the completed source graph.
         func phaseTwo() throws {
-            if !configuration.disableUnusedImportAnalysis {
-                graph.withLock { graph in
-                    graph.addIndexedSourceFile(sourceFile)
-                    graph.addIndexedModules(sourceFile.modules)
-                }
+            let hasWork = !declarations.isEmpty || !referencesByUsr.isEmpty || !danglingReferences.isEmpty
+
+            if !hasWork, configuration.disableUnusedImportAnalysis {
+                return
             }
 
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: sourceFile, swiftVersion: swiftVersion)
             let declarationSyntaxVisitor = multiplexingSyntaxVisitor.add(DeclarationSyntaxVisitor.self)
             let importSyntaxVisitor = multiplexingSyntaxVisitor.add(ImportSyntaxVisitor.self)
+            let functionCollector = multiplexingSyntaxVisitor.add(FunctionSyntaxCollector.self)
             multiplexingSyntaxVisitor.visit()
 
             sourceFile.importStatements = importSyntaxVisitor.importStatements
             sourceFile.importsSwiftTesting = importSyntaxVisitor.importStatements.contains(where: { $0.module == "Testing" })
 
-            if !configuration.disableUnusedImportAnalysis {
-                for stmt in sourceFile.importStatements where stmt.isExported {
-                    graph.withLock { graph in
+            if !hasWork {
+                graph.withLock { graph in
+                    graph.addIndexedSourceFile(sourceFile)
+                    graph.addIndexedModules(sourceFile.modules)
+                    for stmt in sourceFile.importStatements where stmt.isExported {
                         graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
                     }
                 }
+                return
             }
 
-            associateLatentReferences()
-            associateDanglingReferences()
-            visitDeclarations(using: declarationSyntaxVisitor)
-            identifyUnusedParameters(using: multiplexingSyntaxVisitor)
-            applyCommentCommands(using: multiplexingSyntaxVisitor)
+            let declarationsByLocation = declarationSyntaxVisitor.resultsByLocation
+            let fileCommands = multiplexingSyntaxVisitor.parseComments()
+
+            let danglingRefTables = buildDanglingReferenceTables()
+
+            let analyzer = UnusedParameterAnalyzer()
+            let paramsByFunction = analyzer.analyze(
+                collectedFunctionDecls: functionCollector.functionDecls,
+                collectedInitializerDecls: functionCollector.initializerDecls,
+                file: multiplexingSyntaxVisitor.sourceFile,
+                locationConverter: multiplexingSyntaxVisitor.locationConverter,
+                parseProtocols: true
+            )
+
+            var unmatchedFunctions: [(String, Location)] = []
+
+            graph.withLock { graph in
+                if !configuration.disableUnusedImportAnalysis {
+                    graph.addIndexedSourceFile(sourceFile)
+                    graph.addIndexedModules(sourceFile.modules)
+                    for stmt in sourceFile.importStatements where stmt.isExported {
+                        graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
+                    }
+                }
+
+                associateLatentReferencesUnsafe(graph: graph)
+                associateDanglingReferencesUnsafe(tables: danglingRefTables)
+                applyDeclarationMetadataUnsafe(declarationsByLocation)
+                identifyUnusedParametersUnsafe(
+                    paramsByFunction: paramsByFunction,
+                    graph: graph,
+                    unmatchedFunctions: &unmatchedFunctions
+                )
+                applyCommentCommandsUnsafe(fileCommands: fileCommands, graph: graph)
+            }
+
+            for (name, location) in unmatchedFunctions {
+                logger.debug("Failed to associate indexed function for parameter function '\(name)' at \(location).")
+            }
         }
 
         // MARK: - Private
@@ -332,27 +375,20 @@ final class SwiftIndexer: Indexer {
             }
         }
 
-        private func associateLatentReferences() {
-            graph.withLock { graph in
-                for (usr, refs) in referencesByUsr {
-                    if let decl = graph.declaration(withUsr: usr) {
-                        for ref in refs {
-                            associateUnsafe(ref, with: decl)
-                        }
-                    } else {
-                        danglingReferences.append(contentsOf: refs)
+        private func associateLatentReferencesUnsafe(graph: SourceGraph) {
+            for (usr, refs) in referencesByUsr {
+                if let decl = graph.declaration(withUsr: usr) {
+                    for ref in refs {
+                        associateUnsafe(ref, with: decl)
                     }
+                } else {
+                    danglingReferences.append(contentsOf: refs)
                 }
             }
         }
 
-        // Swift does not associate some type references with the containing declaration, resulting in references
-        // with no clear parent. Property references are one example: https://github.com/apple/swift/issues/56163
-        private func associateDanglingReferences() {
-            guard !danglingReferences.isEmpty else { return }
-
+        private func buildDanglingReferenceTables() -> DanglingReferenceTables {
             let sortedDeclarations = sortedDeclarationsCache ?? declarations.sorted()
-
             let declsByLocation = sortedDeclarations
                 .reduce(into: [Location: [Declaration]]()) { result, decl in
                     result[decl.location, default: []].append(decl)
@@ -362,67 +398,56 @@ final class SwiftIndexer: Indexer {
                     result[decl.location.line, default: []].append(decl)
                 }
             let sortedDeclLines = declsByLine.keys.sorted().reversed()
+            return DanglingReferenceTables(
+                declsByLocation: declsByLocation,
+                declsByLine: declsByLine,
+                sortedDeclLines: sortedDeclLines
+            )
+        }
 
-            var associations: [(Reference, Declaration)] = []
+        // Swift does not associate some type references with the containing declaration, resulting in references
+        // with no clear parent. Property references are one example: https://github.com/apple/swift/issues/56163
+        private func associateDanglingReferencesUnsafe(tables: DanglingReferenceTables) {
+            guard !danglingReferences.isEmpty else { return }
 
             for ref in danglingReferences {
-                let sameLineCandidateDecls = declsByLocation[ref.location] ??
-                    declsByLine[ref.location.line]
+                let sameLineCandidateDecls = tables.declsByLocation[ref.location] ??
+                    tables.declsByLine[ref.location.line]
                 var candidateDecls = [Declaration]()
 
                 if let sameLineCandidateDecls {
                     candidateDecls = sameLineCandidateDecls
                 } else {
-                    // For references with no declaration on the same line, find the nearest preceding declaration.
-                    if let line = sortedDeclLines.first(where: { $0 < ref.location.line }) {
-                        candidateDecls = declsByLine[line]?.filter {
+                    if let line = tables.sortedDeclLines.first(where: { $0 < ref.location.line }) {
+                        candidateDecls = tables.declsByLine[line]?.filter {
                             !$0.usrIDs.contains(ref.usrID) &&
                                 !$0.ancestralDeclarations.contains(where: { $0.usrIDs.contains(ref.usrID) })
                         } ?? []
                     }
                 }
 
-                // The vast majority of the time there will only be a single declaration for this location,
-                // however it is possible for there to be more than one. In that case, first attempt to associate with
-                // a decl without a parent, as the reference may be a related type of a class/struct/etc.
                 if let decl = candidateDecls.first(where: { $0.parent == nil }) {
-                    associations.append((ref, decl))
+                    associateUnsafe(ref, with: decl)
                 } else if let decl = candidateDecls.min() {
-                    // Fallback to using the first declaration.
-                    // Sorting the declarations helps in the situation where the candidate declarations includes a
-                    // property/subscript, and a getter on the same line. The property/subscript is more likely to be
-                    // the declaration that should hold the references.
-                    associations.append((ref, decl))
-                }
-            }
-
-            graph.withLock { _ in
-                for (ref, decl) in associations {
                     associateUnsafe(ref, with: decl)
                 }
             }
         }
 
-        private func applyCommentCommands(using syntaxVisitor: MultiplexingSyntaxVisitor) {
-            let fileCommands = syntaxVisitor.parseComments()
+        private func applyDeclarationMetadataUnsafe(_ declarationsByLocation: [Location: DeclarationSyntaxVisitor.Result]) {
+            for decl in declarations {
+                guard let result = declarationsByLocation[decl.location] else { continue }
 
-            if fileCommands.contains(.ignoreAll) {
-                commandIgnore(declarations, kind: .file)
-            } else {
-                for decl in declarations where decl.commentCommands.contains(.ignore) {
-                    commandIgnore([decl], kind: .declaration)
-                }
+                applyDeclarationMetadata(to: decl, with: result)
             }
         }
 
-        private func visitDeclarations(using declarationVisitor: DeclarationSyntaxVisitor) {
-            let declarationsByLocation = declarationVisitor.resultsByLocation
-
-            graph.withLock { _ in
-                for decl in declarations {
-                    guard let result = declarationsByLocation[decl.location] else { continue }
-
-                    applyDeclarationMetadata(to: decl, with: result)
+        private func applyCommentCommandsUnsafe(fileCommands: [CommentCommand], graph: SourceGraph) {
+            if fileCommands.contains(.ignoreAll) {
+                commandIgnoreUnsafe(declarations, kind: .file, graph: graph)
+            } else {
+                for decl in declarations where decl.commentCommands.contains(.ignore) {
+                    commandIgnoreUnsafe([decl], kind: .declaration, graph: graph)
                 }
             }
         }
@@ -480,16 +505,15 @@ final class SwiftIndexer: Indexer {
             }
         }
 
-        private func commandIgnore(_ decls: [Declaration], kind: CommandIgnoreKind) {
+        private func commandIgnoreUnsafe(_ decls: [Declaration], kind: CommandIgnoreKind, graph: SourceGraph) {
             for decl in decls {
-                graph.withLock { graph in
-                    graph.markRetained(decl)
-                    decl.unusedParameters.forEach { graph.markRetained($0) }
+                graph.markRetained(decl)
+                decl.unusedParameters.forEach { graph.markRetained($0) }
 
-                    graph.markCommandIgnored(decl, kind: kind)
-                    decl.unusedParameters.forEach { graph.markCommandIgnored($0, kind: kind) }
-                }
-                commandIgnore(Array(decl.declarations), kind: kind)
+                graph.markCommandIgnored(decl, kind: kind)
+                decl.unusedParameters.forEach { graph.markCommandIgnored($0, kind: kind) }
+
+                commandIgnoreUnsafe(Array(decl.declarations), kind: kind, graph: graph)
             }
         }
 
@@ -503,7 +527,11 @@ final class SwiftIndexer: Indexer {
             }
         }
 
-        private func identifyUnusedParameters(using syntaxVisitor: MultiplexingSyntaxVisitor) {
+        private func identifyUnusedParametersUnsafe(
+            paramsByFunction: [Function: Set<Parameter>],
+            graph: SourceGraph,
+            unmatchedFunctions: inout [(String, Location)]
+        ) {
             let functionDecls = declarations.filter(\.kind.isFunctionKind)
             let functionDeclsByLocation = functionDecls.reduce(into: [Location: Declaration]()) {
                 $0[$1.location] = $1
@@ -519,46 +547,30 @@ final class SwiftIndexer: Indexer {
                 }
             }
 
-            let analyzer = UnusedParameterAnalyzer()
-            let paramsByFunction = analyzer.analyze(
-                file: syntaxVisitor.sourceFile,
-                syntax: syntaxVisitor.syntax,
-                locationConverter: syntaxVisitor.locationConverter,
-                parseProtocols: true
-            )
-
-            var unmatchedFunctions: [(String, Location)] = []
-
-            graph.withLock { graph in
-                for functionDecl in functionsWithIgnoredParams {
-                    graph.markHasIgnoredParameters(functionDecl)
-                }
-
-                for (function, params) in paramsByFunction {
-                    guard let functionDecl = functionDeclsByLocation[function.location] else {
-                        unmatchedFunctions.append((function.name, function.location))
-                        continue
-                    }
-
-                    let ignoredParamNames = ignoredParamsByLocation[functionDecl.location] ?? []
-
-                    for param in params {
-                        let paramDecl = param.makeDeclaration(withParent: functionDecl, interner: self.graph.usrInterner)
-                        functionDecl.unusedParameters.insert(paramDecl)
-                        graph.add(paramDecl)
-
-                        if retainAllDeclarations || (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) {
-                            graph.markRetained(paramDecl)
-                        } else if ignoredParamNames.contains(param.name.text) {
-                            graph.markRetained(paramDecl)
-                            graph.markCommandIgnored(paramDecl, kind: .declaration)
-                        }
-                    }
-                }
+            for functionDecl in functionsWithIgnoredParams {
+                graph.markHasIgnoredParameters(functionDecl)
             }
 
-            for (name, location) in unmatchedFunctions {
-                logger.debug("Failed to associate indexed function for parameter function '\(name)' at \(location).")
+            for (function, params) in paramsByFunction {
+                guard let functionDecl = functionDeclsByLocation[function.location] else {
+                    unmatchedFunctions.append((function.name, function.location))
+                    continue
+                }
+
+                let ignoredParamNames = ignoredParamsByLocation[functionDecl.location] ?? []
+
+                for param in params {
+                    let paramDecl = param.makeDeclaration(withParent: functionDecl, interner: self.graph.usrInterner)
+                    functionDecl.unusedParameters.insert(paramDecl)
+                    graph.add(paramDecl)
+
+                    if retainAllDeclarations || (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) {
+                        graph.markRetained(paramDecl)
+                    } else if ignoredParamNames.contains(param.name.text) {
+                        graph.markRetained(paramDecl)
+                        graph.markCommandIgnored(paramDecl, kind: .declaration)
+                    }
+                }
             }
         }
 

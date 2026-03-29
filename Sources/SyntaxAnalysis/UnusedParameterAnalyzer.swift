@@ -23,6 +23,27 @@ public final class UnusedParameterAnalyzer {
         return analyzeAll(functions)
     }
 
+    public func analyze(functions: [Function]) -> [Function: Set<Parameter>] {
+        analyzeAll(functions)
+    }
+
+    public func analyze(
+        collectedFunctionDecls: [FunctionDeclSyntax],
+        collectedInitializerDecls: [InitializerDeclSyntax],
+        file: SourceFile,
+        locationConverter: SourceLocationConverter,
+        parseProtocols: Bool
+    ) -> [Function: Set<Parameter>] {
+        let functions = UnusedParameterParser.parseCollected(
+            functionDecls: collectedFunctionDecls,
+            initializerDecls: collectedInitializerDecls,
+            file: file,
+            locationConverter: locationConverter,
+            parseProtocols: parseProtocols
+        )
+        return analyzeAll(functions)
+    }
+
     private func analyzeAll(_ functions: [Function]) -> [Function: Set<Parameter>] {
         functions.reduce(into: [Function: Set<Parameter>]()) { result, function in
             let params = analyze(function: function)
