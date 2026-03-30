@@ -6,6 +6,20 @@
 
 ##### Enhancements
 
+- None.
+
+##### Bug Fixes
+
+- None.
+
+## 3.7.0 (2026-03-30)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
 - Added support for Bazel 9.x.
 
 ##### Bug Fixes
