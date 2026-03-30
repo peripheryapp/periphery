@@ -66,7 +66,7 @@ open class SourceGraphTestCase: XCTestCase {
         )
         try! pipeline.perform()
 
-        allIndexedDeclarations = graph.allDeclarations
+        allIndexedDeclarations = Set(graph.allDeclarations)
         try! SourceGraphMutatorRunner(
             graph: graph,
             logger: logger,
@@ -303,7 +303,7 @@ open class SourceGraphTestCase: XCTestCase {
             switch scope {
             case let .declaration(declaration):
                 if result.contains(declaration) {
-                    result = declaration.declarations.union(declaration.unusedParameters)
+                    result = Set(declaration.declarations + declaration.unusedParameters)
                 }
             case let .module(module):
                 result = result.filter { $0.location.file.modules.contains(module) }
@@ -333,7 +333,7 @@ private extension [ScanResult] {
         }
     }
 
-    var redundantProtocolDeclarations: [Declaration: (references: Set<Reference>, inherited: Set<String>)] {
+    var redundantProtocolDeclarations: [Declaration: (references: [Reference], inherited: Set<String>)] {
         reduce(into: .init()) { result, scanResult in
             if case let .redundantProtocol(references, inherited) = scanResult.annotation {
                 result[scanResult.declaration] = (references, inherited)

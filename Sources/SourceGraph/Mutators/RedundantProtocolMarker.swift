@@ -59,7 +59,7 @@ final class RedundantProtocolMarker: SourceGraphMutator {
 
             if areAllReferencesConformances {
                 // The protocol is redundant.
-                let inherited = graph.inheritedTypeReferences(of: protocolDecl).filter { $0.declarationKind == .protocol }
+                let inherited = Array(graph.inheritedTypeReferences(of: protocolDecl).filter { $0.declarationKind == .protocol })
                 graph.markRedundantProtocol(protocolDecl, references: protocolReferences, inherited: inherited)
                 protocolDecl.declarations.forEach { graph.markIgnored($0) }
             }

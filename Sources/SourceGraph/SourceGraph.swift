@@ -3,12 +3,10 @@ import Foundation
 import Shared
 
 public final class SourceGraph {
-    public private(set) var allDeclarations: Set<Declaration> = []
-    public private(set) var redundantProtocols: [Declaration: (references: Set<Reference>, inherited: Set<Reference>)] = [:]
+    public private(set) var redundantProtocols: [Declaration: (references: [Reference], inherited: [Reference])] = [:]
     public private(set) var rootDeclarations: Set<Declaration> = []
     public private(set) var redundantPublicAccessibility: [Declaration: Set<String>] = [:]
-    public private(set) var rootReferences: Set<Reference> = []
-    public private(set) var allReferences: Set<Reference> = []
+    public private(set) var rootReferences: [Reference] = []
     public private(set) var retainedDeclarations: Set<Declaration> = []
     public private(set) var ignoredDeclarations: Set<Declaration> = []
     public private(set) var assetReferences: Set<AssetReference> = []
@@ -16,7 +14,7 @@ public final class SourceGraph {
     /// Flat array indexed by `USRID.rawValue` for O(1) reference lookup by USR.
     /// Maintained incrementally during indexing so that `indexingComplete()` has
     /// no per-reference hashing work to do.
-    private var referencesByUsrID: [Set<Reference>] = []
+    private var referencesByUsrID: [[Reference]] = []
     public private(set) var indexedSourceFiles: [SourceFile] = []
     public private(set) var unusedModuleImports: Set<Declaration> = []
     public private(set) var assignOnlyProperties: Set<Declaration> = []
@@ -31,7 +29,9 @@ public final class SourceGraph {
     private var unindexedExportedModules: Set<ModuleID> = []
     private var allDeclarationsByKind: [Declaration.Kind: Set<Declaration>] = [:]
     private var declarationsOfKindsCache: [Set<Declaration.Kind>: Set<Declaration>] = [:]
-    private var allDeclarationsByUsr: [USRID: Declaration] = [:]
+    private var declarationsOfKindsCacheDirty = false
+    /// Flat array indexed by `USRID.rawValue` for O(1) declaration lookup by USR.
+    private var declarationsByUsrID: [Declaration?] = []
     private var moduleToExportingModules: [ModuleID: Set<ModuleID>] = [:]
     private var moduleExportsUnindexedCache: [ModuleID: Bool] = [:]
 
@@ -43,24 +43,28 @@ public final class SourceGraph {
 
     public func reserveCapacity(forFileCount fileCount: Int) {
         let estimatedDeclarations = fileCount * 100
-        let estimatedReferences = fileCount * 500
         let estimatedUsrs = fileCount * 80
-        allDeclarations.reserveCapacity(estimatedDeclarations)
-        allReferences.reserveCapacity(estimatedReferences)
-        allDeclarationsByUsr.reserveCapacity(estimatedUsrs)
         usrInterner.reserveCapacity(estimatedUsrs)
         retainedDeclarations.reserveCapacity(estimatedDeclarations / 4)
         referencesByUsrID.reserveCapacity(estimatedUsrs)
     }
 
     public func indexingComplete() {
-        rootDeclarations = allDeclarations.filter { $0.parent == nil }
-        rootReferences = allReferences.filter { $0.parent == nil }
+        rootDeclarations = Set(allDeclarationsByKind.values.joined().filter { $0.parent == nil })
+        rootReferences = referencesByUsrID.flatMap { $0.filter { $0.parent == nil } }
         unindexedExportedModules = Set(moduleToExportingModules.keys).subtracting(indexedModules)
     }
 
+    public var allDeclarations: FlattenSequence<Dictionary<Declaration.Kind, Set<Declaration>>.Values> {
+        allDeclarationsByKind.values.joined()
+    }
+
+    public var allReferences: FlattenSequence<[[Reference]]> {
+        referencesByUsrID.joined()
+    }
+
     public var unusedDeclarations: Set<Declaration> {
-        allDeclarations.filter { !$0.isUsed }
+        Set(allDeclarationsByKind.values.joined().filter { !$0.isUsed })
     }
 
     public func declarations(ofKind kind: Declaration.Kind) -> Set<Declaration> {
@@ -68,6 +72,10 @@ public final class SourceGraph {
     }
 
     public func declarations(ofKinds kinds: Set<Declaration.Kind>) -> Set<Declaration> {
+        if declarationsOfKindsCacheDirty {
+            declarationsOfKindsCache.removeAll(keepingCapacity: true)
+            declarationsOfKindsCacheDirty = false
+        }
         if let cached = declarationsOfKindsCache[kinds] { return cached }
         // Pre-size the set to avoid incremental rehashing during formUnion.
         // Per-kind sets are disjoint so the sum is exact.
@@ -87,27 +95,33 @@ public final class SourceGraph {
     public func declaration(withUsr usr: String) -> Declaration? {
         guard let usrID = usrInterner.existing(usr) else { return nil }
 
-        return allDeclarationsByUsr[usrID]
+        let idx = usrID.rawValue
+        guard idx < declarationsByUsrID.count else { return nil }
+
+        return declarationsByUsrID[idx]
     }
 
     func declaration(withUsrID usrID: USRID) -> Declaration? {
-        allDeclarationsByUsr[usrID]
+        let idx = usrID.rawValue
+        guard idx < declarationsByUsrID.count else { return nil }
+
+        return declarationsByUsrID[idx]
     }
 
-    public func references(to decl: Declaration) -> Set<Reference> {
+    public func references(to decl: Declaration) -> [Reference] {
         if decl.usrIDs.count == 1 {
             return refsForUsr(decl.usrIDs[0])
         }
-        return decl.usrIDs.flatMapSet { refsForUsr($0) }
+        return decl.usrIDs.flatMap { refsForUsr($0) }
     }
 
-    public func references(to usr: String) -> Set<Reference> {
+    public func references(to usr: String) -> [Reference] {
         guard let usrID = usrInterner.existing(usr) else { return [] }
 
         return refsForUsr(usrID)
     }
 
-    func references(toUsrID usrID: USRID) -> Set<Reference> {
+    func references(toUsrID usrID: USRID) -> [Reference] {
         refsForUsr(usrID)
     }
 
@@ -115,7 +129,7 @@ public final class SourceGraph {
         decl.usrIDs.contains { usrHasRefs($0) }
     }
 
-    private func refsForUsr(_ usrID: USRID) -> Set<Reference> {
+    private func refsForUsr(_ usrID: USRID) -> [Reference] {
         let idx = usrID.rawValue
         return idx < referencesByUsrID.count ? referencesByUsrID[idx] : []
     }
@@ -128,11 +142,18 @@ public final class SourceGraph {
     private func ensureUsrBucket(for usrID: USRID) {
         let idx = usrID.rawValue
         if idx >= referencesByUsrID.count {
-            referencesByUsrID.append(contentsOf: repeatElement(Set<Reference>(), count: idx + 1 - referencesByUsrID.count))
+            referencesByUsrID.append(contentsOf: repeatElement([Reference](), count: idx + 1 - referencesByUsrID.count))
         }
     }
 
-    func markRedundantProtocol(_ declaration: Declaration, references: Set<Reference>, inherited: Set<Reference>) {
+    private func ensureUsrDeclBucket(for usrID: USRID) {
+        let idx = usrID.rawValue
+        if idx >= declarationsByUsrID.count {
+            declarationsByUsrID.append(contentsOf: repeatElement(nil, count: idx + 1 - declarationsByUsrID.count))
+        }
+    }
+
+    func markRedundantProtocol(_ declaration: Declaration, references: [Reference], inherited: [Reference]) {
         redundantProtocols[declaration] = (references, inherited)
     }
 
@@ -208,53 +229,43 @@ public final class SourceGraph {
     }
 
     public func add(_ declaration: Declaration) throws {
-        try validateNoDeclarationConflict(for: declaration, existingDeclarationsByUsr: allDeclarationsByUsr)
+        try validateNoDeclarationConflict(for: declaration)
 
-        allDeclarations.insert(declaration)
         allDeclarationsByKind[declaration.kind, default: []].insert(declaration)
-        declarationsOfKindsCache.removeAll(keepingCapacity: true)
+        declarationsOfKindsCacheDirty = true
         for usrID in declaration.usrIDs {
-            allDeclarationsByUsr[usrID] = declaration
+            ensureUsrDeclBucket(for: usrID)
+            declarationsByUsrID[usrID.rawValue] = declaration
         }
     }
 
     public func add(_ declarations: Set<Declaration>) throws {
-        var batchDeclarationsByUsr: [USRID: Declaration] = [:]
-        for declaration in declarations {
-            try validateNoDeclarationConflict(for: declaration, existingDeclarationsByUsr: allDeclarationsByUsr)
-            try validateNoDeclarationConflict(for: declaration, existingDeclarationsByUsr: batchDeclarationsByUsr)
-            for usrID in declaration.usrIDs {
-                batchDeclarationsByUsr[usrID] = declaration
-            }
-        }
-
         for declaration in declarations {
             try add(declaration)
         }
     }
 
     public func remove(_ declaration: Declaration) {
-        declaration.parent?.declarations.remove(declaration)
-        allDeclarations.remove(declaration)
+        if let i = declaration.parent?.declarations.firstIndex(where: { $0 === declaration }) {
+            declaration.parent?.declarations.remove(at: i)
+        }
         allDeclarationsByKind[declaration.kind]?.remove(declaration)
-        declarationsOfKindsCache.removeAll(keepingCapacity: true)
+        declarationsOfKindsCacheDirty = true
         rootDeclarations.remove(declaration)
         declaration.isUsed = false
         assignOnlyProperties.remove(declaration)
         suppressedAssignOnlyProperties.remove(declaration)
-        declaration.usrIDs.forEach { allDeclarationsByUsr.removeValue(forKey: $0) }
+        for usrID in declaration.usrIDs {
+            let idx = usrID.rawValue
+            if idx < declarationsByUsrID.count {
+                declarationsByUsrID[idx] = nil
+            }
+        }
     }
 
     public func add(_ reference: Reference) {
-        _ = allReferences.insert(reference)
         ensureUsrBucket(for: reference.usrID)
-        referencesByUsrID[reference.usrID.rawValue].insert(reference)
-    }
-
-    public func ensureReferencesCapacity(_ minimumCapacity: Int) {
-        if allReferences.capacity < minimumCapacity {
-            allReferences.reserveCapacity(minimumCapacity)
-        }
+        referencesByUsrID[reference.usrID.rawValue].append(reference)
     }
 
     public func add(_ references: [Reference]) {
@@ -262,31 +273,35 @@ public final class SourceGraph {
             ensureUsrBucket(for: USRID(maxID))
         }
         for ref in references {
-            allReferences.insert(ref)
-            referencesByUsrID[ref.usrID.rawValue].insert(ref)
+            referencesByUsrID[ref.usrID.rawValue].append(ref)
         }
     }
 
     public func add(_ reference: Reference, from declaration: Declaration) {
         if reference.kind == .related {
-            _ = declaration.related.insert(reference)
+            declaration.related.append(reference)
         } else {
-            _ = declaration.references.insert(reference)
+            declaration.references.append(reference)
         }
 
         add(reference)
     }
 
     func remove(_ reference: Reference) {
-        _ = allReferences.remove(reference)
         let idx = reference.usrID.rawValue
-        if idx < referencesByUsrID.count {
-            referencesByUsrID[idx].remove(reference)
+        if idx < referencesByUsrID.count,
+           let i = referencesByUsrID[idx].firstIndex(where: { $0 === reference })
+        {
+            referencesByUsrID[idx].remove(at: i)
         }
 
         if let parent = reference.parent {
-            parent.references.remove(reference)
-            parent.related.remove(reference)
+            if let i = parent.references.firstIndex(where: { $0 === reference }) {
+                parent.references.remove(at: i)
+            }
+            if let i = parent.related.firstIndex(where: { $0 === reference }) {
+                parent.related.remove(at: i)
+            }
         }
     }
 
@@ -491,12 +506,10 @@ public final class SourceGraph {
         }
     }
 
-    private func validateNoDeclarationConflict(
-        for declaration: Declaration,
-        existingDeclarationsByUsr: [USRID: Declaration]
-    ) throws {
+    private func validateNoDeclarationConflict(for declaration: Declaration) throws {
         for usrID in declaration.usrIDs {
-            if let existingDecl = existingDeclarationsByUsr[usrID] {
+            let idx = usrID.rawValue
+            if idx < declarationsByUsrID.count, let existingDecl = declarationsByUsrID[idx] {
                 let usr = usrInterner.string(for: usrID)
                 throw PeripheryError.sourceGraphIntegrityError(message: """
                 Declaration conflict detected: a declaration with the USR '\(usr)' has already been indexed.

@@ -160,10 +160,6 @@ final class ProtocolConformanceReferenceBuilder: SourceGraphMutator {
         }
 
         // Apply all mutations after traversal completes.
-        // Reserve capacity to reduce Set resizing during bulk insertions.
-        let estimatedNewRefs = referencesToAdd.count + declarationsToRetain.count
-        graph.ensureReferencesCapacity(graph.allReferences.count - referencesToRemove.count + estimatedNewRefs)
-
         for reference in referencesToRemove {
             graph.remove(reference)
         }

@@ -163,8 +163,6 @@ final class SwiftIndexer: Indexer {
         /// phase two.
         func phaseOne() throws {
             var rawDeclsByKey: [RawDeclaration.Key: [(RawDeclaration, [RawRelation])]] = [:]
-            // Array (not Set) to avoid redundant hashing -- deduplication happens
-            // in SourceGraph.allReferences when references are added under the lock.
             var references: [Reference] = []
 
             for unit in units {
@@ -246,11 +244,8 @@ final class SwiftIndexer: Indexer {
             }
 
             try graph.withLock { graph in
-                graph.ensureReferencesCapacity(graph.allReferences.count + references.count)
                 graph.add(references)
                 try graph.add(newDeclarations)
-                // Apply batched retention after insertion so any synthetic
-                // retained references resolve against the completed file graph.
                 graph.markRetained(retainedDecls)
 
                 if retainAllDeclarations {
@@ -260,8 +255,6 @@ final class SwiftIndexer: Indexer {
 
             establishDeclarationHierarchy()
 
-            // Only sort when needed -- associateDanglingReferences is the sole consumer
-            // and it early-exits when there are no dangling references.
             if !danglingReferences.isEmpty {
                 sortedDeclarationsCache = declarations.sorted()
             }
@@ -359,7 +352,6 @@ final class SwiftIndexer: Indexer {
                 for (parent, decls) in childDeclsByParentUsr {
                     guard let parentDecl = graph.declaration(withUsr: parent) else {
                         if varParameterUsrs.contains(parent) {
-                            // These declarations are children of a parameter and are redundant.
                             decls.forEach { graph.remove($0) }
                         }
 
@@ -370,7 +362,7 @@ final class SwiftIndexer: Indexer {
                         decl.parent = parentDecl
                     }
 
-                    parentDecl.declarations.formUnion(decls)
+                    parentDecl.declarations.append(contentsOf: decls)
                 }
             }
         }
@@ -513,7 +505,7 @@ final class SwiftIndexer: Indexer {
                 graph.markCommandIgnored(decl, kind: kind)
                 decl.unusedParameters.forEach { graph.markCommandIgnored($0, kind: kind) }
 
-                commandIgnoreUnsafe(Array(decl.declarations), kind: kind, graph: graph)
+                commandIgnoreUnsafe(decl.declarations, kind: kind, graph: graph)
             }
         }
 
@@ -521,9 +513,9 @@ final class SwiftIndexer: Indexer {
             ref.parent = decl
 
             if ref.kind == .related {
-                decl.related.insert(ref)
+                decl.related.append(ref)
             } else {
-                decl.references.insert(ref)
+                decl.references.append(ref)
             }
         }
 
@@ -561,7 +553,7 @@ final class SwiftIndexer: Indexer {
 
                 for param in params {
                     let paramDecl = param.makeDeclaration(withParent: functionDecl, interner: self.graph.usrInterner)
-                    functionDecl.unusedParameters.insert(paramDecl)
+                    functionDecl.unusedParameters.append(paramDecl)
                     try graph.add(paramDecl)
 
                     if retainAllDeclarations || (functionDecl.isObjcAccessible && configuration.retainObjcAccessible) {
@@ -643,7 +635,7 @@ final class SwiftIndexer: Indexer {
                             location: decl.location
                         )
                         reference.parent = decl
-                        decl.related.insert(reference)
+                        decl.related.append(reference)
                         references.append(reference)
                     }
                 }

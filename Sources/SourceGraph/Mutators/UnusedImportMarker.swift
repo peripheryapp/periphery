@@ -36,9 +36,13 @@ final class UnusedImportMarker: SourceGraphMutator {
     func mutate() throws {
         guard !configuration.disableUnusedImportAnalysis else { return }
 
+        let files = graph.indexedSourceFiles
+
         // Pre-intern all module names (source file modules, import statements,
         // retained modules) so that wordCount is stable for all bitsets.
-        for file in graph.indexedSourceFiles {
+        var fileToIndex = [ObjectIdentifier: Int](minimumCapacity: files.count)
+        for (i, file) in files.enumerated() {
+            fileToIndex[ObjectIdentifier(file)] = i
             for name in file.modules {
                 _ = graph.moduleInterner.intern(name)
             }
@@ -53,12 +57,6 @@ final class UnusedImportMarker: SourceGraphMutator {
         wordCount = graph.moduleInterner.wordCount
         emptyBitset = ModuleBitset(wordCount: wordCount)
         let retainedModuleIDs = graph.moduleInterner.internBitset(retainedModules, wordCount: wordCount)
-
-        let files = graph.indexedSourceFiles
-        var fileToIndex = [ObjectIdentifier: Int](minimumCapacity: files.count)
-        for (i, file) in files.enumerated() {
-            fileToIndex[ObjectIdentifier(file)] = i
-        }
 
         // Manual pointer instead of [UInt64] to eliminate bounds checking and
         // copy-on-write overhead in the inner loops that accumulate module bits.
@@ -209,26 +207,26 @@ final class UnusedImportMarker: SourceGraphMutator {
         let references: Set<Reference>
 
         if decl.kind.isVariableKind {
-            references = decl.references.filter { $0.role == .varType }
+            references = Set(decl.references.filter { $0.role == .varType })
         } else if decl.kind == .enumelement {
-            references = decl.references
+            references = Set(decl.references)
         } else if decl.kind == .typealias {
             let transitiveReferences = decl.references.flatMapSet { ref -> Set<Reference> in
                 guard let refDecl = graph.declaration(withUsrID: ref.usrID) else { return [] }
 
                 return referencedTypes(from: refDecl)
             }
-            references = decl.references.union(transitiveReferences)
+            references = Set(decl.references).union(transitiveReferences)
         } else if decl.kind.isFunctionKind {
-            references = decl.references
+            references = Set(decl.references
                 .filter {
                     [
                         .returnType,
                         .parameterType,
                     ].contains($0.role)
-                }
+                })
         } else if decl.kind == .protocol {
-            references = decl.related.filter { $0.role == .refinedProtocolType }
+            references = Set(decl.related.filter { $0.role == .refinedProtocolType })
         } else {
             references = []
         }

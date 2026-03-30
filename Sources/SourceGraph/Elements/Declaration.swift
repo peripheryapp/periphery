@@ -306,14 +306,14 @@ public final class Declaration {
     public let name: String
     public let usrs: Set<String>
     public let usrIDs: [USRID]
-    public var unusedParameters: Set<Declaration> = []
-    public var declarations: Set<Declaration> = []
+    public var unusedParameters: [Declaration] = []
+    public var declarations: [Declaration] = []
     public var commentCommands: Set<CommentCommand> = []
-    public var references: Set<Reference> = []
+    public var references: [Reference] = []
     public var declaredType: String?
     public var hasGenericFunctionReturnedMetatypeParameters: Bool = false
     public var parent: Declaration?
-    public var related: Set<Reference> = []
+    public var related: [Reference] = []
     public var isImplicit: Bool = false
     public var isObjcAccessible: Bool = false
     public internal(set) var isUsed: Bool = false
@@ -343,12 +343,12 @@ public final class Declaration {
         }
     }
 
-    public var immediateInheritedTypeReferences: Set<Reference> {
+    public var immediateInheritedTypeReferences: [Reference] {
         let superclassReferences = related.filter { [.class, .struct, .protocol].contains($0.declarationKind) }
 
         // Inherited typealiases are References instead of a Related.
         let typealiasReferences = references.filter { $0.declarationKind == .typealias }
-        return superclassReferences.union(typealiasReferences)
+        return superclassReferences + typealiasReferences
     }
 
     public var isComplexProperty: Bool {

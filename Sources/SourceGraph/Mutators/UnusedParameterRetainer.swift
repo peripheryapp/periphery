@@ -43,7 +43,7 @@ final class UnusedParameterRetainer: SourceGraphMutator {
                         if configuration.retainUnusedProtocolFuncParams {
                             functionDecl.unusedParameters.forEach { graph.markRetained($0) }
                         } else {
-                            retain(params: Array(functionDecl.unusedParameters), usedIn: allFunctionDecls)
+                            retain(params: functionDecl.unusedParameters, usedIn: allFunctionDecls)
                         }
                     }
                 }

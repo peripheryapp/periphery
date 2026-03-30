@@ -29,9 +29,9 @@ final class ExtensionReferenceBuilder: SourceGraphMutator {
             // Don't fold protocol extensions as they must be treated differently.
             guard kind != .extensionProtocol else { continue }
 
-            extendedDeclaration.declarations.formUnion(extensionDeclaration.declarations)
-            extendedDeclaration.references.formUnion(extensionDeclaration.references)
-            extendedDeclaration.related.formUnion(extensionDeclaration.related)
+            extendedDeclaration.declarations.append(contentsOf: extensionDeclaration.declarations)
+            extendedDeclaration.references.append(contentsOf: extensionDeclaration.references)
+            extendedDeclaration.related.append(contentsOf: extensionDeclaration.related)
 
             extensionDeclaration.declarations.forEach { $0.parent = extendedDeclaration }
             extensionDeclaration.references.forEach { $0.parent = extendedDeclaration }

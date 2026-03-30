@@ -7,8 +7,7 @@
 ##### Enhancements
 
 - Added support for Bazel 9.x.
-- Significant performance improvements. Total runtime scanning the Reddit iOS codebase reduced by 72.6% from 77.2s to 21.2s.
-- Significant performance improvements. Total runtime scanning the Reddit iOS codebase reduced by 74.6% from 77.2s to 19.6s.
+- Significant performance improvements. Scanning the Reddit iOS codebase reduced by 80.4% from 77.2s to 15.1s.
 
 ##### Bug Fixes
 

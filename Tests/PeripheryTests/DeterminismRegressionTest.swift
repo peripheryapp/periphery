@@ -217,7 +217,7 @@ final class DeterminismRegressionTest: XCTestCase {
         )
         outletDecl.attributes.insert(DeclarationAttribute(name: "IBOutlet", arguments: nil))
         outletDecl.parent = classDecl
-        classDecl.declarations.insert(outletDecl)
+        classDecl.declarations.append(outletDecl)
 
         try graph.add(classDecl)
         try graph.add(outletDecl)
@@ -263,7 +263,7 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
         requirement.parent = proto
-        proto.declarations.insert(requirement)
+        proto.declarations.append(requirement)
 
         let conformingClass = makeDeclaration(
             kind: .class,
@@ -295,7 +295,7 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
         superLaterMethod.parent = superLater
-        superLater.declarations.insert(superLaterMethod)
+        superLater.declarations.append(superLaterMethod)
 
         let superEarlierMethod = makeDeclaration(
             kind: .functionMethodInstance,
@@ -305,7 +305,7 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
         superEarlierMethod.parent = superEarlier
-        superEarlier.declarations.insert(superEarlierMethod)
+        superEarlier.declarations.append(superEarlierMethod)
 
         try graph.add(proto)
         try graph.add(requirement)
@@ -405,7 +405,7 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
         member.parent = extensionDecl
-        extensionDecl.declarations.insert(member)
+        extensionDecl.declarations.append(member)
 
         let extendsBaseProtocolRef = makeReference(
             kind: .normal,
@@ -539,7 +539,7 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
         classDecl.parent = structDecl
-        structDecl.declarations.insert(classDecl)
+        structDecl.declarations.append(classDecl)
 
         // A reference TO the struct from an external declaration (the correct scenario).
         let externalParent = makeDeclaration(
@@ -639,7 +639,7 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
         requirement.parent = proto
-        proto.declarations.insert(requirement)
+        proto.declarations.append(requirement)
 
         let classA = makeDeclaration(
             kind: .class,
@@ -656,7 +656,7 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
         implA.parent = classA
-        classA.declarations.insert(implA)
+        classA.declarations.append(implA)
 
         let classB = makeDeclaration(
             kind: .class,
@@ -673,7 +673,7 @@ final class DeterminismRegressionTest: XCTestCase {
             graph: graph
         )
         implB.parent = classB
-        classB.declarations.insert(implB)
+        classB.declarations.append(implB)
 
         try graph.add(proto)
         try graph.add(requirement)

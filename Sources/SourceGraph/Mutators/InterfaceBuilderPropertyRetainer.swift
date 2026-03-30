@@ -38,7 +38,7 @@ final class InterfaceBuilderPropertyRetainer {
     ) {
         let inheritedDeclarations = graph.inheritedDeclarations(of: declaration)
         let descendentInheritedDeclarations = inheritedDeclarations.map(\.declarations).joined()
-        let allDeclarations = declaration.declarations.union(descendentInheritedDeclarations)
+        let allDeclarations = declaration.declarations + descendentInheritedDeclarations
 
         for decl in allDeclarations {
             // Check IBOutlet properties

@@ -57,7 +57,7 @@ final class UsedDeclarationMarker: SourceGraphMutator {
         }
     }
 
-    private func markUsed(_ declarations: Set<Declaration>) {
+    private func markUsed(_ declarations: some Collection<Declaration>) {
         for decl in declarations {
             markUsed(decl)
         }
@@ -87,7 +87,7 @@ final class UsedDeclarationMarker: SourceGraphMutator {
         }
     }
 
-    private func ignoreUnusedDescendents(in decls: Set<Declaration>, unusedDeclarations: Set<Declaration>) {
+    private func ignoreUnusedDescendents(in decls: some Collection<Declaration>, unusedDeclarations: Set<Declaration>) {
         for decl in decls {
             guard !decl.declarations.isEmpty || !decl.unusedParameters.isEmpty
             else { continue }
