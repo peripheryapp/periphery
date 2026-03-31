@@ -27,6 +27,35 @@ notarize () {
   xcrun notarytool submit --keychain-profile "PeripheryNotarize" --wait "$1"
 }
 
+bundle_runtime_dependencies () {
+  developer_dir="$(xcode-select -p)"
+  toolchain_lib_dir="${developer_dir}/Toolchains/XcodeDefault.xctoolchain/usr/lib"
+  indexstore_dylib="${toolchain_lib_dir}/libIndexStore.dylib"
+  swift_stdlib_rpath="$(
+    otool -l .release/periphery | awk '
+      /LC_RPATH/ { in_rpath = 1; next }
+      in_rpath && /path / {
+        print $2
+        in_rpath = 0
+      }
+    ' | awk -v prefix="${toolchain_lib_dir}/swift-" 'index($0, prefix) == 1 { print; exit }'
+  )"
+
+  if [ ! -f "${indexstore_dylib}" ]; then
+    echo "ERROR: Missing libIndexStore.dylib at ${indexstore_dylib}"
+    exit 1
+  fi
+
+  cp "${indexstore_dylib}" .release/
+  if [ -z "${swift_stdlib_rpath}" ]; then
+    echo "ERROR: Missing Swift stdlib rpath under ${toolchain_lib_dir}"
+    exit 1
+  fi
+
+  install_name_tool -delete_rpath "${toolchain_lib_dir}" .release/periphery
+  install_name_tool -delete_rpath "${swift_stdlib_rpath}" .release/periphery
+}
+
 xcodebuild -version
 
 printf "\nVersion: "
@@ -52,6 +81,8 @@ if [ ! -f .release/periphery ]; then
   exit 1
 fi
 
+bundle_runtime_dependencies
+
 echo "Testing release binary..."
 for i in {1..3}; do
     .release/periphery scan --strict
@@ -66,11 +97,12 @@ confirm "\nContinue?"
 
 # Codesign
 cd .release
+codesign libIndexStore.dylib
 codesign periphery
 
 # Archive
 zip_filename="periphery-${version}.zip"
-zip -r "${zip_filename}" periphery LICENSE.md
+zip -r "${zip_filename}" periphery libIndexStore.dylib LICENSE.md
 codesign "${zip_filename}"
 
 echo -e "\n${zip_filename} checksum:"
@@ -83,6 +115,7 @@ zip_artifactbundle="periphery-${version}.artifactbundle.zip"
 
 mkdir -p ${macos_artifact}/bin
 cp periphery ${macos_artifact}/bin
+cp libIndexStore.dylib ${macos_artifact}/bin
 mkdir ${artifactbundle}
 cp -R ${macos_artifact} LICENSE.md info.json ${artifactbundle}
 zip -r "${zip_artifactbundle}" periphery-${version}.artifactbundle
