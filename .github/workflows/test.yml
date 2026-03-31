@@ -27,10 +27,11 @@ jobs:
       - name: Check generated Bazel rules
         run: mise r gen-bazel-rules && git diff --quiet --exit-code
   bazel:
-      name: Bazel (${{ matrix.os }})
+      name: Bazel (${{ matrix.bazel }}, ${{ matrix.os }})
       strategy:
         fail-fast: false
         matrix:
+          bazel: [8.x, 9.x]
           os: [macOS, Linux]
           include:
             - os: macOS
@@ -44,6 +45,7 @@ jobs:
       runs-on: ${{ matrix.runs-on }}
       container: ${{ matrix.container }}
       env:
+        USE_BAZEL_VERSION: ${{ matrix.bazel }}
         CC: ${{ matrix.cc }}
       steps:
         - uses: actions/checkout@master
@@ -51,7 +53,7 @@ jobs:
           with:
             bazelisk-version: 1.x
             bazelisk-cache: true
-            disk-cache: bazel-${{ matrix.os }}
+            disk-cache: bazel-${{ matrix.os }}-${{ matrix.bazel }}
             repository-cache: true
         - name: Scan
           run: bazel run //:periphery -- scan --bazel --quiet --strict --baseline baselines/${{ matrix.baseline }}
