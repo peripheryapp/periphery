@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix Homebrew Linux builds failing to link `libIndexStore` when Swift is resolved through shimmed toolchain paths.
 
 ## 3.7.1 (2026-03-31)
 
