@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix runtime crash due to absolute libIndexStore.dylib path in pre-built binary.
 
 ## 3.7.0 (2026-03-30)
 
