@@ -11,6 +11,7 @@
 ##### Bug Fixes
 
 - Fix runtime crash due to absolute libIndexStore.dylib path in pre-built binary.
+- Fix building on Linux with SwiftPM and non-standard Swift install location for Homebrew release.
 
 ## 3.7.0 (2026-03-30)
 
