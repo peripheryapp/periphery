@@ -30,6 +30,7 @@
                     </buttonCell>
                     <connections>
                         <action selector="buttonTapped:" target="-2" id="jLb-bl-k6b"/>
+                        <action selector="privateExtensionTapped:" target="-2" id="private-extension-action"/>
                     </connections>
                 </button>
             </subviews>
