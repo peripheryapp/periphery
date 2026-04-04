@@ -10,7 +10,7 @@
 
 ##### Bug Fixes
 
-- None.
+- Fix mixed Swift/Objective-C indexing failures caused by non-Swift symbols being processed from the index store, which could trigger unknown extension reference errors and duplicate declaration conflicts.
 
 ## 3.7.3 (2026-03-31)
 

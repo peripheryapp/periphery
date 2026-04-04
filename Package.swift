@@ -7,7 +7,7 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/tadija/AEXML", from: "4.0.0"),
     .package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.0"),
     // Use tag once https://github.com/MobileNativeFoundation/swift-index-store/issues/27 is resolved.
-    .package(url: "https://github.com/ileitch/swift-index-store", revision: "ad6f20532864a2cf3b1e1ee7a084267e94eb68b9"),
+    .package(url: "https://github.com/MobileNativeFoundation/swift-index-store", revision: "7edb9a64e084ed64f83b84fb9269d3d1a20c0687"),
     .package(url: "https://github.com/apple/swift-syntax", from: "603.0.0"),
     .package(url: "https://github.com/ileitch/swift-filename-matcher", from: "2.0.0"),
 ]
