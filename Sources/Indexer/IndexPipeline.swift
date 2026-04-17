@@ -19,8 +19,8 @@ public struct IndexPipeline {
         self.swiftVersion = swiftVersion
     }
 
-    public func perform() throws {
-        try SwiftIndexer(
+    public func perform() throws -> Int {
+        let scannedLOC = try SwiftIndexer(
             sourceFiles: plan.sourceFiles,
             graph: graph,
             logger: logger,
@@ -65,5 +65,6 @@ public struct IndexPipeline {
         }
 
         graph.withLock { $0.indexingComplete() }
+        return scannedLOC
     }
 }
