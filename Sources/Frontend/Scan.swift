@@ -20,7 +20,12 @@ final class Scan {
         graph = SourceGraph(configuration: configuration, logger: logger)
     }
 
-    func perform(project: Project) throws -> [ScanResult] {
+    struct Output {
+        let results: [ScanResult]
+        let loc: Int
+    }
+
+    func perform(project: Project) throws -> Output {
         if !configuration.indexStorePath.isEmpty {
             logger.warn("When using the '--index-store-path' option please ensure that Xcode is not running. False-positives can occur if Xcode writes to the index store while Periphery is running.")
 
@@ -39,9 +44,9 @@ final class Scan {
         }
 
         try build(driver)
-        try index(driver)
+        let loc = try index(driver)
         try analyze()
-        return buildResults()
+        return Output(results: buildResults(), loc: loc)
     }
 
     // MARK: - Private
@@ -59,7 +64,7 @@ final class Scan {
         logger.endInterval(driverBuildInterval)
     }
 
-    private func index(_ driver: ProjectDriver) throws {
+    private func index(_ driver: ProjectDriver) throws -> Int {
         let indexInterval = logger.beginInterval("index")
 
         if configuration.outputFormat.supportsAuxiliaryOutput {
@@ -71,8 +76,9 @@ final class Scan {
         let plan = try driver.plan(logger: indexLogger)
         let graphMutex = SourceGraphMutex(graph: graph)
         let pipeline = IndexPipeline(plan: plan, graph: graphMutex, logger: indexLogger, configuration: configuration, swiftVersion: swiftVersion)
-        try pipeline.perform()
+        let loc = try pipeline.perform()
         logger.endInterval(indexInterval)
+        return loc
     }
 
     private func analyze() throws {
