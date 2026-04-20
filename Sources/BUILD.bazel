@@ -25,6 +25,7 @@ swift_library(
     srcs = [
         "SyntaxAnalysis/CommentCommand.swift",
         "SyntaxAnalysis/DeclarationSyntaxVisitor.swift",
+        "SyntaxAnalysis/ImageAssetReferenceSyntaxVisitor.swift",
         "SyntaxAnalysis/ImportSyntaxVisitor.swift",
         "SyntaxAnalysis/MultiplexingSyntaxVisitor.swift",
         "SyntaxAnalysis/SourceLOCCounter.swift",
@@ -52,6 +53,7 @@ swift_library(
         "SourceGraph/Elements/Declaration.swift",
         "SourceGraph/Elements/DeclarationAttribute.swift",
         "SourceGraph/Elements/ImportStatement.swift",
+        "SourceGraph/Elements/ImageAssetReference.swift",
         "SourceGraph/Elements/Location.swift",
         "SourceGraph/Elements/ProjectFileKind.swift",
         "SourceGraph/Elements/Reference.swift",
@@ -74,6 +76,7 @@ swift_library(
         "SourceGraph/Mutators/GenericClassAndStructConstructorReferenceBuilder.swift",
         "SourceGraph/Mutators/InheritedImplicitInitializerReferenceBuilder.swift",
         "SourceGraph/Mutators/InterfaceBuilderPropertyRetainer.swift",
+        "SourceGraph/Mutators/ImageAssetReferenceRetainer.swift",
         "SourceGraph/Mutators/ObjCAccessibleRetainer.swift",
         "SourceGraph/Mutators/PropertyWrapperRetainer.swift",
         "SourceGraph/Mutators/ProtocolConformanceReferenceBuilder.swift",
@@ -195,6 +198,8 @@ swift_library(
 swift_library(
     name = "Indexer",
     srcs = [
+        "Indexer/AssetCatalogIndexer.swift",
+        "Indexer/AssetCatalogParser.swift",
         "Indexer/IndexPipeline.swift",
         "Indexer/IndexPlan.swift",
         "Indexer/Indexer.swift",

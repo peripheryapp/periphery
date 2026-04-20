@@ -49,6 +49,7 @@ open class SourceGraphTestCase: XCTestCase {
         if let sourceFiles {
             newPlan = IndexPlan(
                 sourceFiles: plan.sourceFiles.filter { sourceFiles.contains($0.key.path) },
+                assetCatalogPaths: plan.assetCatalogPaths,
                 plistPaths: plan.plistPaths,
                 xibPaths: plan.xibPaths,
                 xcDataModelPaths: plan.xcDataModelPaths,

@@ -132,6 +132,7 @@
                 configuration: configuration
             )
             let sourceFiles = try collector.collect()
+            let assetCatalogPaths = targets.flatMapSet { $0.files(kind: .assetCatalog) }
             let infoPlistPaths = targets.flatMapSet { $0.files(kind: .infoPlist) }
             let xibPaths = targets.flatMapSet { $0.files(kind: .interfaceBuilder) }
             let xcDataModelPaths = targets.flatMapSet { $0.files(kind: .xcDataModel) }
@@ -139,6 +140,7 @@
 
             return IndexPlan(
                 sourceFiles: sourceFiles,
+                assetCatalogPaths: assetCatalogPaths,
                 plistPaths: infoPlistPaths,
                 xibPaths: xibPaths,
                 xcDataModelPaths: xcDataModelPaths,

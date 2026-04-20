@@ -28,6 +28,15 @@ public struct IndexPipeline {
             swiftVersion: swiftVersion
         ).perform()
 
+        if !plan.assetCatalogPaths.isEmpty {
+            try AssetCatalogIndexer(
+                assetCatalogs: plan.assetCatalogPaths,
+                graph: graph,
+                logger: logger,
+                configuration: configuration
+            ).perform()
+        }
+
         if !plan.plistPaths.isEmpty {
             try InfoPlistIndexer(
                 infoPlistFiles: plan.plistPaths,

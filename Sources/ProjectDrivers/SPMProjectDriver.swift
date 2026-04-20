@@ -61,10 +61,12 @@ extension SPMProjectDriver: ProjectDriver {
             configuration: configuration
         )
         let sourceFiles = try collector.collect()
+        let assetCatalogPaths = assetCatalogs(from: description)
         let xibPaths = interfaceBuilderFiles(from: description)
 
         return IndexPlan(
             sourceFiles: sourceFiles,
+            assetCatalogPaths: assetCatalogPaths,
             xibPaths: xibPaths
         )
     }
@@ -99,5 +101,48 @@ extension SPMProjectDriver: ProjectDriver {
         }
 
         return xibFiles
+    }
+
+    private func assetCatalogs(from description: PackageDescription) -> Set<FilePath> {
+        var catalogs: Set<FilePath> = []
+
+        for target in description.targets {
+            let targetPath = pkg.path.appending(target.path)
+
+            guard let resources = target.resources else { continue }
+
+            for resource in resources {
+                let resourceFilePath = FilePath(resource.path)
+                let resourcePath: FilePath = resourceFilePath.isAbsolute
+                    ? resourceFilePath
+                    : targetPath.appending(resource.path)
+
+                guard resourcePath.exists else { continue }
+
+                if resourcePath.extension?.lowercased() == "xcassets" {
+                    catalogs.insert(resourcePath)
+                } else {
+                    catalogs.formUnion(assetCatalogs(in: resourcePath))
+                }
+            }
+        }
+
+        return catalogs
+    }
+
+    private func assetCatalogs(in path: FilePath) -> Set<FilePath> {
+        guard let enumerator = FileManager.default.enumerator(
+            at: path.url,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+        ) else { return [] }
+
+        var paths: Set<FilePath> = []
+
+        for case let url as URL in enumerator where url.pathExtension == "xcassets" {
+            paths.insert(FilePath(url.path))
+        }
+
+        return paths
     }
 }
