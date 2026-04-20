@@ -12,7 +12,11 @@
       "s:6Shared17SetupGuideHelpersC6select8multipleAA0B9SelectionOSaySSG_tF",
       "s:SS10ExtensionsE17withEscapedQuotesSSvp",
       "s:SS10ExtensionsE4djb2Sivp",
-      "s:SS10ExtensionsE7djb2HexSSvp"
+      "s:SS10ExtensionsE7djb2HexSSvp",
+      "s:14SyntaxAnalysis23UnusedParameterAnalyzerC7analyze8functionShyAA0D0VGAA8FunctionV_tF",
+      "s:14SyntaxAnalysis9ParameterV5labelAC8PartKindOvp",
+      "s:14SyntaxAnalysis9ParameterV8location11SourceGraph8LocationCvp",
+      "s:11SourceGraph32InterfaceBuilderPropertyRetainerC19swiftNameToSelectoryS2SFZ"
     ]
   }
 }

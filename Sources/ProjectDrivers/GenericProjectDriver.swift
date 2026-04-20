@@ -7,7 +7,7 @@ import Shared
 import SystemPackage
 
 public final class GenericProjectDriver {
-    struct GenericConfig: Decodable {
+    private struct GenericConfig: Decodable {
         let indexstores: Set<String>
         let plists: Set<String>
         let xibs: Set<String>

@@ -177,6 +177,71 @@ open class SourceGraphTestCase: XCTestCase {
         scopeStack.removeLast()
     }
 
+    func assertRedundantInternalAccessibility(_ description: DeclarationDescription, suggestedAccessibility: Accessibility? = nil, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
+
+        if !Self.results.redundantInternalAccessibilityDeclarations.contains(declaration) {
+            XCTFail("Expected declaration to have redundant internal accessibility: \(declaration)", file: file, line: line)
+        }
+
+        if let suggestedAccessibility {
+            if let actual = Self.graph.redundantInternalAccessibility[declaration] {
+                if actual != suggestedAccessibility {
+                    let actualText = actual?.rawValue ?? "nil"
+                    XCTFail("Expected suggested accessibility to be '\(suggestedAccessibility.rawValue)', but got '\(actualText)': \(declaration)", file: file, line: line)
+                }
+            }
+        }
+
+        scopeStack.append(.declaration(declaration))
+        scopedAssertions?()
+        scopeStack.removeLast()
+    }
+
+    func assertNotRedundantInternalAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
+
+        if Self.results.redundantInternalAccessibilityDeclarations.contains(declaration) {
+            XCTFail("Expected declaration to not have redundant internal accessibility: \(declaration)", file: file, line: line)
+        }
+
+        scopeStack.append(.declaration(declaration))
+        scopedAssertions?()
+        scopeStack.removeLast()
+    }
+
+    func assertRedundantFilePrivateAccessibility(_ description: DeclarationDescription, containingTypeName: String? = nil, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
+
+        if !Self.results.redundantFilePrivateAccessibilityDeclarations.contains(declaration) {
+            XCTFail("Expected declaration to have redundant fileprivate accessibility: \(declaration)", file: file, line: line)
+        }
+
+        if let containingTypeName {
+            if let actual = Self.graph.redundantFilePrivateAccessibility[declaration] {
+                if actual != containingTypeName {
+                    XCTFail("Expected containing type name to be '\(containingTypeName)', but got '\(actual ?? "nil")': \(declaration)", file: file, line: line)
+                }
+            }
+        }
+
+        scopeStack.append(.declaration(declaration))
+        scopedAssertions?()
+        scopeStack.removeLast()
+    }
+
+    func assertNotRedundantFilePrivateAccessibility(_ description: DeclarationDescription, scopedAssertions: (() -> Void)? = nil, file: StaticString = #file, line: UInt = #line) {
+        guard let declaration = materialize(description, in: Self.allIndexedDeclarations, file: file, line: line) else { return }
+
+        if Self.results.redundantFilePrivateAccessibilityDeclarations.contains(declaration) {
+            XCTFail("Expected declaration to not have redundant fileprivate accessibility: \(declaration)", file: file, line: line)
+        }
+
+        scopeStack.append(.declaration(declaration))
+        scopedAssertions?()
+        scopeStack.removeLast()
+    }
+
     func assertUsedParameter(_ name: String, file: StaticString = #file, line: UInt = #line) {
         let declaration = materialize(.varParameter(name), fail: false, file: file, line: line)
 
@@ -344,6 +409,26 @@ private extension [ScanResult] {
     var redundantPublicAccessibilityDeclarations: Set<Declaration> {
         compactMapSet {
             if case .redundantPublicAccessibility = $0.annotation {
+                return $0.declaration
+            }
+
+            return nil
+        }
+    }
+
+    var redundantInternalAccessibilityDeclarations: Set<Declaration> {
+        compactMapSet {
+            if case .redundantInternalAccessibility = $0.annotation {
+                return $0.declaration
+            }
+
+            return nil
+        }
+    }
+
+    var redundantFilePrivateAccessibilityDeclarations: Set<Declaration> {
+        compactMapSet {
+            if case .redundantFilePrivateAccessibility = $0.annotation {
                 return $0.declaration
             }
 

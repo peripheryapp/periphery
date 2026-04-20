@@ -2,7 +2,7 @@ import Foundation
 import Logger
 import Synchronization
 
-final class ShellProcessStore: Sendable {
+private final class ShellProcessStore: Sendable {
     private let processes = Mutex<Set<Process>>([])
 
     func interruptRunning() {
