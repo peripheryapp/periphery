@@ -1,5 +1,5 @@
 {
-  "originHash" : "11243e6076e6bead003068dcaef877161ad74a645761e8fa0bd7a5f3f90b7dbf",
+  "originHash" : "2e444ccf7e9a1075624d35210321a0ac279dfd5cea240ee48ce3c615d9ef85b2",
   "pins" : [
     {
       "identity" : "aexml",
@@ -49,9 +49,9 @@
     {
       "identity" : "swift-index-store",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ileitch/swift-index-store",
+      "location" : "https://github.com/MobileNativeFoundation/swift-index-store",
       "state" : {
-        "revision" : "ad6f20532864a2cf3b1e1ee7a084267e94eb68b9"
+        "revision" : "7edb9a64e084ed64f83b84fb9269d3d1a20c0687"
       }
     },
     {

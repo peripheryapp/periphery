@@ -65,12 +65,12 @@ jobs:
         step: ["main-snapshot", "6.3", "6.2", "6.1"]
         include:
           - step: "main-snapshot"
-            xcode: "26.4.0"
+            xcode: "26.4"
             swiftly: "main-snapshot"
             continueOnError: true
             macos: "macos-26"
           - step: "6.3"
-            xcode: "26.4.0"
+            xcode: "26.4"
             macos: "macos-26"
           - step: "6.2"
             xcode: "26.3.0"

@@ -165,7 +165,8 @@ final class SwiftIndexer: Indexer {
 
                     record.forEach(occurrence: { occurrence in
                         let usr = occurrence.symbol.usr
-                        guard let location = self.transformLocation(occurrence.location)
+                        guard Self.shouldProcessOccurrence(occurrence),
+                              let location = self.transformLocation(occurrence.location)
                         else { return }
 
                         var relations: [RawRelation] = []
@@ -707,6 +708,10 @@ final class SwiftIndexer: Indexer {
 
         private func transformLocation(_ input: (line: Int, column: Int)) -> Location? {
             Location(file: sourceFile, line: input.line, column: input.column)
+        }
+
+        static func shouldProcessOccurrence(_ occurrence: SymbolOccurrence) -> Bool {
+            occurrence.symbol.language == .swift
         }
 
         private func transformDeclarationKind(_ kind: SymbolKind, _ subKind: SymbolSubkind) -> Declaration.Kind? {
