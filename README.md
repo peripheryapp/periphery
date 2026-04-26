@@ -480,6 +480,9 @@ Periphery can analyze projects using other build systems, though it cannot drive
     "plists": [
         "path/to/file.plist"
     ],
+    "asset_catalogs": [
+        "path/to/Assets.xcassets"
+    ],
     "xibs": [
         "path/to/file.xib",
         "path/to/file.storyboard"

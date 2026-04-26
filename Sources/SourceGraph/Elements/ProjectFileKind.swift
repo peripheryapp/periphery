@@ -1,4 +1,5 @@
 public enum ProjectFileKind: CaseIterable {
+    case assetCatalog
     case interfaceBuilder
     case infoPlist
     case xcDataModel
@@ -6,6 +7,8 @@ public enum ProjectFileKind: CaseIterable {
 
     public var extensions: [String] {
         switch self {
+        case .assetCatalog:
+            ["xcassets"]
         case .interfaceBuilder:
             ["xib", "storyboard"]
         case .infoPlist:

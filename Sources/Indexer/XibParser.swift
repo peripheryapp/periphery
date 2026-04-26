@@ -10,8 +10,15 @@ final class XibParser {
         self.path = path
     }
 
-    func parse() throws -> [AssetReference] {
-        guard let data = FileManager.default.contents(atPath: path.string) else { return [] }
+    struct Result {
+        let assetReferences: [AssetReference]
+        let imageAssetReferences: Set<ImageAssetReference>
+    }
+
+    func parse() throws -> Result {
+        guard let data = FileManager.default.contents(atPath: path.string) else {
+            return Result(assetReferences: [], imageAssetReferences: [])
+        }
 
         let structure = try AEXMLDocument(xml: data)
 
@@ -22,8 +29,10 @@ final class XibParser {
         // Collect all references with their outlets, actions, and runtime attributes
         var referencesByClass: [String: (outlets: Set<String>, actions: Set<String>, runtimeAttributes: Set<String>)] = [:]
         collectReferences(from: structure.root, idToCustomClass: idToCustomClass, into: &referencesByClass)
+        var imageReferences: Set<ImageAssetReference> = []
+        collectImageReferences(from: structure.root, into: &imageReferences)
 
-        return referencesByClass.map { className, members in
+        let assetReferences = referencesByClass.map { className, members in
             AssetReference(
                 absoluteName: className,
                 source: .interfaceBuilder,
@@ -32,6 +41,8 @@ final class XibParser {
                 runtimeAttributes: Array(members.runtimeAttributes)
             )
         }
+
+        return Result(assetReferences: assetReferences, imageAssetReferences: imageReferences)
     }
 
     // MARK: - Private
@@ -179,5 +190,32 @@ final class XibParser {
         }
 
         return path
+    }
+
+    private func collectImageReferences(from element: AEXMLElement, into imageReferences: inout Set<ImageAssetReference>) {
+        for (key, value) in element.attributes {
+            let lowercasedKey = key.lowercased()
+
+            if lowercasedKey.contains("image"), lowercasedKey != "systemimage" {
+                imageReferences.insert(imageReference(named: value))
+            }
+        }
+
+        if element.name == "image", let name = element.attributes["name"] {
+            imageReferences.insert(imageReference(named: name))
+        }
+
+        for child in element.children {
+            collectImageReferences(from: child, into: &imageReferences)
+        }
+    }
+
+    private func imageReference(named name: String) -> ImageAssetReference {
+        let file = SourceFile(path: path, modules: [])
+        return ImageAssetReference(
+            name: name,
+            location: Location(file: file, line: 1, column: 1),
+            source: .interfaceBuilder
+        )
     }
 }

@@ -261,6 +261,7 @@ final class SwiftIndexer: Indexer {
             let multiplexingSyntaxVisitor = try MultiplexingSyntaxVisitor(file: sourceFile, swiftVersion: swiftVersion)
             let declarationSyntaxVisitor = multiplexingSyntaxVisitor.add(DeclarationSyntaxVisitor.self)
             let importSyntaxVisitor = multiplexingSyntaxVisitor.add(ImportSyntaxVisitor.self)
+            let imageAssetReferenceSyntaxVisitor = multiplexingSyntaxVisitor.add(ImageAssetReferenceSyntaxVisitor.self)
 
             multiplexingSyntaxVisitor.visit()
 
@@ -278,6 +279,10 @@ final class SwiftIndexer: Indexer {
                         graph.addExportedModule(stmt.module, exportedBy: sourceFile.modules)
                     }
                 }
+            }
+
+            graph.withLock { graph in
+                imageAssetReferenceSyntaxVisitor.references.forEach { graph.add($0) }
             }
 
             associateLatentReferences()
