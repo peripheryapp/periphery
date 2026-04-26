@@ -12,6 +12,20 @@
 
 - None.
 
+## 3.7.4 (2026-04-26)
+
+##### Breaking
+
+- None.
+
+##### Enhancements
+
+- None.
+
+##### Bug Fixes
+
+- Fix Homebrew releases.
+
 ## 3.7.3 (2026-04-25)
 
 ##### Breaking
