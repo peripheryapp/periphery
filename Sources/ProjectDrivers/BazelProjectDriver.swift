@@ -129,7 +129,12 @@ public final class BazelProjectDriver: ProjectDriver {
     // MARK: - Private
 
     private func queryTargets() throws -> [String] {
-        try shell
+        if let filter = configuration.bazelFilter,
+           let exactTargetLabels = exactTargetLabels(filter: filter) {
+            return exactTargetLabels
+        }
+
+        return try shell
             .exec(["bazel", "query", "\"\(query)\""])
             .split(separator: "\n")
             .map { "\"@@\($0)\"" }
@@ -144,5 +149,41 @@ public final class BazelProjectDriver: ProjectDriver {
         }
 
         return query
+    }
+
+    private func exactTargetLabels(filter: String) -> [String]? {
+        guard let label = exactQueryRoot(filter: filter) else {
+            return nil
+        }
+
+        return ["\"@@\(label)\""]
+    }
+
+    private func exactQueryRoot(filter: String) -> String? {
+        var pattern = filter.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !pattern.isEmpty else {
+            return nil
+        }
+
+        guard pattern.last == "$" else {
+            return nil
+        }
+
+        if pattern.first == "^" {
+            pattern.removeFirst()
+        }
+
+        pattern.removeLast()
+
+        let disallowedCharacters = CharacterSet(charactersIn: "^$.*+?[](){}|\\")
+        guard pattern.rangeOfCharacter(from: disallowedCharacters) == nil else {
+            return nil
+        }
+
+        guard pattern.hasPrefix("//"), !pattern.contains("...") else {
+            return nil
+        }
+
+        return pattern
     }
 }

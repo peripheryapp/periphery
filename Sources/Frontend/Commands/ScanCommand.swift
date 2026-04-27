@@ -153,7 +153,7 @@ struct ScanCommand: ParsableCommand {
     @Flag(help: "Enable Bazel project mode")
     var bazel: Bool = defaultConfiguration.$bazel.defaultValue
 
-    @Option(help: "Filter pattern applied to the Bazel top-level targets query")
+    @Option(help: "Filter pattern applied to the Bazel top-level targets query. Exact single-target label filters skip target discovery and use that label directly.")
     var bazelFilter: String?
 
     @Option(help: "Path to a global index store populated by Bazel. If provided, will be used instead of individual module stores.")
