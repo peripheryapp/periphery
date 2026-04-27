@@ -143,6 +143,8 @@ public extension OutputFormat {
             GitHubMarkdownFormatter.self
         case .gitlabCodeQuality:
             GitLabCodeQualityFormatter.self
+        case .sonarQube:
+            SonarQubeFormatter.self
         }
     }
 }

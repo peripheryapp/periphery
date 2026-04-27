@@ -162,6 +162,9 @@ struct ScanCommand: ParsableCommand {
     @Flag(help: "Enable Bazel visibility checking")
     var bazelCheckVisibility: Bool = defaultConfiguration.$bazelCheckVisibility.defaultValue
 
+    @Option(help: "SonarQube Rule severity")
+    var sonarqubeRuleSeverity: SonarQubeRuleSeverity = .default
+
     private static let defaultConfiguration = Configuration()
 
     func run() throws {
@@ -223,6 +226,7 @@ struct ScanCommand: ParsableCommand {
         configuration.apply(\.$bazelFilter, bazelFilter)
         configuration.apply(\.$bazelIndexStore, bazelIndexStore)
         configuration.apply(\.$bazelCheckVisibility, bazelCheckVisibility)
+        configuration.apply(\.$sonarqubeRuleSeverity, sonarqubeRuleSeverity)
 
         configuration.buildFilenameMatchers()
 
