@@ -141,12 +141,12 @@ public final class BazelProjectDriver: ProjectDriver {
         }
 
         let kinds = Self.topLevelKinds.joined(separator: "|")
-        let defaultQuery = "filter('^//.*', kind('(\(kinds)) rule', deps(//...)))"
+        let query = "filter('^//.*', kind('(\(kinds)) rule', deps(//...)))"
 
         if let pattern = configuration.bazelFilter {
-            return "filter('\(pattern)', \(defaultQuery))"
+            return "filter('\(pattern)', \(query))"
         }
 
-        return defaultQuery
+        return query
     }
 }
