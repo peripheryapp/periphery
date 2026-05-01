@@ -6,11 +6,11 @@
 
 ##### Enhancements
 
-- None.
+- Added a `--bazel-query` option to override the default Bazel top-level target query.
 
 ##### Bug Fixes
 
-- None.
+- Follow embedded bundle and plugin edges transitively in the generated Bazel scan rule so custom Bazel queries can avoid building incorrectly transitioned targets while still analyzing extension- and plugin-reachable code.
 
 ## 3.7.4 (2026-04-26)
 
