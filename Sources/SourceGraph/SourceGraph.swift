@@ -403,4 +403,18 @@ public final class SourceGraph {
             [.protocol, .typealias].contains($0.declarationKind) && encodableTypes.contains($0.name)
         }
     }
+
+    func isEquatable(_ decl: Declaration) -> Bool {
+        let equatableTypes = ["Equatable", "Hashable"]
+
+        return inheritedTypeReferences(of: decl).contains {
+            [.protocol, .typealias].contains($0.declarationKind) && equatableTypes.contains($0.name)
+        }
+    }
+
+    func isHashable(_ decl: Declaration) -> Bool {
+        inheritedTypeReferences(of: decl).contains {
+            [.protocol, .typealias].contains($0.declarationKind) && $0.name == "Hashable"
+        }
+    }
 }

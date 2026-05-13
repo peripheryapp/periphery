@@ -6,7 +6,7 @@
 
 ##### Enhancements
 
-- None.
+- Added the `--retain-equatable-properties` and `--retain-hashable-properties` options to retain all properties on `Equatable` and `Hashable` types.
 
 ##### Bug Fixes
 
