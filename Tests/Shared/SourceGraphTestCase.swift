@@ -109,6 +109,26 @@ open class SourceGraphTestCase: XCTestCase {
         }
     }
 
+    func assertNoUnusedResult(_ description: DeclarationDescription, inModule module: String? = nil, file: StaticString = #file, line: UInt = #line) {
+        let hasUnusedResult = Self.results.contains { result in
+            guard case .unused = result.annotation else { return false }
+            let declaration = result.declaration
+            guard declaration.kind == description.kind, declaration.name == description.name else { return false }
+            if let module, !declaration.location.file.modules.contains(module) {
+                return false
+            }
+            if let declarationLine = description.line, declaration.location.line != declarationLine {
+                return false
+            }
+            return true
+        }
+
+        if hasUnusedResult {
+            let scopeSuffix = module.map { " in module '\($0)'" } ?? ""
+            XCTFail("Expected declaration to not have an unused result\(scopeSuffix): \(description)", file: file, line: line)
+        }
+    }
+
     func assertRedundantProtocol(
         _ name: String,
         implementedBy conformances: DeclarationDescription...,

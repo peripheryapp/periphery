@@ -50,6 +50,7 @@ public final class SourceGraphMutatorRunner {
         AssignOnlyPropertyReferenceEliminator.self,
 
         UsedDeclarationMarker.self,
+        EquivalentDeclarationMarker.self,
         RedundantProtocolMarker.self,
     ]
 

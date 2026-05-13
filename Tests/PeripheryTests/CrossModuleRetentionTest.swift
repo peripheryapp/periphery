@@ -19,4 +19,14 @@ final class CrossModuleRetentionTest: SPMSourceGraphTestCase {
             self.assertReferenced(.class("FixtureClass129"))
         }
     }
+
+    func testCrossModuleLocalizedStringOverridesAreTreatedAsSingleSourceDeclaration() {
+        assertNoUnusedResult(.varInstance("title", line: 15), inModule: "GeneratedLocalizedStringPrimaryFixtures")
+        assertNoUnusedResult(.varInstance("title", line: 20), inModule: "GeneratedLocalizedStringPrimaryFixtures")
+        assertNoUnusedResult(.varInstance("toast", line: 29), inModule: "GeneratedLocalizedStringPrimaryFixtures")
+
+        assertNoUnusedResult(.varInstance("title", line: 15), inModule: "GeneratedLocalizedStringDuplicateFixtures")
+        assertNoUnusedResult(.varInstance("title", line: 20), inModule: "GeneratedLocalizedStringDuplicateFixtures")
+        assertNoUnusedResult(.varInstance("toast", line: 29), inModule: "GeneratedLocalizedStringDuplicateFixtures")
+    }
 }

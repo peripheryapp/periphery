@@ -18,6 +18,12 @@ var targets: [PackageDescription.Target] = [
         name: "CrossModuleRetentionSupportFixtures"
     ),
     .target(
+        name: "GeneratedLocalizedStringPrimaryFixtures"
+    ),
+    .target(
+        name: "GeneratedLocalizedStringDuplicateFixtures"
+    ),
+    .target(
         name: "UnusedImportFixtureA",
         path: "Sources/UnusedImportFixtures/A"
     ),
