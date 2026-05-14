@@ -9,6 +9,7 @@ import SystemPackage
 public final class GenericProjectDriver {
     struct GenericConfig: Decodable {
         let indexstores: Set<String>
+        let assetCatalogs: Set<String>?
         let plists: Set<String>
         let xibs: Set<String>
         let xcdatamodels: Set<String>
@@ -17,6 +18,7 @@ public final class GenericProjectDriver {
     }
 
     private let indexstorePaths: Set<FilePath>
+    private let assetCatalogPaths: Set<FilePath>
     private let plistPaths: Set<FilePath>
     private let xibPaths: Set<FilePath>
     private let xcDataModelsPaths: Set<FilePath>
@@ -33,6 +35,7 @@ public final class GenericProjectDriver {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         let data = try Data(contentsOf: genericProjectConfig.url)
         let config = try decoder.decode(GenericConfig.self, from: data)
+        let assetCatalogPaths = (config.assetCatalogs ?? []).mapSet { FilePath.makeAbsolute($0) }
         let plistPaths = config.plists.mapSet { FilePath.makeAbsolute($0) }
         let xibPaths = config.xibs.mapSet { FilePath.makeAbsolute($0) }
         let xcDataModelPaths = config.xcdatamodels.mapSet { FilePath.makeAbsolute($0) }
@@ -41,6 +44,7 @@ public final class GenericProjectDriver {
 
         self.init(
             indexstorePaths: indexstorePaths,
+            assetCatalogPaths: assetCatalogPaths,
             plistPaths: plistPaths,
             xibPaths: xibPaths,
             xcDataModelsPaths: xcDataModelPaths,
@@ -52,6 +56,7 @@ public final class GenericProjectDriver {
 
     private init(
         indexstorePaths: Set<FilePath>,
+        assetCatalogPaths: Set<FilePath>,
         plistPaths: Set<FilePath>,
         xibPaths: Set<FilePath>,
         xcDataModelsPaths: Set<FilePath>,
@@ -60,6 +65,7 @@ public final class GenericProjectDriver {
         configuration: Configuration
     ) {
         self.indexstorePaths = indexstorePaths
+        self.assetCatalogPaths = assetCatalogPaths
         self.plistPaths = plistPaths
         self.xibPaths = xibPaths
         self.xcDataModelsPaths = xcDataModelsPaths
@@ -82,6 +88,7 @@ extension GenericProjectDriver: ProjectDriver {
 
         return IndexPlan(
             sourceFiles: sourceFiles,
+            assetCatalogPaths: assetCatalogPaths,
             plistPaths: plistPaths,
             xibPaths: xibPaths,
             xcDataModelPaths: xcDataModelsPaths,

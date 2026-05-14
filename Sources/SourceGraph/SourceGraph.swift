@@ -14,6 +14,9 @@ public final class SourceGraph {
     public private(set) var retainedDeclarations: Set<Declaration> = []
     public private(set) var ignoredDeclarations: Set<Declaration> = []
     public private(set) var assetReferences: Set<AssetReference> = []
+    public private(set) var imageAssets: Set<Declaration> = []
+    public private(set) var imageAssetReferences: Set<ImageAssetReference> = []
+    public private(set) var usedImageAssets: Set<Declaration> = []
     public private(set) var mainAttributedDeclarations: Set<Declaration> = []
     public private(set) var allReferencesByUsr: [String: Set<Reference>] = [:]
     public private(set) var indexedSourceFiles: [SourceFile] = []
@@ -46,6 +49,10 @@ public final class SourceGraph {
 
     public var unusedDeclarations: Set<Declaration> {
         allDeclarations.subtracting(usedDeclarations)
+    }
+
+    public var unusedImageAssets: Set<Declaration> {
+        imageAssets.subtracting(usedImageAssets)
     }
 
     public func declarations(ofKind kind: Declaration.Kind) -> Set<Declaration> {
@@ -223,6 +230,18 @@ public final class SourceGraph {
 
     public func add(_ assetReference: AssetReference) {
         _ = assetReferences.insert(assetReference)
+    }
+
+    public func addImageAsset(_ declaration: Declaration) {
+        _ = imageAssets.insert(declaration)
+    }
+
+    public func add(_ imageAssetReference: ImageAssetReference) {
+        _ = imageAssetReferences.insert(imageAssetReference)
+    }
+
+    func markUsedImageAsset(_ declaration: Declaration) {
+        _ = usedImageAssets.insert(declaration)
     }
 
     func markUsed(_ declaration: Declaration) {

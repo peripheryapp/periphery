@@ -8,6 +8,7 @@ public enum ScanResultBuilder {
         let removableDeclarations = graph.unusedDeclarations
             .subtracting(assignOnlyProperties)
             .union(graph.unusedModuleImports)
+            .union(graph.unusedImageAssets)
         let redundantProtocols = graph.redundantProtocols.filter { !removableDeclarations.contains($0.0) }
         let redundantPublicAccessibility = graph.redundantPublicAccessibility.filter { !removableDeclarations.contains($0.0) }
 

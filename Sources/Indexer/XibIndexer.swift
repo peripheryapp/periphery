@@ -29,10 +29,11 @@ final class XibIndexer: Indexer {
 
             let elapsed = try Benchmark.measure {
                 do {
-                    let refs = try XibParser(path: xibPath)
+                    let result = try XibParser(path: xibPath)
                         .parse()
                     self.graph.withLock { graph in
-                        refs.forEach { graph.add($0) }
+                        result.assetReferences.forEach { graph.add($0) }
+                        result.imageAssetReferences.forEach { graph.add($0) }
                     }
                 } catch {
                     throw XibError.failedToParse(path: xibPath, underlyingError: error)

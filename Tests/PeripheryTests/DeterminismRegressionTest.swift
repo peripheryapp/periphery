@@ -224,6 +224,38 @@ final class DeterminismRegressionTest: XCTestCase {
         XCTAssertNil(graph.redundantPublicAccessibility[outletDecl])
     }
 
+    func testImageAssetReferenceRetainerMarksReferencedImageAssets() {
+        let graph = makeGraph()
+
+        let used = makeDeclaration(
+            kind: .imageAsset,
+            name: "UsedImage",
+            usr: "image-used",
+            location: makeLocation("/tmp/Assets.xcassets/UsedImage.imageset/Contents.json", module: "")
+        )
+        let unused = makeDeclaration(
+            kind: .imageAsset,
+            name: "UnusedImage",
+            usr: "image-unused",
+            location: makeLocation("/tmp/Assets.xcassets/UnusedImage.imageset/Contents.json", module: "")
+        )
+
+        graph.addImageAsset(used)
+        graph.addImageAsset(unused)
+        graph.add(
+            ImageAssetReference(
+                name: "UsedImage",
+                location: makeLocation("/tmp/View.swift", module: "Feature"),
+                source: .swift
+            )
+        )
+
+        ImageAssetReferenceRetainer(graph: graph, configuration: Configuration(), swiftVersion: makeSwiftVersion()).mutate()
+
+        XCTAssertTrue(graph.usedImageAssets.contains(used))
+        XCTAssertEqual(graph.unusedImageAssets, [unused])
+    }
+
     func testProtocolConformanceReferenceBuilderDeterministicallySelectsSuperclassImplementation() {
         let graph = makeGraph()
         let configuration = Configuration()
