@@ -465,7 +465,7 @@ Periphery's generated scan rule follows embedded bundle and plugin edges transit
 > [!TIP]
 > By default, Periphery passes `--check_visibility=false` to `bazel run` to simplify integration, since the generated scan target references your project's targets which may not otherwise be visible. However, disabling visibility checking can invalidate Bazel's analysis cache, resulting in slower subsequent builds.
 >
-> You can disable this behavior with the `--bazel-check-visibility` option. You must ensure the necessary targets are visible to the generated package by adding the `@@+generated+periphery_generated//:__pkg__` visibility label to your targets.
+> You can disable this behavior with the `--bazel-check-visibility` option. You must ensure the necessary targets are visible to Periphery's generated package, for example by adding the `@@+generated+periphery//bazel:generated` visibility label to your targets.
 
 ### Other
 

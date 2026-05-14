@@ -1,0 +1,4 @@
+package_group(
+    name = "generated",
+    includes = ["@periphery_generated//visibility:package_group"],
+)

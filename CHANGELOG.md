@@ -6,6 +6,7 @@
 
 ##### Enhancements
 
+- Expose a stable `@periphery//bazel:generated` package group so Bazel projects can grant visibility to Periphery's generated scan target and use `--bazel-check-visibility` safely.
 - Added a `--bazel-query` option to override the default Bazel top-level target query.
 
 ##### Bug Fixes
