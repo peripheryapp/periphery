@@ -156,6 +156,9 @@ struct ScanCommand: ParsableCommand {
     @Option(help: "Filter pattern applied to the Bazel top-level targets query")
     var bazelFilter: String?
 
+    @Option(help: "Query expression used for the Bazel top-level targets query. Overrides the default query and bypasses bazelFilter.")
+    var bazelQuery: String?
+
     @Option(help: "Path to a global index store populated by Bazel. If provided, will be used instead of individual module stores.")
     var bazelIndexStore: FilePath?
 
@@ -221,6 +224,7 @@ struct ScanCommand: ParsableCommand {
         configuration.apply(\.$genericProjectConfig, genericProjectConfig)
         configuration.apply(\.$bazel, bazel)
         configuration.apply(\.$bazelFilter, bazelFilter)
+        configuration.apply(\.$bazelQuery, bazelQuery)
         configuration.apply(\.$bazelIndexStore, bazelIndexStore)
         configuration.apply(\.$bazelCheckVisibility, bazelCheckVisibility)
 
