@@ -19,6 +19,26 @@ PeripheryInfo = provider(
     },
 )
 
+_TRANSITIVE_ATTRS = [
+    "app_clips",
+    "deps",
+    "extension",
+    "extensions",
+    "plugins",
+    "swift_target",
+    "watch_application",
+]
+
+def _periphery_info_providers(rule_attr):
+    providers = []
+    for attr in _TRANSITIVE_ATTRS:
+        value = getattr(rule_attr, attr, None)
+        values = value if type(value) == "list" else ([value] if value else [])
+        for target in values:
+            if PeripheryInfo in target:
+                providers.append(target[PeripheryInfo])
+    return providers
+
 def _force_indexstore_impl(settings, _attr):
     return {
         "//command_line_option:features": settings["//command_line_option:features"] + [
@@ -90,12 +110,7 @@ def _scan_inputs_aspect_impl(target, ctx):
                     elif ".xcmappingmodel" in resource.path:
                         xcmappingmodels.append(resource)
 
-    deps = getattr(ctx.rule.attr, "deps", [])
-    providers = [dep[PeripheryInfo] for dep in deps]
-    swift_target = getattr(ctx.rule.attr, "swift_target", None)
-
-    if swift_target:
-        providers.append(swift_target[PeripheryInfo])
+    providers = _periphery_info_providers(ctx.rule.attr)
 
     swift_srcs_depset = depset(
         swift_srcs,
@@ -206,5 +221,5 @@ def scan_impl(ctx):
 
 scan_inputs_aspect = aspect(
     _scan_inputs_aspect_impl,
-    attr_aspects = ["deps", "swift_target"],
+    attr_aspects = _TRANSITIVE_ATTRS,
 )
