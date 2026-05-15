@@ -496,8 +496,8 @@
     },
     "@@swift-index-store+//:repositories.bzl%bzlmod_deps": {
       "general": {
-        "bzlTransitiveDigest": "5SgzvK5bW1AjBEGcIZ+V8t1hdrKQxcL5liC+blXrOeo=",
-        "usagesDigest": "6gSsMFoZD8MOT1d3qLGp8z92CBXKqQI0zULrhGHXrow=",
+        "bzlTransitiveDigest": "lQ53e8CJVUhAUlLtQHBMA6CHnfoEVqLeN/PpMp0m9jw=",
+        "usagesDigest": "f8v90Z0jhAD//t5+/A2VQp2N8NISaI/oFgntRKckdYI=",
         "recordedInputs": [
           "REPO_MAPPING:swift-index-store+,bazel_tools bazel_tools"
         ],
@@ -509,6 +509,10 @@
               "sha256": "da69bab932357a817aa0756e400be86d7156040bfbea8eded7a3acc529320731",
               "build_file_content": "\nload(\"@build_bazel_rules_apple//apple:apple.bzl\", \"apple_static_xcframework_import\")\n\napple_static_xcframework_import(\n    name = \"libIndexStore\",\n    visibility = [\"//visibility:public\"],\n    xcframework_imports = glob([\"libIndexStore.xcframework/**\"]),\n)\n        "
             }
+          },
+          "LinuxIndexStore": {
+            "repoRuleId": "@@swift-index-store+//:repositories.bzl%_linux_indexstore",
+            "attributes": {}
           }
         }
       }

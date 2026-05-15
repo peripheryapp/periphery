@@ -27,3 +27,4 @@ use_repo(use_extension("//bazel:generated.bzl", "generated"), "periphery_generat
 
 # Bazel dev dependencies
 bazel_dep(name = "buildifier_prebuilt", version = "8.2.1.1", dev_dependency = True)
+bazel_dep(name = "rules_shell", version = "0.6.1", dev_dependency = True)

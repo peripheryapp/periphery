@@ -1,0 +1,51 @@
+"""
+    Harness targets that exercise the public Periphery Bazel rules end-to-end.
+"""
+
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load("@rules_swift//swift:swift_binary.bzl", "swift_binary")
+load("//bazel:rules.bzl", "scan", "scan_report", "scan_test")
+
+# Fixture with no unused declarations.
+swift_binary(
+    name = "Clean",
+    srcs = ["Clean.swift"],
+)
+
+# Exercises the `scan` rule (executable). Built but not run by default.
+scan(
+    name = "clean_scan",
+    deps = [":Clean"],
+)
+
+# Exercises the `scan_test` rule. Passes because the fixture has no unused code.
+scan_test(
+    name = "clean_scan_test",
+    deps = [":Clean"],
+)
+
+# Exercises the `scan_report` rule against clean code (empty findings path).
+scan_report(
+    name = "clean_scan_report",
+    deps = [":Clean"],
+)
+
+# Fixture with an intentionally unused declaration.
+swift_binary(
+    name = "Unused",
+    srcs = ["Unused.swift"],
+)
+
+# `scan_report` against code with findings; consumed by the verification test below.
+scan_report(
+    name = "unused_scan_report",
+    deps = [":Unused"],
+)
+
+# Asserts that scan_report's output actually contains the expected unused symbol.
+sh_test(
+    name = "unused_scan_report_test",
+    srcs = ["verify_unused_report.sh"],
+    args = ["$(rootpath :unused_scan_report)"],
+    data = [":unused_scan_report"],
+)
