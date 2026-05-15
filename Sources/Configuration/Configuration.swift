@@ -152,6 +152,9 @@ public final class Configuration {
     @Setting(key: "bazel_filter", defaultValue: nil)
     public var bazelFilter: String?
 
+    @Setting(key: "bazel_query", defaultValue: nil)
+    public var bazelQuery: String?
+
     @Setting(key: "bazel_index_store", defaultValue: nil)
     public var bazelIndexStore: FilePath?
 
@@ -231,7 +234,7 @@ public final class Configuration {
         $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults,
         $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $retainEquatableProperties,
         $retainHashableProperties, $baseline, $writeBaseline,
-        $writeResults, $genericProjectConfig, $bazel, $bazelFilter, $bazelIndexStore, $bazelCheckVisibility,
+        $writeResults, $genericProjectConfig, $bazel, $bazelFilter, $bazelQuery, $bazelIndexStore, $bazelCheckVisibility,
     ]
 
     private func buildFilenameMatchers(with patterns: [String]) -> [FilenameMatcher] {

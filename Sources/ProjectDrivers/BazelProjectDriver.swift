@@ -136,6 +136,10 @@ public final class BazelProjectDriver: ProjectDriver {
     }
 
     private var query: String {
+        if let bazelQuery = configuration.bazelQuery {
+            return bazelQuery
+        }
+
         let kinds = Self.topLevelKinds.joined(separator: "|")
         let query = "filter('^//.*', kind('(\(kinds)) rule', deps(//...)))"
 
