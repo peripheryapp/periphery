@@ -40,39 +40,40 @@ def _periphery_info_providers(rule_attr):
                 providers.append(target[PeripheryInfo])
     return providers
 
+_SWIFT_COPT_SETTING = "@rules_swift//swift:copt"
+
 def _periphery_deps_transition_impl(settings, _attr):
-    # Periphery's analysis relies on accurate per-module index data, which is
-    # only produced when:
+    # Periphery's analysis relies on:
     #
-    #   - `swift.index_while_building` is enabled, so an indexstore is written
-    #     during compilation.
-    #   - Whole-module optimization is in effect, so each module compiles in a
-    #     single frontend invocation and emits a single consolidated indexstore
-    #     that captures cross-file references. Per-file compilation otherwise
-    #     splits the indexstore in ways that confuse periphery's reference
-    #     resolution.
+    #   - `swift.index_while_building`, so an indexstore is written during
+    #     compilation.
+    #   - Whole-module optimization, so each module compiles in a single
+    #     frontend invocation and emits a single consolidated indexstore that
+    #     captures cross-file references. Per-file compilation otherwise splits
+    #     the indexstore in ways that confuse periphery's reference resolution.
     #
-    # In rules_swift, WMO is driven by `compilation_mode = opt` together with
-    # the `swift.opt_uses_wmo` feature, so we set both here. We also clear
-    # `swift.opt_uses_osize` so size optimizations don't drop or rewrite
-    # declarations that periphery would otherwise observe.
+    # rules_swift's toolchain scans the `@rules_swift//swift:copt` build
+    # setting and auto-enables `swift._wmo_in_swiftcopts` whenever it sees
+    # `-wmo`, `-whole-module-optimization`, or `-force-single-frontend-invocation`
+    # (see `swift/internal/wmo.bzl`). Setting `-wmo` here triggers that path
+    # without forcing `compilation_mode = opt`, which would also enable
+    # inlining, dead-code elimination, and other transforms we don't want.
     return {
-        "//command_line_option:compilation_mode": "opt",
         "//command_line_option:features": settings["//command_line_option:features"] + [
             "swift.index_while_building",
-            "swift.opt_uses_wmo",
-            "-swift.opt_uses_osize",
         ],
+        _SWIFT_COPT_SETTING: settings[_SWIFT_COPT_SETTING] + ["-wmo"],
     }
 
 periphery_deps_transition = transition(
     implementation = _periphery_deps_transition_impl,
     inputs = [
         "//command_line_option:features",
+        _SWIFT_COPT_SETTING,
     ],
     outputs = [
-        "//command_line_option:compilation_mode",
         "//command_line_option:features",
+        _SWIFT_COPT_SETTING,
     ],
 )
 
