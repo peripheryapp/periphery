@@ -1,5 +1,6 @@
 """
-    Declares the `scan` rule which acts as the primary entry point for the Periphery Bazel integration.
+    Declares the `scan` and `scan_test` rules which act as the primary entry points
+    for the Periphery Bazel integration.
 """
 
 load("@bazel_skylib//lib:sets.bzl", "sets")
@@ -153,8 +154,13 @@ def _scan_inputs_aspect_impl(target, ctx):
         ),
     ]
 
-# buildifier: disable=function-docstring
-def scan_impl(ctx):
+def _path_for(file, is_test):
+    # When invoked via `bazel test` the script runs from the runfiles directory,
+    # so paths must be runfiles-relative (short_path). For `bazel run` the script
+    # runs from the workspace root, so the exec-root relative path is correct.
+    return file.short_path if is_test else file.path
+
+def _scan_impl_common(ctx, is_test):
     swift_srcs_set = sets.make()
     indexstores_set = sets.make()
     plists_set = sets.make()
@@ -180,23 +186,23 @@ def scan_impl(ctx):
     xcmappingmodels = sets.to_list(xcmappingmodels_set)
     test_targets = sets.to_list(test_targets_set)
 
-    indexstores_config = [file.path for file in indexstores]
+    indexstores_config = [_path_for(file, is_test) for file in indexstores]
     if ctx.attr.global_indexstore:
         indexstores_config = [ctx.attr.global_indexstore]
 
     project_config = struct(
         indexstores = indexstores_config,
-        plists = [file.path for file in plists],
-        xibs = [file.path for file in xibs],
-        xcdatamodels = [file.path for file in xcdatamodels],
-        xcmappingmodels = [file.path for file in xcmappingmodels],
+        plists = [_path_for(file, is_test) for file in plists],
+        xibs = [_path_for(file, is_test) for file in xibs],
+        xcdatamodels = [_path_for(file, is_test) for file in xcdatamodels],
+        xcmappingmodels = [_path_for(file, is_test) for file in xcmappingmodels],
         test_targets = test_targets,
     )
 
     periphery = ctx.attr.periphery[DefaultInfo].files_to_run.executable
 
     project_config_json = json.encode_indent(project_config)
-    project_config_file = ctx.actions.declare_file("project_config.json")
+    project_config_file = ctx.outputs.project_config
     ctx.actions.write(project_config_file, project_config_json)
 
     ctx.actions.expand_template(
@@ -205,9 +211,15 @@ def scan_impl(ctx):
         substitutions = {
             "%periphery_path%": periphery.short_path,
             "%config_path%": ctx.attr.config,
-            "%project_config_path%": project_config_file.path,
+            "%project_config_path%": _path_for(project_config_file, is_test),
         },
     )
+
+    runfiles_files = swift_srcs + indexstores + plists + xibs + xcdatamodels + xcmappingmodels + [periphery]
+    if is_test:
+        # The generated config file is referenced by the script via its runfiles
+        # path, so it must be included in the test's runfiles.
+        runfiles_files = runfiles_files + [project_config_file]
 
     return DefaultInfo(
         executable = ctx.outputs.scan,
@@ -215,9 +227,103 @@ def scan_impl(ctx):
             # Swift sources are not included in the generated project file, yet they are referenced
             # in the indexstores and will be read by Periphery, and therefore must be present in
             # the runfiles.
-            files = swift_srcs + indexstores + plists + xibs + xcdatamodels + xcmappingmodels + [periphery],
+            files = runfiles_files,
         ),
     )
+
+# buildifier: disable=function-docstring
+def scan_impl(ctx):
+    return _scan_impl_common(ctx, is_test = False)
+
+# buildifier: disable=function-docstring
+def scan_test_impl(ctx):
+    return _scan_impl_common(ctx, is_test = True)
+
+def _collect_inputs(ctx):
+    swift_srcs_set = sets.make()
+    indexstores_set = sets.make()
+    plists_set = sets.make()
+    xibs_set = sets.make()
+    xcdatamodels_set = sets.make()
+    xcmappingmodels_set = sets.make()
+    test_targets_set = sets.make()
+
+    for dep in ctx.attr.deps:
+        swift_srcs_set = sets.union(swift_srcs_set, sets.make(dep[PeripheryInfo].swift_srcs.to_list()))
+        indexstores_set = sets.union(indexstores_set, sets.make(dep[PeripheryInfo].indexstores.to_list()))
+        plists_set = sets.union(plists_set, sets.make(dep[PeripheryInfo].plists.to_list()))
+        xibs_set = sets.union(xibs_set, sets.make(dep[PeripheryInfo].xibs.to_list()))
+        xcdatamodels_set = sets.union(xcdatamodels_set, sets.make(dep[PeripheryInfo].xcdatamodels.to_list()))
+        xcmappingmodels_set = sets.union(xcmappingmodels_set, sets.make(dep[PeripheryInfo].xcmappingmodels.to_list()))
+        test_targets_set = sets.union(test_targets_set, sets.make(dep[PeripheryInfo].test_targets.to_list()))
+
+    return struct(
+        swift_srcs = sets.to_list(swift_srcs_set),
+        indexstores = sets.to_list(indexstores_set),
+        plists = sets.to_list(plists_set),
+        xibs = sets.to_list(xibs_set),
+        xcdatamodels = sets.to_list(xcdatamodels_set),
+        xcmappingmodels = sets.to_list(xcmappingmodels_set),
+        test_targets = sets.to_list(test_targets_set),
+    )
+
+# buildifier: disable=function-docstring
+def scan_report_impl(ctx):
+    inputs = _collect_inputs(ctx)
+
+    indexstores_config = [file.path for file in inputs.indexstores]
+    if ctx.attr.global_indexstore:
+        indexstores_config = [ctx.attr.global_indexstore]
+
+    project_config = struct(
+        indexstores = indexstores_config,
+        plists = [file.path for file in inputs.plists],
+        xibs = [file.path for file in inputs.xibs],
+        xcdatamodels = [file.path for file in inputs.xcdatamodels],
+        xcmappingmodels = [file.path for file in inputs.xcmappingmodels],
+        test_targets = inputs.test_targets,
+    )
+
+    project_config_file = ctx.outputs.project_config
+    ctx.actions.write(project_config_file, json.encode_indent(project_config))
+
+    periphery = ctx.attr.periphery[DefaultInfo].files_to_run.executable
+    report_file = ctx.outputs.report
+
+    args = ctx.actions.args()
+    args.add("scan")
+    args.add("--disable-update-check")
+    args.add("--format", ctx.attr.format)
+    args.add("--write-results", report_file.path)
+    args.add("--generic-project-config", project_config_file.path)
+    if ctx.attr.config:
+        args.add("--config", ctx.attr.config)
+
+    action_inputs = (
+        inputs.swift_srcs +
+        inputs.indexstores +
+        inputs.plists +
+        inputs.xibs +
+        inputs.xcdatamodels +
+        inputs.xcmappingmodels +
+        [project_config_file]
+    )
+
+    ctx.actions.run(
+        executable = periphery,
+        arguments = [args],
+        inputs = action_inputs,
+        outputs = [report_file],
+        mnemonic = "PeripheryScan",
+        progress_message = "Generating Periphery report for %{label}",
+    )
+
+    return [
+        DefaultInfo(files = depset([report_file])),
+        OutputGroupInfo(
+            project_config = depset([project_config_file]),
+        ),
+    ]
 
 scan_inputs_aspect = aspect(
     _scan_inputs_aspect_impl,

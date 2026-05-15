@@ -302,7 +302,7 @@ struct ScanCommand: ParsableCommand {
 
             logger.info(output, canQuiet: false)
 
-            if !filteredResults.isEmpty, let resultsPath = configuration.writeResults {
+            if let resultsPath = configuration.writeResults {
                 var output = output
 
                 if colored {

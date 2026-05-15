@@ -472,6 +472,71 @@ Periphery's generated scan rule follows embedded bundle and plugin edges transit
 >
 > You can disable this behavior with the `--bazel-check-visibility` option. You must ensure the necessary targets are visible to Periphery's generated package, for example by adding the `@@+generated+periphery//bazel:generated` visibility label to your targets.
 
+#### Declaring scan targets in your `BUILD.bazel`
+
+For deeper integration — for example, wiring Periphery into CI as a `bazel test`, or scanning a specific subset of your build graph without invoking the `--bazel` driver — you can declare scan targets directly in your `BUILD.bazel` files. Three rules are provided:
+
+- `scan` — an executable target that prints results when run with `bazel run`.
+- `scan_test` — a test target that exits non-zero when unused code is found (via `--strict`), so `bazel test` fails. Use this for CI.
+- `scan_report` — a build target that runs Periphery at build time and writes the formatted report to a file output. Use this when you need to feed the report into another rule via `data` deps or `srcs`.
+
+All three rules produce the same scan results as `bazel run @periphery -- scan --bazel`. Apply them to your top-level targets (applications, tests, command-line tools, etc.):
+
+```python
+load("@periphery//bazel:rules.bzl", "scan", "scan_report", "scan_test")
+
+scan(
+    name = "scan",
+    testonly = True,
+    config = ".periphery.yml",
+    deps = [
+        "//App:MyApp",
+        "//Tests:MyAppTests",
+    ],
+)
+
+scan_test(
+    name = "scan_test",
+    config = ".periphery.yml",
+    deps = [
+        "//App:MyApp",
+        "//Tests:MyAppTests",
+    ],
+)
+
+scan_report(
+    name = "scan_report",
+    config = ".periphery.yml",
+    format = "json",
+    deps = [
+        "//App:MyApp",
+        "//Tests:MyAppTests",
+    ],
+)
+```
+
+Run the scan locally with:
+
+```sh
+bazel run //:scan
+```
+
+Fail the build in CI with:
+
+```sh
+bazel test //:scan_test
+```
+
+Build a report file:
+
+```sh
+bazel build //:scan_report
+```
+
+The report file is exposed as the rule's default output, so any consumer rule can depend on `//:scan_report` and read the report via `$(execpath //:scan_report)`.
+
+`format` accepts any of Periphery's output formats: `xcode`, `csv`, `json`, `checkstyle`, `codeclimate`, `github-actions`, `github-markdown`, `gitlab-codequality`.
+
 ### Other
 
 Periphery can analyze projects using other build systems, though it cannot drive them automatically like SPM, Xcode, and Bazel. Instead, you need to create a configuration file that specifies the location of indexstore and other resource files. The format is as follows:
