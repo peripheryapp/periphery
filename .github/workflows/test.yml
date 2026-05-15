@@ -57,6 +57,8 @@ jobs:
             repository-cache: true
         - name: Scan
           run: bazel run //:periphery -- scan --bazel --quiet --strict --baseline baselines/${{ matrix.baseline }}
+        - name: Test Bazel rules
+          run: bazel test //bazel/tests/...
   macOS:
     name: macOS
     strategy:

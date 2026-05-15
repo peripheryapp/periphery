@@ -1,3 +1,4 @@
 exports_files([
     "scan_template.sh",
+    "scan_test_template.sh",
 ])
