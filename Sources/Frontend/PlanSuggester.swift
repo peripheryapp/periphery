@@ -124,7 +124,7 @@ final class PlanSuggester {
             "",
             "Open-source and small projects will continue to use Periphery for free but larger projects will require a paid plan. \(suggestion)",
             "",
-            "Learn more at " + logger.colorize("https://periphery.pro", .bold),
+            "Learn more at " + logger.colorize("https://periphery.pro/a-new-chapter", .bold),
         ]
 
         let contentWidth = 70
