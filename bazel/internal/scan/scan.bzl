@@ -40,19 +40,38 @@ def _periphery_info_providers(rule_attr):
                 providers.append(target[PeripheryInfo])
     return providers
 
-def _force_indexstore_impl(settings, _attr):
+def _periphery_deps_transition_impl(settings, _attr):
+    # Periphery's analysis relies on accurate per-module index data, which is
+    # only produced when:
+    #
+    #   - `swift.index_while_building` is enabled, so an indexstore is written
+    #     during compilation.
+    #   - Whole-module optimization is in effect, so each module compiles in a
+    #     single frontend invocation and emits a single consolidated indexstore
+    #     that captures cross-file references. Per-file compilation otherwise
+    #     splits the indexstore in ways that confuse periphery's reference
+    #     resolution.
+    #
+    # In rules_swift, WMO is driven by `compilation_mode = opt` together with
+    # the `swift.opt_uses_wmo` feature, so we set both here. We also clear
+    # `swift.opt_uses_osize` so size optimizations don't drop or rewrite
+    # declarations that periphery would otherwise observe.
     return {
+        "//command_line_option:compilation_mode": "opt",
         "//command_line_option:features": settings["//command_line_option:features"] + [
             "swift.index_while_building",
+            "swift.opt_uses_wmo",
+            "-swift.opt_uses_osize",
         ],
     }
 
-force_indexstore = transition(
-    implementation = _force_indexstore_impl,
+periphery_deps_transition = transition(
+    implementation = _periphery_deps_transition_impl,
     inputs = [
         "//command_line_option:features",
     ],
     outputs = [
+        "//command_line_option:compilation_mode",
         "//command_line_option:features",
     ],
 )

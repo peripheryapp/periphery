@@ -4,7 +4,7 @@
 
 load(
     "//bazel/internal/scan:scan.bzl",
-    "force_indexstore",
+    "periphery_deps_transition",
     "scan_impl",
     "scan_inputs_aspect",
     "scan_report_impl",
@@ -13,7 +13,7 @@ load(
 
 _COMMON_ATTRS = {
     "deps": attr.label_list(
-        cfg = force_indexstore,
+        cfg = periphery_deps_transition,
         mandatory = True,
         aspects = [scan_inputs_aspect],
         doc = "Top-level project targets to scan.",
