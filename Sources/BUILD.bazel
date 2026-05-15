@@ -68,6 +68,7 @@ swift_library(
         "SourceGraph/Mutators/DynamicMemberRetainer.swift",
         "SourceGraph/Mutators/EntryPointAttributeRetainer.swift",
         "SourceGraph/Mutators/EnumCaseReferenceBuilder.swift",
+        "SourceGraph/Mutators/EquatableHashablePropertyRetainer.swift",
         "SourceGraph/Mutators/ExtensionReferenceBuilder.swift",
         "SourceGraph/Mutators/ExternalOverrideRetainer.swift",
         "SourceGraph/Mutators/ExternalTypeProtocolConformanceReferenceRemover.swift",

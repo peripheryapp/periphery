@@ -95,6 +95,12 @@ public final class Configuration {
     @Setting(key: "retain_encodable_properties", defaultValue: false)
     public var retainEncodableProperties: Bool
 
+    @Setting(key: "retain_equatable_properties", defaultValue: false)
+    public var retainEquatableProperties: Bool
+
+    @Setting(key: "retain_hashable_properties", defaultValue: false)
+    public var retainHashableProperties: Bool
+
     @Setting(key: "verbose", defaultValue: false)
     public var verbose: Bool
 
@@ -226,7 +232,8 @@ public final class Configuration {
         $externalEncodableProtocols, $externalCodableProtocols, $externalTestCaseClasses, $verbose, $quiet, $color,
         $disableUpdateCheck, $strict, $indexStorePath,
         $skipBuild, $skipSchemesValidation, $cleanBuild, $buildArguments, $xcodeListArguments, $relativeResults,
-        $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $baseline, $writeBaseline,
+        $jsonPackageManifestPath, $retainCodableProperties, $retainEncodableProperties, $retainEquatableProperties,
+        $retainHashableProperties, $baseline, $writeBaseline,
         $writeResults, $genericProjectConfig, $bazel, $bazelFilter, $bazelQuery, $bazelIndexStore, $bazelCheckVisibility,
     ]
 

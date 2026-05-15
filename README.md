@@ -31,6 +31,7 @@
     - [Unused Imports](#unused-imports)
     - [Objective-C](#objective-c)
     - [Codable](#codable)
+    - [Equatable and Hashable](#equatable-and-hashable)
     - [XCTestCase](#xctestcase)
     - [Interface Builder](#interface-builder)
     - [SPI (System Programming Interface)](#spi-system-programming-interface)
@@ -311,6 +312,10 @@ Alternatively, the `--retain-objc-annotated` option can be used to only retain d
 Swift synthesizes additional code for `Codable` types that is not visible to Periphery and can result in false positives for properties not directly referenced from non-synthesized code. If your project contains many such types, you can retain all properties on `Codable` types with `--retain-codable-properties`. Alternatively, you can retain properties only on `Encodable` types with `--retain-encodable-properties`.
 
 If `Codable` conformance is declared by a protocol in an external module not scanned by Periphery, you can instruct Periphery to identify the protocols as `Codable` with `--external-codable-protocols "ExternalProtocol"`.
+
+### Equatable and Hashable
+
+Swift synthesizes additional code for `Equatable` and `Hashable` types that is not visible to Periphery and can result in false positives for properties not directly referenced from non-synthesized code. If your project contains many such types, you can retain all properties on `Equatable` types with `--retain-equatable-properties`, or all properties on `Hashable` types with `--retain-hashable-properties`. The `Equatable` option also retains properties on `Hashable` types because `Hashable` refines `Equatable`.
 
 ### XCTestCase
 

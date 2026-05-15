@@ -1002,6 +1002,64 @@ final class RetentionTest: FixtureSourceGraphTestCase {
         }
     }
 
+    func testRetainsEquatableProperties() {
+        analyze(
+            retainPublic: true,
+            retainEquatableProperties: false,
+            retainAssignOnlyProperties: false
+        ) {
+            assertReferenced(.struct("FixtureStruct222")) {
+                self.assertNotReferenced(.functionConstructor("init(unused:)"))
+                self.assertAssignOnlyProperty(.varInstance("unused"))
+            }
+        }
+
+        analyze(
+            retainPublic: true,
+            retainEquatableProperties: true
+        ) {
+            assertReferenced(.struct("FixtureStruct222")) {
+                self.assertNotReferenced(.functionConstructor("init(unused:)"))
+                self.assertReferenced(.varInstance("unused"))
+                self.assertNotAssignOnlyProperty(.varInstance("unused"))
+            }
+
+            assertReferenced(.struct("FixtureStruct223")) {
+                self.assertNotReferenced(.functionConstructor("init(unused:)"))
+                self.assertReferenced(.varInstance("unused"))
+                self.assertNotAssignOnlyProperty(.varInstance("unused"))
+            }
+
+            assertReferenced(.class("FixtureClass222")) {
+                self.assertAssignOnlyProperty(.varInstance("unused"))
+            }
+        }
+    }
+
+    func testRetainsHashableProperties() {
+        analyze(
+            retainPublic: true,
+            retainHashableProperties: false,
+            retainAssignOnlyProperties: false
+        ) {
+            assertReferenced(.struct("FixtureStruct224")) {
+                self.assertNotReferenced(.functionConstructor("init(unused:)"))
+                self.assertAssignOnlyProperty(.varInstance("unused"))
+            }
+        }
+
+        analyze(
+            retainPublic: true,
+            retainHashableProperties: true
+        ) {
+            assertReferenced(.struct("FixtureStruct224")) {
+                self.assertNotReferenced(.functionConstructor("init(unused:)"))
+                self.assertReferenced(.varInstance("unused"))
+                self.assertNotAssignOnlyProperty(.varInstance("unused"))
+            }
+        }
+    }
+
     func testRetainsFilesOption() {
         analyze(retainFiles: [testFixturePath.string]) {
             assertReferenced(.class("FixtureClass100"))

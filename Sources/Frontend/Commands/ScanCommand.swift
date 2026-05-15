@@ -105,6 +105,12 @@ struct ScanCommand: ParsableCommand {
     @Flag(help: "Retain properties on Encodable types only")
     var retainEncodableProperties: Bool = defaultConfiguration.$retainEncodableProperties.defaultValue
 
+    @Flag(help: "Retain properties on Equatable types, including Hashable types")
+    var retainEquatableProperties: Bool = defaultConfiguration.$retainEquatableProperties.defaultValue
+
+    @Flag(help: "Retain properties on Hashable types")
+    var retainHashableProperties: Bool = defaultConfiguration.$retainHashableProperties.defaultValue
+
     @Flag(help: "Clean existing build artifacts before building")
     var cleanBuild: Bool = defaultConfiguration.$cleanBuild.defaultValue
 
@@ -217,6 +223,8 @@ struct ScanCommand: ParsableCommand {
         configuration.apply(\.$relativeResults, relativeResults)
         configuration.apply(\.$retainCodableProperties, retainCodableProperties)
         configuration.apply(\.$retainEncodableProperties, retainEncodableProperties)
+        configuration.apply(\.$retainEquatableProperties, retainEquatableProperties)
+        configuration.apply(\.$retainHashableProperties, retainHashableProperties)
         configuration.apply(\.$jsonPackageManifestPath, jsonPackageManifestPath)
         configuration.apply(\.$baseline, baseline)
         configuration.apply(\.$writeBaseline, writeBaseline)
