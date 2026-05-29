@@ -235,6 +235,7 @@ public final class Declaration {
     public var related: Set<Reference> = []
     public var isImplicit: Bool = false
     public var isObjcAccessible: Bool = false
+    public var isLetBinding: Bool = false
 
     private let hashValueCache: Int
 

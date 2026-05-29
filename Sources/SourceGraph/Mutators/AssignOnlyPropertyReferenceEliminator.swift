@@ -19,6 +19,7 @@ enum AssignOnlyPropertyAnalyzer {
               !retainAssignOnlyPropertyTypes.contains(declaredType),
               property.attributes.isEmpty,
               !property.isComplexProperty,
+              !property.isLetBinding,
               // A protocol property can technically be assigned and never used when the protocol is
               // used as an existential type, however communicating that succinctly would be very
               // tricky, and most likely just lead to confusion. Here we filter out protocol

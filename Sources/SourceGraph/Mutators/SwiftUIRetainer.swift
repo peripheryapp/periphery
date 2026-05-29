@@ -5,7 +5,7 @@ import Shared
 final class SwiftUIRetainer: SourceGraphMutator {
     private let graph: SourceGraph
     private let configuration: Configuration
-    private static let specialProtocolNames = ["LibraryContentProvider"]
+    private static let specialProtocolNames = ["App", "Commands", "LibraryContentProvider", "Scene"]
     private static let applicationDelegateAdaptorStructNames = ["UIApplicationDelegateAdaptor", "NSApplicationDelegateAdaptor"]
 
     required init(graph: SourceGraph, configuration: Configuration, swiftVersion _: SwiftVersion) {
@@ -47,24 +47,27 @@ final class SwiftUIRetainer: SourceGraphMutator {
             ? graph.declarations(ofKinds: [.class, .struct])
             : graph.mainAttributedDeclarations
         candidateParents
-            .lazy
-            .flatMap(\.declarations)
-            .filter { $0.kind == .varInstance }
-            .filter {
-                $0.references.contains {
-                    ($0.declarationKind == .struct || $0.declarationKind == .enum) && Self.applicationDelegateAdaptorStructNames.contains($0.name)
-                }
-            }
-            .forEach { property in
-                graph.markRetained(property)
-                // The delegate class (e.g. AppDelegate) is passed as a metatype argument
-                // to the adaptor. It exists only within the same file, so Periphery may
-                // suggest downgrading it to fileprivate — but doing so causes a compiler
-                // error because the property referencing it must match its access level.
-                // Unmark it from redundant-internal analysis so no suggestion is emitted.
-                for ref in property.references where ref.declarationKind == .class {
-                    if let delegateDecl = graph.declaration(withUsr: ref.usr) {
-                        graph.unmarkRedundantInternalAccessibility(delegateDecl)
+            .forEach { parent in
+                let adaptorProperties = parent.declarations
+                    .filter { $0.kind == .varInstance }
+                    .filter {
+                        $0.references.contains {
+                            ($0.declarationKind == .struct || $0.declarationKind == .enum) && Self.applicationDelegateAdaptorStructNames.contains($0.name)
+                        }
+                    }
+                guard !adaptorProperties.isEmpty else { return }
+                graph.markRetained(parent)
+                adaptorProperties.forEach { property in
+                    graph.markRetained(property)
+                    // The delegate class (e.g. AppDelegate) is passed as a metatype argument
+                    // to the adaptor. It exists only within the same file, so Periphery may
+                    // suggest downgrading it to fileprivate — but doing so causes a compiler
+                    // error because the property referencing it must match its access level.
+                    // Unmark it from redundant-internal analysis so no suggestion is emitted.
+                    for ref in property.references where ref.declarationKind == .class {
+                        if let delegateDecl = graph.declaration(withUsr: ref.usr) {
+                            graph.unmarkRedundantInternalAccessibility(delegateDecl)
+                        }
                     }
                 }
             }
