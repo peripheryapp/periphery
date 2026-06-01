@@ -65,7 +65,7 @@ public final class XcodeProject: XcodeProjectlike {
         if !path.components.contains("Pods.xcodeproj") {
             subProjects = try xcodeProject.pbxproj.fileReferences
                 .filter { $0.path?.hasSuffix(".xcodeproj") ?? false }
-                .compactMap { try $0.fullPath(sourceRoot: sourceRoot.string) }
+                .compactMap { try? $0.fullPath(sourceRoot: sourceRoot.string) }
                 .compactMap {
                     let projectPath = FilePath($0)
 
