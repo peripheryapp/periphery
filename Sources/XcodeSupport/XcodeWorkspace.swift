@@ -62,6 +62,8 @@ public final class XcodeWorkspace: XcodeProjectlike {
                 }
             case let .group(group):
                 paths += collectProjectPaths(in: group.children, groups: groups + [group])
+            case let .fileSystemSynchronizedGroup(group):
+                paths += collectProjectPaths(in: group.children, groups: groups + [group])
             }
         }
 
