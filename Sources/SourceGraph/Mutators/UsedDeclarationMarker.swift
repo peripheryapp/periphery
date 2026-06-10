@@ -66,6 +66,27 @@ final class UsedDeclarationMarker: SourceGraphMutator {
             for ref in declaration.related {
                 markUsed(declarationsReferenced(by: ref))
             }
+
+            // When a type is marked used, check whether any of its stored-property children
+            // reference a sibling nested type by name. The Swift index store does not always emit
+            // a reference occurrence when a nested type is used as the type annotation of a stored
+            // property within the same parent scope (e.g. `private let status: PhraseStatus` where
+            // `PhraseStatus` is a nested enum inside the same struct). Without this walk, the nested
+            // type has no incoming references and is falsely flagged as unused.
+            let nestedTypesByName = declaration.declarations
+                .filter { Declaration.Kind.concreteTypeKinds.contains($0.kind) }
+                .reduce(into: [String: Declaration]()) { $0[$1.name] = $1 }
+
+            if !nestedTypesByName.isEmpty {
+                for childDecl in declaration.declarations where childDecl.kind.isVariableKind {
+                    guard let declaredType = childDecl.declaredType else { continue }
+                    let baseName = PropertyTypeSanitizer.sanitize(declaredType)
+                        .trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
+                    if let nested = nestedTypesByName[baseName] {
+                        markUsed([nested])
+                    }
+                }
+            }
         }
     }
 
