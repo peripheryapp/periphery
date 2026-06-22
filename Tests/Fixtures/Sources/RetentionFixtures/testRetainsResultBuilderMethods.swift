@@ -37,6 +37,14 @@ class FixtureClass130 {
     static func buildLimitedAvailability(_ component: Component) -> Component {
         component
     }
+
+    static func buildPartialBlock(first: Component) -> Component {
+        first
+    }
+
+    static func buildPartialBlock(accumulated: Component, next: Component) -> Component {
+        accumulated + next
+    }
 }
 
 public class FixtureClass130Retainer {

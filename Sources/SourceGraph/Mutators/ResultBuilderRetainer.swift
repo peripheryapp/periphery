@@ -14,6 +14,8 @@ final class ResultBuilderRetainer: SourceGraphMutator {
         "buildBlock(_:)",
         "buildFinalResult(_:)",
         "buildLimitedAvailability(_:)",
+        "buildPartialBlock(first:)",
+        "buildPartialBlock(accumulated:next:)",
     ])
 
     required init(graph: SourceGraph, configuration _: Configuration, swiftVersion _: SwiftVersion) {

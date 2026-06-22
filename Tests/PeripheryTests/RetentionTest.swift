@@ -916,6 +916,8 @@ final class RetentionTest: FixtureSourceGraphTestCase {
                 self.assertReferenced(.functionMethodStatic("buildBlock(_:)"))
                 self.assertReferenced(.functionMethodStatic("buildFinalResult(_:)"))
                 self.assertReferenced(.functionMethodStatic("buildLimitedAvailability(_:)"))
+                self.assertReferenced(.functionMethodStatic("buildPartialBlock(first:)"))
+                self.assertReferenced(.functionMethodStatic("buildPartialBlock(accumulated:next:)"))
             }
         }
     }
