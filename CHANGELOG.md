@@ -13,6 +13,7 @@
 ##### Bug Fixes
 
 - Follow embedded bundle and plugin edges transitively in the generated Bazel scan rule so custom Bazel queries can avoid building incorrectly transitioned targets while still analyzing extension- and plugin-reachable code.
+- The `--write-results` file is now written even when a scan produces no results, instead of being left absent from a prior run.
 
 ## 3.7.4 (2026-04-26)
 

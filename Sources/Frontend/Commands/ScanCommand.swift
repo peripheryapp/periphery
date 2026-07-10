@@ -295,24 +295,26 @@ struct ScanCommand: ParsableCommand {
         let formatter = outputFormat.formatter.init(configuration: configuration, logger: logger)
         let colored = outputFormat.supportsColoredOutput && logger.isColoredOutputEnabled
 
-        if let output = try formatter.format(filteredResults, colored: colored) {
+        let formattedOutput = try formatter.format(filteredResults, colored: colored)
+
+        if let output = formattedOutput {
             if outputFormat.supportsAuxiliaryOutput {
                 logger.info("", canQuiet: true)
             }
 
             logger.info(output, canQuiet: false)
+        }
 
-            if !filteredResults.isEmpty, let resultsPath = configuration.writeResults {
-                var output = output
-
-                if colored {
-                    // The formatted output contains ANSI escape codes, so we need to re-format
-                    // with coloring disabled.
-                    output = try formatter.format(filteredResults, colored: false) ?? ""
-                }
-
-                try output.write(to: resultsPath.url, atomically: true, encoding: .utf8)
+        if let resultsPath = configuration.writeResults {
+            let output: String = if colored {
+                // The formatted output contains ANSI escape codes, so we need to re-format
+                // with coloring disabled.
+                try formatter.format(filteredResults, colored: false) ?? ""
+            } else {
+                formattedOutput ?? ""
             }
+
+            try output.write(to: resultsPath.url, atomically: true, encoding: .utf8)
         }
 
         logger.endInterval(interval)
