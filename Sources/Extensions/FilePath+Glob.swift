@@ -20,9 +20,9 @@ public extension FilePath {
 }
 
 /// Finds files on the file system using Bash v4 style pattern matching.
-///    - A double globstar (**) causes recursive matching in subdirectories.
+///    - A double globstar (`**`) causes recursive matching in subdirectories.
 ///    - Files from the root directory of the globstar are also included.
-///      For example, with the pattern "dir/**/*.ext" the file "dir/file.ext" is also included.
+///      For example, with the pattern `dir/**/*.ext` the file `dir/file.ext` is also included.
 ///    - When the pattern ends with a trailing slash, only directories are matched.
 private final class Glob {
     private let excludedDirectories: [String]
