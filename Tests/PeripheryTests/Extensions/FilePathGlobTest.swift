@@ -2,14 +2,26 @@ import SystemPackage
 import XCTest
 
 final class FilePathGlobTest: XCTestCase {
-    private let files = ["foo", "bar", "baz", "dir1/file1.ext", "dir1/dir2/dir3/file2.ext"]
+    private let files = [
+        "foo",
+        "bar",
+        "baz",
+        "dir1/file1.ext",
+        "dir1/dir2/dir3/file2.ext",
+        "** ExampleFolder/file3.ext", // A directory name starting with "**" is a literal, not a globstar.
+        "**/file4.ext", // A directory name that is exactly "**".
+        "mid**dle/file5.ext", // "**" in the middle of a name must not be read as a globstar.
+    ]
     private let baseDir = FilePath.current.appending("tmp/FilePathGlobTest").string
     private let fileManager = FileManager.default
 
     override func setUpWithError() throws {
         super.setUp()
-        try fileManager.createDirectory(atPath: "\(baseDir)/dir1/dir2/dir3/", withIntermediateDirectories: true, attributes: nil)
-        files.forEach { fileManager.createFile(atPath: "\(baseDir)/\($0)", contents: nil, attributes: nil) }
+        for file in files {
+            let path = "\(baseDir)/\(file)"
+            try fileManager.createDirectory(atPath: (path as NSString).deletingLastPathComponent, withIntermediateDirectories: true, attributes: nil)
+            fileManager.createFile(atPath: path, contents: nil, attributes: nil)
+        }
     }
 
     override func tearDownWithError() throws {
@@ -41,6 +53,10 @@ final class FilePathGlobTest: XCTestCase {
         let paths = FilePath.glob(pattern).sorted()
         XCTAssertPathsEqual(paths, [
             baseDir,
+            "\(baseDir)/**",
+            "\(baseDir)/** ExampleFolder",
+            "\(baseDir)/** ExampleFolder/file3.ext",
+            "\(baseDir)/**/file4.ext",
             "\(baseDir)/bar",
             "\(baseDir)/baz",
             "\(baseDir)/dir1",
@@ -49,6 +65,8 @@ final class FilePathGlobTest: XCTestCase {
             "\(baseDir)/dir1/dir2/dir3/file2.ext",
             "\(baseDir)/dir1/file1.ext",
             "\(baseDir)/foo",
+            "\(baseDir)/mid**dle",
+            "\(baseDir)/mid**dle/file5.ext",
         ])
     }
 
@@ -58,9 +76,12 @@ final class FilePathGlobTest: XCTestCase {
         let paths = FilePath.glob(pattern).sorted()
         XCTAssertPathsEqual(paths, [
             baseDir,
+            "\(baseDir)/**",
+            "\(baseDir)/** ExampleFolder",
             "\(baseDir)/dir1",
             "\(baseDir)/dir1/dir2",
             "\(baseDir)/dir1/dir2/dir3",
+            "\(baseDir)/mid**dle",
         ])
     }
 
@@ -69,6 +90,10 @@ final class FilePathGlobTest: XCTestCase {
         let pattern = "\(baseDir)/**/*"
         let paths = FilePath.glob(pattern).sorted()
         XCTAssertPathsEqual(paths, [
+            "\(baseDir)/**",
+            "\(baseDir)/** ExampleFolder",
+            "\(baseDir)/** ExampleFolder/file3.ext",
+            "\(baseDir)/**/file4.ext",
             "\(baseDir)/bar",
             "\(baseDir)/baz",
             "\(baseDir)/dir1",
@@ -77,6 +102,8 @@ final class FilePathGlobTest: XCTestCase {
             "\(baseDir)/dir1/dir2/dir3/file2.ext",
             "\(baseDir)/dir1/file1.ext",
             "\(baseDir)/foo",
+            "\(baseDir)/mid**dle",
+            "\(baseDir)/mid**dle/file5.ext",
         ])
     }
 
@@ -94,8 +121,11 @@ final class FilePathGlobTest: XCTestCase {
             let pattern = "**/*.ext"
             let paths = FilePath.glob(pattern).sorted()
             XCTAssertPathsEqual(paths, [
+                "\(baseDir)/** ExampleFolder/file3.ext",
+                "\(baseDir)/**/file4.ext",
                 "\(baseDir)/dir1/dir2/dir3/file2.ext",
                 "\(baseDir)/dir1/file1.ext",
+                "\(baseDir)/mid**dle/file5.ext",
             ])
         }
     }
@@ -113,8 +143,11 @@ final class FilePathGlobTest: XCTestCase {
             let pattern = "../../**/*.ext"
             let paths = FilePath.glob(pattern).sorted()
             XCTAssertPathsEqual(paths, [
+                "\(baseDir)/** ExampleFolder/file3.ext",
+                "\(baseDir)/**/file4.ext",
                 "\(baseDir)/dir1/dir2/dir3/file2.ext",
                 "\(baseDir)/dir1/file1.ext",
+                "\(baseDir)/mid**dle/file5.ext",
             ])
         }
     }
