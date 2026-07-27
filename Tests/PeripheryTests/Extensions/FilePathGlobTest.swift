@@ -11,6 +11,9 @@ final class FilePathGlobTest: XCTestCase {
         "** ExampleFolder/file3.ext", // A directory name starting with "**" is a literal, not a globstar.
         "**/file4.ext", // A directory name that is exactly "**".
         "mid**dle/file5.ext", // "**" in the middle of a name must not be read as a globstar.
+        "dir1/** ExampleFile.ext", // A file name starting with "**".
+        "dir1/fi**le.ext", // "**" in the middle of a file name.
+        "dir1/**", // A file name that is exactly "**".
     ]
     private let baseDir = FilePath.current.appending("tmp/FilePathGlobTest").string
     private let fileManager = FileManager.default
@@ -60,9 +63,12 @@ final class FilePathGlobTest: XCTestCase {
             "\(baseDir)/bar",
             "\(baseDir)/baz",
             "\(baseDir)/dir1",
+            "\(baseDir)/dir1/**",
+            "\(baseDir)/dir1/** ExampleFile.ext",
             "\(baseDir)/dir1/dir2",
             "\(baseDir)/dir1/dir2/dir3",
             "\(baseDir)/dir1/dir2/dir3/file2.ext",
+            "\(baseDir)/dir1/fi**le.ext",
             "\(baseDir)/dir1/file1.ext",
             "\(baseDir)/foo",
             "\(baseDir)/mid**dle",
@@ -97,9 +103,12 @@ final class FilePathGlobTest: XCTestCase {
             "\(baseDir)/bar",
             "\(baseDir)/baz",
             "\(baseDir)/dir1",
+            "\(baseDir)/dir1/**",
+            "\(baseDir)/dir1/** ExampleFile.ext",
             "\(baseDir)/dir1/dir2",
             "\(baseDir)/dir1/dir2/dir3",
             "\(baseDir)/dir1/dir2/dir3/file2.ext",
+            "\(baseDir)/dir1/fi**le.ext",
             "\(baseDir)/dir1/file1.ext",
             "\(baseDir)/foo",
             "\(baseDir)/mid**dle",
@@ -123,7 +132,9 @@ final class FilePathGlobTest: XCTestCase {
             XCTAssertPathsEqual(paths, [
                 "\(baseDir)/** ExampleFolder/file3.ext",
                 "\(baseDir)/**/file4.ext",
+                "\(baseDir)/dir1/** ExampleFile.ext",
                 "\(baseDir)/dir1/dir2/dir3/file2.ext",
+                "\(baseDir)/dir1/fi**le.ext",
                 "\(baseDir)/dir1/file1.ext",
                 "\(baseDir)/mid**dle/file5.ext",
             ])
@@ -145,7 +156,9 @@ final class FilePathGlobTest: XCTestCase {
             XCTAssertPathsEqual(paths, [
                 "\(baseDir)/** ExampleFolder/file3.ext",
                 "\(baseDir)/**/file4.ext",
+                "\(baseDir)/dir1/** ExampleFile.ext",
                 "\(baseDir)/dir1/dir2/dir3/file2.ext",
+                "\(baseDir)/dir1/fi**le.ext",
                 "\(baseDir)/dir1/file1.ext",
                 "\(baseDir)/mid**dle/file5.ext",
             ])
