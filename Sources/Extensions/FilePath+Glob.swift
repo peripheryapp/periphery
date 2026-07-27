@@ -60,37 +60,51 @@ private final class Glob {
     }
 
     private func expandGlobstar(pattern: String) -> [String] {
-        guard pattern.contains("**") else {
-            return [pattern]
+        expandGlobstar(base: nil, remainder: pattern)
+    }
+
+    /// Expands `**` globstar components in `remainder`, relative to the already-resolved `base`
+    /// directory. `base` is a concrete path and is never re-examined for globstars, so a directory
+    /// literally named `**`or starting with `**` is treated as a literal rather than triggering
+    /// unbounded recursion.
+    private func expandGlobstar(base: URL?, remainder: String) -> [String] {
+        let components = remainder.components(separatedBy: "/")
+
+        guard let globstarIndex = components.firstIndex(of: "**") else {
+            return [resolve(base: base, remainder: remainder)]
         }
 
-        var results = [String]()
-        var parts = pattern.components(separatedBy: "**")
-        let firstPart = parts.removeFirst()
-        var lastPart = parts.joined(separator: "**")
+        let beforeGlobstar = components[..<globstarIndex].joined(separator: "/")
+        let afterGlobstar = components[(globstarIndex + 1)...].joined(separator: "/")
+        let searchRoot = resolve(base: base, remainder: beforeGlobstar)
 
-        let directories: [URL] = if FileManager.default.fileExists(atPath: firstPart) {
-            exploreDirectories(url: URL(fileURLWithPath: firstPart))
+        let directories: [URL] = if FileManager.default.fileExists(atPath: searchRoot) {
+            exploreDirectories(url: URL(fileURLWithPath: searchRoot))
         } else {
             []
         }
 
+        var results = [String]()
+
         // Include the globstar root directory ("dir/") in a pattern like "dir/**" or "dir/**/"
-        if lastPart.isEmpty {
-            results.append(firstPart)
+        if afterGlobstar.isEmpty {
+            results.append(searchRoot)
         }
 
-        if lastPart.isEmpty {
-            lastPart = "*"
-        }
+        let tail = afterGlobstar.isEmpty ? "*" : afterGlobstar
 
         for directory in directories {
-            let partiallyResolvedPattern = directory.appendingPathComponent(lastPart)
-            let standardizedPattern = (partiallyResolvedPattern.relativePath as NSString).standardizingPath
-            results.append(contentsOf: expandGlobstar(pattern: standardizedPattern))
+            // Recursion!
+            results.append(contentsOf: expandGlobstar(base: directory, remainder: tail))
         }
 
         return results
+    }
+
+    private func resolve(base: URL?, remainder: String) -> String {
+        guard let base else { return remainder }
+        let joined = remainder.isEmpty ? base : base.appendingPathComponent(remainder)
+        return FilePath(joined.path).lexicallyNormalized().string
     }
 
     private func exploreDirectories(url: URL) -> [URL] {
