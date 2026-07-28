@@ -55,8 +55,10 @@ public final class Xcodebuild {
         return try shell.exec(xcodebuild)
     }
 
+    /// removes the DerivedData folder used to build the specified schemes
     public func removeDerivedData(for project: XcodeProjectlike, allSchemes: [String]) throws {
-        try shell.exec(["rm", "-rf", derivedDataPath(for: project, schemes: allSchemes).string])
+        let path = try derivedDataPath(for: project, schemes: allSchemes).string
+        try self.shell.exec(["rm", "-rf", path])
     }
 
     public func indexStorePath(project: XcodeProjectlike, schemes: [String]) throws -> FilePath {
@@ -91,7 +93,7 @@ public final class Xcodebuild {
             // `-derivedDataPath <path>/<xcode-default-hashed-folder-name>`.
             // this is not a problem, since we still can scope the folders on a per-project
             // and per-xcode-version level; the actual contents just happen to be one level deeper.
-            "-IDECustomDerivedDataLocation='\(try derivedDataPath(projectName: path, schemes: []).string)'",
+            "-IDECustomDerivedDataLocation='\(try derivedDataPath(projectIdentifier: path, schemes: []).string)'",
         ]
 
         let quotedArguments = quote(arguments: additionalArguments)
@@ -129,18 +131,24 @@ public final class Xcodebuild {
     }
 
     private func derivedDataPath(for project: XcodeProjectlike, schemes: [String]) throws -> FilePath {
-        try derivedDataPath(projectName: project.name, schemes: schemes)
+        try derivedDataPath(
+            projectIdentifier: project.path.lexicallyNormalized().string,
+            schemes: schemes
+        )
     }
-    
-    private func derivedDataPath(projectName: String, schemes: [String]) throws -> FilePath {
+
+    private func derivedDataPath(projectIdentifier: String, schemes: [String]) throws -> FilePath {
         // Given a project with two schemes: A and B, a scenario can arise where the index store contains conflicting
         // data. If scheme A is built, then the source file modified and then scheme B built, the index store will
         // contain two records for that source file. One reflects the state of the file when scheme A was built, and the
         // other when B was built. We must therefore key the DerivedData path with the full list of schemes being built.
-        let xcodeVersionHash = try version().djb2Hex
-        let projectHash = projectName.djb2Hex
-        let schemesHash = Array(schemes).joined().djb2Hex
-        return try Constants.cachePath().appending("DerivedData-\(xcodeVersionHash)-\(projectHash)-\(schemesHash)")
+        var name = "DerivedData"
+        name += "-\(try version().djb2Hex)"
+        name += "-\(projectIdentifier.djb2Hex)"
+        if !schemes.isEmpty {
+            name += "-\(schemes.joined().djb2Hex)"
+        }
+        return try Constants.cachePath().appending(name)
     }
 
     private func quote(arguments: [String]) -> [String] {

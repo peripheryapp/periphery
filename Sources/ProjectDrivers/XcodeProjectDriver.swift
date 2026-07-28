@@ -60,6 +60,9 @@
                 schemes = Set(configuration.schemes)
             } else {
                 // Ensure schemes exist within the project
+                if configuration.cleanBuild {
+                    try xcodebuild.removeDerivedData(for: project, allSchemes: [])
+                }
                 schemes = try project.schemes(
                     additionalArguments: configuration.xcodeListArguments
                 ).filter { configuration.schemes.contains($0) }
