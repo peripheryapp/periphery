@@ -15,8 +15,8 @@ var dependencies: [Package.Dependency] = [
 #if os(macOS)
     dependencies.append(
         .package(
-            url: "https://github.com/superology-ios/XcodeProj",
-            exact: "9.12.1"
+            url: "https://github.com/tuist/xcodeproj",
+            from: "9.0.0"
         )
     )
 #endif

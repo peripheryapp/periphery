@@ -1,5 +1,5 @@
 {
-  "originHash" : "116ddcd062ae29bf5d78c36328e9f83c87e449135736f1d742ffae7b82f34bc5",
+  "originHash" : "7ba8ddf61062e73b9d569f82fd759d8dda039d3f731d180bc62eb3a988dd83d3",
   "pins" : [
     {
       "identity" : "aexml",
@@ -75,10 +75,10 @@
     {
       "identity" : "xcodeproj",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/superology-ios/XcodeProj",
+      "location" : "https://github.com/tuist/xcodeproj",
       "state" : {
-        "revision" : "d1fff7bfb527912d406cde98b008dbc48676b5ab",
-        "version" : "9.12.1"
+        "revision" : "3259a01e7193d55174c2f370d72e3ff4c277d8fd",
+        "version" : "9.15.0"
       }
     },
     {
