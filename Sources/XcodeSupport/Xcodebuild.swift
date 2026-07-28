@@ -79,12 +79,19 @@ public final class Xcodebuild {
     }
 
     func schemes(type: String, path: String, additionalArguments: [String]) throws -> Set<String> {
-        let derivedDataPath = try derivedDataPath(projectName: path, schemes: []).string
         let args = [
             "-\(type)", "\"\(path.withEscapedQuotes)\"",
             "-list",
             "-json",
-            "-IDECustomDerivedDataLocation", "'\(derivedDataPath)'",
+            // since `xcodebuild -list` performs package resolution (meaning that it needs a DerivedData folder),
+            // but doesn't support `-derivedDataPath`, we instead use `-IDECustomDerivedDataLocation=<path>`.
+            // the difference between the two is that the former points to the specific folder xcodebuild will use
+            // for its build output, whereas the latter points to the parent folder.
+            // i.e., `-IDECustomDerivedDataLocation=<path>` is effectively identical to
+            // `-derivedDataPath <path>/<xcode-default-hashed-folder-name>`.
+            // this is not a problem, since we still can scope the folders on a per-project
+            // and per-xcode-version level; the actual contents just happen to be one level deeper.
+            "-IDECustomDerivedDataLocation='\(try derivedDataPath(projectName: path, schemes: []).string)'",
         ]
 
         let quotedArguments = quote(arguments: additionalArguments)
