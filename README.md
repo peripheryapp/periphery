@@ -1,3 +1,18 @@
+> [!IMPORTANT]
+>
+> Periphery has transitioned from an open-source project to a commercial product. This change will support the continued maintenance of Periphery and the development of more advanced features.
+>
+> This repository is preserved as a historical record of the original open-source project and will remain available for anyone who wishes to fork and continue building upon it.
+>
+> All existing issues have been migrated to the new [issue tracker](https://github.com/periphery-pro/issues). Please use that repository to browse existing issues or report a new one.
+>
+> **[Read more about the transition.](https://periphery.pro/a-new-chapter)**
+
+<br>
+
+<details>
+<summary>Click to expand original README</summary>
+
 <h1 align="center">
   <img src="assets/logo.png" alt="Periphery" height="60" />
   <br>
@@ -600,3 +615,5 @@ Special thanks go to the following generous sponsors:
         <img src="https://github.com/peripheryapp/periphery/raw/master/assets/sponsors/emerge-tools-vertical-black.svg">
     </picture>
 </a>
+
+</details>
